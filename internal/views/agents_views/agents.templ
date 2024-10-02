@@ -1,0 +1,200 @@
+package agents_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+)
+
+templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, successMessage, errMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		@partials.SuccessMessage(successMessage)
+		@partials.ErrorMessage(errMessage, true)
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<h3 class="uk-card-title">{ i18n.T(ctx, "Agents") }</h3>
+				<p class="uk-margin-small-top uk-text-small">
+					{ i18n.T(ctx, "agents.description") }
+				</p>
+			</div>
+			<div class="uk-card-body">
+				if len(agents) > 0 {
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+						<thead>
+							<tr>
+								<th class="uk-width-1-6">
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.hostname") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "hostname", p.SortOrder, "alpha")
+									</div>
+								</th>
+								<th class="uk-width-1-6">
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.enabled") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "enabled", p.SortOrder, "alpha")
+									</div>
+								</th>
+								<th>
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.os") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "os", p.SortOrder, "alpha")
+									</div>
+								</th>
+								<th class="uk-width-1-6">
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.version") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "version", p.SortOrder, "alpha")
+									</div>
+								</th>
+								<th class="uk-width-1-6">
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "IP Address") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "ip_address", p.SortOrder, "alpha")
+									</div>
+								</th>
+								<th class="uk-width-1-6">
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.last_contact") }</span>
+										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "last_contact", p.SortOrder, "time")
+									</div>
+								</th>
+								<th>
+									<div class="flex gap-2 items-center">
+										<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+									</div>
+								</th>
+							</tr>
+						</thead>
+						for _, agent := range agents {
+							<tr>
+								<td>{ agent.Hostname }</td>
+								<td>
+									if agent.Enabled {
+										<uk-icon hx-history="false" icon="check" custom-class="h-6 w-6 pr-2 text-green-600" uk-cloack></uk-icon>
+									} else {
+										<uk-icon hx-history="false" icon="x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>
+									}
+								</td>
+								switch agent.Os {
+									case "windows":
+										<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+									case "linux":
+										<td></td>
+								}
+								<td>{ agent.Version }</td>
+								<td>{ agent.IP }</td>
+								<td>{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
+								<td>
+									<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+									<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+										<ul class="uk-dropdown-nav uk-nav">
+											if agent.Enabled {
+												<li>
+													<a
+														hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcereport", agent.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+													>
+														<uk-icon hx-history="false" icon="circle-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+														{ i18n.T(ctx, "agents.force_run") }
+													</a>
+												</li>
+											}
+											<li>
+												if agent.Enabled {
+													<a
+														hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/disable", agent.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+													>
+														<uk-icon hx-history="false" icon="megaphone-off" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+														{ i18n.T(ctx, "Disable") }
+													</a>
+												} else {
+													<a
+														hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+														hx-indicator="#enable-spinner"
+													>
+														<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+														{ i18n.T(ctx, "Enabled") }
+														<div id="enable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+													</a>
+												}
+											</li>
+											if agent.IP != "" && agent.Enabled {
+												<li>
+													<a
+														hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", agent.ID))) }
+														hx-push-url="true"
+														hx-target="#main"
+														hx-swap="outerHTML"
+													><uk-icon hx-history="false" icon="monitor-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Remote Assistance") }</a>
+												</li>
+											}
+											<li>
+												<a
+													hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+											</li>
+										</ul>
+									</div>
+								</td>
+							</tr>
+						}
+					</table>
+					if p.NItems / p.PageSize > 1 {
+						@partials.Pagination(c, p.CurrentPage, len(agents), p.PageSize, p.NItems, p.SortBy, p.SortOrder)
+					}
+				} else {
+					<p class="uk-text-small uk-text-muted my-4">
+						{ i18n.T(ctx, "agents.no_agents") }
+					</p>
+				}
+			</div>
+		</div>
+	</main>
+}
+
+templ AgentsConfirmDelete(agent *ent.Agent) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		@partials.ConfirmDelete(i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
+		@AgentInfo(agent)
+	</main>
+}
+
+templ AgentsConfirmDisable(agent *ent.Agent) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+		@partials.ConfirmDisable(i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable")
+		@AgentInfo(agent)
+	</main>
+}
+
+templ AgentInfo(agent *ent.Agent) {
+	<div class="uk-width-1-2@m uk-card uk-card-default">
+		<div class="uk-card-body">
+			<table class="uk-table uk-table-striped">
+				<tr><th>{ i18n.T(ctx, "agents.hostname") }</th><td>{ agent.Hostname }</td></tr>
+				<tr><th>{ i18n.T(ctx, "agents.last_contact") }</th><td>{ agent.LastContact.Local().String() }</td></tr>
+				<tr><th>{ i18n.T(ctx, "OperatingSystem") }</th><td>{ agent.Os }</td></tr>
+				<tr><th>{ i18n.T(ctx, "agents.version") }</th><td>{ agent.Edges.Operatingsystem.Version }</td></tr>
+				<tr><th>{ i18n.T(ctx, "agents.username") }</th><td>{ agent.Edges.Operatingsystem.Username }</td></tr>
+			</table>
+		</div>
+	</div>
+}
+
+templ AgentsIndex(title string, cmp templ.Component) {
+	@layout.Base("agents") {
+		@cmp
+	}
+}

@@ -1,0 +1,20 @@
+package partials
+
+templ BitlockerStatus(status string) {
+	<div uk-tooltip="title: Unencrypted; pos: left">
+		switch status {
+			case "Unencrypted":
+				<span class="text-orange-500">
+					<uk-icon hx-history="false" icon="lock-open" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</span>
+			case "Encrypted":
+				<span class="text-green-600">
+					<uk-icon hx-history="false" icon="lock" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</span>
+			default:
+				<span class="text-red-600">
+					<uk-icon hx-history="false" icon="shield-question" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</span>
+		}
+	</div>
+}

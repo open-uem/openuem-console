@@ -1,0 +1,39 @@
+package config_views
+
+templ ConfigNavbar(active string) {
+	<ul class="uk-tab">
+		<li class={ templ.KV("uk-active", active == "users") }>
+			<a
+				href={ templ.URL("/config/users") }
+				hx-get={ string(templ.URL("/config/users")) }
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Users
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "sessions") }>
+			<a
+				href={ templ.URL("/config/sessions") }
+				hx-get={ string(templ.URL("/config/sessions")) }
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Sessions
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "settings") }>
+			<a
+				href={ templ.URL("/config/settings") }
+				hx-get={ string(templ.URL("/config/settings")) }
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Settings
+			</a>
+		</li>
+	</ul>
+}

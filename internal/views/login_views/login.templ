@@ -1,0 +1,59 @@
+package login_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+templ Login() {
+	<div class="flex flex-1 h-full w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+		<div class="flex items-center justify-center h-full py-12">
+			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
+				<img
+					src="/static/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.2] dark:grayscale mx-auto"
+				/>
+				<div class="grid gap-2 text-center">
+					<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
+					<p class="text-balance text-muted-foreground">
+						{ i18n.T(ctx, "login.description") }
+					</p>
+				</div>
+				<div class="grid gap-4">
+					<a
+						href="/auth"
+						class="uk-button uk-button-primary text-white"
+						type="button"
+					>
+						<uk-icon hx-history="false" icon="log-in" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "login.button") }
+					</a>
+					<button
+						href="/register"
+						hx-get="/register"
+						hx-push-url="true"
+						hx-target="body"
+						hx-swap="outerHTML"
+						class="uk-button uk-button-default"
+						type="button"
+					>
+						<uk-icon hx-history="false" icon="user-plus" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.button") }
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="flex-1 bg-muted lg:block">
+			<img
+				src="/static/img/computers.jpg"
+				alt="Image"
+				class="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+			/>
+		</div>
+	</div>
+}
+
+templ LoginIndex(cmp templ.Component) {
+	@layout.Login() {
+		@cmp
+	}
+}

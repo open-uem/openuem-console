@@ -1,0 +1,152 @@
+package desktops_views
+
+import "fmt"
+
+templ DesktopsNavbar(id string, active string, confirmDelete bool) {
+	<ul class="uk-tab">
+		<li class={ templ.KV("uk-active", active == "computer") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/computer?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/computer?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/computer", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/computer", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Computer
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "os") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/os?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/os?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/os", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/os", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				OS
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "monitors") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/monitors?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/monitors?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/monitors?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/monitors", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Monitors
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "logical-disks") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/logical-disks?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Logical Disks	
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "shares") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/shares?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/shares?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/shares", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/shares", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Shares
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "network-adapters") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/network-adapters?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/network-adapters?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/network-adapters", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/network-adapters", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Network Adapters
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "printers") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/printers?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/printers?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/printers", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/printers", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Printers
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "software") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/software?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/software?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/software", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/software", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Software
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "remote-assistance") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				Remote Assistance
+			</a>
+		</li>
+	</ul>
+}

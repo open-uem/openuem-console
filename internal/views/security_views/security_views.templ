@@ -1,0 +1,169 @@
+package security_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+templ Antivirus(agents []*ent.Agent) {
+	<title>OpenUEM | { i18n.T(ctx, "Security") } | Antivirus </title>
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: "/security"}, {Title: "Antivirus", Url: "/security/antivirus"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@SecurityNavbar("antivirus")
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "antivirus.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "antivirus.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(agents) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>{ i18n.T(ctx, "antivirus.hostname") }</th>
+										<th>{ i18n.T(ctx, "antivirus.os") }</th>
+										<th>{ i18n.T(ctx, "antivirus.title") }</th>
+										<th>{ i18n.T(ctx, "antivirus.enabled") }</th>
+										<th>{ i18n.T(ctx, "antivirus.updated") }</th>
+										<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
+									</tr>
+								</thead>
+								for _, agent := range agents {
+									<tr>
+										<td>{ agent.Hostname }</td>
+										switch agent.Os {
+											case "windows":
+												<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+											case "linux":
+												<td></td>
+										}
+										<td>{ agent.Edges.Antivirus.Name }</td>
+										if agent.Edges.Antivirus.IsActive {
+											<td><uk-icon hx-history="false" icon="shield-check" custom-class="h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+										} else {
+											<td><uk-icon hx-history="false" icon="shield-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+										}
+										if agent.Edges.Antivirus.IsUpdated {
+											<td><uk-icon hx-history="false" icon="shield-check" custom-class="h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+										} else {
+											<td><uk-icon hx-history="false" icon="shield-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+										}
+										<td>
+											<uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon>
+										</td>
+									</tr>
+								}
+							</table>
+						} else {
+							<p class="uk-text-small uk-text-muted my-4">
+								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SecurityUpdates(agents []*ent.Agent) {
+	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "Updates") } </title>
+	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@SecurityNavbar("updates")
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "updates.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "updates.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(agents) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>Hostname</th>
+										<th>OS</th>
+										<th>Status</th>
+										<th>Last search</th>
+										<th>Last install</th>
+										<th>Pending updates?</th>
+										<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
+									</tr>
+								</thead>
+								for _, agent := range agents {
+									<tr>
+										<td>{ agent.Hostname }</td>
+										switch agent.Os {
+											case "windows":
+												<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+											case "linux":
+												<td></td>
+										}
+										<td>{ agent.Edges.Systemupdate.Status }</td>
+										<td>{ agent.Edges.Systemupdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
+										<td>{ agent.Edges.Systemupdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
+										if agent.Edges.Systemupdate.PendingUpdates {
+											<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+										} else {
+											<td>{ i18n.T(ctx, "No") }</td>
+										}
+										<td>
+											<uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon>
+										</td>
+									</tr>
+								}
+							</table>
+						} else {
+							<p class="uk-text-small uk-text-muted my-4">
+								{ i18n.T(ctx, "updates.no_updates_info") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SecurityNavbar(active string) {
+	<ul class="uk-tab">
+		<li class={ templ.KV("uk-active", active == "antivirus") }>
+			<a
+				href="/security/antivirus"
+				hx-get="/security/antivirus"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Antivirus") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "updates") }>
+			<a
+				href="/security/updates"
+				hx-get="/security/updates"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Updates") }
+			</a>
+		</li>
+	</ul>
+}
+
+templ SecurityIndex(title string, cmp templ.Component) {
+	@layout.Base("security") {
+		@cmp
+	}
+}

@@ -1,0 +1,53 @@
+package views
+
+templ ErrorPage(code, message string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta
+				name="description"
+				content="OpenUEM: An Open Source Unified Endpoint Manager"
+			/>
+			<meta name="google" content="notranslate"/>
+			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
+			<title>OpenUEM | { message }</title>
+			<link
+				href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+				rel="stylesheet"
+			/>
+			<link rel="stylesheet" href="/static/css/main.css" type="text/css"/>
+			<link rel="stylesheet" href="/static/css/flag-icons.min.css" type="text/css"/>
+			<link
+				rel="stylesheet"
+				href="https://unpkg.com/franken-ui@1.1.0/dist/css/core.min.css"
+			/>
+			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js" type="module"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js" type="module"></script>
+			<script src="/static/js/echarts.min.js"></script>
+		</head>
+		<body>
+			<main class="flex items-center justify-center h-screen w-screen">
+				<div id="errorPage" class="flex items-center justifiy-items-center gap-10 h-">
+					switch code {
+						case "400":
+							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "404":
+							<uk-icon hx-history="false" icon="search-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "503":
+							<uk-icon hx-history="false" icon="bomb" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "401":
+							<uk-icon hx-history="false" icon="ticket-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "405":
+							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						default:
+							<uk-icon hx-history="false" icon="circle-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+					}
+					<span>{ code } | { message }</span>
+				</div>
+			</main>
+		</body>
+	</html>
+}

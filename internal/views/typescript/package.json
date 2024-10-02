@@ -1,0 +1,20 @@
+{
+  "name": "openuem",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild src\\index.ts --bundle --minify --outfile=../../../assets/js/openuem.js",
+    "build-dev": "esbuild src\\index.ts --bundle --minify --sourcemap --outfile=../../../assets/js/openuem.js"
+  },
+  "author": "Miguel Ángel Álvarez Cabrerizo",
+  "license": "Apache-2.0",
+  "description": "JS module to be used with OpenUEM",
+  "dependencies": {
+    "phone": "^3.1.50"
+  },
+  "devDependencies": {
+    "esbuild": "0.23.1",
+    "prettier": "^3.3.3"
+  }
+}

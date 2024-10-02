@@ -1,0 +1,25 @@
+package deploy_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+)
+
+templ Deploy() {
+	@partials.Header([]partials.Breadcrumb{{Title: "Deploy", Url: "/deploy"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
+			<h3 class="uk-card-title">Deploy</h3>
+			<p class="uk-margin">
+				Lorem ipsum <a href="#">dolor</a> sit amet, consectetur adipiscing elit, sed
+				do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+			</p>
+		</div>
+	</main>
+}
+
+templ DeployIndex(title string, cmp templ.Component) {
+	@layout.Base("deploy") {
+		@cmp
+	}
+}

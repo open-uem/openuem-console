@@ -1,0 +1,54 @@
+package layout
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ Login() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta
+				name="description"
+				content="OpenUEM: An Open Source Unified Endpoint Manager"
+			/>
+			<meta name="google" content="notranslate"/>
+			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
+			<title>OpenUEM | { i18n.T(ctx, "Login") }</title>
+			<link
+				href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+				rel="stylesheet"
+			/>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-icons-font@v13/font/simple-icons.min.css" type="text/css"/>
+			<link rel="stylesheet" href="/static/css/main.css" type="text/css"/>
+			<link rel="stylesheet" href="/static/css/flag-icons.min.css" type="text/css"/>
+			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js" type="module"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js" type="module"></script>
+			<script src="/static/js/htmx.min.js"></script>
+			<script src="/static/js/openuem.js" type="module"></script>
+			<script>
+				const htmlElement = document.documentElement;
+
+				if (
+					localStorage.getItem("mode") === "dark" ||
+					(!("mode" in localStorage) &&
+					window.matchMedia("(prefers-color-scheme: dark)").matches)
+				) {
+					htmlElement.classList.add("dark");
+				} else {
+					htmlElement.classList.remove("dark");
+				}
+
+				htmlElement.classList.add(
+					localStorage.getItem("theme") || "uk-theme-emerald",
+				);
+			</script>
+		</head>
+		<body>
+			<div class="flex min-h-screen w-full flex-col bg-muted/40">
+				{ children... }
+			</div>
+		</body>
+	</html>
+}

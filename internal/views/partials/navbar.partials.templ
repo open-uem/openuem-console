@@ -1,0 +1,133 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ NavBar(active string) {
+	<nav id="navbar" hx-history="false" class="uk-flex uk-flex-between@s h-full flex-col items-center px-2 sm:py-5">
+		<div class="flex flex-col gap-4">
+			<a
+				href="/dashboard"
+				hx-get="/dashboard"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Dashboard; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "dashboard"), templ.KV("text-muted-foreground hover:text-foreground", active != "dashboard") }
+			>
+				<uk-icon hx-history="false" icon="layout-dashboard" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">{ i18n.T(ctx, "Dashboard") }</span>
+			</a>
+			<a
+				href="/desktops"
+				hx-get="/desktops"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Desktops; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "desktops"), templ.KV("text-muted-foreground hover:text-foreground", active != "desktops") }
+			>
+				<uk-icon hx-history="false" icon="computer" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Desktops</span>
+			</a>
+			<a
+				href="/software"
+				hx-get="/software"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Software; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "software"), templ.KV("text-muted-foreground hover:text-foreground", active != "software") }
+			>
+				<uk-icon hx-history="false" icon="app-window" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Software</span>
+			</a>
+			<a
+				href="/security"
+				hx-get="/security"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Security; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "security"), templ.KV("text-muted-foreground hover:text-foreground", active != "security") }
+			>
+				<uk-icon hx-history="false" icon="shield" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">{ i18n.T(ctx, "Security") }</span>
+			</a>
+			<a
+				href="/deploy"
+				hx-get="/deploy"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Deploy; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "deploy"), templ.KV("text-muted-foreground hover:text-foreground", active != "deploy") }
+			>
+				<uk-icon hx-history="false" icon="package" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Deploy</span>
+			</a>
+			/* <a
+			href="/remote-workers"
+			hx-get="/remote-workers"
+			hx-push-url="true"
+			hx-target="body"
+			uk-tooltip="title: Remote workers; pos: right"
+			class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "remote workers"), templ.KV("text-muted-foreground hover:text-foreground", active != "remote workers") }
+		>
+			<uk-icon hx-history="false" icon="briefcase-business" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			<span class="sr-only">Remote Workers</span>
+		</a>
+		<a
+			href="/network-printers"
+			hx-get="/network-printers"
+			hx-push-url="true"
+			hx-target="body"
+			uk-tooltip="title: Network Printers; pos: right"
+			class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "network printers"), templ.KV("text-muted-foreground hover:text-foreground", active != "network printers") }
+		>
+			<uk-icon hx-history="false" icon="printer" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			<span class="sr-only">Network Printers</span>
+		</a> */
+			<a
+				href="/agents"
+				hx-get="/agents"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Agents; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "agents"), templ.KV("text-muted-foreground hover:text-foreground", active != "agents") }
+			>
+				<uk-icon hx-history="false" icon="satellite-dish" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Agents</span>
+			</a>
+		</div>
+		<div class="flex flex-col gap-4">
+			<a
+				href="/config"
+				hx-get="/config"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Config; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "settings"), templ.KV("text-muted-foreground hover:text-foreground", active != "settings") }
+			>
+				<uk-icon hx-history="false" icon="settings" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Config</span>
+			</a>
+			<a
+				href="/logs"
+				hx-get="/logs"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip="title: Logs; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "settings"), templ.KV("text-muted-foreground hover:text-foreground", active != "settings") }
+			>
+				<uk-icon hx-history="false" icon="scroll-text" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Logs</span>
+			</a>
+			<a
+				href="/logout"
+				hx-post="/logout"
+				hx-push-url="false"
+				hx-target="body"
+				uk-tooltip="title: Log Out; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground" }
+			>
+				<uk-icon hx-history="false" icon="log-out" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Log Out</span>
+			</a>
+		</div>
+	</nav>
+}

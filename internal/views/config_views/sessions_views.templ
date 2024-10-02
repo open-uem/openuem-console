@@ -1,0 +1,163 @@
+package config_views
+
+import (
+	"fmt"
+	"github.com/alexedwards/scs/v2"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/mssola/useragent"
+	"log"
+)
+
+templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAndSort, successMessage, errMessage string, codec scs.Codec) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Sessions", Url: "/config/sessions"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("sessions")
+				<div id="confirm" class="hidden"></div>
+				@partials.SuccessMessage(successMessage)
+				@partials.ErrorMessage(errMessage, true)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "sessions.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "sessions.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(sessions) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.uid") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "uid", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "sessions.user_agent") }</span>
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "IP Address") }</span>
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "sessions.token") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "token", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "sessions.expiry") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "expiry", p.SortOrder, "time")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+											</div>
+										</th>
+									</tr>
+								</thead>
+								for _, session := range sessions {
+									<tr>
+										<td>{ session.Edges.Owner.ID }</td>
+										<td>{ decodeUserAgent(decodeData(session.Data, codec, "user-agent")) }</td>
+										<td>{ decodeData(session.Data, codec, "ip-address") }</td>
+										<td>{ session.ID }</td>
+										if session.Expiry.IsZero() {
+											<td>-</td>
+										} else {
+											<td>{ session.Expiry.Local().Format("02/01/2006 15:04:05") }</td>
+										}
+										<td>
+											<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+												<ul class="uk-dropdown-nav uk-nav" _="on click remove .uk-open from .uk-dropdown">
+													<li>
+														<a
+															hx-get={ string(templ.URL(fmt.Sprintf("/config/sessions/%s/delete", session.ID))) }
+															hx-target="#main"
+															hx-swap="outerHTML"
+														><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+													</li>
+												</ul>
+											</div>
+										</td>
+									</tr>
+								}
+							</table>
+							if p.NItems / p.PageSize > 1 {
+								@partials.Pagination(c, p.CurrentPage, len(sessions), p.PageSize, p.NItems, p.SortBy, p.SortOrder)
+							}
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "sessions.nosessions") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SessionsDelete(session *ent.Sessions, codec scs.Codec) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Sessions", Url: "/config/sessions"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/config/sessions", "/config/sessions/"+session.ID)
+		/* @SessionInfo(session, codec) */
+	</main>
+}
+
+templ SessionInfo(session *ent.Sessions, codec scs.Codec) {
+	<div class="uk-width-1-2@m uk-card uk-card-default">
+		<div class="uk-card-body">
+			<table class="uk-table uk-table-striped">
+				<tr><th>{ i18n.T(ctx, "session.uid") }</th><td>{ session.Edges.Owner.ID }</td></tr>
+				<tr><th>{ i18n.T(ctx, "session.user_agent") }</th><td>{ decodeData(session.Data, codec, "user-agent") }</td></tr>
+				<tr><th>{ i18n.T(ctx, "IP Address") }</th><td>{ decodeData(session.Data, codec, "ip-address") }</td></tr>
+				<tr><th>{ i18n.T(ctx, "session.expiry") }</th><td>{ session.Expiry.Local().String() }</td></tr>
+			</table>
+		</div>
+	</div>
+}
+
+templ SessionsIndex(title string, cmp templ.Component) {
+	@layout.Base("config | sessions") {
+		@cmp
+	}
+}
+
+func decodeData(s []byte, codec scs.Codec, key string) string {
+	_, values, err := codec.Decode(s)
+	if err != nil {
+		log.Println("could not decode session data")
+		return "-"
+	}
+
+	_, ok := values[key]
+	if ok {
+		return values[key].(string)
+	}
+	return "-"
+}
+
+func decodeUserAgent(s string) string {
+	if s == "-" {
+		return s
+	}
+
+	ua := useragent.New(s)
+	browser, version := ua.Browser()
+	return browser + " " + version + " / " + ua.OS()
+}

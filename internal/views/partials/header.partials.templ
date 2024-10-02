@@ -1,0 +1,32 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+type Breadcrumb struct {
+	Title string
+	Url   string
+}
+
+templ Header(breadcrumbs []Breadcrumb) {
+	<header class="sticky top-0 z-30 uk-flex uk-flex-between@s w-full h-14 items-center border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+		<nav id="header">
+			<ul class="uk-breadcrumb" aria-label="Breadcrumb">
+				<li>OpenUEM</li>
+				for _,bc := range breadcrumbs {
+					<li>
+						<a
+							href={ templ.URL(bc.Url) }
+							hx-get={ string(templ.URL(bc.Url)) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-push-url="true"
+						>
+							{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }
+						</a>
+					</li>
+				}
+			</ul>
+		</nav>
+		<button class="rounded-full"><uk-icon hx-history="false" icon="user-circle" hx-history="false" custom-class="h-6 w-6" uk-cloack></uk-icon></button>
+	</header>
+}

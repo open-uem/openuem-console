@@ -1,0 +1,88 @@
+package partials
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/utils"
+	"github.com/labstack/echo/v4"
+	"strconv"
+)
+
+templ Pagination(c echo.Context, offset, itemsInPage, itemsPerPage, totalItems int, sortBy, sortOrder string) {
+	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
+		<div class="uk-flex uk-width-1-3 gap-2 items-center">
+			<span class="uk-text-small uk-text-muted text-center">Items per page</span>
+			/* We set itemsPerPage to 0 so we can use the selected value using hx-include, also we set offset to 1 to avoid issues with empty
+			results for a new offset and itemsPerPage combination */
+			<select
+				id="itemsPerPage"
+				name="pageSize"
+				title="Items per page"
+				class="uk-select uk-width-1-4"
+				hx-trigger="change"
+				hx-get={ string(utils.GetURLWithParams(c, 1, 0, sortBy, sortOrder)) }
+				hx-include="[name='pageSize']"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				<option value="5" selected?={ 5 == itemsPerPage }>5</option>
+				<option value="10" selected?={ 10 == itemsPerPage }>10</option>
+				<option value="15" selected?={ 15 == itemsPerPage }>15</option>
+				<option value="20" selected?={ 20 == itemsPerPage }>20</option>
+				<option value="25" selected?={ 25 == itemsPerPage }>25</option>
+			</select>
+		</div>
+		<ul class="uk-flex-center uk-pagination uk-width-1-3" uk-margin>
+			if offset > 1 {
+				<li>
+					<a
+						href={ utils.GetURLWithParams(c, offset-1, itemsPerPage, sortBy, sortOrder) }
+						hx-get={ string(utils.GetURLWithParams(c, offset-1, itemsPerPage, sortBy, sortOrder)) }
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						<span uk-pagination-previous></span>
+					</a>
+				</li>
+			} else {
+				<li>
+					<span uk-pagination-previous class="uk-disabled"></span>
+				</li>
+			}
+			for _, p := range GetPaginationEntries(c, offset, itemsPerPage, totalItems, sortBy, sortOrder) {
+				<li
+					class={ templ.KV("uk-disabled", p.Disabled), 
+					templ.KV("uk-active", p.Active) }
+				>
+					<a
+						href={ p.Href }
+						hx-get={ string(p.Href) }
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						{ p.Number }
+					</a>
+				</li>
+			}
+			if offset * itemsPerPage < totalItems {
+				<li>
+					<a
+						href={ utils.GetURLWithParams(c, offset+1, itemsPerPage, sortBy, sortOrder) }
+						hx-get={ string(utils.GetURLWithParams(c, offset+1, itemsPerPage, sortBy, sortOrder)) }
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						<span uk-pagination-next></span>
+					</a>
+				</li>
+			} else {
+				<li>
+					<span uk-pagination-next class="uk-disabled"></span>
+				</li>
+			}
+		</ul>
+		<span class="uk-text-small uk-text-muted uk-width-1-3 text-center">Showing { strconv.Itoa(1 + (offset - 1) * itemsPerPage) } - { strconv.Itoa(offset * itemsInPage) } of { strconv.Itoa(totalItems) } items</span>
+	</nav>
+}

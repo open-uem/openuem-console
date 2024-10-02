@@ -1,0 +1,104 @@
+package desktops_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/labstack/echo/v4"
+	"strings"
+)
+
+templ Apps(agent *ent.Agent, apps []*ent.App, c echo.Context, currentPage, itemsPerPage, totalItems int, sortBy, sortOrder string, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				if confirmDelete {
+					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/desktops", "/desktops/"+agent.ID)
+				}
+				@DesktopsNavbar(agent.ID, "software", confirmDelete)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">Apps</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							These are the applications found in this computer as reported by the OpenUEM agent.
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(apps) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th class="sr-only w-1/12">Logo</th>
+										<th class="w-1/3">
+											<div class="flex gap-2 items-center ">
+												<span>Name</span>
+												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "name", sortOrder, "alpha")
+											</div>
+										</th>
+										<th class="w-1/12">
+											<div class="flex gap-2 items-center ">
+												<span>Version</span>
+												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "version", sortOrder, "alpha")
+											</div>
+										</th>
+										<th class="w-1/3">
+											<div class="flex gap-2 items-center ">
+												<span>Publisher</span>
+												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "publisher", sortOrder, "alpha")
+											</div>
+										</th>
+										<th class="w-1/12">
+											<div class="flex gap-2 items-center ">
+												<span>Installation</span>
+												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "installation", sortOrder, "alpha")
+											</div>
+										</th>
+									</tr>
+								</thead>
+								for _, app := range apps {
+									<tr class="h-16">
+										<td class="!align-middle text-center">
+											@partials.Brand(strings.ToLower(app.Name), strings.ToLower(app.Publisher))
+										</td>
+										<td class="!align-middle">{ app.Name }</td>
+										if app.Version == "" {
+											<td class="!align-middle">-</td>
+										} else {
+											<td class="!align-middle">{ app.Version }</td>
+										}
+										if app.Publisher == "" {
+											<td class="!align-middle">-</td>
+										} else {
+											<td class="!align-middle">{ app.Publisher }</td>
+										}
+										if app.InstallDate == "" {
+											<td class="!align-middle">-</td>
+										} else {
+											<td class="!align-middle">{ app.InstallDate }</td>
+										}
+									</tr>
+								}
+								if len(apps) < itemsPerPage {
+									for i:=0; i < itemsPerPage - len(apps); i++ {
+										<tr class="h-16">
+											<td class="!align-middle">-</td>
+											<td class="!align-middle">-</td>
+											<td class="!align-middle">-</td>
+											<td class="!align-middle">-</td>
+										</tr>
+									}
+								}
+							</table>
+							@partials.Pagination(c, currentPage, len(apps), itemsPerPage, totalItems, sortBy, sortOrder)
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								No apps information is available yet.
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}

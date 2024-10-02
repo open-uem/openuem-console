@@ -1,0 +1,37 @@
+package dashboard_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/go-echarts/go-echarts/v2/render"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+type DashboardCharts struct {
+	AgentByOs           render.ChartSnippet
+	AgentByOsVersion    render.ChartSnippet
+	AgentBySystemUpdate render.ChartSnippet
+	AgentByLastReport   render.ChartSnippet
+	Top10Apps           render.ChartSnippet
+}
+
+templ Dashboard(charts DashboardCharts) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Dashboard", Url: "/dashboard"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
+			<h3 class="uk-card-title">{ i18n.T(ctx, "Dashboard") }</h3>
+			<div class="flex gap-2 mt-4">
+				@Chart("Agents By Last Contact", "Agent distribution by last contact date", charts.AgentByLastReport)
+				@Chart("Agents By OS", "Agent distribution by operating system", charts.AgentByOs)
+				@Chart("Agents By OS Version", "Agent distribution by operating system version", charts.AgentByOsVersion)
+				@Chart("Agents By System Update", "Agent distribution by system update", charts.AgentBySystemUpdate)
+			</div>
+		</div>
+	</main>
+}
+
+templ DashboardIndex(title string, cmp templ.Component) {
+	@layout.Base("dashboard") {
+		@cmp
+	}
+}

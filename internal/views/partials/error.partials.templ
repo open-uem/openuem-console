@@ -1,0 +1,12 @@
+package partials
+
+templ Error(err, title, url string) {
+	@Header([]Breadcrumb{{Title: title, Url: url}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-alert uk-alert-danger" uk-alert>
+			<div class="uk-alert-description uk-text-large p-4">
+				{ err }
+			</div>
+		</div>
+	</main>
+}

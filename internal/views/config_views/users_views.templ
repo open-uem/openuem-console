@@ -1,0 +1,324 @@
+package config_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"strings"
+)
+
+templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, successMessage, errMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Users", Url: "/config/users"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("users")
+				@partials.SuccessMessage(successMessage)
+				@partials.ErrorMessage(errMessage, true)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "users.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "users.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(users) > 0 {
+							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
+								<button
+									hx-get={ "/config/users/new" }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
+								>
+									<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.import") }
+								</button>
+								<button
+									hx-get={ "/config/users/new" }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									class="uk-button uk-button-primary text-white"
+								>
+									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
+								</button>
+							</div>
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.uid") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "uid", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.name") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "name", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.email") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "email", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "register.country") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "country", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.phone") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "phone", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.register") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "register", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.role") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "role", p.SortOrder, "alpha")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.created") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "created", p.SortOrder, "time")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "users.modified") }</span>
+												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "modified", p.SortOrder, "time")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+											</div>
+										</th>
+									</tr>
+								</thead>
+								for _, user := range users {
+									<tr>
+										<td>{ user.ID }</td>
+										<td>{ user.Name }</td>
+										if user.Email != "" {
+											<td>{ user.Email }</td>
+										} else {
+											<td>-</td>
+										}
+										<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
+										if user.Phone != "" {
+											<td>{ user.Phone }</td>
+										} else {
+											<td>-</td>
+										}
+										if user.Register == "users.completed" {
+											<td class="flex">
+												<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600 mr-2" uk-cloack></uk-icon>
+												{ i18n.T(ctx, user.Register) }
+											</td>
+										} else {
+											<td class="flex">
+												<uk-icon hx-history="false" icon="message-circle-warning" custom-class="h-5 w-5 text-orange-600 mr-2" uk-cloack></uk-icon>
+												{ i18n.T(ctx, user.Register) }
+											</td>
+										}
+										<td>- </td>
+										if user.Created.IsZero() {
+											<td>-</td>
+										} else {
+											<td>{ user.Created.Local().Format("02/01/2006 15:04:05") }</td>
+										}
+										if user.Modified.IsZero() {
+											<td>-</td>
+										} else {
+											<td>{ user.Modified.Local().Format("02/01/2006 15:04:05") }</td>
+										}
+										<td>
+											<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+												<ul class="uk-dropdown-nav uk-nav">
+													if !user.EmailVerified && user.Email != "" {
+														<li>
+															<a
+																hx-post={ string(templ.URL(fmt.Sprintf("/config/users/%s/confirmemail", user.ID))) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="mail-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.verify_email") }
+															</a>
+														</li>
+													}
+													if !user.EmailVerified && user.Email != "" {
+														<li>
+															<a
+																hx-post={ string(templ.URL(fmt.Sprintf("/config/users/%s/askconfirm", user.ID))) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="mail-question" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.resend_confirmation") }
+															</a>
+														</li>
+													}
+													// TODO this should not be hardcoded, register status must be constants
+													if user.EmailVerified && user.Register == "users.review_request" {
+														<li>
+															<a
+																hx-get={ string(templ.URL(fmt.Sprintf("/config/users/%s/certificate", user.ID))) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.request_certificate") }
+															</a>
+														</li>
+													}
+													if user.EmailVerified && user.Register != "users.review_request" {
+														<li>
+															<a
+																hx-target="#main"
+																hx-swap="outerHTML"
+																hx-get={ string(templ.URL("/config/users/" + user.ID + "/renewcertificate")) }
+																hx-push-url="false"
+															>
+																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
+															</a>
+														</li>
+													}
+													<li>
+														<a
+															hx-delete={ string(templ.URL("/config/users/" + user.ID)) }
+															hx-target="#main"
+															hx-push-url="false"
+															hx-swap="outerHTML"
+														>
+															<uk-icon hx-history="false" icon="user-x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }
+														</a>
+													</li>
+												</ul>
+											</div>
+										</td>
+									</tr>
+								}
+							</table>
+							if p.NItems / p.PageSize > 1 {
+								@partials.Pagination(c, p.CurrentPage, len(users), p.PageSize, p.NItems, p.SortBy, p.SortOrder)
+							}
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								No users have been created yet
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ NewUser() {
+	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Users", Url: "/config/users"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("users")
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "new.user.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "new.user.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form
+							class="uk-form-stacked"
+							hx-post="/config/users/new"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							<div class="uk-margin">
+								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.uid") }</label>
+								<div class="uk-form-controls">
+									<input
+										id="uid"
+										name="uid"
+										class="uk-input !w-1/12"
+										type="text"
+										placeholder={ i18n.T(ctx, "users.uid") + "..." }
+										required
+									/>
+									<div class="uk-form-help uk-margin-small-top">
+										{ i18n.T(ctx, "new.user.uid_help") }
+									</div>
+								</div>
+							</div>
+							<div class="uk-margin">
+								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.name") }</label>
+								<div class="uk-form-controls">
+									<input
+										id="name"
+										name="name"
+										class="uk-input !uk-width-1-6@s"
+										type="text"
+										placeholder={ i18n.T(ctx, "users.name") + "..." }
+										required
+									/>
+								</div>
+							</div>
+							<div class="uk-margin">
+								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.email") }</label>
+								<div class="uk-form-controls">
+									<input
+										id="email"
+										name="email"
+										class="uk-input !uk-width-1-6@s"
+										type="email"
+										placeholder={ i18n.T(ctx, "users.email") + "..." }
+										required
+									/>
+								</div>
+							</div>
+							<div class="uk-margin">
+								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>
+								<div class="uk-form-controls">
+									<input
+										id="phone"
+										name="phone"
+										class="uk-input !w-1/12"
+										type="text"
+										placeholder={ i18n.T(ctx, "users.phone") + "..." }
+									/>
+								</div>
+							</div>
+							<div class="flex gap-4">
+								<button type="reset" class="uk-button uk-button-secondary">{ i18n.T(ctx, "Reset") }</button>
+								<button type="submit" class="uk-button uk-button-primary">{ i18n.T(ctx, "Add") }</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ UsersIndex(title string, cmp templ.Component) {
+	@layout.Base("config | users") {
+		@cmp
+	}
+}

@@ -1,0 +1,36 @@
+package desktops_views
+
+import "fmt"
+
+templ VNC(agentId, hostname, port, domainSuffix string) {
+	<div class="flex gap-4 items-center my-4">
+		<div id="vncConnectPanel" class="flex gap-4 items-center">
+			<span>PIN: </span>
+			<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
+			<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">Authenticate</button>
+		</div>
+		<input id="vncHostname" type="hidden" value={ hostname + domainSuffix }/>
+		<input id="vncPort" type="hidden" value={ port }/>
+		<button
+			class="uk-button uk-button-danger"
+			hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/stopvnc", agentId))) }
+			hx-target="#vnc"
+			hx-swap="innerHTML"
+		>
+			Disconnect!
+		</button>
+	</div>
+	<div id="status" class="uk-text-muted uk-text-small"></div>
+	<div id="screen"></div>
+}
+
+templ VNCConnect(agentId string) {
+	<button
+		class="uk-button uk-button-primary"
+		hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agentId))) }
+		hx-target="#vnc"
+		hx-swap="innerHTML"
+	>
+		Connect
+	</button>
+}

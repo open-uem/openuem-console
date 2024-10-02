@@ -1,0 +1,81 @@
+package desktops_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"strconv"
+	"strings"
+)
+
+templ Computer(agent *ent.Agent, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				if confirmDelete {
+					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/desktops", "/desktops/"+agent.ID)
+				}
+				@DesktopsNavbar(agent.ID, "computer", confirmDelete)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">Computer</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							This is the information about the computer reported by the OpenUEM agent.
+						</p>
+					</div>
+				</div>
+				<div class="uk-child-width-1-2 uk-text-left" uk-grid>
+					<div>
+						<div class="uk-card uk-card-body uk-card-default">
+							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+								<tr>
+									<th>Manufacturer</th>
+									<td>
+										@partials.Manufacturer(strings.ToLower(agent.Edges.Computer.Manufacturer))
+									</td>
+								</tr>
+								<tr>
+									<th>Model</th>
+									<td>{ agent.Edges.Computer.Model }</td>
+								</tr>
+								<tr>
+									<th>Serial</th>
+									<td>{ agent.Edges.Computer.Serial }</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div>
+						<div class="uk-card uk-card-body uk-card-default">
+							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+								<tr>
+									<th>Memory</th>
+									<td>{ fmt.Sprintf("%d MB", agent.Edges.Computer.Memory) }</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div>
+						<div class="uk-card uk-card-body uk-card-default">
+							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+								<tr>
+									<th>Processor</th>
+									<td>{ agent.Edges.Computer.Processor }</td>
+								</tr>
+								<tr>
+									<th>Architecture</th>
+									<td>{ agent.Edges.Computer.ProcessorArch }</td>
+								</tr>
+								<tr>
+									<th># Cores</th>
+									<td>{ strconv.Itoa(int(agent.Edges.Computer.ProcessorCores)) }</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}

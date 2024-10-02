@@ -1,0 +1,45 @@
+package partials
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/utils"
+	"github.com/labstack/echo/v4"
+)
+
+templ SortByColumnIcon(c echo.Context, currentPage, pageSize int, currentSortBy, sortBy, currentSortOrder, sortIcon string) {
+	<a
+		href={ utils.GetURLWithParams(c, currentPage, pageSize, sortBy, newSortOrder(currentSortOrder)) }
+		hx-get={ string(utils.GetURLWithParams(c, currentPage, pageSize, sortBy, newSortOrder(currentSortOrder))) }
+		hx-push-url="true"
+		hx-target="#main"
+		hx-swap="outerHTML"
+	>
+		<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == currentSortBy) }>
+			if sortBy != currentSortBy || newSortOrder(currentSortOrder) == "asc" && sortBy == currentSortBy {
+				switch sortIcon {
+					case "alpha":
+						<uk-icon hx-history="false" icon="arrow-up-z-a" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					case "numeric":
+						<uk-icon hx-history="false" icon="arrow-up-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					case "time":
+						<uk-icon hx-history="false" icon="clock-arrow-up" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				}
+			} else {
+				switch sortIcon {
+					case "alpha":
+						<uk-icon hx-history="false" icon="arrow-down-a-z" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					case "numeric":
+						<uk-icon hx-history="false" icon="arrow-down-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					case "time":
+						<uk-icon hx-history="false" icon="clock-arrow-down" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				}
+			}
+		</div>
+	</a>
+}
+
+func newSortOrder(currentSortOrder string) string {
+	if currentSortOrder == "asc" {
+		return "desc"
+	}
+	return "asc"
+}

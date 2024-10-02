@@ -1,0 +1,36 @@
+package partials
+
+templ SuccessMessage(message string) {
+	if message != "" {
+		<div _="init wait 4s call UIkit.alert('#success-message').close()" id="success-message" class="uk-alert uk-animation-fade border-green-700 uk-background-primary text-white " uk-alert="animation:true">
+			<a href class="uk-alert-close" uk-close></a>
+			<div class="flex gap-2 items-center uk-alert-description">
+				<uk-icon hx-history="false" icon="check" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
+				<span>{ message }</span>
+			</div>
+		</div>
+	}
+}
+
+templ ErrorMessage(message string, autoClose bool) {
+	if message != "" {
+		<div id="error">
+			<div
+				if autoClose {
+					_="init wait 8s call UIkit.alert('#error-message').close() then toggle .hidden on #error"
+				}
+				id="error-message"
+				class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white "
+				uk-alert="animation:true"
+			>
+				<a href class="uk-alert-close" uk-close _="on click toggle .hidden on #error"></a>
+				<div class="flex gap-2 items-center uk-alert-description">
+					<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
+					<span>{ message }</span>
+				</div>
+			</div>
+		</div>
+	} else {
+		<div id="error" class="hidden"></div>
+	}
+}

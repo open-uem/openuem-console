@@ -1,0 +1,32 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ ConfirmDisable(confirm, cancelURL, disableURL string) {
+	<div class="uk-alert border-blue-600 text-blue-500" uk-alert>
+		<div class="uk-alert-description p-2">
+			{ confirm }
+			<div class="flex gap-6 pt-6">
+				<button
+					hx-get={ string(templ.URL(cancelURL)) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					class="uk-button uk-button-default"
+				>
+					{ i18n.T(ctx, "Cancel") }
+				</button>
+				<button
+					hx-post={ string(templ.URL(disableURL)) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					htmx-indicator="#disable-spinner"
+					class="uk-button bg-blue-700 text-white hover:bg-blue-500"
+				>
+					{ i18n.T(ctx, "Disable") }
+					<div id="disable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+				</button>
+			</div>
+		</div>
+	</div>
+}

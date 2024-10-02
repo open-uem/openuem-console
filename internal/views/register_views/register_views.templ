@@ -1,0 +1,365 @@
+package register_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+)
+
+type RegisterValidations struct {
+	UIDRequired      bool
+	NameRequired     bool
+	EmailRequired    bool
+	PhoneRequired    bool
+	PhoneInvalid     bool
+	UIDExists        bool
+	EmailExists      bool
+	EmailInvalid     bool
+	CountryRequired  bool
+	CountryInvalid   bool
+	PasswordRequired bool
+}
+
+type RegisterValues struct {
+	UID      string
+	Name     string
+	Email    string
+	Phone    string
+	Country  string
+	Password string
+}
+
+templ Register(c echo.Context, values RegisterValues, validations RegisterValidations) {
+	<main id="main" class="flex items-center justify-center h-screen">
+		<div class="uk-card uk-card-body uk-card-default w-1/4">
+			<div class="flex flex-col gap-4">
+				<img
+					src="/static/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.2] dark:grayscale mx-auto"
+				/>
+				<div class="gap-2 text-center">
+					<h1 class="text-2xl font-bold">{ i18n.T(ctx, "register.button") }</h1>
+					<p class="text-muted-foreground my-2">
+						{ i18n.T(ctx, "register.description") }
+					</p>
+				</div>
+				<div id="error" class="uk-text-danger hidden"></div>
+				<form id="register" class="uk-form-stacked gap-4">
+					<div class="uk-margin" id="uid-field" hx-swap="outerHTML">
+						<label class="uk-form-label" for="uid">{ i18n.T(ctx, "register.uid") }</label>
+						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
+							<input
+								class="uk-input"
+								id="uid"
+								name="uid"
+								type="text"
+								placeholder={ i18n.T(ctx, "register.uid_placeholder") }
+								value={ values.UID }
+								required
+								autofocus
+								autocomplete="off"
+								if validations.UIDExists || validations.UIDRequired || values.UID == "" {
+									data-error="true"
+								}
+								_="on blur or keyup wait 1s
+									if uid's value is not empty										 
+										add .hidden to #uid-required
+										remove @data-error
+										fetch `/user/${uid's value}/exists` then
+										if result is 'true'
+											remove .hidden from #uid-exists
+											add @data-error='true'
+										else 
+											if result is 'error'
+												remove .hidden from #uid-exists
+												add @data-error='true'
+											else
+												add .hidden to #uid-exists
+												remove @data-error='true'
+											end
+										end
+									else
+										remove .hidden from #uid-required
+										add @data-error='true'
+									end
+								
+									repeat for el in register.elements
+										if el.dataset.error is 'true' 
+											add @disabled to #SendRegister
+											exit
+										end
+									end
+									remove @disabled from #SendRegister
+								end"
+							/>
+						</div>
+						<div id="uid-required" class={ "uk-form-help uk-text-danger", templ.KV("hidden",!validations.UIDRequired) }>{ i18n.T(ctx, "forms.required") }</div>
+						<div id="uid-exists" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.UIDExists) }>{ i18n.T(ctx, "register.uid_taken") }</div>
+					</div>
+					<div class="uk-margin">
+						<label class="uk-form-label" for="myname">{ i18n.T(ctx, "register.name") }</label>
+						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
+							<input
+								class="uk-input"
+								id="myname"
+								name="name"
+								type="text"
+								autocomplete="off"
+								placeholder={ i18n.T(ctx, "register.name_placeholder") }
+								value={ values.Name }
+								required
+								autofocus
+								autocomplete="off"
+								if validations.NameRequired || values.Name == "" {
+									data-error="true"
+								}
+								_="on blur or keyup wait 1s
+									if myname's value is not empty										 
+										add .hidden to #name-required
+										remove @data-error									
+									else
+										remove .hidden from #name-required
+										add @data-error='true'
+									end
+
+									repeat for el in register.elements
+										if el.dataset.error is 'true' 
+											add @disabled to #SendRegister
+											exit
+										end
+									end
+									remove @disabled from #SendRegister
+								end"
+							/>
+						</div>
+						<div id="name-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.NameRequired) }>{ i18n.T(ctx, "forms.required") }</div>
+					</div>
+					<div class="uk-margin">
+						<label class="uk-form-label" for="email">{ i18n.T(ctx, "register.email") }</label>
+						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
+							<input
+								class="uk-input"
+								id="email"
+								name="email"
+								type="email"
+								placeholder={ i18n.T(ctx, "register.email_placeholder") }
+								required
+								value={ values.Email }
+								autofocus
+								autocomplete="off"
+								if validations.EmailExists || validations.EmailInvalid || validations.EmailRequired || values.Email == "" {
+									data-error="true"
+								}
+								_="on blur or keyup wait 1s
+									if email's value is not empty										 
+										add .hidden to #email-required
+										add .hidden to #email-invalid
+										remove @data-error
+
+										fetch `/email/${email's value}/exists` then
+										if result is 'true'
+											remove .hidden from #email-exists
+											add @data-error='true'
+										else 
+											if result is 'error'
+												remove .hidden from #email-exists
+												add @data-error='true'
+											else
+												add .hidden to #email-exists
+												remove @data-error='true'
+											end
+										end
+									else
+										remove .hidden from #email-required
+										add @data-error='true'
+									end
+
+									repeat for el in register.elements
+										if el.dataset.error is 'true' 
+											add @disabled to #SendRegister
+											exit
+										end
+									end
+									remove @disabled from #SendRegister
+								end"
+							/>
+						</div>
+						<div id="email-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.EmailRequired ) }>{ i18n.T(ctx, "forms.required") }</div>
+						<div id="email-exists" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.EmailExists ) }>{ i18n.T(ctx, "register.email_taken") }</div>
+						<div id="email-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.EmailInvalid) }>{ i18n.T(ctx, "register.wrong_email") }</div>
+					</div>
+					<div class="uk-margin">
+						<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
+						// TODO country should be a setting
+						@partials.Countries(c, "ES")
+						<div id="country-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.CountryRequired ) }>{ i18n.T(ctx, "forms.required") }</div>
+						<div id="country-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.CountryInvalid) }>{ i18n.T(ctx, "register.wrong_country") }</div>
+					</div>
+					<div class="uk-margin">
+						<label class="uk-form-label" for="phone">{ i18n.T(ctx, "register.phone") }</label>
+						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
+							<input
+								class="uk-input"
+								id="phone"
+								name="phone"
+								type="text"
+								autocomplete="off"
+								placeholder={ i18n.T(ctx, "register.phone_placeholder") }
+								required
+								value={ values.Phone }
+								autofocus
+								autocomplete="off"
+								if validations.PhoneRequired || validations.PhoneInvalid || values.Phone == "" {
+									data-error="true"
+								}
+								_="
+								on blur on keyup wait 0.5s
+									if phone's value is not empty										 
+										add .hidden to #phone-required
+										remove @data-error
+
+										get toE164(#phone.value) put it into #phone.value
+									else
+										remove .hidden from #phone-required
+										add @data-error='true'
+									end
+
+									repeat for el in register.elements
+										if el.dataset.error is 'true' 
+											add @disabled to #SendRegister
+											exit
+										end
+									end
+									remove @disabled from #SendRegister
+								end"
+							/>
+						</div>
+						<div id="phone-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.PhoneRequired, ) }>{ i18n.T(ctx, "forms.required") }</div>
+						<div id="phone-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.PhoneInvalid) }>{ i18n.T(ctx, "register.wrong_phone") }</div>
+					</div>
+					<div class="uk-margin">
+						<label class="uk-form-label" for="password">{ i18n.T(ctx, "register.certificate_password") }</label>
+						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
+							<input
+								class="uk-input"
+								id="mypassword"
+								name="password"
+								type="password"
+								autocomplete="off"
+								placeholder={ i18n.T(ctx, "register.cert_placeholder") }
+								required
+								autofocus
+								autocomplete="off"
+								if validations.PasswordRequired || values.Password == "" {
+									data-error="true"
+								}
+								_="on blur or keyup wait 1s
+									if mypassword's value is not empty										 
+										add .hidden to #password-required
+										remove @data-error									
+									else
+										remove .hidden from #password-required
+										add @data-error='true'
+									end
+
+									repeat for el in register.elements
+										if el.dataset.error is 'true' 
+											add @disabled to #SendRegister
+											exit
+										end
+									end
+									remove @disabled from #SendRegister
+								end"
+							/>
+						</div>
+						<div id="password-required" class={ "uk-form-help uk-text-danger", templ.KV("hidden",!validations.PasswordRequired) }>{ i18n.T(ctx, "forms.required") }</div>
+					</div>
+					<div class="flex items-center justify-between w-full gap-4">
+						<button type="reset" class="uk-button uk-button-secondary mt-6 mb-2 w-1/3">{ i18n.T(ctx, "Reset") }</button>
+						<button
+							id="SendRegister"
+							class="uk-button uk-button-primary text-white mt-6 mb-2 w-1/3"
+							type="button"
+							disabled
+							hx-indicator="#send-spinner"
+							hx-post="/register"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx, "Send") }
+							<div id="send-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+}
+
+templ RegisterSuccesful() {
+	<main id="main" class="flex items-center justify-center h-screen">
+		<div class="uk-card uk-card-body uk-card-default w-1/4">
+			<div class="flex flex-col gap-4">
+				<img
+					src="/static/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.2] dark:grayscale mx-auto"
+				/>
+				<div class="gap-2 text-center">
+					<h1 class="text-2xl font-bold">{ i18n.T(ctx, "register.success") }</h1>
+					<p class="text-justify text-muted-foreground my-2">
+						{ i18n.T(ctx, "register.next_steps") }
+					</p>
+				</div>
+				<div class="flex justify-center uk-margin w-full">
+					<a
+						href="/"
+						class="uk-button uk-button-primary text-white mt-6 mb-2"
+						type="button"
+						disabled
+					>
+						<uk-icon hx-history="false" icon="home" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.back") }
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ EmailConfirmed() {
+	<main id="main" class="flex items-center justify-center h-screen">
+		<div class="uk-card uk-card-body uk-card-default w-1/4">
+			<div class="flex flex-col gap-4">
+				<img
+					src="/static/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.2] dark:grayscale mx-auto"
+				/>
+				<div class="gap-2 text-center">
+					<h1 class="text-2xl font-bold">{ i18n.T(ctx, "register.email_confirmed") }</h1>
+					<p class="text-justify text-muted-foreground my-2">
+						{ i18n.T(ctx, "register.email_confirmed_description") }
+					</p>
+				</div>
+				<div class="flex justify-center uk-margin w-full">
+					<a
+						href="/"
+						class="uk-button uk-button-primary text-white mt-6 mb-2"
+						type="button"
+						disabled
+					>
+						<uk-icon hx-history="false" icon="home" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.back") }
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ RegisterIndex(cmp templ.Component) {
+	@layout.Register() {
+		@cmp
+	}
+}

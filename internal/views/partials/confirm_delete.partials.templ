@@ -1,0 +1,38 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ ConfirmDelete(confirm, cancelURL, deleteURL string) {
+	<div id="confirm">
+		<div id="confirm-message" class="uk-alert uk-alert-danger bg-red-100" uk-alert>
+			<div class="uk-alert-description p-2">
+				{ confirm }
+				<div class="flex gap-6 pt-6">
+					if cancelURL != "" {
+						<button
+							hx-get={ string(templ.URL(cancelURL)) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							class="uk-button uk-button-default"
+						>
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					} else {
+						<button class="uk-button uk-button-default" _="on click UIkit.alert('#confirm-message').close() then toggle .hidden on #confirm" id="error-message" class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white " uk-alert="animation:true">
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					}
+					<button
+						hx-delete={ string(templ.URL(deleteURL)) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						class="uk-button uk-button-danger"
+					>
+						{ i18n.T(ctx, "Delete") }
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

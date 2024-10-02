@@ -1,0 +1,9 @@
+*.exe
+*.db
+tmp
+node_modules
+*_templ.go
+*_templ.txt
+*.cer
+*.key
+.vscode
