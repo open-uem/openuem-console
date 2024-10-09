@@ -5,6 +5,7 @@ import (
 	"log"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
+	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/desktops_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_nats"
@@ -193,7 +194,7 @@ func (h *Handler) Desktops(c echo.Context) error {
 		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
 	}
 
-	p.NItems, err = h.Model.CountAllAgents()
+	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
 	if err != nil {
 		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
 	}

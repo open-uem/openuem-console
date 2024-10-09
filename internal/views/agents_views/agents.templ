@@ -7,9 +7,19 @@ import (
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strconv"
 )
 
-templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, successMessage, errMessage string) {
+type AgentFilter struct {
+	Hostname       string
+	EnabledAgents  bool
+	DisabledAgents bool
+	WindowsAgents  bool
+	LinuxAgents    bool
+	MacAgents      bool
+}
+
+templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents []*ent.Agent, successMessage, errMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.SuccessMessage(successMessage)
@@ -21,9 +31,144 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 					{ i18n.T(ctx, "agents.description") }
 				</p>
 			</div>
-			<div class="uk-card-body">
+			<div class="uk-card-body flex flex-col gap-4">
+				<form class="flex gap-4 mt-5 mb-2">
+					<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+					<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+					<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+					<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+					<div class="uk-inline  w-1/5">
+						<span class="uk-form-icon">
+							<uk-icon icon="list-filter" hx-history="false" uk-cloak></uk-icon>
+						</span>
+						<input
+							class="uk-input"
+							id="filterByHostname"
+							name="filterByHostname"
+							value={ f.Hostname }
+							placeholder={ i18n.T(ctx, "agents.filter_by_hostname") }
+							aria-label="Filter by name"
+							hx-post="/agents"
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-trigger="keyup delay:1s"
+							_="
+								on load 
+									if my.value.length > 0 then
+										set my.selectionStart to my.value.length
+										set my.selectionEnd to my.value.length
+									end
+								end
+
+								on keyup
+									if #filterByHostname.value.length == 0 then
+										put 1 into #page.value
+									end
+								then
+								"
+						/>
+					</div>
+					<button class="uk-button uk-button-default" type="button">
+						<uk-icon icon="list-filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon> { i18n.T(ctx, "Status") }
+					</button>
+					<div class="uk-drop uk-dropdown" uk-dropdown>
+						<ul class="uk-dropdown-nav uk-nav">
+							<li class="p-2">
+								<input
+									id="filterByEnabledAgents"
+									name="filterByEnabledAgents"
+									type="checkbox"
+									class="uk-checkbox mx-3"
+									hx-post="/agents"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									checked?={ f.EnabledAgents }
+								/>
+								<label for="filterByEnabledAgents">{ i18n.T(ctx, "agents.enabled") }</label>
+							</li>
+							<li class="p-2">
+								<input
+									id="filterByDisabledAgents"
+									name="filterByDisabledAgents"
+									type="checkbox"
+									class="uk-checkbox mx-3"
+									hx-post="/agents"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									checked?={ f.DisabledAgents }
+								/>
+								<label for="filterByDisabledAgents">{ i18n.T(ctx, "agents.disabled") }</label>
+							</li>
+						</ul>
+					</div>
+					<button class="uk-button uk-button-default" type="button">
+						<uk-icon icon="list-filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon> { i18n.T(ctx, "agents.os") }
+					</button>
+					<div class="uk-drop uk-dropdown" uk-dropdown>
+						<ul class="uk-dropdown-nav uk-nav">
+							<li class="p-2">
+								<input
+									id="filterByWindowsAgents"
+									name="filterByWindowsAgents"
+									type="checkbox"
+									value="windows"
+									class="uk-checkbox mx-3"
+									hx-post="/agents"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									checked?={ f.WindowsAgents }
+								/>
+								<label for="filterByWindowsAgents">Windows</label>
+							</li>
+							<li class="p-2">
+								<input
+									id="filterByLinuxAgents"
+									name="filterByLinuxAgents"
+									type="checkbox"
+									value="linux"
+									class="uk-checkbox mx-3"
+									hx-post="/agents"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									checked?={ f.LinuxAgents }
+								/>
+								<label for="filterByLinuxAgents">Linux</label>
+							</li>
+							<li class="p-2">
+								<input
+									id="filterByMacAgents"
+									name="filterByMacAgents"
+									type="checkbox"
+									class="uk-checkbox mx-3"
+									value="mac"
+									hx-post="/agents"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									checked?={ f.MacAgents }
+								/>
+								<label for="filterByMacAgents">Mac</label>
+							</li>
+						</ul>
+					</div>
+					<button
+						type="button"
+						class="uk-button uk-button-default"
+						hx-push-url="false"
+						hx-get="/agents"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
+					</button>
+				</form>
 				if len(agents) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
 						<thead>
 							<tr>
 								<th class="uk-width-1-6">
@@ -34,7 +179,7 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 								</th>
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
-										<span>{ i18n.T(ctx, "agents.enabled") }</span>
+										<span>{ i18n.T(ctx, "Status") }</span>
 										@partials.SortByColumnIcon(c, p, "enabled", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
@@ -160,7 +305,7 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 						}
 					</table>
 					if p.NItems / p.PageSize > 1 {
-						@partials.Pagination(c, p, "#main", "outerHTML", "")
+						@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 					}
 				} else {
 					<p class="uk-text-small uk-text-muted my-4">

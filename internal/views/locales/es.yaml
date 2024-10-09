@@ -4,6 +4,7 @@ es:
   Add: "Añadir"
   Antivirus: "Antivirus"
   Cancel: "Cancelar"
+  Clear: "Limpiar filtro"
   Connect: "Conectar"
   Dashboard: "Panel de control"
   Delete: "Borrar"
@@ -22,6 +23,7 @@ es:
   Reset: "Reestablecer"
   Security: "Seguridad"
   Send: "Enviar"
+  Status: "Estado"
   Update: "Actualizar"
   Updates: "Actualizaciones"
   View: "Ver"
@@ -39,6 +41,7 @@ es:
   Yes: "Sí"
   No: "No"
   WOL: "Wake On Lan"
+  Filter: "Filtrar"
   agents:
     title: "Agentes"
     description: "Estos son los agentes que han contactado con el servidor de OpenUEM"
@@ -50,6 +53,7 @@ es:
     manufacturer: "Fabricante"
     model: "Modelo"
     enabled: "Activado"
+    disabled: "Desactivado"
     no_agents: "No hay información de agentes disponible"
     force_run: "Forzar Informe"
     vnc: "Serv. VNC"
@@ -68,6 +72,7 @@ es:
     already_deployed: "Este paquete ya ha sido desplegado, sin embargo puede actualizarlo o instalarlo desde la tabla de paquetes desplegados"
     no_deployments: "No se han encontrado despliegues para este equipo"
     deploy_empty_values: "El ID del agente, el ID del paquete o su nombre no se enviaron en la petición"
+    filter_by_hostname: "Filtrar por nombre de equipo..."
   inventory:
     hardware:
       title: "Hardware"
@@ -121,6 +126,8 @@ es:
     num_installations: "Núm. Instalaciones"
     no_apps: "No hay información de aplicaciones disponible"
     logo: "Logo"
+    filter_by_name: "Filtrar por nombre de app..."
+    filter_by_publisher: "Filtrar por desarrollador..."
   antivirus:
     title: "Antivirus"
     description: "Esta es la información sobre los sistemas de antivirus informada por los agentes de OpenUEM que han contactado"

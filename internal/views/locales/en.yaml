@@ -4,6 +4,7 @@ en:
   Add: "Add"
   Antivirus: "Antivirus"
   Cancel: "Cancel"
+  Clear: "Clear Filter"
   Connect: "Connect"
   Dashboard: "Dashboard"
   Delete: "Delete"
@@ -22,6 +23,7 @@ en:
   Reset: "Reset"
   Security: "Security"
   Send: "Send"
+  Status: "Status"
   Update: "Update"
   Updates: "Updates"
   View: "View"
@@ -39,6 +41,7 @@ en:
   Yes: "Yes"
   No: "No"
   WOL: "Wake On Lan"
+  Filter: "Filter"
   agents:
     title: "Agents"
     description: "These are the agents that have contacted with the OpenUEM server"
@@ -50,6 +53,7 @@ en:
     manufacturer: "Manufacturer"
     model: "Model"
     enabled: "Enabled"
+    disabled: "Disabled"
     no_agents: "No agents information is available yet"
     force_run: "Force Report"
     vnc: "VNC server"
@@ -68,6 +72,7 @@ en:
     already_deployed: "This package has already been deployed, you can however update or uninstall it from the deployments table"
     no_deployments: "No deployments have been for this endpoint"
     deploy_empty_values: "The agent id, package id or the package name were absent"
+    filter_by_hostname: "Filter by hostname..."
   inventory:
     hardware:
       title: "Hardware"
@@ -122,6 +127,8 @@ en:
     num_installations: "# Installations"
     no_apps: "No apps have been reported yet"
     logo: "Logo"
+    filter_by_name: "Filter by app name..."
+    filter_by_publisher: "Filter by publisher..."
   antivirus:
     title: "Antivirus"
     description: "This is the information about antivirus reported by the agents that have contacted with OpenUEM server."

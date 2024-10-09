@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
+	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/deploy_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_nats"
@@ -64,12 +65,12 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p.GetPaginationAndSortParams(c)
 
 	p.SortBy = "hostname"
-	p.NItems, err = h.Model.CountAllAgents()
+	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p)
+	agents, err := h.Model.GetAgentsByPage(p, agents_views.AgentFilter{})
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}

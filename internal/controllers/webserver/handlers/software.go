@@ -20,15 +20,20 @@ func (h *Handler) Software(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	apps, err = h.Model.GetAppsByPage(p)
+	// Get filters
+	focus := c.FormValue("focus")
+	filterByName := c.FormValue("filterByName")
+	filterByPublisher := c.FormValue("filterByPublisher")
+
+	apps, err = h.Model.GetAppsByPage(p, filterByName, filterByPublisher)
 	if err != nil {
 		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	p.NItems, err = h.Model.CountAllApps()
+	p.NItems, err = h.Model.CountAllApps(filterByName, filterByPublisher)
 	if err != nil {
 		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(apps, c, p)))
+	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, filterByName, filterByPublisher, focus)))
 }

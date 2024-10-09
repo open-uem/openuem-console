@@ -19,19 +19,50 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	p.NItems, err = h.Model.CountAllAgents()
+	// TODO - TEST set pageSize to 1
+	p.PageSize = 1
+
+	// Get filters values
+	f := agents_views.AgentFilter{}
+	f.Hostname = c.FormValue("filterByHostname")
+
+	enabledAgents := c.FormValue("filterByEnabledAgents")
+	if enabledAgents == "on" {
+		f.EnabledAgents = true
+	}
+
+	disabledAgents := c.FormValue("filterByDisabledAgents")
+	if disabledAgents == "on" {
+		f.DisabledAgents = true
+	}
+
+	windowsAgents := c.FormValue("filterByWindowsAgents")
+	if windowsAgents == "windows" {
+		f.WindowsAgents = true
+	}
+
+	linuxAgents := c.FormValue("filterByLinuxAgents")
+	if linuxAgents == "linux" {
+		f.LinuxAgents = true
+	}
+
+	macAgents := c.FormValue("filterByMacAgents")
+	if macAgents == "mac" {
+		f.MacAgents = true
+	}
+	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	agents, err = h.Model.GetAgentsByPage(p)
+	agents, err = h.Model.GetAgentsByPage(p, f)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, agents, p, successMessage, errMessage)))
+	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, successMessage, errMessage)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

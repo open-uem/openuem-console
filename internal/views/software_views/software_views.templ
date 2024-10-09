@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ Software(apps []models.App, c echo.Context, p partials.PaginationAndSort) {
+templ Software(c echo.Context, p partials.PaginationAndSort, apps []models.App, filterByName, filterByPublisher, focus string) {
 	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Software", i18n.Default("Software")), Url: "/software"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -20,9 +20,85 @@ templ Software(apps []models.App, c echo.Context, p partials.PaginationAndSort) 
 					{ i18n.T(ctx, "apps.description") }
 				</p>
 			</div>
-			<div class="uk-card-body">
+			<div class="uk-card-body flex flex-col gap-4">
+				<form class="flex gap-4 mt-5 mb-2">
+					<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+					<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+					<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+					<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+					<input id="focus" type="hidden" name="focus" value={ focus }/>
+					<input
+						class="uk-input w-1/5"
+						id="filterByName"
+						name="filterByName"
+						value={ filterByName }
+						placeholder={ i18n.T(ctx, "apps.filter_by_name") }
+						aria-label="Filter by name"
+						autofocus?={ focus == "filterByName" }
+						hx-post="/software"
+						hx-push-url="false"
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-trigger="keyup delay:1s"
+						_="
+								on load 
+									if my.value.length > 0 then
+										set my.selectionStart to my.value.length
+										set my.selectionEnd to my.value.length
+									end
+								end
+
+								on keyup
+									put 'filterByName' into #focus.value
+									if #filterByName.value.length == 0 or #filterByPublisher.value.length == 0 then
+										put 1 into #page.value
+									end
+								then
+								"
+					/>
+					<input
+						class="uk-input w-1/5"
+						id="filterByPublisher"
+						name="filterByPublisher"
+						value={ filterByPublisher }
+						placeholder={ i18n.T(ctx, "apps.filter_by_publisher") }
+						aria-label="Filter by publisher"
+						autofocus?={ focus == "filterByPublisher" }
+						hx-post="/software"
+						hx-push-url="false"
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-trigger="keyup delay:1s"
+						_="
+								on load 
+									if my.value.length > 0 then
+										set my.selectionStart to my.value.length
+										set my.selectionEnd to my.value.length
+									end
+								end
+
+								on keyup
+									put 'filterByPublisher' into #focus.value
+									if #filterByName.value.length == 0 or #filterByPublisher.value.length == 0 then
+										put 1 into #page.value
+									end
+								then
+								"
+					/>
+					<button
+						type="button"
+						class="uk-button uk-button-default"
+						hx-push-url="false"
+						hx-get="/software"
+						hx-target="#main"
+						hx-swap="outerHTML"
+						disabled?={ len(filterByName) == 0 && len(filterByPublisher) == 0 }
+					>
+						{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-4" uk-cloack></uk-icon>
+					</button>
+				</form>
 				if len(apps) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 						<thead>
 							<tr>
 								<th><span class="sr-only">{ i18n.T(ctx, "apps.logo") }</span></th>
@@ -67,7 +143,7 @@ templ Software(apps []models.App, c echo.Context, p partials.PaginationAndSort) 
 							}
 						}
 					</table>
-					@partials.Pagination(c, p, "#main", "outerHTML", "")
+					@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 				} else {
 					<p class="uk-text-small uk-text-muted my-4">
 						{ i18n.T(ctx, "apps.no_apps") }
