@@ -36,7 +36,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										<th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
-												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "uid", p.SortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "uid", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
@@ -52,13 +52,13 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										<th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "sessions.token") }</span>
-												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "token", p.SortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "token", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "sessions.expiry") }</span>
-												@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "expiry", p.SortOrder, "time")
+												@partials.SortByColumnIcon(c, p, "expiry", "time", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
@@ -97,7 +97,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 								}
 							</table>
 							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p.CurrentPage, len(sessions), p.PageSize, p.NItems, p.SortBy, p.SortOrder)
+								@partials.Pagination(c, p, "#main", "outerHTML", "")
 							}
 						} else {
 							<p class="uk-text-small uk-text-muted">

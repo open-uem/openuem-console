@@ -1,20 +1,29 @@
 package partials
 
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
 templ BitlockerStatus(status string) {
-	<div uk-tooltip="title: Unencrypted; pos: left">
-		switch status {
-			case "Unencrypted":
+	switch status {
+		case "Unencrypted":
+			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unencrypted")) }>
 				<span class="text-orange-500">
 					<uk-icon hx-history="false" icon="lock-open" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				</span>
-			case "Encrypted":
+			</div>
+		case "Encrypted":
+			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_encrypted")) }>
 				<span class="text-green-600">
 					<uk-icon hx-history="false" icon="lock" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				</span>
-			default:
+			</div>
+		default:
+			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unknown")) }>
 				<span class="text-red-600">
 					<uk-icon hx-history="false" icon="shield-question" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				</span>
-		}
-	</div>
+			</div>
+	}
 }

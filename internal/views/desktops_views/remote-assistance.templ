@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 var connectVNCHandle = templ.NewOnceHandle()
@@ -18,12 +19,10 @@ templ RemoteAssistance(agent *ent.Agent, confirmDelete bool) {
 				}
 				@DesktopsNavbar(agent.ID, "remote-assistance", confirmDelete)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
-					if agent.IP != "" {
+					if agent.IP != "" || agent.Vnc == "" {
 						<div class="uk-card-header">
-							<h3 class="uk-card-title">Remote Assistance</h3>
-							<p class="uk-margin-small-top uk-text-small">
-								Initiate a remote assistance session. If the session can be established a PIN will be shown to the user. Use that PIN as the password for the connection.
-							</p>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.vnc_title") }</h3>
+							<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.vnc_description") }</p>
 						</div>
 						<div id="vnc" class="uk-card-body mt-8 mb-4">
 							<button
@@ -33,12 +32,12 @@ templ RemoteAssistance(agent *ent.Agent, confirmDelete bool) {
 								hx-swap="innerHTML"
 								type="button"
 							>
-								Connect
+								{ i18n.T(ctx, "Connect") }
 							</button>
 						</div>
 					} else {
 						<p class="uk-text-small uk-text-muted">
-							Remote Assistance is not available, IP address is not assigned to the agent.
+							{ i18n.T(ctx, "agents.no_supported_vnc") }
 						</p>
 					}
 				</div>

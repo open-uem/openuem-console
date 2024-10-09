@@ -1,23 +1,26 @@
 package desktops_views
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
 templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 	<ul class="uk-tab">
-		<li class={ templ.KV("uk-active", active == "computer") }>
+		<li class={ templ.KV("uk-active", active == "hardware") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/desktops/%s/computer?delete=true", id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/computer?delete=true", id))) }
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/hardware?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/hardware?delete=true", id))) }
 				} else {
-					href={ templ.URL(fmt.Sprintf("/desktops/%s/computer", id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/computer", id))) }
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/hardware", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/hardware", id))) }
 				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Computer
+				{ i18n.T(ctx, "inventory.hardware.title") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "os") }>
@@ -33,7 +36,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				OS
+				{ i18n.T(ctx, "OS") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "monitors") }>
@@ -49,7 +52,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Monitors
+				{ i18n.T(ctx, "Monitors") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "logical-disks") }>
@@ -65,7 +68,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Logical Disks	
+				{ i18n.T(ctx, "Logical Disks") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "shares") }>
@@ -81,7 +84,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Shares
+				{ i18n.T(ctx, "Shares") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "network-adapters") }>
@@ -97,7 +100,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Network Adapters
+				{ i18n.T(ctx, "Network Adapters") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "printers") }>
@@ -113,7 +116,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Printers
+				{ i18n.T(ctx, "Printers") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "software") }>
@@ -129,7 +132,23 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Software
+				{ i18n.T(ctx, "Software") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "deploy") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/deploy?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/deploy", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "DeployShort") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "remote-assistance") }>
@@ -145,7 +164,23 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Remote Assistance
+				{ i18n.T(ctx, "Remote Assistance") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "wol") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/wol?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "WOL") }
 			</a>
 		</li>
 	</ul>

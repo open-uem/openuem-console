@@ -31,45 +31,47 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort) ([]*ent.Agent, err
 	var err error
 	var apps []*ent.Agent
 
+	query := m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+
 	switch p.SortBy {
 	case "hostname":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldHostname)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldHostname)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
 		}
 	case "os":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldOs)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldOs)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldOs)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldOs)).All(context.Background())
 		}
 	case "version":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldVersion)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldVersion)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldVersion)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldVersion)).All(context.Background())
 		}
 	case "last_contact":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldLastContact)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldLastContact)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 		}
 	case "enabled":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldEnabled)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldEnabled)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldEnabled)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldEnabled)).All(context.Background())
 		}
 	case "ip_address":
 		if p.SortOrder == "asc" {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Asc(agent.FieldIP)).All(context.Background())
+			apps, err = query.Order(ent.Asc(agent.FieldIP)).All(context.Background())
 		} else {
-			apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldIP)).All(context.Background())
+			apps, err = query.Order(ent.Desc(agent.FieldIP)).All(context.Background())
 		}
 	default:
-		apps, err = m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems).Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
+		apps, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 	}
 
 	if err != nil {

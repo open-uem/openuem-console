@@ -29,7 +29,7 @@ func (m *Model) GetUsersByPage(p partials.PaginationAndSort) ([]*ent.User, error
 	var err error
 	var users []*ent.User
 
-	query := m.Client.User.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems)
+	query := m.Client.User.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	switch p.SortBy {
 	case "uid":

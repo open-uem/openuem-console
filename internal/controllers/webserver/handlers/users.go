@@ -25,7 +25,7 @@ type NewUser struct {
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
 	var err error
 
-	p := partials.PaginationAndSort{}
+	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
 	p.NItems, err = h.Model.CountAllUsers()

@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "tmp\\main.exe start  --jwt-key supers3cr3t --nats-host nats-server --nats-port 4433 --cacert C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem\\certificates\\console\\ca.cer --cert C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem\\certificates\\console\\console.cer --key C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem\\certificates\\console\\console.key"
+  bin = "tmp\\main.exe start  --jwt-key supers3cr3t --nats-host nats-server --nats-port 4433 --cacert C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem-docker\\certificates\\console\\ca.cer --cert C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem-docker\\certificates\\console\\console.cer --key C:\\Users\\mcabr\\go\\src\\github.com\\doncicuto\\openuem-docker\\certificates\\console\\console.key"
   cmd = "go build -o .\\tmp\\main.exe .\\main.go"
   delay = 1000
   exclude_dir = ["assets", "tmp", "internal\\views\\typescript", "internal\\views\\tailwind"]

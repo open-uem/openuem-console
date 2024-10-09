@@ -2,11 +2,13 @@ package partials
 
 templ SuccessMessage(message string) {
 	if message != "" {
-		<div _="init wait 4s call UIkit.alert('#success-message').close()" id="success-message" class="uk-alert uk-animation-fade border-green-700 uk-background-primary text-white " uk-alert="animation:true">
-			<a href class="uk-alert-close" uk-close></a>
-			<div class="flex gap-2 items-center uk-alert-description">
-				<uk-icon hx-history="false" icon="check" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
-				<span>{ message }</span>
+		<div id="success">
+			<div _="init wait 4s call UIkit.alert('#success-message').close() then toggle .hidden on #success" id="success-message" class="uk-alert uk-animation-fade border-green-700 uk-background-primary text-white " uk-alert="animation:true">
+				<a href class="uk-alert-close" uk-close></a>
+				<div class="flex gap-2 items-center uk-alert-description">
+					<uk-icon hx-history="false" icon="check" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
+					<span>{ message }</span>
+				</div>
 			</div>
 		</div>
 	}

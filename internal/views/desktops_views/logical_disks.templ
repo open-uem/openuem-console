@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
 	"strconv"
 )
 
@@ -18,9 +19,9 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 				@DesktopsNavbar(agent.ID, "logical-disks", confirmDelete)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">Logical Disks</h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.logical_disk.title") }</h3>
 						<p class="uk-margin-small-top uk-text-small">
-							These are the logical disks connected to this computer as reported by the OpenUEM agent.
+							{ i18n.T(ctx, "inventory.logical_disk.description") }
 						</p>
 					</div>
 					<div class="uk-card-body">
@@ -28,13 +29,13 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
 								<thead>
 									<tr>
-										<th>Label</th>
-										<th>Volume Name</th>
-										<th>Filesystem</th>
-										<th>Usage</th>
-										<th>Total size</th>
-										<th>Remaining space</th>
-										<th>BitLocker</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
 									</tr>
 								</thead>
 								for _, disk := range agent.Edges.Logicaldisks {

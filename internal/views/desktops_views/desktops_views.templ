@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ Desktops(agents []models.Desktop, c echo.Context, currentPage, pageSize, totalItems int, sortBy, sortOrder string) {
+templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Desktop) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -28,36 +28,36 @@ templ Desktops(agents []models.Desktop, c echo.Context, currentPage, pageSize, t
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.hostname") }</span>
-										@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "hostname", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.os") }</span>
-										@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "os", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.version") }</span>
-										@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "version", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.username") }</span>
-										@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "username", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "username", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center justify-center">
 										<span>{ i18n.T(ctx, "agents.manufacturer") }</span>
-										@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "manufacturer", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "manufacturer", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th class="flex gap-2 items-center">
 									<span>{ i18n.T(ctx, "agents.model") }</span>
-									@partials.SortByColumnIcon(c, currentPage, pageSize, sortBy, "model", sortOrder, "alpha")
+									@partials.SortByColumnIcon(c, p, "model", "alpha", "#main", "outerHTML", "")
 								</th>
 								<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
 							</tr>

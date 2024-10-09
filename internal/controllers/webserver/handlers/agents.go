@@ -16,7 +16,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	var err error
 	var agents []*ent.Agent
 
-	p := partials.PaginationAndSort{}
+	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
 	p.NItems, err = h.Model.CountAllAgents()

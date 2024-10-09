@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-templ Apps(agent *ent.Agent, apps []*ent.App, c echo.Context, currentPage, itemsPerPage, totalItems int, sortBy, sortOrder string, confirmDelete bool) {
+templ Apps(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, apps []*ent.App, confirmDelete bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -33,25 +33,25 @@ templ Apps(agent *ent.Agent, apps []*ent.App, c echo.Context, currentPage, items
 										<th class="w-1/3">
 											<div class="flex gap-2 items-center ">
 												<span>Name</span>
-												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "name", sortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/12">
 											<div class="flex gap-2 items-center ">
 												<span>Version</span>
-												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "version", sortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/3">
 											<div class="flex gap-2 items-center ">
 												<span>Publisher</span>
-												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "publisher", sortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "publisher", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/12">
 											<div class="flex gap-2 items-center ">
 												<span>Installation</span>
-												@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "installation", sortOrder, "alpha")
+												@partials.SortByColumnIcon(c, p, "installation", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 									</tr>
@@ -79,8 +79,8 @@ templ Apps(agent *ent.Agent, apps []*ent.App, c echo.Context, currentPage, items
 										}
 									</tr>
 								}
-								if len(apps) < itemsPerPage {
-									for i:=0; i < itemsPerPage - len(apps); i++ {
+								if len(apps) < p.PageSize {
+									for i:=0; i < p.PageSize - len(apps); i++ {
 										<tr class="h-16">
 											<td class="!align-middle">-</td>
 											<td class="!align-middle">-</td>
@@ -90,7 +90,7 @@ templ Apps(agent *ent.Agent, apps []*ent.App, c echo.Context, currentPage, items
 									}
 								}
 							</table>
-							@partials.Pagination(c, currentPage, len(apps), itemsPerPage, totalItems, sortBy, sortOrder)
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								No apps information is available yet.

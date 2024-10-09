@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
@@ -11,7 +10,6 @@ import (
 
 func (m *Model) GetAllSessions() ([]*ent.Sessions, error) {
 	sessions, err := m.Client.Sessions.Query().All(context.Background())
-	fmt.Println(sessions)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +28,7 @@ func (m *Model) GetSessionsByPage(p partials.PaginationAndSort) ([]*ent.Sessions
 	var err error
 	var s []*ent.Sessions
 
-	query := m.Client.Sessions.Query().WithOwner().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.NItems)
+	query := m.Client.Sessions.Query().WithOwner().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	switch p.SortBy {
 	case "token":

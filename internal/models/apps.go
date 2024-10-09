@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/app"
@@ -34,56 +35,86 @@ func (m *Model) CountAllApps() (int, error) {
 	return len(apps), err
 }
 
-func (m *Model) GetAgentAppsByPage(agentId string, currentPage, nAppsPerPage int) ([]*ent.App, error) {
-	apps, err := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId))).Limit(nAppsPerPage).Offset((currentPage - 1) * nAppsPerPage).Order(ent.Asc(app.FieldName)).All(context.Background())
+func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort) ([]*ent.App, error) {
+
+	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+
+	switch p.SortBy {
+	case "name":
+		if p.SortOrder == "asc" {
+			query = query.Order(ent.Asc(app.FieldName))
+		} else {
+			query = query.Order(ent.Desc(app.FieldName))
+		}
+	case "version":
+		if p.SortOrder == "asc" {
+			query = query.Order(ent.Asc(app.FieldVersion))
+		} else {
+			query = query.Order(ent.Desc(app.FieldVersion))
+		}
+	case "publisher":
+		if p.SortOrder == "asc" {
+			query = query.Order(ent.Asc(app.FieldPublisher))
+		} else {
+			query = query.Order(ent.Desc(app.FieldPublisher))
+		}
+	case "installation":
+		if p.SortOrder == "asc" {
+			query = query.Order(ent.Asc(app.FieldInstallDate))
+		} else {
+			query = query.Order(ent.Desc(app.FieldInstallDate))
+		}
+	}
+
+	apps, err := query.All(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	return apps, nil
 }
 
-func mainAppsByPageSQL(s *sql.Selector, currentPage, nAppsPerPage int) {
-	s.Select(app.FieldName, app.FieldPublisher, "count(*) AS count").GroupBy(app.FieldName, app.FieldPublisher).Limit(nAppsPerPage).Offset((currentPage - 1) * nAppsPerPage)
+func mainAppsByPageSQL(s *sql.Selector, p partials.PaginationAndSort) {
+	s.Select(app.FieldName, app.FieldPublisher, "count(*) AS count").GroupBy(app.FieldName, app.FieldPublisher).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 }
 
-func (m *Model) GetAppsByPage(currentPage, nAppsPerPage int, sortBy, sortOrder string) ([]App, error) {
+func (m *Model) GetAppsByPage(p partials.PaginationAndSort) ([]App, error) {
 	var apps []App
 	var err error
 
-	switch sortBy {
+	switch p.SortBy {
 	case "name":
-		if sortOrder == "asc" {
+		if p.SortOrder == "asc" {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Asc(app.FieldName))
 			}).Scan(context.Background(), &apps)
 		} else {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Desc(app.FieldName))
 			}).Scan(context.Background(), &apps)
 		}
 	case "publisher":
-		if sortOrder == "asc" {
+		if p.SortOrder == "asc" {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Asc(app.FieldPublisher))
 			}).Scan(context.Background(), &apps)
 		} else {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Desc(app.FieldPublisher))
 			}).Scan(context.Background(), &apps)
 		}
 	case "installations":
-		if sortOrder == "asc" {
+		if p.SortOrder == "asc" {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Asc("count"))
 			}).Scan(context.Background(), &apps)
 		} else {
 			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
-				mainAppsByPageSQL(s, currentPage, nAppsPerPage)
+				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Desc("count"))
 			}).Scan(context.Background(), &apps)
 		}

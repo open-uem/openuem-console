@@ -6,9 +6,9 @@ templ Brand(name, publisher string) {
 	if strings.Contains(name, "7-zip") {
 		<i class="si si-7zip si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "adobe acrobat") {
-		<i class="si si-adobeacrobatreader si--color uk-cloak text-3xl"></i>
+		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "adobe") {
-		<i class="si si-adobe si--color uk-cloak text-3xl"></i>
+		<i class="si si-adobe si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "amd") || strings.Contains(publisher, "amd") {
 		<i class="si si-amd si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "autofirma") {
@@ -47,6 +47,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-google si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "go") {
 		<i class="si si-go si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "gimp") {
+		<i class="si si-gimp si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "greenshot") {
 		<uk-icon hx-history="false" icon="brush" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "hp") || strings.Contains(publisher, "hp") {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 templ OperatingSystem(agent *ent.Agent, confirmDelete bool) {
@@ -17,36 +18,36 @@ templ OperatingSystem(agent *ent.Agent, confirmDelete bool) {
 				@DesktopsNavbar(agent.ID, "os", confirmDelete)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">Operating System</h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.os.title") }</h3>
 						<p class="uk-margin-small-top uk-text-small">
-							This is the information about the operating system reported by the OpenUEM agent.
+							{ i18n.T(ctx, "inventory.os.description") }
 						</p>
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
 					<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
 						<tr>
-							<th>Version</th>
+							<th>{ i18n.T(ctx, "inventory.os.version") }</th>
 							<td>{ agent.Edges.Operatingsystem.Version }</td>
 						</tr>
 						<tr>
-							<th>Description</th>
+							<th>{ i18n.T(ctx, "inventory.os.desc") }</th>
 							<td>{ agent.Edges.Operatingsystem.Description }</td>
 						</tr>
 						<tr>
-							<th>Architecture</th>
+							<th>{ i18n.T(ctx, "inventory.os.architecture") }</th>
 							<td>{ agent.Edges.Operatingsystem.Arch }</td>
 						</tr>
 						<tr>
-							<th>Username</th>
+							<th>{ i18n.T(ctx, "inventory.os.username") }</th>
 							<td>{ agent.Edges.Operatingsystem.Username }</td>
 						</tr>
 						<tr>
-							<th>Installation date</th>
+							<th>{ i18n.T(ctx, "inventory.os.installation") }</th>
 							<td>{ agent.Edges.Operatingsystem.InstallDate.Local().Format("02/01/2006 15:04:05") }</td>
 						</tr>
 						<tr>
-							<th>Last Bootup date</th>
+							<th>{ i18n.T(ctx, "inventory.os.last_bootup") }</th>
 							<td>{ agent.Edges.Operatingsystem.LastBootupTime.Local().Format("02/01/2006 15:04:05") }</td>
 						</tr>
 					</table>

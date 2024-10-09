@@ -36,13 +36,23 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 
-	e.GET("/deploy", h.Deploy, h.IsAuthenticated)
+	e.GET("/deploy", h.DeployInstall, h.IsAuthenticated)
+	e.GET("/deploy/install", h.DeployInstall, h.IsAuthenticated)
+	e.GET("/deploy/uninstall", h.DeployUninstall, h.IsAuthenticated)
+	e.GET("/deploy/searchinstall", h.DeployInstall, h.IsAuthenticated)
+	e.POST("/deploy/searchinstall", func(c echo.Context) error { return h.SearchPackagesAction(c, true) }, h.IsAuthenticated)
+	e.GET("/deploy/searchuninstall", h.DeployUninstall, h.IsAuthenticated)
+	e.POST("/deploy/searchuninstall", func(c echo.Context) error { return h.SearchPackagesAction(c, false) }, h.IsAuthenticated)
+	e.GET("/deploy/selectpackagedeployment", h.SelectPackageDeployment, h.IsAuthenticated)
+	e.POST("/deploy/selectpackagedeployment", h.DeployPackageToSelectedAgents, h.IsAuthenticated)
 
 	e.GET("/desktops", h.Desktops, h.IsAuthenticated)
+	e.POST("/desktops", h.Desktops, h.IsAuthenticated)
 	e.GET("/desktops/:uuid", h.Computer, h.IsAuthenticated)
 	e.DELETE("/desktops/:uuid", h.AgentConfirmDelete, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/software", h.Apps, h.IsAuthenticated)
-	e.GET("/desktops/:uuid/computer", h.Computer, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/software", h.Apps, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/hardware", h.Computer, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/logical-disks", h.LogicalDisks, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/monitors", h.Monitors, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/network-adapters", h.NetworkAdapters, h.IsAuthenticated)
@@ -50,6 +60,13 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/desktops/:uuid/printers", h.Printers, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/shares", h.Shares, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/remote-assistance", h.RemoteAssistance, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/deploy/searchinstall", h.DesktopDeploy, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/deploy/searchinstall", h.DesktopDeploySearchPackagesInstall, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/deploy/install", h.DesktopDeployInstall, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/deploy/update", h.DesktopDeployUpdate, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/deploy/uninstall", h.DesktopDeployUninstall, h.IsAuthenticated)
 
 	e.POST("/logout", h.Logout, h.IsAuthenticated)
 
@@ -67,6 +84,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/security/updates", h.ListSecurityUpdatesStatus, h.IsAuthenticated)
 
 	e.GET("/software", h.Software, h.IsAuthenticated)
+	e.POST("/software", h.Software, h.IsAuthenticated)
 
 }
 

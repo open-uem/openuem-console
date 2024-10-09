@@ -12,7 +12,7 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 
 	errMessage := ""
 
-	p := partials.PaginationAndSort{}
+	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
 	p.NItems, err = h.Model.CountAllSessions()

@@ -1,0 +1,213 @@
+package desktops_views
+
+import (
+	"fmt"
+	models "github.com/doncicuto/openuem-console/internal/models/winget"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"strings"
+)
+
+templ DesktopDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				if confirmDelete {
+					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/desktops", "/desktops/"+agent.ID)
+				}
+				@DesktopsNavbar(agent.ID, "deploy", confirmDelete)
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "Deploy") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.deploy_description") }</p>
+					</div>
+				</div>
+				<div class="uk-flex gap-8">
+					<div class="uk-card uk-card-body uk-card-default w-5/12 my-4 p-6">
+						<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_search") }</p>
+						<div class="w-1/2 mb-4">
+							<form
+								class="uk-search uk-search-default w-full flex items-center gap-4"
+								_="on load
+										set emptyArray to [] as Array
+										set sessionStorage.checkedItems to emptyArray as JSON
+									end
+								"
+							>
+								<span uk-search-icon></span>
+								<input
+									name="search"
+									class="uk-search-input"
+									type="search"
+									placeholder={ i18n.T(ctx, "Search") }
+									aria-label="Search"
+									_="on keyup
+										if my.value.length > 3 then
+											remove @disabled from #search-packages
+										else
+											add @disabled to #search-packages
+										end
+									end"
+								/>
+								<button
+									id="search-packages"
+									type="submit"
+									class="uk-button uk-button-primary"
+									hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy/searchinstall", agent.ID))) }
+									hx-target="#deploy-search-results"
+									hx-push-url="false"
+									hx-swap="innerHTML"
+									disabled
+								>
+									{ i18n.T(ctx, "Search") }
+								</button>
+							</form>
+						</div>
+						<div id="deploy-search-results"></div>
+					</div>
+					<div class="uk-card uk-card-body uk-card-default w-7/12 my-4 p-6">
+						if p.NItems > 0 {
+							<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_list") }</p>
+							<div id="deployments-results">
+								@DeploymentsTable(c, p, agent.ID, deployments)
+							</div>
+						} else {
+							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_deployments") }</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort) {
+	if len(packages) > 0 {
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+			<thead>
+				<tr>
+					<th class="sr-only w-1/12">Logo</th>
+					<th>
+						<div class="flex gap-2 items-center">
+							<span>{ i18n.T(ctx, "Name") }</span>
+							@partials.SortByColumnIcon(c, p, "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
+						</div>
+					</th>
+					<th>{ i18n.T(ctx, "Actions") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, p := range packages {
+					<tr>
+						<td class="text-center !align-middle">
+							@partials.Brand(strings.ToLower(p.Name), "")
+						</td>
+						<td class="!align-middle">{ p.Name }</td>
+						<td class="!align-middle">
+							<form>
+								<input type="hidden" name="packageId" value={ p.ID }/>
+								<input type="hidden" name="packageName" value={ p.Name }/>
+								<button
+									type="submit"
+									hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy/install", agentId))) }
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+								>
+									<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+								</button>
+							</form>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name=search]")
+	} else {
+		<p class="uk-text-small uk-text-muted mt-8 mb-2">
+			{ i18n.T(ctx, "install.no_packages") }
+		</p>
+	}
+}
+
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*openuem_ent.Deployment) {
+	<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+		<thead>
+			<tr>
+				<th>
+					<div class="flex gap-2 items-center">
+						<span class="sr-only">Logo</span>
+					</div>
+				</th>
+				<th>
+					<div class="flex gap-2 items-center">
+						<span>{ i18n.T(ctx, "Name") }</span>
+						@partials.SortByColumnIcon(c, p, "name", "alpha", "#deployments-results", "innerHTML", "")
+					</div>
+				</th>
+				<th>
+					<div class="flex gap-2 items-center">
+						<span>{ i18n.T(ctx, "agents.deploy_install_date") }</span>
+						@partials.SortByColumnIcon(c, p, "installation", "time", "#deployments-results", "innerHTML", "")
+					</div>
+				</th>
+				<th>
+					<div class="flex gap-2 items-center">
+						<span>{ i18n.T(ctx, "agents.deploy_updated_date") }</span>
+						@partials.SortByColumnIcon(c, p, "updated", "time", "#deployments-results", "innerHTML", "")
+					</div>
+				</th>
+				<th>{ i18n.T(ctx, "Update") }</th>
+				<th>{ i18n.T(ctx, "Uninstall") }</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, item := range packages {
+				<tr>
+					<td class="text-center !align-middle">
+						@partials.Brand(strings.ToLower(item.Name), "")
+					</td>
+					<td class="!align-middle">{ item.Name }</td>
+					<td class="!align-middle">{ item.Installed.Format("02/01/2006 15:04:05") }</td>
+					<td class="!align-middle">{ item.Updated.Format("02/01/2006 15:04:05") }</td>
+					<td class="!align-middle">
+						<form>
+							<input type="hidden" name="packageId" value={ item.PackageID }/>
+							<input type="hidden" name="packageName" value={ item.Name }/>
+							<button
+								type="submit"
+								hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy/update", agentId))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								<uk-icon hx-history="false" icon="package-check" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+							</button>
+						</form>
+					</td>
+					<td class="!align-middle">
+						<form>
+							<input type="hidden" name="packageId" value={ item.PackageID }/>
+							<input type="hidden" name="packageName" value={ item.Name }/>
+							<button
+								type="submit"
+								hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/deploy/uninstall", agentId))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
+							</button>
+						</form>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "")
+}

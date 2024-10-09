@@ -1,44 +1,52 @@
 package partials
 
 import (
-	"github.com/doncicuto/openuem-console/internal/views/utils"
 	"github.com/labstack/echo/v4"
+	"strconv"
 )
 
-templ SortByColumnIcon(c echo.Context, currentPage, pageSize int, currentSortBy, sortBy, currentSortOrder, sortIcon string) {
-	<a
-		href={ utils.GetURLWithParams(c, currentPage, pageSize, sortBy, newSortOrder(currentSortOrder)) }
-		hx-get={ string(utils.GetURLWithParams(c, currentPage, pageSize, sortBy, newSortOrder(currentSortOrder))) }
-		hx-push-url="true"
-		hx-target="#main"
-		hx-swap="outerHTML"
-	>
-		<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == currentSortBy) }>
-			if sortBy != currentSortBy || newSortOrder(currentSortOrder) == "asc" && sortBy == currentSortBy {
-				switch sortIcon {
-					case "alpha":
-						<uk-icon hx-history="false" icon="arrow-up-z-a" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "numeric":
-						<uk-icon hx-history="false" icon="arrow-up-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "time":
-						<uk-icon hx-history="false" icon="clock-arrow-up" custom-class="h-5 w-5" uk-cloack></uk-icon>
+templ SortByColumnIcon(c echo.Context, p PaginationAndSort, sortBy, sortIcon, target, swap, include string) {
+	<form>
+		<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+		<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+		<input type="hidden" name="sortBy" value={ sortBy }/>
+		<input type="hidden" name="sortOrder" value={ newSortOrder(p.SortOrder) }/>
+		<button
+			type="button"
+			hx-post={ c.Request().RequestURI }
+			hx-push-url="true"
+			hx-target={ target }
+			hx-swap={ swap }
+			hx-include={ include }
+			title="sortBy"
+		>
+			<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == p.SortBy) }>
+				if sortBy != p.SortBy || newSortOrder(p.SortOrder) == "asc" && sortBy == p.SortBy {
+					switch sortIcon {
+						case "alpha":
+							<uk-icon hx-history="false" icon="arrow-up-a-z" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "numeric":
+							<uk-icon hx-history="false" icon="arrow-down-0-1" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "time":
+							<uk-icon hx-history="false" icon="clock-arrow-down" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					}
+				} else {
+					switch sortIcon {
+						case "alpha":
+							<uk-icon hx-history="false" icon="arrow-down-z-a" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "numeric":
+							<uk-icon hx-history="false" icon="arrow-up-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "time":
+							<uk-icon hx-history="false" icon="clock-arrow-up" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					}
 				}
-			} else {
-				switch sortIcon {
-					case "alpha":
-						<uk-icon hx-history="false" icon="arrow-down-a-z" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "numeric":
-						<uk-icon hx-history="false" icon="arrow-down-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "time":
-						<uk-icon hx-history="false" icon="clock-arrow-down" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				}
-			}
-		</div>
-	</a>
+			</div>
+		</button>
+	</form>
 }
 
-func newSortOrder(currentSortOrder string) string {
-	if currentSortOrder == "asc" {
+func newSortOrder(sortOrder string) string {
+	if sortOrder == "asc" {
 		return "desc"
 	}
 	return "asc"

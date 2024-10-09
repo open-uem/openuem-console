@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ Software(apps []models.App, c echo.Context, currentPage, itemsPerPage, totalItems int, sortBy, sortOrder string) {
+templ Software(apps []models.App, c echo.Context, p partials.PaginationAndSort) {
 	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Software", i18n.Default("Software")), Url: "/software"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -29,19 +29,19 @@ templ Software(apps []models.App, c echo.Context, currentPage, itemsPerPage, tot
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "apps.name") }</span>
-										@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "name", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "apps.publisher") }</span>
-										@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "publisher", sortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "publisher", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "apps.num_installations") }</span>
-										@partials.SortByColumnIcon(c, currentPage, itemsPerPage, sortBy, "installations", sortOrder, "numeric")
+										@partials.SortByColumnIcon(c, p, "installations", "numeric", "#main", "outerHTML", "")
 									</div>
 								</th>
 							</tr>
@@ -56,8 +56,8 @@ templ Software(apps []models.App, c echo.Context, currentPage, itemsPerPage, tot
 								<td class="uk-width-1-6 !align-middle">{ strconv.Itoa(app.Count) }</td>
 							</tr>
 						}
-						if len(apps) < itemsPerPage {
-							for i:=0; i < itemsPerPage - len(apps); i++ {
+						if len(apps) < p.PageSize {
+							for i:=0; i < p.PageSize - len(apps); i++ {
 								<tr class="h-16">
 									<td class="uk-width-1-6 text-center !align-middle">-</td>
 									<td class="uk-width-1-3 !align-middle">-</td>
@@ -67,7 +67,7 @@ templ Software(apps []models.App, c echo.Context, currentPage, itemsPerPage, tot
 							}
 						}
 					</table>
-					@partials.Pagination(c, currentPage, len(apps), itemsPerPage, totalItems, sortBy, sortOrder)
+					@partials.Pagination(c, p, "#main", "outerHTML", "")
 				} else {
 					<p class="uk-text-small uk-text-muted my-4">
 						{ i18n.T(ctx, "apps.no_apps") }

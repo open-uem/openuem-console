@@ -29,37 +29,41 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.hostname") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "hostname", p.SortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.enabled") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "enabled", p.SortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "enabled", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.os") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "os", p.SortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.version") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "version", p.SortOrder, "alpha")
 									</div>
 								</th>
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "IP Address") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "ip_address", p.SortOrder, "alpha")
+										@partials.SortByColumnIcon(c, p, "ip_address", "alpha", "#main", "outerHTML", "")
+									</div>
+								</th>
+								<th>
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.vnc") }</span>
 									</div>
 								</th>
 								<th class="uk-width-1-6">
 									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.last_contact") }</span>
-										@partials.SortByColumnIcon(c, p.CurrentPage, p.PageSize, p.SortBy, "last_contact", p.SortOrder, "time")
+										@partials.SortByColumnIcon(c, p, "last_contact", "time", "#main", "outerHTML", "")
 									</div>
 								</th>
 								<th>
@@ -87,6 +91,11 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 								}
 								<td>{ agent.Version }</td>
 								<td>{ agent.IP }</td>
+								if agent.Vnc != "" {
+									<td>{ agent.Vnc }</td>
+								} else {
+									<td>{ i18n.T(ctx, "agents.no_vnc") }</td>
+								}
 								<td>{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
 								<td>
 									<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
@@ -127,7 +136,7 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 													</a>
 												}
 											</li>
-											if agent.IP != "" && agent.Enabled {
+											if agent.IP != "" && agent.Enabled && agent.Vnc != "" {
 												<li>
 													<a
 														hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", agent.ID))) }
@@ -151,7 +160,7 @@ templ Agents(c echo.Context, agents []*ent.Agent, p partials.PaginationAndSort, 
 						}
 					</table>
 					if p.NItems / p.PageSize > 1 {
-						@partials.Pagination(c, p.CurrentPage, len(agents), p.PageSize, p.NItems, p.SortBy, p.SortOrder)
+						@partials.Pagination(c, p, "#main", "outerHTML", "")
 					}
 				} else {
 					<p class="uk-text-small uk-text-muted my-4">
