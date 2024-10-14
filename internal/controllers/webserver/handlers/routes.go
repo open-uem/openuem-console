@@ -61,6 +61,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/desktops/:uuid/printers", h.Printers, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/shares", h.Shares, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/remote-assistance", h.RemoteAssistance, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/wol", h.WakeOnLan, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/wol", h.WakeOnLan, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
 	e.POST("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/deploy/searchinstall", h.DesktopDeploy, h.IsAuthenticated)

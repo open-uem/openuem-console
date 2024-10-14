@@ -73,6 +73,10 @@ en:
     no_deployments: "No deployments have been for this endpoint"
     deploy_empty_values: "The agent id, package id or the package name were absent"
     filter_by_hostname: "Filter by hostname..."
+    wol_title: "Wake On Lan"
+    wol_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up"
+    wol_no_mac: "No MAC Address is available to send the WOL packet"
+    wol_success: "A WOL magic packet has been sent, check later if the computer has been woken up"
   inventory:
     hardware:
       title: "Hardware"
@@ -112,6 +116,7 @@ en:
       bitlocker_encrypted: "Encrypted"
       bitlocker_unencrypted: "Unencrypted"
       bitlocker_unknown: "Unknown"
+      file_browser: "File Browser"
     share:
       title: "Shares"
       description: "These are the shares exported by this computer as reported by the OpenUEM agent"

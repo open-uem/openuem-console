@@ -9617,6 +9617,11 @@ th.uk-text-break, td.uk-text-break {
   z-index: 30;
 }
 
+.mx-3 {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -9635,21 +9640,6 @@ th.uk-text-break, td.uk-text-break {
 .my-7 {
   margin-top: 1.75rem;
   margin-bottom: 1.75rem;
-}
-
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
-.mx-4 {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
-.mx-3 {
-  margin-left: 0.75rem;
-  margin-right: 0.75rem;
 }
 
 .mb-2 {
@@ -9698,10 +9688,6 @@ th.uk-text-break, td.uk-text-break {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.inline-block {
-  display: inline-block;
 }
 
 .flex {
@@ -9822,6 +9808,10 @@ th.uk-text-break, td.uk-text-break {
 
 .w-screen {
   width: 100vw;
+}
+
+.w-1\/6 {
+  width: 16.666667%;
 }
 
 .flex-1 {
@@ -9958,6 +9948,10 @@ th.uk-text-break, td.uk-text-break {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.fill-yellow-500 {
+  fill: #eab308;
+}
+
 .object-cover {
   -o-object-fit: cover;
      object-fit: cover;
@@ -10083,6 +10077,16 @@ th.uk-text-break, td.uk-text-break {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-yellow-500 {
+  --tw-text-opacity: 1;
+  color: rgb(234 179 8 / var(--tw-text-opacity));
+}
+
+.text-yellow-700 {
+  --tw-text-opacity: 1;
+  color: rgb(161 98 7 / var(--tw-text-opacity));
 }
 
 .blur {

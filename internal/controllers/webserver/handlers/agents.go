@@ -20,7 +20,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	p.GetPaginationAndSortParams(c)
 
 	// TODO - TEST set pageSize to 1
-	p.PageSize = 1
+	// p.PageSize = 1
 
 	// Get filters values
 	f := agents_views.AgentFilter{}

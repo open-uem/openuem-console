@@ -73,6 +73,10 @@ es:
     no_deployments: "No se han encontrado despliegues para este equipo"
     deploy_empty_values: "El ID del agente, el ID del paquete o su nombre no se enviaron en la petición"
     filter_by_hostname: "Filtrar por nombre de equipo..."
+    wol_title: "Wake On Lan"
+    wol_description: "Envíe un paquete mágico Wake On Lan a la dirección MAC registrada del agente para despertar este equipo"
+    wol_no_mac: "No hay una dirección MAC disponible a la que enviar el paquete WOL"
+    wol_success: "Se ha enviado un paquete WOL, compruebe más tarde si el equipo ha sido despertado"
   inventory:
     hardware:
       title: "Hardware"
@@ -112,6 +116,7 @@ es:
       bitlocker_encrypted: "Encriptado"
       bitlocker_unencrypted: "No encriptado"
       bitlocker_unknown: "Desconocido"
+      file_browser: "Expl. Archivos"
     share:
       title: "Recursos Compartidos"
       description: "Estos son los recursos compartidos exportados por este equipo según informa el agente de OpenUEM"

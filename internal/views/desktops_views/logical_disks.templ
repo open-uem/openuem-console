@@ -36,6 +36,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 										<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
 										<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
 										<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
+										<th>{ i18n.T(ctx, "inventory.logical_disk.file_browser") }</th>
 									</tr>
 								</thead>
 								for _, disk := range agent.Edges.Logicaldisks {
@@ -58,6 +59,9 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 										<td>{ disk.RemainingSpaceInUnits }</td>
 										<td>
 											@partials.BitlockerStatus(disk.BitlockerStatus)
+										</td>
+										<td>
+											<uk-icon icon="folder-open" custom-class="h-5 w-5 text-yellow-700 fill-yellow-500" hx-history="false" uk-cloak></uk-icon>
 										</td>
 									</tr>
 								}

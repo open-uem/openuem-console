@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"net"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
@@ -11,6 +12,7 @@ import (
 	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/mdlayher/wol"
 )
 
 func (h *Handler) Computer(c echo.Context) error {
@@ -381,4 +383,41 @@ func (h *Handler) DesktopDeployUninstall(c echo.Context) error {
 	}
 
 	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.uninstall_success")))
+}
+
+func (h *Handler) WakeOnLan(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+	}
+
+	if c.Request().Method == "GET" {
+		confirmDelete := c.QueryParam("delete") != ""
+		return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.WakeOnLan(agent, confirmDelete)))
+	}
+
+	mac := c.FormValue("MACAddress")
+	hwAddress, err := net.ParseMAC(mac)
+	if err != nil {
+		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+	}
+
+	ip := c.FormValue("IPAddress")
+
+	wolClient, err := wol.NewClient()
+	if err != nil {
+		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+	}
+
+	err = wolClient.Wake(ip+":0", hwAddress)
+	if err != nil {
+		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+	}
+
+	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
 }
