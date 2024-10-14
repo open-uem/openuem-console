@@ -18,6 +18,7 @@ type Desktop struct {
 	OS           string
 	Version      string
 	IP           string
+	MAC          string
 	Username     string
 	Manufacturer string
 	Model        string
@@ -33,7 +34,7 @@ func (m *Model) CountAllDesktops() (int, error) {
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, `agents."version"`, agent.FieldIP, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, `agents."version"`, agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).

@@ -113,6 +113,18 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 													><uk-icon hx-history="false" icon="monitor-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Remote Assistance") }</a>
 												</li>
 											}
+											if len(agent.MAC) > 0 {
+												<li>
+													<a
+														hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", agent.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+													>
+														<uk-icon hx-history="false" icon="alarm-clock" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+														{ i18n.T(ctx, "agents.wol_title") }
+													</a>
+												</li>
+											}
 										</ul>
 									</div>
 								</td>
