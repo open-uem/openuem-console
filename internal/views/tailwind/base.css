@@ -5,3 +5,13 @@
 #errorPage {
     font-size: 3rem;
 }
+
+.my-indicator{
+    display:none;
+}
+.htmx-request .my-indicator{
+    display:inline;
+}
+.htmx-request.my-indicator{
+    display:inline;
+}

@@ -65,6 +65,10 @@ func (h *Handler) Auth(c echo.Context) error {
 	}
 
 	ocspResponse, err := ocsp.ParseResponse(output, caCert)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not parse OCSP Response")
+	}
+
 	if ocspResponse.Status == 2 {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not check OCSP status, try again later")
 	}

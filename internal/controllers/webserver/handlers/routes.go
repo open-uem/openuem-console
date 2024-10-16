@@ -55,6 +55,17 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/desktops/:uuid/software", h.Apps, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/hardware", h.Computer, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/logical-disks", h.LogicalDisks, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks", h.BrowseLogicalDisk, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks/file", h.UploadFile, h.IsAuthenticated)
+	e.PUT("/desktops/:uuid/logical-disks/file", h.RenameItem, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks/downloadfile", h.DownloadFile, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks/downloadfolder", h.DownloadFolderAsZIP, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks/downloadmany", h.DownloadManyAsZIP, h.IsAuthenticated)
+	e.DELETE("/desktops/:uuid/logical-disks/file", h.DeleteItem, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/logical-disks/folder", h.NewFolder, h.IsAuthenticated)
+	e.PUT("/desktops/:uuid/logical-disks/folder", h.RenameItem, h.IsAuthenticated)
+	e.DELETE("/desktops/:uuid/logical-disks/folder", h.DeleteItem, h.IsAuthenticated)
+	e.DELETE("/desktops/:uuid/logical-disks/many", h.DeleteMany, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/monitors", h.Monitors, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/network-adapters", h.NetworkAdapters, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/os", h.OperatingSystem, h.IsAuthenticated)
@@ -89,6 +100,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/software", h.Software, h.IsAuthenticated)
 	e.POST("/software", h.Software, h.IsAuthenticated)
 
+	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 }
 
 func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {

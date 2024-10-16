@@ -1,0 +1,545 @@
+package desktops_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"io/fs"
+)
+
+templ SFTPHome(agent *openuem_ent.Agent, cwd, parent string, files []fs.FileInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DesktopsNavbar(agent.ID, "logical-disks", false)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.file_browser.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "inventory.file_browser.description") }
+						</p>
+					</div>
+					<div id="file-browser" class="uk-card-body m-4">
+						<div id="success" class="hidden"></div>
+						<div id="error" class="hidden"></div>
+						@SFTPNavBar(agent, cwd, parent)
+						<div class="flex justify-center my-4">
+							<uk-icon id="spinner" hx-history="false" icon="loader-circle" custom-class="my-indicator h-28 w-28 text-green-700 animate-spin" uk-cloack></uk-icon>
+						</div>
+						<div id="files">
+							if len(files) > 0 {
+								@FileBrowser(files, agent, cwd, parent)
+							} else {
+								<p class="mx-1 uk-text-muted">{ i18n.T(ctx, "inventory.file_browser.empty_folder") }</p>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SFTPNavBar(agent *openuem_ent.Agent, cwd, parent string) {
+	<nav class="flex gap-4 my-4 mx-1 items-center">
+		@FolderUpIcon(agent, cwd, parent)
+		@NewFolderIcon()
+		@SyncFolderIcon(agent, cwd, parent)
+		@UploadFileIcon()
+		@DownloadIcon(agent, cwd, parent)
+		@RemoveIcon(cwd, parent)
+		<div class="mx-1">
+			<p class="uk-text-muted">{ i18n.T(ctx, "inventory.file_browser.current_folder") } { cwd }</p>
+		</div>
+	</nav>
+	<div id="new-folder" class="mx-1 my-4 w-1/3 hidden">
+		@NewFolderDialog(agent, cwd)
+	</div>
+	<div id="upload-file" class="mx-1 my-4 w-1/3 hidden">
+		@UploadFileDialog(agent, cwd, parent)
+	</div>
+	<div id="confirm-bulk-delete" class="mx-1 my-4 w-1/3 hidden">
+		@BulkRemoveDialog(agent, cwd, parent)
+	</div>
+}
+
+templ FolderUpIcon(agent *openuem_ent.Agent, cwd, parent string) {
+	<form>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="action" value="up"/>
+		<input type="hidden" name="dst" value={ parent }/>
+		<button
+			type="button"
+			disabled?={ parent == cwd || len(cwd) == 0 }
+			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-indicator="#spinner"
+			hx-swap="outerHTML"
+			_="on click add .hidden to #files"
+		>
+			if parent == cwd || len(cwd) == 0 {
+				<uk-icon hx-history="false" icon="folder-up" custom-class="h-8 w-8 text-gray-300" uk-cloack></uk-icon>
+			} else {
+				<uk-icon hx-history="false" icon="folder-up" custom-class="h-8 w-8 text-green-700" uk-cloack></uk-icon>
+			}
+		</button>
+	</form>
+}
+
+templ NewFolderIcon() {
+	<form>
+		<button
+			id="folder-plus"
+			type="button"
+			_="on click toggle .hidden on #new-folder"
+		>
+			<uk-icon hx-history="false" icon="folder-plus" custom-class="h-8 w-8 text-green-700" uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ NewFolderDialog(agent *openuem_ent.Agent, cwd string) {
+	<form class="flex gap-4">
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="text" id="itemName" name="itemName" placeholder={ i18n.T(ctx, "inventory.file_browser.folder_name") } class="uk-input" value=""/>
+		<button
+			type="button"
+			class="uk-button uk-button-primary flex gap-2"
+			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#spinner"
+		>
+			<uk-icon hx-history="false" icon="folder-plus" custom-class="h-5 w-5" uk-cloack></uk-icon>{ i18n.T(ctx, "Create") }
+		</button>
+		<button
+			type="reset"
+			class="uk-button uk-button-default flex gap-2"
+		>
+			<uk-icon hx-history="false" icon="eraser" custom-class="h-5 w-5" uk-cloack></uk-icon>{ i18n.T(ctx, "Reset") }
+		</button>
+	</form>
+}
+
+templ SyncFolderIcon(agent *openuem_ent.Agent, cwd, parent string) {
+	<form>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="dst" value={ parent }/>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#spinner"
+			_="on click add .hidden to #files"
+		>
+			<uk-icon hx-history="false" icon="folder-sync" custom-class="h-8 w-8 text-green-700" uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ UploadFileIcon() {
+	<form>
+		<button
+			type="button"
+			_="on click toggle .hidden on #upload-file"
+		>
+			<uk-icon hx-history="false" icon="upload" custom-class="h-8 w-8 text-green-700" uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ UploadFileDialog(agent *openuem_ent.Agent, cwd, parent string) {
+	<form
+		class="flex gap-4 items-center justify-between"
+		hx-encoding="multipart/form-data"
+		hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+		hx-target="#main"
+		hx-indicator="#spinner"
+	>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="dst" value={ parent }/>
+		<input type="file" name="file"/>
+		<button class="uk-button uk-button-primary" _="on click add .hidden to #files">
+			{ i18n.T(ctx, "Upload") }
+		</button>
+	</form>
+}
+
+templ DownloadIcon(agent *openuem_ent.Agent, cwd, parent string) {
+	<form>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="dst" value={ parent }/>
+		<button
+			id="download"
+			class="text-gray-300"
+			type="button"
+			disabled
+			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadmany", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-include="input[name$='-check']"
+			hx-indicator="#spinner"
+			_="on htmx:afterRequest remove .htmx-request from #spinner"
+		>
+			<uk-icon hx-history="false" icon="download" custom-class="h-8 w-8 " uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ RemoveIcon(cwd, parent string) {
+	<form>
+		<button
+			id="remove"
+			type="button"
+			class="text-gray-300"
+			disabled?={ parent == cwd || len(cwd) == 0 }
+			_="on click toggle .hidden on #confirm-bulk-delete"
+		>
+			<uk-icon hx-history="false" icon="trash-2" custom-class="h-8 w-8" uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
+	<form class="flex gap-4">
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="dst" value={ parent }/>
+		<button
+			type="button"
+			class="uk-button uk-button-danger"
+			disabled?={ parent == cwd || len(cwd) == 0 }
+			hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/many", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-include="input[name$='-check']"
+			hx-indicator="#spinner"
+		>
+			{ i18n.T(ctx, "Confirm") }
+		</button>
+		<button
+			type="button"
+			class="uk-button uk-button-default flex gap-2"
+			_="on click add .hidden to #confirm-bulk-delete"
+		>
+			{ i18n.T(ctx, "Cancel") }
+		</button>
+	</form>
+}
+
+templ FileBrowser(files []fs.FileInfo, agent *openuem_ent.Agent, cwd, parent string) {
+	<div class=" max-h-96 overflow-y-auto">
+		<table class="uk-table uk-table-striped">
+			<thead class="top-0 sticky bg-white w-full">
+				<tr><th class="w-1/12"></th><th class="w-1/12"></th><th class="w-1/12">{ i18n.T(ctx, "Actions") }</th><th class="w-1/2">{ i18n.T(ctx, "Name") }</th><th class="w-1/4">{ i18n.T(ctx, "Size") }</th></tr>
+			</thead>
+			<tbody>
+				for i,file := range files {
+					<tr>
+						<td class="w-1/12">
+							@FileCheckBox(file.Name())
+						</td>
+						<td class="w-1/12">
+							if file.IsDir() {
+								@FolderIcon(i)
+							} else {
+								@FileIcon(i)
+							}
+						</td>
+						<td class="w-1/12">
+							@ActionDropDown(agent, cwd, parent, file, i, file.IsDir())
+						</td>
+						<td class="w-1/2">{ file.Name() }</td>
+						if file.IsDir() {
+							<td class="w-1/12"></td>
+						} else {
+							<td class="w-1/12">{ ByteCountSI(file.Size()) }</td>
+						}
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ FileCheckBox(fileName string) {
+	<input
+		name="folder-check"
+		class="uk-checkbox"
+		type="checkbox"
+		value={ fileName }
+		_="
+			on click 
+				if me.checked then
+					remove .text-gray-300 from #remove
+					remove .text-gray-300 from #download
+					add .text-red-700 to #remove
+					add .text-green-700 to #download
+					remove @disabled from #remove
+					remove @disabled from #download
+				else
+					set checked to false
+					repeat in <input[name$='-check']/>
+						if it.checked then
+							set checked to true
+							break
+						end
+					end
+					if not checked then
+						remove .text-red-700 from #remove
+						remove .text-green-700 from #download
+						add .text-gray-300 to #remove
+						add .text-gray-300 to #download
+						add @disabled to #remove
+						add @disabled to #download
+					end
+				end
+			end
+		"
+	/>
+}
+
+templ FolderIcon(i int) {
+	<uk-icon
+		id={ fmt.Sprintf("folder-down-%d", i) }
+		hx-history="false"
+		icon="folder"
+		custom-class="h-5 w-5 text-green-700 fill-green-700"
+		_="on click add .hidden to #files"
+		uk-cloack
+	></uk-icon>
+}
+
+templ FileIcon(i int) {
+	<uk-icon id={ fmt.Sprintf("file-dropdown-%d", i) } hx-history="false" icon="file" custom-class="h-5 w-5" uk-cloack></uk-icon>
+}
+
+templ ActionDropDown(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool) {
+	<uk-icon id={ fmt.Sprintf("action-dropdown-%d", i) } hx-history="false" icon="ellipsis" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
+	<div
+		class="uk-drop uk-dropdown"
+		uk-dropdown="mode: click"
+		_="on hide 
+			add .hidden to <input[name='newName']/>
+			add .hidden to <button[name$='Rename']/>
+		end"
+	>
+		<ul class="uk-dropdown-nav uk-nav">
+			if isDir {
+				<li>
+					@OpenFolderEntry(agent, cwd, parent, file, i)
+				</li>
+			}
+			<li>
+				@DownloadEntry(agent, cwd, parent, file, i, isDir)
+			</li>
+			<li>
+				@RenameEntry(agent, cwd, parent, file, isDir)
+			</li>
+			<li>
+				@RemoveEntry(agent, cwd, parent, file, isDir)
+			</li>
+		</ul>
+	</div>
+}
+
+templ OpenFolderEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int) {
+	<form>
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="action" value="down"/>
+		<input type="hidden" name="dst" value={ file.Name() }/>
+		<button
+			class="flex gap-4 m-4"
+			type="button"
+			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#spinner"
+			hx-trigger={ fmt.Sprintf("click, click from:#folder-down-%d", i) }
+			_="on click add .hidden to #files"
+		>
+			<uk-icon hx-history="false" icon="folder-open" custom-class="h-5 w-5" uk-cloack></uk-icon>{ i18n.T(ctx,"inventory.file_browser.open_folder") }
+		</button>
+	</form>
+}
+
+templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool) {
+	<form class="flex gap-4 items-center">
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="itemName" value={ file.Name() }/>
+		<button
+			class="flex gap-4 m-4 items-center"
+			if isDir {
+				hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadfolder", agent.ID))) }
+			} else {
+				hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadfile", agent.ID))) }
+			}
+			hx-push-url="false"
+			hx-indicator={ fmt.Sprintf("#download-spinner-%d", i) }
+			_={ fmt.Sprintf(`on htmx:afterRequest
+				remove .htmx-request from <div[id='download-spinner-%d']/>
+				call #action-dropdown-%d.click()
+			end
+			`, i, i) }
+		>
+			<uk-icon hx-history="false" icon="download" custom-class="h-5 w-5" uk-cloack></uk-icon>{ i18n.T(ctx, "Download") }
+			<uk-icon id={ fmt.Sprintf("download-spinner-%d", i) } hx-history="false" icon="loader-circle" custom-class="my-indicator h-5 w-5 animate-spin" uk-cloack></uk-icon>
+		</button>
+	</form>
+}
+
+templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool) {
+	<form class="flex gap-2 items-center">
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="parent" value={ parent }/>
+		<input type="hidden" name="currentName" value={ file.Name() }/>
+		<button
+			type="button"
+			class="flex gap-4 m-4"
+			_="
+			on click
+				remove .hidden from <input[name='newName']/>
+			end
+
+			on load
+				add .hidden to <input[name='newName']/>
+			end
+			"
+		>
+			if isDir {
+				<uk-icon hx-history="false" icon="folder-pen" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			} else {
+				<uk-icon hx-history="false" icon="file-pen" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			}
+			<span>{ i18n.T(ctx, "Rename") }</span>
+		</button>
+		<input
+			type="text"
+			name="newName"
+			class="uk-input mx-2 hidden"
+			placeholder={ i18n.T(ctx, "inventory.file_browser.new_name") }
+			_="on keyup
+				if my value's length > 0 then 
+					remove .hidden from <button[name$='Rename']/>
+				else
+					add .hidden to <button[name$='Rename']/>
+				end
+			end"
+		/>
+		<button
+			type="button"
+			name="confirmRename"
+			class="uk-button uk-button-primary hidden"
+			if isDir {
+				hx-put={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+			} else {
+				hx-put={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+			}
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#spinner"
+			_="on click add .hidden to #files"
+		>
+			{ i18n.T(ctx, "Confirm") }
+		</button>
+		<button
+			type="reset"
+			name="cancelRename"
+			class="uk-button uk-button-default hidden mx-2"
+			_="on click
+				add .hidden to <input[name='newName']/>
+				add .hidden to <button[name='confirmRename']/>
+				add .hidden to me
+			end"
+		>
+			{ i18n.T(ctx, "Cancel") }
+		</button>
+	</form>
+}
+
+templ RemoveEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool) {
+	<form class="flex gap-2 items-center">
+		<input type="hidden" name="cwd" value={ cwd }/>
+		<input type="hidden" name="itemName" value={ file.Name() }/>
+		<button
+			type="button"
+			class="flex gap-4 m-4"
+			_="
+			on click
+				remove .hidden from <button[name='confirmRemove']/>
+				remove .hidden from <button[name='cancelRemove']/>
+			end
+
+			on load
+				add .hidden to <button[name='confirmRemove']/>
+				add .hidden to <button[name='cancelRemove']/>
+			end
+			"
+		>
+			if isDir {
+				<uk-icon hx-history="false" icon="folder-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "inventory.file_browser.remove_folder") }
+			} else {
+				<uk-icon hx-history="false" icon="file-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "inventory.file_browser.remove_file") }
+			}
+		</button>
+		<button
+			type="button"
+			name="confirmRemove"
+			class="uk-button uk-button-danger hidden"
+			if isDir {
+				hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+			} else {
+				hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+			}
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#spinner"
+			_="on click add .hidden to #files"
+		>
+			{ i18n.T(ctx, "Confirm") }
+		</button>
+		<button
+			type="button"
+			name="cancelRemove"
+			class="uk-button uk-button-default hidden mx-2"
+			_="on click
+				add .hidden to <button[name='confirmRemove']/>
+				add .hidden to me
+			end"
+		>
+			{ i18n.T(ctx, "Cancel") }
+		</button>
+	</form>
+}
+
+func ByteCountSI(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
+}

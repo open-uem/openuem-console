@@ -9617,6 +9617,24 @@ th.uk-text-break, td.uk-text-break {
   z-index: 30;
 }
 
+.m-4 {
+  margin: 1rem;
+}
+
+.m-6 {
+  margin: 1.5rem;
+}
+
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 .mx-3 {
   margin-left: 0.75rem;
   margin-right: 0.75rem;
@@ -9714,6 +9732,10 @@ th.uk-text-break, td.uk-text-break {
   height: 4rem;
 }
 
+.h-28 {
+  height: 7rem;
+}
+
 .h-40 {
   height: 10rem;
 }
@@ -9740,6 +9762,10 @@ th.uk-text-break, td.uk-text-break {
 
 .h-screen {
   height: 100vh;
+}
+
+.max-h-96 {
+  max-height: 24rem;
 }
 
 .min-h-screen {
@@ -9770,8 +9796,16 @@ th.uk-text-break, td.uk-text-break {
   width: 20%;
 }
 
+.w-1\/6 {
+  width: 16.666667%;
+}
+
 .w-14 {
   width: 3.5rem;
+}
+
+.w-28 {
+  width: 7rem;
 }
 
 .w-40 {
@@ -9810,16 +9844,26 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
-.w-1\/6 {
-  width: 16.666667%;
-}
-
 .flex-1 {
   flex: 1 1 0%;
 }
 
 .grow {
   flex-grow: 1;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .select-all {
@@ -9866,6 +9910,10 @@ th.uk-text-break, td.uk-text-break {
 
 .gap-8 {
   gap: 2rem;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
 }
 
 .text-balance {
@@ -9946,6 +9994,10 @@ th.uk-text-break, td.uk-text-break {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.fill-green-700 {
+  fill: #15803d;
 }
 
 .fill-yellow-500 {
@@ -10046,9 +10098,19 @@ th.uk-text-break, td.uk-text-break {
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
 
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(209 213 219 / var(--tw-text-opacity));
+}
+
 .text-green-600 {
   --tw-text-opacity: 1;
   color: rgb(22 163 74 / var(--tw-text-opacity));
+}
+
+.text-green-700 {
+  --tw-text-opacity: 1;
+  color: rgb(21 128 61 / var(--tw-text-opacity));
 }
 
 .text-muted-foreground {
@@ -10074,14 +10136,14 @@ th.uk-text-break, td.uk-text-break {
   color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
+.text-red-700 {
+  --tw-text-opacity: 1;
+  color: rgb(185 28 28 / var(--tw-text-opacity));
+}
+
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-
-.text-yellow-500 {
-  --tw-text-opacity: 1;
-  color: rgb(234 179 8 / var(--tw-text-opacity));
 }
 
 .text-yellow-700 {
@@ -10106,6 +10168,18 @@ th.uk-text-break, td.uk-text-break {
 
 #errorPage {
   font-size: 3rem;
+}
+
+.my-indicator{
+  display:none;
+}
+
+.htmx-request .my-indicator{
+  display:inline;
+}
+
+.htmx-request.my-indicator{
+  display:inline;
 }
 
 .hover\:cursor-pointer:hover {

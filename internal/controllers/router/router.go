@@ -28,6 +28,10 @@ func New(s *sessions.SessionManager) *echo.Echo {
 	}
 	e.Use(middleware.GetLocale)
 
+	// Limit uploads
+	// TODO - This should be a setting!
+	e.Use(mw.BodyLimit("512M"))
+
 	// Add CORS middleware
 	e.Use(mw.CORSWithConfig(mw.CORSConfig{
 		AllowOrigins: []string{"https://localhost:1323"},
@@ -71,6 +75,10 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			}
 		case http.StatusMethodNotAllowed:
 			if err := views.ErrorPage("405", "Method Not Allowed").Render(c.Request().Context(), c.Response().Writer); err != nil {
+				c.Logger().Error(err)
+			}
+		case http.StatusRequestEntityTooLarge:
+			if err := views.ErrorPage("413", "Request Entity Too Large").Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)
 			}
 		default:
