@@ -94,6 +94,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/email/:email/exists", h.EmailExists)
 
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
+	e.GET("/security/:uuid/updates", h.ListLatestUpdates, h.IsAuthenticated)
+	e.POST("/security/:uuid/updates", h.ListLatestUpdates, h.IsAuthenticated)
 	e.GET("/security/antivirus", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.GET("/security/updates", h.ListSecurityUpdatesStatus, h.IsAuthenticated)
 

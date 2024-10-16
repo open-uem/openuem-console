@@ -9844,6 +9844,22 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
+.w-2\/3 {
+  width: 66.666667%;
+}
+
+.w-4\/12 {
+  width: 33.333333%;
+}
+
+.w-2\/12 {
+  width: 16.666667%;
+}
+
+.w-3\/12 {
+  width: 25%;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -10149,6 +10165,10 @@ th.uk-text-break, td.uk-text-break {
 .text-yellow-700 {
   --tw-text-opacity: 1;
   color: rgb(161 98 7 / var(--tw-text-opacity));
+}
+
+.underline {
+  text-decoration-line: underline;
 }
 
 .blur {

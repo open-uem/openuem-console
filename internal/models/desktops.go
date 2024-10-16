@@ -184,22 +184,6 @@ func (m *Model) GetAgentMonitorsInfo(agentId string) (*ent.Agent, error) {
 	return agent, nil
 }
 
-func (m *Model) GetAntiviriInfo() ([]*ent.Agent, error) {
-	agents, err := m.Client.Agent.Query().WithAntivirus().All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return agents, nil
-}
-
-func (m *Model) GetSystemUpdatesInfo() ([]*ent.Agent, error) {
-	agents, err := m.Client.Agent.Query().WithSystemupdate().All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return agents, nil
-}
-
 func (m *Model) GetDeploymentsForAgent(agentId string, p partials.PaginationAndSort) ([]*ent.Deployment, error) {
 	query := m.Client.Deployment.Query().Where(deployment.HasOwnerWith(agent.ID(agentId)))
 
