@@ -82,7 +82,13 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 								<td class="!align-middle text-center">
 									@partials.Manufacturer(strings.ToLower(agent.Manufacturer))
 								</td>
-								<td class="!align-middle">{ agent.Model }</td>
+								<td class="!align-middle">
+									if agent.Model == "Unknown" {
+										{ i18n.T(ctx, "Unknown") }
+									} else {
+										{ agent.Model }
+									}
+								</td>
 								<td class="!align-middle">
 									<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
 									<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">

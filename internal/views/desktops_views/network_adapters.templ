@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 templ NetworkAdapters(agent *ent.Agent, confirmDelete bool) {
@@ -17,9 +18,9 @@ templ NetworkAdapters(agent *ent.Agent, confirmDelete bool) {
 				@DesktopsNavbar(agent.ID, "network-adapters", confirmDelete)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">Network Adapters</h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.network_adapters.title") }</h3>
 						<p class="uk-margin-small-top uk-text-small">
-							These are the network adapters connected to this computer as reported by the OpenUEM agent.
+							{ i18n.T(ctx, "inventory.network_adapters.description") }
 						</p>
 					</div>
 					<div class="uk-card-body">
@@ -28,13 +29,13 @@ templ NetworkAdapters(agent *ent.Agent, confirmDelete bool) {
 								<thead>
 									<tr>
 										<th>Name</th>
-										<th>MAC Address</th>
-										<th>IP Address</th>
-										<th>Subnet</th>
-										<th>Default Gateway</th>
-										<th>DHCP</th>
-										<th>DNS</th>
-										<th>Speed</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.mac_address") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.ip_address") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.subnet") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.default_gateway") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.dhcp") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.dns") }</th>
+										<th>{ i18n.T(ctx, "inventory.network_adapters.speed") }</th>
 									</tr>
 								</thead>
 								for _, adapter := range agent.Edges.Networkadapters {
@@ -76,8 +77,8 @@ templ NetworkAdapters(agent *ent.Agent, confirmDelete bool) {
 								}
 							</table>
 						} else {
-							<p class="uk-text-small uk-text-muted">
-								No network adapters information is available yet.
+							<p class="uk-text-small uk-text-muted my-4">
+								{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }
 							</p>
 						}
 					</div>

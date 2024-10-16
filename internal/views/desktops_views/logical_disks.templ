@@ -83,7 +83,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 							</table>
 						} else {
 							<p class="uk-text-small uk-text-muted my-4">
-								No logical disks information is available yet.
+								{ i18n.T(ctx, "inventory.logical_disk.no_logical_disks") }
 							</p>
 						}
 					</div>

@@ -1,13 +1,16 @@
 package desktops_views
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
 templ VNC(agentId, hostname, port, domainSuffix string) {
 	<div class="flex gap-4 items-center my-4">
 		<div id="vncConnectPanel" class="flex gap-4 items-center">
 			<span>PIN: </span>
 			<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
-			<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">Authenticate</button>
+			<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">{ i18n.T(ctx, "Authenticate") }</button>
 		</div>
 		<input id="vncHostname" type="hidden" value={ hostname + domainSuffix }/>
 		<input id="vncPort" type="hidden" value={ port }/>
@@ -17,7 +20,7 @@ templ VNC(agentId, hostname, port, domainSuffix string) {
 			hx-target="#vnc"
 			hx-swap="innerHTML"
 		>
-			Disconnect!
+			{ i18n.T(ctx, "Disconnect") }
 		</button>
 	</div>
 	<div id="status" class="uk-text-muted uk-text-small"></div>
@@ -31,6 +34,6 @@ templ VNCConnect(agentId string) {
 		hx-target="#vnc"
 		hx-swap="innerHTML"
 	>
-		Connect
+		{ i18n.T(ctx, "Connect") }
 	</button>
 }

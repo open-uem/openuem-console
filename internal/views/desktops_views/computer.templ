@@ -38,11 +38,23 @@ templ Computer(agent *ent.Agent, confirmDelete bool) {
 								</tr>
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.model") }</th>
-									<td>{ agent.Edges.Computer.Model }</td>
+									<td>
+										if  agent.Edges.Computer.Model == "Unknown" {
+											{ i18n.T(ctx, "Unknown") }
+										} else {
+											{ agent.Edges.Computer.Model }
+										}
+									</td>
 								</tr>
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.serial") }</th>
-									<td>{ agent.Edges.Computer.Serial }</td>
+									<td>
+										if  agent.Edges.Computer.Serial == "Unknown" {
+											{ i18n.T(ctx, "Unknown") }
+										} else {
+											{ agent.Edges.Computer.Serial }
+										}
+									</td>
 								</tr>
 							</table>
 						</div>
