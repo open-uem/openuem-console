@@ -1,5 +1,7 @@
 package config_views
 
+import "github.com/invopop/ctxi18n/i18n"
+
 templ ConfigNavbar(active string) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "users") }>
@@ -10,7 +12,7 @@ templ ConfigNavbar(active string) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Users
+				{ i18n.T(ctx, "User.other") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "sessions") }>
@@ -21,7 +23,18 @@ templ ConfigNavbar(active string) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Sessions
+				{ i18n.T(ctx, "Session.other") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "tags") }>
+			<a
+				href={ templ.URL("/config/tags") }
+				hx-get={ string(templ.URL("/config/tags")) }
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Tag.other") }
 			</a>
 		</li>
 		<li class={ templ.KV("uk-active", active == "settings") }>
@@ -32,7 +45,7 @@ templ ConfigNavbar(active string) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				Settings
+				{ i18n.T(ctx, "Advanced Settings") }
 			</a>
 		</li>
 	</ul>

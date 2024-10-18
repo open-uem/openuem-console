@@ -394,7 +394,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 							</table>
 							@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
 						} else {
-							<p class="uk-text-small uk-text-muted my-4">
+							<p class="uk-text-small uk-text-muted mt-6 mb-4">
 								{ i18n.T(ctx, "agents.no_agents") }
 							</p>
 						}

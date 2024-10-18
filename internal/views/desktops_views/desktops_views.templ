@@ -39,12 +39,6 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
-										<span>{ i18n.T(ctx, "agents.version") }</span>
-										@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
-									</div>
-								</th>
-								<th>
-									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.username") }</span>
 										@partials.SortByColumnIcon(c, p, "username", "alpha", "#main", "outerHTML", "")
 									</div>
@@ -58,6 +52,11 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 								<th class="flex gap-2 items-center">
 									<span>{ i18n.T(ctx, "agents.model") }</span>
 									@partials.SortByColumnIcon(c, p, "model", "alpha", "#main", "outerHTML", "")
+								</th>
+								<th>
+									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "Tag.other") }</span>
+									</div>
 								</th>
 								<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
 							</tr>
@@ -77,7 +76,6 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 									case "linux":
 										<td></td>
 								}
-								<td class="!align-middle">{ agent.Version }</td>
 								<td class="!align-middle">{ agent.Username } </td>
 								<td class="!align-middle text-center">
 									@partials.Manufacturer(strings.ToLower(agent.Manufacturer))
@@ -89,6 +87,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 										{ agent.Model }
 									}
 								</td>
+								<td class="!align-middle"></td>
 								<td class="!align-middle">
 									<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
 									<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
@@ -138,7 +137,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 						}
 					</table>
 				} else {
-					<p class="uk-text-small uk-text-muted my-4">
+					<p class="uk-text-small uk-text-muted mt-6 mb-4">
 						{ i18n.T(ctx, "agents.no_agents") }
 					</p>
 				}

@@ -1,0 +1,255 @@
+package config_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"math/rand"
+)
+
+templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Tags", Url: "/config/tags"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("tags")
+				<div id="confirm" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<div id="confirm-tag-delete" class="uk-alert uk-alert-danger bg-red-100 hidden" uk-alert>
+					@ConfirmTagDeletion()
+				</div>
+				<div id="edit-tag-dialog" class="uk-alert border border-green-700 bg-green-50 hidden" uk-alert>
+					@EditTag()
+				</div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "Tag.other") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "tags.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						@NewTag()
+						if len(tags) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+								<thead>
+									<tr>
+										<th class="w-1/4">
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "Tag.one") }</span>
+												@partials.SortByColumnIcon(c, p, "tag", "alpha", "#main", "outerHTML", "")
+											</div>
+										</th>
+										<th class="w-1/2">
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "tags.descr") }</span>
+												@partials.SortByColumnIcon(c, p, "description", "alpha", "#main", "outerHTML", "")
+											</div>
+										</th>
+										<th class="w-1/4">
+											<div class="flex gap-2 items-center">
+												<span>{ i18n.T(ctx, "tags.color") }</span>
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center">
+												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+											</div>
+										</th>
+									</tr>
+								</thead>
+								for _, tag := range tags {
+									<tr>
+										<td class="!align-middle">{ tag.Tag }</td>
+										<td class="!align-middle">{ tag.Description }</td>
+										<td class="!align-middle">
+											<div
+												title="color"
+												class={ "rounded-full px-5 py-1 text-white inline-block", fmt.Sprintf("bg-%s-500", tag.Color) }
+											>{ i18n.T(ctx, "Example") }</div>
+										</td>
+										<td class="flex gap-4 items-center mt-1">
+											<button
+												title="edit tag"
+												type="button"
+												_={ fmt.Sprintf(`on click 
+                                                    remove .hidden from #edit-tag-dialog
+                                                    set #edit-tag.value to "%d"
+                                                    set #edit-tag-name.value to "%s"
+                                                    set #edit-tag-description.value to "%s"
+													put 'rounded-full px-5 py-1 text-white inline-block bg-%s-500' into #edit-tag-example@class
+                                                end`, tag.ID, tag.Tag, tag.Description, tag.Color) }
+											>
+												<uk-icon hx-history="false" icon="pencil" custom-class="h-5 w-5" uk-cloack></uk-icon>
+											</button>
+											<button
+												title="delete tag"
+												type="button"
+												_={ fmt.Sprintf(`on click 
+                                                    remove .hidden from #confirm-tag-delete
+                                                    set #delete-tag.value to "%d"
+                                                end`, tag.ID) }
+											>
+												<uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5 text-red-500" uk-cloack></uk-icon>
+											</button>
+										</td>
+									</tr>
+								}
+							</table>
+							if p.NItems / p.PageSize > 1 {
+								@partials.Pagination(c, p, "#main", "outerHTML", "")
+							}
+						} else {
+							<p class="uk-text-small uk-text-muted mt-6 mb-4">
+								{ i18n.T(ctx, "tags.no_tags") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ TagsIndex(title string, cmp templ.Component) {
+	@layout.Base("config | tags") {
+		@cmp
+	}
+}
+
+templ ConfirmTagDeletion() {
+	<div class="uk-alert-description p-2">
+		<div class="flex flex-col gap-6 pt-2">
+			<p>{ i18n.T(ctx, "tags.confirm_delete") }</p>
+			<form class="flex gap-4">
+				<input id="delete-tag" name="tagId" type="hidden" value=""/>
+				<button
+					title="cancel tag deletion"
+					class="uk-button uk-button-default"
+					_={ `on click 
+                        add .hidden to #confirm-tag-delete then set #delete-tag.value to ""
+                    ` }
+				>
+					{ i18n.T(ctx, "Cancel") }
+				</button>
+				<button
+					title="confirm tag deletion"
+					hx-delete="/config/tags"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					class="uk-button uk-button-danger"
+				>
+					{ i18n.T(ctx, "Delete") }
+				</button>
+			</form>
+		</div>
+	</div>
+}
+
+templ NewTag() {
+	<form class="flex gap-2 items-center w-1/2 mt-6 mb-2">
+		<input name="tag" class="uk-input w-1/3" type="text" placeholder={ i18n.T(ctx, "tags.new") }/>
+		<input name="description" class="uk-input w-2/3" type="text" placeholder={ i18n.T(ctx, "tags.optional_description") }/>
+		@ColorSelector("new")
+		<button
+			title="add tag"
+			type="button"
+			class="uk-button uk-button-primary"
+			hx-post="/config/tags"
+			hx-target="#main"
+			hx-swap="outerHTML"
+		>
+			{ i18n.T(ctx, "Add") }
+		</button>
+	</form>
+}
+
+templ ColorSelector(id string) {
+	<div class="flex items-center gap-2">
+		<button id="palette-button" title="color selector" type="button" class="uk-button uk-button-default">
+			<uk-icon icon="palette" hx-history="false" uk-cloak></uk-icon>
+		</button>
+		<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+			<div class="uk-dropdown-nav uk-nav flex flex-wrap w-48 overflow-y-auto">
+				<button title="red color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-red-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'red' then put 'rounded-full px-5 py-1 text-white inline-block bg-red-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="orange color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-orange-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'orange' then put 'rounded-full px-5 py-1 text-white inline-block bg-orange-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="amber color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-amber-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'amber' then put 'rounded-full px-5 py-1 text-white inline-block bg-amber-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="yellow color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-yellow-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'yellow' then put 'rounded-full px-5 py-1 text-white inline-block bg-yellow-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="lime color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-lime-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'lime' then put 'rounded-full px-5 py-1 text-white inline-block bg-lime-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="green color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-green-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'green' then put 'rounded-full px-5 py-1 text-white inline-block bg-green-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="emerald color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-emerald-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'emerald' then put 'rounded-full px-5 py-1 text-white inline-block bg-emerald-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="teal color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-teal-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'teal' then put 'rounded-full px-5 py-1 text-white inline-block bg-teal-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="cyan color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-cyan-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'cyan' then put 'rounded-full px-5 py-1 text-white inline-block bg-cyan-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="sky color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-sky-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'sky' then put 'rounded-full px-5 py-1 text-white inline-block bg-sky-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="blue color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-blue-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'blue' then put 'rounded-full px-5 py-1 text-white inline-block bg-blue-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="indigo color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-indigo-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'indigo' then put 'rounded-full px-5 py-1 text-white inline-block bg-indigo-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="violet color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-violet-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'violet' then put 'rounded-full px-5 py-1 text-white inline-block bg-violet-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="purple color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-purple-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'purple' then put 'rounded-full px-5 py-1 text-white inline-block bg-purple-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="fuchsia color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-fuchsia-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'fuchsia' then put 'rounded-full px-5 py-1 text-white inline-block bg-fuchsia-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="pink color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-pink-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'pink' then put 'rounded-full px-5 py-1 text-white inline-block bg-pink-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="pink color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-rose-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'rose' then put 'rounded-full px-5 py-1 text-white inline-block bg-rose-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="gray color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-gray-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'gray' then put 'rounded-full px-5 py-1 text-white inline-block bg-gray-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+				<button title="stone color" type="button" class="rounded-full h-2 w-2 p-2 m-2 bg-stone-500" _={ fmt.Sprintf(`on click set #%s-tag-color.value to 'stone' then put 'rounded-full px-5 py-1 text-white inline-block bg-stone-500' into <div[id='%s-tag-example']/>@class then call #palette-button.click()`, id, id) }></button>
+			</div>
+		</div>
+		if id == "new" {
+			@RandomColor(GetRandomColor())
+		} else {
+			<div id="edit-tag-example" class="rounded-full px-5 py-1 text-white inline-block">{ i18n.T(ctx, "Example") }</div>
+			<input id="edit-tag-color" type="hidden" name="color" value=""/>
+		}
+	</div>
+}
+
+templ EditTag() {
+	<div class="uk-alert-description p-2">
+		<div class="flex flex-col gap-6 pt-2">
+			<p>{ i18n.T(ctx, "tags.edit_tag") }</p>
+			<form class="flex flex-col gap-4">
+				<input id="edit-tag" name="tagId" type="hidden" value=""/>
+				<div class="flex gap-4 w-1/2">
+					<input id="edit-tag-name" name="tag" class="uk-input w-1/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.new") }/>
+					<input id="edit-tag-description" name="description" class="uk-input w-2/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.optional_description") }/>
+					@ColorSelector("edit")
+				</div>
+				<div class="flex gap-4">
+					<button
+						title="cancel tag deletion"
+						class="uk-button uk-button-default"
+						_={ `on click 
+                            add .hidden to #confirm-tag-delete 
+                            set #edit-tag.value to ""
+                            set #edit-tag-name.value to ""
+                            set #edit-tag-description.value to ""
+                        ` }
+					>
+						{ i18n.T(ctx, "Cancel") }
+					</button>
+					<button
+						title="confirm tag deletion"
+						hx-post="/config/tags"
+						hx-target="#main"
+						hx-swap="outerHTML"
+						class="uk-button uk-button-primary"
+					>
+						{ i18n.T(ctx, "Edit") }
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+func GetRandomColor() string {
+	tagColors := []string{"red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", "gray", "stone"}
+	return tagColors[rand.Intn(len(tagColors))]
+}
+
+templ RandomColor(color string) {
+	<div id="new-tag-example" class={ "rounded-full px-5 py-1 text-white inline-block", fmt.Sprintf("bg-%s-500", color) }>{ i18n.T(ctx, "Example") }</div>
+	<input type="hidden" name="color" id="new-tag-color" value={ color }/>
+}

@@ -50,10 +50,35 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	if macAgents == "mac" {
 		f.MacAgents = true
 	}
-	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
+
+	tags, err := h.Model.GetAllTags()
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
+	}
+
+	for _, tag := range tags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
+
+	tagId := c.FormValue("tagId")
+	agentId := c.FormValue("agentId")
+	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
+		err := h.Model.AddTagToAgent(agentId, tagId)
+		if err != nil {
+			successMessage = ""
+			errMessage = err.Error()
+		}
+	}
+
+	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
+		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		if err != nil {
+			successMessage = ""
+			errMessage = err.Error()
+		}
 	}
 
 	agents, err = h.Model.GetAgentsByPage(p, f)
@@ -62,7 +87,13 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		errMessage = err.Error()
 	}
 
-	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, successMessage, errMessage)))
+	p.NItems, err = h.Model.CountAllAgents(f)
+	if err != nil {
+		successMessage = ""
+		errMessage = err.Error()
+	}
+
+	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

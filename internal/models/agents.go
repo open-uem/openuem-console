@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -10,7 +11,9 @@ import (
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
+	"github.com/doncicuto/openuem_ent/predicate"
 	"github.com/doncicuto/openuem_ent/systemupdate"
+	"github.com/doncicuto/openuem_ent/tag"
 )
 
 type Agent struct {
@@ -32,7 +35,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f agents_views.Age
 	var err error
 	var apps []*ent.Agent
 
-	query := m.Client.Agent.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Agent.Query().WithTags().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	if len(f.Hostname) > 0 {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))
@@ -60,6 +63,16 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f agents_views.Age
 		}
 
 		query = query.Where(agent.OsIn(agentSystems...))
+	}
+
+	if len(f.Tags) > 0 {
+		predicates := []predicate.Agent{}
+		for _, id := range f.Tags {
+			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
+		}
+		if len(predicates) > 0 {
+			query = query.Where(agent.And(predicates...))
+		}
 	}
 
 	switch p.SortBy {
@@ -159,6 +172,16 @@ func (m *Model) CountAllAgents(f agents_views.AgentFilter) (int, error) {
 		query = query.Where(agent.OsIn(agentSystems...))
 	}
 
+	if len(f.Tags) > 0 {
+		predicates := []predicate.Agent{}
+		for _, id := range f.Tags {
+			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
+		}
+		if len(predicates) > 0 {
+			query = query.Where(agent.And(predicates...))
+		}
+	}
+
 	count, err := query.Count(context.Background())
 	return count, err
 }
@@ -211,4 +234,20 @@ func (m *Model) DisableAgent(agentId string) error {
 		return err
 	}
 	return nil
+}
+
+func (m *Model) AddTagToAgent(agentId, tagId string) error {
+	id, err := strconv.Atoi(tagId)
+	if err != nil {
+		return err
+	}
+	return m.Client.Agent.UpdateOneID(agentId).AddTagIDs(id).Exec(context.Background())
+}
+
+func (m *Model) RemoveTagFromAgent(agentId, tagId string) error {
+	id, err := strconv.Atoi(tagId)
+	if err != nil {
+		return err
+	}
+	return m.Client.Agent.UpdateOneID(agentId).RemoveTagIDs(id).Exec(context.Background())
 }

@@ -12,6 +12,7 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
 	e.POST("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
+	e.DELETE("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
 	e.GET("/agents/:uuid/delete", h.AgentDelete, h.IsAuthenticated)
 	e.GET("/agents/:uuid/disable", h.AgentDisable, h.IsAuthenticated)
 	e.POST("/agents/:uuid/enabled", h.AgentEnable, h.IsAuthenticated)
@@ -26,14 +27,16 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/config/users/new", h.NewUser, h.IsAuthenticated)
 	e.GET("/config/users/:uid/certificate", h.RequestUserCertificate, h.IsAuthenticated)
 	e.GET("/config/users/:uid/renewcertificate", h.RenewUserCertificate, h.IsAuthenticated)
-	e.GET("/config/sessions", func(c echo.Context) error { successMessage := ""; return h.ListSessions(c, successMessage) }, h.IsAuthenticated)
 	e.POST("/config/users/new", h.AddUser, h.IsAuthenticated)
 	e.POST("/config/users/:uid/askconfirm", h.AskForConfirmation, h.IsAuthenticated)
 	e.POST("/config/users/:uid/confirmemail", h.SetEmailConfirmed, h.IsAuthenticated)
 	e.DELETE("/config/users/:uid", h.DeleteUser, h.IsAuthenticated)
-
+	e.GET("/config/sessions", func(c echo.Context) error { successMessage := ""; return h.ListSessions(c, successMessage) }, h.IsAuthenticated)
 	e.GET("/config/sessions/:token/delete", h.SessionDelete)
 	e.DELETE("/config/sessions/:token", h.SessionConfirmDelete, h.IsAuthenticated)
+	e.GET("/config/tags", h.TagManager, h.IsAuthenticated)
+	e.POST("/config/tags", h.TagManager, h.IsAuthenticated)
+	e.DELETE("/config/tags", h.TagManager, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

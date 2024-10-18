@@ -72,18 +72,6 @@ func (m *Model) GetDesktopsByPage(p partials.PaginationAndSort) ([]Desktop, erro
 				s.OrderBy(sql.Desc(agent.FieldOs))
 			}).Scan(context.Background(), &desktops)
 		}
-	case "version":
-		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
-				mainQuery(s, p)
-				s.OrderBy(sql.Asc(agent.FieldVersion))
-			}).Scan(context.Background(), &desktops)
-		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
-				mainQuery(s, p)
-				s.OrderBy(sql.Desc(agent.FieldVersion))
-			}).Scan(context.Background(), &desktops)
-		}
 	case "username":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
