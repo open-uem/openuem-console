@@ -13,6 +13,7 @@ en:
   Dashboard: "Dashboard"
   Delete: "Delete"
   Deploy: "Deploy"
+  Description: "Description"
   Disconnect: "Disconnect"
   Download: "Download"
   Edit: "Edit"
@@ -26,7 +27,9 @@ en:
   IP Address: "IP Address"
   Login: "Login"
   Logo: "Logo"
+  Metadata: "Metadata"
   Name: "Name"
+  Notes: "Notes"
   OperatingSystem: "Operating System"
   Publisher: "Publisher"
   Rename: "Rename"
@@ -49,6 +52,7 @@ en:
   User:
     one: "User"
     other: "Users"
+  Value: "Value"
   Version: "Version"
   View: "View"
   Search: "Search"
@@ -101,6 +105,11 @@ en:
     wol_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up"
     wol_no_mac: "No MAC Address is available to send the WOL packet"
     wol_success: "A WOL magic packet has been sent, check later if the computer has been woken up"
+    metadata_title: "Metadata"
+    metadata_description: "Here's a table showing your Organization metadata so you can assign a value to them"
+    metadata_no_metadata: "No metadata has been defined for your organization"
+    metadata_insert_value: "Introduce a value..."
+    metadata_save_success: "Metadata value has been saved"
   inventory:
     hardware:
       title: "Hardware"
@@ -314,6 +323,13 @@ en:
     confirm_delete: "Are you sure that you want to remove this tag?"
     edit_tag: "Edit the tag according to your needs"
     add_tags: "Add tags!"
+  metadata:
+    description: "Here you can define the metadata that you want to add to your endpoints and which are valuable to your organization. You could add your org's inventory number to an endpoint. The metadata that you create here will be available in the Metadata table inside your endpoint's view"
+    no_metadata: "No metadata for your org has been defined yet"
+    new: "New metadata name..."
+    optional_description: "Optional description..."
+    confirm_delete: "Are you sure that you want to remove this metadata, note that this operation is destructive and will remove any existing metadata value associated to the endpoings managed by OpenUEM"
+    edit: "Edit the metadata name and/or description according to your needs"
   success:
     session_delete: "The session has been deleted"
   charts:

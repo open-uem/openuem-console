@@ -166,6 +166,10 @@ func (p *PaginationAndSort) GetPaginationAndSortParams(c echo.Context) {
 		p.CurrentPage = 1
 	}
 
+	if p.CurrentPage == 0 {
+		p.CurrentPage = 1
+	}
+
 	if p.PageSize, err = strconv.Atoi(c.FormValue("pageSize")); err != nil {
 		p.PageSize = 5
 	}

@@ -2,13 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
+	"strconv"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/desktops_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -420,4 +423,88 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 	}
 
 	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
+}
+
+func (h *Handler) DesktopMetadata(c echo.Context) error {
+	var data []*openuem_ent.Metadata
+	successMessage := ""
+
+	agentId := c.Param("uuid")
+
+	if agentId == "" {
+		return renderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+	}
+
+	p := partials.NewPaginationAndSort()
+	p.GetPaginationAndSortParams(c)
+
+	if p.SortBy == "" {
+		p.SortBy = "name"
+		p.SortOrder = "asc"
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	data, err = h.Model.GetMetadataForAgent(agentId, p)
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	orgMetadata, err := h.Model.GetAllOrgMetadata()
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	p.NItems, err = h.Model.CountAllOrgMetadata()
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if c.Request().Method == "POST" {
+		orgMetadataId := c.FormValue("orgMetadataId")
+		name := c.FormValue("name")
+		value := c.FormValue("value")
+
+		id, err := strconv.Atoi(orgMetadataId)
+		if err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		if orgMetadataId != "" && name != "" && value != "" {
+			acceptedMetadata := []int{}
+			for _, data := range orgMetadata {
+				acceptedMetadata = append(acceptedMetadata, data.ID)
+			}
+
+			found := false
+			for _, item := range acceptedMetadata {
+				if item == id {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				return renderError(c, partials.ErrorMessage(fmt.Sprintf("%s is not an accepted metadata", name), false))
+			}
+
+			if err := h.Model.SaveMetadata(agentId, id, value); err != nil {
+				return renderError(c, partials.ErrorMessage(err.Error(), false))
+			}
+
+			data, err = h.Model.GetMetadataForAgent(agentId, p)
+			if err != nil {
+				return renderError(c, partials.ErrorMessage(err.Error(), false))
+			}
+
+			successMessage = i18n.T(c.Request().Context(), "agents.metadata_save_success")
+		}
+	}
+
+	return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.DesktopMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage)))
 }

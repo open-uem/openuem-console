@@ -38,6 +38,10 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/tags", h.TagManager, h.IsAuthenticated)
 	e.DELETE("/admin/tags", h.TagManager, h.IsAuthenticated)
 
+	e.GET("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
+	e.POST("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
+	e.DELETE("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
+
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 
 	e.GET("/deploy", h.DeployInstall, h.IsAuthenticated)
@@ -84,6 +88,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/desktops/:uuid/deploy/install", h.DesktopDeployInstall, h.IsAuthenticated)
 	e.POST("/desktops/:uuid/deploy/update", h.DesktopDeployUpdate, h.IsAuthenticated)
 	e.POST("/desktops/:uuid/deploy/uninstall", h.DesktopDeployUninstall, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/metadata", h.DesktopMetadata, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/metadata", h.DesktopMetadata, h.IsAuthenticated)
+	e.DELETE("/desktops/:uuid/metadata", h.DesktopMetadata, h.IsAuthenticated)
 
 	e.POST("/logout", h.Logout, h.IsAuthenticated)
 

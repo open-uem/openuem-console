@@ -173,7 +173,7 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 					href={ templ.URL(fmt.Sprintf("/desktops/%s/wol?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol?delete=true", id))) }
 				} else {
-					href={ templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", id)) }
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/wol", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", id))) }
 				}
 				hx-push-url="true"
@@ -181,6 +181,38 @@ templ DesktopsNavbar(id string, active string, confirmDelete bool) {
 				hx-swap="outerHTML"
 			>
 				{ i18n.T(ctx, "WOL") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "notes") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/notes?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/notes?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/notes", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/notes", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Notes") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "metadata") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/metadata?delete=true", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/metadata?delete=true", id))) }
+				} else {
+					href={ templ.URL(fmt.Sprintf("/desktops/%s/metadata", id)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/metadata", id))) }
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Metadata") }
 			</a>
 		</li>
 	</ul>

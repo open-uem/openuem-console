@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/doncicuto/openuem-console/internal/views/config_views"
+	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -26,7 +26,7 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 		errMessage = err.Error()
 	}
 
-	return renderView(c, config_views.SessionsIndex(" | Sessions", config_views.Sessions(c, s, p, successMessage, errMessage, h.SessionManager.Manager.Codec)))
+	return renderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, s, p, successMessage, errMessage, h.SessionManager.Manager.Codec)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {

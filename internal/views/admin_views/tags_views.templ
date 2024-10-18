@@ -1,4 +1,4 @@
-package config_views
+package admin_views
 
 import (
 	"fmt"
@@ -116,7 +116,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
 }
 
 templ TagsIndex(title string, cmp templ.Component) {
-	@layout.Base("config | tags") {
+	@layout.Base("admin | tags") {
 		@cmp
 	}
 }
@@ -221,10 +221,7 @@ templ EditTag() {
 						title="cancel tag deletion"
 						class="uk-button uk-button-default"
 						_={ `on click 
-                            add .hidden to #confirm-tag-delete 
-                            set #edit-tag.value to ""
-                            set #edit-tag-name.value to ""
-                            set #edit-tag-description.value to ""
+                            add .hidden to #edit-tag-dialog 
                         ` }
 					>
 						{ i18n.T(ctx, "Cancel") }

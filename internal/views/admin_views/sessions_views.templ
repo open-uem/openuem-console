@@ -1,4 +1,4 @@
-package config_views
+package admin_views
 
 import (
 	"fmt"
@@ -133,7 +133,7 @@ templ SessionInfo(session *ent.Sessions, codec scs.Codec) {
 }
 
 templ SessionsIndex(title string, cmp templ.Component) {
-	@layout.Base("config | sessions") {
+	@layout.Base("admin | sessions") {
 		@cmp
 	}
 }

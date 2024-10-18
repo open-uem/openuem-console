@@ -9,6 +9,7 @@ import (
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/computer"
 	"github.com/doncicuto/openuem_ent/deployment"
+	"github.com/doncicuto/openuem_ent/metadata"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 )
 
@@ -209,4 +210,22 @@ func (m *Model) CountDeploymentsForAgent(agentId string) (int, error) {
 
 func (m *Model) DeploymentAlreadyInstalled(agentId, packageId string) (bool, error) {
 	return m.Client.Deployment.Query().Where(deployment.And(deployment.PackageID(packageId), deployment.HasOwnerWith(agent.ID(agentId)))).Exist(context.Background())
+}
+
+func (m *Model) GetMetadataForAgent(agentId string, p partials.PaginationAndSort) ([]*ent.Metadata, error) {
+	query := m.Client.Metadata.Query().WithOrg().WithOwner().Where(metadata.HasOwnerWith(agent.ID(agentId)))
+
+	data, err := query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (m *Model) CountMetadataForAgent(agentId string) (int, error) {
+	return m.Client.Metadata.Query().Where(metadata.HasOwnerWith(agent.ID(agentId))).Count(context.Background())
+}
+
+func (m *Model) SaveMetadata(agentId string, metadataId int, value string) error {
+	return m.Client.Metadata.Create().SetOwnerID(agentId).SetOrgID(metadataId).SetValue(value).OnConflict(sql.ConflictColumns(metadata.OwnerColumn, metadata.OrgColumn)).UpdateNewValues().Exec(context.Background())
 }

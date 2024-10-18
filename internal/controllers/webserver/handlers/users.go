@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/doncicuto/openuem-console/internal/views/config_views"
+	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/go-playground/form/v4"
@@ -40,11 +40,11 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		errMessage = err.Error()
 	}
 
-	return renderView(c, config_views.UsersIndex(" | Users", config_views.Users(c, users, p, successMessage, errMessage)))
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, successMessage, errMessage)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
-	return renderView(c, config_views.UsersIndex(" | Users", config_views.NewUser()))
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser()))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
