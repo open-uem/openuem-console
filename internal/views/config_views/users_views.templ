@@ -11,7 +11,7 @@ import (
 )
 
 templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, successMessage, errMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Users", Url: "/config/users"}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -28,16 +28,16 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 					<div class="uk-card-body">
 						if len(users) > 0 {
 							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
-								<button
-									hx-get={ "/config/users/new" }
+								/* <button
+									hx-get={ "/admin/users/new" }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
 								>
 									<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.import") }
-								</button>
+								</button> */
 								<button
-									hx-get={ "/config/users/new" }
+									hx-get={ "/admin/users/new" }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									class="uk-button uk-button-primary text-white"
@@ -84,12 +84,12 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 												@partials.SortByColumnIcon(c, p, "register", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
-										<th>
+										/* <th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "users.role") }</span>
 												@partials.SortByColumnIcon(c, p, "role", "alpha", "#main", "outerHTML", "")
 											</div>
-										</th>
+										</th> */
 										<th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "users.created") }</span>
@@ -135,7 +135,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 												{ i18n.T(ctx, user.Register) }
 											</td>
 										}
-										<td>- </td>
+										/* <td>- </td> */
 										if user.Created.IsZero() {
 											<td>-</td>
 										} else {
@@ -153,7 +153,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/config/users/%s/confirmemail", user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -165,7 +165,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/config/users/%s/askconfirm", user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -178,7 +178,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 													if user.EmailVerified && user.Register == "users.review_request" {
 														<li>
 															<a
-																hx-get={ string(templ.URL(fmt.Sprintf("/config/users/%s/certificate", user.ID))) }
+																hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -192,7 +192,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 															<a
 																hx-target="#main"
 																hx-swap="outerHTML"
-																hx-get={ string(templ.URL("/config/users/" + user.ID + "/renewcertificate")) }
+																hx-get={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
@@ -201,7 +201,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 													}
 													<li>
 														<a
-															hx-delete={ string(templ.URL("/config/users/" + user.ID)) }
+															hx-delete={ string(templ.URL("/admin/users/" + user.ID)) }
 															hx-target="#main"
 															hx-push-url="false"
 															hx-swap="outerHTML"
@@ -231,7 +231,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 }
 
 templ NewUser() {
-	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Users", Url: "/config/users"}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -247,7 +247,7 @@ templ NewUser() {
 					<div class="uk-card-body">
 						<form
 							class="uk-form-stacked"
-							hx-post="/config/users/new"
+							hx-post="/admin/users/new"
 							hx-target="#main"
 							hx-swap="outerHTML"
 						>

@@ -35,7 +35,7 @@ func (h *Handler) SessionDelete(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage("no token was found in request", true))
 	}
 
-	return renderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "confirm.session_delete"), "", "/config/sessions/"+token))
+	return renderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "confirm.session_delete"), "", "/admin/sessions/"+token))
 }
 
 func (h *Handler) SessionConfirmDelete(c echo.Context) error {

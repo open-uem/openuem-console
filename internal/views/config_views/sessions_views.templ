@@ -13,7 +13,7 @@ import (
 )
 
 templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAndSort, successMessage, errMessage string, codec scs.Codec) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Sessions", Url: "/config/sessions"}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -85,7 +85,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 												<ul class="uk-dropdown-nav uk-nav" _="on click remove .uk-open from .uk-dropdown">
 													<li>
 														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/config/sessions/%s/delete", session.ID))) }
+															hx-get={ string(templ.URL(fmt.Sprintf("/admin/sessions/%s/delete", session.ID))) }
 															hx-target="#main"
 															hx-swap="outerHTML"
 														><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -112,9 +112,9 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 }
 
 templ SessionsDelete(session *ent.Sessions, codec scs.Codec) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Sessions", Url: "/config/sessions"}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/config/sessions", "/config/sessions/"+session.ID)
+		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID)
 		/* @SessionInfo(session, codec) */
 	</main>
 }

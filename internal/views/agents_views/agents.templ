@@ -245,9 +245,9 @@ templ AddTagButton(availableTags, appliedTags []*ent.Tag, agentId string) {
 					<button
 						type="button"
 						title="add more tags"
-						hx-get="/config/tags"
+						hx-get="/admin/tags"
 						hx-push-url="true"
-						href="/config/tags"
+						href="/admin/tags"
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="flex gap-2 items-center text-left p-2"

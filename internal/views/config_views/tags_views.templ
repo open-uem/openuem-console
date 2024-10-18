@@ -11,7 +11,7 @@ import (
 )
 
 templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Config", Url: "/config/users"}, {Title: "Tags", Url: "/config/tags"}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Tags", Url: "/admin/tags"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -138,7 +138,7 @@ templ ConfirmTagDeletion() {
 				</button>
 				<button
 					title="confirm tag deletion"
-					hx-delete="/config/tags"
+					hx-delete="/admin/tags"
 					hx-target="#main"
 					hx-swap="outerHTML"
 					class="uk-button uk-button-danger"
@@ -159,7 +159,7 @@ templ NewTag() {
 			title="add tag"
 			type="button"
 			class="uk-button uk-button-primary"
-			hx-post="/config/tags"
+			hx-post="/admin/tags"
 			hx-target="#main"
 			hx-swap="outerHTML"
 		>
@@ -231,7 +231,7 @@ templ EditTag() {
 					</button>
 					<button
 						title="confirm tag deletion"
-						hx-post="/config/tags"
+						hx-post="/admin/tags"
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="uk-button uk-button-primary"
