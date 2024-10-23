@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto"
+	"crypto/x509"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,26 +21,31 @@ func (h *Handler) Auth(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Please provide valid credentials")
 	}
 
-	uid := certs[0].Subject.CommonName
+	cert := certs[0]
+	caCert := h.CACert
+
+	uid := cert.Subject.CommonName
 	if uid == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Wrong certificate")
 	}
 
-	if len(certs[0].OCSPServer) == 0 {
+	if len(cert.OCSPServer) == 0 {
 		return echo.NewHTTPError(http.StatusUnauthorized, "No OCSP responders found in certificate")
 	}
-	ocspServer := certs[0].OCSPServer[0]
+	ocspServer := cert.OCSPServer[0]
 
-	// Verify cert against OCSP
+	// Verify cert
 	ocspURL, err := url.Parse(ocspServer)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not parse OCSP Responder URL")
 	}
 
-	cert := certs[0]
-	caCert := h.CACert
+	issuer, err := getIssuerFromCert(cert, caCert)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Certificate did not pass verification")
+	}
 
-	ocspRequest, err := ocsp.CreateRequest(cert, caCert, &ocsp.RequestOptions{Hash: crypto.SHA256})
+	ocspRequest, err := ocsp.CreateRequest(cert, issuer, &ocsp.RequestOptions{Hash: crypto.SHA256})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not create OCSP Request")
 	}
@@ -64,7 +70,7 @@ func (h *Handler) Auth(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not read response from OCSP Responder")
 	}
 
-	ocspResponse, err := ocsp.ParseResponse(output, caCert)
+	ocspResponse, err := ocsp.ParseResponse(output, issuer)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not parse OCSP Response")
 	}
@@ -114,4 +120,22 @@ func (h *Handler) Auth(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusFound, "https://localhost:1323/dashboard")
+}
+
+func getIssuerFromCert(cert, caCert *x509.Certificate) (*x509.Certificate, error) {
+
+	// Check if current certificate is valid for client auth and is issued by our CA
+	trustedCAPool := x509.NewCertPool()
+	trustedCAPool.AddCert(caCert)
+	vOpts := x509.VerifyOptions{
+		Roots:     trustedCAPool,
+		KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+	}
+
+	chains, err := cert.Verify(vOpts)
+	if err != nil || len(chains) == 0 {
+		return nil, err
+	} else {
+		return chains[0][1], err
+	}
 }

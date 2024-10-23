@@ -12,7 +12,7 @@ import (
 func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 	var err error
 
-	log.Println("... reading CA certificate")
+	log.Println("... reading CA certificate", cCtx.String("cacert"))
 	command.CACert, err = openuem_utils.ReadPEMCertificate(cCtx.String("cacert"))
 	if err != nil {
 		return err
