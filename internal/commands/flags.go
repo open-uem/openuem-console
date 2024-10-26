@@ -23,15 +23,9 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars: []string{"CONSOLE_KEY_FILENAME"},
 		},
 		&cli.StringFlag{
-			Name:     "nats-host",
-			Usage:    "the NATS server hostname",
-			EnvVars:  []string{"NATS_HOST"},
-			Required: true,
-		},
-		&cli.StringFlag{
-			Name:     "nats-port",
-			Usage:    "the port where NATS server is listening on",
-			EnvVars:  []string{"NATS_PORT"},
+			Name:     "nats-servers",
+			Usage:    "comma-separated list of NATS servers urls e.g (tls://localhost:4433)",
+			EnvVars:  []string{"NATS_SERVERS"},
 			Required: true,
 		},
 		&cli.StringFlag{

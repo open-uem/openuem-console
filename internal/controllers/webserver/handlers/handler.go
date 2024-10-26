@@ -3,12 +3,12 @@ package handlers
 import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_nats"
+	"github.com/nats-io/nats.go"
 )
 
 type Handler struct {
 	Model          *models.Model
-	MessageServer  *openuem_nats.MessageServer
+	NATSConnection *nats.Conn
 	SessionManager *sessions.SessionManager
 	JWTKey         string
 	CertPath       string
@@ -16,10 +16,10 @@ type Handler struct {
 	CACertPath     string
 }
 
-func NewHandler(model *models.Model, ms *openuem_nats.MessageServer, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *Handler {
+func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *Handler {
 	return &Handler{
 		Model:          model,
-		MessageServer:  ms,
+		NATSConnection: nc,
 		SessionManager: s,
 		JWTKey:         jwtKey,
 		CertPath:       certPath,

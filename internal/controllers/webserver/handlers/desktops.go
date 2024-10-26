@@ -314,7 +314,7 @@ func (h *Handler) DesktopDeployInstall(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	err = h.MessageServer.Connection.Publish("agent.installpackage."+agentId, data)
+	err = h.NATSConnection.Publish("agent.installpackage."+agentId, data)
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -347,7 +347,7 @@ func (h *Handler) DesktopDeployUpdate(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	err = h.MessageServer.Connection.Publish("agent.updatepackage."+agentId, data)
+	err = h.NATSConnection.Publish("agent.updatepackage."+agentId, data)
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -380,7 +380,7 @@ func (h *Handler) DesktopDeployUninstall(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	err = h.MessageServer.Connection.Publish("agent.uninstallpackage."+agentId, data)
+	err = h.NATSConnection.Publish("agent.uninstallpackage."+agentId, data)
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}

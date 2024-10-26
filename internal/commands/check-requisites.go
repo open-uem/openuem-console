@@ -5,7 +5,6 @@ import (
 
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem_utils"
-	"github.com/go-playground/validator"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,14 +18,14 @@ func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 	}
 	command.CACertPath = cCtx.String("cacert")
 
-	log.Println("... reading console's certificate")
+	log.Println("... reading console's certificate", cCtx.String("cert"))
 	_, err = openuem_utils.ReadPEMCertificate(cCtx.String("cert"))
 	if err != nil {
 		return err
 	}
 	command.CertPath = cCtx.String("cert")
 
-	log.Println("... reading console's private key")
+	log.Println("... reading console's private key", cCtx.String("key"))
 	_, err = openuem_utils.ReadPEMPrivateKey(cCtx.String("key"))
 	if err != nil {
 		return err
@@ -40,18 +39,7 @@ func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 		log.Fatalf("❌ could not connect to database, reason: %s", err.Error())
 	}
 
-	validate := validator.New()
-	err = validate.Var(cCtx.String("nats-host"), "hostname")
-	if err != nil {
-		return err
-	}
-	command.NATSHost = cCtx.String("nats-host")
-
-	err = validate.Var(cCtx.String("nats-port"), "numeric")
-	if err != nil {
-		return err
-	}
-	command.NATSPort = cCtx.String("nats-port")
+	command.NATSServers = cCtx.String("nats-servers")
 
 	command.JWTKey = cCtx.String("jwt-key")
 	return nil

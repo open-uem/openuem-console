@@ -101,7 +101,7 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.MessageServer.Connection.Publish("certificates.new", data); err != nil {
+	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -176,7 +176,7 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.MessageServer.Connection.Publish("certificates.new", data); err != nil {
+	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -230,7 +230,7 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.MessageServer.Connection.Publish("notification.confirm_email", data); err != nil {
+	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 

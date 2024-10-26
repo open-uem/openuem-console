@@ -115,11 +115,11 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 
 		if install {
-			if err := h.MessageServer.Connection.Publish("agent.installpackage."+agent, actionBytes); err != nil {
+			if err := h.NATSConnection.Publish("agent.installpackage."+agent, actionBytes); err != nil {
 				return renderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
-			if err := h.MessageServer.Connection.Publish("agent.uninstallpackage."+agent, actionBytes); err != nil {
+			if err := h.NATSConnection.Publish("agent.uninstallpackage."+agent, actionBytes); err != nil {
 				return renderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}

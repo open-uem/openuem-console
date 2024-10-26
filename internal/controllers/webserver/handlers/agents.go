@@ -129,7 +129,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return fmt.Errorf("uuid cannot be empty")
 	}
 
-	if _, err := h.MessageServer.Connection.Request("agent.enable."+agentId, nil, 10*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, 10*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -154,7 +154,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 
 	// TODO - Timeout should not be hardcoded
 	go func() {
-		if _, err := h.MessageServer.Connection.Request("agent.report."+agentId, nil, 10*time.Second); err != nil {
+		if _, err := h.NATSConnection.Request("agent.report."+agentId, nil, 10*time.Second); err != nil {
 			log.Printf("[ERROR]: %v", err)
 		}
 	}()
@@ -166,7 +166,7 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	// TODO - Timeout should not be hardcoded
-	if _, err := h.MessageServer.Connection.Request("agent.disable."+agentId, nil, 10*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, 10*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -186,7 +186,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 	}
 
 	// TODO - Timeout should not be hardcoded
-	if _, err := h.MessageServer.Connection.Request("agent.startvnc."+agentId, nil, 120*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, 120*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -199,7 +199,7 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	// TODO - Timeout should not be hardcoded
-	if _, err := h.MessageServer.Connection.Request("agent.stopvnc."+agentId, nil, 120*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, 120*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 

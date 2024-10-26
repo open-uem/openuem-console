@@ -146,7 +146,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.MessageServer.Connection.Publish("notification.confirm_email", data); err != nil {
+	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 

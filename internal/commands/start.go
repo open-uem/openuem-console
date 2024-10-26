@@ -9,6 +9,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/authserver"
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
+	"github.com/doncicuto/openuem_nats"
 
 	"github.com/urfave/cli/v2"
 )
@@ -23,19 +24,22 @@ func StartConsole() *cli.Command {
 }
 
 func startConsole(cCtx *cli.Context) error {
+	var err error
 	command := ConsoleCommand{}
 
 	command.CheckRequisites(cCtx)
 
 	// TODO: NATS connection close in stop?
-	command.connectToNATS()
-
+	command.NATSConnection, err = openuem_nats.ConnectWithNATS(command.NATSServers, command.CertPath, command.CertKey, command.CACertPath)
+	if err != nil {
+		log.Println("Error connecting to NATS", err.Error())
+	}
 	// Session handler
 	sessionsHandler := sessions.New(command.DBUrl)
 	defer sessionsHandler.Close()
 
 	// HTTPS web server
-	w := webserver.New(command.Model, command.MessageServer, sessionsHandler, command.JWTKey, command.CertPath, command.CertKey, command.CACertPath)
+	w := webserver.New(command.Model, command.NATSConnection, sessionsHandler, command.JWTKey, command.CertPath, command.CertKey, command.CACertPath)
 	go w.Serve(":1323", command.CertPath, command.CertKey)
 	defer func() {
 		if err := w.Close(); err != nil {

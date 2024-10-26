@@ -8,8 +8,8 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver/handlers"
 	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_nats"
 	"github.com/labstack/echo/v4"
+	"github.com/nats-io/nats.go"
 )
 
 type WebServer struct {
@@ -19,13 +19,13 @@ type WebServer struct {
 	SessionManager *sessions.SessionManager
 }
 
-func New(m *models.Model, ms *openuem_nats.MessageServer, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *WebServer {
+func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *WebServer {
 	w := WebServer{}
 	// Router
 	w.Router = router.New(s)
 
 	// Create Handlers and register its router
-	w.Handler = handlers.NewHandler(m, ms, s, jwtKey, certPath, keyPath, caCertPath)
+	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath)
 	w.Handler.Register(w.Router)
 
 	w.SessionManager = s
