@@ -332,6 +332,31 @@ es:
   smtp:
     title: SMTP
     description: "Configura tu proveedor SMTP para poder enviar notificaciones por email"
+    server_fieldset: Servidor SMTP
+    server: Servidor
+    server_placeholder: El nombre del servidor SMTP...
+    port: Puerto
+    port_placeholder: El puerto del servidor SMTP...
+    auth_fieldset: Autenticación SMTP
+    user: Usuario
+    user_placeholder: El usuario SMTP...
+    password: Contraseña
+    password_placeholder: La contraseña SMTP...
+    auth_type: Tipo Autent.
+    from_fieldset: Mail From
+    from_placeholder: Email de origen...
+    id_cannot_be_empty: El ID de configuración no puede estar vacío
+    id_invalid: El ID de configuración no es válido
+    server_invalid: El servidor no es válido
+    server_cannot_be_empty: El servidor no puede estar vacío
+    port_invalid: El puerto no es válido
+    port_cannot_be_empty: El puerto no puede estar vacío
+    auth_invalid: El tipo de autenticación no es válido
+    mailfrom_cannot_be_empty: El campo Mail From no puede estar vacío
+    mailfrom_invalid: El campo Mail From no es válido
+    saved: La configuración SMTP se ha guardado
+    test: Probar config.
+    test_success: Se envió con éxito el email de prueba a %s
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

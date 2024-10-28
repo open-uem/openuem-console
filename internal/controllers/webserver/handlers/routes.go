@@ -37,10 +37,12 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/admin/tags", h.TagManager, h.IsAuthenticated)
 	e.POST("/admin/tags", h.TagManager, h.IsAuthenticated)
 	e.DELETE("/admin/tags", h.TagManager, h.IsAuthenticated)
-
 	e.GET("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
 	e.POST("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
 	e.DELETE("/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
+	e.GET("/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
+	e.POST("/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
+	e.POST("/admin/smtp/test", h.TestSMTPSettings, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

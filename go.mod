@@ -27,7 +27,8 @@ require (
 	github.com/nats-io/nats.go v1.37.0
 	github.com/pkg/sftp v1.13.6
 	github.com/urfave/cli/v2 v2.27.4
-	golang.org/x/crypto v0.26.0
+	github.com/wneessen/go-mail v0.5.1
+	golang.org/x/crypto v0.28.0
 )
 
 require (
@@ -73,7 +74,7 @@ require (
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -336,6 +336,31 @@ en:
   smtp:
     title: SMTP
     description: "Configure your SMTP provider in order to send email notifications"
+    server_fieldset: SMTP Server
+    server: Server
+    server_placeholder: Your SMTP server name...
+    port: Port
+    port_placeholder: Your SMTP server port...
+    auth_fieldset: SMTP Authentication
+    user: User
+    user_placeholder: Your SMTP auth user
+    password: Password
+    password_placeholder: Your SMTP password...
+    auth_type: Auth Type
+    from_fieldset: Mail From
+    from_placeholder: Email address...
+    id_cannot_be_empty: Settings ID cannot be empty
+    id_invalid: Settings ID is not valid
+    server_invalid: Server is not valid
+    server_cannot_be_empty: Server cannot be empty
+    port_invalid: Port is not valid
+    port_cannot_be_empty: Port cannot be empty
+    auth_invalid: Auth type is not valid
+    mailfrom_cannot_be_empty: Mail From cannot be empty
+    mailfrom_invalid: Mail From is not valid
+    saved: SMTP Settings saved!
+    test: Test settings
+    test_success: Email test was sent successfully to %s!
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."

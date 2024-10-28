@@ -103,7 +103,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgM
 }
 
 templ OrgMetadataIndex(title string, cmp templ.Component) {
-	@layout.Base("admin | metadata") {
+	@layout.Base("admin") {
 		@cmp
 	}
 }

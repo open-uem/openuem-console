@@ -1,0 +1,109 @@
+package admin_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"strconv"
+)
+
+templ SMTPSettings(c echo.Context, settings *openuem_ent.Settings) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "SMTP Settings", Url: "/admin/smtp"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("smtp")
+				<div id="success" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "smtp.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "smtp.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form class="mt-6">
+							<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+							<div class="flex gap-8">
+								<fieldset class="uk-fieldset w-1/6">
+									<legend class="uk-legend">{ i18n.T(ctx, "smtp.server_fieldset") }</legend>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="server">{ i18n.T(ctx, "smtp.server") }</label>
+										<input id="server" name="server" type="text" class="uk-input" value={ settings.SMTPServer } placeholder={ i18n.T(ctx, "smtp.server_placeholder") }/>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="port">{ i18n.T(ctx, "smtp.port") }</label>
+										<input id="port" name="port" type="number" class="uk-input" value={ strconv.Itoa(settings.SMTPPort) } placeholder={ i18n.T(ctx, "smtp.port_placeholder") }/>
+									</div>
+								</fieldset>
+								<fieldset class="uk-fieldset w-1/6">
+									<legend class="uk-legend">{ i18n.T(ctx, "smtp.auth_fieldset") }</legend>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="user">{ i18n.T(ctx, "smtp.user") }</label>
+										<input id="user" name="user" type="text" class="uk-input" value={ settings.SMTPUser } placeholder={ i18n.T(ctx, "smtp.user_placeholder") }/>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="password">{ i18n.T(ctx, "smtp.password") }</label>
+										<input id="password" name="password" type="password" class="uk-input" value={ settings.SMTPPassword } placeholder={ i18n.T(ctx, "smtp.password_placeholder") }/>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="auth">{ i18n.T(ctx, "smtp.auth_type") }</label>
+										<select id="auth" name="auth" class="uk-select">
+											for _, authType := range AuthTypes {
+												<option checked?={ settings.SMTPAuth == authType }>{ authType }</option>
+											}
+										</select>
+									</div>
+								</fieldset>
+								<fieldset class="uk-fieldset w-1/6">
+									<legend class="uk-legend">{ i18n.T(ctx, "smtp.from_fieldset") }</legend>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="mail-from">{ i18n.T(ctx, "smtp.from_fieldset") }</label>
+										<input id="mail-from" name="mail-from" type="text" class="uk-input" value={ settings.MessageFrom } placeholder={ i18n.T(ctx, "smtp.from_placeholder") }/>
+									</div>
+								</fieldset>
+							</div>
+							<div class="flex gap-2">
+								<button
+									class="uk-button uk-button-primary flex items-center gap-2"
+									type="submit"
+									hx-post="/admin/smtp"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-indicator="#save-smtp-spinner"
+								>
+									{ i18n.T(ctx, "Save") }
+									<uk-icon id="save-smtp-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+								</button>
+								<button
+									class="uk-button uk-button-secondary flex items-center gap-2"
+									type="button"
+									hx-post="/admin/smtp/test"
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-indicator="#test-smtp-spinner"
+								>
+									{ i18n.T(ctx, "smtp.test") }
+									<uk-icon id="test-smtp-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ SMTPSettingsIndex(title string, cmp templ.Component) {
+	@layout.Base("admin") {
+		@cmp
+	}
+}
+
+var AuthTypes = []string{"LOGIN", "PLAIN", "XOAUTH2", "SCRAM-SHA-256"}

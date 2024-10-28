@@ -318,7 +318,7 @@ templ NewUser() {
 }
 
 templ UsersIndex(title string, cmp templ.Component) {
-	@layout.Base("admin | users") {
+	@layout.Base("admin") {
 		@cmp
 	}
 }

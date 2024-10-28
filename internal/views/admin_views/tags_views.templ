@@ -116,7 +116,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
 }
 
 templ TagsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin | tags") {
+	@layout.Base("admin") {
 		@cmp
 	}
 }
