@@ -39,6 +39,12 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 								</th>
 								<th>
 									<div class="flex gap-2 items-center">
+										<span>{ i18n.T(ctx, "agents.version") }</span>
+										@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
+									</div>
+								</th>
+								<th>
+									<div class="flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.username") }</span>
 										@partials.SortByColumnIcon(c, p, "username", "alpha", "#main", "outerHTML", "")
 									</div>
@@ -76,6 +82,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 									case "linux":
 										<td></td>
 								}
+								<td class="!align-middle">{ agent.Version } </td>
 								<td class="!align-middle">{ agent.Username } </td>
 								<td class="!align-middle text-center">
 									@partials.Manufacturer(strings.ToLower(agent.Manufacturer))

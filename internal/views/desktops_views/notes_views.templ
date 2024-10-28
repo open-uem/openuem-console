@@ -28,10 +28,10 @@ templ Notes(c echo.Context, agent *openuem_ent.Agent, markdown, renderedMarkdown
 				<div class="uk-card uk-card-body uk-card-default my-4 p-6">
 					<form>
 						@partials.MarkdownNavbar(agent.ID, renderedMarkdown)
-						<article id="rendered-markdown" class={ "markdown-body uk-textarea w-1/2 h-96 max-h-96 overflow-y-auto", templ.KV("hidden", len(renderedMarkdown) == 0) }>
+						<article id="rendered-markdown" class={ "markdown-body uk-textarea w-1/2 h-80 max-h-80 overflow-y-auto", templ.KV("hidden", len(renderedMarkdown) == 0) }>
 							@templ.Raw(renderedMarkdown)
 						</article>
-						<textarea id="notes" name="markdown" class={ "uk-textarea w-1/2 h-96 max-h-96 overflow-y-auto", templ.KV("hidden", len(renderedMarkdown) > 0 ) } placeholder={ i18n.T(ctx, "notes.no_notes") } spellcheck="false">{ markdown }</textarea>
+						<textarea id="notes" name="markdown" class={ "uk-textarea w-1/2 h-80 max-h-80 overflow-y-auto", templ.KV("hidden", len(renderedMarkdown) > 0 ) } placeholder={ i18n.T(ctx, "notes.no_notes") } spellcheck="false">{ markdown }</textarea>
 					</form>
 				</div>
 			</div>

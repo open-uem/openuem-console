@@ -9768,12 +9768,12 @@ th.uk-text-break, td.uk-text-break {
   height: 1.5rem;
 }
 
-.h-60 {
-  height: 15rem;
-}
-
 .h-8 {
   height: 2rem;
+}
+
+.h-80 {
+  height: 20rem;
 }
 
 .h-9 {
@@ -9788,16 +9788,12 @@ th.uk-text-break, td.uk-text-break {
   height: 100vh;
 }
 
-.h-96 {
-  height: 24rem;
-}
-
 .max-h-40 {
   max-height: 10rem;
 }
 
-.max-h-60 {
-  max-height: 15rem;
+.max-h-80 {
+  max-height: 20rem;
 }
 
 .max-h-96 {

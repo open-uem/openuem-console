@@ -77,7 +77,7 @@ templ DesktopDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem
 								@DeploymentsTable(c, p, agent.ID, deployments)
 							</div>
 						} else {
-							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_deployments") }</p>
+							<p class="uk-text-small uk-text-muted mt-6 mb-4">{ i18n.T(ctx, "agents.no_deployments") }</p>
 						}
 					</div>
 				</div>
