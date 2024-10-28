@@ -15,7 +15,18 @@ type Country struct {
 templ Countries(c echo.Context, code string) {
 	<div class="flex gap-4">
 		<div id="flag" class={ "fi", "fi-" + strings.ToLower(code) }></div>
-		<select id="country" name="country" class="uk-select" autocomplete="off" _="on change get #country.value.toLowerCase then set #flag[@class] to `fi fi-${it}`  end">
+		<select
+			id="country"
+			name="country"
+			class="uk-select"
+			autocomplete="off"
+			_="on change 
+				set flag to #country.value.toLowerCase() 
+				set #flag[@class] to `fi fi-$flag`  
+
+				
+		end"
+		>
 			for _, country := range GetCountries(c) {
 				<option value={ country.Code } selected?={ code == country.Code }>{ country.Name }</option>
 			}

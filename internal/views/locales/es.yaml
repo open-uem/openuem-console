@@ -234,7 +234,7 @@ es:
     description: "Use el certificado digital que se le ha proporcionado para identificarse desde su navegador o regístrese para solicitar uno"
     button: "Inicie sesión con certificado digital"
   register:
-    description: "Rellene los datos del formulario para registarse en la aplicación. El administrador de OpenUEM revisará su solicitud, le asignará un rol y generará un certificado digital para que pueda acceder"
+    description: "Rellene los datos del formulario para registarse en la aplicación. El administrador de OpenUEM revisará su solicitud y generará un certificado digital para que pueda acceder"
     button: "Regístrese"
     uid: "ID de Usuario"
     name: "Nombre"
@@ -256,7 +256,7 @@ es:
     back: "Ir al inicio"
     country: "País"
     email_confirmed: "Ha confirmado su dirección"
-    email_confirmed_description: "El administrador de OpenUEM revisará su solicitud, le asignará un rol y generará un certificado digital para que pueda acceder"
+    email_confirmed_description: "El administrador de OpenUEM revisará su solicitud y generará un certificado digital para que pueda acceder"
   new:
     user:
       title: "Nuevo Usuario"
@@ -286,6 +286,10 @@ es:
     regenerate_certificate: "Regenerar certificado"
     certificate_requested: "Un certificado de cliente ha sido solicitado para este usuario"
     deleted: "El usuario ha sido borrado"
+    edit:
+      title: Editar usuario
+      description: Edite este perfil de usuario
+      success: El perfil del usuario se ha actualizado
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"

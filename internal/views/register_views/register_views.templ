@@ -220,7 +220,7 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 										add .hidden to #phone-required
 										remove @data-error
 
-										get toE164(#phone.value) put it into #phone.value
+										get toE164(#phone.value, #country.options[#country.selectedIndex].value) put it into #phone.value
 									else
 										remove .hidden from #phone-required
 										add @data-error='true'

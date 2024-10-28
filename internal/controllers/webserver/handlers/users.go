@@ -16,10 +16,11 @@ import (
 )
 
 type NewUser struct {
-	UID   string `form:"uid" validate:"required"`
-	Name  string `form:"name" validate:"required"`
-	Email string `form:"email" validate:"required,email"`
-	Phone string `form:"phone"`
+	UID     string `form:"uid" validate:"required"`
+	Name    string `form:"name" validate:"required"`
+	Email   string `form:"email" validate:"required,email"`
+	Phone   string `form:"phone"`
+	Country string `form:"country"`
 }
 
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
@@ -44,7 +45,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser()))
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -67,7 +68,7 @@ func (h *Handler) AddUser(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone)
+	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country)
 	if err != nil {
 		// TODO manage duplicate key error
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
@@ -235,4 +236,22 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 	}
 
 	return h.ListUsers(c, "A new confirmation email has been sent to "+user.Email, "")
+}
+
+func (h *Handler) EditUser(c echo.Context) error {
+	uid := c.Param("uid")
+	user, err := h.Model.GetUserById(uid)
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if c.Request().Method == "POST" {
+		if err := h.Model.UpdateUser(uid, c.FormValue("name"), c.FormValue("email"), c.FormValue("phone"), c.FormValue("country")); err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.edit.success")))
+	}
+
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user)))
 }

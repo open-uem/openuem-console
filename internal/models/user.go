@@ -99,8 +99,16 @@ func (m *Model) EmailExists(email string) (bool, error) {
 	return m.Client.User.Query().Where(user.Email(email)).Exist(context.Background())
 }
 
-func (m *Model) AddUser(uid, name, email, phone string) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCreated(time.Now()).Save(context.Background())
+func (m *Model) AddUser(uid, name, email, phone, country string) error {
+	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now()).Save(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Model) UpdateUser(uid, name, email, phone, country string) error {
+	_, err := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now()).Save(context.Background())
 	if err != nil {
 		return err
 	}

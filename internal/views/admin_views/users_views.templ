@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -45,7 +46,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
 								</button>
 							</div>
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
 								<thead>
 									<tr>
 										<th>
@@ -112,7 +113,16 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 								for _, user := range users {
 									<tr>
 										<td>{ user.ID }</td>
-										<td>{ user.Name }</td>
+										<td class="underline">
+											<a
+												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												{ user.Name }
+											</a>
+										</td>
 										if user.Email != "" {
 											<td>{ user.Email }</td>
 										} else {
@@ -178,7 +188,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 													if user.EmailVerified && user.Register == "users.review_request" {
 														<li>
 															<a
-																hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -192,7 +202,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 															<a
 																hx-target="#main"
 																hx-swap="outerHTML"
-																hx-get={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
+																hx-post={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
@@ -230,7 +240,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 	</main>
 }
 
-templ NewUser() {
+templ NewUser(c echo.Context) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -246,68 +256,181 @@ templ NewUser() {
 					</div>
 					<div class="uk-card-body">
 						<form
-							class="uk-form-stacked"
+							class="mt-6"
 							hx-post="/admin/users/new"
 							hx-target="#main"
 							hx-swap="outerHTML"
 						>
-							<div class="uk-margin">
-								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.uid") }</label>
-								<div class="uk-form-controls">
-									<input
-										id="uid"
-										name="uid"
-										class="uk-input !w-1/12"
-										type="text"
-										placeholder={ i18n.T(ctx, "users.uid") + "..." }
-										required
-									/>
-									<div class="uk-form-help uk-margin-small-top">
-										{ i18n.T(ctx, "new.user.uid_help") }
+							<div class="flex gap-8">
+								<fieldset class="uk-fieldset w-1/6">
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.uid") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="uid"
+												name="uid"
+												class="uk-input"
+												type="text"
+												placeholder={ i18n.T(ctx, "users.uid") + "..." }
+												required
+											/>
+											<div class="uk-form-help uk-margin-small-top">
+												{ i18n.T(ctx, "new.user.uid_help") }
+											</div>
+										</div>
 									</div>
-								</div>
-							</div>
-							<div class="uk-margin">
-								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.name") }</label>
-								<div class="uk-form-controls">
-									<input
-										id="name"
-										name="name"
-										class="uk-input !uk-width-1-6@s"
-										type="text"
-										placeholder={ i18n.T(ctx, "users.name") + "..." }
-										required
-									/>
-								</div>
-							</div>
-							<div class="uk-margin">
-								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.email") }</label>
-								<div class="uk-form-controls">
-									<input
-										id="email"
-										name="email"
-										class="uk-input !uk-width-1-6@s"
-										type="email"
-										placeholder={ i18n.T(ctx, "users.email") + "..." }
-										required
-									/>
-								</div>
-							</div>
-							<div class="uk-margin">
-								<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>
-								<div class="uk-form-controls">
-									<input
-										id="phone"
-										name="phone"
-										class="uk-input !w-1/12"
-										type="text"
-										placeholder={ i18n.T(ctx, "users.phone") + "..." }
-									/>
-								</div>
+								</fieldset>
+								<fieldset class="uk-fieldset w-1/6">
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.name") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="name"
+												name="name"
+												class="uk-input"
+												type="text"
+												placeholder={ i18n.T(ctx, "users.name") + "..." }
+												required
+											/>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.email") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="email"
+												name="email"
+												class="uk-input"
+												type="email"
+												placeholder={ i18n.T(ctx, "users.email") + "..." }
+												required
+											/>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
+										@partials.Countries(c, "ES")
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="phone"
+												name="phone"
+												class="uk-input"
+												type="text"
+												placeholder={ i18n.T(ctx, "users.phone") + "..." }
+												_="
+												on blur on keyup wait 0.5s
+													if phone's value is not empty										 
+														get toE164(#phone.value, #country.options[#country.selectedIndex].value) put it into #phone.value
+													end
+												end"
+											/>
+										</div>
+									</div>
+								</fieldset>
 							</div>
 							<div class="flex gap-4">
 								<button type="reset" class="uk-button uk-button-secondary">{ i18n.T(ctx, "Reset") }</button>
-								<button type="submit" class="uk-button uk-button-primary">{ i18n.T(ctx, "Add") }</button>
+								<button id="new-user" type="submit" class="uk-button uk-button-primary">{ i18n.T(ctx, "Add") }</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ EditUser(c echo.Context, user *openuem_ent.User) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("users")
+				<div id="success" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "users.edit.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "users.edit.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form
+							class="mt-6"
+							hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#update-profile-spinner"
+						>
+							<div class="flex gap-8">
+								<fieldset class="uk-fieldset w-1/6">
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.name") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="name"
+												name="name"
+												class="uk-input"
+												type="text"
+												value={ user.Name }
+												placeholder={ i18n.T(ctx, "users.name") + "..." }
+												required
+											/>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.email") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="email"
+												name="email"
+												class="uk-input"
+												type="email"
+												value={ user.Email }
+												placeholder={ i18n.T(ctx, "users.email") + "..." }
+												required
+											/>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
+										@partials.Countries(c, user.Country)
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="phone"
+												name="phone"
+												class="uk-input"
+												type="text"
+												value={ user.Phone }
+												placeholder={ i18n.T(ctx, "users.phone") + "..." }
+												_="
+												on blur on keyup wait 0.5s
+													if phone's value is not empty										 
+														get toE164(#phone.value, #country.options[#country.selectedIndex].value) put it into #phone.value
+													end
+												end"
+											/>
+										</div>
+									</div>
+								</fieldset>
+							</div>
+							<div class="flex gap-4">
+								<button type="reset" class="uk-button uk-button-secondary">{ i18n.T(ctx, "Reset") }</button>
+								<button
+									id="new-user"
+									type="submit"
+									class="uk-button uk-button-primary flex items-center gap-2"
+								>
+									{ i18n.T(ctx, "Update") }
+								</button>
+								<uk-icon id="update-profile-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 							</div>
 						</form>
 					</div>

@@ -237,7 +237,7 @@ en:
     description: "Use the digital certificate that has been provided to you for browser's authentication purposes or register to request one"
     button: "Login with digital certificate"
   register:
-    description: "Fill the form to register in the application. The OpenUEM admin will review your request, assign you a role and generate a digital certificate for you to log in"
+    description: "Fill the form to register in the application. The OpenUEM admin will review your request and generate a digital certificate for you to log in"
     button: "Register"
     uid: "User ID"
     name: "Name"
@@ -260,7 +260,7 @@ en:
     back: "Go to home"
     country: "Country"
     email_confirmed: "Your email has been confirmed"
-    email_confirmed_description: "Your OpenUEM administrator will review your request, assign you a role and generate a digital certificate so you log in to the console"
+    email_confirmed_description: "Your OpenUEM administrator will review your request and generate a digital certificate so you log in to the console"
   new:
     user:
       title: "New User"
@@ -290,6 +290,10 @@ en:
     regenerate_certificate: "Regenerate certificate"
     certificate_requested: "A client certificate has been requested for this user"
     deleted: "User has been deleted"
+    edit:
+      title: Edit User
+      description: Edit this user's profile
+      success: User's profile has been updated
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"
