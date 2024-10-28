@@ -13,9 +13,11 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
+	"github.com/gomarkdown/markdown"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/mdlayher/wol"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 func (h *Handler) Computer(c echo.Context) error {
@@ -507,4 +509,31 @@ func (h *Handler) DesktopMetadata(c echo.Context) error {
 	}
 
 	return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.DesktopMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage)))
+}
+
+func (h *Handler) Notes(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	if agentId == "" {
+		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if c.Request().Method == "POST" {
+		notes := c.FormValue("markdown")
+		if err := h.Model.SaveNotes(agentId, notes); err != nil {
+			return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.error", err.Error())))
+		}
+		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.updated")))
+	}
+
+	maybeUnsafeHTML := markdown.ToHTML([]byte(agent.Notes), nil, nil)
+	renderedMarkdown := string(bluemonday.UGCPolicy().SanitizeBytes(maybeUnsafeHTML))
+
+	confirmDelete := c.QueryParam("delete") != ""
+	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Notes(c, agent, agent.Notes, renderedMarkdown, confirmDelete)))
 }

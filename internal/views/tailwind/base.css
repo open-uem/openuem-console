@@ -15,3 +15,15 @@
 .htmx-request.my-indicator{
     display:inline;
 }
+
+.markdown-body ol {
+    list-style: inherit;
+}
+
+.markdown-body ul {
+    list-style: inherit;
+}
+
+.markdown-body menu {
+    list-style: inherit;
+}

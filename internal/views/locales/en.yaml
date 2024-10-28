@@ -35,6 +35,7 @@ en:
   Rename: "Rename"
   Required: "Required"
   Reset: "Reset"
+  Save: "Save"
   Security: "Security"
   Send: "Send"
   Session:
@@ -105,6 +106,8 @@ en:
     wol_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up"
     wol_no_mac: "No MAC Address is available to send the WOL packet"
     wol_success: "A WOL magic packet has been sent, check later if the computer has been woken up"
+    notes_title: "Notes"
+    notes_description: "Save useful information about thise endpoint using Markdown"
     metadata_title: "Metadata"
     metadata_description: "Here's a table showing your Organization metadata so you can assign a value to them"
     metadata_no_metadata: "No metadata has been defined for your organization"
@@ -330,6 +333,13 @@ en:
     optional_description: "Optional description..."
     confirm_delete: "Are you sure that you want to remove this metadata, note that this operation is destructive and will remove any existing metadata value associated to the endpoings managed by OpenUEM"
     edit: "Edit the metadata name and/or description according to your needs"
+  smtp:
+    title: SMTP
+    description: "Configure your SMTP provider in order to send email notifications"
+  notes:
+    updated: "Notes have been updated"
+    no_notes: "Add a note..."
+    error: "Notes could not be saved: %s"
   success:
     session_delete: "The session has been deleted"
   charts:

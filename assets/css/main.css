@@ -9768,6 +9768,10 @@ th.uk-text-break, td.uk-text-break {
   height: 1.5rem;
 }
 
+.h-60 {
+  height: 15rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -9784,8 +9788,16 @@ th.uk-text-break, td.uk-text-break {
   height: 100vh;
 }
 
+.h-96 {
+  height: 24rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
+}
+
+.max-h-60 {
+  max-height: 15rem;
 }
 
 .max-h-96 {
@@ -10286,6 +10298,10 @@ th.uk-text-break, td.uk-text-break {
   font-weight: 700;
 }
 
+.italic {
+  font-style: italic;
+}
+
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
@@ -10387,6 +10403,22 @@ th.uk-text-break, td.uk-text-break {
 
 .htmx-request.my-indicator{
   display:inline;
+}
+
+.markdown-body ol {
+  list-style: inherit;
+}
+
+.markdown-body ul {
+  list-style: inherit;
+}
+
+.markdown-body menu {
+  list-style: inherit;
+}
+
+.hover\:uk-background-muted:hover {
+  background-color: hsl(var(--muted));
 }
 
 .hover\:cursor-pointer:hover {

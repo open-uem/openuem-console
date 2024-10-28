@@ -1,0 +1,335 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+templ MarkdownNavbar(agentId, renderedMarkdown string) {
+	<ul class="flex mb-6 gap-2 items-center">
+		<li>
+			<div id="edit" class={ "", templ.KV("hidden", len(renderedMarkdown) == 0) }>
+				<button
+					type="button"
+					title="edit"
+					class="p-2 uk-button uk-button-secondary flex gap-2"
+					_="on click                    
+                    remove .hidden from #view
+                    add .hidden to #edit
+                    remove @disabled from <button[id^='markdown-']/>
+                    add .hidden to #rendered-markdown
+                    remove .hidden from #notes
+                end"
+				>
+					<uk-icon id="markdown-action" hx-history="false" icon="pen" custom-class="h-4 w-4 " uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Edit") }
+				</button>
+			</div>
+			<div id="view" class={ templ.KV("hidden", len(renderedMarkdown) > 0) }>
+				<button
+					type="button"
+					title="view"
+					class="p-2 uk-button uk-button-secondary flex gap-2"
+					hx-post={ "/render-markdown" }
+					hx-push-url="false"
+					hx-target="#rendered-markdown"
+					hx-swap="innerHTML"
+					hx-include="[name='markdown']"
+					_="on click
+                    remove .hidden from #edit
+                    add .hidden to #view
+                    add @disabled to <button[id^='markdown-']/>
+                    add .hidden to #notes
+                    remove .hidden from #rendered-markdown
+                end"
+				>
+					<uk-icon id="markdown-action" hx-history="false" icon="eye" custom-class="h-4 w-4 " uk-cloack></uk-icon>
+					{ i18n.T(ctx, "View") }
+				</button>
+			</div>
+		</li>
+		<li>
+			<button
+				id="save"
+				type="button"
+				title="save"
+				class="p-2 uk-button uk-button-primary flex gap-2"
+				hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/notes", agentId))) }
+				hx-push-url="false"
+				hx-target="#success"
+				hx-swap="innerHTML"
+				hx-include="[name='markdown']"
+			>
+				<uk-icon hx-history="false" icon="save" custom-class="h-4 w-4" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "Save") }
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-h1"
+				type="button"
+				title="heading-1"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart                    
+                    if cursorPos == 0 then
+                        set #notes.value to '# ' + #notes.value                        
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '# ' + textAfter
+                    end
+
+                    call #notes.focus()
+                    call #notes.setSelectionRange(cursorPos + 2, cursorPos + 2)
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="heading-1" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-h2"
+				type="button"
+				title="heading-2"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart                    
+                    if cursorPos == 0 then
+                        set #notes.value to '## ' + #notes.value
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 3, cursorPos + 3) 
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '## ' + textAfter
+                    end
+
+                    call #notes.focus()
+                    call #notes.setSelectionRange(cursorPos + 2, cursorPos + 2)              
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="heading-2" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-h3"
+				type="button"
+				title="heading-3"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart                    
+                    if cursorPos == 0 then
+                        set #notes.value to '### ' + #notes.value
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 4, cursorPos + 4) 
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '### ' + textAfter
+                    end
+
+                    call #notes.focus()
+                    call #notes.setSelectionRange(cursorPos + 3, cursorPos + 3)
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="heading-3" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-bold"
+				type="button"
+				title="bold"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '**bold text**' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 2, cursorPos + 2)  
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '**' + text + '**' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 2 + text.length + 2, cursorPos + 2 + text.length + 2)  
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="bold" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-italic"
+				type="button"
+				title="italic"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '*italic text*' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 1, cursorPos + 1)        
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '*' + text + '*' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 1 + text.length + 1, cursorPos + 1 + text.length + 1) 
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="italic" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-link"
+				type="button"
+				title="link"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart                    
+                    if cursorPos == 0 then
+                        set #notes.value to '[title](https://www.example.com) ' + #notes.value
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set link to '[title](https://www.example.com) '
+                        set #notes.value to textBefore + '[title](https://www.example.com) ' + textAfter
+                    end          
+                    call #notes.focus()
+                    call #notes.setSelectionRange(cursorPos, cursorPos)        
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="link" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-list"
+				type="button"
+				title="list"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '- Item ' + textAfter
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '- ' + text + '\n' + textAfter
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="list" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				type="button"
+				title="list-ordered"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '1. Item ' + textAfter
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '1. ' + text + '\n' + textAfter
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="list-ordered" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				id="markdown-code"
+				type="button"
+				title="code"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '`code`' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 1, cursorPos + 1)        
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '`' + text + '`' + textAfter
+                        call #notes.focus()
+                        call #notes.setSelectionRange(cursorPos + 1 + text.length + 1, cursorPos + 1 + text.length + 1) 
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="code" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+		<li>
+			<button
+				type="button"
+				id="markdown-text-quote"
+				title="text quote"
+				class="p-2 hover:uk-background-muted"
+				_="on click
+                    set cursorPos to #notes.selectionStart
+                    set endPos to #notes.selectionEnd
+                    
+                    if cursorPos == endPos then
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set textAfter to #notes.value.substring(cursorPos, #notes.value.length)
+                        set #notes.value to textBefore + '> ' + textAfter
+                    else
+                        set textBefore to #notes.value.substring(0,  cursorPos)
+                        set text to #notes.value.substring(cursorPos, endPos)
+                        set textAfter to #notes.value.substring(endPos, #notes.value.length)
+                        set #notes.value to textBefore + '> ' + text + '\n' + textAfter
+                    end
+                end"
+				disabled?={ len(renderedMarkdown) > 0 }
+			>
+				<uk-icon hx-history="false" icon="text-quote" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+			</button>
+		</li>
+	</ul>
+}

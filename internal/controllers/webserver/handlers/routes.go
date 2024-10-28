@@ -81,6 +81,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/desktops/:uuid/remote-assistance", h.RemoteAssistance, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/wol", h.WakeOnLan, h.IsAuthenticated)
 	e.POST("/desktops/:uuid/wol", h.WakeOnLan, h.IsAuthenticated)
+	e.GET("/desktops/:uuid/notes", h.Notes, h.IsAuthenticated)
+	e.POST("/desktops/:uuid/notes", h.Notes, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
 	e.POST("/desktops/:uuid/deploy", h.DesktopDeploy, h.IsAuthenticated)
 	e.GET("/desktops/:uuid/deploy/searchinstall", h.DesktopDeploy, h.IsAuthenticated)
@@ -113,6 +115,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/software", h.Software, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
+
+	e.POST("/render-markdown", h.RenderMarkdown, h.IsAuthenticated)
 }
 
 func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {

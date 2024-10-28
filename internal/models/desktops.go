@@ -229,3 +229,7 @@ func (m *Model) CountMetadataForAgent(agentId string) (int, error) {
 func (m *Model) SaveMetadata(agentId string, metadataId int, value string) error {
 	return m.Client.Metadata.Create().SetOwnerID(agentId).SetOrgID(metadataId).SetValue(value).OnConflict(sql.ConflictColumns(metadata.OwnerColumn, metadata.OrgColumn)).UpdateNewValues().Exec(context.Background())
 }
+
+func (m *Model) SaveNotes(agentId string, notes string) error {
+	return m.Client.Agent.UpdateOneID(agentId).SetNotes(notes).Exec(context.Background())
+}

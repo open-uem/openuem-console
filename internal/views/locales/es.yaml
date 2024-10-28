@@ -35,6 +35,7 @@ es:
   Rename: "Renombrar"
   Required: "Requerido"
   Reset: "Reestablecer"
+  Save: "Guardar"
   Security: "Seguridad"
   Send: "Enviar"
   Session:
@@ -105,6 +106,8 @@ es:
     wol_description: "Envíe un paquete mágico Wake On Lan a la dirección MAC registrada del agente para despertar este equipo"
     wol_no_mac: "No hay una dirección MAC disponible a la que enviar el paquete WOL"
     wol_success: "Se ha enviado un paquete WOL, compruebe más tarde si el equipo ha sido despertado"
+    notes_title: "Notas"
+    notes_description: "Guarde información de interés sobre este equipo usando Markdown"
     metadata_title: "Metadatos"
     metadata_description: "Esta es la tabla que muestra los metadatos de su organización para que puede asignarles un valor"
     metadata_no_metadata: "No se han definido metadatos para su organización"
@@ -326,6 +329,13 @@ es:
     optional_description: "Descripción opcional..."
     confirm_delete: "¿Está seguro de que quiere eliminar este metadato, tenga en cuenta que esta operación es destructiva y eliminará cualquier valor de este metadato asociado a los equipos gestionados por OpenUEM"
     edit: "Edite el nombre y/o la descripción del metadato de acuerdo a sus necesidades"
+  smtp:
+    title: SMTP
+    description: "Configura tu proveedor SMTP para poder enviar notificaciones por email"
+  notes:
+    updated: "Las notas han sido actualizadas"
+    no_notes: "Añada una nota..."
+    error: "No se pudieron guardar las notas: %s"
   success:
     session_delete: "La sesión ha sido borrada"
   charts:
