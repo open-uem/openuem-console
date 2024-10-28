@@ -7,6 +7,7 @@ import (
 
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
@@ -125,16 +126,17 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 	// Revoke certificate
 	cert, err := h.Model.GetCertificateByUID(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
-	}
+		if !openuem_ent.IsNotFound(err) {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+		if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 
-	if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	// Delete certificate information
-	if err := h.Model.DeleteCertificate(cert.ID); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		// Delete certificate information
+		if err := h.Model.DeleteCertificate(cert.ID); err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.deleted")
