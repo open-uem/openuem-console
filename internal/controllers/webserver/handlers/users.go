@@ -75,6 +75,15 @@ func (h *Handler) AddUser(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	addedUser, err := h.Model.GetUserById(u.UID)
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if err := sendConfirmationEmail(h, c, addedUser); err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	successMessage = i18n.T(c.Request().Context(), "new.user.success")
 	return h.ListUsers(c, successMessage, errMessage)
 }
@@ -129,14 +138,17 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 		if !openuem_ent.IsNotFound(err) {
 			return renderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
-		}
+		successMessage := i18n.T(c.Request().Context(), "users.deleted")
+		return h.ListUsers(c, successMessage, "")
+	}
 
-		// Delete certificate information
-		if err := h.Model.DeleteCertificate(cert.ID); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
-		}
+	if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	// Delete certificate information
+	if err := h.Model.DeleteCertificate(cert.ID); err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.deleted")
@@ -213,27 +225,7 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	token, err := h.generateConfirmEmailToken(uid)
-	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	notification := openuem_nats.Notification{
-		To:               user.Email,
-		Subject:          "Please, confirm your email address",
-		MessageTitle:     "OpenUEM | Verify your email address",
-		MessageText:      "Please, confirm your email address so that it can be used to receive emails from OpenUEM",
-		MessageGreeting:  fmt.Sprintf("Hi %s", user.Name),
-		MessageAction:    "Confirm email",
-		MessageActionURL: c.Request().Header.Get("Origin") + "/auth/confirm/" + token,
-	}
-
-	data, err := json.Marshal(notification)
-	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
+	if err := sendConfirmationEmail(h, c, user); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -256,4 +248,32 @@ func (h *Handler) EditUser(c echo.Context) error {
 	}
 
 	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user)))
+}
+
+func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {
+	token, err := h.generateConfirmEmailToken(user.ID)
+	if err != nil {
+		return err
+	}
+
+	notification := openuem_nats.Notification{
+		To:               user.Email,
+		Subject:          "Please, confirm your email address",
+		MessageTitle:     "OpenUEM | Verify your email address",
+		MessageText:      "Please, confirm your email address so that it can be used to receive emails from OpenUEM",
+		MessageGreeting:  fmt.Sprintf("Hi %s", user.Name),
+		MessageAction:    "Confirm email",
+		MessageActionURL: c.Request().Header.Get("Origin") + "/auth/confirm/" + token,
+	}
+
+	data, err := json.Marshal(notification)
+	if err != nil {
+		return err
+	}
+
+	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -262,7 +262,7 @@ es:
       title: "Nuevo Usuario"
       description: "Añada un nuevo usuario para la consola de OpenUEM. El usuario recibirá un correo electrónico con un certificado digital como fichero adjunto. Este certificado debe instalarse en cualquier navegador que vaya a utilizarse para gestionar la organización"
       uid_help: "Este ID de usuario debe ser una cadena de texto única y será utilizada para identificar el certificado digital cuando el navegador muestre una lista de certificados que pueden utilizarse para iniciar sesión"
-      success: "Se ha añadido un nuevo usuario. El usuario recibirá un correo electrónico con el certificado digital requerido para iniciar sesión"
+      success: "Se ha añadido un nuevo usuario que deberá confirmar su correo. Posteriormente el administrador deberá generar del certificado"
   users:
     add: "Agregar Usuario"
     completed: "Completado"

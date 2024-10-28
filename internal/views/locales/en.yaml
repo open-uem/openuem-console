@@ -266,7 +266,7 @@ en:
       title: "New User"
       description: "Create a new user for the OpenUEM console. The user will receive an email with a digital certificate attached to it. This certificate must be installed in any browser that will be used to manage the organization"
       uid_help: "This user ID must be a unique string and will be used to identify the digital certificate when the browser shows a list of certificates that can be used to log in"
-      success: "A new user has been added. The user will receive an email with the digital certificate required to log in"
+      success: "A new user has been added. The user will receive an email to confirm the address. Afterwards the administrator must generate a digital certificate"
   users:
     add: "Add User"
     completed: "Completed"
