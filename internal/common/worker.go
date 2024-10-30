@@ -129,7 +129,9 @@ func (w *Worker) StopWorker() {
 		}
 	}
 
-	w.Logger.Close()
+	if w.Logger != nil {
+		w.Logger.Close()
+	}
 }
 
 func (w *Worker) GenerateConsoleConfig() error {
