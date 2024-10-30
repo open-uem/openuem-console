@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/danieljoos/wincred"
@@ -36,6 +38,7 @@ type Worker struct {
 	SessionManager        *sessions.SessionManager
 	WebServer             *webserver.WebServer
 	AuthServer            *authserver.AuthServer
+	DownloadDir           string
 }
 
 func NewWorker(logName string) *Worker {
@@ -70,11 +73,17 @@ func (w *Worker) StartWorker() {
 		return
 	}
 
+	// Start a job to clean tmp download directory
+	if err := w.StartDownloadCleanJob(); err != nil {
+		log.Printf("[ERROR]: could not start Dowload dir clean job, reason: %s", err.Error())
+		return
+	}
+
 	// Session handler
 	w.SessionManager = sessions.New(w.DBUrl)
 
 	// HTTPS web server
-	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath)
+	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, w.DownloadDir)
 	go func() {
 		if err := w.WebServer.Serve(":1323", w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
@@ -210,5 +219,28 @@ func (w *Worker) StartNATSConnectJob() error {
 		return err
 	}
 	log.Printf("[INFO]: new NATS connect job has been scheduled every %d minutes", 2)
+	return nil
+}
+
+func (w *Worker) CreateDowloadTempDir() error {
+	cwd, err := GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return err
+	}
+
+	w.DownloadDir = filepath.Join(cwd, "tmp", "download")
+
+	if strings.HasSuffix(cwd, "tmp") {
+		w.DownloadDir = filepath.Join(cwd, "download")
+	}
+
+	if _, err := os.Stat(w.DownloadDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(w.DownloadDir, 0666); err != nil {
+			log.Printf("[ERROR]: could not create temp download directory, reason: %v", err)
+			return err
+		}
+	}
+
 	return nil
 }

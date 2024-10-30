@@ -14,6 +14,11 @@ func main() {
 		log.Printf("[ERROR]: could not generate config for OpenUEM console: %v", err)
 	}
 
+	// Create temp directory for downloads
+	if err := w.CreateDowloadTempDir(); err != nil {
+		log.Printf("[ERROR]: could not create download temp dir: %v", err)
+	}
+
 	s := openuem_utils.NewOpenUEMWindowsService()
 	s.ServiceStart = w.StartWorker
 	s.ServiceStop = w.StopWorker

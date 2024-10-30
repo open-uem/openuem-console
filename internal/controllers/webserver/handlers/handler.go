@@ -16,9 +16,11 @@ type Handler struct {
 	CertPath       string
 	KeyPath        string
 	CACertPath     string
+	DownloadDir    string
 }
 
-func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *Handler {
+func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, tmpDownloadDir string) *Handler {
+
 	return &Handler{
 		Model:          model,
 		NATSConnection: nc,
@@ -27,5 +29,6 @@ func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, 
 		CertPath:       certPath,
 		KeyPath:        keyPath,
 		CACertPath:     caCertPath,
+		DownloadDir:    tmpDownloadDir,
 	}
 }

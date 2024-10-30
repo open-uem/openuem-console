@@ -401,7 +401,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 	defer client.Close()
 	defer sshConn.Close()
 
-	dstPath := filepath.Join("tmp", "download", file)
+	dstPath := filepath.Join(h.DownloadDir, file)
 	dstFile, err := os.Create(dstPath)
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
@@ -462,7 +462,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 	defer client.Close()
 	defer sshConn.Close()
 
-	file, err := os.CreateTemp("tmp/download", "openuem")
+	file, err := os.CreateTemp(h.DownloadDir, "openuem")
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -530,7 +530,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 	defer client.Close()
 	defer sshConn.Close()
 
-	file, err := os.CreateTemp("tmp/download", "openuem")
+	file, err := os.CreateTemp(h.DownloadDir, "openuem")
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -568,7 +568,7 @@ func (h *Handler) Download(c echo.Context) error {
 		return fmt.Errorf("filename cannot be empty")
 	}
 
-	path := filepath.Join("tmp", "download", fileName)
+	path := filepath.Join(h.DownloadDir, fileName)
 	return c.Attachment(path, fileName)
 }
 

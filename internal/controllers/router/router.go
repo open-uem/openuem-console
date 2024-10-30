@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	session "github.com/canidam/echo-scs-session"
 	"github.com/doncicuto/openuem-console/internal/controllers/router/middleware"
@@ -27,6 +28,10 @@ func New(s *sessions.SessionManager) *echo.Echo {
 	}
 
 	assetsPath := filepath.Join(cwd, "assets")
+	if strings.HasSuffix(cwd, "tmp") {
+		assetsPath = "assets"
+	}
+
 	e.Static("/static", assetsPath)
 	e.File("/favicon.ico", filepath.Join(assetsPath, "favicon.ico"))
 

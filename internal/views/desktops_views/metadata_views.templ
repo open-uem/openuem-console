@@ -32,7 +32,7 @@ templ DesktopMetadata(c echo.Context, p partials.PaginationAndSort, agent *openu
 							@MetadataTable(c, p, agent.ID, data, orgMetadata)
 						</div>
 					} else {
-						<p class="uk-text-small uk-text-muted mt-6 mb-4">{ i18n.T(ctx, "agents.metadata_no_metadata") }</p>
+						<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.metadata_no_metadata") }</p>
 					}
 				</div>
 			</div>
