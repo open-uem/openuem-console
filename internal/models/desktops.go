@@ -35,7 +35,7 @@ func (m *Model) CountAllDesktops() (int, error) {
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, `t2."version"`, agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).
@@ -77,12 +77,12 @@ func (m *Model) GetDesktopsByPage(p partials.PaginationAndSort) ([]Desktop, erro
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Asc(operatingsystem.FieldVersion))
+				s.OrderBy(sql.Asc("Version"))
 			}).Scan(context.Background(), &desktops)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Desc(operatingsystem.FieldVersion))
+				s.OrderBy(sql.Desc("Version"))
 			}).Scan(context.Background(), &desktops)
 		}
 	case "username":

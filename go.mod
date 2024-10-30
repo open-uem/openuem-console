@@ -6,6 +6,7 @@ require (
 	entgo.io/ent v0.14.1
 	github.com/a-h/templ v0.2.771
 	github.com/alexedwards/scs/pgxstore v0.0.0-20240316134038-7e11d57e8885
+	github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
@@ -20,7 +21,7 @@ require (
 	github.com/invopop/ctxi18n v0.8.1
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/mattn/go-sqlite3 v1.14.23
+	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/mdlayher/wol v0.0.0-20220221231636-b763a792253a
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0

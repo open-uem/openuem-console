@@ -4,11 +4,13 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 type Handler struct {
 	Model          *models.Model
 	NATSConnection *nats.Conn
+	JetStream      jetstream.JetStream
 	SessionManager *sessions.SessionManager
 	JWTKey         string
 	CertPath       string

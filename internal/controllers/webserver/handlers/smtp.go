@@ -27,6 +27,11 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 			return renderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
+		// Notification Worker must reload its smtp settings
+		if err := h.NATSConnection.Publish("notification.reload_settings", nil); err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
 		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.saved")))
 	}
 

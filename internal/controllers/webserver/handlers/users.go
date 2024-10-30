@@ -183,6 +183,7 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 		FullName:   user.Name,
 		Email:      user.Email,
 		Country:    user.Country,
+		ConsoleURL: c.Request().Header.Get("Origin"),
 		YearsValid: 1,
 	}
 

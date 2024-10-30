@@ -8,14 +8,6 @@ import (
 	"github.com/doncicuto/openuem_ent/sessions"
 )
 
-func (m *Model) GetAllSessions() ([]*ent.Sessions, error) {
-	sessions, err := m.Client.Sessions.Query().All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return sessions, nil
-}
-
 func (m *Model) CountAllSessions() (int, error) {
 	count, err := m.Client.Sessions.Query().Count(context.Background())
 	if err != nil {
@@ -57,14 +49,7 @@ func (m *Model) GetSessionsByPage(p partials.PaginationAndSort) ([]*ent.Sessions
 	if err != nil {
 		return nil, err
 	}
-	return s, nil
-}
 
-func (m *Model) GetSessionById(token string) (*ent.Sessions, error) {
-	s, err := m.Client.Sessions.Query().Where(sessions.ID(token)).Only(context.Background())
-	if err != nil {
-		return nil, err
-	}
 	return s, nil
 }
 

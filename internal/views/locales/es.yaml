@@ -116,7 +116,7 @@ es:
   inventory:
     hardware:
       title: "Hardware"
-      description: "Es es la información de hardware proporcionada por el agente de OpenUEM"
+      description: "Esta es la información de hardware proporcionada por el agente de OpenUEM"
       manufacturer: "Fabricante"
       model: "Modelo"
       serial: "Núm. Serie"
@@ -209,7 +209,7 @@ es:
     os: "S.O"
     enabled: "¿Antivirus activo?"
     updated: "¿Antivirus actualizado?"
-    no_antivirus_yet: "No información de sistemas de antivirus disponible"
+    no_antivirus_yet: "No hay información de sistemas de antivirus disponible"
   install:
     title: "Instalación  de software"
     phase_1: "Busca paquetes de software que pueden ser instalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe instalarse"

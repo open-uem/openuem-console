@@ -76,7 +76,7 @@ templ SMTPSettings(c echo.Context, settings *openuem_ent.Settings) {
 									hx-swap="outerHTML"
 									hx-indicator="#save-smtp-spinner"
 								>
-									{ i18n.T(ctx, "Save") }
+									<span class="ml-2">{ i18n.T(ctx, "Save") }</span>
 									<uk-icon id="save-smtp-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 								</button>
 								<button
@@ -88,7 +88,7 @@ templ SMTPSettings(c echo.Context, settings *openuem_ent.Settings) {
 									hx-swap="outerHTML"
 									hx-indicator="#test-smtp-spinner"
 								>
-									{ i18n.T(ctx, "smtp.test") }
+									<span class="ml-2">{ i18n.T(ctx, "smtp.test") }</span>
 									<uk-icon id="test-smtp-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 								</button>
 							</div>

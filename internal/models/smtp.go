@@ -8,7 +8,8 @@ import (
 )
 
 func (m *Model) GetSMTPSettings() (*openuem_ent.Settings, error) {
-	return m.Client.Settings.Query().Select(
+
+	query := m.Client.Settings.Query().Select(
 		settings.FieldSMTPServer,
 		settings.FieldSMTPPort,
 		settings.FieldSMTPUser,
@@ -16,8 +17,22 @@ func (m *Model) GetSMTPSettings() (*openuem_ent.Settings, error) {
 		settings.FieldSMTPAuth,
 		settings.FieldSMTPTLS,
 		settings.FieldSMTPStarttls,
-		settings.FieldMessageFrom,
-	).Only(context.Background())
+		settings.FieldMessageFrom)
+
+	settings, err := query.Only(context.Background())
+
+	if err != nil {
+		if !openuem_ent.IsNotFound(err) {
+			return nil, err
+		} else {
+			if err := m.Client.Settings.Create().Exec(context.Background()); err != nil {
+				return nil, err
+			}
+			return query.Only(context.Background())
+		}
+	}
+
+	return settings, nil
 }
 
 func (m *Model) UpdateSMTPSettings(settings *SMTPSettings) error {

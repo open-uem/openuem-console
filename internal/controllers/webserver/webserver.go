@@ -10,6 +10,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 type WebServer struct {
@@ -20,12 +21,18 @@ type WebServer struct {
 }
 
 func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath string) *WebServer {
+	var err error
 	w := WebServer{}
 	// Router
 	w.Router = router.New(s)
 
 	// Create Handlers and register its router
 	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath)
+
+	w.Handler.JetStream, err = jetstream.New(w.Handler.NATSConnection)
+	if err != nil {
+		log.Fatalf("[FATAL]: could not instantiate JetStream, reason: %v", err)
+	}
 	w.Handler.Register(w.Router)
 
 	w.SessionManager = s

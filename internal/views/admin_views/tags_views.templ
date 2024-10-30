@@ -81,8 +81,9 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
                                                     set #edit-tag.value to "%d"
                                                     set #edit-tag-name.value to "%s"
                                                     set #edit-tag-description.value to "%s"
+													set #edit-tag-color.value to "%s"
 													put 'rounded-full px-5 py-1 text-white inline-block bg-%s-500' into #edit-tag-example@class
-                                                end`, tag.ID, tag.Tag, tag.Description, tag.Color) }
+                                                end`, tag.ID, tag.Tag, tag.Description, tag.Color, tag.Color) }
 											>
 												<uk-icon hx-history="false" icon="pencil" custom-class="h-5 w-5" uk-cloack></uk-icon>
 											</button>
@@ -233,7 +234,7 @@ templ EditTag() {
 						hx-swap="outerHTML"
 						class="uk-button uk-button-primary"
 					>
-						{ i18n.T(ctx, "Edit") }
+						{ i18n.T(ctx, "Save") }
 					</button>
 				</div>
 			</form>
