@@ -25,79 +25,79 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, apps 
 							{ i18n.T(ctx, "inventory.apps.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(apps) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
-								<thead>
-									<tr>
-										<th class="sr-only w-1/12">{ i18n.T(ctx, "Logo") }</th>
-										<th class="w-1/3">
-											<div class="flex gap-2 items-center ">
-												<span>{ i18n.T(ctx, "Name") }</span>
-												@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th class="w-1/12">
-											<div class="flex gap-2 items-center ">
-												<span>{ i18n.T(ctx, "Version") }</span>
-												@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th class="w-1/3">
-											<div class="flex gap-2 items-center ">
-												<span>{ i18n.T(ctx, "Publisher") }</span>
-												@partials.SortByColumnIcon(c, p, "publisher", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th class="w-1/12">
-											<div class="flex gap-2 items-center ">
-												<span>{ i18n.T(ctx, "inventory.apps.installation_date") }</span>
-												@partials.SortByColumnIcon(c, p, "installation", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-									</tr>
-								</thead>
-								for _, app := range apps {
-									<tr class="h-16">
-										<td class="!align-middle text-center">
-											@partials.Brand(strings.ToLower(app.Name), strings.ToLower(app.Publisher))
-										</td>
-										<td class="!align-middle">{ app.Name }</td>
-										if app.Version == "" {
-											<td class="!align-middle">-</td>
-										} else {
-											<td class="!align-middle">{ app.Version }</td>
-										}
-										if app.Publisher == "" {
-											<td class="!align-middle">-</td>
-										} else {
-											<td class="!align-middle">{ app.Publisher }</td>
-										}
-										if app.InstallDate == "" {
-											<td class="!align-middle">-</td>
-										} else {
-											<td class="!align-middle">{ app.InstallDate }</td>
-										}
-									</tr>
-								}
-								if len(apps) < p.PageSize {
-									for i:=0; i < p.PageSize - len(apps); i++ {
-										<tr class="h-16">
-											<td class="!align-middle">-</td>
-											<td class="!align-middle">-</td>
-											<td class="!align-middle">-</td>
-											<td class="!align-middle">-</td>
-										</tr>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(apps) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+							<thead>
+								<tr>
+									<th class="sr-only w-1/12">{ i18n.T(ctx, "Logo") }</th>
+									<th class="w-1/3">
+										<div class="flex gap-2 items-center ">
+											<span>{ i18n.T(ctx, "Name") }</span>
+											@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
+										</div>
+									</th>
+									<th class="w-1/12">
+										<div class="flex gap-2 items-center ">
+											<span>{ i18n.T(ctx, "Version") }</span>
+											@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
+										</div>
+									</th>
+									<th class="w-1/3">
+										<div class="flex gap-2 items-center ">
+											<span>{ i18n.T(ctx, "Publisher") }</span>
+											@partials.SortByColumnIcon(c, p, "publisher", "alpha", "#main", "outerHTML", "")
+										</div>
+									</th>
+									<th class="w-1/12">
+										<div class="flex gap-2 items-center ">
+											<span>{ i18n.T(ctx, "inventory.apps.installation_date") }</span>
+											@partials.SortByColumnIcon(c, p, "installation", "alpha", "#main", "outerHTML", "")
+										</div>
+									</th>
+								</tr>
+							</thead>
+							for _, app := range apps {
+								<tr class="h-16">
+									<td class="!align-middle text-center">
+										@partials.Brand(strings.ToLower(app.Name), strings.ToLower(app.Publisher))
+									</td>
+									<td class="!align-middle">{ app.Name }</td>
+									if app.Version == "" {
+										<td class="!align-middle">-</td>
+									} else {
+										<td class="!align-middle">{ app.Version }</td>
 									}
+									if app.Publisher == "" {
+										<td class="!align-middle">-</td>
+									} else {
+										<td class="!align-middle">{ app.Publisher }</td>
+									}
+									if app.InstallDate == "" {
+										<td class="!align-middle">-</td>
+									} else {
+										<td class="!align-middle">{ app.InstallDate }</td>
+									}
+								</tr>
+							}
+							if len(apps) < p.PageSize {
+								for i:=0; i < p.PageSize - len(apps); i++ {
+									<tr class="h-16">
+										<td class="!align-middle">-</td>
+										<td class="!align-middle">-</td>
+										<td class="!align-middle">-</td>
+										<td class="!align-middle">-</td>
+									</tr>
 								}
-							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "")
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								{ i18n.T(ctx, "inventory.apps.no_apps") }
-							</p>
-						}
-					</div>
+							}
+						</table>
+						@partials.Pagination(c, p, "#main", "outerHTML", "")
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							{ i18n.T(ctx, "inventory.apps.no_apps") }
+						</p>
+					}
 				</div>
 			</div>
 		</div>

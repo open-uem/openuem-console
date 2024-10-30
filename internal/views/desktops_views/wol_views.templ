@@ -25,29 +25,29 @@ templ WakeOnLan(agent *ent.Agent, confirmDelete bool) {
 							{ i18n.T(ctx, "agents.wol_description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(agent.MAC) > 0 {
-							<form>
-								<input type="hidden" name="MACAddress" value={ agent.MAC }/>
-								<input type="hidden" name="IPAddress" value={ agent.IP }/>
-								<button
-									type="button"
-									class="flex gap-4 uk-button uk-button-primary mt-8 mb-2"
-									hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", agent.ID))) }
-									hx-push-url="false"
-									hx-target="#main"
-									hx-swap="outerHTML"
-								>
-									<uk-icon icon="alarm-clock" hx-history="false" uk-cloak></uk-icon>
-									{ i18n.T(ctx, "Send") }
-								</button>
-							</form>
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								{ i18n.T(ctx, "agents.wol_no_mac") }
-							</p>
-						}
-					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.MAC) > 0 {
+						<form>
+							<input type="hidden" name="MACAddress" value={ agent.MAC }/>
+							<input type="hidden" name="IPAddress" value={ agent.IP }/>
+							<button
+								type="button"
+								class="flex gap-4 uk-button uk-button-primary"
+								hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", agent.ID))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								<uk-icon icon="alarm-clock" hx-history="false" uk-cloak></uk-icon>
+								{ i18n.T(ctx, "Send") }
+							</button>
+						</form>
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							{ i18n.T(ctx, "agents.wol_no_mac") }
+						</p>
+					}
 				</div>
 			</div>
 		</div>

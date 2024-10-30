@@ -23,38 +23,38 @@ templ Monitors(agent *ent.Agent, confirmDelete bool) {
 							{ i18n.T(ctx, "inventory.monitor.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(agent.Edges.Monitors) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
-								<thead>
-									<tr>
-										<th>{ i18n.T(ctx, "inventory.monitor.manufacturer") }</th>
-										<th>{ i18n.T(ctx, "inventory.monitor.model") }</th>
-										<th>{ i18n.T(ctx, "inventory.monitor.serial") }</th>
-									</tr>
-								</thead>
-								for _, monitor := range agent.Edges.Monitors {
-									<tr>
-										<td>{ monitor.Manufacturer }</td>
-										if monitor.Model == "" {
-											<td>-</td>
-										} else {
-											<td>{ monitor.Model }</td>
-										}
-										if monitor.Serial == "0" {
-											<td>-</td>
-										} else {
-											<td>{ monitor.Serial }</td>
-										}
-									</tr>
-								}
-							</table>
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								No monitors information is available yet.
-							</p>
-						}
-					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.Edges.Monitors) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+							<thead>
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.monitor.manufacturer") }</th>
+									<th>{ i18n.T(ctx, "inventory.monitor.model") }</th>
+									<th>{ i18n.T(ctx, "inventory.monitor.serial") }</th>
+								</tr>
+							</thead>
+							for _, monitor := range agent.Edges.Monitors {
+								<tr>
+									<td>{ monitor.Manufacturer }</td>
+									if monitor.Model == "" {
+										<td>-</td>
+									} else {
+										<td>{ monitor.Model }</td>
+									}
+									if monitor.Serial == "0" {
+										<td>-</td>
+									} else {
+										<td>{ monitor.Serial }</td>
+									}
+								</tr>
+							}
+						</table>
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							No monitors information is available yet.
+						</p>
+					}
 				</div>
 			</div>
 		</div>

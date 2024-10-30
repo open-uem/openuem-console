@@ -26,7 +26,7 @@ templ DesktopMetadata(c echo.Context, p partials.PaginationAndSort, agent *openu
 						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.metadata_description") }</p>
 					</div>
 				</div>
-				<div class="uk-card uk-card-body uk-card-default my-4 p-6">
+				<div class="uk-card uk-card-body uk-card-default p-6">
 					if p.NItems > 0 {
 						<div id="metadata">
 							@MetadataTable(c, p, agent.ID, data, orgMetadata)

@@ -25,68 +25,68 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 							{ i18n.T(ctx, "inventory.logical_disk.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(agent.Edges.Logicaldisks) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
-								<thead>
-									<tr>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
-										<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
-										<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
-									</tr>
-								</thead>
-								for i, disk := range agent.Edges.Logicaldisks {
-									<tr>
-										<td>{ disk.Label }</td>
-										if disk.VolumeName == "" {
-											<td>-</td>
-										} else {
-											<td>{ disk.VolumeName }</td>
-										}
-										<td>{ disk.Filesystem }</td>
-										<td>
-											<progress
-												class="uk-progress"
-												value={ strconv.Itoa(int(disk.Usage)) }
-												max="100"
-											></progress>
-										</td>
-										<td>{ disk.SizeInUnits }</td>
-										<td>{ disk.RemainingSpaceInUnits }</td>
-										<td>
-											@partials.BitlockerStatus(disk.BitlockerStatus)
-										</td>
-										<td>
-											<form>
-												<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
-												<button
-													class="flex gap-2 items-center"
-													type="button"
-													hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
-													hx-target="#main"
-													hx-push-url="false"
-													hx-swap="outerHTML"
-													hx-indicator={ fmt.Sprintf("#file-browser-%d", i) }
-												>
-													<uk-icon icon="folder-open" custom-class="h-5 w-5 text-yellow-700 fill-yellow-500" hx-history="false" uk-cloak></uk-icon>
-													<div id={ fmt.Sprintf("file-browser-%d", i) } class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
-												</button>
-											</form>
-										</td>
-									</tr>
-								}
-							</table>
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								{ i18n.T(ctx, "inventory.logical_disk.no_logical_disks") }
-							</p>
-						}
-					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.Edges.Logicaldisks) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+							<thead>
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
+									<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
+								</tr>
+							</thead>
+							for i, disk := range agent.Edges.Logicaldisks {
+								<tr>
+									<td>{ disk.Label }</td>
+									if disk.VolumeName == "" {
+										<td>-</td>
+									} else {
+										<td>{ disk.VolumeName }</td>
+									}
+									<td>{ disk.Filesystem }</td>
+									<td>
+										<progress
+											class="uk-progress"
+											value={ strconv.Itoa(int(disk.Usage)) }
+											max="100"
+										></progress>
+									</td>
+									<td>{ disk.SizeInUnits }</td>
+									<td>{ disk.RemainingSpaceInUnits }</td>
+									<td>
+										@partials.BitlockerStatus(disk.BitlockerStatus)
+									</td>
+									<td>
+										<form>
+											<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
+											<button
+												class="flex gap-2 items-center"
+												type="button"
+												hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+												hx-target="#main"
+												hx-push-url="false"
+												hx-swap="outerHTML"
+												hx-indicator={ fmt.Sprintf("#file-browser-%d", i) }
+											>
+												<uk-icon icon="folder-open" custom-class="h-5 w-5 text-yellow-700 fill-yellow-500" hx-history="false" uk-cloak></uk-icon>
+												<div id={ fmt.Sprintf("file-browser-%d", i) } class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+						</table>
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							{ i18n.T(ctx, "inventory.logical_disk.no_logical_disks") }
+						</p>
+					}
 				</div>
 			</div>
 		</div>

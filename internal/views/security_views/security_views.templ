@@ -33,7 +33,6 @@ templ Antivirus(agents []*ent.Agent) {
 										<th>{ i18n.T(ctx, "antivirus.title") }</th>
 										<th>{ i18n.T(ctx, "antivirus.enabled") }</th>
 										<th>{ i18n.T(ctx, "antivirus.updated") }</th>
-										<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
 									</tr>
 								</thead>
 								for _, agent := range agents {
@@ -56,9 +55,6 @@ templ Antivirus(agents []*ent.Agent) {
 										} else {
 											<td><uk-icon hx-history="false" icon="shield-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
 										}
-										<td>
-											<uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon>
-										</td>
 									</tr>
 								}
 							</table>

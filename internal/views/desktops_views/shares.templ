@@ -23,34 +23,34 @@ templ Shares(agent *ent.Agent, confirmDelete bool) {
 							{ i18n.T(ctx, "inventory.share.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(agent.Edges.Shares) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
-								<thead>
-									<tr>
-										<th>{ i18n.T(ctx, "inventory.share.name") }</th>
-										<th>{ i18n.T(ctx, "inventory.share.descr") }</th>
-										<th>{ i18n.T(ctx, "inventory.share.path") }</th>
-									</tr>
-								</thead>
-								for _, share := range agent.Edges.Shares {
-									<tr>
-										<td>{ share.Name }</td>
-										<td>{ share.Description }</td>
-										if share.Path == "" {
-											<td>-</td>
-										} else {
-											<td>{ share.Path }</td>
-										}
-									</tr>
-								}
-							</table>
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								No shares information is available yet.
-							</p>
-						}
-					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.Edges.Shares) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+							<thead>
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.share.name") }</th>
+									<th>{ i18n.T(ctx, "inventory.share.descr") }</th>
+									<th>{ i18n.T(ctx, "inventory.share.path") }</th>
+								</tr>
+							</thead>
+							for _, share := range agent.Edges.Shares {
+								<tr>
+									<td>{ share.Name }</td>
+									<td>{ share.Description }</td>
+									if share.Path == "" {
+										<td>-</td>
+									} else {
+										<td>{ share.Path }</td>
+									}
+								</tr>
+							}
+						</table>
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							No shares information is available yet.
+						</p>
+					}
 				</div>
 			</div>
 		</div>

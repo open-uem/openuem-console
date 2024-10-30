@@ -23,65 +23,65 @@ templ NetworkAdapters(agent *ent.Agent, confirmDelete bool) {
 							{ i18n.T(ctx, "inventory.network_adapters.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
-						if len(agent.Edges.Networkadapters) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.mac_address") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.ip_address") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.subnet") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.default_gateway") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.dhcp") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.dns") }</th>
-										<th>{ i18n.T(ctx, "inventory.network_adapters.speed") }</th>
-									</tr>
-								</thead>
-								for _, adapter := range agent.Edges.Networkadapters {
-									<tr>
-										<td>{ adapter.Name }</td>
-										<td>{ adapter.MACAddress }</td>
-										if adapter.Addresses == "" {
-											<td>-</td>
-										} else {
-											<td>{ adapter.Addresses }</td>
-										}
-										if adapter.Subnet == "" {
-											<td>-</td>
-										} else {
-											<td>{ adapter.Subnet }</td>
-										}
-										if adapter.DefaultGateway == "" {
-											<td>-</td>
-										} else {
-											<td>{ adapter.DefaultGateway }</td>
-										}
-										if adapter.DhcpEnabled {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
-										if adapter.DNSServers != "" {
-											// TODO escape content from the database for tooltip
-											<td
-												uk-tooltip={ fmt.Sprintf("title: DNS Servers: %s<br>Domain: %s; pos: top", adapter.DNSServers, adapter.DNSDomain) }
-											>
-												<uk-icon hx-history="false" icon="book-text" custom-class="h-5 w-5" uk-cloack></uk-icon>
-											</td>
-										} else {
-											<td>-</td>
-										}
-										<td>{ adapter.Speed }</td>
-									</tr>
-								}
-							</table>
-						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }
-							</p>
-						}
-					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.Edges.Networkadapters) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.mac_address") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.ip_address") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.subnet") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.default_gateway") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.dhcp") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.dns") }</th>
+									<th>{ i18n.T(ctx, "inventory.network_adapters.speed") }</th>
+								</tr>
+							</thead>
+							for _, adapter := range agent.Edges.Networkadapters {
+								<tr>
+									<td>{ adapter.Name }</td>
+									<td>{ adapter.MACAddress }</td>
+									if adapter.Addresses == "" {
+										<td>-</td>
+									} else {
+										<td>{ adapter.Addresses }</td>
+									}
+									if adapter.Subnet == "" {
+										<td>-</td>
+									} else {
+										<td>{ adapter.Subnet }</td>
+									}
+									if adapter.DefaultGateway == "" {
+										<td>-</td>
+									} else {
+										<td>{ adapter.DefaultGateway }</td>
+									}
+									if adapter.DhcpEnabled {
+										@partials.Checkmark()
+									} else {
+										<td>-</td>
+									}
+									if adapter.DNSServers != "" {
+										// TODO escape content from the database for tooltip
+										<td
+											uk-tooltip={ fmt.Sprintf("title: DNS Servers: %s<br>Domain: %s; pos: top", adapter.DNSServers, adapter.DNSDomain) }
+										>
+											<uk-icon hx-history="false" icon="book-text" custom-class="h-5 w-5" uk-cloack></uk-icon>
+										</td>
+									} else {
+										<td>-</td>
+									}
+									<td>{ adapter.Speed }</td>
+								</tr>
+							}
+						</table>
+					} else {
+						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }
+						</p>
+					}
 				</div>
 			</div>
 		</div>

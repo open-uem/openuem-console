@@ -28,7 +28,7 @@ templ DesktopDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem
 					</div>
 				</div>
 				<div class="uk-flex gap-8">
-					<div class="uk-card uk-card-body uk-card-default w-5/12 my-4 p-6">
+					<div class="uk-card uk-card-body uk-card-default w-5/12 p-6">
 						<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_search") }</p>
 						<div class="w-1/2 mb-4">
 							<form
@@ -70,7 +70,7 @@ templ DesktopDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem
 						</div>
 						<div id="deploy-search-results"></div>
 					</div>
-					<div class="uk-card uk-card-body uk-card-default w-7/12 my-4 p-6">
+					<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
 						if p.NItems > 0 {
 							<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_list") }</p>
 							<div id="deployments-results">

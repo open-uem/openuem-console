@@ -70,7 +70,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 						for _, agent := range agents {
 							<tr class="h-16">
 								<td
-									class="!align-middle hover:underline hover:cursor-pointer"
+									class="!align-middle underline cursor-pointer"
 									hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s", agent.ID))) }
 									hx-push-url="true"
 									hx-target="#main"
