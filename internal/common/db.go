@@ -18,7 +18,7 @@ func (w *Worker) StartDBConnectJob() error {
 	}
 	log.Printf("[ERROR]: could not connect with database %v", err)
 
-	// Create task for running the agent
+	// Create task
 	w.DBConnectJob, err = w.TaskScheduler.NewJob(
 		gocron.DurationJob(
 			time.Duration(time.Duration(2*time.Minute)),

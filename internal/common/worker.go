@@ -79,6 +79,12 @@ func (w *Worker) StartWorker() {
 		return
 	}
 
+	// Start a job to download Microsoft Winget database
+	if err := w.StartWinGetDBDownloadJob(); err != nil {
+		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
+		return
+	}
+
 	// Session handler
 	w.SessionManager = sessions.New(w.DBUrl)
 

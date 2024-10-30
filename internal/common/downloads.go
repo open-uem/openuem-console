@@ -12,7 +12,7 @@ import (
 func (w *Worker) StartDownloadCleanJob() error {
 	var err error
 
-	// Create task for running the agent
+	// Create task
 	_, err = w.TaskScheduler.NewJob(
 		gocron.DurationJob(
 			time.Duration(time.Duration(60*time.Minute)),

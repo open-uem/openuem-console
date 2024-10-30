@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -18,13 +21,8 @@ func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployP
 	var rows *sql.Rows
 	var err error
 
-	// Open Winget Community Repository index database
-	_, err = os.Stat("index.db")
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
-	}
-
-	db, err := sql.Open("sqlite3", "index.db")
+	// Open Winget DB
+	db, err := openWingetDB()
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +70,9 @@ func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployP
 }
 
 func CountPackages(packageName string) (int, error) {
-	// Open Winget Community Repository index database
-	_, err := os.Stat("index.db")
-	if os.IsNotExist(err) {
-		return 0, fmt.Errorf("database doesn't exist, reason: %v", err)
-	}
 
-	db, err := sql.Open("sqlite3", "index.db")
+	// Open Winget DB
+	db, err := openWingetDB()
 	if err != nil {
 		return 0, err
 	}
@@ -109,4 +103,26 @@ func CountPackages(packageName string) (int, error) {
 	}
 
 	return count, nil
+}
+
+func openWingetDB() (*sql.DB, error) {
+	// Create the file
+	cwd, err := openuem_utils.GetWd()
+	if err != nil {
+		return nil, err
+	}
+
+	tmpDir := filepath.Join(cwd, "tmp")
+	if strings.HasSuffix(cwd, "tmp") {
+		tmpDir = cwd
+	}
+
+	indexPath := filepath.Join(tmpDir, "index.db")
+
+	// Open Winget Community Repository index database
+	if _, err = os.Stat(indexPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
+	}
+
+	return sql.Open("sqlite3", indexPath)
 }
