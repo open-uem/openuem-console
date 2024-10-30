@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	"entgo.io/ent/dialect"
@@ -40,5 +39,4 @@ func New(dbUrl string) (*Model, error) {
 
 func (m *Model) Close() {
 	m.Client.Close()
-	log.Println("... closing database connection")
 }

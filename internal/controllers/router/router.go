@@ -3,6 +3,7 @@ package router
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	session "github.com/canidam/echo-scs-session"
@@ -10,6 +11,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/locales"
+	"github.com/doncicuto/openuem_utils"
 	"github.com/invopop/ctxi18n"
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
@@ -19,8 +21,14 @@ func New(s *sessions.SessionManager) *echo.Echo {
 	e := echo.New()
 
 	// Static assets
-	e.Static("/static", "assets")
-	e.File("/favicon.ico", "assets/favicon.ico")
+	cwd, err := openuem_utils.GetWd()
+	if err != nil {
+		log.Fatalf("could not get working directory: %v", err)
+	}
+
+	assetsPath := filepath.Join(cwd, "assets")
+	e.Static("/static", assetsPath)
+	e.File("/favicon.ico", filepath.Join(assetsPath, "favicon.ico"))
 
 	// Add i18n middleware
 	if err := ctxi18n.LoadWithDefault(locales.Content, "en"); err != nil {

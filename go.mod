@@ -6,13 +6,14 @@ require (
 	entgo.io/ent v0.14.1
 	github.com/a-h/templ v0.2.771
 	github.com/alexedwards/scs/pgxstore v0.0.0-20240316134038-7e11d57e8885
-	github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
+	github.com/danieljoos/wincred v1.2.2
 	github.com/doncicuto/openuem_ent v0.0.0-00010101000000-000000000000
 	github.com/doncicuto/openuem_nats v0.0.0-00010101000000-000000000000
 	github.com/doncicuto/openuem_utils v0.0.0-00010101000000-000000000000
+	github.com/go-co-op/gocron/v2 v2.12.1
 	github.com/go-echarts/go-echarts/v2 v2.4.1
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
@@ -30,6 +31,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.4
 	github.com/wneessen/go-mail v0.5.1
 	golang.org/x/crypto v0.28.0
+	golang.org/x/sys v0.26.0
 )
 
 require (
@@ -38,7 +40,6 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
-	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -52,6 +53,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/josharian/native v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
@@ -65,16 +67,17 @@ require (
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

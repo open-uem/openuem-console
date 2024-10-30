@@ -40,14 +40,12 @@ func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, cer
 	return &w
 }
 
-func (w *WebServer) Serve(address, certFile, certKey string) {
+func (w *WebServer) Serve(address, certFile, certKey string) error {
 	w.Server = &http.Server{
 		Addr:    address,
 		Handler: w.Router,
 	}
-	if err := w.Server.ListenAndServeTLS(certFile, certKey); err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
+	return w.Server.ListenAndServeTLS(certFile, certKey)
 }
 
 func (w *WebServer) Close() error {

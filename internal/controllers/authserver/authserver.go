@@ -45,7 +45,7 @@ func New(m *models.Model, s *sessions.SessionManager, caCert string) *AuthServer
 	return &a
 }
 
-func (a *AuthServer) Serve(address, certFile, certKey string) {
+func (a *AuthServer) Serve(address, certFile, certKey string) error {
 	cp := x509.NewCertPool()
 	cp.AddCert(a.CACert)
 
@@ -57,9 +57,7 @@ func (a *AuthServer) Serve(address, certFile, certKey string) {
 			ClientCAs:  cp,
 		},
 	}
-	if err := a.Server.ListenAndServeTLS(certFile, certKey); err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
+	return a.Server.ListenAndServeTLS(certFile, certKey)
 }
 
 func (a *AuthServer) Close() error {
