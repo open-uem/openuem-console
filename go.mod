@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	entgo.io/ent v0.14.1
-	github.com/a-h/templ v0.2.771
+	github.com/a-h/templ v0.2.793
 	github.com/alexedwards/scs/pgxstore v0.0.0-20240316134038-7e11d57e8885
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5

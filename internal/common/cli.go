@@ -32,5 +32,8 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 
 	w.JWTKey = cCtx.String("jwt-key")
 
+	w.ConsolePort = cCtx.String("console-port")
+	w.AuthPort = cCtx.String("auth-port")
+
 	return nil
 }

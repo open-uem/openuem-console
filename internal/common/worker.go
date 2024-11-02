@@ -39,6 +39,8 @@ type Worker struct {
 	WebServer             *webserver.WebServer
 	AuthServer            *authserver.AuthServer
 	DownloadDir           string
+	ConsolePort           string
+	AuthPort              string
 }
 
 func NewWorker(logName string) *Worker {
@@ -85,13 +87,24 @@ func (w *Worker) StartWorker() {
 		return
 	}
 
+	// Get port information
+	consolePort := ":1323"
+	if w.ConsolePort != "" {
+		consolePort = ":" + w.ConsolePort
+	}
+
+	authPort := ":1324"
+	if w.AuthPort != "" {
+		authPort = ":" + w.AuthPort
+	}
+
 	// Session handler
 	w.SessionManager = sessions.New(w.DBUrl)
 
 	// HTTPS web server
 	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, w.DownloadDir)
 	go func() {
-		if err := w.WebServer.Serve(":1323", w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
+		if err := w.WebServer.Serve(consolePort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
 		}
 	}()
@@ -100,7 +113,7 @@ func (w *Worker) StartWorker() {
 	// HTTPS auth server
 	w.AuthServer = authserver.New(w.Model, w.SessionManager, w.CACertPath)
 	go func() {
-		if err := w.AuthServer.Serve(":1324", w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
+		if err := w.AuthServer.Serve(authPort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
 		}
 	}()
