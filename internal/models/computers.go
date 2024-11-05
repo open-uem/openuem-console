@@ -13,7 +13,7 @@ import (
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 )
 
-type Desktop struct {
+type Computer struct {
 	ID           string
 	Hostname     string
 	OS           string
@@ -25,8 +25,8 @@ type Desktop struct {
 	Model        string
 }
 
-func (m *Model) CountAllDesktops() (int, error) {
-	// TODO specify agent type to desktop
+func (m *Model) CountAllComputers() (int, error) {
+	// TODO specify agent type to computer
 	count, err := m.Client.Agent.Query().Count(context.Background())
 	if err != nil {
 		return 0, err
@@ -44,9 +44,9 @@ func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
 		Offset((p.CurrentPage - 1) * p.PageSize)
 }
 
-func (m *Model) GetDesktopsByPage(p partials.PaginationAndSort) ([]Desktop, error) {
+func (m *Model) GetComputersByPage(p partials.PaginationAndSort) ([]Computer, error) {
 	var err error
-	var desktops []Desktop
+	var computers []Computer
 
 	switch p.SortBy {
 	case "hostname":
@@ -54,79 +54,79 @@ func (m *Model) GetDesktopsByPage(p partials.PaginationAndSort) ([]Desktop, erro
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(agent.FieldHostname))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(agent.FieldHostname))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	case "os":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(agent.FieldOs))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(agent.FieldOs))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	case "version":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc("Version"))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc("Version"))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	case "username":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(operatingsystem.FieldUsername))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(operatingsystem.FieldUsername))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	case "manufacturer":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(computer.FieldManufacturer))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(computer.FieldManufacturer))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	case "model":
 		if p.SortOrder == "asc" {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(computer.FieldModel))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		} else {
 			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(computer.FieldModel))
-			}).Scan(context.Background(), &desktops)
+			}).Scan(context.Background(), &computers)
 		}
 	}
 
 	if err != nil {
 		return nil, err
 	}
-	return desktops, nil
+	return computers, nil
 }
 
 func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {

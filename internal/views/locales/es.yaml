@@ -7,6 +7,7 @@ es:
   Authenticate: "Autenticarse"
   Cancel: "Cancelar"
   Clear: "Limpiar filtro"
+  Computers: "Equipos"
   Confirm: "Confirmar"
   Connect: "Conectar"
   Create: "Crear"
@@ -19,7 +20,6 @@ es:
   Example: "Ejemplo"
   Install: "Instalar"
   Uninstall: "Desinstalar"
-  Desktops: "Ordenadores"
   Disable: "Desactivar"
   Download: "Descargar"
   Enabled: "Activar"
@@ -223,8 +223,8 @@ es:
     phase_1: "Busca paquetes de software que pueden ser desinstalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe desinstalarse"
     phase_2: "Selecciona los agentes en los que deseas desinstalar"
     requested: "Hemos solicitado a los agentes seleccionados que desinstalen este paquete, compruebe más tarde si el software se ha desinstalado correctamente en ese dispositivo"
-  desktops:
-    description: "Este es el inventario de equipos de escritorio de su organización comunicado por los agentes que han contactado con el servidor OpenUEM"
+  computers:
+    description: "Este es el inventario de equipos de su organización comunicado por los agentes que han contactado con el servidor OpenUEM"
   confirm:
     agent_disable: "¿Está seguro de que quiere desactivar este agente? El agente no enviará más información hasta que vuelva a ser activado"
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"

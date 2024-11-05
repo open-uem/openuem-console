@@ -1,4 +1,4 @@
-package desktops_views
+package computers_views
 
 import (
 	"fmt"
@@ -9,11 +9,11 @@ import (
 )
 
 templ SFTPHome(agent *openuem_ent.Agent, cwd, parent string, files []fs.FileInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@DesktopsNavbar(agent.ID, "logical-disks", false)
+				@ComputersNavbar(agent.ID, "logical-disks", false)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.file_browser.title") }</h3>
@@ -74,7 +74,7 @@ templ FolderUpIcon(agent *openuem_ent.Agent, cwd, parent string) {
 		<button
 			type="button"
 			disabled?={ parent == cwd || len(cwd) == 0 }
-			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-indicator="#spinner"
@@ -109,7 +109,7 @@ templ NewFolderDialog(agent *openuem_ent.Agent, cwd string) {
 		<button
 			type="button"
 			class="uk-button uk-button-primary flex gap-2"
-			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -133,7 +133,7 @@ templ SyncFolderIcon(agent *openuem_ent.Agent, cwd, parent string) {
 		<input type="hidden" name="dst" value={ parent }/>
 		<button
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -160,7 +160,7 @@ templ UploadFileDialog(agent *openuem_ent.Agent, cwd, parent string) {
 	<form
 		class="flex gap-4 items-center justify-between"
 		hx-encoding="multipart/form-data"
-		hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+		hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
 		hx-target="#main"
 		hx-indicator="#spinner"
 	>
@@ -184,7 +184,7 @@ templ DownloadIcon(agent *openuem_ent.Agent, cwd, parent string) {
 			class="text-gray-300"
 			type="button"
 			disabled
-			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadmany", agent.ID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadmany", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -221,7 +221,7 @@ templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
 			type="button"
 			class="uk-button uk-button-danger"
 			disabled?={ parent == cwd || len(cwd) == 0 }
-			hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/many", agent.ID))) }
+			hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/many", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -365,7 +365,7 @@ templ OpenFolderEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.File
 		<button
 			class="flex gap-4 m-4"
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -386,9 +386,9 @@ templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileIn
 		<button
 			class="flex gap-4 m-4 items-center"
 			if isDir {
-				hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadfolder", agent.ID))) }
+				hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadfolder", agent.ID))) }
 			} else {
-				hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/downloadfile", agent.ID))) }
+				hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadfile", agent.ID))) }
 			}
 			hx-push-url="false"
 			hx-indicator={ fmt.Sprintf("#download-spinner-%d", i) }
@@ -447,9 +447,9 @@ templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 			name="confirmRename"
 			class="uk-button uk-button-primary hidden"
 			if isDir {
-				hx-put={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+				hx-put={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
 			} else {
-				hx-put={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+				hx-put={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"
@@ -504,9 +504,9 @@ templ RemoveEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 			name="confirmRemove"
 			class="uk-button uk-button-danger hidden"
 			if isDir {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/folder", agent.ID))) }
+				hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
 			} else {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks/file", agent.ID))) }
+				hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"

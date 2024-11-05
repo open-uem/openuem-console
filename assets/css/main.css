@@ -9498,6 +9498,14 @@ th.uk-text-break, td.uk-text-break {
   margin-bottom: 1.75rem;
 }
 
+.\!mb-0 {
+  margin-bottom: 0px !important;
+}
+
+.-mt-4 {
+  margin-top: -1rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -9548,14 +9556,6 @@ th.uk-text-break, td.uk-text-break {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.\!mb-0 {
-  margin-bottom: 0px !important;
-}
-
-.-mt-4 {
-  margin-top: -1rem;
 }
 
 .inline-block {
@@ -9818,8 +9818,16 @@ th.uk-text-break, td.uk-text-break {
   gap: 2rem;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .overflow-y-auto {
   overflow-y: auto;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
 }
 
 .text-balance {
@@ -10282,10 +10290,6 @@ th.uk-text-break, td.uk-text-break {
   color: hsl(var(--foreground));
 }
 
-.hover\:underline:hover {
-  text-decoration-line: underline;
-}
-
 .dark\:brightness-\[0\.2\]:is(.dark *) {
   --tw-brightness: brightness(0.2);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
@@ -10357,29 +10361,5 @@ th.uk-text-break, td.uk-text-break {
 
   .md\:gap-8 {
     gap: 2rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .lg\:block {
-    display: block;
-  }
-
-  .lg\:grid {
-    display: grid;
-  }
-
-  .lg\:min-h-\[600px\] {
-    min-height: 600px;
-  }
-
-  .lg\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .xl\:min-h-\[800px\] {
-    min-height: 800px;
   }
 }

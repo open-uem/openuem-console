@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
-	"github.com/doncicuto/openuem-console/internal/views/desktops_views"
+	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/labstack/echo/v4"
@@ -191,7 +191,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 	}
 
 	// TODO - Domain should not be hardcoded
-	return renderView(c, desktops_views.VNC(agentId, agent.Hostname, "1443", ".openuem.eu"))
+	return renderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", ".openuem.eu"))
 
 }
 
@@ -204,6 +204,6 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 	}
 
 	// TODO - Domain should not be hardcoded
-	return renderView(c, desktops_views.VNCConnect(agentId))
+	return renderView(c, computers_views.VNCConnect(agentId))
 
 }

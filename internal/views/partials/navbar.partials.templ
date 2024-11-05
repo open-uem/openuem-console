@@ -17,15 +17,15 @@ templ NavBar(active string) {
 				<span class="sr-only">{ i18n.T(ctx, "Dashboard") }</span>
 			</a>
 			<a
-				href="/desktops"
-				hx-get="/desktops"
+				href="/computers"
+				hx-get="/computers"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Desktops; pos: right"
-				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "desktops"), templ.KV("text-muted-foreground hover:text-foreground", active != "desktops") }
+				uk-tooltip="title: Computers; pos: right"
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "computers"), templ.KV("text-muted-foreground hover:text-foreground", active != "computers") }
 			>
 				<uk-icon hx-history="false" icon="computer" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				<span class="sr-only">Desktops</span>
+				<span class="sr-only">Computers</span>
 			</a>
 			<a
 				href="/software"

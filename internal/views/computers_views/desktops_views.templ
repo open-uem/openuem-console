@@ -1,4 +1,4 @@
-package desktops_views
+package computers_views
 
 import (
 	"fmt"
@@ -10,14 +10,14 @@ import (
 	"strings"
 )
 
-templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Desktop) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}})
+templ Computers(c echo.Context, p partials.PaginationAndSort, agents []models.Computer) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
-				<h3 class="uk-card-title"><span>{ i18n.T(ctx, "Desktops") }</span></h3>
+				<h3 class="uk-card-title"><span>{ i18n.T(ctx, "Computers") }</span></h3>
 				<p class="uk-margin-small-top uk-text-small">
-					{ i18n.T(ctx, "desktops.description") }
+					{ i18n.T(ctx, "computers.description") }
 				</p>
 			</div>
 			<div class="uk-card-body">
@@ -72,7 +72,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 							<tr class="h-16">
 								<td
 									class="!align-middle underline cursor-pointer"
-									hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s", agent.ID))) }
+									hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
 									hx-push-url="true"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -102,7 +102,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 										<ul class="uk-dropdown-nav uk-nav">
 											<li>
 												<a
-													hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s", agent.ID))) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
 													hx-push-url="true"
 													hx-target="#main"
 													hx-swap="outerHTML"
@@ -110,7 +110,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 											</li>
 											<li>
 												<a
-													hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s?delete=true", agent.ID))) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s?delete=true", agent.ID))) }
 													hx-push-url="true"
 													hx-target="#main"
 													hx-swap="outerHTML"
@@ -119,7 +119,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 											if agent.IP != "" {
 												<li>
 													<a
-														hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", agent.ID))) }
+														hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", agent.ID))) }
 														hx-push-url="true"
 														hx-target="#main"
 														hx-swap="outerHTML"
@@ -129,7 +129,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 											if len(agent.MAC) > 0 {
 												<li>
 													<a
-														hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", agent.ID))) }
+														hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/wol", agent.ID))) }
 														hx-target="#main"
 														hx-swap="outerHTML"
 													>
@@ -155,7 +155,7 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 }
 
 templ InventoryIndex(title string, cmp templ.Component) {
-	@layout.Base("desktops") {
+	@layout.Base("computers") {
 		@cmp
 	}
 }

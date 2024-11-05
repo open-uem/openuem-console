@@ -9,7 +9,7 @@ import (
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
-	"github.com/doncicuto/openuem-console/internal/views/desktops_views"
+	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
@@ -24,112 +24,112 @@ func (h *Handler) Computer(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentComputerInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Computer(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(agent, confirmDelete)))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentOSInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.OperatingSystem(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(agent, confirmDelete)))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.NetworkAdapters(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(agent, confirmDelete)))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentPrintersInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Printers(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(agent, confirmDelete)))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.LogicalDisks(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(agent, confirmDelete)))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentSharesInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Shares(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(agent, confirmDelete)))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Monitors(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(agent, confirmDelete)))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
@@ -146,7 +146,7 @@ func (h *Handler) Apps(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	a, err := h.Model.GetAgentById(agentId)
@@ -165,26 +165,26 @@ func (h *Handler) Apps(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Apps(c, p, a, apps, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, a, apps, confirmDelete)))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.RemoteAssistance(agent, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(agent, confirmDelete)))
 }
 
-func (h *Handler) Desktops(c echo.Context) error {
+func (h *Handler) Computers(c echo.Context) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
@@ -196,20 +196,20 @@ func (h *Handler) Desktops(c echo.Context) error {
 		p.SortOrder = "desc"
 	}
 
-	desktops, err := h.Model.GetDesktopsByPage(p)
+	computers, err := h.Model.GetComputersByPage(p)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Desktops(c, p, desktops)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, computers)))
 }
 
-func (h *Handler) DesktopDeploy(c echo.Context) error {
+func (h *Handler) ComputerDeploy(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -226,7 +226,7 @@ func (h *Handler) DesktopDeploy(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -242,13 +242,13 @@ func (h *Handler) DesktopDeploy(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		return renderView(c, desktops_views.DeploymentsTable(c, p, agentId, deployments))
+		return renderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments))
 	}
 
-	return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.DesktopDeploy(c, p, agent, deployments, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete)))
 }
 
-func (h *Handler) DesktopDeploySearchPackagesInstall(c echo.Context) error {
+func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -279,10 +279,10 @@ func (h *Handler) DesktopDeploySearchPackagesInstall(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return renderView(c, desktops_views.SearchPacketResult(c, agentId, packages, p))
+	return renderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
 }
 
-func (h *Handler) DesktopDeployInstall(c echo.Context) error {
+func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
@@ -324,7 +324,7 @@ func (h *Handler) DesktopDeployInstall(c echo.Context) error {
 	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.deploy_success")))
 }
 
-func (h *Handler) DesktopDeployUpdate(c echo.Context) error {
+func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
@@ -357,7 +357,7 @@ func (h *Handler) DesktopDeployUpdate(c echo.Context) error {
 	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.update_success")))
 }
 
-func (h *Handler) DesktopDeployUninstall(c echo.Context) error {
+func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
@@ -398,36 +398,36 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
-		return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.WakeOnLan(agent, confirmDelete)))
+		return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(agent, confirmDelete)))
 	}
 
 	mac := c.FormValue("MACAddress")
 	hwAddress, err := net.ParseMAC(mac)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	ip := c.FormValue("IPAddress")
 
 	wolClient, err := wol.NewClient()
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	err = wolClient.Wake(ip+":0", hwAddress)
 	if err != nil {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Desktops", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
 	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
 }
 
-func (h *Handler) DesktopMetadata(c echo.Context) error {
+func (h *Handler) ComputerMetadata(c echo.Context) error {
 	var data []*openuem_ent.Metadata
 	successMessage := ""
 
@@ -508,14 +508,14 @@ func (h *Handler) DesktopMetadata(c echo.Context) error {
 		}
 	}
 
-	return renderView(c, desktops_views.InventoryIndex(" | Deploy SW", desktops_views.DesktopMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage)))
+	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage)))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return renderView(c, desktops_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Desktop", "/desktops")))
+		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers")))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -535,5 +535,5 @@ func (h *Handler) Notes(c echo.Context) error {
 	renderedMarkdown := string(bluemonday.UGCPolicy().SanitizeBytes(maybeUnsafeHTML))
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return renderView(c, desktops_views.InventoryIndex(" | Inventory", desktops_views.Notes(c, agent, agent.Notes, renderedMarkdown, confirmDelete)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, agent, agent.Notes, renderedMarkdown, confirmDelete)))
 }

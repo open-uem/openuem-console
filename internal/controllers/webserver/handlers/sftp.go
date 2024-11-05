@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/doncicuto/openuem-console/internal/views/desktops_views"
+	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_utils"
 	"github.com/labstack/echo/v4"
@@ -86,7 +86,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	sortFiles(files)
 
-	return renderView(c, desktops_views.InventoryIndex(" | File Browser", desktops_views.SFTPHome(agent, cwd, parent, files)))
+	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -180,7 +180,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 
 	sortFiles(files)
 
-	return renderView(c, desktops_views.InventoryIndex(" | File Browser", desktops_views.SFTPHome(agent, cwd, parent, files)))
+	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
@@ -239,7 +239,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	sortFiles(files)
 
-	return renderView(c, desktops_views.InventoryIndex(" | File Browser", desktops_views.SFTPHome(agent, cwd, parent, files)))
+	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
@@ -291,7 +291,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 
 	sortFiles(files)
 
-	return renderView(c, desktops_views.InventoryIndex(" | File Browser", desktops_views.SFTPHome(agent, cwd, removeForm.Parent, files)))
+	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, removeForm.Parent, files)))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -362,7 +362,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	sortFiles(files)
 
-	return renderView(c, desktops_views.SFTPHome(agent, cwd, parent, files))
+	return renderView(c, computers_views.SFTPHome(agent, cwd, parent, files))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {

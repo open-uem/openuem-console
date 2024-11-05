@@ -125,13 +125,13 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort) {
 					<span>{ i18n.T(ctx, "agents.version") }</span>
 				</div>
 			</th>
-			<th class="w-1/12">
+			<th class="w-1/6">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "IP Address") }</span>
 					@partials.SortByColumnIcon(c, p, "ip_address", "alpha", "#main", "outerHTML", "")
 				</div>
 			</th>
-			<th class="w-1/6">
+			<th class="w-1/4">
 				{ i18n.T(ctx, "Tag.other") }
 			</th>
 			<th class="w-1/6">
@@ -154,7 +154,7 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 		<tr>
 			<td
 				class="!align-middle underline hover:cursor-pointer"
-				hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s", agent.ID))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -303,7 +303,7 @@ templ AddActionsButton(agent *ent.Agent) {
 			if agent.IP != "" && agent.Enabled && agent.Vnc != "" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/remote-assistance", agent.ID))) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", agent.ID))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -313,7 +313,7 @@ templ AddActionsButton(agent *ent.Agent) {
 			if len(agent.MAC) > 0 {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s/wol", agent.ID))) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/wol", agent.ID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>

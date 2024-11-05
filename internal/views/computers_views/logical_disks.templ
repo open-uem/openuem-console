@@ -1,4 +1,4 @@
-package desktops_views
+package computers_views
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 )
 
 templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Desktops", Url: "/desktops"}, {Title: agent.Hostname, Url: fmt.Sprintf("/desktops/%s", agent.ID)}})
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				if confirmDelete {
-					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/desktops", "/desktops/"+agent.ID)
+					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/computers", "/computers/"+agent.ID)
 				}
-				@DesktopsNavbar(agent.ID, "logical-disks", confirmDelete)
+				@ComputersNavbar(agent.ID, "logical-disks", confirmDelete)
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -68,7 +68,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 											<button
 												class="flex gap-2 items-center"
 												type="button"
-												hx-post={ string(templ.URL(fmt.Sprintf("/desktops/%s/logical-disks", agent.ID))) }
+												hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
 												hx-target="#main"
 												hx-push-url="false"
 												hx-swap="outerHTML"
