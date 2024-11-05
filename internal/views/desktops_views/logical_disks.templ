@@ -28,7 +28,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
 					if len(agent.Edges.Logicaldisks) > 0 {
-						<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 							<thead>
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
@@ -43,26 +43,26 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 							</thead>
 							for i, disk := range agent.Edges.Logicaldisks {
 								<tr>
-									<td>{ disk.Label }</td>
+									<td class="!align-middle">{ disk.Label }</td>
 									if disk.VolumeName == "" {
-										<td>-</td>
+										<td class="!align-middle">-</td>
 									} else {
-										<td>{ disk.VolumeName }</td>
+										<td class="!align-middle">{ disk.VolumeName }</td>
 									}
-									<td>{ disk.Filesystem }</td>
-									<td>
+									<td class="!align-middle">{ disk.Filesystem }</td>
+									<td class="!align-middle">
 										<progress
-											class="uk-progress"
+											class="uk-progress !mb-0"
 											value={ strconv.Itoa(int(disk.Usage)) }
 											max="100"
 										></progress>
 									</td>
-									<td>{ disk.SizeInUnits }</td>
-									<td>{ disk.RemainingSpaceInUnits }</td>
-									<td>
+									<td class="!align-middle">{ disk.SizeInUnits }</td>
+									<td class="!align-middle">{ disk.RemainingSpaceInUnits }</td>
+									<td class="!align-middle">
 										@partials.BitlockerStatus(disk.BitlockerStatus)
 									</td>
-									<td>
+									<td class="!align-middle">
 										<form>
 											<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
 											<button

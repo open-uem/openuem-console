@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto"
 	"crypto/x509"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -119,7 +120,7 @@ func (h *Handler) Auth(c echo.Context) error {
 		}
 	}
 
-	return c.Redirect(http.StatusFound, "https://localhost:1323/dashboard")
+	return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/dashboard", h.ServerName, h.ConsolePort))
 }
 
 func getIssuerFromCert(cert, caCert *x509.Certificate) (*x509.Certificate, error) {

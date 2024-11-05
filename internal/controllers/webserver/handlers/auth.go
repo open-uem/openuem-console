@@ -17,7 +17,7 @@ type MyCustomClaims struct {
 }
 
 func (h *Handler) Auth(c echo.Context) error {
-	return c.Redirect(http.StatusFound, "https://localhost:1324/auth")
+	return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ServerName, h.AuthPort))
 }
 
 func (h *Handler) ConfirmEmail(c echo.Context) error {

@@ -37,6 +37,7 @@ en:
   Reset: "Reset"
   Save: "Save"
   Security: "Security"
+  SelectCountry: "Select a country"
   Send: "Send"
   Session:
     one: "Session"

@@ -128,7 +128,11 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 										} else {
 											<td>-</td>
 										}
-										<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
+										if user.Country != "" {
+											<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
+										} else {
+											<td>-</td>
+										}
 										if user.Phone != "" {
 											<td>{ user.Phone }</td>
 										} else {

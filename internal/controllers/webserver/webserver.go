@@ -20,14 +20,14 @@ type WebServer struct {
 	SessionManager *sessions.SessionManager
 }
 
-func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, tmpDownloadDir string) *WebServer {
+func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir string) *WebServer {
 	var err error
 	w := WebServer{}
 	// Router
-	w.Router = router.New(s)
+	w.Router = router.New(s, server, consolePort)
 
 	// Create Handlers and register its router
-	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath, tmpDownloadDir)
+	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir)
 
 	w.Handler.JetStream, err = jetstream.New(w.Handler.NATSConnection)
 	if err != nil {

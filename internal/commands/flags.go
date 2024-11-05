@@ -41,14 +41,20 @@ func StartConsoleFlags() []cli.Flag {
 			Required: true,
 		},
 		&cli.StringFlag{
+			Name:    "server-name",
+			Usage:   "the server name like example.com or localhost",
+			EnvVars: []string{"SERVER_NAME"},
+			Value:   "1323",
+		},
+		&cli.StringFlag{
 			Name:    "console-port",
-			Usage:   "t signed to use JWT tokens used in email address confirmation",
+			Usage:   "the TCP port used by the console server",
 			EnvVars: []string{"CONSOLE_PORT"},
 			Value:   "1323",
 		},
 		&cli.StringFlag{
 			Name:    "auth-port",
-			Usage:   "a string signed to use JWT tokens used in email address confirmation",
+			Usage:   "the TCP port used by the authentication server",
 			EnvVars: []string{"AUTH_PORT"},
 			Value:   "1324",
 		},

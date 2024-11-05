@@ -4,6 +4,7 @@ import (
 	"github.com/biter777/countries"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"sort"
 	"strings"
 )
 
@@ -27,6 +28,7 @@ templ Countries(c echo.Context, code string) {
 				
 		end"
 		>
+			<option value="">{ i18n.T(ctx, "SelectCountry") }</option>
 			for _, country := range GetCountries(c) {
 				<option value={ country.Code } selected?={ code == country.Code }>{ country.Name }</option>
 			}
@@ -38,12 +40,17 @@ func GetCountries(c echo.Context) []Country {
 	var translatedCountries []Country
 
 	for _, country := range countries.All() {
-		if country.String() != "Yugoslavia" {
+		if country.String() != "Yugoslavia" && country.String() != "Aland Islands" && country.String() != "Western Sahara" && country.String() != "Mayotte" 
+		&& country.String() != "Macau (Special Administrative Region of China)" {
 			translatedCountries = append(translatedCountries, Country{
 				Name: i18n.T(c.Request().Context(), "countries."+country.String()),
 				Code: country.Info().Alpha2,
 			})
 		}
 	}
+
+	sort.Slice(translatedCountries, func(i, j int) bool {
+		return translatedCountries[i].Name < translatedCountries[j].Name
+	})
 	return translatedCountries
 }

@@ -34,6 +34,7 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 
 	w.ConsolePort = cCtx.String("console-port")
 	w.AuthPort = cCtx.String("auth-port")
+	w.ServerName = cCtx.String("server-name")
 
 	return nil
 }

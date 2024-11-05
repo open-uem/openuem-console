@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "tmp\\main.exe start  --jwt-key supers3cr3t --nats-servers nats-server:4433 --cacert tmp\\ca.cer --cert tmp\\console.cer --key tmp\\console.key"
+  bin = "tmp\\main.exe start  --jwt-key supers3cr3t --nats-servers lothlorien.openuem.eu:4433 --cacert tmp\\ca.cer --server-name lothlorien.openuem.eu --cert tmp\\console.cer --key tmp\\console.key"
   cmd = "go build -o .\\tmp\\main.exe .\\main.go"
   delay = 1000
   exclude_dir = ["assets", "tmp", "internal\\views\\typescript", "internal\\views\\tailwind"]

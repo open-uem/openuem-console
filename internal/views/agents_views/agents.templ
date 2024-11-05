@@ -153,7 +153,7 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 	for _, agent := range agents {
 		<tr>
 			<td
-				class="!align-middle hover:underline hover:cursor-pointer"
+				class="!align-middle underline hover:cursor-pointer"
 				hx-get={ string(templ.URL(fmt.Sprintf("/desktops/%s", agent.ID))) }
 				hx-push-url="true"
 				hx-target="#main"

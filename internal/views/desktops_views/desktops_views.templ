@@ -21,8 +21,9 @@ templ Desktops(c echo.Context, p partials.PaginationAndSort, agents []models.Des
 				</p>
 			</div>
 			<div class="uk-card-body">
+				<form class="flex gap-4 mt-5 mb-2"></form>
 				if len(agents) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 						<thead>
 							<tr>
 								<th>

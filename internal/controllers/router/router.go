@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -18,7 +19,7 @@ import (
 	mw "github.com/labstack/echo/v4/middleware"
 )
 
-func New(s *sessions.SessionManager) *echo.Echo {
+func New(s *sessions.SessionManager, server, port string) *echo.Echo {
 	e := echo.New()
 
 	// Static assets
@@ -47,7 +48,7 @@ func New(s *sessions.SessionManager) *echo.Echo {
 
 	// Add CORS middleware
 	e.Use(mw.CORSWithConfig(mw.CORSConfig{
-		AllowOrigins: []string{"https://localhost:1323"},
+		AllowOrigins: []string{fmt.Sprintf("https://%s:%s", server, port), fmt.Sprintf("https://localhost:%s", port)},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
