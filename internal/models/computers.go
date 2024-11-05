@@ -26,7 +26,6 @@ type Computer struct {
 }
 
 func (m *Model) CountAllComputers() (int, error) {
-	// TODO specify agent type to computer
 	count, err := m.Client.Agent.Query().Count(context.Background())
 	if err != nil {
 		return 0, err

@@ -3,16 +3,14 @@ package authserver
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/doncicuto/openuem-console/internal/controllers/authserver/handlers"
 	"github.com/doncicuto/openuem-console/internal/controllers/router"
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/doncicuto/openuem_utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,13 +25,21 @@ type AuthServer struct {
 func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePort, authPort string) *AuthServer {
 	var err error
 	a := AuthServer{}
+
+	// Get max upload size setting
+	maxUploadSize, err := m.GetMaxUploadSize()
+	if err != nil {
+		maxUploadSize = "512M"
+		log.Println("[ERROR]: could not get max upload size from database")
+	}
+
 	// Router
-	a.Router = router.New(s, server, authPort)
+	a.Router = router.New(s, server, authPort, maxUploadSize)
 
 	// Session Manager
 	a.SessionManager = s
 
-	a.CACert, err = readPEMCertificate(caCert)
+	a.CACert, err = openuem_utils.ReadPEMCertificate(caCert)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,24 +68,4 @@ func (a *AuthServer) Serve(address, certFile, certKey string) error {
 
 func (a *AuthServer) Close() error {
 	return a.Server.Close()
-}
-
-// TODO use utils from cert-manager
-func readPEMCertificate(path string) (*x509.Certificate, error) {
-	certBytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	certBlock, _ := pem.Decode(certBytes)
-	if certBlock.Type != "CERTIFICATE" || certBlock.Bytes == nil {
-		return nil, fmt.Errorf("file does not content a certificate")
-	}
-
-	cert, err := x509.ParseCertificate(certBlock.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return cert, nil
 }

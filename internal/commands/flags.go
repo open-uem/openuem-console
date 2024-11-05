@@ -58,5 +58,11 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars: []string{"AUTH_PORT"},
 			Value:   "1324",
 		},
+		&cli.StringFlag{
+			Name:     "domain",
+			Usage:    "the DNS domain used to contact with agents",
+			EnvVars:  []string{"DOMAIN"},
+			Required: true,
+		},
 	}
 }

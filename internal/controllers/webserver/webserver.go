@@ -20,14 +20,22 @@ type WebServer struct {
 	SessionManager *sessions.SessionManager
 }
 
-func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir string) *WebServer {
+func New(m *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain string) *WebServer {
 	var err error
 	w := WebServer{}
+
+	// Get max upload size setting
+	maxUploadSize, err := m.GetMaxUploadSize()
+	if err != nil {
+		maxUploadSize = "512M"
+		log.Println("[ERROR]: could not get max upload size from database")
+	}
+
 	// Router
-	w.Router = router.New(s, server, consolePort)
+	w.Router = router.New(s, server, consolePort, maxUploadSize)
 
 	// Create Handlers and register its router
-	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir)
+	w.Handler = handlers.NewHandler(m, nc, s, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir, domain)
 
 	w.Handler.JetStream, err = jetstream.New(w.Handler.NATSConnection)
 	if err != nil {
@@ -45,6 +53,7 @@ func (w *WebServer) Serve(address, certFile, certKey string) error {
 		Addr:    address,
 		Handler: w.Router,
 	}
+
 	return w.Server.ListenAndServeTLS(certFile, certKey)
 }
 

@@ -7,6 +7,9 @@ import (
 	"strconv"
 )
 
+const PAGE_SIZE = 5
+const MAX_PAGE_SIZE = 25
+
 type PaginationAndSort struct {
 	CurrentPage   int
 	PageSize      int
@@ -155,7 +158,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 func NewPaginationAndSort() PaginationAndSort {
 	return PaginationAndSort{
 		CurrentPage: 1,
-		PageSize:    5,
+		PageSize:    PAGE_SIZE,
 	}
 }
 
@@ -171,10 +174,9 @@ func (p *PaginationAndSort) GetPaginationAndSortParams(c echo.Context) {
 	}
 
 	if p.PageSize, err = strconv.Atoi(c.FormValue("pageSize")); err != nil {
-		p.PageSize = 5
+		p.PageSize = PAGE_SIZE
 	}
-	// TODO set a MAX value for pageSize
-	p.PageSize = min(p.PageSize, 25)
+	p.PageSize = min(p.PageSize, MAX_PAGE_SIZE)
 	p.SortBy = c.FormValue("sortBy")
 	p.SortOrder = c.FormValue("sortOrder")
 	p.CurrentSortBy = c.FormValue("currentSortBy")

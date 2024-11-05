@@ -59,7 +59,7 @@ templ Antivirus(agents []*ent.Agent) {
 								}
 							</table>
 						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }
 							</p>
 						}
@@ -130,7 +130,7 @@ templ SecurityUpdates(agents []*ent.Agent) {
 								}
 							</table>
 						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }
 							</p>
 						}
@@ -214,7 +214,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 								@partials.Pagination(c, p, "#main", "innerHTML", "")
 							}
 						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates_history.no_info") }
 							</p>
 						}

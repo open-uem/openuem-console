@@ -30,7 +30,7 @@ type RegisterValues struct {
 	Password string
 }
 
-templ Register(c echo.Context, values RegisterValues, validations RegisterValidations) {
+templ Register(c echo.Context, values RegisterValues, validations RegisterValidations, defaultCountry string) {
 	<main id="main" class="flex items-center justify-center h-screen">
 		<div class="uk-card uk-card-body uk-card-default w-1/4">
 			<div class="flex flex-col gap-4">
@@ -192,8 +192,7 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 					</div>
 					<div class="uk-margin">
 						<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
-						// TODO country should be a setting
-						@partials.Countries(c, "ES")
+						@partials.Countries(c, defaultCountry)
 						<div id="country-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.CountryRequired ) }>{ i18n.T(ctx, "forms.required") }</div>
 						<div id="country-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.CountryInvalid) }>{ i18n.T(ctx, "register.wrong_country") }</div>
 					</div>

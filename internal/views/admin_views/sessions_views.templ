@@ -100,7 +100,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 								@partials.Pagination(c, p, "#main", "outerHTML", "")
 							}
 						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
+							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "sessions.nosessions") }
 							</p>
 						}

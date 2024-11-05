@@ -233,8 +233,8 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 								@partials.Pagination(c, p, "#main", "outerHTML", "")
 							}
 						} else {
-							<p class="uk-text-small uk-text-muted mt-6 mb-4">
-								No users have been created yet
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "users.no_users") }
 							</p>
 						}
 					</div>
@@ -244,7 +244,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 	</main>
 }
 
-templ NewUser(c echo.Context) {
+templ NewUser(c echo.Context, defaultCountry string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -313,7 +313,7 @@ templ NewUser(c echo.Context) {
 									</div>
 									<div class="uk-margin">
 										<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
-										@partials.Countries(c, "ES")
+										@partials.Countries(c, defaultCountry)
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>
@@ -347,7 +347,7 @@ templ NewUser(c echo.Context) {
 	</main>
 }
 
-templ EditUser(c echo.Context, user *openuem_ent.User) {
+templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -402,7 +402,11 @@ templ EditUser(c echo.Context, user *openuem_ent.User) {
 									</div>
 									<div class="uk-margin">
 										<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
-										@partials.Countries(c, user.Country)
+										if user.Country != "" {
+											@partials.Countries(c, user.Country)
+										} else {
+											@partials.Countries(c, defaultCountry)
+										}
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "users.phone") }</label>

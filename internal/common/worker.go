@@ -42,6 +42,7 @@ type Worker struct {
 	ConsolePort           string
 	AuthPort              string
 	ServerName            string
+	Domain                string
 }
 
 func NewWorker(logName string) *Worker {
@@ -109,7 +110,7 @@ func (w *Worker) StartWorker() {
 	w.SessionManager = sessions.New(w.DBUrl)
 
 	// HTTPS web server
-	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir)
+	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain)
 	go func() {
 		if err := w.WebServer.Serve(":"+consolePort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
@@ -225,6 +226,12 @@ func (w *Worker) GenerateConsoleConfig() error {
 	w.AuthPort, err = openuem_utils.GetValueFromRegistry(k, "AuthPort")
 	if err != nil {
 		log.Println("[ERROR]: could not read auth port from registry")
+		return err
+	}
+
+	w.Domain, err = openuem_utils.GetValueFromRegistry(k, "Domain")
+	if err != nil {
+		log.Println("[ERROR]: could not read domain from registry")
 		return err
 	}
 

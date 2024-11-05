@@ -29,16 +29,26 @@ type RegisterRequest struct {
 func (h *Handler) SignIn(c echo.Context) error {
 	validations := register_views.RegisterValidations{}
 
-	return renderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations)))
+	defaultCountry, err := h.Model.GetDefaultCountry()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry)))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
+	defaultCountry, err := h.Model.GetDefaultCountry()
+	if err != nil {
+		return err
+	}
+
 	r := RegisterRequest{}
 	decoder := form.NewDecoder()
 	if err := c.Request().ParseForm(); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	err := decoder.Decode(&r, c.Request().Form)
+	err = decoder.Decode(&r, c.Request().Form)
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -116,7 +126,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			validations.PasswordRequired = true
 		}
 
-		return renderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations)))
+		return renderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry)))
 	}
 
 	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password); err != nil {

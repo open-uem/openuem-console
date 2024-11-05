@@ -2,7 +2,6 @@ en:
   Agents: "Agents"
   Actions: "Actions"
   Add: "Add"
-  Advanced Settings: "Advanced Settings"
   Antivirus: "Antivirus"
   Authenticate: "Authenticate"
   Cancel: "Cancel"
@@ -19,6 +18,7 @@ en:
   Download: "Download"
   Edit: "Edit"
   Example: "Example"
+  General Settings: "General Settings"
   Install: "Install"
   Uninstall: "Uninstall"
   Disable: "Disable"
@@ -32,6 +32,7 @@ en:
   Notes: "Notes"
   OperatingSystem: "Operating System"
   Publisher: "Publisher"
+  Refresh: "Refresh"
   Rename: "Rename"
   Required: "Required"
   Reset: "Reset"
@@ -114,6 +115,10 @@ en:
     metadata_no_metadata: "No metadata has been defined for your organization"
     metadata_insert_value: "Introduce a value..."
     metadata_save_success: "Metadata value has been saved"
+    force_run_success: "Agent will run a report anf send new information, check it again in a few minutes"
+    has_been_enabled: "The agent has been enabled"
+    has_been_disabled: "The agent has been disabled"
+    confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
   inventory:
     hardware:
       title: "Hardware"
@@ -140,6 +145,7 @@ en:
       manufacturer: "Manufacturer"
       model: "Model"
       serial: "Serial"
+      no_monitors: "No monitors information is available yet"
     logical_disk:
       title: "Logical Disks"
       description: "These are the logical disks connected to this computer as reported by the OpenUEM agent"
@@ -170,6 +176,7 @@ en:
       name: "Name"
       descr: "Description"
       path: "Path"
+      no_shares: "No shares information is available yet"
     printers:
       title: "Printers"
       description: "These are the printers connected to this computer as reported by the OpenUEM agent"
@@ -295,6 +302,7 @@ en:
       title: Edit User
       description: Edit this user's profile
       success: User's profile has been updated
+    no_users: No users have been created yet
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"
@@ -366,6 +374,25 @@ en:
     saved: SMTP Settings saved!
     test: Test settings
     test_success: Email test was sent successfully to %s!
+  settings:
+    title: General Settings
+    description: OpenUEM has some settings that configure its behavior
+    country_title: Country
+    country_description: Default country for user registration
+    nats_timeout_title: NATS Timeout
+    nats_timeout_description: Default NATS request timeout in seconds
+    max_upload_title: Max Upload Size
+    max_upload_description: Max upload size for files expressed in GB (G), MB (M) or KB (K)
+    user_cert_years_title: User cert duration
+    user_cert_years_description: The duration in years of the user certificate
+    id_cannot_be_empty: Settings ID cannot be empty
+    id_invalid: Settings ID is not valid
+    country_invalid: Country ID is not valid
+    cert_years_invalid: Number of years for user certificate is not valid
+    nats_timeout_invalid: NATS timeout is not valid
+    max_upload_size_invalid: Max Upload Size is not valid
+    saved: General Settings saved!
+    reload: This setting has been saved, but the console service must be restarted by hand for it to take effect
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."

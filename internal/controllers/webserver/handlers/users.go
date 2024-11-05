@@ -46,7 +46,12 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c)))
+	defaultCountry, err := h.Model.GetDefaultCountry()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -97,14 +102,18 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	// TODO many of the following values should be set as settings in database and not hardcoded
+	userCertYears, err := h.Model.GetDefaultUserCertDuration()
+	if err != nil {
+		return err
+	}
+
 	certRequest := openuem_nats.CertificateRequest{
 		Username:   user.ID,
 		FullName:   user.Name,
 		Email:      user.Email,
 		Country:    user.Country,
 		Password:   user.CertClearPassword,
-		YearsValid: 1,
+		YearsValid: userCertYears,
 	}
 
 	data, err := json.Marshal(certRequest)
@@ -248,7 +257,12 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.edit.success")))
 	}
 
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user)))
+	defaultCountry, err := h.Model.GetDefaultCountry()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry)))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {

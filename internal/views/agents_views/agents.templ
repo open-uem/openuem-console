@@ -34,16 +34,21 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 				</p>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
-				<form class="flex gap-4 mt-5 mb-2">
+				<form class="flex gap-4 mt-5 mb-2 justify-between">
 					<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
 					<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 					<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
 					<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-					@FilterByHostname(f)
-					@FilterStatus(f)
-					@FilterByOS(f)
-					@FilterByTags(f, tags)
-					@ClearFilters()
+					<div class="flex gap-4">
+						@FilterByHostname(f)
+						@FilterStatus(f)
+						@FilterByOS(f)
+						@FilterByTags(f, tags)
+						@ClearFilters()
+					</div>
+					<div class="flex-gap-4">
+						@RefreshAgentList()
+					</div>
 				</form>
 				if len(agents) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
@@ -54,7 +59,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 						@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 					}
 				} else {
-					<p class="uk-text-small uk-text-muted mt-6 mb-4">
+					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }
 					</p>
 				}
@@ -514,6 +519,19 @@ templ ClearFilters() {
 		hx-swap="outerHTML"
 	>
 		{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
+	</button>
+}
+
+templ RefreshAgentList() {
+	<button
+		type="button"
+		class="uk-button uk-button-default"
+		hx-push-url="false"
+		hx-get="/agents"
+		hx-target="#main"
+		hx-swap="outerHTML"
+	>
+		{ i18n.T(ctx, "Refresh") }<uk-icon hx-history="false" icon="refresh-cw" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
 	</button>
 }
 

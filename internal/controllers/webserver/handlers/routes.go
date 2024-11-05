@@ -45,6 +45,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
 	e.POST("/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
 	e.POST("/admin/smtp/test", h.TestSMTPSettings, h.IsAuthenticated)
+	e.GET("/admin/settings", h.GeneralSettings, h.IsAuthenticated)
+	e.POST("/admin/settings", h.GeneralSettings, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

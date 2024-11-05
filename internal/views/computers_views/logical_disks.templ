@@ -14,7 +14,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				if confirmDelete {
-					@partials.ConfirmDelete("Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive", "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				@ComputersNavbar(agent.ID, "logical-disks", confirmDelete)
 				<div id="error" class="hidden"></div>
@@ -83,7 +83,7 @@ templ LogicalDisks(agent *ent.Agent, confirmDelete bool) {
 							}
 						</table>
 					} else {
-						<p class="uk-text-small uk-text-muted mt-6 mb-4">
+						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "inventory.logical_disk.no_logical_disks") }
 						</p>
 					}

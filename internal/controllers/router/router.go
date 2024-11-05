@@ -19,7 +19,7 @@ import (
 	mw "github.com/labstack/echo/v4/middleware"
 )
 
-func New(s *sessions.SessionManager, server, port string) *echo.Echo {
+func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.Echo {
 	e := echo.New()
 
 	// Static assets
@@ -43,8 +43,7 @@ func New(s *sessions.SessionManager, server, port string) *echo.Echo {
 	e.Use(middleware.GetLocale)
 
 	// Limit uploads
-	// TODO - This should be a setting!
-	e.Use(mw.BodyLimit("512M"))
+	e.Use(mw.BodyLimit(maxUploadSize))
 
 	// Add CORS middleware
 	e.Use(mw.CORSWithConfig(mw.CORSConfig{

@@ -59,7 +59,7 @@ templ ConfigNavbar(active string) {
 				{ i18n.T(ctx, "Metadata") }
 			</a>
 		</li>
-		/* <li class={ templ.KV("uk-active", active == "settings") }>
+		<li class={ templ.KV("uk-active", active == "settings") }>
 			<a
 				href={ templ.URL("/admin/settings") }
 				hx-get={ string(templ.URL("/admin/settings")) }
@@ -67,8 +67,8 @@ templ ConfigNavbar(active string) {
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
-				{ i18n.T(ctx, "Advanced Settings") }
+				{ i18n.T(ctx, "General Settings") }
 			</a>
-		</li> */
+		</li>
 	</ul>
 }

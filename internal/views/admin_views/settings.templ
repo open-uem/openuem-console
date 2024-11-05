@@ -1,0 +1,129 @@
+package admin_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"strconv"
+)
+
+templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "General Settings", Url: "/admin/settings"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("settings")
+				<div id="success" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "settings.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "settings.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.country_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.country_description") }</td>
+								<td class="w-1/5 !align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										@partials.Countries(c, settings.Country)
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-1"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-1" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_description") } </td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<input class="uk-input" type="number" name="nats-timeout" value={ strconv.Itoa(settings.NatsRequestTimeoutSeconds) }/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-2"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-2" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<input class="uk-input" type="text" name="max-upload-size" value={ settings.MaxUploadSize }/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-3"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-3" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<input class="uk-input" type="number" name="cert-years" value={ strconv.Itoa(settings.UserCertYearsValid) }/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-4"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ GeneralSettingsIndex(title string, cmp templ.Component) {
+	@layout.Base("admin") {
+		@cmp
+	}
+}

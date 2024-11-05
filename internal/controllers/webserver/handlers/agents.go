@@ -9,6 +9,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +20,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	// TODO - TEST set pageSize to 1
+	// DEBUG - TEST set pageSize to 1
 	// p.PageSize = 1
 
 	// Get filters values
@@ -137,7 +138,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, "Agent has been enabled", "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "")
 }
 
 func (h *Handler) AgentDisable(c echo.Context) error {
@@ -152,21 +153,19 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 func (h *Handler) AgentForceRun(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	// TODO - Timeout should not be hardcoded
 	go func() {
-		if _, err := h.NATSConnection.Request("agent.report."+agentId, nil, 10*time.Second); err != nil {
+		if _, err := h.NATSConnection.Request("agent.report."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 			log.Printf("[ERROR]: %v", err)
 		}
 	}()
 
-	return h.ListAgents(c, "Agent will run an send new information, check it again in a few minutes", "")
+	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.force_run_success")))
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	// TODO - Timeout should not be hardcoded
-	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, 10*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -174,7 +173,7 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, "Agent has been disabled", "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
 }
 
 func (h *Handler) AgentStartVNC(c echo.Context) error {
@@ -185,25 +184,22 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 		return h.ListAgents(c, "", err.Error())
 	}
 
-	// TODO - Timeout should not be hardcoded
-	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, 120*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	// TODO - Domain should not be hardcoded
-	return renderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", ".openuem.eu"))
+	// TODO - Proxy port should not be hardcoded?
+	return renderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", h.Domain))
 
 }
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	// TODO - Timeout should not be hardcoded
-	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, 120*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	// TODO - Domain should not be hardcoded
 	return renderView(c, computers_views.VNCConnect(agentId))
 
 }

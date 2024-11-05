@@ -9630,6 +9630,10 @@ th.uk-text-break, td.uk-text-break {
   height: 100vh;
 }
 
+.h-7 {
+  height: 1.75rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
 }
@@ -9742,6 +9746,10 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
+.w-7 {
+  width: 1.75rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -9818,16 +9826,8 @@ th.uk-text-break, td.uk-text-break {
   gap: 2rem;
 }
 
-.overflow-hidden {
-  overflow: hidden;
-}
-
 .overflow-y-auto {
   overflow-y: auto;
-}
-
-.text-ellipsis {
-  text-overflow: ellipsis;
 }
 
 .text-balance {

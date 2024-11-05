@@ -18,6 +18,7 @@ es:
   Disconnect: "Desconectar"
   Edit: "Editar"
   Example: "Ejemplo"
+  General Settings: "Conf. General"
   Install: "Instalar"
   Uninstall: "Desinstalar"
   Disable: "Desactivar"
@@ -32,6 +33,7 @@ es:
   Notes: "Notas"
   OperatingSystem: "Sistema Operativo"
   Publisher: "Desarrollador"
+  Refresh: "Refrescar"
   Rename: "Renombrar"
   Required: "Requerido"
   Reset: "Reestablecer"
@@ -114,6 +116,10 @@ es:
     metadata_no_metadata: "No se han definido metadatos para su organización"
     metadata_insert_value: "Introduzca un valor..."
     metadata_save_success: "El valor del metadato se ha guardado"
+    force_run_success: "El agente consultará y enviará la nueva información, consúltela en unos minutos"
+    has_been_enabled: "El agente ha sido activado"
+    has_been_disabled: "El agente ha sido desactivado"
+    confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
   inventory:
     hardware:
       title: "Hardware"
@@ -140,6 +146,7 @@ es:
       manufacturer: "Fabricante"
       model: "Modelo"
       serial: "Núm. Serie"
+      no_monitors: "No existe aún información sobre los monitores conectados"
     logical_disk:
       title: "Discos Lógicos"
       description: "Estos son los discos lógicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
@@ -153,7 +160,7 @@ es:
       bitlocker_encrypted: "Encriptado"
       bitlocker_unencrypted: "No encriptado"
       bitlocker_unknown: "Desconocido"
-      no_logical_disks: "No existe aún información disponible sobre los discos lógicos conectados"
+      no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
     file_browser:
       title: "Expl. Archivos"
       description: "Navegue por este disco lógico de forma remota usando SFTP. Haga clic en los tres puntos junto al icono de la carpeta o de fichero para mostrar un menú de acciones. También puede usar los iconos superiores para moverse a una carpeta superior, añadir una nueva carpeta, actualizar el contenido de la carpeta actual, subir un fichero a la carpeta actual o descargar varios ficheros y/o carpetas como un fichero ZIP o borrar varios elementos después de seleccionarlos"
@@ -170,13 +177,14 @@ es:
       name: "Nombre"
       descr: "Descripción"
       path: "Ruta"
+      no_shares: "No existe aún información sobre los recursos compartidos"
     printers:
       title: "Impresoras"
       description: "Estas son las impresoras conectadas a este equipo de acuerdo a lo informado por el agente de OpenUEM"
       port: "Puerto"
       is_default: "¿Por defecto?"
       is_network_printer: "¿Impresora de Red?"
-      no_printers: "No existe aún información disponible sobre las impresoras conectadas"
+      no_printers: "No existe aún información sobre las impresoras conectadas"
     network_adapters:
       title: "Adaptadores de red"
       description: "Estos son los adaptadores de red conectados a este equipo de acuerdo a lo informado por el agente de OpenUEM"
@@ -291,6 +299,7 @@ es:
       title: Editar usuario
       description: Edite este perfil de usuario
       success: El perfil del usuario se ha actualizado
+    no_users: Aún no se han creado usuarios
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"
@@ -362,6 +371,25 @@ es:
     saved: La configuración SMTP se ha guardado
     test: Probar config.
     test_success: Se envió con éxito el email de prueba a %s
+  settings:
+    title: Configuración general
+    description: OpenUEM tiene algunos ajustes que configuran su comportamiento
+    country_title: País
+    country_description: País por defecto para el registro de usuarios
+    nats_timeout_title: NATS Timeout
+    nats_timeout_description: Timeout de petición NATS en segundos
+    max_upload_title: Tamaño máximo de subida
+    max_upload_description: Tamaño máximo de subida para ficheros expresado en GB (G), MB (M) o KB (K)
+    user_cert_years_title: Duración certificado Usuario
+    user_cert_years_description: La duración en años del certificado de usuario
+    id_cannot_be_empty: El ID de configuración no puede estar vacío
+    id_invalid: El ID de configuración no es válido
+    country_invalid: El ID de país no es válido
+    cert_years_invalid: Número de años para el certificado de usuario no es válido
+    nats_timeout_invalid: El timeout de NATS no es válido
+    max_upload_size_invalid: El tamaño máximo de subida no es válido
+    saved: La configuración general se ha guardado
+    reload: Esta configuración se ha guardado, pero el servicio de la consola debe reiniciarse manualmente para que surta efecto
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."
