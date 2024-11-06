@@ -94,7 +94,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		errMessage = err.Error()
 	}
 
-	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

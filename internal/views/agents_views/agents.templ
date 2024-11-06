@@ -21,7 +21,7 @@ type AgentFilter struct {
 	Tags           []int
 }
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents []*ent.Agent, tags []*ent.Tag, successMessage, errMessage string) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents []*ent.Agent, tags []*ent.Tag, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.SuccessMessage(successMessage)
@@ -39,7 +39,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 					<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 					<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
 					<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-					<div class="flex gap-4">
+					<div class="flex gap-4 w-2/3">
 						@FilterByHostname(f)
 						@FilterStatus(f)
 						@FilterByOS(f)
@@ -47,7 +47,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 						@ClearFilters()
 					</div>
 					<div class="flex-gap-4">
-						@RefreshAgentList()
+						@partials.RefreshPage("/agents", refresh)
 					</div>
 				</form>
 				if len(agents) > 0 {
@@ -519,19 +519,6 @@ templ ClearFilters() {
 		hx-swap="outerHTML"
 	>
 		{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
-	</button>
-}
-
-templ RefreshAgentList() {
-	<button
-		type="button"
-		class="uk-button uk-button-default"
-		hx-push-url="false"
-		hx-get="/agents"
-		hx-target="#main"
-		hx-swap="outerHTML"
-	>
-		{ i18n.T(ctx, "Refresh") }<uk-icon hx-history="false" icon="refresh-cw" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
 	</button>
 }
 

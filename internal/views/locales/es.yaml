@@ -51,6 +51,7 @@ es:
     other: "Etiquetas"
   Unknown: "Desconocido"
   Update: "Actualizar"
+  Updated at: Actualizado a las %s
   Updates: "Actualizaciones"
   Upload: "Subir fichero"
   User:
@@ -390,6 +391,9 @@ es:
     max_upload_size_invalid: El tamaño máximo de subida no es válido
     saved: La configuración general se ha guardado
     reload: Esta configuración se ha guardado, pero el servicio de la consola debe reiniciarse manualmente para que surta efecto
+    refresh_title: Refresco automático
+    refresh_description: Algunas páginas se actualizan automáticamente. Configure el periodo de refresco en minutos
+    refresh_invalid: El tiempo de refresco no es válido
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

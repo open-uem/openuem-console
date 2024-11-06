@@ -49,6 +49,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if settings.Refresh != 0 {
+			if err := h.Model.UpdateRefreshTimeSetting(settings.ID, settings.Refresh); err != nil {
+				return renderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+
 		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -71,6 +77,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	natsTimeout := c.FormValue("nats-timeout")
 	maxUploadSize := c.FormValue("max-upload-size")
 	certYear := c.FormValue("cert-years")
+	refresh := c.FormValue("refresh")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -115,6 +122,17 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.max_upload_size_invalid"))
 		}
 		settings.MaxUploadSize = maxUploadSize
+	}
+
+	if refresh != "" {
+		settings.NATSTimeout, err = strconv.Atoi(natsTimeout)
+		if err != nil {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+		}
+
+		if settings.NATSTimeout <= 0 {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+		}
 	}
 
 	return &settings, nil

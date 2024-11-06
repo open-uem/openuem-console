@@ -1,0 +1,26 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"time"
+)
+
+templ RefreshPage(url string, refreshTime int) {
+	<div class="flex gap-4 items-center">
+		<button
+			type="button"
+			class="uk-button uk-button-default"
+			hx-push-url="false"
+			hx-post={ url }
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-trigger={ fmt.Sprintf("click, every %dm", refreshTime) }
+			_="on click add .animate-spin to #refresh-icon"
+		>
+			{ i18n.T(ctx, "Refresh") }
+			<span id="refresh-icon" class="ml-3"><uk-icon hx-history="false" icon="refresh-cw" custom-class="h-5 w-5" uk-cloack></uk-icon></span>
+		</button>
+		<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
+	</div>
+}

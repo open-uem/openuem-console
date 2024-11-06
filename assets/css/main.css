@@ -9610,6 +9610,10 @@ th.uk-text-break, td.uk-text-break {
   height: 1.5rem;
 }
 
+.h-7 {
+  height: 1.75rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -9628,10 +9632,6 @@ th.uk-text-break, td.uk-text-break {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-7 {
-  height: 1.75rem;
 }
 
 .max-h-40 {
@@ -9726,6 +9726,10 @@ th.uk-text-break, td.uk-text-break {
   width: 1.5rem;
 }
 
+.w-7 {
+  width: 1.75rem;
+}
+
 .w-7\/12 {
   width: 58.333333%;
 }
@@ -9744,10 +9748,6 @@ th.uk-text-break, td.uk-text-break {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-7 {
-  width: 1.75rem;
 }
 
 .flex-1 {

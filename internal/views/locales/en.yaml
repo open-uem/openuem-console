@@ -50,6 +50,7 @@ en:
     other: "Tags"
   Unknown: "Unknown"
   Update: "Update"
+  Updated at: Updated at %s
   Updates: "Updates"
   Upload: "Upload"
   User:
@@ -393,6 +394,9 @@ en:
     max_upload_size_invalid: Max Upload Size is not valid
     saved: General Settings saved!
     reload: This setting has been saved, but the console service must be restarted by hand for it to take effect
+    refresh_title: Automatic Refresh
+    refresh_description: Some pages refresh automatically. Set the refresh period in minutes
+    refresh_invalid: Refresh time is not valid
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."
