@@ -9794,6 +9794,10 @@ th.uk-text-break, td.uk-text-break {
   align-items: center;
 }
 
+.justify-end {
+  justify-content: flex-end;
+}
+
 .justify-center {
   justify-content: center;
 }

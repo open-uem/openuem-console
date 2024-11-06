@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -71,14 +71,21 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 						<div id="deploy-search-results"></div>
 					</div>
 					<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
-						if p.NItems > 0 {
-							<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_list") }</p>
-							<div id="deployments-results">
-								@DeploymentsTable(c, p, agent.ID, deployments)
+						<div class="flex flex-col gap-4">
+							<div class="flex justify-end">
+								@partials.RefreshPage(string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime)
 							</div>
-						} else {
-							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_deployments") }</p>
-						}
+							<div>
+								if p.NItems > 0 {
+									<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_list") }</p>
+									<div id="deployments-results">
+										@DeploymentsTable(c, p, agent.ID, deployments)
+									</div>
+								} else {
+									<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_deployments") }</p>
+								}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

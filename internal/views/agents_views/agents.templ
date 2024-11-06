@@ -47,7 +47,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 						@ClearFilters()
 					</div>
 					<div class="flex-gap-4">
-						@partials.RefreshPage("/agents", refresh)
+						@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
 					</div>
 				</form>
 				if len(agents) > 0 {

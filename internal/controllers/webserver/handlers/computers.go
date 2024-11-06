@@ -245,7 +245,12 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		return renderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments))
 	}
 
-	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {

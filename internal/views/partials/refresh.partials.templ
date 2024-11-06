@@ -6,15 +6,19 @@ import (
 	"time"
 )
 
-templ RefreshPage(url string, refreshTime int) {
+templ RefreshPage(url, target, swap, method string, refreshTime int) {
 	<div class="flex gap-4 items-center">
 		<button
 			type="button"
 			class="uk-button uk-button-default"
 			hx-push-url="false"
-			hx-post={ url }
-			hx-target="#main"
-			hx-swap="outerHTML"
+			if method == "post" {
+				hx-post={ url }
+			} else {
+				hx-get={ url }
+			}
+			hx-target={ target }
+			hx-swap={ swap }
 			hx-trigger={ fmt.Sprintf("click, every %dm", refreshTime) }
 			_="on click add .animate-spin to #refresh-icon"
 		>
