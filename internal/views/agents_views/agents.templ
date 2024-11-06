@@ -25,7 +25,10 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters("/agents", "#main", "outerHTML")
+					@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
+						return f.Hostname == "" && !f.EnabledAgents && !f.DisabledAgents &&
+							!f.WindowsAgents && !f.LinuxAgents && !f.MacAgents && len(f.Tags) == 0
+					})
 					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
 				</div>
 				if len(agents) > 0 {

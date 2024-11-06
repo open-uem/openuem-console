@@ -2,7 +2,7 @@ package filters
 
 import "github.com/invopop/ctxi18n/i18n"
 
-templ ClearFilters(url, target, swap string) {
+templ ClearFilters(url, target, swap string, disableFunc func() bool) {
 	<button
 		type="button"
 		class="uk-button uk-button-default"
@@ -10,6 +10,7 @@ templ ClearFilters(url, target, swap string) {
 		hx-get={ url }
 		hx-target={ target }
 		hx-swap={ swap }
+		disabled?={ disableFunc() }
 	>
 		{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
 	</button>

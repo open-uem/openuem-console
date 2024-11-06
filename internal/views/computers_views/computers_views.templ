@@ -24,7 +24,10 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters("/computers", "#main", "outerHTML")
+					@filters.ClearFilters("/computers", "#main", "outerHTML", func() bool {
+						return f.Hostname == "" && !f.WindowsAgents && !f.LinuxAgents && !f.MacAgents &&
+							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 && len(f.ComputerModels) == 0
+					})
 					@partials.RefreshPage("/computers", "#main", "outerHTML", "post", refreshTime)
 				</div>
 				if len(agents) > 0 {
