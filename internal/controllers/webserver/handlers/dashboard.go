@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/charts"
 	"github.com/doncicuto/openuem-console/internal/views/dashboard_views"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,7 +21,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {
 	ch := dashboard_views.DashboardCharts{}
 
-	countAllAgents, err := h.Model.CountAllAgents(agents_views.AgentFilter{})
+	countAllAgents, err := h.Model.CountAllAgents(filters.AgentFilter{})
 	if err != nil {
 		return nil, err
 	}

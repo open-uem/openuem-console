@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem-console/internal/views/software_views"
 	"github.com/labstack/echo/v4"
@@ -21,19 +22,31 @@ func (h *Handler) Software(c echo.Context) error {
 	}
 
 	// Get filters
-	focus := c.FormValue("focus")
-	filterByName := c.FormValue("filterByName")
-	filterByPublisher := c.FormValue("filterByPublisher")
+	filterByName := c.FormValue("filterByAppName")
+	filterByPublisher := c.FormValue("filterByAppPublisher")
 
-	apps, err = h.Model.GetAppsByPage(p, filterByName, filterByPublisher)
+	f := filters.ApplicationsFilter{}
+	if filterByName != "" {
+		f.AppName = filterByName
+	}
+	if filterByPublisher != "" {
+		f.Vendor = filterByPublisher
+	}
+
+	apps, err = h.Model.GetAppsByPage(p, f)
 	if err != nil {
 		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	p.NItems, err = h.Model.CountAllApps(filterByName, filterByPublisher)
+	p.NItems, err = h.Model.CountAllApps(f)
 	if err != nil {
 		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, filterByName, filterByPublisher, focus)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, refreshTime)))
 }

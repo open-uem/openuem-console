@@ -7,6 +7,7 @@ import (
 
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
@@ -24,7 +25,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	// p.PageSize = 1
 
 	// Get filters values
-	f := agents_views.AgentFilter{}
+	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
 	enabledAgents := c.FormValue("filterByEnabledAgents")

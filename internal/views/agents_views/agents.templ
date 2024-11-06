@@ -2,26 +2,16 @@ package agents_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"slices"
 	"strconv"
 )
 
-type AgentFilter struct {
-	Hostname       string
-	EnabledAgents  bool
-	DisabledAgents bool
-	WindowsAgents  bool
-	LinuxAgents    bool
-	MacAgents      bool
-	Tags           []int
-}
-
-templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents []*ent.Agent, tags []*ent.Tag, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, tags []*ent.Tag, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.SuccessMessage(successMessage)
@@ -34,27 +24,21 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f AgentFilter, agents
 				</p>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
-				<form class="flex gap-4 mt-5 mb-2 justify-between">
-					<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-					<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-					<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-					<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-					<div class="flex gap-4 w-2/3">
-						@FilterByHostname(f)
-						@FilterStatus(f)
-						@FilterByOS(f)
-						@FilterByTags(f, tags)
-						@ClearFilters()
-					</div>
-					<div class="flex-gap-4">
-						@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
-					</div>
-				</form>
+				<div class="flex justify-between mt-8">
+					@filters.ClearFilters("/agents", "#main", "outerHTML")
+					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
+				</div>
 				if len(agents) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
-						@AgentsTableHead(c, p)
-						@AgentsTableBody(agents, tags)
-					</table>
+					<form class="flex gap-4 mt-5 mb-2 justify-between">
+						<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+						<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+						<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+						<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
+							@AgentsTableHead(c, p, f, tags)
+							@AgentsTableBody(agents, tags)
+						</table>
+					</form>
 					if p.NItems / p.PageSize > 1 {
 						@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 					}
@@ -104,30 +88,34 @@ templ AgentsIndex(title string, cmp templ.Component) {
 	}
 }
 
-templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort) {
+templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, tags []*ent.Tag) {
 	<thead>
 		<tr>
 			<th class="w-1/6">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
 					@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
+					@filters.FilterByHostname(f, "/agents", "agents.filter_by_hostname", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
 					@partials.SortByColumnIcon(c, p, "enabled", "alpha", "#main", "outerHTML", "")
+					@filters.FilterStatus(f, "/agents", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
 					@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
+					@filters.FilterByOS(f, "/agents", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "agents.version") }</span>
+					@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
 				</div>
 			</th>
 			<th class="w-1/6">
@@ -137,7 +125,10 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort) {
 				</div>
 			</th>
 			<th class="w-1/4">
-				{ i18n.T(ctx, "Tag.other") }
+				<div class="flex gap-2 items-center">
+					{ i18n.T(ctx, "Tag.other") }
+					@filters.FilterByTags(f, tags)
+				</div>
 			</th>
 			<th class="w-1/6">
 				<div class="flex gap-2 items-center">
@@ -336,194 +327,6 @@ templ AddActionsButton(agent *ent.Agent) {
 			</li>
 		</ul>
 	</div>
-}
-
-templ FilterByHostname(f AgentFilter) {
-	<div class="uk-inline  w-1/5">
-		<span class="uk-form-icon">
-			if len(f.Hostname) > 0 {
-				<uk-icon icon="filter-x" hx-history="false" custom-class="mr-2 fill-red-500 text-red-500" uk-cloak></uk-icon>
-			} else {
-				<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon>
-			}
-		</span>
-		<input
-			class="uk-input"
-			id="filterByHostname"
-			name="filterByHostname"
-			value={ f.Hostname }
-			placeholder={ i18n.T(ctx, "agents.filter_by_hostname") }
-			aria-label="Filter by name"
-			hx-post="/agents"
-			hx-push-url="false"
-			hx-target="#main"
-			hx-swap="outerHTML"
-			hx-trigger="keyup delay:1s"
-			_="
-			on load 
-				if my.value.length > 0 then
-					set my.selectionStart to my.value.length
-					set my.selectionEnd to my.value.length
-				end
-			end
-
-			on keyup
-				if #filterByHostname.value.length == 0 then
-					put 1 into #page.value
-				end
-			then
-			"
-		/>
-	</div>
-}
-
-templ FilterStatus(f AgentFilter) {
-	<button class="uk-button uk-button-default" type="button">
-		if f.EnabledAgents || f.DisabledAgents {
-			<uk-icon icon="filter-x" hx-history="false" custom-class="mr-2 fill-red-500 text-red-500" uk-cloak></uk-icon> { i18n.T(ctx, "Status") }
-		} else {
-			<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon> { i18n.T(ctx, "Status") }
-		}
-	</button>
-	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<ul class="uk-dropdown-nav uk-nav">
-			<li class="p-2">
-				<input
-					id="filterByEnabledAgents"
-					name="filterByEnabledAgents"
-					type="checkbox"
-					class="uk-checkbox mx-3"
-					hx-post="/agents"
-					hx-push-url="false"
-					hx-target="#main"
-					hx-swap="outerHTML"
-					checked?={ f.EnabledAgents }
-				/>
-				<label for="filterByEnabledAgents">{ i18n.T(ctx, "agents.enabled") }</label>
-			</li>
-			<li class="p-2">
-				<input
-					id="filterByDisabledAgents"
-					name="filterByDisabledAgents"
-					type="checkbox"
-					class="uk-checkbox mx-3"
-					hx-post="/agents"
-					hx-push-url="false"
-					hx-target="#main"
-					hx-swap="outerHTML"
-					checked?={ f.DisabledAgents }
-				/>
-				<label for="filterByDisabledAgents">{ i18n.T(ctx, "agents.disabled") }</label>
-			</li>
-		</ul>
-	</div>
-}
-
-templ FilterByOS(f AgentFilter) {
-	<button class="uk-button uk-button-default" type="button">
-		if f.WindowsAgents || f.LinuxAgents || f.MacAgents {
-			<uk-icon icon="filter-x" hx-history="false" custom-class="mr-2 fill-red-500 text-red-500" uk-cloak></uk-icon> { i18n.T(ctx, "agents.os") }
-		} else {
-			<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon> { i18n.T(ctx, "agents.os") }
-		}
-	</button>
-	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<ul class="uk-dropdown-nav uk-nav">
-			<li class="p-2">
-				<input
-					id="filterByWindowsAgents"
-					name="filterByWindowsAgents"
-					type="checkbox"
-					value="windows"
-					class="uk-checkbox mx-3"
-					hx-post="/agents"
-					hx-push-url="false"
-					hx-target="#main"
-					hx-swap="outerHTML"
-					checked?={ f.WindowsAgents }
-				/>
-				<label for="filterByWindowsAgents">Windows</label>
-			</li>
-			<li class="p-2">
-				<input
-					id="filterByLinuxAgents"
-					name="filterByLinuxAgents"
-					type="checkbox"
-					value="linux"
-					class="uk-checkbox mx-3"
-					hx-post="/agents"
-					hx-push-url="false"
-					hx-target="#main"
-					hx-swap="outerHTML"
-					checked?={ f.LinuxAgents }
-				/>
-				<label for="filterByLinuxAgents">Linux</label>
-			</li>
-			<li class="p-2">
-				<input
-					id="filterByMacAgents"
-					name="filterByMacAgents"
-					type="checkbox"
-					class="uk-checkbox mx-3"
-					value="mac"
-					hx-post="/agents"
-					hx-push-url="false"
-					hx-target="#main"
-					hx-swap="outerHTML"
-					checked?={ f.MacAgents }
-				/>
-				<label for="filterByMacAgents">Mac</label>
-			</li>
-		</ul>
-	</div>
-}
-
-templ FilterByTags(f AgentFilter, tags []*ent.Tag) {
-	<button class="uk-button uk-button-default" type="button">
-		if len(f.Tags) > 0 {
-			<uk-icon icon="filter-x" hx-history="false" custom-class="mr-2 fill-red-500 text-red-500" uk-cloak></uk-icon> { i18n.T(ctx, "Tag.other") }
-		} else {
-			<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon> { i18n.T(ctx, "Tag.other") }
-		}
-	</button>
-	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<ul class="uk-dropdown-nav uk-nav">
-			for _, tag := range tags {
-				<li class="p-2">
-					<input
-						id={ fmt.Sprintf("filterByTag%d", tag.ID) }
-						name={ fmt.Sprintf("filterByTag%d", tag.ID) }
-						type="checkbox"
-						value={ tag.Tag }
-						class="uk-checkbox mx-3"
-						hx-post="/agents"
-						hx-push-url="false"
-						hx-target="#main"
-						hx-swap="outerHTML"
-						checked?={ isFilteredByTag(tag.ID, f) }
-					/>
-					<label for={ fmt.Sprintf("filterByTag%d", tag.ID) }>{ tag.Tag }</label>
-				</li>
-			}
-		</ul>
-	</div>
-}
-
-templ ClearFilters() {
-	<button
-		type="button"
-		class="uk-button uk-button-default"
-		hx-push-url="false"
-		hx-get="/agents"
-		hx-target="#main"
-		hx-swap="outerHTML"
-	>
-		{ i18n.T(ctx, "Clear") }<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
-	</button>
-}
-
-func isFilteredByTag(id int, f AgentFilter) bool {
-	return slices.Contains(f.Tags, id)
 }
 
 func getAvailableTags(allTags, usedTags []*ent.Tag) []*ent.Tag {

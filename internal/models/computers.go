@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
@@ -25,8 +26,14 @@ type Computer struct {
 	Model        string
 }
 
-func (m *Model) CountAllComputers() (int, error) {
-	count, err := m.Client.Agent.Query().Count(context.Background())
+func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
+
+	query := m.Client.Agent.Query()
+
+	// Apply filters
+	applyComputerFilters(query, f)
+
+	count, err := query.Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -43,79 +50,85 @@ func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
 		Offset((p.CurrentPage - 1) * p.PageSize)
 }
 
-func (m *Model) GetComputersByPage(p partials.PaginationAndSort) ([]Computer, error) {
+func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]Computer, error) {
 	var err error
 	var computers []Computer
 
+	query := m.Client.Agent.Query()
+
+	// Apply filters
+	applyComputerFilters(query, f)
+
+	// Apply sort
 	switch p.SortBy {
 	case "hostname":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(agent.FieldHostname))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(agent.FieldHostname))
 			}).Scan(context.Background(), &computers)
 		}
 	case "os":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(agent.FieldOs))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(agent.FieldOs))
 			}).Scan(context.Background(), &computers)
 		}
 	case "version":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Asc("Version"))
+				s.OrderBy(sql.Asc("version"))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Desc("Version"))
+				s.OrderBy(sql.Desc("version"))
 			}).Scan(context.Background(), &computers)
 		}
 	case "username":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(operatingsystem.FieldUsername))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(operatingsystem.FieldUsername))
 			}).Scan(context.Background(), &computers)
 		}
 	case "manufacturer":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(computer.FieldManufacturer))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(computer.FieldManufacturer))
 			}).Scan(context.Background(), &computers)
 		}
 	case "model":
 		if p.SortOrder == "asc" {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Asc(computer.FieldModel))
 			}).Scan(context.Background(), &computers)
 		} else {
-			err = m.Client.Agent.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
 				s.OrderBy(sql.Desc(computer.FieldModel))
 			}).Scan(context.Background(), &computers)
@@ -126,6 +139,44 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort) ([]Computer, er
 		return nil, err
 	}
 	return computers, nil
+}
+
+func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
+	if len(f.Hostname) > 0 {
+		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+	}
+
+	if len(f.Username) > 0 {
+		query = query.Where(agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Username)))
+	}
+
+	if f.WindowsAgents || f.LinuxAgents || f.MacAgents {
+		agentSystems := []string{}
+
+		if f.WindowsAgents {
+			agentSystems = append(agentSystems, "windows")
+		}
+		if f.LinuxAgents {
+			agentSystems = append(agentSystems, "linux")
+		}
+		if f.MacAgents {
+			agentSystems = append(agentSystems, "mac")
+		}
+
+		query = query.Where(agent.OsIn(agentSystems...))
+	}
+
+	if len(f.OSVersions) > 0 {
+		query = query.Where(agent.HasOperatingsystemWith(operatingsystem.VersionIn(f.OSVersions...)))
+	}
+
+	if len(f.ComputerManufacturers) > 0 {
+		query = query.Where(agent.HasComputerWith(computer.ManufacturerIn(f.ComputerManufacturers...)))
+	}
+
+	if len(f.ComputerModels) > 0 {
+		query = query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
+	}
 }
 
 func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {
@@ -243,4 +294,76 @@ func (m *Model) SaveMetadata(agentId string, metadataId int, value string) error
 
 func (m *Model) SaveNotes(agentId string, notes string) error {
 	return m.Client.Agent.UpdateOneID(agentId).SetNotes(notes).Exec(context.Background())
+}
+
+func (m *Model) GetComputerManufacturers() ([]string, error) {
+	query := m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true)
+
+	data, err := query.All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	manufacturers := []string{}
+
+	for _, item := range data {
+		manufacturers = append(manufacturers, item.Manufacturer)
+	}
+
+	return manufacturers, nil
+}
+
+func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
+	query := m.Client.Computer.Query().Select(computer.FieldModel).Unique(true)
+
+	if len(f.ComputerManufacturers) > 0 {
+		query.Where(computer.ManufacturerIn(f.ComputerManufacturers...))
+	}
+
+	data, err := query.All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	models := []string{}
+
+	for _, item := range data {
+		models = append(models, item.Model)
+	}
+
+	return models, nil
+}
+
+func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
+	query := m.Client.OperatingSystem.Query().Select(operatingsystem.FieldVersion).Unique(true)
+
+	osTypes := []string{}
+	if f.WindowsAgents {
+		osTypes = append(osTypes, "windows")
+	}
+
+	if f.LinuxAgents {
+		osTypes = append(osTypes, "linux")
+	}
+
+	if f.MacAgents {
+		osTypes = append(osTypes, "mac")
+	}
+
+	if len(osTypes) > 0 {
+		query.Where(operatingsystem.TypeIn(osTypes...))
+	}
+
+	data, err := query.All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	versions := []string{}
+
+	for _, item := range data {
+		versions = append(versions, item.Version)
+	}
+
+	return versions, nil
 }

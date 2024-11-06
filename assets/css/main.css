@@ -9506,6 +9506,10 @@ th.uk-text-break, td.uk-text-break {
   margin-top: -1rem;
 }
 
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }

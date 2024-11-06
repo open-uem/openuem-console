@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
-	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
@@ -190,23 +190,87 @@ func (h *Handler) Computers(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
+	// Get filters values
+	f := filters.AgentFilter{}
+	f.Hostname = c.FormValue("filterByHostname")
+	f.Username = c.FormValue("filterByUsername")
+
+	windowsAgents := c.FormValue("filterByWindowsAgents")
+	if windowsAgents == "windows" {
+		f.WindowsAgents = true
+	}
+
+	linuxAgents := c.FormValue("filterByLinuxAgents")
+	if linuxAgents == "linux" {
+		f.LinuxAgents = true
+	}
+
+	macAgents := c.FormValue("filterByMacAgents")
+	if macAgents == "mac" {
+		f.MacAgents = true
+	}
+
+	versions, err := h.Model.GetOSVersions(f)
+	if err != nil {
+		return err
+	}
+	filteredVersions := []string{}
+	for index, version := range versions {
+		value := c.FormValue(fmt.Sprintf("filterByOSVersion%d", index))
+		if value != "" {
+			filteredVersions = append(filteredVersions, version)
+		}
+	}
+	f.OSVersions = filteredVersions
+
+	filteredComputerManufacturers := []string{}
+	vendors, err := h.Model.GetComputerManufacturers()
+	if err != nil {
+		return err
+	}
+	for index, vendor := range vendors {
+		value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
+		if value != "" {
+			filteredComputerManufacturers = append(filteredComputerManufacturers, vendor)
+		}
+	}
+	f.ComputerManufacturers = filteredComputerManufacturers
+
+	filteredComputerModels := []string{}
+	models, err := h.Model.GetComputerModels(f)
+	if err != nil {
+		return err
+	}
+	for index, model := range models {
+		value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
+		if value != "" {
+			filteredComputerModels = append(filteredComputerModels, model)
+		}
+	}
+	f.ComputerModels = filteredComputerModels
+
 	// Default sort
 	if p.SortBy == "" {
 		p.SortBy = "hostname"
 		p.SortOrder = "desc"
 	}
 
-	computers, err := h.Model.GetComputersByPage(p)
+	computers, err := h.Model.GetComputersByPage(p, f)
 	if err != nil {
 		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	p.NItems, err = h.Model.CountAllAgents(agents_views.AgentFilter{})
+	p.NItems, err = h.Model.CountAllComputers(filters.AgentFilter{})
 	if err != nil {
 		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, computers)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {

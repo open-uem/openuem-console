@@ -234,6 +234,7 @@ es:
     requested: "Hemos solicitado a los agentes seleccionados que desinstalen este paquete, compruebe más tarde si el software se ha desinstalado correctamente en ese dispositivo"
   computers:
     description: "Este es el inventario de equipos de su organización comunicado por los agentes que han contactado con el servidor OpenUEM"
+    filter_by_username: "Filtrar por nombre de usuario..."
   confirm:
     agent_disable: "¿Está seguro de que quiere desactivar este agente? El agente no enviará más información hasta que vuelva a ser activado"
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
