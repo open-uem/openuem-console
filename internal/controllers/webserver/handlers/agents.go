@@ -100,12 +100,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, refreshTime)))
+	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, h.RefreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

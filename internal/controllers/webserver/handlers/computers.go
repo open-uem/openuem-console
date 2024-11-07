@@ -292,12 +292,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		return err
-	}
-
-	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, refreshTime)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, h.RefreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {
@@ -336,12 +331,7 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		return renderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments))
 	}
 
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		return err
-	}
-
-	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, refreshTime)))
+	return renderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, h.RefreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {

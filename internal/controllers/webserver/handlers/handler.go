@@ -24,6 +24,7 @@ type Handler struct {
 	ConsolePort    string
 	Domain         string
 	NATSTimeout    int
+	RefreshTime    int
 }
 
 func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir, domain string) *Handler {
@@ -33,6 +34,12 @@ func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, 
 	if err != nil {
 		timeout = 20
 		log.Println("[ERROR]: could not get NATS request timeout from database")
+	}
+
+	refreshTime, err := model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
 	}
 
 	return &Handler{
@@ -48,5 +55,6 @@ func NewHandler(model *models.Model, nc *nats.Conn, s *sessions.SessionManager, 
 		AuthPort:       authPort,
 		Domain:         domain,
 		NATSTimeout:    timeout,
+		RefreshTime:    refreshTime,
 	}
 }

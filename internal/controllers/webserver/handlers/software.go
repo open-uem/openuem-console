@@ -43,10 +43,5 @@ func (h *Handler) Software(c echo.Context) error {
 		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		return err
-	}
-
-	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, refreshTime)))
+	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, h.RefreshTime)))
 }
