@@ -26,26 +26,26 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 		errMessage = err.Error()
 	}
 
-	return renderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, s, p, successMessage, errMessage, h.SessionManager.Manager.Codec)))
+	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, s, p, successMessage, errMessage, h.SessionManager.Manager.Codec)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {
 	token := c.Param("token")
 	if token == "" {
-		return renderError(c, partials.ErrorMessage("no token was found in request", true))
+		return RenderError(c, partials.ErrorMessage("no token was found in request", true))
 	}
 
-	return renderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "confirm.session_delete"), "", "/admin/sessions/"+token))
+	return RenderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "confirm.session_delete"), "", "/admin/sessions/"+token))
 }
 
 func (h *Handler) SessionConfirmDelete(c echo.Context) error {
 	token := c.Param("token")
 	if token == "" {
-		return renderError(c, partials.ErrorMessage("no token was found in request", true))
+		return RenderError(c, partials.ErrorMessage("no token was found in request", true))
 	}
 
 	if err := h.Model.DeleteSession(token); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	return h.ListSessions(c, i18n.T(c.Request().Context(), "success.session_delete"))

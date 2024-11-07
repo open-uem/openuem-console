@@ -404,6 +404,10 @@ en:
     refresh_title: Automatic Refresh
     refresh_description: Some pages refresh automatically. Set the refresh period in minutes
     refresh_invalid: Refresh time is not valid
+    session_lifetime_title: Session Lifetime
+    session_lifetime_description: Session lifetime in minutes. Once that time expires the session will be closed
+    session_lifetime_invalid: Session lifetime is not valid
+
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."

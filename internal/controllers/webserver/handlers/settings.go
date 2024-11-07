@@ -20,50 +20,57 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 
 		settings, err := validateGeneralSettings(c)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), true))
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
 		// TODO - This setting may not be effective until the console service is restarted
 		if settings.MaxUploadSize != "" {
 			if err := h.Model.UpdateMaxUploadSizeSetting(settings.ID, settings.MaxUploadSize); err != nil {
-				return renderError(c, partials.ErrorMessage(err.Error(), true))
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
-			return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.reload")))
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.reload")))
 		}
 
 		if settings.NATSTimeout != 0 {
 			if err := h.Model.UpdateNATSTimeoutSetting(settings.ID, settings.NATSTimeout); err != nil {
-				return renderError(c, partials.ErrorMessage(err.Error(), true))
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 
 		if settings.Country != "" {
 			if err := h.Model.UpdateCountrySetting(settings.ID, settings.Country); err != nil {
-				return renderError(c, partials.ErrorMessage(err.Error(), true))
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 
 		if settings.UserCertYears != 0 {
 			if err := h.Model.UpdateUserCertDurationSetting(settings.ID, settings.UserCertYears); err != nil {
-				return renderError(c, partials.ErrorMessage(err.Error(), true))
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 
 		if settings.Refresh != 0 {
 			if err := h.Model.UpdateRefreshTimeSetting(settings.ID, settings.Refresh); err != nil {
-				return renderError(c, partials.ErrorMessage(err.Error(), true))
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 
-		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
+		if settings.SessionLifetime != 0 {
+			if err := h.Model.UpdateSessionLifetime(settings.ID, settings.SessionLifetime); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.reload")))
+		}
+
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
 	settings, err := h.Model.GetGeneralSettings()
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return renderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings)))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings)))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
@@ -78,6 +85,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	maxUploadSize := c.FormValue("max-upload-size")
 	certYear := c.FormValue("cert-years")
 	refresh := c.FormValue("refresh")
+	sessionLifetime := c.FormValue("session-lifetime")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -125,12 +133,23 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	}
 
 	if refresh != "" {
-		settings.NATSTimeout, err = strconv.Atoi(natsTimeout)
+		settings.Refresh, err = strconv.Atoi(refresh)
 		if err != nil {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 
-		if settings.NATSTimeout <= 0 {
+		if settings.Refresh <= 0 {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+		}
+	}
+
+	if sessionLifetime != "" {
+		settings.SessionLifetime, err = strconv.Atoi(sessionLifetime)
+		if err != nil {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+		}
+
+		if settings.SessionLifetime <= 0 {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 	}

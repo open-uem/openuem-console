@@ -401,6 +401,9 @@ es:
     refresh_title: Refresco automático
     refresh_description: Algunas páginas se actualizan automáticamente. Configure el periodo de refresco en minutos
     refresh_invalid: El tiempo de refresco no es válido
+    session_lifetime_title: Tiempo de vida de la sesión
+    session_lifetime_description: Tiempo de vida de la sesión en minutos pasado el cual se cerrará la sesión
+    session_lifetime_invalid: Tiempo de vida de sesión no válido
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

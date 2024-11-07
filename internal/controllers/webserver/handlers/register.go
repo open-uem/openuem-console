@@ -34,7 +34,7 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return err
 	}
 
-	return renderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry)))
+	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry)))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
@@ -46,11 +46,11 @@ func (h *Handler) SendRegister(c echo.Context) error {
 	r := RegisterRequest{}
 	decoder := form.NewDecoder()
 	if err := c.Request().ParseForm(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	err = decoder.Decode(&r, c.Request().Form)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
@@ -71,7 +71,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 
 		exists, err := h.Model.UserExists(r.UID)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
 		if exists {
@@ -95,7 +95,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 
 		exists, err = h.Model.EmailExists(r.Email)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		if exists {
 			validations.EmailExists = true
@@ -126,20 +126,20 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			validations.PasswordRequired = true
 		}
 
-		return renderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry)))
+		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry)))
 	}
 
 	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	token, err := h.generateConfirmEmailToken(r.UID)
 	if err != nil {
 		// rollback register user
 		if err := h.Model.DeleteUser(r.UID); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	notification := openuem_nats.Notification{
@@ -154,18 +154,18 @@ func (h *Handler) SendRegister(c echo.Context) error {
 
 	data, err := json.Marshal(notification)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if _, err := h.JetStream.Publish(context.Background(), "notification.confirm_email", data); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	/* if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	} */
 
-	return renderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful()))
+	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful()))
 }
 
 func (h *Handler) UIDExists(c echo.Context) error {

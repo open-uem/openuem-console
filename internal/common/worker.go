@@ -107,7 +107,13 @@ func (w *Worker) StartWorker() {
 	}
 
 	// Session handler
-	w.SessionManager = sessions.New(w.DBUrl)
+	sessionLifetimeInMinutes, err := w.Model.GetDefaultSessionLifetime()
+	if err != nil {
+		log.Printf("[ERROR]: could not get session lifetime from database, reason: %v", err.Error())
+		sessionLifetimeInMinutes = 1440
+	}
+
+	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes)
 
 	// HTTPS web server
 	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain)

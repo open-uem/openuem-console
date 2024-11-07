@@ -5,13 +5,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func renderView(c echo.Context, cmp templ.Component) error {
+func RenderView(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func renderError(c echo.Context, cmp templ.Component) error {
+func RenderLogin(c echo.Context, cmp templ.Component) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	c.Response().Header().Set("HX-Retarget", "body")
+	c.Response().Header().Set("HX-Reswap", "outerHTML")
+	return cmp.Render(c.Request().Context(), c.Response().Writer)
+}
+
+func RenderError(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	c.Response().Header().Set("HX-Retarget", "#error")
 	c.Response().Header().Set("HX-Reswap", "outerHTML")
@@ -19,7 +26,7 @@ func renderError(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func renderConfirm(c echo.Context, cmp templ.Component) error {
+func RenderConfirm(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	c.Response().Header().Set("HX-Retarget", "#confirm")
 	c.Response().Header().Set("HX-Reswap", "outerHTML")
@@ -27,7 +34,7 @@ func renderConfirm(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func renderSuccess(c echo.Context, cmp templ.Component) error {
+func RenderSuccess(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	c.Response().Header().Set("HX-Retarget", "#success")
 	c.Response().Header().Set("HX-Reswap", "outerHTML")

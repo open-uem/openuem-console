@@ -82,6 +82,21 @@ func (m *Model) UpdateRefreshTimeSetting(settingsId, refresh int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetRefreshTimeInMinutes(refresh).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultSessionLifetime() (int, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldRefreshTimeInMinutes).Only(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	return settings.RefreshTimeInMinutes, nil
+}
+
+func (m *Model) UpdateSessionLifetime(settingsId, sessionLifetime int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetSessionLifetimeInMinutes(sessionLifetime).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().Select(
@@ -91,6 +106,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldUserCertYearsValid,
 		settings.FieldNatsRequestTimeoutSeconds,
 		settings.FieldRefreshTimeInMinutes,
+		settings.FieldSessionLifetimeInMinutes,
 	)
 
 	settings, err := query.Only(context.Background())
@@ -110,10 +126,11 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 }
 
 type GeneralSettings struct {
-	ID            int
-	Country       string
-	MaxUploadSize string
-	UserCertYears int
-	NATSTimeout   int
-	Refresh       int
+	ID              int
+	Country         string
+	MaxUploadSize   string
+	UserCertYears   int
+	NATSTimeout     int
+	Refresh         int
+	SessionLifetime int
 }

@@ -6,5 +6,5 @@ import (
 )
 
 func (h *Handler) Login(c echo.Context) error {
-	return renderView(c, login_views.LoginIndex(login_views.Login()))
+	return RenderLogin(c, login_views.LoginIndex(login_views.Login()))
 }

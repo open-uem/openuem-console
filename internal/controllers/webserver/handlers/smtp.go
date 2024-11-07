@@ -21,26 +21,26 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 
 		settings, err := validateSMTPSettings(c)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		if err := h.Model.UpdateSMTPSettings(settings); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
 		// Notification Worker must reload its smtp settings
 		if err := h.NATSConnection.Publish("notification.reload_settings", nil); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.saved")))
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.saved")))
 	}
 
 	settings, err := h.Model.GetSMTPSettings()
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return renderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, settings)))
+	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, settings)))
 }
 
 func (h *Handler) TestSMTPSettings(c echo.Context) error {
@@ -48,13 +48,13 @@ func (h *Handler) TestSMTPSettings(c echo.Context) error {
 
 	settings, err := validateSMTPSettings(c)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := sendEmailTest(settings, settings.MailFrom); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.test_success", settings.MailFrom)))
+	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.test_success", settings.MailFrom)))
 }
 
 func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {

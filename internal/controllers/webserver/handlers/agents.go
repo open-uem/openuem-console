@@ -79,28 +79,28 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
 		err := h.Model.AddTagToAgent(agentId, tagId)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
 		err := h.Model.RemoveTagFromAgent(agentId, tagId)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	agents, err = h.Model.GetAgentsByPage(p, f)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	p.NItems, err = h.Model.CountAllAgents(f)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, h.RefreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, h.RefreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
@@ -113,7 +113,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
-	return renderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(agent)))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
@@ -137,11 +137,11 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 	}
 
 	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, 10*time.Second); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := h.Model.EnableAgent(agentId); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "")
@@ -153,7 +153,7 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
-	return renderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -165,18 +165,18 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.force_run_success")))
+	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.force_run_success")))
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := h.Model.DisableAgent(agentId); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
@@ -191,11 +191,11 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 	}
 
 	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// TODO - Proxy port should not be hardcoded?
-	return renderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", h.Domain))
+	return RenderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", h.Domain))
 
 }
 
@@ -203,9 +203,9 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return renderView(c, computers_views.VNCConnect(agentId))
+	return RenderView(c, computers_views.VNCConnect(agentId))
 
 }

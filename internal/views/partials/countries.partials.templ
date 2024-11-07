@@ -40,8 +40,7 @@ func GetCountries(c echo.Context) []Country {
 	var translatedCountries []Country
 
 	for _, country := range countries.All() {
-		if country.String() != "Yugoslavia" && country.String() != "Aland Islands" && country.String() != "Western Sahara" && country.String() != "Mayotte" 
-		&& country.String() != "Macau (Special Administrative Region of China)" {
+		if country.String() != "Yugoslavia" && country.String() != "Aland Islands" && country.String() != "Western Sahara" && country.String() != "Mayotte" && country.String() != "Macau (Special Administrative Region of China)" {
 			translatedCountries = append(translatedCountries, Country{
 				Name: i18n.T(c.Request().Context(), "countries."+country.String()),
 				Code: country.Info().Alpha2,

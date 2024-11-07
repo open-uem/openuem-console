@@ -92,7 +92,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		errMessage = err.Error()
 	}
 
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, h.RefreshTime)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, h.RefreshTime)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -101,7 +101,7 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return err
 	}
 
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -111,32 +111,32 @@ func (h *Handler) AddUser(c echo.Context) error {
 
 	decoder := form.NewDecoder()
 	if err := c.Request().ParseForm(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	err := decoder.Decode(&u, c.Request().Form)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(u); err != nil {
 		// TODO Try to translate and create a nice error message
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country)
 	if err != nil {
 		// TODO manage duplicate key error
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	addedUser, err := h.Model.GetUserById(u.UID)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := sendConfirmationEmail(h, c, addedUser); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	successMessage = i18n.T(c.Request().Context(), "new.user.success")
@@ -149,7 +149,7 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	userCertYears, err := h.Model.GetDefaultUserCertDuration()
@@ -168,11 +168,11 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 
 	data, err := json.Marshal(certRequest)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
@@ -183,31 +183,31 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 	uid := c.Param("uid")
 	_, err := h.Model.GetUserById(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Delete user
 	if err := h.Model.DeleteUser(uid); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Revoke certificate
 	cert, err := h.Model.GetCertificateByUID(uid)
 	if err != nil {
 		if !openuem_ent.IsNotFound(err) {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		successMessage := i18n.T(c.Request().Context(), "users.deleted")
 		return h.ListUsers(c, successMessage, "")
 	}
 
 	if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Delete certificate information
 	if err := h.Model.DeleteCertificate(cert.ID); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.deleted")
@@ -218,22 +218,22 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// First revoke certificate
 	cert, err := h.Model.GetCertificateByUID(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := h.Model.RevokeCertificate(cert, "a new certificate has been requested", ocsp.CessationOfOperation); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Now delete certificate
 	if err := h.Model.DeleteCertificate(cert.ID); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Now request a new certificate
@@ -248,11 +248,11 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 
 	data, err := json.Marshal(certRequest)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
@@ -263,16 +263,16 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 	uid := c.Param("uid")
 	exists, err := h.Model.UserExists(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if !exists {
-		return renderError(c, partials.ErrorMessage("user doesn't exist", false))
+		return RenderError(c, partials.ErrorMessage("user doesn't exist", false))
 	}
 
 	err = h.Model.Client.User.UpdateOneID(uid).SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Exec(context.Background())
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return h.ListUsers(c, "Email has been confirmed", "")
@@ -282,11 +282,11 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := sendConfirmationEmail(h, c, user); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return h.ListUsers(c, "A new confirmation email has been sent to "+user.Email, "")
@@ -296,15 +296,15 @@ func (h *Handler) EditUser(c echo.Context) error {
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "POST" {
 		if err := h.Model.UpdateUser(uid, c.FormValue("name"), c.FormValue("email"), c.FormValue("phone"), c.FormValue("country")); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return renderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.edit.success")))
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.edit.success")))
 	}
 
 	defaultCountry, err := h.Model.GetDefaultCountry()
@@ -312,7 +312,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return err
 	}
 
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry)))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {

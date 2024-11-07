@@ -15,7 +15,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return renderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(*myCharts)))
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(*myCharts)))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

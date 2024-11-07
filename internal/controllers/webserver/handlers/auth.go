@@ -52,7 +52,7 @@ func (h *Handler) ConfirmEmail(c echo.Context) error {
 			return views.ErrorPage(strconv.Itoa(http.StatusInternalServerError), err.Error()).Render(c.Request().Context(), c.Response().Writer)
 		}
 
-		return renderView(c, register_views.RegisterIndex(register_views.EmailConfirmed()))
+		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed()))
 
 	} else {
 		return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "unknown claims type, cannot proceed").Render(c.Request().Context(), c.Response().Writer)

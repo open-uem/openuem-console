@@ -33,12 +33,12 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Get form values
@@ -54,7 +54,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -81,23 +81,23 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	files, err := client.ReadDir(cwd)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	sortFiles(files)
 
-	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -107,7 +107,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -126,7 +126,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 
 	path := filepath.Join(cwd, itemName)
 	if err := client.Mkdir(path); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return h.BrowseLogicalDisk(c)
@@ -136,12 +136,12 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -150,7 +150,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	}
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -170,29 +170,29 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 
 	path := filepath.Join(cwd, itemName)
 	if err := client.RemoveAll(path); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	files, err := client.ReadDir(cwd)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	sortFiles(files)
 
-	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -202,7 +202,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -214,50 +214,50 @@ func (h *Handler) RenameItem(c echo.Context) error {
 	parent := c.FormValue("parent")
 
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("current working directory cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("current working directory cannot be empty", false))
 	}
 
 	if currentName == "" {
-		return renderError(c, partials.ErrorMessage("current name cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("current name cannot be empty", false))
 	}
 
 	if newName == "" {
-		return renderError(c, partials.ErrorMessage("current name cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("current name cannot be empty", false))
 	}
 
 	currentPath := filepath.Join(cwd, currentName)
 	newPath := filepath.Join(cwd, newName)
 
 	if err := client.Rename(currentPath, newPath); err != nil {
-		return renderError(c, partials.ErrorMessage("current name cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("current name cannot be empty", false))
 	}
 
 	files, err := client.ReadDir(cwd)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	sortFiles(files)
 
-	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
 	removeForm := new(CheckedItemsForm)
 	if err := c.Bind(removeForm); err != nil {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	items := slices.Concat(removeForm.FolderCheck, removeForm.FileCheck)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -267,31 +267,31 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
 
 	cwd := removeForm.Cwd
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
 	}
 
 	for _, item := range items {
 		path := filepath.Join(removeForm.Cwd, item)
 		if err := client.RemoveAll(path); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	files, err := client.ReadDir(cwd)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	sortFiles(files)
 
-	return renderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, removeForm.Parent, files)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, removeForm.Parent, files)))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -300,7 +300,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	cwd := c.FormValue("cwd")
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
 	}
 
 	// Source
@@ -317,12 +317,12 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	// Destination
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -332,7 +332,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -340,29 +340,29 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	path := filepath.Join(cwd, file.Filename)
 	dst, err := client.Create(path)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer dst.Close()
 
 	// Copy
 	if _, err = dst.ReadFrom(src); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Get stat info
 	_, err = client.Stat(path)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	files, err := client.ReadDir(cwd)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	sortFiles(files)
 
-	return renderView(c, computers_views.SFTPHome(agent, cwd, parent, files))
+	return RenderView(c, computers_views.SFTPHome(agent, cwd, parent, files))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {
@@ -370,23 +370,23 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 	// Get form values
 	cwd := c.FormValue("cwd")
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
 	}
 
 	file := c.FormValue("itemName")
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("file name cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("file name cannot be empty", false))
 	}
 	remoteFile := filepath.Join(cwd, file)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -396,7 +396,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
@@ -404,19 +404,19 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 	dstPath := filepath.Join(h.DownloadDir, file)
 	dstFile, err := os.Create(dstPath)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer dstFile.Close()
 
 	srcFile, err := client.OpenFile(remoteFile, (os.O_RDONLY))
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer srcFile.Close()
 
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Redirect to file
@@ -431,23 +431,23 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 	// Get form values
 	cwd := c.FormValue("cwd")
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
 	}
 
 	folder := c.FormValue("itemName")
 	if cwd == "" {
-		return renderError(c, partials.ErrorMessage("folder name cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("folder name cannot be empty", false))
 	}
 	remoteFolder := filepath.Join(cwd, folder)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -457,31 +457,31 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
 
 	file, err := os.CreateTemp(h.DownloadDir, "openuem")
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	w := zip.NewWriter(file)
 
 	if err := addFiles(client, w, remoteFolder, ""); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	if err := w.Close(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := file.Close(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := os.Rename(file.Name(), file.Name()+".zip"); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Redirect to ZIP file
@@ -496,26 +496,26 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 	// Get form values
 	deleteForm := new(CheckedItemsForm)
 	if err := c.Bind(deleteForm); err != nil {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	if deleteForm.Cwd == "" {
-		return renderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
 	}
 
 	items := slices.Concat(deleteForm.FolderCheck, deleteForm.FileCheck)
 	if len(items) == 0 {
-		return renderError(c, partials.ErrorMessage("no items were checked", false))
+		return RenderError(c, partials.ErrorMessage("no items were checked", false))
 	}
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
@@ -525,14 +525,14 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 
 	client, sshConn, err := connectWithSFTP(agent.IP, key)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer client.Close()
 	defer sshConn.Close()
 
 	file, err := os.CreateTemp(h.DownloadDir, "openuem")
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	w := zip.NewWriter(file)
@@ -540,19 +540,19 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 	for _, item := range items {
 		path := filepath.Join(deleteForm.Cwd, item)
 		if err := addFiles(client, w, path, ""); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 	if err := w.Close(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := file.Close(); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if err := os.Rename(file.Name(), file.Name()+".zip"); err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	// Redirect to ZIP file

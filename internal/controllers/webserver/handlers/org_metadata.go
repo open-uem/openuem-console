@@ -16,7 +16,7 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 
 	p.NItems, err = h.Model.CountAllTags()
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "POST" {
@@ -27,15 +27,15 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		if name != "" {
 			if orgMetadataId == "" {
 				if err := h.Model.NewOrgMetadata(name, description); err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			} else {
 				id, err := strconv.Atoi(orgMetadataId)
 				if err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 				if err := h.Model.UpdateOrgMetadata(id, name, description); err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			}
 
@@ -45,23 +45,23 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	if c.Request().Method == "DELETE" {
 		orgMetadataId := c.FormValue("orgMetadataId")
 		if orgMetadataId == "" {
-			return renderError(c, partials.ErrorMessage("tag cannot be empty", false))
+			return RenderError(c, partials.ErrorMessage("tag cannot be empty", false))
 		}
 
 		id, err := strconv.Atoi(orgMetadataId)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
 		if err := h.Model.DeleteOrgMetadata(id); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	data, err := h.Model.GetOrgMetadataByPage(p)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return renderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, data)))
+	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, data)))
 }

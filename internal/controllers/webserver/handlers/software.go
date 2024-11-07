@@ -35,13 +35,13 @@ func (h *Handler) Software(c echo.Context) error {
 
 	apps, err = h.Model.GetAppsByPage(p, f)
 	if err != nil {
-		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
 	p.NItems, err = h.Model.CountAllApps(f)
 	if err != nil {
-		return renderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	return renderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, h.RefreshTime)))
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, h.RefreshTime)))
 }

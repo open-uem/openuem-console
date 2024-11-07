@@ -16,7 +16,7 @@ func (h *Handler) TagManager(c echo.Context) error {
 
 	p.NItems, err = h.Model.CountAllTags()
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "POST" {
@@ -28,15 +28,15 @@ func (h *Handler) TagManager(c echo.Context) error {
 		if tag != "" && color != "" {
 			if tagId == "" {
 				if err := h.Model.NewTag(tag, description, color); err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			} else {
 				id, err := strconv.Atoi(tagId)
 				if err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 				if err := h.Model.UpdateTag(id, tag, description, color); err != nil {
-					return renderError(c, partials.ErrorMessage(err.Error(), false))
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			}
 
@@ -46,23 +46,23 @@ func (h *Handler) TagManager(c echo.Context) error {
 	if c.Request().Method == "DELETE" {
 		tagId := c.FormValue("tagId")
 		if tagId == "" {
-			return renderError(c, partials.ErrorMessage("tag cannot be empty", false))
+			return RenderError(c, partials.ErrorMessage("tag cannot be empty", false))
 		}
 
 		id, err := strconv.Atoi(tagId)
 		if err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
 		if err := h.Model.DeleteTag(id); err != nil {
-			return renderError(c, partials.ErrorMessage(err.Error(), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	tags, err := h.Model.GetTagsByPage(p)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return renderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, tags)))
+	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, tags)))
 }

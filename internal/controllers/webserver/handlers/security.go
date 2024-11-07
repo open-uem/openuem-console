@@ -9,29 +9,29 @@ import (
 func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	agents, err := h.Model.GetAntiviriInfo()
 	if err != nil {
-		return renderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
 	}
-	return renderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(agents)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(agents)))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 	agents, err := h.Model.GetSystemUpdatesInfo()
 	if err != nil {
-		return renderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
 	}
 
-	return renderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(agents)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(agents)))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return renderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage("could not find agent info", false))
+		return RenderError(c, partials.ErrorMessage("could not find agent info", false))
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -44,17 +44,17 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 
 	p.NItems, err = h.Model.CountLatestUpdates(agentId)
 	if err != nil {
-		return renderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	updates, err := h.Model.GetLatestUpdates(agentId, p)
 	if err != nil {
-		return renderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
 	}
 
 	if c.Request().Method == "POST" {
-		return renderView(c, security_views.LatestUpdates(c, p, agent, updates))
+		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates))
 	}
 
-	return renderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates)))
 }

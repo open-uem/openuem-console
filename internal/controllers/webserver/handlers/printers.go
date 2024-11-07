@@ -6,5 +6,5 @@ import (
 )
 
 func (h *Handler) NetworkPrinters(c echo.Context) error {
-	return renderView(c, printers_views.PrintersIndex("| Network Printers", printers_views.Printers()))
+	return RenderView(c, printers_views.PrintersIndex("| Network Printers", printers_views.Printers()))
 }
