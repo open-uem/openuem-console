@@ -16,6 +16,8 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.SuccessMessage(successMessage)
 		@partials.ErrorMessage(errMessage, true)
+		<div id="error" class="hidden"></div>
+		<div id="success" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
 				<h3 class="uk-card-title">{ i18n.T(ctx, "Agents") }</h3>
@@ -176,8 +178,8 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 			<td class="!align-middle">{ agent.Version }</td>
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
-				@ShowAppliedTags(agent.Edges.Tags, agent.ID)
-				@AddTagButton(tags, agent.Edges.Tags, agent.ID)
+				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, "/agents", "#main", "outerHTML")
+				@partials.AddTagButton(tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
 			</td>
 			<td class="!align-middle">{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
 			<td class="!align-middle">
@@ -185,79 +187,6 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 			</td>
 		</tr>
 	}
-}
-
-templ ShowAppliedTags(tags []*ent.Tag, agentId string) {
-	for i, tag := range tags {
-		<form>
-			<input type="hidden" name="tagId" value={ strconv.Itoa(tag.ID) }/>
-			<input type="hidden" name="agentId" value={ agentId }/>
-			<button
-				title={ fmt.Sprintf("Remove tag %s", tag.Tag) }
-				type="button"
-				class={ "flex items-center gap-2 rounded-full px-4 py-1 text-white", fmt.Sprintf("bg-%s-500", tag.Color) }
-				hx-delete="/agents"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator={ fmt.Sprintf("#remove-tag-spinner-%d", i) }
-				_={ fmt.Sprintf(`on click add .hidden to #remove-tag-icon-%d`, i) }
-			>
-				{ tag.Tag }
-				<uk-icon id={ fmt.Sprintf("remove-tag-icon-%d", i) } icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
-				<uk-icon id={ fmt.Sprintf("remove-tag-spinner-%d", i) } hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-			</button>
-		</form>
-	}
-}
-
-templ AddTagButton(availableTags, appliedTags []*ent.Tag, agentId string) {
-	<button type="button" class="border rounded-full px-5 py-1 flex gap-2 items-center ">
-		<uk-icon icon="tag" hx-history="false" uk-cloak></uk-icon>
-		{ i18n.T(ctx, "Add") }
-	</button>
-	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<div class="uk-dropdown-nav uk-nav">
-			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">
-				for _, tag := range getAvailableTags(availableTags, appliedTags) {
-					<form class="w-full border-b">
-						<input type="hidden" name="tagId" value={ strconv.Itoa(tag.ID) }/>
-						<input type="hidden" name="agentId" value={ agentId }/>
-						<button
-							type="button"
-							title={ tag.Tag }
-							hx-post="/agents"
-							hx-push-url="true"
-							hx-target="#main"
-							hx-swap="outerHTML"
-						>
-							<div class="flex flex-col text-left p-2 ">
-								<div class="flex gap-2 items-center">
-									<div class={ "rounded-full h-2 w-2 p-2", fmt.Sprintf("bg-%s-500", tag.Color) }></div>
-									{ tag.Tag }
-								</div>
-								<p class="uk-text-muted text-xs">{ tag.Description }</p>
-							</div>
-						</button>
-					</form>
-				}
-				<form>
-					<button
-						type="button"
-						title="add more tags"
-						hx-get="/admin/tags"
-						hx-push-url="true"
-						href="/admin/tags"
-						hx-target="#main"
-						hx-swap="outerHTML"
-						class="flex gap-2 items-center text-left p-2"
-					>
-						<uk-icon icon="tag" hx-history="false" uk-cloak></uk-icon>
-						{ i18n.T(ctx, "tags.add_tags") }
-					</button>
-				</form>
-			</div>
-		</div>
-	</div>
 }
 
 templ AddActionsButton(agent *ent.Agent) {
@@ -330,23 +259,4 @@ templ AddActionsButton(agent *ent.Agent) {
 			</li>
 		</ul>
 	</div>
-}
-
-func getAvailableTags(allTags, usedTags []*ent.Tag) []*ent.Tag {
-	available := []*ent.Tag{}
-
-	for _, tag := range allTags {
-		found := false
-		for _, usedTag := range usedTags {
-			if tag.ID == usedTag.ID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			available = append(available, tag)
-		}
-	}
-
-	return available
 }

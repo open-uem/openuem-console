@@ -6,13 +6,14 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"strconv"
 	"strings"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, refreshTime int) {
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, refreshTime int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -39,47 +40,47 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
 							<thead>
 								<tr>
-									<th>
+									<th class="w-2/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.hostname") }</span>
 											@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByHostname(f, "/computers", "agents.filter_by_hostname", "#main", "outerHTML")
 										</div>
 									</th>
-									<th>
+									<th class="w-1/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.os") }</span>
 											@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByOS(f, "/computers", "#main", "outerHTML")
 										</div>
 									</th>
-									<th>
+									<th class="w-1/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.version") }</span>
 											@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByOSVersions(f, "/computers", "#main", "outerHTML", versions)
 										</div>
 									</th>
-									<th>
+									<th class="w-2/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.username") }</span>
 											@partials.SortByColumnIcon(c, p, "username", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByUsername(f, "/computers", "computers.filter_by_username", "#main", "outerHTML")
 										</div>
 									</th>
-									<th>
+									<th class="w-1/12">
 										<div class="flex gap-2 items-center justify-center">
 											<span>{ i18n.T(ctx, "agents.manufacturer") }</span>
 											@partials.SortByColumnIcon(c, p, "manufacturer", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByComputerManufacturer(f, "/computers", "#main", "outerHTML", vendors)
 										</div>
 									</th>
-									<th class="flex gap-2 items-center">
+									<th class="w-2/12 flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.model") }</span>
 										@partials.SortByColumnIcon(c, p, "model", "alpha", "#main", "outerHTML", "")
 										@filters.FilterByComputerModel(f, "/computers", "#main", "outerHTML", models)
 									</th>
-									<th>
+									<th class="w-3/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "Tag.other") }</span>
 										</div>
@@ -88,7 +89,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 								</tr>
 							</thead>
 							for _, agent := range agents {
-								<tr class="h-16">
+								<tr>
 									<td
 										class="!align-middle underline cursor-pointer"
 										hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
@@ -96,12 +97,14 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										hx-target="#main"
 										hx-swap="outerHTML"
 									>{ agent.Hostname }</td>
-									switch agent.OS {
-										case "windows":
-											<td class="!align-middle"><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-										case "linux":
-											<td></td>
-									}
+									<td class="!align-middle">
+										switch agent.OS {
+											case "windows":
+												<i class="ri-windows-fill ri-2x text-blue-600"></i>
+											case "linux":
+												<span></span>
+										}
+									</td>
 									<td class="!align-middle">{ agent.Version } </td>
 									<td class="!align-middle">{ agent.Username } </td>
 									<td class="!align-middle text-center">
@@ -114,7 +117,12 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 											{ agent.Model }
 										}
 									</td>
-									<td class="!align-middle"></td>
+									<td class="!align-middle">
+										<div class="flex flex-wrap gap-2">
+											@partials.ShowAppliedTags(agent.Tags, agent.ID, "/computers", "#main", "outerHTML")
+											@partials.AddTagButton(availableTags, agent.Tags, agent.ID, "/computers", "post", "#main", "outerHTML")
+										</div>
+									</td>
 									<td class="!align-middle">
 										<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
 										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">

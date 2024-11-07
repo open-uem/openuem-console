@@ -70,34 +70,30 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
 		err := h.Model.AddTagToAgent(agentId, tagId)
 		if err != nil {
-			successMessage = ""
-			errMessage = err.Error()
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
 		err := h.Model.RemoveTagFromAgent(agentId, tagId)
 		if err != nil {
-			successMessage = ""
-			errMessage = err.Error()
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	agents, err = h.Model.GetAgentsByPage(p, f)
 	if err != nil {
-		successMessage = ""
-		errMessage = err.Error()
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	p.NItems, err = h.Model.CountAllAgents(f)
 	if err != nil {
-		successMessage = ""
-		errMessage = err.Error()
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
-		return err
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return renderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, refreshTime)))

@@ -1,0 +1,30 @@
+package partials
+
+import (
+	"fmt"
+	ent "github.com/doncicuto/openuem_ent"
+	"strconv"
+)
+
+templ ShowAppliedTags(tags []*ent.Tag, agentId, url, target, swap string) {
+	for i, tag := range tags {
+		<form>
+			<input type="hidden" name="tagId" value={ strconv.Itoa(tag.ID) }/>
+			<input type="hidden" name="agentId" value={ agentId }/>
+			<button
+				title={ fmt.Sprintf("Remove tag %s", tag.Tag) }
+				type="button"
+				class={ "flex items-center gap-2 rounded-full px-4 py-1 text-white", fmt.Sprintf("bg-%s-500", tag.Color) }
+				hx-delete={ url }
+				hx-target={ target }
+				hx-swap={ swap }
+				hx-indicator={ fmt.Sprintf("#remove-tag-spinner-%d", i) }
+				_={ fmt.Sprintf(`on click add .hidden to #remove-tag-icon-%d`, i) }
+			>
+				{ tag.Tag }
+				<uk-icon id={ fmt.Sprintf("remove-tag-icon-%d", i) } icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
+				<uk-icon id={ fmt.Sprintf("remove-tag-spinner-%d", i) } hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+			</button>
+		</form>
+	}
+}

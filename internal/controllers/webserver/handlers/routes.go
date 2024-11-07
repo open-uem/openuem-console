@@ -62,6 +62,7 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/computers", h.Computers, h.IsAuthenticated)
 	e.POST("/computers", h.Computers, h.IsAuthenticated)
+	e.DELETE("/computers", h.Computers, h.IsAuthenticated)
 	e.GET("/computers/:uuid", h.Computer, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid", h.AgentConfirmDelete, h.IsAuthenticated)
 	e.GET("/computers/:uuid/software", h.Apps, h.IsAuthenticated)

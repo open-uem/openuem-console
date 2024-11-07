@@ -24,6 +24,7 @@ type Computer struct {
 	Username     string
 	Manufacturer string
 	Model        string
+	Tags         []*ent.Tag
 }
 
 func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
@@ -49,6 +50,54 @@ func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
 		Limit(p.PageSize).
 		Offset((p.CurrentPage - 1) * p.PageSize)
 }
+
+/* func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]*ent.Agent, error) {
+
+	// Apply sort using go as there's a bug in entgo: https://github.com/ent/ent/issues/3722
+	// I get SQL state: 42803 errors due to try sortering using edge fields that are not
+	// part of the groupby
+
+	switch p.SortBy {
+	case "hostname":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByHostname())
+		} else {
+			query = query.Order(agent.ByHostname(sql.OrderDesc()))
+		}
+	case "os":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByOs())
+		} else {
+			query = query.Order(agent.ByOs(sql.OrderDesc()))
+		}
+	case "version":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByOperatingsystemField(operatingsystem.FieldVersion))
+		} else {
+			query = query.Order(agent.ByOperatingsystemField(operatingsystem.FieldVersion, sql.OrderDesc()))
+		}
+	case "username":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByOperatingsystemField(operatingsystem.FieldUsername))
+		} else {
+			query = query.Order(agent.ByOperatingsystemField(operatingsystem.FieldUsername, sql.OrderDesc()))
+		}
+	case "manufacturer":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByComputerField(computer.FieldManufacturer))
+		} else {
+			query = query.Order(agent.ByComputerField(computer.FieldManufacturer, sql.OrderDesc()))
+		}
+	case "model":
+		if p.SortOrder == "asc" {
+			query = query.Order(agent.ByComputerField(computer.FieldModel))
+		} else {
+			query = query.Order(agent.ByComputerField(computer.FieldModel, sql.OrderDesc()))
+		}
+	}
+
+	return agents, nil
+}*/
 
 func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]Computer, error) {
 	var err error
@@ -134,10 +183,30 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 			}).Scan(context.Background(), &computers)
 		}
 	}
-
 	if err != nil {
 		return nil, err
 	}
+
+	// Add tags
+	sortedAgentIDs := []string{}
+	for _, computer := range computers {
+		sortedAgentIDs = append(sortedAgentIDs, computer.ID)
+	}
+	agents, err := m.Client.Agent.Query().WithTags().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Add tags to each computer in order
+	for i, computer := range computers {
+		for _, agent := range agents {
+			if computer.ID == agent.ID {
+				computers[i].Tags = agent.Edges.Tags
+				break
+			}
+		}
+	}
+
 	return computers, nil
 }
 

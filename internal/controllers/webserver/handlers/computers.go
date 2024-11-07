@@ -255,6 +255,33 @@ func (h *Handler) Computers(c echo.Context) error {
 		p.SortOrder = "desc"
 	}
 
+	tags, err := h.Model.GetAllTags()
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	for _, tag := range tags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
+
+	tagId := c.FormValue("tagId")
+	agentId := c.FormValue("agentId")
+	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
+		err := h.Model.AddTagToAgent(agentId, tagId)
+		if err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+	}
+
+	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
+		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		if err != nil {
+			return renderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+	}
+
 	computers, err := h.Model.GetComputersByPage(p, f)
 	if err != nil {
 		return renderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
@@ -270,7 +297,12 @@ func (h *Handler) Computers(c echo.Context) error {
 		return err
 	}
 
-	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, refreshTime)))
+	availableTags, err := h.Model.GetAllTags()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, availableTags, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {
