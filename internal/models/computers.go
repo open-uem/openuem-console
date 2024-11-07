@@ -12,6 +12,8 @@ import (
 	"github.com/doncicuto/openuem_ent/deployment"
 	"github.com/doncicuto/openuem_ent/metadata"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
+	"github.com/doncicuto/openuem_ent/predicate"
+	"github.com/doncicuto/openuem_ent/tag"
 )
 
 type Computer struct {
@@ -245,6 +247,16 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 
 	if len(f.ComputerModels) > 0 {
 		query = query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
+	}
+
+	if len(f.Tags) > 0 {
+		predicates := []predicate.Agent{}
+		for _, id := range f.Tags {
+			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
+		}
+		if len(predicates) > 0 {
+			query = query.Where(agent.And(predicates...))
+		}
 	}
 }
 

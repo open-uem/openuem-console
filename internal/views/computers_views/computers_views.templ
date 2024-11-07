@@ -27,7 +27,8 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 				<div class="flex justify-between mt-8">
 					@filters.ClearFilters("/computers", "#main", "outerHTML", func() bool {
 						return f.Hostname == "" && !f.WindowsAgents && !f.LinuxAgents && !f.MacAgents &&
-							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 && len(f.ComputerModels) == 0
+							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
+							len(f.ComputerModels) == 0 && len(f.Tags) == 0
 					})
 					@partials.RefreshPage("/computers", "#main", "outerHTML", "post", refreshTime)
 				</div>
@@ -82,7 +83,8 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 									</th>
 									<th class="w-3/12">
 										<div class="flex gap-2 items-center">
-											<span>{ i18n.T(ctx, "Tag.other") }</span>
+											{ i18n.T(ctx, "Tag.other") }
+											@filters.FilterByTags(f, "/computers", "#main", "outerHTML", availableTags)
 										</div>
 									</th>
 									<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>

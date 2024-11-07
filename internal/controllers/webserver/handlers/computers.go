@@ -255,7 +255,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		p.SortOrder = "desc"
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAppliedTags()
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -297,12 +297,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		return err
 	}
 
-	availableTags, err := h.Model.GetAllTags()
-	if err != nil {
-		return err
-	}
-
-	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, availableTags, refreshTime)))
+	return renderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {

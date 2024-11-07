@@ -132,7 +132,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/4">
 				<div class="flex gap-2 items-center">
 					{ i18n.T(ctx, "Tag.other") }
-					@filters.FilterByTags(f, tags)
+					@filters.FilterByTags(f, "/agents", "#main", "outerHTML", tags)
 				</div>
 			</th>
 			<th class="w-1/6">

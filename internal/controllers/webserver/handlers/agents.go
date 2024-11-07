@@ -53,7 +53,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		f.MacAgents = true
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAppliedTags()
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()

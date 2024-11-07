@@ -16,6 +16,14 @@ func (m *Model) GetAllTags() ([]*ent.Tag, error) {
 	return tags, nil
 }
 
+func (m *Model) GetAppliedTags() ([]*ent.Tag, error) {
+	tags, err := m.Client.Tag.Query().Where(tag.HasOwner()).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return tags, nil
+}
+
 func (m *Model) GetTagsByPage(p partials.PaginationAndSort) ([]*ent.Tag, error) {
 	var err error
 	var tags []*ent.Tag
