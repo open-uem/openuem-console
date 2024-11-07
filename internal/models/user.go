@@ -4,91 +4,85 @@ import (
 	"context"
 	"time"
 
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/user"
+	"github.com/doncicuto/openuem_nats"
 )
 
-func (m *Model) GetAllUsers() ([]*ent.User, error) {
-	users, err := m.Client.User.Query().All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
-}
+func (m *Model) CountAllUsers(f filters.UserFilter) (int, error) {
+	query := m.Client.User.Query()
 
-func (m *Model) CountAllUsers() (int, error) {
-	count, err := m.Client.User.Query().Count(context.Background())
+	applyUsersFilter(query, f)
+
+	count, err := query.Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
 	return count, nil
 }
 
-func (m *Model) GetUsersByPage(p partials.PaginationAndSort) ([]*ent.User, error) {
-	var err error
-	var users []*ent.User
+func (m *Model) GetUsersByPage(p partials.PaginationAndSort, f filters.UserFilter) ([]*ent.User, error) {
+	query := m.Client.User.Query()
 
-	query := m.Client.User.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	applyUsersFilter(query, f)
 
 	switch p.SortBy {
 	case "uid":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldID)).All(context.Background())
+			query.Order(ent.Asc(user.FieldID))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldID)).All(context.Background())
+			query.Order(ent.Desc(user.FieldID))
 		}
 	case "name":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldName)).All(context.Background())
+			query.Order(ent.Asc(user.FieldName))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldName)).All(context.Background())
+			query.Order(ent.Desc(user.FieldName))
 		}
 	case "email":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldEmail)).All(context.Background())
+			query.Order(ent.Asc(user.FieldEmail))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldEmail)).All(context.Background())
+			query.Order(ent.Desc(user.FieldEmail))
 		}
 	case "phone":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldPhone)).All(context.Background())
+			query.Order(ent.Asc(user.FieldPhone))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldPhone)).All(context.Background())
+			query.Order(ent.Desc(user.FieldPhone))
 		}
 	case "country":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldCountry)).All(context.Background())
+			query.Order(ent.Asc(user.FieldCountry))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldCountry)).All(context.Background())
+			query.Order(ent.Desc(user.FieldCountry))
 		}
 	case "register":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldRegister)).All(context.Background())
+			query.Order(ent.Asc(user.FieldRegister))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldRegister)).All(context.Background())
+			query.Order(ent.Desc(user.FieldRegister))
 		}
 	case "created":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldCreated)).All(context.Background())
+			query.Order(ent.Asc(user.FieldCreated))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldCreated)).All(context.Background())
+			query.Order(ent.Desc(user.FieldCreated))
 		}
 	case "modified":
 		if p.SortOrder == "asc" {
-			users, err = query.Order(ent.Asc(user.FieldModified)).All(context.Background())
+			query.Order(ent.Asc(user.FieldModified))
 		} else {
-			users, err = query.Order(ent.Desc(user.FieldModified)).All(context.Background())
+			query.Order(ent.Desc(user.FieldModified))
 		}
 
 	default:
-		users, err = query.Order(ent.Desc(user.FieldID)).All(context.Background())
+		query.Order(ent.Desc(user.FieldID))
 	}
 
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
+	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }
 
 func (m *Model) UserExists(uid string) (bool, error) {
@@ -128,13 +122,64 @@ func (m *Model) GetUserById(uid string) (*ent.User, error) {
 }
 
 func (m *Model) ConfirmEmail(uid string) error {
-	return m.Client.User.Update().SetEmailVerified(true).SetRegister("users.review_request").Where(user.ID(uid)).Exec(context.Background())
+	return m.Client.User.Update().SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Where(user.ID(uid)).Exec(context.Background())
 }
 
 func (m *Model) ConfirmLogIn(uid string) error {
-	return m.Client.User.Update().SetRegister("users.completed").SetCertClearPassword("").Where(user.ID(uid)).Exec(context.Background())
+	return m.Client.User.Update().SetRegister(openuem_nats.REGISTER_COMPLETE).SetCertClearPassword("").Where(user.ID(uid)).Exec(context.Background())
 }
 
 func (m *Model) DeleteUser(uid string) error {
 	return m.Client.User.DeleteOneID(uid).Exec(context.Background())
+}
+
+func applyUsersFilter(query *ent.UserQuery, f filters.UserFilter) {
+
+	if len(f.Username) > 0 {
+		query = query.Where(user.IDContainsFold(f.Username))
+	}
+
+	if len(f.Name) > 0 {
+		query = query.Where(user.NameContainsFold(f.Name))
+	}
+
+	if len(f.Email) > 0 {
+		query = query.Where(user.EmailContainsFold(f.Email))
+	}
+
+	if len(f.Phone) > 0 {
+		query = query.Where(user.PhoneContainsFold(f.Phone))
+	}
+
+	if len(f.CreatedFrom) > 0 {
+		dateFrom, err := time.Parse("2006-01-02", f.CreatedFrom)
+		if err == nil {
+			query = query.Where(user.CreatedGTE(dateFrom))
+		}
+	}
+
+	if len(f.CreatedTo) > 0 {
+		dateTo, err := time.Parse("2006-01-02", f.CreatedTo)
+		if err == nil {
+			query = query.Where(user.CreatedLTE(dateTo))
+		}
+	}
+
+	if len(f.ModifiedFrom) > 0 {
+		dateFrom, err := time.Parse("2006-01-02", f.ModifiedFrom)
+		if err == nil {
+			query = query.Where(user.ModifiedGTE(dateFrom))
+		}
+	}
+
+	if len(f.ModifiedTo) > 0 {
+		dateTo, err := time.Parse("2006-01-02", f.ModifiedTo)
+		if err == nil {
+			query = query.Where(user.ModifiedLTE(dateTo))
+		}
+	}
+
+	if len(f.RegisterOptions) > 0 {
+		query = query.Where(user.RegisterIn(f.RegisterOptions...))
+	}
 }

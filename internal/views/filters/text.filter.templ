@@ -1,11 +1,14 @@
 package filters
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
-templ FilterByUsername(f AgentFilter, url, placeholder, target, swap string) {
-	<button title="Filter by Hostname" type="button">
-		if len(f.Username) > 0 {
-			<uk-icon icon="filter-x" hx-history="false" custom-class="mr-2 h-5 w-5 fill-red-500 text-red-500" uk-cloak></uk-icon>
+templ FilterByText(field, value, placeholder, url, target, swap string) {
+	<button title={ i18n.T(ctx, placeholder) } type="button">
+		if len(value) > 0 {
+			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5 fill-red-500 text-red-500" uk-cloak></uk-icon>
 		} else {
 			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5" uk-cloak></uk-icon>
 		}
@@ -19,32 +22,32 @@ templ FilterByUsername(f AgentFilter, url, placeholder, target, swap string) {
 					</span>
 					<input
 						class="uk-input"
-						id="filterByUsername"
-						name="filterByUsername"
-						value={ f.Username }
+						id={ fmt.Sprintf("filterBy%s", field) }
+						name={ fmt.Sprintf("filterBy%s", field) }
+						value={ value }
 						placeholder={ i18n.T(ctx, placeholder) }
 						spellcheck="false"
-						aria-label="Filter by username"
+						aria-label={ i18n.T(ctx, placeholder) }
 						hx-post={ url }
 						hx-push-url="false"
 						hx-target={ target }
 						hx-swap={ swap }
 						hx-trigger="keyup delay:1s"
-						_="
+						_={ fmt.Sprintf(`
 			on load 
 				if my.value.length > 0 then
 					set my.selectionStart to my.value.length
 					set my.selectionEnd to my.value.length
 				end
-                set @size to @placeholder.length
+                set @size to @%s.length
 			end
 
 			on keyup
-				if #filterByUsername.value.length == 0 then
+				if #%s.value.length == 0 then
 					put 1 into #page.value
 				end
 			then
-			"
+			`,placeholder,fmt.Sprintf("filterBy%s", field)) }
 					/>
 				</div>
 			</li>

@@ -144,6 +144,20 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		query = query.Where(agent.OsIn(agentSystems...))
 	}
 
+	if len(f.ContactFrom) > 0 {
+		from, err := time.Parse("2006-01-02", f.ContactFrom)
+		if err == nil {
+			query = query.Where(agent.LastContactGTE(from))
+		}
+	}
+
+	if len(f.ContactTo) > 0 {
+		to, err := time.Parse("2006-01-02", f.ContactTo)
+		if err == nil {
+			query = query.Where(agent.LastContactLTE(to))
+		}
+	}
+
 	if len(f.Tags) > 0 {
 		predicates := []predicate.Agent{}
 		for _, id := range f.Tags {

@@ -2,16 +2,19 @@ package admin_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strconv"
 	"strings"
 )
 
-templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, successMessage, errMessage string) {
+templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f filters.UserFilter, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -26,7 +29,15 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 							{ i18n.T(ctx, "users.description") }
 						</p>
 					</div>
-					<div class="uk-card-body">
+					<div class="uk-card-body flex flex-col gap-4">
+						<div class="flex justify-between mt-8">
+							@filters.ClearFilters("/admin", "#main", "outerHTML", func() bool {
+								return f.Username == "" && f.Name == "" && f.Email == "" && f.Phone == "" &&
+									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
+									len(f.RegisterOptions) == 0
+							})
+							@partials.RefreshPage("/admin", "#main", "outerHTML", "post", refresh)
+						</div>
 						if len(users) > 0 {
 							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 								/* <button
@@ -46,194 +57,206 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, suc
 									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
 								</button>
 							</div>
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
-								<thead>
-									<tr>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.uid") }</span>
-												@partials.SortByColumnIcon(c, p, "uid", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.name") }</span>
-												@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.email") }</span>
-												@partials.SortByColumnIcon(c, p, "email", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "register.country") }</span>
-												@partials.SortByColumnIcon(c, p, "country", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.phone") }</span>
-												@partials.SortByColumnIcon(c, p, "phone", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.register") }</span>
-												@partials.SortByColumnIcon(c, p, "register", "alpha", "#main", "outerHTML", "")
-											</div>
-										</th>
-										/* <th>
+							<form class="flex gap-4 mb-2 justify-between">
+								<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+								<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+								<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+								<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+								<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
+									<thead>
+										<tr>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.uid") }</span>
+													@partials.SortByColumnIcon(c, p, "uid", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByText("Username", f.Username, "users.filter_by_username", "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.name") }</span>
+													@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByText("Name", f.Name, "users.filter_by_name", "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.email") }</span>
+													@partials.SortByColumnIcon(c, p, "email", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByText("Email", f.Email, "users.filter_by_email", "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "register.country") }</span>
+													@partials.SortByColumnIcon(c, p, "country", "alpha", "#main", "outerHTML", "")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.phone") }</span>
+													@partials.SortByColumnIcon(c, p, "phone", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByText("Phone", f.Phone, "users.filter_by_phone", "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.register") }</span>
+													@partials.SortByColumnIcon(c, p, "register", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByOptions("RegisterStatus", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, "/admin", "#main", "outerHTML", true)
+												</div>
+											</th>
+											/* <th>
 											<div class="flex gap-2 items-center">
 												<span>{ i18n.T(ctx, "users.role") }</span>
 												@partials.SortByColumnIcon(c, p, "role", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th> */
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.created") }</span>
-												@partials.SortByColumnIcon(c, p, "created", "time", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span>{ i18n.T(ctx, "users.modified") }</span>
-												@partials.SortByColumnIcon(c, p, "modified", "time", "#main", "outerHTML", "")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-2 items-center">
-												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
-											</div>
-										</th>
-									</tr>
-								</thead>
-								for _, user := range users {
-									<tr>
-										<td>{ user.ID }</td>
-										<td class="underline">
-											<a
-												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
-												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
-												hx-target="#main"
-												hx-swap="outerHTML"
-											>
-												{ user.Name }
-											</a>
-										</td>
-										if user.Email != "" {
-											<td>{ user.Email }</td>
-										} else {
-											<td>-</td>
-										}
-										if user.Country != "" {
-											<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
-										} else {
-											<td>-</td>
-										}
-										if user.Phone != "" {
-											<td>{ user.Phone }</td>
-										} else {
-											<td>-</td>
-										}
-										if user.Register == "users.completed" {
-											<td class="flex">
-												<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600 mr-2" uk-cloack></uk-icon>
-												{ i18n.T(ctx, user.Register) }
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.created") }</span>
+													@partials.SortByColumnIcon(c, p, "created", "time", "#main", "outerHTML", "")
+													@filters.FilterByDate("Created", f.CreatedFrom, f.CreatedTo, "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "users.modified") }</span>
+													@partials.SortByColumnIcon(c, p, "modified", "time", "#main", "outerHTML", "")
+													@filters.FilterByDate("Modified", f.ModifiedFrom, f.ModifiedTo, "/admin", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+												</div>
+											</th>
+										</tr>
+									</thead>
+									for _, user := range users {
+										<tr>
+											<td>{ user.ID }</td>
+											<td class="underline">
+												<a
+													href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													{ user.Name }
+												</a>
 											</td>
-										} else {
-											<td class="flex">
-												<uk-icon hx-history="false" icon="message-circle-warning" custom-class="h-5 w-5 text-orange-600 mr-2" uk-cloack></uk-icon>
-												{ i18n.T(ctx, user.Register) }
+											if user.Email != "" {
+												<td>{ user.Email }</td>
+											} else {
+												<td>-</td>
+											}
+											if user.Country != "" {
+												<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
+											} else {
+												<td>-</td>
+											}
+											if user.Phone != "" {
+												<td>{ user.Phone }</td>
+											} else {
+												<td>-</td>
+											}
+											if user.Register == "users.completed" {
+												<td class="flex">
+													<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600 mr-2" uk-cloack></uk-icon>
+													{ i18n.T(ctx, user.Register) }
+												</td>
+											} else {
+												<td class="flex">
+													<uk-icon hx-history="false" icon="message-circle-warning" custom-class="h-5 w-5 text-orange-600 mr-2" uk-cloack></uk-icon>
+													{ i18n.T(ctx, user.Register) }
+												</td>
+											}
+											/* <td>- </td> */
+											if user.Created.IsZero() {
+												<td>-</td>
+											} else {
+												<td>{ user.Created.Local().Format("02/01/2006 15:04:05") }</td>
+											}
+											if user.Modified.IsZero() {
+												<td>-</td>
+											} else {
+												<td>{ user.Modified.Local().Format("02/01/2006 15:04:05") }</td>
+											}
+											<td>
+												<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+												<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+													<ul class="uk-dropdown-nav uk-nav">
+														if !user.EmailVerified && user.Email != "" {
+															<li>
+																<a
+																	hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
+																	hx-target="#main"
+																	hx-push-url="false"
+																	hx-swap="outerHTML"
+																>
+																	<uk-icon hx-history="false" icon="mail-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.verify_email") }
+																</a>
+															</li>
+														}
+														if !user.EmailVerified && user.Email != "" {
+															<li>
+																<a
+																	hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }
+																	hx-target="#main"
+																	hx-push-url="false"
+																	hx-swap="outerHTML"
+																>
+																	<uk-icon hx-history="false" icon="mail-question" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.resend_confirmation") }
+																</a>
+															</li>
+														}
+														if user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
+															<li>
+																<a
+																	hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
+																	hx-target="#main"
+																	hx-push-url="false"
+																	hx-swap="outerHTML"
+																>
+																	<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.request_certificate") }
+																</a>
+															</li>
+														}
+														if user.EmailVerified && user.Register != openuem_nats.REGISTER_IN_REVIEW {
+															<li>
+																<a
+																	hx-target="#main"
+																	hx-swap="outerHTML"
+																	hx-post={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
+																	hx-push-url="false"
+																>
+																	<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
+																</a>
+															</li>
+														}
+														<li>
+															<a
+																hx-delete={ string(templ.URL("/admin/users/" + user.ID)) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="user-x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }
+															</a>
+														</li>
+													</ul>
+												</div>
 											</td>
-										}
-										/* <td>- </td> */
-										if user.Created.IsZero() {
-											<td>-</td>
-										} else {
-											<td>{ user.Created.Local().Format("02/01/2006 15:04:05") }</td>
-										}
-										if user.Modified.IsZero() {
-											<td>-</td>
-										} else {
-											<td>{ user.Modified.Local().Format("02/01/2006 15:04:05") }</td>
-										}
-										<td>
-											<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
-											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-												<ul class="uk-dropdown-nav uk-nav">
-													if !user.EmailVerified && user.Email != "" {
-														<li>
-															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
-																hx-target="#main"
-																hx-push-url="false"
-																hx-swap="outerHTML"
-															>
-																<uk-icon hx-history="false" icon="mail-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.verify_email") }
-															</a>
-														</li>
-													}
-													if !user.EmailVerified && user.Email != "" {
-														<li>
-															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }
-																hx-target="#main"
-																hx-push-url="false"
-																hx-swap="outerHTML"
-															>
-																<uk-icon hx-history="false" icon="mail-question" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.resend_confirmation") }
-															</a>
-														</li>
-													}
-													// TODO this should not be hardcoded, register status must be constants
-													if user.EmailVerified && user.Register == "users.review_request" {
-														<li>
-															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
-																hx-target="#main"
-																hx-push-url="false"
-																hx-swap="outerHTML"
-															>
-																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.request_certificate") }
-															</a>
-														</li>
-													}
-													if user.EmailVerified && user.Register != "users.review_request" {
-														<li>
-															<a
-																hx-target="#main"
-																hx-swap="outerHTML"
-																hx-post={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
-																hx-push-url="false"
-															>
-																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
-															</a>
-														</li>
-													}
-													<li>
-														<a
-															hx-delete={ string(templ.URL("/admin/users/" + user.ID)) }
-															hx-target="#main"
-															hx-push-url="false"
-															hx-swap="outerHTML"
-														>
-															<uk-icon hx-history="false" icon="user-x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }
-														</a>
-													</li>
-												</ul>
-											</div>
-										</td>
-									</tr>
-								}
-							</table>
+										</tr>
+									}
+								</table>
+							</form>
 							if p.NItems / p.PageSize > 1 {
 								@partials.Pagination(c, p, "#main", "outerHTML", "")
 							}
 						} else {
-							<p class="uk-text-small uk-text-muted">
+							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "users.no_users") }
 							</p>
 						}

@@ -1,0 +1,42 @@
+package filters
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"slices"
+)
+
+templ FilterByOptions(field string, options, filtered []string, url, target, swap string, translate bool) {
+	<button title="Filter by OS Version" type="button">
+		if len(filtered) > 0 {
+			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5 fill-red-500 text-red-500" uk-cloak></uk-icon>
+		} else {
+			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5" uk-cloak></uk-icon>
+		}
+	</button>
+	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+		<ul class="uk-dropdown-nav uk-nav">
+			for index, option := range options {
+				<li class="p-2">
+					<input
+						id={ fmt.Sprintf("filterBy%s%d", field, index) }
+						name={ fmt.Sprintf("filterBy%s%d", field, index) }
+						type="checkbox"
+						value={ option }
+						class="uk-checkbox mx-3"
+						hx-post={ url }
+						hx-push-url="false"
+						hx-target={ target }
+						hx-swap={ swap }
+						checked?={ slices.Contains(filtered, option) }
+					/>
+					if translate {
+						<label for={ fmt.Sprintf("filterBy%s%d", field, index) }>{ i18n.T(ctx, option) }</label>
+					} else {
+						<label for={ fmt.Sprintf("filterBy%s%d", field, index) }>{ option }</label>
+					}
+				</li>
+			}
+		</ul>
+	</div>
+}

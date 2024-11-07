@@ -11,6 +11,8 @@ en:
   Connect: "Connect"
   Create: "Create"
   Dashboard: "Dashboard"
+  DateFrom: From
+  DateTo: To
   Delete: "Delete"
   Deploy: "Deploy"
   Description: "Description"
@@ -18,6 +20,7 @@ en:
   Download: "Download"
   Edit: "Edit"
   Example: "Example"
+  Filter: "Filter"
   General Settings: "General Settings"
   Install: "Install"
   Uninstall: "Uninstall"
@@ -73,7 +76,6 @@ en:
   Yes: "Yes"
   No: "No"
   WOL: "Wake On Lan"
-  Filter: "Filter"
   agents:
     title: "Agents"
     description: "These are the agents that have contacted with the OpenUEM server"
@@ -304,7 +306,11 @@ en:
       title: Edit User
       description: Edit this user's profile
       success: User's profile has been updated
-    no_users: No users have been created yet
+    no_users: No users have been found
+    filter_by_username: Filter by username...
+    filter_by_name: Filter by name...
+    filter_by_email: Filter by email...
+    filter_by_phone: Filter by phone...
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"

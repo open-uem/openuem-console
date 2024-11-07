@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
@@ -27,22 +28,76 @@ type NewUser struct {
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
 	var err error
 
+	f := filters.UserFilter{}
+
+	usernameFilter := c.FormValue("filterByUsername")
+	if usernameFilter != "" {
+		f.Username = usernameFilter
+	}
+
+	nameFilter := c.FormValue("filterByName")
+	if nameFilter != "" {
+		f.Name = nameFilter
+	}
+
+	emailFilter := c.FormValue("filterByEmail")
+	if emailFilter != "" {
+		f.Email = emailFilter
+	}
+
+	phoneFilter := c.FormValue("filterByPhone")
+	if phoneFilter != "" {
+		f.Phone = phoneFilter
+	}
+
+	createdFrom := c.FormValue("filterCreatedDateFrom")
+	if createdFrom != "" {
+		f.CreatedFrom = createdFrom
+	}
+	createdTo := c.FormValue("filterCreatedDateTo")
+	if createdTo != "" {
+		f.CreatedTo = createdTo
+	}
+
+	modifiedFrom := c.FormValue("filterModifiedDateFrom")
+	if modifiedFrom != "" {
+		f.ModifiedFrom = modifiedFrom
+	}
+	modifiedTo := c.FormValue("filterModifiedDateTo")
+	if modifiedTo != "" {
+		f.ModifiedTo = modifiedTo
+	}
+
+	filteredRegisterStatus := []string{}
+	for index := range openuem_nats.RegisterPossibleStatus() {
+		value := c.FormValue(fmt.Sprintf("filterByRegisterStatus%d", index))
+		if value != "" {
+			filteredRegisterStatus = append(filteredRegisterStatus, value)
+		}
+	}
+	f.RegisterOptions = filteredRegisterStatus
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	p.NItems, err = h.Model.CountAllUsers()
+	p.NItems, err = h.Model.CountAllUsers(f)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	users, err := h.Model.GetUsersByPage(p)
+	users, err := h.Model.GetUsersByPage(p, f)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, successMessage, errMessage)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		return renderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return renderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -220,7 +275,7 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 		return renderError(c, partials.ErrorMessage("user doesn't exist", false))
 	}
 
-	err = h.Model.Client.User.UpdateOneID(uid).SetEmailVerified(true).SetRegister("users.review_request").Exec(context.Background())
+	err = h.Model.Client.User.UpdateOneID(uid).SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Exec(context.Background())
 	if err != nil {
 		return renderError(c, partials.ErrorMessage(err.Error(), false))
 	}

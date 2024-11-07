@@ -53,6 +53,15 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		f.MacAgents = true
 	}
 
+	contactFrom := c.FormValue("filterContactDateFrom")
+	if contactFrom != "" {
+		f.ContactFrom = contactFrom
+	}
+	contactTo := c.FormValue("filterContactDateTo")
+	if contactTo != "" {
+		f.ContactTo = contactTo
+	}
+
 	tags, err := h.Model.GetAppliedTags()
 	if err != nil {
 		successMessage = ""

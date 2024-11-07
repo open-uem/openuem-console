@@ -12,12 +12,15 @@ es:
   Connect: "Conectar"
   Create: "Crear"
   Dashboard: "Panel de control"
+  DateFrom: Desde
+  DateTo: Hasta
   Delete: "Borrar"
   Deploy: "Despliegue de software"
   Description: "Descripción"
   Disconnect: "Desconectar"
   Edit: "Editar"
   Example: "Ejemplo"
+  Filter: "Filtrar"
   General Settings: "Conf. General"
   Install: "Instalar"
   Uninstall: "Desinstalar"
@@ -74,7 +77,6 @@ es:
   Yes: "Sí"
   No: "No"
   WOL: "Wake On Lan"
-  Filter: "Filtrar"
   agents:
     title: "Agentes"
     description: "Estos son los agentes que han contactado con el servidor de OpenUEM"
@@ -301,7 +303,11 @@ es:
       title: Editar usuario
       description: Edite este perfil de usuario
       success: El perfil del usuario se ha actualizado
-    no_users: Aún no se han creado usuarios
+    no_users: No se han encontrado usuarios
+    filter_by_username: Filtrar por usuario...
+    filter_by_name: Filtrar por nombre...
+    filter_by_email: Filtrar por email...
+    filter_by_phone: Filtrar por teléfono...
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"

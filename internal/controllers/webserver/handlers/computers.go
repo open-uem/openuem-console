@@ -215,10 +215,10 @@ func (h *Handler) Computers(c echo.Context) error {
 		return err
 	}
 	filteredVersions := []string{}
-	for index, version := range versions {
+	for index := range versions {
 		value := c.FormValue(fmt.Sprintf("filterByOSVersion%d", index))
 		if value != "" {
-			filteredVersions = append(filteredVersions, version)
+			filteredVersions = append(filteredVersions, value)
 		}
 	}
 	f.OSVersions = filteredVersions
@@ -228,10 +228,10 @@ func (h *Handler) Computers(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	for index, vendor := range vendors {
+	for index := range vendors {
 		value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
 		if value != "" {
-			filteredComputerManufacturers = append(filteredComputerManufacturers, vendor)
+			filteredComputerManufacturers = append(filteredComputerManufacturers, value)
 		}
 	}
 	f.ComputerManufacturers = filteredComputerManufacturers
@@ -241,10 +241,10 @@ func (h *Handler) Computers(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	for index, model := range models {
+	for index := range models {
 		value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
 		if value != "" {
-			filteredComputerModels = append(filteredComputerModels, model)
+			filteredComputerModels = append(filteredComputerModels, value)
 		}
 	}
 	f.ComputerModels = filteredComputerModels
