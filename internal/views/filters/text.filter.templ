@@ -14,43 +14,49 @@ templ FilterByText(field, value, placeholder, url, target, swap string) {
 		}
 	</button>
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<ul class="uk-dropdown-nav uk-nav">
-			<li class="p-2">
-				<div class="flex-1 uk-inline">
-					<span class="uk-form-icon">
-						<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon>
-					</span>
-					<input
-						class="uk-input"
-						id={ fmt.Sprintf("filterBy%s", field) }
-						name={ fmt.Sprintf("filterBy%s", field) }
-						value={ value }
-						placeholder={ i18n.T(ctx, placeholder) }
-						spellcheck="false"
-						aria-label={ i18n.T(ctx, placeholder) }
-						hx-post={ url }
-						hx-push-url="false"
-						hx-target={ target }
-						hx-swap={ swap }
-						hx-trigger="keyup delay:1s"
-						_={ fmt.Sprintf(`
-			on load 
-				if my.value.length > 0 then
-					set my.selectionStart to my.value.length
-					set my.selectionEnd to my.value.length
-				end
-                set @size to @%s.length
-			end
+		<div class="flex flex-col gap-4 p-2">
+			<div class="flex-1 uk-inline mx-2">
+				<span class="uk-form-icon">
+					<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon>
+				</span>
+				<input
+					class="uk-input"
+					id={ fmt.Sprintf("filterBy%s", field) }
+					name={ fmt.Sprintf("filterBy%s", field) }
+					value={ value }
+					placeholder={ i18n.T(ctx, placeholder) }
+					spellcheck="false"
+					aria-label={ i18n.T(ctx, placeholder) }
+					_={ fmt.Sprintf(`
+						on load 
+							if my.value.length > 0 then
+								set my.selectionStart to my.value.length
+								set my.selectionEnd to my.value.length
+							end
+							set @size to %d
+						end
 
-			on keyup
-				if #%s.value.length == 0 then
-					put 1 into #page.value
-				end
-			then
-			`,placeholder,fmt.Sprintf("filterBy%s", field)) }
-					/>
-				</div>
-			</li>
-		</ul>
+						on keyup
+							if #%s.value.length == 0 then
+								put 1 into #page.value
+							end
+						then
+					`,len(placeholder), fmt.Sprintf("filterBy%s", field)) }
+				/>
+			</div>
+			<button
+				type="button"
+				class="uk-button uk-button-primary mx-2"
+				hx-post={ url }
+				hx-push-url="false"
+				hx-target={ target }
+				hx-swap={ swap }
+			>
+				{ i18n.T(ctx, "Filter") }
+			</button>
+			@ClearFilter(fmt.Sprintf("filterBy%s", field), url, target, swap, func() bool {
+				return len(value) == 0
+			})
+		</div>
 	</div>
 }

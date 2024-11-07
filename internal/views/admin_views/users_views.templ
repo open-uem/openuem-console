@@ -103,7 +103,9 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 												<div class="flex gap-2 items-center">
 													<span>{ i18n.T(ctx, "users.register") }</span>
 													@partials.SortByColumnIcon(c, p, "register", "alpha", "#main", "outerHTML", "")
-													@filters.FilterByOptions("RegisterStatus", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, "/admin", "#main", "outerHTML", true)
+													@filters.FilterByOptions("RegisterStatus", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, "/admin", "#main", "outerHTML", true, func() bool {
+														return len(f.RegisterOptions) == 0
+													})
 												</div>
 											</th>
 											/* <th>
@@ -116,14 +118,14 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 												<div class="flex gap-2 items-center">
 													<span>{ i18n.T(ctx, "users.created") }</span>
 													@partials.SortByColumnIcon(c, p, "created", "time", "#main", "outerHTML", "")
-													@filters.FilterByDate("Created", f.CreatedFrom, f.CreatedTo, "/admin", "#main", "outerHTML")
+													@filters.FilterByDate("Created", f.CreatedFrom, f.CreatedTo, "/admin", "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
 												</div>
 											</th>
 											<th>
 												<div class="flex gap-2 items-center">
 													<span>{ i18n.T(ctx, "users.modified") }</span>
 													@partials.SortByColumnIcon(c, p, "modified", "time", "#main", "outerHTML", "")
-													@filters.FilterByDate("Modified", f.ModifiedFrom, f.ModifiedTo, "/admin", "#main", "outerHTML")
+													@filters.FilterByDate("Modified", f.ModifiedFrom, f.ModifiedTo, "/admin", "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
 												</div>
 											</th>
 											<th>

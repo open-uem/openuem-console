@@ -52,14 +52,16 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.os") }</span>
 											@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
-											@filters.FilterByOS(f, "/computers", "#main", "outerHTML")
+											@filters.FilterByOS(f, "/computers", "#main", "outerHTML", func() bool { return !f.WindowsAgents && !f.LinuxAgents && !f.MacAgents })
 										</div>
 									</th>
 									<th class="w-1/12">
 										<div class="flex gap-2 items-center">
 											<span>{ i18n.T(ctx, "agents.version") }</span>
 											@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
-											@filters.FilterByOptions("OSVersion", versions, f.OSVersions, "/computers", "#main", "outerHTML", false)
+											@filters.FilterByOptions("OSVersion", versions, f.OSVersions, "/computers", "#main", "outerHTML", false, func() bool {
+												return len(f.OSVersions) == 0
+											})
 										</div>
 									</th>
 									<th class="w-2/12">
@@ -73,18 +75,22 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										<div class="flex gap-2 items-center justify-center">
 											<span>{ i18n.T(ctx, "agents.manufacturer") }</span>
 											@partials.SortByColumnIcon(c, p, "manufacturer", "alpha", "#main", "outerHTML", "")
-											@filters.FilterByOptions("ComputerManufacturer", vendors, f.ComputerManufacturers, "/computers", "#main", "outerHTML", false)
+											@filters.FilterByOptions("ComputerManufacturer", vendors, f.ComputerManufacturers, "/computers", "#main", "outerHTML", false, func() bool {
+												return len(f.ComputerManufacturers) == 0
+											})
 										</div>
 									</th>
 									<th class="w-2/12 flex gap-2 items-center">
 										<span>{ i18n.T(ctx, "agents.model") }</span>
 										@partials.SortByColumnIcon(c, p, "model", "alpha", "#main", "outerHTML", "")
-										@filters.FilterByOptions("ComputerModel", models, f.ComputerModels, "/computers", "#main", "outerHTML", false)
+										@filters.FilterByOptions("ComputerModel", models, f.ComputerModels, "/computers", "#main", "outerHTML", false, func() bool {
+											return len(f.ComputerModels) == 0
+										})
 									</th>
 									<th class="w-3/12">
 										<div class="flex gap-2 items-center">
 											{ i18n.T(ctx, "Tag.other") }
-											@filters.FilterByTags(f, "/computers", "#main", "outerHTML", availableTags)
+											@filters.FilterByTags(f, "/computers", "#main", "outerHTML", availableTags, func() bool { return len(f.Tags) == 0 })
 										</div>
 									</th>
 									<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>

@@ -195,17 +195,17 @@ func (h *Handler) Computers(c echo.Context) error {
 	f.Hostname = c.FormValue("filterByHostname")
 	f.Username = c.FormValue("filterByUsername")
 
-	windowsAgents := c.FormValue("filterByWindowsAgents")
+	windowsAgents := c.FormValue("filterByOSAgentWindows")
 	if windowsAgents == "windows" {
 		f.WindowsAgents = true
 	}
 
-	linuxAgents := c.FormValue("filterByLinuxAgents")
+	linuxAgents := c.FormValue("filterByOSAgentLinux")
 	if linuxAgents == "linux" {
 		f.LinuxAgents = true
 	}
 
-	macAgents := c.FormValue("filterByMacAgents")
+	macAgents := c.FormValue("filterByOSAgentMac")
 	if macAgents == "mac" {
 		f.MacAgents = true
 	}

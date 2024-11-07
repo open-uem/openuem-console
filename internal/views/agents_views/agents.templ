@@ -108,14 +108,14 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
 					@partials.SortByColumnIcon(c, p, "enabled", "alpha", "#main", "outerHTML", "")
-					@filters.FilterStatus(f, "/agents", "#main", "outerHTML")
+					@filters.FilterStatus(f, "/agents", "#main", "outerHTML", func() bool { return !f.EnabledAgents && !f.DisabledAgents })
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
 					@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
-					@filters.FilterByOS(f, "/agents", "#main", "outerHTML")
+					@filters.FilterByOS(f, "/agents", "#main", "outerHTML", func() bool { return !f.WindowsAgents && !f.LinuxAgents && !f.MacAgents })
 				</div>
 			</th>
 			<th class="w-1/12">
@@ -133,14 +133,14 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/4">
 				<div class="flex gap-2 items-center">
 					{ i18n.T(ctx, "Tag.other") }
-					@filters.FilterByTags(f, "/agents", "#main", "outerHTML", tags)
+					@filters.FilterByTags(f, "/agents", "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 				</div>
 			</th>
 			<th class="w-1/6">
 				<div class="flex gap-2 items-center">
 					<span>{ i18n.T(ctx, "agents.last_contact") }</span>
 					@partials.SortByColumnIcon(c, p, "last_contact", "time", "#main", "outerHTML", "")
-					@filters.FilterByDate("Contact", f.ContactFrom, f.ContactTo, "/agents", "#main", "outerHTML")
+					@filters.FilterByDate("Contact", f.ContactFrom, f.ContactTo, "/agents", "#main", "outerHTML", func() bool { return f.ContactFrom == "" && f.ContactTo == "" })
 				</div>
 			</th>
 			<th>

@@ -28,27 +28,27 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
-	enabledAgents := c.FormValue("filterByEnabledAgents")
+	enabledAgents := c.FormValue("filterByAgentsEnabled")
 	if enabledAgents == "on" {
 		f.EnabledAgents = true
 	}
 
-	disabledAgents := c.FormValue("filterByDisabledAgents")
+	disabledAgents := c.FormValue("filterByAgentsDisabled")
 	if disabledAgents == "on" {
 		f.DisabledAgents = true
 	}
 
-	windowsAgents := c.FormValue("filterByWindowsAgents")
+	windowsAgents := c.FormValue("filterByOSAgentWindows")
 	if windowsAgents == "windows" {
 		f.WindowsAgents = true
 	}
 
-	linuxAgents := c.FormValue("filterByLinuxAgents")
+	linuxAgents := c.FormValue("filterByOSAgentLinux")
 	if linuxAgents == "linux" {
 		f.LinuxAgents = true
 	}
 
-	macAgents := c.FormValue("filterByMacAgents")
+	macAgents := c.FormValue("filterByOSAgentMac")
 	if macAgents == "mac" {
 		f.MacAgents = true
 	}
