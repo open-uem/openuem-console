@@ -34,7 +34,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgM
 					<div class="uk-card-body">
 						@NewOrgMetadata()
 						if len(data) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
 								<thead>
 									<tr>
 										<th class="w-1/4">

@@ -99,7 +99,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 
 templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
-		<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
@@ -147,7 +147,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 }
 
 templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*openuem_ent.Deployment) {
-	<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+	<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 		<thead>
 			<tr>
 				<th>

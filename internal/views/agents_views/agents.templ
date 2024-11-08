@@ -77,7 +77,7 @@ templ AgentsConfirmDisable(agent *ent.Agent) {
 templ AgentInfo(agent *ent.Agent) {
 	<div class="uk-width-1-2@m uk-card uk-card-default">
 		<div class="uk-card-body">
-			<table class="uk-table uk-table-striped">
+			<table class="uk-table uk-table-striped border border-gray-400!important mt-6">
 				<tr><th>{ i18n.T(ctx, "agents.hostname") }</th><td>{ agent.Hostname }</td></tr>
 				<tr><th>{ i18n.T(ctx, "agents.last_contact") }</th><td>{ agent.LastContact.Local().String() }</td></tr>
 				<tr><th>{ i18n.T(ctx, "OperatingSystem") }</th><td>{ agent.Os }</td></tr>

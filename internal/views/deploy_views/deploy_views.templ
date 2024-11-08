@@ -132,7 +132,7 @@ templ DeployIndex(title string, cmp templ.Component) {
 
 templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.Context, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
-		<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
@@ -276,7 +276,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 					</div>
 					<div class="uk-card-body mt-8 mb-2">
 						if len(agents) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
 								<thead>
 									<tr>
 										<th>
