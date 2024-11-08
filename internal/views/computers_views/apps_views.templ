@@ -17,6 +17,10 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, apps 
 				if confirmDelete {
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
+				<div class="flex gap-2 items-center">
+					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, "/computers", "#main", "outerHTML")
+				</div>
 				@ComputersNavbar(agent.ID, "software", confirmDelete)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">

@@ -261,7 +261,7 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 }
 
 func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithComputer().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithComputer().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {
 }
 
 func (m *Model) GetAgentOSInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithOperatingsystem().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -277,7 +277,7 @@ func (m *Model) GetAgentOSInfo(agentId string) (*ent.Agent, error) {
 }
 
 func (m *Model) GetAgentNetworkAdaptersInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithNetworkadapters().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string) (*ent.Agent, error) 
 }
 
 func (m *Model) GetAgentPrintersInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithPrinters().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithPrinters().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +293,7 @@ func (m *Model) GetAgentPrintersInfo(agentId string) (*ent.Agent, error) {
 }
 
 func (m *Model) GetAgentLogicalDisksInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithLogicaldisks().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string) (*ent.Agent, error) {
 }
 
 func (m *Model) GetAgentSharesInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithShares().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithShares().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +309,7 @@ func (m *Model) GetAgentSharesInfo(agentId string) (*ent.Agent, error) {
 }
 
 func (m *Model) GetAgentMonitorsInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithMonitors().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithMonitors().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
