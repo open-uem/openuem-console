@@ -115,6 +115,10 @@ func (m *Model) CountAllAgents(f filters.AgentFilter) (int, error) {
 	return count, err
 }
 
+func (m *Model) GetAgentsUsedOSes() ([]string, error) {
+	return m.Client.Agent.Query().Unique(true).Select(agent.FieldOs).Strings(context.Background())
+}
+
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Hostname) > 0 {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))

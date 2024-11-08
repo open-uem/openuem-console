@@ -212,7 +212,7 @@ func (h *Handler) Computers(c echo.Context) error {
 
 	versions, err := h.Model.GetOSVersions(f)
 	if err != nil {
-		return err
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	filteredVersions := []string{}
 	for index := range versions {
@@ -226,7 +226,7 @@ func (h *Handler) Computers(c echo.Context) error {
 	filteredComputerManufacturers := []string{}
 	vendors, err := h.Model.GetComputerManufacturers()
 	if err != nil {
-		return err
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	for index := range vendors {
 		value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
@@ -239,7 +239,7 @@ func (h *Handler) Computers(c echo.Context) error {
 	filteredComputerModels := []string{}
 	models, err := h.Model.GetComputerModels(f)
 	if err != nil {
-		return err
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	for index := range models {
 		value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
@@ -287,12 +287,18 @@ func (h *Handler) Computers(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	p.NItems, err = h.Model.CountAllComputers(filters.AgentFilter{})
+	p.NItems, err = h.Model.CountAllComputers(f)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, h.RefreshTime)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {
@@ -331,7 +337,13 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, h.RefreshTime)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {

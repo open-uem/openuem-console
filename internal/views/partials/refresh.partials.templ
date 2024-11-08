@@ -8,6 +8,7 @@ import (
 
 templ RefreshPage(url, target, swap, method string, refreshTime int) {
 	<div class="flex gap-4 items-center">
+		<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
 		<button
 			type="button"
 			class="uk-button uk-button-default"
@@ -25,6 +26,5 @@ templ RefreshPage(url, target, swap, method string, refreshTime int) {
 			{ i18n.T(ctx, "Refresh") }
 			<span id="refresh-icon" class="ml-3"><uk-icon hx-history="false" icon="refresh-cw" custom-class="h-5 w-5" uk-cloack></uk-icon></span>
 		</button>
-		<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
 	</div>
 }

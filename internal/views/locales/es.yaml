@@ -6,7 +6,9 @@ es:
   Antivirus: "Antivirus"
   Authenticate: "Autenticarse"
   Cancel: "Cancelar"
-  Clear: "Limpiar filtro"
+  Clear:
+    one: "Limpiar filtro"
+    other: "Limpiar filtros"
   Computers: "Equipos"
   Confirm: "Confirmar"
   Connect: "Conectar"
@@ -417,6 +419,12 @@ es:
     update_status: "Agentes por est. actualización"
     last_contact_less_24: "Últ. contacto -24h"
     last_contact_more_24: "Últ. contacto +24h"
+  systemupdate:
+    not_configured: "Actualizaciones automáticas no configuradas"
+    disabled: "Actualizaciones automáticas inhabilitadas"
+    notify_before_download: "Las actualizaciones se descargan e instalan por intervención del usuario"
+    notify_before_installation: "Las actualizaciones se instalan por intervención del usuario"
+    notify_scheduled_installation: "Las actualizaciones se descargan e instalan automáticamente"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

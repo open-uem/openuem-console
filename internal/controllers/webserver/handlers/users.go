@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -92,7 +93,13 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		errMessage = err.Error()
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, h.RefreshTime)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {

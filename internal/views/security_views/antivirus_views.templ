@@ -1,0 +1,127 @@
+package security_views
+
+import (
+	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"strconv"
+)
+
+templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: "/security"}, {Title: "Antivirus", Url: "/security/antivirus"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@SecurityNavbar("antivirus")
+				<div id="success" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "antivirus.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "antivirus.description") }
+						</p>
+					</div>
+					<div class="uk-card-body flex flex-col gap-4">
+						<div class="flex justify-between mt-8">
+							@filters.ClearFilters("/security", "#main", "outerHTML", func() bool {
+								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
+									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
+							
+							})
+							@partials.RefreshPage("/security", "#main", "outerHTML", "post", refresh)
+						</div>
+						if len(antiviri) > 0 {
+							<form class="mt-5 mb-2">
+								<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+								<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+								<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+								<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+								<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+									<thead>
+										<tr>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "antivirus.hostname") }</span>
+													@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/antivirus", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "antivirus.os") }</span>
+													@partials.SortByColumnIcon(c, p, "agentOS", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByOptions("AgentOS", availableOSes, f.AgentOSVersions, "/security/antivirus", "#main", "outerHTML", false, func() bool {
+														return len(f.AgentOSVersions) == 0
+													})
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center">
+													<span>{ i18n.T(ctx, "antivirus.title") }</span>
+													@partials.SortByColumnIcon(c, p, "antivirusName", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByOptions("AntivirusName", detectedAntiviri, f.AntivirusNameOptions, "/security/antivirus", "#main", "outerHTML", false, func() bool {
+														return len(f.AntivirusNameOptions) == 0
+													})
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center justify-center">
+													<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
+													@partials.SortByColumnIcon(c, p, "antivirusEnabled", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByOptions("AntivirusEnabled", []string{"Yes", "No"}, f.AntivirusEnabledOptions, "/security/antivirus", "#main", "outerHTML", true, func() bool {
+														return len(f.AntivirusEnabledOptions) == 0
+													})
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-2 items-center justify-center">
+													<span>{ i18n.T(ctx,"antivirus.updated") }</span>
+													@partials.SortByColumnIcon(c, p, "antivirusUpdated", "alpha", "#main", "outerHTML", "")
+													@filters.FilterByOptions("AntivirusUpdated", []string{"Yes", "No"}, f.AntivirusUpdatedOptions, "/security/antivirus", "#main", "outerHTML", true, func() bool {
+														return len(f.AntivirusUpdatedOptions) == 0
+													})
+												</div>
+											</th>
+										</tr>
+									</thead>
+									for _, antivirus := range antiviri {
+										<tr>
+											<td>{ antivirus.Hostname }</td>
+											switch antivirus.OS {
+												case "windows":
+													<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+												case "linux":
+													<td></td>
+											}
+											<td>{ antivirus.Name }</td>
+											if antivirus.IsActive {
+												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+											} else {
+												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+											}
+											if antivirus.IsUpdated {
+												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+											} else {
+												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+											}
+										</tr>
+									}
+								</table>
+								if p.NItems / p.PageSize > 1 {
+									@partials.Pagination(c, p, "#main", "outerHTML", "")
+								}
+							</form>
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}

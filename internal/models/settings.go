@@ -85,12 +85,12 @@ func (m *Model) UpdateRefreshTimeSetting(settingsId, refresh int) error {
 func (m *Model) GetDefaultSessionLifetime() (int, error) {
 	var err error
 
-	settings, err := m.Client.Settings.Query().Select(settings.FieldRefreshTimeInMinutes).Only(context.Background())
+	settings, err := m.Client.Settings.Query().Select(settings.FieldSessionLifetimeInMinutes).Only(context.Background())
 	if err != nil {
 		return 0, err
 	}
 
-	return settings.RefreshTimeInMinutes, nil
+	return settings.SessionLifetimeInMinutes, nil
 }
 
 func (m *Model) UpdateSessionLifetime(settingsId, sessionLifetime int) error {

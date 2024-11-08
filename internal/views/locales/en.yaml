@@ -5,7 +5,9 @@ en:
   Antivirus: "Antivirus"
   Authenticate: "Authenticate"
   Cancel: "Cancel"
-  Clear: "Clear Filter"
+  Clear:
+    one: "Clear Filter"
+    other: "Clear Filters"
   Computers: "Computers"
   Confirm: "Confirm"
   Connect: "Connect"
@@ -421,7 +423,12 @@ en:
     update_status: "Agents by System Update status"
     last_contact_less_24: "Last contact -24h"
     last_contact_more_24: "Last contact +24h"
-    updates_automaticatlly: ""
+  systemupdate:
+    not_configured: "Automatic updates are not configured"
+    disabled: "Automatic updates are disabled"
+    notify_before_download: "Updates are downloaded and installed by user intervention"
+    notify_before_installation: "Updates are installed by user intervention"
+    notify_scheduled_installation: "Updates are downloaded an installed automatically"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"

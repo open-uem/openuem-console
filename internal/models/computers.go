@@ -378,45 +378,21 @@ func (m *Model) SaveNotes(agentId string, notes string) error {
 }
 
 func (m *Model) GetComputerManufacturers() ([]string, error) {
-	query := m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true)
-
-	data, err := query.All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	manufacturers := []string{}
-
-	for _, item := range data {
-		manufacturers = append(manufacturers, item.Manufacturer)
-	}
-
-	return manufacturers, nil
+	return m.Client.Computer.Query().Unique(true).Select(computer.FieldManufacturer).Strings(context.Background())
 }
 
 func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
-	query := m.Client.Computer.Query().Select(computer.FieldModel).Unique(true)
+	query := m.Client.Computer.Query().Unique(true).Select(computer.FieldModel)
 
 	if len(f.ComputerManufacturers) > 0 {
 		query.Where(computer.ManufacturerIn(f.ComputerManufacturers...))
 	}
 
-	data, err := query.All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	models := []string{}
-
-	for _, item := range data {
-		models = append(models, item.Model)
-	}
-
-	return models, nil
+	return query.Strings(context.Background())
 }
 
 func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
-	query := m.Client.OperatingSystem.Query().Select(operatingsystem.FieldVersion).Unique(true)
+	query := m.Client.OperatingSystem.Query().Unique(true).Select(operatingsystem.FieldVersion)
 
 	osTypes := []string{}
 	if f.WindowsAgents {
@@ -435,16 +411,5 @@ func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
 		query.Where(operatingsystem.TypeIn(osTypes...))
 	}
 
-	data, err := query.All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	versions := []string{}
-
-	for _, item := range data {
-		versions = append(versions, item.Version)
-	}
-
-	return versions, nil
+	return query.Strings(context.Background())
 }

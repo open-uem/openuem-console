@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -43,5 +45,11 @@ func (h *Handler) Software(c echo.Context) error {
 		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, h.RefreshTime)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, refreshTime)))
 }

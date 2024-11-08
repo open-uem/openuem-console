@@ -92,7 +92,9 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, apps 
 								}
 							}
 						</table>
-						@partials.Pagination(c, p, "#main", "outerHTML", "")
+						if p.NItems / p.PageSize > 1 {
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
+						}
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "inventory.apps.no_apps") }

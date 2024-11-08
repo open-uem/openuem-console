@@ -34,3 +34,22 @@ type UserFilter struct {
 	ModifiedTo      string
 	RegisterOptions []string
 }
+
+type AntivirusFilter struct {
+	Hostname                string
+	AntivirusNameOptions    []string
+	AntivirusUpdatedOptions []string
+	AntivirusEnabledOptions []string
+	AgentOSVersions         []string
+}
+
+type SystemUpdatesFilter struct {
+	Hostname             string
+	AgentOSVersions      []string
+	UpdateStatus         []string
+	LastSearchFrom       string
+	LastSearchTo         string
+	LastInstallFrom      string
+	LastInstallTo        string
+	PendingUpdateOptions []string
+}
