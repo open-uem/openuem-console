@@ -53,6 +53,7 @@ en:
     one: "Session"
     other: "Sessions"
   Size: "Size"
+  SortBy: "Sort by %s"
   Status: "Status"
   Tag:
     one: "Tag"

@@ -41,21 +41,21 @@ templ Software(c echo.Context, p partials.PaginationAndSort, apps []models.App, 
 									<th>
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "apps.name") }</span>
-											@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.name"), "name", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByText("AppName", f.AppName, "apps.filter_by_name", "/software", "#main", "outerHTML")
 										</div>
 									</th>
 									<th>
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "apps.publisher") }</span>
-											@partials.SortByColumnIcon(c, p, "publisher", "alpha", "#main", "outerHTML", "")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.publisher"), "publisher", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByText("AppPublisher", f.Vendor, "apps.filter_by_publisher", "/software", "#main", "outerHTML")
 										</div>
 									</th>
 									<th>
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "apps.num_installations") }</span>
-											@partials.SortByColumnIcon(c, p, "installations", "numeric", "#main", "outerHTML", "")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.num_installations"), "installations", "numeric", "#main", "outerHTML", "")
 										</div>
 									</th>
 								</tr>

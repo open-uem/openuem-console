@@ -100,14 +100,14 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
-					@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
 					@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/agents", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
-					@partials.SortByColumnIcon(c, p, "enabled", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "enabled", "alpha", "#main", "outerHTML", "")
 					@filters.FilterByOptions("EnabledAgent", "agents.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AgentEnabledOptions, "/agents", "#main", "outerHTML", true, func() bool {
 						return len(f.AgentEnabledOptions) == 0
 					})
@@ -116,7 +116,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
-					@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "")
 					@filters.FilterByOptions("AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "/agents", "#main", "outerHTML", false, func() bool {
 						return len(f.AgentOSVersions) == 0
 					})
@@ -125,13 +125,13 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.version") }</span>
-					@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML", "")
 				</div>
 			</th>
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "IP Address") }</span>
-					@partials.SortByColumnIcon(c, p, "ip_address", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML", "")
 				</div>
 			</th>
 			<th class="w-1/4">
@@ -143,7 +143,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.last_contact") }</span>
-					@partials.SortByColumnIcon(c, p, "last_contact", "time", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML", "")
 					@filters.FilterByDate("Contact", "agents.filter_by_last_contact", f.ContactFrom, f.ContactTo, "/agents", "#main", "outerHTML", func() bool { return f.ContactFrom == "" && f.ContactTo == "" })
 				</div>
 			</th>

@@ -2,10 +2,12 @@ package partials
 
 import (
 	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strings"
 )
 
-templ SortByColumnIcon(c echo.Context, p PaginationAndSort, sortBy, sortIcon, target, swap, include string) {
+templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap, include string) {
 	<button
 		type="submit"
 		hx-post={ c.Request().RequestURI }
@@ -13,7 +15,7 @@ templ SortByColumnIcon(c echo.Context, p PaginationAndSort, sortBy, sortIcon, ta
 		hx-target={ target }
 		hx-swap={ swap }
 		hx-include={ include }
-		title="sortBy"
+		title={ i18n.T(ctx, "SortBy", strings.ToLower(title)) }
 		_={ fmt.Sprintf(`
 		on htmx:configRequest			
 			set event.detail.parameters['sortBy'] to '%s'

@@ -54,6 +54,7 @@ es:
     one: "Sesión"
     other: "Sesiones"
   Size: "Tamaño"
+  SortBy: "Ordenar por %s"
   Status: "Estado"
   Tag:
     one: "Etiqueta"
@@ -373,6 +374,7 @@ es:
     confirm_delete: "¿Está seguro de que desea eliminar esta etiqueta?"
     edit_tag: "Edite la etiqueta de acuerdo con sus necesidades"
     add_tags: "¡Añada etiquetas!"
+    filter_by: "Filtrar por etiquetas"
   metadata:
     description: "Aquí puede definir los metadatos que quiere añadir a sus equipos y que son valiosos para su organización. Por ejemplo puede añadir a un equipo el número de inventario de su organización. Los metadatos que cree aquí estarán disponibles en la pestaña Metadatos de la vista de su equipo"
     no_metadata: "Aún no ha definido metadatos para su organización"

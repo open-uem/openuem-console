@@ -144,7 +144,7 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 						<th>
 							<div class="flex gap-1 items-center">
 								<span>{ i18n.T(ctx, "Name") }</span>
-								@partials.SortByColumnIcon(c, p, "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
+								@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
 							</div>
 						</th>
 						<th>{ i18n.T(ctx, "Actions") }</th>
@@ -308,13 +308,13 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "agents.hostname") }</span>
-												@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "agents.os") }</span>
-												@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 									</tr>

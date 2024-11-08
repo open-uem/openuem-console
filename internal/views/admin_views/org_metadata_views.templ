@@ -40,13 +40,13 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgM
 										<th class="w-1/4">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Name") }</span>
-												@partials.SortByColumnIcon(c, p, "name", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/2">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Description") }</span>
-												@partials.SortByColumnIcon(c, p, "description", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Description"), "description", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
