@@ -1,6 +1,7 @@
 package security_views
 
 import (
+	"fmt"
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -44,7 +45,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 										<tr>
 											<th>
 												<div class="flex gap-2 items-center">
-													<span>{ i18n.T(ctx, "antivirus.hostname") }</span>
+													<span>{ i18n.T(ctx, "updates.hostname") }</span>
 													@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/antivirus", "#main", "outerHTML")
 												</div>
@@ -87,28 +88,40 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											</th>
 										</tr>
 									</thead>
-									for _, antivirus := range antiviri {
-										<tr>
-											<td>{ antivirus.Hostname }</td>
-											switch antivirus.OS {
-												case "windows":
-													<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-												case "linux":
-													<td></td>
-											}
-											<td>{ antivirus.Name }</td>
-											if antivirus.IsActive {
-												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
-											} else {
-												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
-											}
-											if antivirus.IsUpdated {
-												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
-											} else {
-												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
-											}
-										</tr>
-									}
+									<tbody>
+										for _, antivirus := range antiviri {
+											<tr>
+												<td
+													class="!align-middle underline cursor-pointer"
+													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", antivirus.ID))) }
+													hx-push-url="true"
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													{ antivirus.Hostname }
+												</td>
+												<td>
+													switch antivirus.OS {
+														case "windows":
+															<i class="ri-windows-fill ri-2x text-blue-600"></i>
+														case "linux":
+															<span></span>
+													}
+												</td>
+												<td>{ antivirus.Name }</td>
+												if antivirus.IsActive {
+													<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+												} else {
+													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												}
+												if antivirus.IsUpdated {
+													<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+												} else {
+													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												}
+											</tr>
+										}
+									</tbody>
 								</table>
 								if p.NItems / p.PageSize > 1 {
 									@partials.Pagination(c, p, "#main", "outerHTML", "")

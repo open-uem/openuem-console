@@ -94,36 +94,48 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 											<th>{ i18n.T(ctx, "updates.history") }</th>
 										</tr>
 									</thead>
-									for _, systemUpdate := range systemUpdates {
-										<tr>
-											<td>{ systemUpdate.Hostname }</td>
-											switch systemUpdate.OS {
-												case "windows":
-													<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-												case "linux":
-													<td></td>
-											}
-											<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
-											<td>{ systemUpdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
-											<td>{ systemUpdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
-											if systemUpdate.PendingUpdates {
-												<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
-											} else {
-												<td>{ i18n.T(ctx, "No") }</td>
-											}
-											<td>
-												<button
-													type="button"
+									<tbody>
+										for _, systemUpdate := range systemUpdates {
+											<tr>
+												<td
+													class="!align-middle underline cursor-pointer"
+													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", systemUpdate.ID))) }
 													hx-push-url="true"
-													hx-get={ string(templ.URL(fmt.Sprintf("/security/%s/updates", agent.ID))) }
 													hx-target="#main"
 													hx-swap="outerHTML"
 												>
-													<uk-icon hx-history="false" icon="folder-clock" custom-class="h-5 w-5 text-blue-600" uk-cloack></uk-icon>
-												</button>
-											</td>
-										</tr>
-									}
+													{ systemUpdate.Hostname }
+												</td>
+												<td>
+													switch systemUpdate.OS {
+														case "windows":
+															<i class="ri-windows-fill ri-2x text-blue-600"></i>
+														case "linux":
+															<span></span>
+													}
+												</td>
+												<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
+												<td>{ systemUpdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
+												<td>{ systemUpdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
+												if systemUpdate.PendingUpdates {
+													<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+												} else {
+													<td>{ i18n.T(ctx, "No") }</td>
+												}
+												<td>
+													<button
+														type="button"
+														hx-push-url="true"
+														hx-get={ string(templ.URL(fmt.Sprintf("/security/%s/updates", agent.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+													>
+														<uk-icon hx-history="false" icon="folder-clock" custom-class="h-5 w-5 text-blue-600" uk-cloack></uk-icon>
+													</button>
+												</td>
+											</tr>
+										}
+									</tbody>
 								</table>
 							</form>
 							if p.NItems / p.PageSize > 1 {
