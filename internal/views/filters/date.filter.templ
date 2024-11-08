@@ -13,9 +13,9 @@ templ FilterByDate(field, from, to, url, target, swap string, disableFunc func()
 			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5" uk-cloak></uk-icon>
 		}
 	</button>
-	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<div class="flex flex-col gap-4 p-4">
-			<label class="mx-2" for={ fmt.Sprintf("filter%sDateFrom", field) }>{ i18n.T(ctx, "DateFrom") }</label>
+	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click" _="on load ">
+		<div class="flex flex-col pt-4 pl-4 pb-6 pr-8 gap-4">
+			<label class="mx-2 w-full" for={ fmt.Sprintf("filter%sDateFrom", field) }>{ i18n.T(ctx, "DateFrom") }</label>
 			<input
 				id={ fmt.Sprintf("filter%sDateFrom", field) }
 				name={ fmt.Sprintf("filter%sDateFrom", field) }
@@ -23,17 +23,17 @@ templ FilterByDate(field, from, to, url, target, swap string, disableFunc func()
 				value={ from }
 				class="mx-2 uk-input"
 			/>
-			<label class="mx-2" for={ fmt.Sprintf("filter%sDateTo", field) }>{ i18n.T(ctx, "DateTo") }</label>
+			<label class="mx-2 w-full" for={ fmt.Sprintf("filter%sDateTo", field) }>{ i18n.T(ctx, "DateTo") }</label>
 			<input
 				id={ fmt.Sprintf("filter%sDateTo", field) }
 				name={ fmt.Sprintf("filter%sDateTo", field) }
 				type="date"
 				value={ to }
-				class="mx-2 uk-input"
+				class="mx-2 uk-input w-full"
 			/>
 			<button
 				type="button"
-				class="uk-button uk-button-primary mx-2"
+				class="uk-button uk-button-primary mx-2 w-full"
 				hx-post={ url }
 				hx-push-url="false"
 				hx-target={ target }
