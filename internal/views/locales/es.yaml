@@ -97,7 +97,7 @@ es:
     model: "Modelo"
     enabled: "Activado"
     disabled: "Desactivado"
-    no_agents: "No hay información de agentes disponible"
+    no_agents: "No se han encontrado agentes para esta consulta"
     force_run: "Forzar Informe"
     vnc: "Serv. VNC"
     no_vnc: "Ninguno"
@@ -221,7 +221,7 @@ es:
     name: "Nombre"
     publisher: "Desarrollador"
     num_installations: "Núm. Instalaciones"
-    no_apps: "No hay información de aplicaciones disponible"
+    no_apps: "No se han encontrado aplicaciones para esta consulta"
     logo: "Logo"
     filter_by_name: "Filtrar por nombre de app..."
     filter_by_publisher: "Filtrar por desarrollador..."
@@ -232,7 +232,7 @@ es:
     os: "S.O"
     enabled: "¿Antivirus activo?"
     updated: "¿Antivirus actualizado?"
-    no_antivirus_yet: "No hay información de sistemas de antivirus disponible"
+    no_antivirus_yet: "No se han encontrado sistemas de antivirus para esta consulta"
     filter_by_name: "Filtrar por nombre de antivirus"
     filter_by_enabled: "Filter por estado de activación del antivirus"
     filter_by_updated: "Filter por estado de actualización del antivirus"
@@ -328,10 +328,18 @@ es:
     filter_by_creation: Filtar por fecha de creación
     filter_by_modification: Filtar por fecha de modificación
     filter_by_register_status: Filtrar por estado del registro
+    csv_file: Fichero CSV
+    csv_description: Suba un fichero de valores separados por coma sin cabecera y en el que las filas siguen el formato 'userid,nombre,email,país,teléfono'. País es un código de dos letras ISO 3166 Alpha-2 como 'es'. Todos los campos son opcionales salvo los campos userid y email
+    import_success: El fichero de usuarios se ha recibido y será procesado en breve
+    import_error_wrong_format: La fila %d CSV tiene un formato erróneo
+    import_required: El campo %s en la fila %d es obligatorio y no puede estar vacío
+    import_wrong_country: País %s en la fila %d debe ser un código ISO3166 Alpha2 de dos letras
+    import_wrong_email: Email en la fila %d debe contener una dirección válida
+    import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"
-    no_updates_info: "No hay información de actualizaciones de seguridad disponible"
+    no_updates_info: "No se ha encontrado información de actualizaciones para esta consulta"
     hostname: "Equipo"
     os: "S.O"
     status: "Estado"
@@ -448,6 +456,7 @@ es:
     filter_by_last_install: "Filtar por última instalación de actualizaciones"
     filter_by_pendingupdate: "Filtrar por estado de actualizaciones pendientes"
     filter_by_updatestatus: "Filtrar por estado de actualización"
+    show_updates_history: "Mostrar historial de actualizaciones recientes"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

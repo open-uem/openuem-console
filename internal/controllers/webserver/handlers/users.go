@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"strings"
 
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -16,6 +19,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/ocsp"
+	"software.sslmate.com/src/go-pkcs12"
 )
 
 type NewUser struct {
@@ -159,6 +163,15 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	if err := h.SendCertificateRequestToNATS(c, user); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
+	return h.ListUsers(c, successMessage, "")
+}
+
+func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent.User) error {
 	userCertYears, err := h.Model.GetDefaultUserCertDuration()
 	if err != nil {
 		return err
@@ -175,15 +188,13 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 
 	data, err := json.Marshal(certRequest)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return err
 	}
 
 	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return err
 	}
-
-	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
-	return h.ListUsers(c, successMessage, "")
+	return nil
 }
 
 func (h *Handler) DeleteUser(c echo.Context) error {
@@ -348,4 +359,86 @@ func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) e
 	}
 
 	return nil
+}
+
+func (h *Handler) ImportUsers(c echo.Context) error {
+	// Source
+	file, err := c.FormFile("csvFile")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	r := csv.NewReader(src)
+
+	validate := validator.New()
+	index := 1
+
+	var errors = []string{}
+
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		if len(record) != 5 {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_error_wrong_format", index), false))
+		}
+
+		if record[0] == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_required", "userid", index), false))
+		}
+
+		if record[2] == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_required", "email", index), false))
+		}
+
+		if record[2] != "" {
+			if errs := validate.Var(record[2], "email"); errs != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_email", index), false))
+			}
+		}
+
+		if record[3] != "" {
+			if errs := validate.Var(strings.ToUpper(record[3]), "iso3166_1_alpha2"); errs != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_country", index, record[3]), false))
+			}
+		}
+
+		index++
+
+		user := openuem_ent.User{}
+		user.ID = record[0]
+		user.Name = record[1]
+		user.Email = record[2]
+		user.Country = strings.ToUpper(record[3])
+		user.Phone = record[4]
+		user.CertClearPassword = pkcs12.DefaultPassword
+
+		err = h.Model.AddUser(user.ID, user.Name, user.Email, user.Phone, user.Country)
+		if err != nil {
+			// TODO manage duplicate key error
+			errors = append(errors, err.Error())
+			continue
+		}
+
+		if err := h.SendCertificateRequestToNATS(c, &user); err != nil {
+			errors = append(errors, err.Error())
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_users", strings.Join(errors, ",")), false))
+	}
+
+	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.import_success")))
 }

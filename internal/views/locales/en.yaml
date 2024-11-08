@@ -96,7 +96,7 @@ en:
     model: "Model"
     enabled: "Enabled"
     disabled: "Disabled"
-    no_agents: "No agents information is available yet"
+    no_agents: "No agents were found for this query"
     force_run: "Force Report"
     vnc: "VNC server"
     no_vnc: "None"
@@ -213,7 +213,7 @@ en:
       title: "Apps"
       description: "These are the applications found in this computer as reported by the OpenUEM agent"
       installation_date: "Installation"
-      no_apps: "No apps information is available yet"
+      no_apps: "No apps were found for this query"
 
   apps:
     title: "Apps"
@@ -232,7 +232,7 @@ en:
     os: "OS"
     enabled: "Antivirus Enabled?"
     updated: "Antivirus Updated?"
-    no_antivirus_yet: "No antivirus information is available yet."
+    no_antivirus_yet: "No antivirus were found for this query"
     filter_by_name: "Filter by antivirus name"
     filter_by_enabled: "Filter by antivirus enabled status"
     filter_by_updated: "Filter by antivirus updates status"
@@ -331,10 +331,18 @@ en:
     filter_by_creation: Filter by creation date
     filter_by_modification: Filter by modification date
     filter_by_register_status: Filter by registration status
+    csv_file: CSV File
+    csv_description: Upload a comma-separated values file with no header row and rows using the following format 'userid,fullname,email,country,phone'. Country is a two-letter ISO 3166 Alpha-2 code like 'es'. All fields are optional except userid and email
+    import_success: Users file has been received and be processed shortly
+    import_error_wrong_format: The CSV row %d has a wrong format
+    import_required: Field %s in row %d is required and cannot be empty
+    import_wrong_country: Country %s in row %d must be a valid two letter ISO3166 Alpha2 code
+    import_wrong_email: Email in row %d must be a valid address
+    import_wrong_users: "We encountered errors for the following users: %s"
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"
-    no_updates_info: "No security information is available yet"
+    no_updates_info: "No security information was found for this query"
     hostname: "Hostname"
     os: "OS"
     status: "Status"
@@ -452,6 +460,7 @@ en:
     filter_by_last_install: "Filter by last updates installation"
     filter_by_pendingupdate: "Filter by pending updates status"
     filter_by_updatestatus: "Filter by update status"
+    show_updates_history: "Show recent updates history"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"

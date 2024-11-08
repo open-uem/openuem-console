@@ -1,7 +1,10 @@
 package partials
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
-templ MoreButton() {
-	<button type="button" title={ i18n.T(ctx, "More") }><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+templ MoreButton(id int) {
+	<button id={ fmt.Sprintf("moreButton%d", id) } type="button" title={ i18n.T(ctx, "More") }><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
 }

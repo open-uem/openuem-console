@@ -68,7 +68,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										</th>
 									</tr>
 								</thead>
-								for _, session := range sessions {
+								for index, session := range sessions {
 									<tr>
 										<td>{ session.Edges.Owner.ID }</td>
 										<td>{ decodeUserAgent(decodeData(session.Data, codec, "user-agent")) }</td>
@@ -80,9 +80,9 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 											<td>{ session.Expiry.Local().Format("02/01/2006 15:04:05") }</td>
 										}
 										<td>
-											@partials.MoreButton()
+											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-												<ul class="uk-dropdown-nav uk-nav" _="on click remove .uk-open from .uk-dropdown">
+												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d", index) }>
 													<li>
 														<a
 															hx-get={ string(templ.URL(fmt.Sprintf("/admin/sessions/%s/delete", session.ID))) }

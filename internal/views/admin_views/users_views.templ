@@ -20,8 +20,8 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@ConfigNavbar("users")
-				@partials.SuccessMessage(successMessage)
-				@partials.ErrorMessage(errMessage, true)
+				<div id="success" class="hidden"></div>
+				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "users.title") } </h3>
@@ -40,18 +40,40 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 						</div>
 						if len(users) > 0 {
 							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
-								/* <button
-									hx-get={ "/admin/users/new" }
-									hx-target="#main"
-									hx-swap="outerHTML"
+								<button
+									id="import"
+									title={ i18n.T(ctx, "Upload") }
+									type="button"
 									class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
 								>
 									<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.import") }
-								</button> */
+								</button>
+								<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+									<form
+										class="flex flex-col gap-4 p-4 w-96"
+										hx-encoding="multipart/form-data"
+										hx-post="/admin/users/import"
+										hx-target="#main"
+										hx-indicator="#upload-csv-spinner"
+										_="on htmx:afterRequest	set #csvFile.value to ''"
+									>
+										<label class="uk-text-bold" for="csvFile">{ i18n.T(ctx, "users.csv_file") }</label>
+										<input id="csvFile" name="csvFile" type="file" accept=".csv,.txt"/>
+										<p>{ i18n.T(ctx, "users.csv_description") }</p>
+										<button
+											title={ i18n.T(ctx, "Upload") }
+											type="submit"
+											class="flex gap-2 uk-button uk-button-primary"
+											_="on click call #import.click()"
+										>
+											<uk-icon id="upload-csv-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											{ i18n.T(ctx, "Upload") }
+										</button>
+									</form>
+								</div>
 								<button
-									hx-get={ "/admin/users/new" }
-									hx-target="#main"
-									hx-swap="outerHTML"
+									title={ i18n.T(ctx, "users.add") }
+									type="button"
 									class="uk-button uk-button-primary text-white"
 								>
 									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
@@ -135,7 +157,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 											</th>
 										</tr>
 									</thead>
-									for _, user := range users {
+									for index, user := range users {
 										<tr>
 											<td>{ user.ID }</td>
 											<td class="underline">
@@ -186,7 +208,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 												<td>{ user.Modified.Local().Format("02/01/2006 15:04:05") }</td>
 											}
 											<td>
-												@partials.MoreButton()
+												@partials.MoreButton(index)
 												<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 													<ul class="uk-dropdown-nav uk-nav">
 														if !user.EmailVerified && user.Email != "" {

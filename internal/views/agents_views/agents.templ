@@ -157,7 +157,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 }
 
 templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
-	for _, agent := range agents {
+	for index, agent := range agents {
 		<tr>
 			<td
 				class="!align-middle underline hover:cursor-pointer"
@@ -189,14 +189,14 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 			</td>
 			<td class="!align-middle">{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
 			<td class="!align-middle">
-				@AddActionsButton(agent)
+				@AddActionsButton(agent, index)
 			</td>
 		</tr>
 	}
 }
 
-templ AddActionsButton(agent *ent.Agent) {
-	@partials.MoreButton()
+templ AddActionsButton(agent *ent.Agent, index int) {
+	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav">
 			if agent.Enabled {

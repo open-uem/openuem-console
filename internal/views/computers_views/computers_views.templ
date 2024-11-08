@@ -98,7 +98,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 									<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>
 								</tr>
 							</thead>
-							for _, agent := range agents {
+							for index, agent := range agents {
 								<tr>
 									<td
 										class="!align-middle underline cursor-pointer"
@@ -134,7 +134,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										</div>
 									</td>
 									<td class="!align-middle">
-										@partials.MoreButton()
+										@partials.MoreButton(index)
 										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 											<ul class="uk-dropdown-nav uk-nav">
 												<li>

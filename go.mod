@@ -32,6 +32,7 @@ require (
 	github.com/wneessen/go-mail v0.5.1
 	golang.org/x/crypto v0.28.0
 	golang.org/x/sys v0.26.0
+	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
 
 require (

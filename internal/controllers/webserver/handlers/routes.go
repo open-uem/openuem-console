@@ -27,6 +27,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/admin/users", func(c echo.Context) error { return h.ListUsers(c, "", "") }, h.IsAuthenticated)
 	e.POST("/admin/users", func(c echo.Context) error { return h.ListUsers(c, "", "") }, h.IsAuthenticated)
 	e.GET("/admin/users/new", h.NewUser, h.IsAuthenticated)
+	e.POST("/admin/users/import", h.ImportUsers, h.IsAuthenticated)
 	e.GET("/admin/users/:uid/profile", h.EditUser, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/profile", h.EditUser, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/certificate", h.RequestUserCertificate, h.IsAuthenticated)
