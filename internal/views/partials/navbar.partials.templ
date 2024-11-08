@@ -1,6 +1,9 @@
 package partials
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
 templ NavBar(active string) {
 	<nav id="navbar" hx-history="false" class="uk-flex uk-flex-between@s h-full flex-col items-center px-2 sm:py-5">
@@ -10,7 +13,7 @@ templ NavBar(active string) {
 				hx-get="/dashboard"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Dashboard; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Dashboard")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "dashboard"), templ.KV("text-muted-foreground hover:text-foreground", active != "dashboard") }
 			>
 				<uk-icon hx-history="false" icon="layout-dashboard" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -21,7 +24,7 @@ templ NavBar(active string) {
 				hx-get="/computers"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Computers; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Computers")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "computers"), templ.KV("text-muted-foreground hover:text-foreground", active != "computers") }
 			>
 				<uk-icon hx-history="false" icon="computer" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -32,7 +35,7 @@ templ NavBar(active string) {
 				hx-get="/software"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Software; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Software")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "software"), templ.KV("text-muted-foreground hover:text-foreground", active != "software") }
 			>
 				<uk-icon hx-history="false" icon="app-window" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -43,7 +46,7 @@ templ NavBar(active string) {
 				hx-get="/security"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Security; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Security")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "security"), templ.KV("text-muted-foreground hover:text-foreground", active != "security") }
 			>
 				<uk-icon hx-history="false" icon="shield" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -54,7 +57,7 @@ templ NavBar(active string) {
 				hx-get="/deploy"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Deploy; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Deploy")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "deploy"), templ.KV("text-muted-foreground hover:text-foreground", active != "deploy") }
 			>
 				<uk-icon hx-history="false" icon="package" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -87,7 +90,7 @@ templ NavBar(active string) {
 				hx-get="/agents"
 				hx-push-url="true"
 				hx-target="body"
-				uk-tooltip="title: Agents; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Agents")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "agents"), templ.KV("text-muted-foreground hover:text-foreground", active != "agents") }
 			>
 				<uk-icon hx-history="false" icon="satellite-dish" custom-class="h-5 w-5" uk-cloack></uk-icon>
@@ -133,11 +136,11 @@ templ NavBar(active string) {
 				hx-post="/logout"
 				hx-push-url="false"
 				hx-target="body"
-				uk-tooltip="title: Log Out; pos: right"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "LogOut")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground" }
 			>
 				<uk-icon hx-history="false" icon="log-out" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				<span class="sr-only">Log Out</span>
+				<span class="sr-only">{ i18n.T(ctx, "LogOut") }</span>
 			</a>
 		</div>
 	</nav>
