@@ -124,28 +124,18 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
-	if f.EnabledAgents && !f.DisabledAgents {
-		query = query.Where(agent.Enabled(true))
+	if len(f.AgentEnabledOptions) > 0 {
+		if len(f.AgentEnabledOptions) == 1 && f.AgentEnabledOptions[0] == "Enabled" {
+			query = query.Where(agent.Enabled(true))
+		}
+
+		if len(f.AgentEnabledOptions) == 1 && f.AgentEnabledOptions[0] == "Disabled" {
+			query = query.Where(agent.Enabled(false))
+		}
 	}
 
-	if f.DisabledAgents && !f.EnabledAgents {
-		query = query.Where(agent.Enabled(false))
-	}
-
-	if f.WindowsAgents || f.LinuxAgents || f.MacAgents {
-		agentSystems := []string{}
-
-		if f.WindowsAgents {
-			agentSystems = append(agentSystems, "windows")
-		}
-		if f.LinuxAgents {
-			agentSystems = append(agentSystems, "linux")
-		}
-		if f.MacAgents {
-			agentSystems = append(agentSystems, "mac")
-		}
-
-		query = query.Where(agent.OsIn(agentSystems...))
+	if len(f.AgentOSVersions) > 0 {
+		query = query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.ContactFrom) > 0 {

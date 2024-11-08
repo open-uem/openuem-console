@@ -155,21 +155,21 @@ func applyAntiviriFilters(query *ent.AgentQuery, f filters.AntivirusFilter) {
 	}
 
 	if len(f.AntivirusEnabledOptions) > 0 {
-		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "Yes" {
+		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "Enabled" {
 			query = query.Where(agent.HasAntivirusWith(antivirus.IsActive(true)))
 		}
 
-		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "No" {
+		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "Disabled" {
 			query = query.Where(agent.HasAntivirusWith(antivirus.IsActive(false)))
 		}
 	}
 
 	if len(f.AntivirusUpdatedOptions) > 0 {
-		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "Yes" {
+		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "UpdatedYes" {
 			query = query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(true)))
 		}
 
-		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "No" {
+		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "UpdatedNo" {
 			query = query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)))
 		}
 	}

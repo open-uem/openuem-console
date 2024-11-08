@@ -19,8 +19,10 @@ es:
   Delete: "Borrar"
   Deploy: "Despliegue de software"
   Description: "Descripción"
+  Disabled: "Desactivado"
   Disconnect: "Desconectar"
   Edit: "Editar"
+  Enabled: "Activado"
   Example: "Ejemplo"
   Filter: "Filtrar"
   General Settings: "Conf. General"
@@ -28,7 +30,7 @@ es:
   Uninstall: "Desinstalar"
   Disable: "Desactivar"
   Download: "Descargar"
-  Enabled: "Activar"
+  Enable: "Activar"
   Import: "Import"
   IP Address: "Dirección IP"
   Login: "Inicio de sesión"
@@ -58,6 +60,8 @@ es:
     other: "Etiquetas"
   Unknown: "Desconocido"
   Update: "Actualizar"
+  UpdatedYes: "Actualizado"
+  UpdatedNo: "No actualizado"
   Updated at: Actualizado a las %s
   Updates: "Actualizaciones"
   Upload: "Subir fichero"
@@ -127,6 +131,9 @@ es:
     has_been_enabled: "El agente ha sido activado"
     has_been_disabled: "El agente ha sido desactivado"
     confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
+    filter_by_last_contact: "Filtrar por último contacto"
+    filter_by_agent_os: "Filtrar por sistema operativo de agente"
+    filter_by_enabled: "Filtrar por estado de activación del agente"
   inventory:
     hardware:
       title: "Hardware"
@@ -226,6 +233,9 @@ es:
     enabled: "¿Antivirus activo?"
     updated: "¿Antivirus actualizado?"
     no_antivirus_yet: "No hay información de sistemas de antivirus disponible"
+    filter_by_name: "Filtrar por nombre de antivirus"
+    filter_by_enabled: "Filter por estado de activación del antivirus"
+    filter_by_updated: "Filter por estado de actualización del antivirus"
   install:
     title: "Instalación  de software"
     phase_1: "Busca paquetes de software que pueden ser instalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe instalarse"
@@ -241,6 +251,9 @@ es:
   computers:
     description: "Este es el inventario de equipos de su organización comunicado por los agentes que han contactado con el servidor OpenUEM"
     filter_by_username: "Filtrar por nombre de usuario..."
+    filter_by_os_version: "Filtrar por versión de sistema operativo"
+    filter_by_manufacturer: "Filtrar por fabricante"
+    filter_by_model: "Filtrar por modelo"
   confirm:
     agent_disable: "¿Está seguro de que quiere desactivar este agente? El agente no enviará más información hasta que vuelva a ser activado"
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
@@ -312,6 +325,9 @@ es:
     filter_by_name: Filtrar por nombre...
     filter_by_email: Filtrar por email...
     filter_by_phone: Filtrar por teléfono...
+    filter_by_creation: Filtar por fecha de creación
+    filter_by_modification: Filtar por fecha de modificación
+    filter_by_register_status: Filtrar por estado del registro
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"
@@ -338,6 +354,7 @@ es:
     title: "Sesiones"
     token: "Token"
     user_agent: "Navegador / Sist. Oper"
+    filter_by: "Filtrar por etiquetas"
   tags:
     description: "Estas son las etiquetas que puedes aplicar a tus agentes para una mejor experience de filtrado y de organización"
     descr: "Descripción"
@@ -427,6 +444,10 @@ es:
     notify_before_download: "Las actualizaciones se descargan e instalan por intervención del usuario"
     notify_before_installation: "Las actualizaciones se instalan por intervención del usuario"
     notify_scheduled_installation: "Las actualizaciones se descargan e instalan automáticamente"
+    filter_by_last_search: "Filtar por última búsqueda de actualizaciones"
+    filter_by_last_install: "Filtar por última instalación de actualizaciones"
+    filter_by_pendingupdate: "Filtrar por estado de actualizaciones pendientes"
+    filter_by_updatestatus: "Filtrar por estado de actualización"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

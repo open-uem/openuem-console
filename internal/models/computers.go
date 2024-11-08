@@ -221,20 +221,8 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		query = query.Where(agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Username)))
 	}
 
-	if f.WindowsAgents || f.LinuxAgents || f.MacAgents {
-		agentSystems := []string{}
-
-		if f.WindowsAgents {
-			agentSystems = append(agentSystems, "windows")
-		}
-		if f.LinuxAgents {
-			agentSystems = append(agentSystems, "linux")
-		}
-		if f.MacAgents {
-			agentSystems = append(agentSystems, "mac")
-		}
-
-		query = query.Where(agent.OsIn(agentSystems...))
+	if len(f.AgentOSVersions) > 0 {
+		query = query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.OSVersions) > 0 {
@@ -394,21 +382,8 @@ func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
 func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
 	query := m.Client.OperatingSystem.Query().Unique(true).Select(operatingsystem.FieldVersion)
 
-	osTypes := []string{}
-	if f.WindowsAgents {
-		osTypes = append(osTypes, "windows")
-	}
-
-	if f.LinuxAgents {
-		osTypes = append(osTypes, "linux")
-	}
-
-	if f.MacAgents {
-		osTypes = append(osTypes, "mac")
-	}
-
-	if len(osTypes) > 0 {
-		query.Where(operatingsystem.TypeIn(osTypes...))
+	if len(f.AgentOSVersions) > 0 {
+		query.Where(operatingsystem.TypeIn(f.AgentOSVersions...))
 	}
 
 	return query.Strings(context.Background())

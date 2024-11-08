@@ -2,11 +2,8 @@ package filters
 
 type AgentFilter struct {
 	Hostname              string
-	EnabledAgents         bool
-	DisabledAgents        bool
-	WindowsAgents         bool
-	LinuxAgents           bool
-	MacAgents             bool
+	AgentEnabledOptions   []string
+	AgentOSVersions       []string
 	Tags                  []int
 	OSVersions            []string
 	ComputerManufacturers []string

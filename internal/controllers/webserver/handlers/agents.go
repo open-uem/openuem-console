@@ -28,30 +28,27 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
-	enabledAgents := c.FormValue("filterByAgentsEnabled")
-	if enabledAgents == "on" {
-		f.EnabledAgents = true
+	filteredAgentEnabledOptions := []string{}
+	for index := range []string{"Enabled", "Disabled"} {
+		value := c.FormValue(fmt.Sprintf("filterByEnabledAgent%d", index))
+		if value != "" {
+			filteredAgentEnabledOptions = append(filteredAgentEnabledOptions, value)
+		}
 	}
+	f.AgentEnabledOptions = filteredAgentEnabledOptions
 
-	disabledAgents := c.FormValue("filterByAgentsDisabled")
-	if disabledAgents == "on" {
-		f.DisabledAgents = true
+	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	if err != nil {
+		return err
 	}
-
-	windowsAgents := c.FormValue("filterByOSAgentWindows")
-	if windowsAgents == "windows" {
-		f.WindowsAgents = true
+	filteredAgentOSes := []string{}
+	for index := range availableOSes {
+		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+		if value != "" {
+			filteredAgentOSes = append(filteredAgentOSes, value)
+		}
 	}
-
-	linuxAgents := c.FormValue("filterByOSAgentLinux")
-	if linuxAgents == "linux" {
-		f.LinuxAgents = true
-	}
-
-	macAgents := c.FormValue("filterByOSAgentMac")
-	if macAgents == "mac" {
-		f.MacAgents = true
-	}
+	f.AgentOSVersions = filteredAgentOSes
 
 	contactFrom := c.FormValue("filterContactDateFrom")
 	if contactFrom != "" {
@@ -106,7 +103,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		refreshTime = 5
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

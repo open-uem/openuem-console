@@ -48,7 +48,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	f.AntivirusNameOptions = filteredAntiviri
 
 	filteredEnableStatus := []string{}
-	for index := range []string{"Yes", "No"} {
+	for index := range []string{"Enabled", "Disabled"} {
 		value := c.FormValue(fmt.Sprintf("filterByAntivirusEnabled%d", index))
 		if value != "" {
 			filteredEnableStatus = append(filteredEnableStatus, value)
@@ -57,7 +57,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	f.AntivirusEnabledOptions = filteredEnableStatus
 
 	filteredUpdateStatus := []string{}
-	for index := range []string{"Yes", "No"} {
+	for index := range []string{"UpdatedYes", "UpdatedNo"} {
 		value := c.FormValue(fmt.Sprintf("filterByAntivirusUpdated%d", index))
 		if value != "" {
 			filteredUpdateStatus = append(filteredUpdateStatus, value)

@@ -195,20 +195,18 @@ func (h *Handler) Computers(c echo.Context) error {
 	f.Hostname = c.FormValue("filterByHostname")
 	f.Username = c.FormValue("filterByUsername")
 
-	windowsAgents := c.FormValue("filterByOSAgentWindows")
-	if windowsAgents == "windows" {
-		f.WindowsAgents = true
+	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	if err != nil {
+		return err
 	}
-
-	linuxAgents := c.FormValue("filterByOSAgentLinux")
-	if linuxAgents == "linux" {
-		f.LinuxAgents = true
+	filteredAgentOSes := []string{}
+	for index := range availableOSes {
+		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+		if value != "" {
+			filteredAgentOSes = append(filteredAgentOSes, value)
+		}
 	}
-
-	macAgents := c.FormValue("filterByOSAgentMac")
-	if macAgents == "mac" {
-		f.MacAgents = true
-	}
+	f.AgentOSVersions = filteredAgentOSes
 
 	versions, err := h.Model.GetOSVersions(f)
 	if err != nil {
@@ -298,7 +296,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {

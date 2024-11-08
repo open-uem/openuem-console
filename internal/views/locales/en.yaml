@@ -18,16 +18,18 @@ en:
   Delete: "Delete"
   Deploy: "Deploy"
   Description: "Description"
+  Disabled: "Disabled"
   Disconnect: "Disconnect"
   Download: "Download"
   Edit: "Edit"
+  Enabled: "Enabled"
   Example: "Example"
   Filter: "Filter"
   General Settings: "General Settings"
   Install: "Install"
   Uninstall: "Uninstall"
   Disable: "Disable"
-  Enabled: "Enable"
+  Enable: "Enable"
   Import: "Import"
   IP Address: "IP Address"
   Login: "Login"
@@ -57,6 +59,8 @@ en:
     other: "Tags"
   Unknown: "Unknown"
   Update: "Update"
+  UpdatedYes: "Updated"
+  UpdatedNo: "Not Updated"
   Updated at: Updated at %s
   Updates: "Updates"
   Upload: "Upload"
@@ -126,6 +130,9 @@ en:
     has_been_enabled: "The agent has been enabled"
     has_been_disabled: "The agent has been disabled"
     confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
+    filter_by_last_contact: "Filter by last contact"
+    filter_by_agent_os: "Filter by agent os"
+    filter_by_enabled: "Filter by enabled agent status"
   inventory:
     hardware:
       title: "Hardware"
@@ -226,6 +233,9 @@ en:
     enabled: "Antivirus Enabled?"
     updated: "Antivirus Updated?"
     no_antivirus_yet: "No antivirus information is available yet."
+    filter_by_name: "Filter by antivirus name"
+    filter_by_enabled: "Filter by antivirus enabled status"
+    filter_by_updated: "Filter by antivirus updates status"
   install:
     title: "Install"
     phase_1: "Search for software packets that can be installed by OpenUEM agents on demand. Then use the button associated to each package to select the agents where te package will be installed"
@@ -243,6 +253,9 @@ en:
   computers:
     description: "This is the inventory of computers for your organization reported by the agents that have contacted with OpenUEM server"
     filter_by_username: "Filter by username..."
+    filter_by_os_version: "Filter by os version"
+    filter_by_manufacturer: "Filter by manufacturer"
+    filter_by_model: "Filter by model"
   confirm:
     agent_disable: "Are you sure that you want to disable this agent? The agent won't report more information until you enable it again"
     agent_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
@@ -315,6 +328,9 @@ en:
     filter_by_name: Filter by name...
     filter_by_email: Filter by email...
     filter_by_phone: Filter by phone...
+    filter_by_creation: Filter by creation date
+    filter_by_modification: Filter by modification date
+    filter_by_register_status: Filter by registration status
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"
@@ -351,6 +367,7 @@ en:
     confirm_delete: "Are you sure that you want to remove this tag?"
     edit_tag: "Edit the tag according to your needs"
     add_tags: "Add tags!"
+    filter_by: "Filter by tags"
   metadata:
     description: "Here you can define the metadata that you want to add to your computers and which are valuable to your organization. You could add your org's inventory number to an computer. The metadata that you create here will be available in the Metadata table inside your computer's view"
     no_metadata: "No metadata for your org has been defined yet"
@@ -431,6 +448,10 @@ en:
     notify_before_download: "Updates are downloaded and installed by user intervention"
     notify_before_installation: "Updates are installed by user intervention"
     notify_scheduled_installation: "Updates are downloaded an installed automatically"
+    filter_by_last_search: "Filter by last updates search"
+    filter_by_last_install: "Filter by last updates installation"
+    filter_by_pendingupdate: "Filter by pending updates status"
+    filter_by_updatestatus: "Filter by update status"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"
