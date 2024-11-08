@@ -9746,10 +9746,6 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
-.w-64 {
-  width: 16rem;
-}
-
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -10077,11 +10073,6 @@ th.uk-text-break, td.uk-text-break {
   padding-right: 1.25rem;
 }
 
-.px-6 {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
@@ -10097,8 +10088,20 @@ th.uk-text-break, td.uk-text-break {
   padding-bottom: 1rem;
 }
 
+.pb-6 {
+  padding-bottom: 1.5rem;
+}
+
+.pl-4 {
+  padding-left: 1rem;
+}
+
 .pr-2 {
   padding-right: 0.5rem;
+}
+
+.pr-8 {
+  padding-right: 2rem;
 }
 
 .pt-2 {
@@ -10111,26 +10114,6 @@ th.uk-text-break, td.uk-text-break {
 
 .pt-6 {
   padding-top: 1.5rem;
-}
-
-.pl-4 {
-  padding-left: 1rem;
-}
-
-.pr-6 {
-  padding-right: 1.5rem;
-}
-
-.pr-8 {
-  padding-right: 2rem;
-}
-
-.pb-6 {
-  padding-bottom: 1.5rem;
-}
-
-.pr-7 {
-  padding-right: 1.75rem;
 }
 
 .text-left {

@@ -192,7 +192,7 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 }
 
 templ AddActionsButton(agent *ent.Agent) {
-	<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+	@partials.MoreButton()
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav">
 			if agent.Enabled {

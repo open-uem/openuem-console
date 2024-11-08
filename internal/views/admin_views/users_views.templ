@@ -186,7 +186,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 												<td>{ user.Modified.Local().Format("02/01/2006 15:04:05") }</td>
 											}
 											<td>
-												<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+												@partials.MoreButton()
 												<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 													<ul class="uk-dropdown-nav uk-nav">
 														if !user.EmailVerified && user.Email != "" {

@@ -132,7 +132,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										</div>
 									</td>
 									<td class="!align-middle">
-										<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+										@partials.MoreButton()
 										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 											<ul class="uk-dropdown-nav uk-nav">
 												<li>

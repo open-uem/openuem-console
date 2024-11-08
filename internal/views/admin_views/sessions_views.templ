@@ -80,7 +80,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 											<td>{ session.Expiry.Local().Format("02/01/2006 15:04:05") }</td>
 										}
 										<td>
-											<button type="button"><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+											@partials.MoreButton()
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 												<ul class="uk-dropdown-nav uk-nav" _="on click remove .uk-open from .uk-dropdown">
 													<li>

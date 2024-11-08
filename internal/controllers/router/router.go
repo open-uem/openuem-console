@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,21 +21,19 @@ import (
 )
 
 func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.Echo {
+
 	e := echo.New()
 
-	// Static assets
 	cwd, err := openuem_utils.GetWd()
 	if err != nil {
 		log.Fatalf("could not get working directory: %v", err)
 	}
 
-	assetsPath := filepath.Join(cwd, "assets")
-	if strings.HasSuffix(cwd, "tmp") {
-		assetsPath = "assets"
-	}
+	// Static Assets
+	assetsPath := staticAssets(e, cwd)
 
-	e.Static("/static", assetsPath)
-	e.File("/favicon.ico", filepath.Join(assetsPath, "favicon.ico"))
+	// Favicon
+	faviconHandler(e, assetsPath)
 
 	// Add i18n middleware
 	if err := ctxi18n.LoadWithDefault(locales.Content, "en"); err != nil {
@@ -57,7 +56,53 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 	// Custom HTTP Error Handler
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
+	// Debug - enable logger
+	// e.Use(mw.Logger())
+
 	return e
+}
+
+func faviconHandler(e *echo.Echo, assetsPath string) string {
+
+	// TODO - Replace with a better cache approach like immutable
+	// nosniff + no-cache
+	customHeaderMw := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+			c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+			return next(c)
+		}
+	}
+
+	e.Add(http.MethodGet, "/favicon.ico", echo.StaticFileHandler("favicon.ico", os.DirFS(assetsPath)), customHeaderMw)
+
+	return assetsPath
+}
+
+func staticAssets(e *echo.Echo, cwd string) string {
+	var assetsPath string
+
+	// Static assets + Headers (Ref: https://github.com/labstack/echo/issues/1902#issuecomment-2435145166)
+	// TODO - Replace with a better cache approach like immutable
+	if strings.HasSuffix(cwd, "tmp") {
+		// DEVEL
+		assetsPath = filepath.Join(filepath.Dir(cwd), "assets")
+	} else {
+		assetsPath = filepath.Join(cwd, "assets")
+	}
+
+	// nosniff + no-cache
+	customHeaderMw := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+			c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+			return next(c)
+		}
+	}
+
+	e.Add(http.MethodGet, "/static*", echo.StaticDirectoryHandler(os.DirFS(assetsPath), false), customHeaderMw)
+
+	return assetsPath
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {

@@ -128,7 +128,7 @@
   
   .markdown-body {
     -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     margin: 0;
     color: var(--fgColor-default);
     background-color: var(--bgColor-default);
