@@ -44,14 +44,14 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									<thead>
 										<tr>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.hostname") }</span>
 													@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/updates", "#main", "outerHTML")
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.os") }</span>
 													@partials.SortByColumnIcon(c, p, "agentOS", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByOptions("AgentOS", availableOSes, f.AgentOSVersions, "/security/updates", "#main", "outerHTML", false, func() bool {
@@ -60,7 +60,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.status") }</span>
 													@partials.SortByColumnIcon(c, p, "updateStatus", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByOptions("UpdateStatus", availableUpdateStatus, f.UpdateStatus, "/security/updates", "#main", "outerHTML", true, func() bool {
@@ -69,21 +69,21 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.last_search") }</span>
 													@partials.SortByColumnIcon(c, p, "lastSearch", "time", "#main", "outerHTML", "")
 													@filters.FilterByDate("LastSearch", f.LastSearchFrom, f.LastSearchTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastSearchFrom == "" && f.LastSearchTo == "" })
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.last_install") }</span>
 													@partials.SortByColumnIcon(c, p, "lastInstall", "time", "#main", "outerHTML", "")
 													@filters.FilterByDate("LastInstall", f.LastInstallFrom, f.LastInstallTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastInstallFrom == "" && f.LastInstallTo == "" })
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.pending_updates") }</span>
 													@partials.SortByColumnIcon(c, p, "pendingUpdates", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByOptions("PendingUpdate", []string{"Yes", "No"}, f.PendingUpdateOptions, "/security/updates", "#main", "outerHTML", true, func() bool {

@@ -42,21 +42,21 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							<thead>
 								<tr>
 									<th class="w-2/12">
-										<div class="flex gap-2 items-center">
+										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "agents.hostname") }</span>
 											@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/computers", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-1/12">
-										<div class="flex gap-2 items-center">
+										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "agents.os") }</span>
 											@partials.SortByColumnIcon(c, p, "os", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByOS(f, "/computers", "#main", "outerHTML", func() bool { return !f.WindowsAgents && !f.LinuxAgents && !f.MacAgents })
 										</div>
 									</th>
 									<th class="w-1/12">
-										<div class="flex gap-2 items-center">
+										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "agents.version") }</span>
 											@partials.SortByColumnIcon(c, p, "version", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByOptions("OSVersion", versions, f.OSVersions, "/computers", "#main", "outerHTML", false, func() bool {
@@ -65,7 +65,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										</div>
 									</th>
 									<th class="w-2/12">
-										<div class="flex gap-2 items-center">
+										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "agents.username") }</span>
 											@partials.SortByColumnIcon(c, p, "username", "alpha", "#main", "outerHTML", "")
 											@filters.FilterByText("Username", f.Username, "computers.filter_by_username", "/computers", "#main", "outerHTML")
@@ -88,7 +88,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										})
 									</th>
 									<th class="w-3/12">
-										<div class="flex gap-2 items-center">
+										<div class="flex gap-1 items-center">
 											{ i18n.T(ctx, "Tag.other") }
 											@filters.FilterByTags(f, "/computers", "#main", "outerHTML", availableTags, func() bool { return len(f.Tags) == 0 })
 										</div>

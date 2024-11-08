@@ -104,7 +104,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
 					<th>
-						<div class="flex gap-2 items-center">
+						<div class="flex gap-1 items-center">
 							<span>{ i18n.T(ctx, "Name") }</span>
 							@partials.SortByColumnIcon(c, p, "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
 						</div>
@@ -151,24 +151,24 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 		<thead>
 			<tr>
 				<th>
-					<div class="flex gap-2 items-center">
+					<div class="flex gap-1 items-center">
 						<span class="sr-only">Logo</span>
 					</div>
 				</th>
 				<th>
-					<div class="flex gap-2 items-center">
+					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "Name") }</span>
 						@partials.SortByColumnIcon(c, p, "name", "alpha", "#deployments-results", "innerHTML", "")
 					</div>
 				</th>
 				<th>
-					<div class="flex gap-2 items-center">
+					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "agents.deploy_install_date") }</span>
 						@partials.SortByColumnIcon(c, p, "installation", "time", "#deployments-results", "innerHTML", "")
 					</div>
 				</th>
 				<th>
-					<div class="flex gap-2 items-center">
+					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "agents.deploy_updated_date") }</span>
 						@partials.SortByColumnIcon(c, p, "updated", "time", "#deployments-results", "innerHTML", "")
 					</div>

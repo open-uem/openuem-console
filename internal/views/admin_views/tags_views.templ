@@ -39,24 +39,24 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
 								<thead>
 									<tr>
 										<th class="w-1/4">
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Tag.one") }</span>
 												@partials.SortByColumnIcon(c, p, "tag", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/2">
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "tags.descr") }</span>
 												@partials.SortByColumnIcon(c, p, "description", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th class="w-1/4">
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "tags.color") }</span>
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
 											</div>
 										</th>

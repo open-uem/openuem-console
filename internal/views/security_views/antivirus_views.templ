@@ -44,14 +44,14 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									<thead>
 										<tr>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.hostname") }</span>
 													@partials.SortByColumnIcon(c, p, "hostname", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/antivirus", "#main", "outerHTML")
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.os") }</span>
 													@partials.SortByColumnIcon(c, p, "agentOS", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByOptions("AgentOS", availableOSes, f.AgentOSVersions, "/security/antivirus", "#main", "outerHTML", false, func() bool {
@@ -60,7 +60,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 												</div>
 											</th>
 											<th>
-												<div class="flex gap-2 items-center">
+												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.title") }</span>
 													@partials.SortByColumnIcon(c, p, "antivirusName", "alpha", "#main", "outerHTML", "")
 													@filters.FilterByOptions("AntivirusName", detectedAntiviri, f.AntivirusNameOptions, "/security/antivirus", "#main", "outerHTML", false, func() bool {

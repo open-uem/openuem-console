@@ -34,35 +34,35 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 								<thead>
 									<tr>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
 												@partials.SortByColumnIcon(c, p, "uid", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sessions.user_agent") }</span>
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "IP Address") }</span>
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sessions.token") }</span>
 												@partials.SortByColumnIcon(c, p, "token", "alpha", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sessions.expiry") }</span>
 												@partials.SortByColumnIcon(c, p, "expiry", "time", "#main", "outerHTML", "")
 											</div>
 										</th>
 										<th>
-											<div class="flex gap-2 items-center">
+											<div class="flex gap-1 items-center">
 												<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
 											</div>
 										</th>

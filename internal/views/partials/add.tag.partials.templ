@@ -32,7 +32,7 @@ templ AddTagButton(availableTags, appliedTags []*ent.Tag, agentId, url, method, 
 							hx-swap={ swap }
 						>
 							<div class="flex flex-col text-left p-2 ">
-								<div class="flex gap-2 items-center">
+								<div class="flex gap-1 items-center">
 									<div class={ "rounded-full h-2 w-2 p-2", fmt.Sprintf("bg-%s-500", tag.Color) }></div>
 									{ tag.Tag }
 								</div>
