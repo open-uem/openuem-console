@@ -7,6 +7,7 @@ import (
 	"github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strconv"
 	"strings"
 )
 
@@ -99,45 +100,51 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 
 templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
-		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
-			<thead>
-				<tr>
-					<th class="sr-only w-1/12">Logo</th>
-					<th>
-						<div class="flex gap-1 items-center">
-							<span>{ i18n.T(ctx, "Name") }</span>
-							@partials.SortByColumnIcon(c, p, "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
-						</div>
-					</th>
-					<th>{ i18n.T(ctx, "Actions") }</th>
-				</tr>
-			</thead>
-			<tbody>
-				for _, p := range packages {
+		<form class="mt-5 mb-2">
+			<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+			<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+			<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+			<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+			<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
+				<thead>
 					<tr>
-						<td class="text-center !align-middle">
-							@partials.Brand(strings.ToLower(p.Name), "")
-						</td>
-						<td class="!align-middle">{ p.Name }</td>
-						<td class="!align-middle">
-							<form>
-								<input type="hidden" name="packageId" value={ p.ID }/>
-								<input type="hidden" name="packageName" value={ p.Name }/>
-								<button
-									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
-									hx-push-url="false"
-									hx-target="#main"
-									hx-swap="outerHTML"
-								>
-									<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
-								</button>
-							</form>
-						</td>
+						<th class="sr-only w-1/12">Logo</th>
+						<th>
+							<div class="flex gap-1 items-center">
+								<span>{ i18n.T(ctx, "Name") }</span>
+								@partials.SortByColumnIcon(c, p, "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
+							</div>
+						</th>
+						<th>{ i18n.T(ctx, "Actions") }</th>
 					</tr>
-				}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					for _, p := range packages {
+						<tr>
+							<td class="text-center !align-middle">
+								@partials.Brand(strings.ToLower(p.Name), "")
+							</td>
+							<td class="!align-middle">{ p.Name }</td>
+							<td class="!align-middle">
+								<form>
+									<input type="hidden" name="packageId" value={ p.ID }/>
+									<input type="hidden" name="packageName" value={ p.Name }/>
+									<button
+										type="submit"
+										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+									</button>
+								</form>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</form>
 		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name=search]")
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">

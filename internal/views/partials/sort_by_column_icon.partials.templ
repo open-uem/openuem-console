@@ -12,6 +12,7 @@ templ SortByColumnIcon(c echo.Context, p PaginationAndSort, sortBy, sortIcon, ta
 		hx-push-url="true"
 		hx-target={ target }
 		hx-swap={ swap }
+		hx-include={ include }
 		title="sortBy"
 		_={ fmt.Sprintf(`
 		on htmx:configRequest			

@@ -34,11 +34,11 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 				</div>
 				if len(agents) > 0 {
 					<form class="mt-5 mb-2">
+						<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+						<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+						<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+						<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
 						<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
-							<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-							<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-							<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-							<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
 							<thead>
 								<tr>
 									<th class="w-2/12">
