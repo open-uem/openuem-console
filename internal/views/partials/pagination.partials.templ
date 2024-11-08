@@ -62,6 +62,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
 							<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 							<button
+								class="flex items-center"
 								type="submit"
 								hx-post={ c.Request().RequestURI }
 								hx-push-url="true"
@@ -77,7 +78,11 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 					</li>
 				} else {
 					<li>
-						<span uk-pagination-previous class="uk-disabled"></span>
+						<form>
+							<button class="flex items-center" disabled>
+								<span uk-pagination-previous class="uk-disabled"></span>
+							</button>
+						</form>
 					</li>
 				}
 				for _, page := range p.GetPaginationEntries() {
@@ -113,6 +118,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
 							<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 							<button
+								class="flex items-center"
 								type="submit"
 								hx-post={ c.Request().RequestURI }
 								hx-push-url="true"
@@ -128,7 +134,11 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 					</li>
 				} else {
 					<li>
-						<span uk-pagination-next class="uk-disabled"></span>
+						<form>
+							<button class="flex items-center" disabled>
+								<span uk-pagination-next class="uk-disabled"></span>
+							</button>
+						</form>
 					</li>
 				}
 			</ul>
