@@ -247,6 +247,10 @@ func (h *Handler) Computers(c echo.Context) error {
 	}
 	f.ComputerModels = filteredComputerModels
 
+	if c.FormValue("filterWithApplication") != "" {
+		f.WithApplication = c.FormValue("filterWithApplication")
+	}
+
 	// Default sort
 	if p.SortBy == "" {
 		p.SortBy = "hostname"

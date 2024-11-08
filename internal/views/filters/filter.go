@@ -11,6 +11,7 @@ type AgentFilter struct {
 	Username              string
 	ContactFrom           string
 	ContactTo             string
+	WithApplication       string
 }
 
 type ApplicationsFilter struct {

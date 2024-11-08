@@ -256,6 +256,7 @@ es:
     filter_by_os_version: "Filtrar por versión de sistema operativo"
     filter_by_manufacturer: "Filtrar por fabricante"
     filter_by_model: "Filtrar por modelo"
+    filter_by_application: "Estos equipos han sido filtrados por aquellos en los que la aplicación %s está instalada"
   confirm:
     agent_disable: "¿Está seguro de que quiere desactivar este agente? El agente no enviará más información hasta que vuelva a ser activado"
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"

@@ -22,13 +22,16 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 				<p class="uk-margin-small-top uk-text-small">
 					{ i18n.T(ctx, "computers.description") }
 				</p>
+				if len(f.WithApplication) > 0 {
+					<p class="uk-text-small uk-text-bold underline">{ i18n.T(ctx, "computers.filter_by_application", f.WithApplication) }</p>
+				}
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
 					@filters.ClearFilters("/computers", "#main", "outerHTML", func() bool {
 						return f.Hostname == "" && len(f.AgentOSVersions) == 0 &&
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
-							len(f.ComputerModels) == 0 && len(f.Tags) == 0
+							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0
 					})
 					@partials.RefreshPage("/computers", "#main", "outerHTML", "post", refreshTime)
 				</div>
@@ -38,6 +41,8 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 						<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 						<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
 						<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+						<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+						<input id="filterWithApplication" type="hidden" name="filterWithApplication" value={ f.WithApplication }/>
 						<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 							<thead>
 								<tr>

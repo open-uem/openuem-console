@@ -80,7 +80,6 @@ func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort)
 
 func mainAppsByPageSQL(s *sql.Selector, p partials.PaginationAndSort) {
 	s = s.Select(app.FieldName, app.FieldPublisher, "count(*) AS count").GroupBy(app.FieldName, app.FieldPublisher).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
-
 }
 
 func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.ApplicationsFilter) ([]App, error) {

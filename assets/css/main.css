@@ -9554,6 +9554,10 @@ th.uk-text-break, td.uk-text-break {
   margin-top: 2rem;
 }
 
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
 .inline-block {
   display: inline-block;
 }
@@ -9722,10 +9726,6 @@ th.uk-text-break, td.uk-text-break {
   width: 1.5rem;
 }
 
-.w-60 {
-  width: 15rem;
-}
-
 .w-7 {
   width: 1.75rem;
 }
@@ -9742,20 +9742,16 @@ th.uk-text-break, td.uk-text-break {
   width: 2.25rem;
 }
 
+.w-96 {
+  width: 24rem;
+}
+
 .w-full {
   width: 100%;
 }
 
 .w-screen {
   width: 100vw;
-}
-
-.w-72 {
-  width: 18rem;
-}
-
-.w-96 {
-  width: 24rem;
 }
 
 .flex-1 {

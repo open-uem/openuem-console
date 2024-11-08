@@ -8,6 +8,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
+	"github.com/doncicuto/openuem_ent/app"
 	"github.com/doncicuto/openuem_ent/computer"
 	"github.com/doncicuto/openuem_ent/deployment"
 	"github.com/doncicuto/openuem_ent/metadata"
@@ -235,6 +236,10 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 
 	if len(f.ComputerModels) > 0 {
 		query = query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
+	}
+
+	if len(f.WithApplication) > 0 {
+		query = query.Where(agent.HasAppsWith(app.Name(f.WithApplication)))
 	}
 
 	if len(f.Tags) > 0 {
