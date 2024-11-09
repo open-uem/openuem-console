@@ -43,8 +43,8 @@ templ FilterByOptions(c echo.Context, p partials.PaginationAndSort, field, title
 			<button
 				type="button"
 				class="uk-button uk-button-primary mx-2 w-full"
-				hx-post={ c.Request().RequestURI }
-				hx-push-url="false"
+				hx-get={ c.Request().URL.Path }
+				hx-push-url="true"
 				hx-target={ target }
 				hx-swap={ swap }
 				hx-include="input[name^='filterBy']"

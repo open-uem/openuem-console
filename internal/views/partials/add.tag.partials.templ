@@ -31,7 +31,7 @@ templ AddTagButton(p PaginationAndSort, allTags, appliedTags []*ent.Tag, agentId
 							} else {
 								hx-get={ url }
 							}
-							hx-push-url="true"
+							hx-push-url="false"
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filter']"

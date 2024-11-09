@@ -16,7 +16,7 @@ templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortI
 		<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 		<button
 			type="submit"
-			hx-post={ c.Request().RequestURI }
+			hx-get={ c.Request().URL.Path }
 			hx-push-url="true"
 			hx-target={ target }
 			hx-swap={ swap }

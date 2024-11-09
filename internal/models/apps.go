@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"log"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -87,7 +86,6 @@ func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.Applicatio
 	var apps []App
 	var err error
 
-	log.Println("called")
 	query := m.Client.App.Query()
 
 	applyAppsFilters(query, f)
