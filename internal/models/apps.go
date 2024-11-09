@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -86,6 +87,7 @@ func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.Applicatio
 	var apps []App
 	var err error
 
+	log.Println("called")
 	query := m.Client.App.Query()
 
 	applyAppsFilters(query, f)
@@ -110,19 +112,19 @@ func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.Applicatio
 				s.OrderBy(sql.Asc(app.FieldPublisher))
 			}).Scan(context.Background(), &apps)
 		} else {
-			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Desc(app.FieldPublisher))
 			}).Scan(context.Background(), &apps)
 		}
 	case "installations":
 		if p.SortOrder == "asc" {
-			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Asc("count"))
 			}).Scan(context.Background(), &apps)
 		} else {
-			err = m.Client.App.Query().Modify(func(s *sql.Selector) {
+			err = query.Modify(func(s *sql.Selector) {
 				mainAppsByPageSQL(s, p)
 				s.OrderBy(sql.Desc("count"))
 			}).Scan(context.Background(), &apps)

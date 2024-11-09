@@ -36,6 +36,7 @@ func (h *Handler) Software(c echo.Context) error {
 	}
 
 	apps, err = h.Model.GetAppsByPage(p, f)
+	log.Println(apps)
 	if err != nil {
 		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software")))
 	}

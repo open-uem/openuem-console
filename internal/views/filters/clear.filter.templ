@@ -3,14 +3,15 @@ package filters
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 )
 
-templ ClearFilter(field, url, target, swap string, disableFunc func() bool) {
+templ ClearFilter(c echo.Context, field, target, swap string, disableFunc func() bool) {
 	<button
 		type="button"
 		class="uk-button uk-button-default mx-2 w-full"
 		hx-push-url="false"
-		hx-post={ url }
+		hx-post={ c.Request().RequestURI }
 		hx-target={ target }
 		hx-swap={ swap }
 		hx-include="input[name^='filterBy']"

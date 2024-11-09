@@ -37,14 +37,14 @@ templ Software(c echo.Context, p partials.PaginationAndSort, apps []models.App, 
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "apps.name") }</span>
 										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.name"), "name", "alpha", "#main", "outerHTML")
-										@filters.FilterByText("AppName", f.AppName, "apps.filter_by_name", p, "/software", "#main", "outerHTML")
+										@filters.FilterByText(c, p, "AppName", f.AppName, "apps.filter_by_name", "#main", "outerHTML")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "apps.publisher") }</span>
 										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.publisher"), "publisher", "alpha", "#main", "outerHTML")
-										@filters.FilterByText("AppPublisher", f.Vendor, "apps.filter_by_publisher", p, "/software", "#main", "outerHTML")
+										@filters.FilterByText(c, p, "AppPublisher", f.Vendor, "apps.filter_by_publisher", "#main", "outerHTML")
 									</div>
 								</th>
 								<th>
