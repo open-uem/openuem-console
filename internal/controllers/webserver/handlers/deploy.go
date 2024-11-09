@@ -23,7 +23,7 @@ func (h *Handler) DeployUninstall(c echo.Context) error {
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	var err error
-	search := c.FormValue("search")
+	search := c.FormValue("filterByAppName")
 	if search == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
 	}

@@ -16,7 +16,7 @@ templ FilterByTags(f AgentFilter, url, target, swap string, tags []*ent.Tag, dis
 		}
 	</button>
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<div class="flex flex-col gap-2 p-2">
+		<form class="flex flex-col gap-2 p-2">
 			for _, tag := range tags {
 				<div class="my-2">
 					<input
@@ -41,7 +41,7 @@ templ FilterByTags(f AgentFilter, url, target, swap string, tags []*ent.Tag, dis
 				{ i18n.T(ctx, "Filter") }
 			</button>
 			@ClearFilter("filterByTag", url, target, swap, disableFunc)
-		</div>
+		</form>
 	</div>
 }
 

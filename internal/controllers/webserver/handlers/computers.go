@@ -257,7 +257,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		p.SortOrder = "desc"
 	}
 
-	tags, err := h.Model.GetAppliedTags()
+	tags, err := h.Model.GetAllTags()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -357,7 +357,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
 	}
 
-	search := c.FormValue("search")
+	search := c.FormValue("filterByAppName")
 
 	if search == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))

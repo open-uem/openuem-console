@@ -4,47 +4,54 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strconv"
 	"strings"
 )
 
-templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap, include string) {
-	<button
-		type="submit"
-		hx-post={ c.Request().RequestURI }
-		hx-push-url="true"
-		hx-target={ target }
-		hx-swap={ swap }
-		hx-include={ include }
-		title={ i18n.T(ctx, "SortBy", strings.ToLower(title)) }
-		_={ fmt.Sprintf(`
+templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap string) {
+	<form>
+		<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+		<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+		<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+		<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+		<button
+			type="submit"
+			hx-post={ c.Request().RequestURI }
+			hx-push-url="true"
+			hx-target={ target }
+			hx-swap={ swap }
+			hx-include="input[name^='filterBy']"
+			title={ i18n.T(ctx, "SortBy", strings.ToLower(title)) }
+			_={ fmt.Sprintf(`
 		on htmx:configRequest			
 			set event.detail.parameters['sortBy'] to '%s'
 			set event.detail.parameters['sortOrder'] to '%s'
 		end
 		`, sortBy, newSortOrder(p.SortOrder)) }
-	>
-		<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == p.SortBy) }>
-			if sortBy != p.SortBy || newSortOrder(p.SortOrder) == "asc" && sortBy == p.SortBy {
-				switch sortIcon {
-					case "alpha":
-						<uk-icon hx-history="false" icon="arrow-up-a-z" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "numeric":
-						<uk-icon hx-history="false" icon="arrow-down-0-1" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "time":
-						<uk-icon hx-history="false" icon="clock-arrow-down" custom-class="h-5 w-5" uk-cloack></uk-icon>
+		>
+			<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == p.SortBy) }>
+				if sortBy != p.SortBy || newSortOrder(p.SortOrder) == "asc" && sortBy == p.SortBy {
+					switch sortIcon {
+						case "alpha":
+							<uk-icon hx-history="false" icon="arrow-up-a-z" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "numeric":
+							<uk-icon hx-history="false" icon="arrow-down-0-1" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "time":
+							<uk-icon hx-history="false" icon="clock-arrow-down" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					}
+				} else {
+					switch sortIcon {
+						case "alpha":
+							<uk-icon hx-history="false" icon="arrow-down-z-a" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "numeric":
+							<uk-icon hx-history="false" icon="arrow-up-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
+						case "time":
+							<uk-icon hx-history="false" icon="clock-arrow-up" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					}
 				}
-			} else {
-				switch sortIcon {
-					case "alpha":
-						<uk-icon hx-history="false" icon="arrow-down-z-a" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "numeric":
-						<uk-icon hx-history="false" icon="arrow-up-1-0" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					case "time":
-						<uk-icon hx-history="false" icon="clock-arrow-up" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				}
-			}
-		</div>
-	</button>
+			</div>
+		</button>
+	</form>
 }
 
 func newSortOrder(sortOrder string) string {

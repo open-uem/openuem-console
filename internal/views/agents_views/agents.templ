@@ -8,10 +8,9 @@ import (
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"strconv"
 )
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, tags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.SuccessMessage(successMessage)
@@ -35,16 +34,10 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
 				</div>
 				if len(agents) > 0 {
-					<form class="flex gap-4 mt-5 mb-2 justify-between">
-						<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-						<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-						<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-						<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
-							@AgentsTableHead(c, p, f, tags, availableOSes)
-							@AgentsTableBody(agents, tags)
-						</table>
-					</form>
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
+						@AgentsTableHead(c, p, f, appliedTags, availableOSes)
+						@AgentsTableBody(p, agents, availableTags)
+					</table>
 					if p.NItems / p.PageSize > 1 {
 						@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 					}
@@ -100,14 +93,14 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
 					@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/agents", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "enabled", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "enabled", "alpha", "#main", "outerHTML")
 					@filters.FilterByOptions("EnabledAgent", "agents.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AgentEnabledOptions, "/agents", "#main", "outerHTML", true, func() bool {
 						return len(f.AgentEnabledOptions) == 0
 					})
@@ -116,7 +109,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
 					@filters.FilterByOptions("AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "/agents", "#main", "outerHTML", false, func() bool {
 						return len(f.AgentOSVersions) == 0
 					})
@@ -125,13 +118,13 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/12">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.version") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "IP Address") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML")
 				</div>
 			</th>
 			<th class="w-1/4">
@@ -143,7 +136,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.last_contact") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML", "")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML")
 					@filters.FilterByDate("Contact", "agents.filter_by_last_contact", f.ContactFrom, f.ContactTo, "/agents", "#main", "outerHTML", func() bool { return f.ContactFrom == "" && f.ContactTo == "" })
 				</div>
 			</th>
@@ -156,7 +149,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</thead>
 }
 
-templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
+templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []*ent.Tag) {
 	for index, agent := range agents {
 		<tr>
 			<td
@@ -185,7 +178,7 @@ templ AgentsTableBody(agents []*ent.Agent, tags []*ent.Tag) {
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
 				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, "/agents", "#main", "outerHTML")
-				@partials.AddTagButton(tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
+				@partials.AddTagButton(p, tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
 			</td>
 			<td class="!align-middle">{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
 			<td class="!align-middle">

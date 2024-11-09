@@ -35,25 +35,25 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 							@partials.RefreshPage("/security", "#main", "outerHTML", "post", refresh)
 						</div>
 						if len(antiviri) > 0 {
-							<form class="mt-5 mb-2">
-								<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-								<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-								<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-								<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-								<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+								<form class="mt-5 mb-2">
+									<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+									<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+									<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+									<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
 									<thead>
 										<tr>
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML")
 													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/antivirus", "#main", "outerHTML")
 												</div>
 											</th>
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.os") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML", "")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML")
 													@filters.FilterByOptions("AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "/security/antivirus", "#main", "outerHTML", false, func() bool {
 														return len(f.AgentOSVersions) == 0
 													})
@@ -62,7 +62,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.title") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML", "")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML")
 													@filters.FilterByOptions("AntivirusName", "antivirus.filter_by_name", detectedAntiviri, f.AntivirusNameOptions, "/security/antivirus", "#main", "outerHTML", false, func() bool {
 														return len(f.AntivirusNameOptions) == 0
 													})
@@ -71,7 +71,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-2 items-center justify-center">
 													<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML", "")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML")
 													@filters.FilterByOptions("AntivirusEnabled", "antivirus.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AntivirusEnabledOptions, "/security/antivirus", "#main", "outerHTML", true, func() bool {
 														return len(f.AntivirusEnabledOptions) == 0
 													})
@@ -80,7 +80,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-2 items-center justify-center">
 													<span>{ i18n.T(ctx,"antivirus.updated") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML", "")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML")
 													@filters.FilterByOptions("AntivirusUpdated", "antivirus.filter_by_updated", []string{"UpdatedYes", "UpdatedNo"}, f.AntivirusUpdatedOptions, "/security/antivirus", "#main", "outerHTML", true, func() bool {
 														return len(f.AntivirusUpdatedOptions) == 0
 													})
@@ -88,45 +88,45 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											</th>
 										</tr>
 									</thead>
-									<tbody>
-										for _, antivirus := range antiviri {
-											<tr>
-												<td
-													class="!align-middle underline cursor-pointer"
-													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", antivirus.ID))) }
-													hx-push-url="true"
-													hx-target="#main"
-													hx-swap="outerHTML"
-												>
-													{ antivirus.Hostname }
-												</td>
-												<td>
-													switch antivirus.OS {
-														case "windows":
-															<i class="ri-windows-fill ri-2x text-blue-600"></i>
-														case "linux":
-															<span></span>
-													}
-												</td>
-												<td>{ antivirus.Name }</td>
-												if antivirus.IsActive {
-													<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
-												} else {
-													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+								</form>
+								<tbody>
+									for _, antivirus := range antiviri {
+										<tr>
+											<td
+												class="!align-middle underline cursor-pointer"
+												hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", antivirus.ID))) }
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												{ antivirus.Hostname }
+											</td>
+											<td>
+												switch antivirus.OS {
+													case "windows":
+														<i class="ri-windows-fill ri-2x text-blue-600"></i>
+													case "linux":
+														<span></span>
 												}
-												if antivirus.IsUpdated {
-													<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
-												} else {
-													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
-												}
-											</tr>
-										}
-									</tbody>
-								</table>
-								if p.NItems / p.PageSize > 1 {
-									@partials.Pagination(c, p, "#main", "outerHTML", "")
-								}
-							</form>
+											</td>
+											<td>{ antivirus.Name }</td>
+											if antivirus.IsActive {
+												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+											} else {
+												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+											}
+											if antivirus.IsUpdated {
+												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+											} else {
+												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+											}
+										</tr>
+									}
+								</tbody>
+							</table>
+							if p.NItems / p.PageSize > 1 {
+								@partials.Pagination(c, p, "#main", "outerHTML", "")
+							}
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }

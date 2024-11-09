@@ -30,13 +30,13 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 										<th class="w-7/12">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "updates_history.update_title") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates_history.update_title"), "title", "alpha", "#main", "innerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates_history.update_title"), "title", "alpha", "#main", "innerHTML")
 											</div>
 										</th>
 										<th class="w-2/12">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "updates_history.date") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates_history.date"), "date", "time", "#main", "innerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates_history.date"), "date", "time", "#main", "innerHTML")
 											</div>
 										</th>
 										<th class="w-3/12">{ i18n.T(ctx, "updates_history.support_url") }</th>

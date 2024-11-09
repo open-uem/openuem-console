@@ -36,7 +36,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.uid"), "uid", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.uid"), "uid", "alpha", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
@@ -52,13 +52,13 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sessions.token") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sessions.token"), "token", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sessions.token"), "token", "alpha", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sessions.expiry") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sessions.expiry"), "expiry", "time", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sessions.expiry"), "expiry", "time", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>

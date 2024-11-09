@@ -7,7 +7,6 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"strconv"
 )
 
 templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
@@ -36,110 +35,104 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 							@partials.RefreshPage("/security/updates", "#main", "outerHTML", "post", refresh)
 						</div>
 						if len(systemUpdates) > 0 {
-							<form class="mt-5 mb-2">
-								<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-								<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-								<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-								<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-								<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
-									<thead>
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.hostname") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML")
+												@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/updates", "#main", "outerHTML")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.os") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.os"), "agentOS", "alpha", "#main", "outerHTML")
+												@filters.FilterByOptions("AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "/security/updates", "#main", "outerHTML", false, func() bool {
+													return len(f.AgentOSVersions) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.status") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.status"), "updateStatus", "alpha", "#main", "outerHTML")
+												@filters.FilterByOptions("UpdateStatus", "systemupdate.filter_by_updatestatus", availableUpdateStatus, f.UpdateStatus, "/security/updates", "#main", "outerHTML", true, func() bool {
+													return len(f.UpdateStatus) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.last_search") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.last_search"), "lastSearch", "time", "#main", "outerHTML")
+												@filters.FilterByDate("LastSearch", "systemupdate.filter_by_last_search", f.LastSearchFrom, f.LastSearchTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastSearchFrom == "" && f.LastSearchTo == "" })
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.last_install") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.last_install"), "lastInstall", "time", "#main", "outerHTML")
+												@filters.FilterByDate("LastInstall", "systemupdate.filter_by_last_install", f.LastInstallFrom, f.LastInstallTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastInstallFrom == "" && f.LastInstallTo == "" })
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "updates.pending_updates") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.pending_updates"), "pendingUpdates", "alpha", "#main", "outerHTML")
+												@filters.FilterByOptions("PendingUpdate", "systemupdate.filter_by_pendingupdate", []string{"Yes", "No"}, f.PendingUpdateOptions, "/security/updates", "#main", "outerHTML", true, func() bool {
+													return len(f.PendingUpdateOptions) == 0
+												})
+											</div>
+										</th>
+										<th>{ i18n.T(ctx, "updates.history") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, systemUpdate := range systemUpdates {
 										<tr>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
-													@filters.FilterByText("Hostname", f.Hostname, "agents.filter_by_hostname", "/security/updates", "#main", "outerHTML")
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.os") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.os"), "agentOS", "alpha", "#main", "outerHTML", "")
-													@filters.FilterByOptions("AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "/security/updates", "#main", "outerHTML", false, func() bool {
-														return len(f.AgentOSVersions) == 0
-													})
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.status") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.status"), "updateStatus", "alpha", "#main", "outerHTML", "")
-													@filters.FilterByOptions("UpdateStatus", "systemupdate.filter_by_updatestatus", availableUpdateStatus, f.UpdateStatus, "/security/updates", "#main", "outerHTML", true, func() bool {
-														return len(f.UpdateStatus) == 0
-													})
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.last_search") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.last_search"), "lastSearch", "time", "#main", "outerHTML", "")
-													@filters.FilterByDate("LastSearch", "systemupdate.filter_by_last_search", f.LastSearchFrom, f.LastSearchTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastSearchFrom == "" && f.LastSearchTo == "" })
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.last_install") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.last_install"), "lastInstall", "time", "#main", "outerHTML", "")
-													@filters.FilterByDate("LastInstall", "systemupdate.filter_by_last_install", f.LastInstallFrom, f.LastInstallTo, "/security/updates", "#main", "outerHTML", func() bool { return f.LastInstallFrom == "" && f.LastInstallTo == "" })
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.pending_updates") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.pending_updates"), "pendingUpdates", "alpha", "#main", "outerHTML", "")
-													@filters.FilterByOptions("PendingUpdate", "systemupdate.filter_by_pendingupdate", []string{"Yes", "No"}, f.PendingUpdateOptions, "/security/updates", "#main", "outerHTML", true, func() bool {
-														return len(f.PendingUpdateOptions) == 0
-													})
-												</div>
-											</th>
-											<th>{ i18n.T(ctx, "updates.history") }</th>
-										</tr>
-									</thead>
-									<tbody>
-										for _, systemUpdate := range systemUpdates {
-											<tr>
-												<td
-													class="!align-middle underline cursor-pointer"
-													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", systemUpdate.ID))) }
+											<td
+												class="!align-middle underline cursor-pointer"
+												hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", systemUpdate.ID))) }
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												{ systemUpdate.Hostname }
+											</td>
+											<td>
+												switch systemUpdate.OS {
+													case "windows":
+														<i class="ri-windows-fill ri-2x text-blue-600"></i>
+													case "linux":
+														<span></span>
+												}
+											</td>
+											<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
+											<td>{ systemUpdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
+											<td>{ systemUpdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
+											if systemUpdate.PendingUpdates {
+												<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+											} else {
+												<td>{ i18n.T(ctx, "No") }</td>
+											}
+											<td>
+												<button
+													title={ i18n.T(ctx, "systemupdate.show_updates_history") }
+													type="button"
 													hx-push-url="true"
+													hx-get={ string(templ.URL(fmt.Sprintf("/security/%s/updates", systemUpdate.ID))) }
 													hx-target="#main"
 													hx-swap="outerHTML"
 												>
-													{ systemUpdate.Hostname }
-												</td>
-												<td>
-													switch systemUpdate.OS {
-														case "windows":
-															<i class="ri-windows-fill ri-2x text-blue-600"></i>
-														case "linux":
-															<span></span>
-													}
-												</td>
-												<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
-												<td>{ systemUpdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
-												<td>{ systemUpdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
-												if systemUpdate.PendingUpdates {
-													<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
-												} else {
-													<td>{ i18n.T(ctx, "No") }</td>
-												}
-												<td>
-													<button
-														title={ i18n.T(ctx, "systemupdate.show_updates_history") }
-														type="button"
-														hx-push-url="true"
-														hx-get={ string(templ.URL(fmt.Sprintf("/security/%s/updates", systemUpdate.ID))) }
-														hx-target="#main"
-														hx-swap="outerHTML"
-													>
-														<uk-icon hx-history="false" icon="folder-clock" custom-class="h-5 w-5 text-blue-600" uk-cloack></uk-icon>
-													</button>
-												</td>
-											</tr>
-										}
-									</tbody>
-								</table>
-							</form>
+													<uk-icon hx-history="false" icon="folder-clock" custom-class="h-5 w-5 text-blue-600" uk-cloack></uk-icon>
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
 							if p.NItems / p.PageSize > 1 {
 								@partials.Pagination(c, p, "#main", "outerHTML", "")
 							}

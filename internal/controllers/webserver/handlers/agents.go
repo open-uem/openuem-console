@@ -59,13 +59,19 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		f.ContactTo = contactTo
 	}
 
-	tags, err := h.Model.GetAppliedTags()
+	availableTags, err := h.Model.GetAllTags()
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	for _, tag := range tags {
+	appliedTags, err := h.Model.GetAppliedTags()
+	if err != nil {
+		successMessage = ""
+		errMessage = err.Error()
+	}
+
+	for _, tag := range appliedTags {
 		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
 			f.Tags = append(f.Tags, tag.ID)
 		}
@@ -103,7 +109,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		refreshTime = 5
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, tags, availableOSes, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

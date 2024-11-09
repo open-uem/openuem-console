@@ -58,7 +58,7 @@ templ Deploy(install bool) {
 							>
 								<span uk-search-icon></span>
 								<input
-									name="search"
+									name="filterByAppName"
 									class="uk-search-input"
 									type="search"
 									placeholder={ i18n.T(ctx, "Search") }
@@ -132,61 +132,55 @@ templ DeployIndex(title string, cmp templ.Component) {
 
 templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.Context, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
-		<form class="mt-5 mb-2">
-			<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-			<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-			<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-			<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-			<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
-				<thead>
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
+			<thead>
+				<tr>
+					<th class="sr-only w-1/12">Logo</th>
+					<th>
+						<div class="flex gap-1 items-center">
+							<span>{ i18n.T(ctx, "Name") }</span>
+							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML")
+						</div>
+					</th>
+					<th>{ i18n.T(ctx, "Actions") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, p := range packages {
 					<tr>
-						<th class="sr-only w-1/12">Logo</th>
-						<th>
-							<div class="flex gap-1 items-center">
-								<span>{ i18n.T(ctx, "Name") }</span>
-								@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "[name=search]")
-							</div>
-						</th>
-						<th>{ i18n.T(ctx, "Actions") }</th>
+						<td class="text-center !align-middle">
+							@partials.Brand(strings.ToLower(p.Name), "")
+						</td>
+						<td>{ p.Name }</td>
+						<td>
+							<form>
+								if install {
+									<button
+										type="submit"
+										hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=true&packageId=%s&packageName=%s", p.ID, p.Name))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+									</button>
+								} else {
+									<button
+										type="submit"
+										hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=false&packageId=%s&packageName=%s", p.ID, p.Name))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
+									</button>
+								}
+							</form>
+						</td>
 					</tr>
-				</thead>
-				<tbody>
-					for _, p := range packages {
-						<tr>
-							<td class="text-center !align-middle">
-								@partials.Brand(strings.ToLower(p.Name), "")
-							</td>
-							<td>{ p.Name }</td>
-							<td>
-								<form>
-									if install {
-										<button
-											type="submit"
-											hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=true&packageId=%s&packageName=%s", p.ID, p.Name))) }
-											hx-push-url="true"
-											hx-target="#main"
-											hx-swap="outerHTML"
-										>
-											<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
-										</button>
-									} else {
-										<button
-											type="submit"
-											hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=false&packageId=%s&packageName=%s", p.ID, p.Name))) }
-											hx-push-url="true"
-											hx-target="#main"
-											hx-swap="outerHTML"
-										>
-											<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
-										</button>
-									}
-								</form>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</form>
+				}
+			</tbody>
+		</table>
 		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name=search]")
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
@@ -308,13 +302,13 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "agents.hostname") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "agents.os") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
 											</div>
 										</th>
 									</tr>

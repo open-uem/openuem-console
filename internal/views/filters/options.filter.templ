@@ -15,7 +15,7 @@ templ FilterByOptions(field, title string, options, filtered []string, url, targ
 		}
 	</button>
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<div class="flex flex-col pt-4 pl-4 pb-6 pr-8 gap-4">
+		<form class="flex flex-col pt-4 pl-4 pb-6 pr-8 gap-4">
 			for index, option := range options {
 				<div class="my-2 w-full">
 					<input
@@ -44,6 +44,6 @@ templ FilterByOptions(field, title string, options, filtered []string, url, targ
 				{ i18n.T(ctx, "Filter") }
 			</button>
 			@ClearFilter(fmt.Sprintf("filterBy%s", field), url, target, swap, disableFunc)
-		</div>
+		</form>
 	</div>
 }

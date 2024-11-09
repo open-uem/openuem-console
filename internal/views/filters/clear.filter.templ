@@ -19,7 +19,6 @@ templ ClearFilter(field, url, target, swap string, disableFunc func() bool) {
             repeat for f in <input[name^='%s']/>                
                 set event.detail.parameters[f.name] to ''
             end
-		end
         `,field) }
 	>
 		{ i18n.T(ctx, "Clear.one") }<uk-icon hx-history="false" icon="filter-x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
