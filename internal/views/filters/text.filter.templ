@@ -17,12 +17,12 @@ templ FilterByText(c echo.Context, p partials.PaginationAndSort, field, value, p
 		}
 	</button>
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<form class="flex flex-col gap-4 p-2">
+		<form class="flex flex-col pt-4 pl-4 pb-6 pr-8 gap-4">
 			<input type="hidden" name="page" value="1"/>
 			<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 			<input type="hidden" name="sortBy" value={ p.SortBy }/>
 			<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
-			<div class="flex-1 uk-inline mx-2">
+			<div class="flex-1 uk-inline mx-2 w-full">
 				<span class="uk-form-icon">
 					<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon>
 				</span>
@@ -53,7 +53,7 @@ templ FilterByText(c echo.Context, p partials.PaginationAndSort, field, value, p
 			</div>
 			<button
 				type="button"
-				class="uk-button uk-button-primary mx-2"
+				class="uk-button uk-button-primary mx-2 w-full"
 				hx-get={ c.Request().URL.Path }
 				hx-push-url="true"
 				hx-target={ target }
