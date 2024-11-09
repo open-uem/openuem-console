@@ -20,7 +20,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 				}
 				<div class="flex gap-2 items-center">
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, "/computers", "#main", "outerHTML")
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
 				@ComputersNavbar(agent.ID, "deploy", confirmDelete)
 				<div id="error" class="hidden"></div>

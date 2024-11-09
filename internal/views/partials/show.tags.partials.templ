@@ -6,11 +6,15 @@ import (
 	"strconv"
 )
 
-templ ShowAppliedTags(tags []*ent.Tag, agentId, url, target, swap string) {
+templ ShowAppliedTags(tags []*ent.Tag, agentId string, p PaginationAndSort, url, target, swap string) {
 	for i, tag := range tags {
 		<form>
 			<input type="hidden" name="tagId" value={ strconv.Itoa(tag.ID) }/>
 			<input type="hidden" name="agentId" value={ agentId }/>
+			<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+			<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+			<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
+			<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
 			<button
 				title={ fmt.Sprintf("Remove tag %s", tag.Tag) }
 				type="button"
@@ -18,6 +22,7 @@ templ ShowAppliedTags(tags []*ent.Tag, agentId, url, target, swap string) {
 				hx-delete={ url }
 				hx-target={ target }
 				hx-swap={ swap }
+				hx-include="input[name^='filterBy']"
 				hx-indicator={ fmt.Sprintf("#remove-tag-spinner-%d", i) }
 				_={ fmt.Sprintf(`on click add .hidden to #remove-tag-icon-%d`, i) }
 			>

@@ -129,7 +129,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 								</td>
 								<td class="!align-middle">
 									<div class="flex flex-wrap gap-2">
-										@partials.ShowAppliedTags(agent.Tags, agent.ID, "/computers", "#main", "outerHTML")
+										@partials.ShowAppliedTags(agent.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 										@partials.AddTagButton(p, availableTags, agent.Tags, agent.ID, "/computers", "post", "#main", "outerHTML")
 									</div>
 								</td>

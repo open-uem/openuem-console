@@ -33,7 +33,9 @@ func (h *Handler) Computer(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(agent, confirmDelete)))
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(agent, p, confirmDelete)))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
@@ -49,7 +51,9 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(agent, confirmDelete)))
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(agent, p, confirmDelete)))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
@@ -65,7 +69,8 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(agent, confirmDelete)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(agent, p, confirmDelete)))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -81,7 +86,9 @@ func (h *Handler) Printers(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(agent, confirmDelete)))
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(agent, p, confirmDelete)))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
@@ -97,7 +104,8 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(agent, confirmDelete)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(agent, p, confirmDelete)))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
@@ -113,7 +121,9 @@ func (h *Handler) Shares(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(agent, confirmDelete)))
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(agent, p, confirmDelete)))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
@@ -129,7 +139,8 @@ func (h *Handler) Monitors(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(agent, confirmDelete)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(agent, p, confirmDelete)))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
@@ -181,7 +192,8 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(agent, confirmDelete)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(agent, p, confirmDelete)))
 }
 
 func (h *Handler) Computers(c echo.Context) error {
@@ -503,7 +515,8 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(agent, confirmDelete)))
+		p := partials.PaginationAndSort{}
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(agent, p, confirmDelete)))
 	}
 
 	mac := c.FormValue("MACAddress")
@@ -635,5 +648,6 @@ func (h *Handler) Notes(c echo.Context) error {
 	renderedMarkdown := string(bluemonday.UGCPolicy().SanitizeBytes(maybeUnsafeHTML))
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, agent, agent.Notes, renderedMarkdown, confirmDelete)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, agent, agent.Notes, renderedMarkdown, p, confirmDelete)))
 }

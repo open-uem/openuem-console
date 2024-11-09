@@ -85,8 +85,8 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 	}
 
 	sortFiles(files)
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files, p)))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -179,8 +179,8 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	}
 
 	sortFiles(files)
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files, p)))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
@@ -239,7 +239,8 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	sortFiles(files)
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, parent, files, p)))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
@@ -290,8 +291,8 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 	}
 
 	sortFiles(files)
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, removeForm.Parent, files)))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(agent, cwd, removeForm.Parent, files, p)))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -362,7 +363,8 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	sortFiles(files)
 
-	return RenderView(c, computers_views.SFTPHome(agent, cwd, parent, files))
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.SFTPHome(agent, cwd, parent, files, p))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {

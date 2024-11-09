@@ -181,7 +181,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 			<td class="!align-middle">{ agent.Version }</td>
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
-				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, "/agents", "#main", "outerHTML")
+				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
 				@partials.AddTagButton(p, tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
 			</td>
 			<td class="!align-middle">{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
