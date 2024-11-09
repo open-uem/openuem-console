@@ -85,21 +85,21 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.uid"), "uid", "alpha", "#main", "outerHTML")
-												@filters.FilterByText("Username", f.Username, "users.filter_by_username", "/admin", "#main", "outerHTML")
+												@filters.FilterByText("Username", f.Username, "users.filter_by_username", p, "/admin", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.name") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.name"), "name", "alpha", "#main", "outerHTML")
-												@filters.FilterByText("Name", f.Name, "users.filter_by_name", "/admin", "#main", "outerHTML")
+												@filters.FilterByText("Name", f.Name, "users.filter_by_name", p, "/admin", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.email") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.email"), "email", "alpha", "#main", "outerHTML")
-												@filters.FilterByText("Email", f.Email, "users.filter_by_email", "/admin", "#main", "outerHTML")
+												@filters.FilterByText("Email", f.Email, "users.filter_by_email", p, "/admin", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
@@ -112,14 +112,14 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.phone") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.phone"), "phone", "alpha", "#main", "outerHTML")
-												@filters.FilterByText("Phone", f.Phone, "users.filter_by_phone", "/admin", "#main", "outerHTML")
+												@filters.FilterByText("Phone", f.Phone, "users.filter_by_phone", p, "/admin", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.register") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.register"), "register", "alpha", "#main", "outerHTML")
-												@filters.FilterByOptions("RegisterStatus", "users.filter_by_register_status", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, "/admin", "#main", "outerHTML", true, func() bool {
+												@filters.FilterByOptions("RegisterStatus", "users.filter_by_register_status", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, p, "/admin", "#main", "outerHTML", true, func() bool {
 													return len(f.RegisterOptions) == 0
 												})
 											</div>
@@ -134,14 +134,14 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.created") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.created"), "created", "time", "#main", "outerHTML")
-												@filters.FilterByDate("Created", "users.filter_by_creation", f.CreatedFrom, f.CreatedTo, "/admin", "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
+												@filters.FilterByDate("Created", "users.filter_by_creation", f.CreatedFrom, f.CreatedTo, p, "/admin", "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.modified") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.modified"), "modified", "time", "#main", "outerHTML")
-												@filters.FilterByDate("Modified", "users.filter_by_modification", f.ModifiedFrom, f.ModifiedTo, "/admin", "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
+												@filters.FilterByDate("Modified", "users.filter_by_modification", f.ModifiedFrom, f.ModifiedTo, p, "/admin", "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
 											</div>
 										</th>
 										<th>

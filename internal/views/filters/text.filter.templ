@@ -2,10 +2,12 @@ package filters
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/invopop/ctxi18n/i18n"
+	"strconv"
 )
 
-templ FilterByText(field, value, placeholder, url, target, swap string) {
+templ FilterByText(field, value, placeholder string, p partials.PaginationAndSort, url, target, swap string) {
 	<button title={ i18n.T(ctx, placeholder) } type="button">
 		if len(value) > 0 {
 			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5 fill-red-500 text-red-500" uk-cloak></uk-icon>
@@ -15,6 +17,10 @@ templ FilterByText(field, value, placeholder, url, target, swap string) {
 	</button>
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<form class="flex flex-col gap-4 p-2">
+			<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+			<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+			<input type="hidden" name="sortBy" value={ p.SortBy }/>
+			<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 			<div class="flex-1 uk-inline mx-2">
 				<span class="uk-form-icon">
 					<uk-icon icon="filter" hx-history="false" custom-class="mr-2" uk-cloak></uk-icon>
@@ -51,6 +57,7 @@ templ FilterByText(field, value, placeholder, url, target, swap string) {
 				hx-push-url="false"
 				hx-target={ target }
 				hx-swap={ swap }
+				hx-include="input[name^='filterBy']"
 			>
 				{ i18n.T(ctx, "Filter") }
 			</button>

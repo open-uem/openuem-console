@@ -9,11 +9,11 @@ import (
 )
 
 templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap string) {
-	<form>
-		<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-		<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-		<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-		<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
+	<form class="flex items-center">
+		<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
+		<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+		<input type="hidden" name="sortBy" value={ p.SortBy }/>
+		<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 		<button
 			type="submit"
 			hx-post={ c.Request().RequestURI }
@@ -23,11 +23,11 @@ templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortI
 			hx-include="input[name^='filterBy']"
 			title={ i18n.T(ctx, "SortBy", strings.ToLower(title)) }
 			_={ fmt.Sprintf(`
-		on htmx:configRequest			
-			set event.detail.parameters['sortBy'] to '%s'
-			set event.detail.parameters['sortOrder'] to '%s'
-		end
-		`, sortBy, newSortOrder(p.SortOrder)) }
+				on htmx:configRequest			
+					set event.detail.parameters['sortBy'] to '%s'
+					set event.detail.parameters['sortOrder'] to '%s'
+				end
+				`, sortBy, newSortOrder(p.SortOrder)) }
 		>
 			<div class={ "p-1 text-muted-foreground", templ.KV("bg-muted", sortBy == p.SortBy) }>
 				if sortBy != p.SortBy || newSortOrder(p.SortOrder) == "asc" && sortBy == p.SortBy {

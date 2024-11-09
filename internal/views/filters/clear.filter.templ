@@ -13,6 +13,7 @@ templ ClearFilter(field, url, target, swap string, disableFunc func() bool) {
 		hx-post={ url }
 		hx-target={ target }
 		hx-swap={ swap }
+		hx-include="input[name^='filterBy']"
 		disabled?={ disableFunc() }
 		_={ fmt.Sprintf(`
         on htmx:configRequest

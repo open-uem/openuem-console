@@ -247,8 +247,8 @@ func (h *Handler) Computers(c echo.Context) error {
 	}
 	f.ComputerModels = filteredComputerModels
 
-	if c.FormValue("filterWithApplication") != "" {
-		f.WithApplication = c.FormValue("filterWithApplication")
+	if c.FormValue("filterByApplication") != "" {
+		f.WithApplication = c.FormValue("filterByApplication")
 	}
 
 	// Default sort
