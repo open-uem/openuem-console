@@ -590,7 +590,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		if orgMetadataId != "" && name != "" && value != "" {
+		if orgMetadataId != "" && name != "" {
 			acceptedMetadata := []int{}
 			for _, data := range orgMetadata {
 				acceptedMetadata = append(acceptedMetadata, data.ID)
