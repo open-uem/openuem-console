@@ -101,9 +101,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
 									</tr>
 								}
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "outerHTML", "")
-							}
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "tags.no_tags") }

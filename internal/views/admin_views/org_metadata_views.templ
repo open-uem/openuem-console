@@ -87,9 +87,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgM
 									</tr>
 								}
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "outerHTML", "")
-							}
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "metadata.no_metadata") }

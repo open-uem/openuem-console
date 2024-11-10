@@ -10156,6 +10156,11 @@ th.uk-text-break, td.uk-text-break {
   line-height: 1rem;
 }
 
+.text-5xl {
+  font-size: 3rem;
+  line-height: 1;
+}
+
 .font-bold {
   font-weight: 700;
 }

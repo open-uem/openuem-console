@@ -30,18 +30,20 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
 			<form>
+				<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage - 1) }/>
+				<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+				<input type="hidden" name="sortBy" value={ p.SortBy }/>
+				<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 				<select
 					name="pageSize"
 					title={ i18n.T(ctx, "pagination.title") }
 					class="uk-select"
-					hx-post={ c.Request().RequestURI }
+					hx-get={ c.Request().URL.Path }
 					hx-trigger="change"
 					hx-push-url="true"
 					hx-target={ target }
 					hx-swap={ swap }
-					if include != "" {
-						hx-include={ include }
-					}
+					hx-include="input[name^='filterBy']"
 					aria-label="Select items per page"
 				>
 					<option value="5" selected?={ 5 == p.PageSize }>5</option>
@@ -55,8 +57,15 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 		if p.NItems > p.PageSize {
 			<ul class="uk-flex-center uk-pagination uk-width-1-2" uk-margin>
 				if p.CurrentPage > 1 {
-					<li>
-						<form>
+					<li class="cursor-pointer">
+						<form
+							hx-get={ c.Request().URL.Path }
+							hx-push-url="true"
+							hx-target={ target }
+							hx-swap={ swap }
+							hx-include="input[name^='filterBy']"
+							hx-trigger="click, from:closest li"
+						>
 							<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage - 1) }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
@@ -64,13 +73,6 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							<button
 								class="flex items-center"
 								type="submit"
-								hx-post={ c.Request().RequestURI }
-								hx-push-url="true"
-								hx-target={ target }
-								hx-swap={ swap }
-								if include != "" {
-									hx-include={ include }
-								}
 							>
 								<span uk-pagination-previous></span>
 							</button>
@@ -79,31 +81,31 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 				} else {
 					<li>
 						<form>
-							<button class="flex items-center" disabled>
-								<span uk-pagination-previous class="uk-disabled"></span>
+							<button type="button" class="flex items-center" disabled>
+								<span uk-pagination-previous class="uk-text-muted uk-disabled"></span>
 							</button>
 						</form>
 					</li>
 				}
 				for _, page := range p.GetPaginationEntries() {
 					<li
-						class={ templ.KV("uk-disabled", page.Disabled), 
+						class={ "cursor-pointer", templ.KV("uk-disabled", page.Disabled), 
 					templ.KV("uk-active", page.Active) }
 					>
-						<form>
+						<form
+							hx-get={ c.Request().URL.Path }
+							hx-push-url="true"
+							hx-target={ target }
+							hx-swap={ swap }
+							hx-include="input[name^='filterBy']"
+							hx-trigger="click, from:closest li"
+						>
 							<input type="hidden" name="page" value={ page.Number }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
 							<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 							<button
 								type="submit"
-								hx-post={ c.Request().RequestURI }
-								hx-push-url="true"
-								hx-target={ target }
-								hx-swap={ swap }
-								if include != "" {
-									hx-include={ include }
-								}
 							>
 								{ page.Number }
 							</button>
@@ -111,8 +113,15 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 					</li>
 				}
 				if p.CurrentPage * p.PageSize < p.NItems {
-					<li>
-						<form>
+					<li class="cursor-pointer">
+						<form
+							hx-get={ c.Request().URL.Path }
+							hx-push-url="true"
+							hx-target={ target }
+							hx-swap={ swap }
+							hx-include="input[name^='filterBy']"
+							hx-trigger="click, from:closest li"
+						>
 							<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage + 1) }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
@@ -120,13 +129,6 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							<button
 								class="flex items-center"
 								type="submit"
-								hx-post={ c.Request().RequestURI }
-								hx-push-url="true"
-								hx-target={ target }
-								hx-swap={ swap }
-								if include != "" {
-									hx-include={ include }
-								}
 							>
 								<span uk-pagination-next></span>
 							</button>
@@ -135,8 +137,8 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 				} else {
 					<li>
 						<form>
-							<button class="flex items-center" disabled>
-								<span uk-pagination-next class="uk-disabled"></span>
+							<button class="flex items-center" type="button" disabled>
+								<span uk-pagination-next class="uk-text-muted uk-disabled"></span>
 							</button>
 						</form>
 					</li>

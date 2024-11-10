@@ -38,9 +38,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						@AgentsTableHead(c, p, f, appliedTags, availableOSes)
 						@AgentsTableBody(p, agents, availableTags)
 					</table>
-					if p.NItems / p.PageSize > 1 {
-						@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
-					}
+					@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }

@@ -99,7 +99,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							</tr>
 						</thead>
 						for index, agent := range agents {
-							<tr>
+							<tr class="h-16">
 								<td
 									class="!align-middle underline cursor-pointer"
 									hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
@@ -180,7 +180,22 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 								</td>
 							</tr>
 						}
+						if len(agents) < p.PageSize {
+							for i:=0; i < p.PageSize - len(agents); i++ {
+								<tr class="h-16">
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+									<td class="!align-middle">-</td>
+								</tr>
+							}
+						}
 					</table>
+					@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }

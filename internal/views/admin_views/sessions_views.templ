@@ -96,9 +96,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 									</tr>
 								}
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "outerHTML", "")
-							}
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "sessions.nosessions") }

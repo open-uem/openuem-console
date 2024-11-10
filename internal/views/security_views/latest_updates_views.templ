@@ -49,10 +49,17 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 										<td><a class="underline text-blue-500" target="_blank" rel="noopener" href={ templ.URL(update.SupportURL) }>{ update.SupportURL }</a></td>
 									</tr>
 								}
+								if len(updates) < p.PageSize {
+									for i:=0; i < p.PageSize - len(updates); i++ {
+										<tr>
+											<td class="!align-middle">-</td>
+											<td class="!align-middle">-</td>
+											<td class="!align-middle">-</td>
+										</tr>
+									}
+								}
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "innerHTML", "")
-							}
+							@partials.Pagination(c, p, "#main", "innerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates_history.no_info") }

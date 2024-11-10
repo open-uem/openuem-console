@@ -124,9 +124,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									}
 								</tbody>
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "outerHTML", "")
-							}
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }
