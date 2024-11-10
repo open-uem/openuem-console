@@ -29,21 +29,22 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
-			<form>
-				<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage - 1) }/>
-				<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+			<form
+				hx-get={ c.Request().URL.Path }
+				hx-push-url="true"
+				hx-target={ target }
+				hx-swap={ swap }
+				hx-include="input[name^='filterBy']"
+				hx-trigger="change"
+			>
+				<input type="hidden" name="page" value="1"/>
 				<input type="hidden" name="sortBy" value={ p.SortBy }/>
 				<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 				<select
+					id="pagesize"
 					name="pageSize"
 					title={ i18n.T(ctx, "pagination.title") }
 					class="uk-select"
-					hx-get={ c.Request().URL.Path }
-					hx-trigger="change"
-					hx-push-url="true"
-					hx-target={ target }
-					hx-swap={ swap }
-					hx-include="input[name^='filterBy']"
 					aria-label="Select items per page"
 				>
 					<option value="5" selected?={ 5 == p.PageSize }>5</option>
@@ -64,7 +65,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
-							hx-trigger="click, from:closest li"
+							hx-trigger="click"
 						>
 							<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage - 1) }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
@@ -98,7 +99,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
-							hx-trigger="click, from:closest li"
+							hx-trigger="click"
 						>
 							<input type="hidden" name="page" value={ page.Number }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
@@ -120,7 +121,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
-							hx-trigger="click, from:closest li"
+							hx-trigger="click"
 						>
 							<input type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage + 1) }/>
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
