@@ -21,7 +21,8 @@ templ ClearFilter(c echo.Context, field, target, swap string, disableFunc func()
             repeat for f in <input[name^='%s']/>                
                 set event.detail.parameters[f.name] to ''
             end
-        `,field) }
+			set event.detail.parameters['filterBySelectedItems'] to '0'
+        end`,field) }
 	>
 		{ i18n.T(ctx, "Clear.one") }<uk-icon hx-history="false" icon="filter-x" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon>
 	</button>

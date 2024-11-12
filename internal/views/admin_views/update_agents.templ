@@ -22,7 +22,7 @@ type Version struct {
 	IsCritical      bool   `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string) {
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string, versions, availableOSes []string, tags []*openuem_ent.Tag) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -63,7 +63,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												type="button"
 												class="uk-button uk-button-default"
 												hx-post="/admin/update-agents/confirm-all"
-												hx-push-url="true"
+												hx-push-url="false"
 												hx-target="#main"
 												hx-swap="outerHTML"
 												disabled?={ f.SelectedItems == 0 }
@@ -109,15 +109,16 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
 							}
 							<hr class="uk-divider-icon"/>
-							if len(agents) > 0 {
-								<div class="flex flex-col gap-2">
-									<div class="flex items-center gap-4">
-										<button
-											id="select-all"
-											title={ i18n.T(ctx, "SelectAll") }
-											type="button"
-											class="uk-button uk-button-default flex items-center gap-2"
-											_={ fmt.Sprintf(`on click 
+							<div class="flex items-center gap-4">
+								@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+									return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
+								})
+								<button
+									id="select-all"
+									title={ i18n.T(ctx, "SelectAll") }
+									type="button"
+									class="uk-button uk-button-default flex items-center gap-2"
+									_={ fmt.Sprintf(`on click 
 												repeat in <input[type='checkbox']/>
 													if it.checked is false then
 														it.click()
@@ -127,16 +128,17 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												set sessionStorage.selectedAgents to storedItems as JSON
 												set #filterBySelectedItems.value to '%d'
 												set #items-selected.innerHTML to '%d'
+												remove @disabled from <button[id$=-all-button]/>
 											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
-										>
-											{ i18n.T(ctx, "SelectAll") }
-										</button>
-										<button
-											id="deselect-all"
-											title={ i18n.T(ctx, "DeselectAll") }
-											type="button"
-											class="uk-button uk-button-default flex items-center gap-2"
-											_="on click 
+								>
+									{ i18n.T(ctx, "SelectAll") }
+								</button>
+								<button
+									id="deselect-all"
+									title={ i18n.T(ctx, "DeselectAll") }
+									type="button"
+									class="uk-button uk-button-default flex items-center gap-2"
+									_="on click 
 												repeat in <input[type='checkbox']/>
 													if it.checked is true then
 														it.click()
@@ -146,12 +148,15 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												set sessionStorage.selectedAgents to storedItems as JSON
 												set #filterBySelectedItems.value to '0'
 												set #items-selected.innerHTML to '0'
+												add @disabled to <button[id$=-all-button]/>
 											end"
-										>
-											{ i18n.T(ctx, "DeselectAll") }
-										</button>
-										<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
-									</div>
+								>
+									{ i18n.T(ctx, "DeselectAll") }
+								</button>
+								<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+							</div>
+							if len(agents) > 0 {
+								<div class="flex flex-col gap-2">
 									<table
 										class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-4"
 										_="on load
@@ -188,18 +193,31 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.hostname") }</span>
 														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+														@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.version") }</span>
 														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
+														@filters.FilterByOptions(c, p, "Version", "Version", versions, f.Versions, "#main", "outerHTML", false, func() bool {
+															return len(f.Versions) == 0
+														})
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.os") }</span>
 														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+														@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
+															return len(f.AgentOSVersions) == 0
+														})
+													</div>
+												</th>
+												<th>
+													<div class="flex gap-1 items-center">
+														{ i18n.T(ctx, "Tag.other") }
+														@filters.FilterByTags(c, p, f, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 													</div>
 												</th>
 											</tr>
@@ -289,12 +307,17 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 														</div>
 													}
 												</td>
-												switch agent.Os {
-													case "windows":
-														<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-													case "linux":
-														<td></td>
-												}
+												<td>
+													switch agent.Os {
+														case "windows":
+															<i class="ri-windows-fill ri-2x text-blue-600"></i>
+														case "linux":
+															<span></span>
+													}
+												</td>
+												<td class="flex flex-wrap gap-2">
+													@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
+												</td>
 											</tr>
 										}
 									</table>

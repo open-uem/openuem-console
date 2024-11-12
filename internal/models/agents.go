@@ -124,6 +124,10 @@ func (m *Model) GetAgentsUsedOSes() ([]string, error) {
 	return m.Client.Agent.Query().Unique(true).Select(agent.FieldOs).Strings(context.Background())
 }
 
+func (m *Model) GetAgentsVersions() ([]string, error) {
+	return m.Client.Agent.Query().Unique(true).Select(agent.FieldVersion).Strings(context.Background())
+}
+
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Hostname) > 0 {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))
@@ -137,6 +141,10 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		if len(f.AgentEnabledOptions) == 1 && f.AgentEnabledOptions[0] == "Disabled" {
 			query = query.Where(agent.Enabled(false))
 		}
+	}
+
+	if len(f.Versions) > 0 {
+		query = query.Where(agent.VersionIn(f.Versions...))
 	}
 
 	if len(f.AgentOSVersions) > 0 {

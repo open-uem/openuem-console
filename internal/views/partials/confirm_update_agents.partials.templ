@@ -54,7 +54,10 @@ templ ConfirmUpdateAgents(version string, all bool) {
 						title={ i18n.T(ctx, "Cancel") }
 						type="button"
 						class="uk-button uk-button-default"
-						_="on click call history.back()"
+						hx-get="/admin/update-agents"
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
 					>
 						{ i18n.T(ctx, "Cancel") }
 					</button>

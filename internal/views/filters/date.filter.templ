@@ -46,6 +46,9 @@ templ FilterByDate(c echo.Context, p partials.PaginationAndSort, field, title, f
 				hx-target={ target }
 				hx-swap={ swap }
 				hx-include="input[name^='filterBy']"
+				_="on htmx:configRequest
+					set event.detail.parameters['filterBySelectedItems'] to '0'
+				end"
 			>
 				{ i18n.T(ctx, "Filter") }
 			</button>

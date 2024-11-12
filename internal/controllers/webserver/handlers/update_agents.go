@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -35,10 +36,32 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	// Get filters values
 	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
-	f.SelectedStatus = c.FormValue("filterBySelectedStatus")
-	if f.SelectedStatus == "" {
-		f.SelectedStatus = "none"
+
+	versions, err := h.Model.GetAgentsVersions()
+	if err != nil {
+		return err
 	}
+	filteredVersions := []string{}
+	for index := range versions {
+		value := c.FormValue(fmt.Sprintf("filterByVersion%d", index))
+		if value != "" {
+			filteredVersions = append(filteredVersions, value)
+		}
+	}
+	f.Versions = filteredVersions
+
+	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	if err != nil {
+		return err
+	}
+	filteredAgentOSes := []string{}
+	for index := range availableOSes {
+		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+		if value != "" {
+			filteredAgentOSes = append(filteredAgentOSes, value)
+		}
+	}
+	f.AgentOSVersions = filteredAgentOSes
 
 	nSelectedItems := c.FormValue("filterBySelectedItems")
 	f.SelectedItems, err = strconv.Atoi(nSelectedItems)
@@ -57,6 +80,11 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
 	agents, err = h.Model.GetAgentsByPage(p, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	appliedTags, err := h.Model.GetAppliedTags()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -97,7 +125,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion, versions, availableOSes, appliedTags)))
 }
 
 func (h *Handler) UpdateAgentsConfirmSelected(c echo.Context) error {

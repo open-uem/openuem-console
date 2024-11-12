@@ -2,6 +2,7 @@ package filters
 
 type AgentFilter struct {
 	Hostname              string
+	Versions              []string
 	AgentEnabledOptions   []string
 	AgentOSVersions       []string
 	Tags                  []int
@@ -12,7 +13,6 @@ type AgentFilter struct {
 	ContactFrom           string
 	ContactTo             string
 	WithApplication       string
-	SelectedStatus        string
 	SelectedItems         int
 	SelectedAllAgents     string
 }
