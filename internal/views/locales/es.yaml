@@ -50,6 +50,7 @@ es:
   Rename: "Renombrar"
   Required: "Requerido"
   Reset: "Reestablecer"
+  Rollback: "Volver a versión anterior"
   RollbackAll: "Retroceder todos"
   RollbackSelected: "Retroceder seleccionados"
   Save: "Guardar"

@@ -58,63 +58,35 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 											<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 											<input name="version" type="hidden" value={ version.ID }/>
 											<button
-												id="update-selected-button"
-												title={ i18n.T(ctx, "UpdateSelected") }
-												type="button"
-												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems == 0) }
-												hx-post="/admin/update-agents/confirm-selected"
-												hx-push-url="true"
-												hx-target="#main"
-												hx-swap="outerHTML"
-											>
-												<div class="flex items-center gap-2">
-													<uk-icon hx-history="false" icon="arrow-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "UpdateSelected") }
-												</div>
-											</button>
-											<button
 												id="update-all-button"
 												title={ i18n.T(ctx, "UpdateAll") }
 												type="button"
-												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems != 0) }
+												class="uk-button uk-button-default"
 												hx-post="/admin/update-agents/confirm-all"
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"
+												disabled?={ f.SelectedItems == 0 }
 											>
 												<div class="flex items-center gap-2">
 													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "UpdateAll") }
-												</div>
-											</button>
-											<button
-												id="rollback-selected-button"
-												title={ i18n.T(ctx, "RollbackSelected") }
-												type="button"
-												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems == 0) }
-												hx-post="/admin/update-agents/confirm-rollback-selected"
-												hx-push-url="true"
-												hx-target="#main"
-												hx-swap="outerHTML"
-											>
-												<div class="flex items-center gap-2">
-													<uk-icon hx-history="false" icon="arrow-down-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "RollbackSelected") }
+													{ i18n.T(ctx, "Update") }
 												</div>
 											</button>
 											<button
 												id="rollback-all-button"
 												title={ i18n.T(ctx, "RollbackAll") }
 												type="button"
-												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems != 0) }
+												class="uk-button uk-button-default"
 												hx-post="/admin/update-agents/confirm-rollback-all"
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"
+												disabled?={ f.SelectedItems == 0 }
 											>
 												<div class="flex items-center gap-2">
 													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5 rotate-180" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "RollbackAll") }
+													{ i18n.T(ctx, "Rollback") }
 												</div>
 											</button>
 										</form>
@@ -139,10 +111,10 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 							<hr class="uk-divider-icon"/>
 							if len(agents) > 0 {
 								<div class="flex flex-col gap-2">
-									<div class="flex gap-4">
+									<div class="flex items-center gap-4">
 										<button
 											id="select-all"
-											title={ i18n.T(ctx, "SelectAll", p.NItems) }
+											title={ i18n.T(ctx, "SelectAll") }
 											type="button"
 											class="uk-button uk-button-default flex items-center gap-2"
 											_={ fmt.Sprintf(`on click 
@@ -154,20 +126,17 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												set storedItems to %s as Array
 												set sessionStorage.selectedAgents to storedItems as JSON
 												set #filterBySelectedItems.value to '%d'
-												set #deselect-all.innerHTML to '%s' + ' (%d)'
-												set #select-all.innerHTML to '%s' + ' (0)'
-												remove .hidden from <button[id$='-all-button'/>
-												add .hidden to <button[id$='-selected-button'/>
-											end`, f.SelectedAllAgents, p.NItems, i18n.T(ctx, "DeselectAll"), p.NItems, i18n.T(ctx, "SelectAll")) }
+												set #items-selected.innerHTML to '%d'
+											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
 										>
-											{ fmt.Sprintf("%s (%d)", i18n.T(ctx, "SelectAll"), p.NItems - f.SelectedItems) }
+											{ i18n.T(ctx, "SelectAll") }
 										</button>
 										<button
 											id="deselect-all"
 											title={ i18n.T(ctx, "DeselectAll") }
 											type="button"
 											class="uk-button uk-button-default flex items-center gap-2"
-											_={ fmt.Sprintf(`on click 
+											_="on click 
 												repeat in <input[type='checkbox']/>
 													if it.checked is true then
 														it.click()
@@ -176,14 +145,12 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												set storedItems to [] as Array
 												set sessionStorage.selectedAgents to storedItems as JSON
 												set #filterBySelectedItems.value to '0'
-												set #deselect-all.innerHTML to '%s' + ' (0)'
-												set #select-all.innerHTML to '%s' + ' (%d)'
-												remove .hidden from <button[id$='-all-button'/>
-												add .hidden to <button[id$='-selected-button'/>
-											end`, i18n.T(ctx, "DeselectAll"), i18n.T(ctx, "SelectAll"), p.NItems) }
+												set #items-selected.innerHTML to '0'
+											end"
 										>
-											{ fmt.Sprintf("%s (%d)", i18n.T(ctx, "DeselectAll"), f.SelectedItems) }
+											{ i18n.T(ctx, "DeselectAll") }
 										</button>
+										<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
 									</div>
 									<table
 										class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-4"
@@ -198,22 +165,21 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 											<tr>
 												<th>
 													<input
+														id="select-all-in-page"
 														name="select-all-in-page"
 														class="uk-checkbox"
 														type="checkbox"
-														_="on click  
-															set value to ((<input[name='select-all-in-page']:checked/>).length == 0)
-															repeat in <input[title='check-agent']/>
-																set it.checked to value
-																it.click()
+														_="on click
+															repeat in <input[title='check-agent']/>																
+																if it.checked !== #select-all-in-page.checked then
+																	it.click()
+																end
 															end
-															
+
 															if ((<input[title='check-agent']:checked/>).length > 0) then
-																remove .hidden from <button[id$='-selected-button']/>
-																add .hidden to <button[id$='-all-button']/>
+																remove @disabled from <button[id$='-all-button']/>
 															else
-																add .hidden to <button[id$='-selected-button']/>
-																remove .hidden from <button[id$='-all-button']/>
+																add @disabled to <button[id$='-all-button']/>
 															end
 														"
 													/>
@@ -248,32 +214,22 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 														type="checkbox"
 														_={ fmt.Sprintf(`
 															on click
-																set totalItems to '%d'
-																decrement totalItems by #filterBySelectedItems.value												
 																set storedItems to [] as Array
 																if sessionStorage.selectedAgents exists then														
 																	set storedItems to sessionStorage.selectedAgents as Object
 																end																								
 
+																set index to storedItems.indexOf(my name)		
 																if me.checked then
-																	decrement totalItems by 1
-																	set #select-all.innerHTML to '%s' + ' (' + totalItems + ')'
-																	
 																	increment #filterBySelectedItems.value by 1
-																	set #deselect-all.innerHTML to '%s' + ' (' + #filterBySelectedItems.value + ')'
-
-																	set index to storedItems.indexOf(my name)														
+																	set #items-selected.innerHTML to #filterBySelectedItems.value
 																	if index < 0 then 															
 																		append my name to storedItems
 																		set sessionStorage.selectedAgents to storedItems as JSON
 																	end														
 																else
-																	increment totalItems by 1
-																	set #select-all.innerHTML to '%s' + ' (' + totalItems + ')'
-														
 																	decrement #filterBySelectedItems.value by 1
-																	set #deselect-all.innerHTML to '%s' + ' (' + #filterBySelectedItems.value + ')'
-
+																	set #items-selected.innerHTML to #filterBySelectedItems.value
 																	set index to storedItems.indexOf(my name)														
 																	if index >= 0 then 															
 																		get storedItems.splice(index, 1)															
@@ -288,17 +244,17 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 																end
 
 																if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
-																	remove .hidden from <button[id$='-selected-button']/>
-																	add .hidden to <button[id$='-all-button']/>
+																	remove @disabled from <button[id$='-all-button']/>
 																else
-																	add .hidden to <button[id$='-selected-button']/>
-																	remove .hidden from <button[id$='-all-button']/>
+																	add @disabled to <button[id$='-all-button']/>
 																end
 
-																if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
-																	set (<input[name='select-all-in-page']/>).checked to true
-																else
-																	set (<input[name='select-all-in-page']/>).checked to false
+																if #select-all-in-page.checked is true and me.checked is false then
+																	set #select-all-in-page.checked to false
+																end
+
+																if #select-all-in-page.checked is false and (<input[title='check-agent']:checked/>).length === %d then
+																	set #select-all-in-page.checked to true
 																end
 
 																set #selectedAgents.value to storedItems.length
@@ -316,12 +272,12 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 																end
 
 																if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
-																	set (<input[name='select-all-in-page']/>).checked to true
+																	set #select-all-in-page.checked to true
 																end
 
 																set #selectedAgents.value to storedItems.length
 															end
-														`, p.NItems, i18n.T(ctx, "SelectAll"), i18n.T(ctx, "DeselectAll"),  i18n.T(ctx, "SelectAll"), i18n.T(ctx, "DeselectAll")) }
+														`,p.PageSize) }
 													/>
 												</td>
 												<td class="!align-middle">{ agent.Hostname }</td>
@@ -345,16 +301,6 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 								</div>
 								@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
 							}
-							/* <button
-							class="flex items-center gap-2 uk-button uk-button-primary mt-6 mb-4"
-							hx-post="/admin/update-agents"
-							hx-push-url="false"
-							hx-target="#main"
-							hx-swap="outerHTML"
-							hx-indicator="#agent-update-spinner"
-						>
-							<div id="agent-update-spinner" class="mr-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>Test Update
-						</button> */
 						</div>
 					</div>
 				</div>

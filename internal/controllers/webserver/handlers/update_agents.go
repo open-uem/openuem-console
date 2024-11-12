@@ -100,7 +100,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion)))
 }
 
-func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
+func (h *Handler) UpdateAgentsConfirmSelected(c echo.Context) error {
 	version := c.FormValue("version")
 
 	/* f := filters.AgentFilter{}

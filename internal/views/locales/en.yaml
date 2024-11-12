@@ -49,6 +49,7 @@ en:
   Rename: "Rename"
   Required: "Required"
   Reset: "Reset"
+  Rollback: "Back to a previous version"
   RollbackAll: "Rollback All"
   RollbackSelected: "Rollback Selected"
   Save: "Save"
