@@ -181,7 +181,7 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name=search]")
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name^='filterBy']")
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -392,7 +392,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
+							@partials.Pagination(c, p, "#main", "outerHTML", "[name^='package']")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "agents.no_agents") }

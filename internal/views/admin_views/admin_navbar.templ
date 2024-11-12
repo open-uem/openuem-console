@@ -6,8 +6,8 @@ templ ConfigNavbar(active string) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "users") }>
 			<a
-				href={ templ.URL("/admin/users") }
-				hx-get={ string(templ.URL("/admin/users")) }
+				href="/admin/users"
+				hx-get="/admin/users"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -17,8 +17,8 @@ templ ConfigNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "sessions") }>
 			<a
-				href={ templ.URL("/admin/sessions") }
-				hx-get={ string(templ.URL("/admin/sessions")) }
+				href="/admin/sessions"
+				hx-get="/admin/sessions"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -28,8 +28,8 @@ templ ConfigNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "tags") }>
 			<a
-				href={ templ.URL("/admin/tags") }
-				hx-get={ string(templ.URL("/admin/tags")) }
+				href="/admin/tags"
+				hx-get="/admin/tags"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -39,8 +39,8 @@ templ ConfigNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "smtp") }>
 			<a
-				href={ templ.URL("/admin/smtp") }
-				hx-get={ string(templ.URL("/admin/smtp")) }
+				href="/admin/smtp"
+				hx-get="/admin/smtp"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -50,8 +50,8 @@ templ ConfigNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "metadata") }>
 			<a
-				href={ templ.URL("/admin/metadata") }
-				hx-get={ string(templ.URL("/admin/metadata")) }
+				href="/admin/metadata"
+				hx-get="/admin/metadata"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -61,13 +61,24 @@ templ ConfigNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "settings") }>
 			<a
-				href={ templ.URL("/admin/settings") }
-				hx-get={ string(templ.URL("/admin/settings")) }
+				href="/admin/settings"
+				hx-get="/admin/settings"
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
 				{ i18n.T(ctx, "General Settings") }
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "update-agents") }>
+			<a
+				href="/admin/update-agents"
+				hx-get="/admin/update-agents"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "admin.update.agents.title") }
 			</a>
 		</li>
 	</ul>

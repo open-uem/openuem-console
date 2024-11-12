@@ -12,6 +12,9 @@ type AgentFilter struct {
 	ContactFrom           string
 	ContactTo             string
 	WithApplication       string
+	SelectedStatus        string
+	SelectedItems         int
+	SelectedAllAgents     string
 }
 
 type ApplicationsFilter struct {

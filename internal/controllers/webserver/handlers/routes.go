@@ -50,6 +50,10 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/smtp/test", h.TestSMTPSettings, h.IsAuthenticated)
 	e.GET("/admin/settings", h.GeneralSettings, h.IsAuthenticated)
 	e.POST("/admin/settings", h.GeneralSettings, h.IsAuthenticated)
+	e.GET("/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
+	e.POST("/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
+	e.POST("/admin/update-agents/confirm-selected", h.UpdateAgentsConfirmSelected, h.IsAuthenticated)
+	e.POST("/admin/update-agents/confirm-all", h.UpdateAgentsConfirmAll, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

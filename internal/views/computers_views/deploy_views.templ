@@ -138,7 +138,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name=search]")
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name^='filterBy']")
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }

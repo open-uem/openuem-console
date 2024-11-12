@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
@@ -23,8 +24,12 @@ type Agent struct {
 	Count   int
 }
 
-func (m *Model) GetAllAgents() ([]*ent.Agent, error) {
-	agents, err := m.Client.Agent.Query().All(context.Background())
+func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
+	query := m.Client.Agent.Query()
+	// Apply filters
+	applyAgentFilters(query, f)
+
+	agents, err := query.All(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -227,4 +232,15 @@ func (m *Model) RemoveTagFromAgent(agentId, tagId string) error {
 		return err
 	}
 	return m.Client.Agent.UpdateOneID(agentId).RemoveTagIDs(id).Exec(context.Background())
+}
+
+func (m *Model) GetHigherAgentVersionInstalled() (string, error) {
+	data, err := m.Client.Agent.Query().Select(agent.FieldVersion).Order(ent.Desc(agent.FieldVersion)).First(context.Background())
+	if err != nil {
+		if openuem_ent.IsNotFound(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	return data.Version, nil
 }

@@ -1,0 +1,385 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"golang.org/x/mod/semver"
+	"strconv"
+)
+
+type Version struct {
+	ID              string `json:"id,omitempty"`
+	Channel         string `json:"channel,omitempty"`
+	Summary         string `json:"summary,omitempty"`
+	ReleaseNotesURL string `json:"release_notes,omitempty"`
+	FileURL         string `json:"file_url,omitempty"`
+	Checksum        string `json:"checksum,omitempty"`
+	IsCritical      bool   `json:"is_critical,omitempty"`
+}
+
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("update-agents")
+				<div id="success" class="hidden"></div>
+				<div id="confirm" class="hidden"></div>
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "admin.update.agents.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "admin.update.agents.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<div class="flex flex-col gap-4 mt-4">
+							if version == nil {
+								@GetVersionError()
+							}
+							if version != nil && semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
+								<div class="flex items-center justify-between">
+									<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", version.IsCritical), templ.KV("bg-blue-700", !version.IsCritical) }>
+										if version.IsCritical {
+											{ i18n.T(ctx, "admin.update.agents.critical") }
+										} else {
+											{ i18n.T(ctx, "admin.update.agents.available") }
+										}
+									</p>
+									if version != nil {
+										<form class="flex items-center gap-4">
+											<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+											<input id="selectedAgents" type="hidden" name="selectedAgents"/>
+											<input name="version" type="hidden" value={ version.ID }/>
+											<button
+												id="update-selected-button"
+												title={ i18n.T(ctx, "UpdateSelected") }
+												type="button"
+												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems == 0) }
+												hx-post="/admin/update-agents/confirm-selected"
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												<div class="flex items-center gap-2">
+													<uk-icon hx-history="false" icon="arrow-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+													{ i18n.T(ctx, "UpdateSelected") }
+												</div>
+											</button>
+											<button
+												id="update-all-button"
+												title={ i18n.T(ctx, "UpdateAll") }
+												type="button"
+												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems != 0) }
+												hx-post="/admin/update-agents/confirm-all"
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												<div class="flex items-center gap-2">
+													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+													{ i18n.T(ctx, "UpdateAll") }
+												</div>
+											</button>
+											<button
+												id="rollback-selected-button"
+												title={ i18n.T(ctx, "RollbackSelected") }
+												type="button"
+												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems == 0) }
+												hx-post="/admin/update-agents/confirm-rollback-selected"
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												<div class="flex items-center gap-2">
+													<uk-icon hx-history="false" icon="arrow-down-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+													{ i18n.T(ctx, "RollbackSelected") }
+												</div>
+											</button>
+											<button
+												id="rollback-all-button"
+												title={ i18n.T(ctx, "RollbackAll") }
+												type="button"
+												class={ "uk-button uk-button-default", templ.KV("hidden", f.SelectedItems != 0) }
+												hx-post="/admin/update-agents/confirm-rollback-all"
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+											>
+												<div class="flex items-center gap-2">
+													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5 rotate-180" uk-cloack></uk-icon>
+													{ i18n.T(ctx, "RollbackAll") }
+												</div>
+											</button>
+										</form>
+									}
+								</div>
+								<p class="uk-text-small">
+									{ i18n.T(ctx, "admin.update.agents.new_version_available") }
+									<a href={ templ.URL(version.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ version.ID }</a>
+								</p>
+								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
+							}
+							if version != nil && semver.Compare("v" + version.ID, "v" + higherVersion) == 0 {
+								<div class="flex">
+									<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
+								</div>
+								<p class="uk-text-small">
+									{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
+									<a href={ templ.URL(version.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ version.ID }</a>
+								</p>
+								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
+							}
+							<hr class="uk-divider-icon"/>
+							if len(agents) > 0 {
+								<div class="flex flex-col gap-2">
+									<div class="flex gap-4">
+										<button
+											id="select-all"
+											title={ i18n.T(ctx, "SelectAll", p.NItems) }
+											type="button"
+											class="uk-button uk-button-default flex items-center gap-2"
+											_={ fmt.Sprintf(`on click 
+												repeat in <input[type='checkbox']/>
+													if it.checked is false then
+														it.click()
+													end
+												end
+												set storedItems to %s as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+												set #filterBySelectedItems.value to '%d'
+												set #deselect-all.innerHTML to '%s' + ' (%d)'
+												set #select-all.innerHTML to '%s' + ' (0)'
+												remove .hidden from <button[id$='-all-button'/>
+												add .hidden to <button[id$='-selected-button'/>
+											end`, f.SelectedAllAgents, p.NItems, i18n.T(ctx, "DeselectAll"), p.NItems, i18n.T(ctx, "SelectAll")) }
+										>
+											{ fmt.Sprintf("%s (%d)", i18n.T(ctx, "SelectAll"), p.NItems - f.SelectedItems) }
+										</button>
+										<button
+											id="deselect-all"
+											title={ i18n.T(ctx, "DeselectAll") }
+											type="button"
+											class="uk-button uk-button-default flex items-center gap-2"
+											_={ fmt.Sprintf(`on click 
+												repeat in <input[type='checkbox']/>
+													if it.checked is true then
+														it.click()
+													end
+												end
+												set storedItems to [] as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+												set #filterBySelectedItems.value to '0'
+												set #deselect-all.innerHTML to '%s' + ' (0)'
+												set #select-all.innerHTML to '%s' + ' (%d)'
+												remove .hidden from <button[id$='-all-button'/>
+												add .hidden to <button[id$='-selected-button'/>
+											end`, i18n.T(ctx, "DeselectAll"), i18n.T(ctx, "SelectAll"), p.NItems) }
+										>
+											{ fmt.Sprintf("%s (%d)", i18n.T(ctx, "DeselectAll"), f.SelectedItems) }
+										</button>
+									</div>
+									<table
+										class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-4"
+										_="on load
+											if #filterBySelectedItems.value is '0' then
+												set storedItems to [] as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+											end
+										end"
+									>
+										<thead>
+											<tr>
+												<th>
+													<input
+														name="select-all-in-page"
+														class="uk-checkbox"
+														type="checkbox"
+														_="on click  
+															set value to ((<input[name='select-all-in-page']:checked/>).length == 0)
+															repeat in <input[title='check-agent']/>
+																set it.checked to value
+																it.click()
+															end
+															
+															if ((<input[title='check-agent']:checked/>).length > 0) then
+																remove .hidden from <button[id$='-selected-button']/>
+																add .hidden to <button[id$='-all-button']/>
+															else
+																add .hidden to <button[id$='-selected-button']/>
+																remove .hidden from <button[id$='-all-button']/>
+															end
+														"
+													/>
+												</th>
+												<th>
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "agents.hostname") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+													</div>
+												</th>
+												<th>
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "agents.version") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
+													</div>
+												</th>
+												<th>
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "agents.os") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+													</div>
+												</th>
+											</tr>
+										</thead>
+										for _, agent := range agents {
+											<tr>
+												<td class="!align-middle">
+													<input
+														title="check-agent"
+														name={ agent.ID }
+														class="uk-checkbox"
+														type="checkbox"
+														_={ fmt.Sprintf(`
+															on click
+																set totalItems to '%d'
+																decrement totalItems by #filterBySelectedItems.value												
+																set storedItems to [] as Array
+																if sessionStorage.selectedAgents exists then														
+																	set storedItems to sessionStorage.selectedAgents as Object
+																end																								
+
+																if me.checked then
+																	decrement totalItems by 1
+																	set #select-all.innerHTML to '%s' + ' (' + totalItems + ')'
+																	
+																	increment #filterBySelectedItems.value by 1
+																	set #deselect-all.innerHTML to '%s' + ' (' + #filterBySelectedItems.value + ')'
+
+																	set index to storedItems.indexOf(my name)														
+																	if index < 0 then 															
+																		append my name to storedItems
+																		set sessionStorage.selectedAgents to storedItems as JSON
+																	end														
+																else
+																	increment totalItems by 1
+																	set #select-all.innerHTML to '%s' + ' (' + totalItems + ')'
+														
+																	decrement #filterBySelectedItems.value by 1
+																	set #deselect-all.innerHTML to '%s' + ' (' + #filterBySelectedItems.value + ')'
+
+																	set index to storedItems.indexOf(my name)														
+																	if index >= 0 then 															
+																		get storedItems.splice(index, 1)															
+																	end															
+																	
+																	if no storedItems then 
+																		set storedItems to [] as Array
+																		set #filterBySelectedItems.value to '0'
+																	end
+
+																	set sessionStorage.selectedAgents to storedItems as JSON 
+																end
+
+																if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
+																	remove .hidden from <button[id$='-selected-button']/>
+																	add .hidden to <button[id$='-all-button']/>
+																else
+																	add .hidden to <button[id$='-selected-button']/>
+																	remove .hidden from <button[id$='-all-button']/>
+																end
+
+																if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
+																	set (<input[name='select-all-in-page']/>).checked to true
+																else
+																	set (<input[name='select-all-in-page']/>).checked to false
+																end
+
+																set #selectedAgents.value to storedItems.length
+															end
+
+															on load
+																set storedItems to [] as Array
+																if sessionStorage.selectedAgents exists then
+																	set storedItems to sessionStorage.selectedAgents as Object												
+																end
+
+																set index to storedItems.indexOf(my name)														
+																if index >= 0 then
+																	set me.checked to true
+																end
+
+																if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
+																	set (<input[name='select-all-in-page']/>).checked to true
+																end
+
+																set #selectedAgents.value to storedItems.length
+															end
+														`, p.NItems, i18n.T(ctx, "SelectAll"), i18n.T(ctx, "DeselectAll"),  i18n.T(ctx, "SelectAll"), i18n.T(ctx, "DeselectAll")) }
+													/>
+												</td>
+												<td class="!align-middle">{ agent.Hostname }</td>
+												<td class="flex items-center gap-2 !align-middle">
+													{ agent.Version }
+													if semver.Compare("v" + agent.Version, "v"+ higherVersion) < 0 {
+														<div uk-tooltip={ i18n.T(ctx, "admin.update.agents.outdated") }>
+															<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+														</div>
+													}
+												</td>
+												switch agent.Os {
+													case "windows":
+														<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+													case "linux":
+														<td></td>
+												}
+											</tr>
+										}
+									</table>
+								</div>
+								@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
+							}
+							/* <button
+							class="flex items-center gap-2 uk-button uk-button-primary mt-6 mb-4"
+							hx-post="/admin/update-agents"
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#agent-update-spinner"
+						>
+							<div id="agent-update-spinner" class="mr-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>Test Update
+						</button> */
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ GetVersionError() {
+	<div id="error-getting-version" class="mt-6">
+		<div
+			class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white "
+			uk-alert="animation:true"
+		>
+			<a href class="uk-alert-close" uk-close _="on click toggle .hidden on #error-getting-version"></a>
+			<div class="flex gap-2 items-center uk-alert-description">
+				<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
+				<span>{ i18n.T(ctx, "admin.update.agents.get_version_error") }</span>
+			</div>
+		</div>
+	</div>
+}
+
+templ UpdateAgentsIndex(title string, cmp templ.Component) {
+	@layout.Base("admin") {
+		@cmp
+	}
+}
