@@ -22,20 +22,21 @@ func AgentsByOs(ctx context.Context, agents []models.Agent, countAllAgents int) 
 	}
 
 	// put data into chart
-	pie.AddSeries(i18n.T(ctx, "charts.os"), pieData).SetSeriesOptions(
+	pie.AddSeries(i18n.T(ctx, "charts.os_version"), pieData).SetSeriesOptions(
 		charts.WithLabelOpts(opts.Label{Show: opts.Bool(false), Formatter: "{b}: {c}"}),
 		charts.WithPieChartOpts(opts.PieChart{
 			Radius: []string{"40%", "75%"},
+			Center: []string{"25%", "50%"},
 		}),
 	)
 
 	textStyle := opts.TextStyle{FontSize: 36}
 	pie.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: "center", Top: "center", TitleStyle: &textStyle}),
-		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll"}),
+		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: "19%", Top: "43%", TitleStyle: &textStyle}),
+		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
 		charts.WithColorsOpts(opts.Colors{"#0f3375", "#13459c", "#1557c0", "#196bde"}),
 		charts.WithInitializationOpts(opts.Initialization{
-			Width:  "300px",
+			Width:  "450px",
 			Height: "300px",
 		}),
 	)
