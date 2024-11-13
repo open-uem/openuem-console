@@ -13,10 +13,16 @@ import (
 templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.SuccessMessage(successMessage)
-		@partials.ErrorMessage(errMessage, true)
-		<div id="error" class="hidden"></div>
-		<div id="success" class="hidden"></div>
+		if successMessage != "" {
+			@partials.SuccessMessage(successMessage)
+		} else {
+			<div id="success" class="hidden"></div>
+		}
+		if errMessage != "" {
+			@partials.ErrorMessage(errMessage, true)
+		} else {
+			<div id="error" class="hidden"></div>
+		}
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
 				<h3 class="uk-card-title">{ i18n.T(ctx, "Agents") }</h3>
@@ -31,7 +37,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
 							f.ContactFrom == "" && f.ContactTo == ""
 					})
-					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh)
+					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh, true)
 				</div>
 				if len(agents) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">

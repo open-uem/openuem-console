@@ -6,9 +6,11 @@ import (
 	"time"
 )
 
-templ RefreshPage(url, target, swap, method string, refreshTime int) {
+templ RefreshPage(url, target, swap, method string, refreshTime int, showTime bool) {
 	<div class="flex gap-4 items-center">
-		<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
+		if showTime {
+			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
+		}
 		<button
 			type="button"
 			class="uk-button uk-button-default"

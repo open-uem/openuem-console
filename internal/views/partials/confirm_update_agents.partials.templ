@@ -20,7 +20,7 @@ templ ConfirmUpdateAgents(version string) {
 					<input class="uk-input w-1/6" name="update-agent-date" type="datetime-local" min={ fmt.Sprintf(time.Now().Format("2006-01-02T15:03")) }/>
 					<button
 						hx-post="/admin/update-agents"
-						hx-push-url="false"
+						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"
 						htmx-indicator="#update-spinner"

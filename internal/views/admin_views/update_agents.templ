@@ -22,15 +22,23 @@ type Version struct {
 	IsCritical      bool   `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string, versions, availableOSes []string, tags []*openuem_ent.Tag) {
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string, versions, availableOSes []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@ConfigNavbar("update-agents")
-				<div id="success" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				if errorMessage != "" {
+					@partials.ErrorMessage(errorMessage, true)
+				} else {
+					<div id="error" class="hidden"></div>
+				}
 				<div id="confirm" class="hidden"></div>
-				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "admin.update.agents.title") } </h3>
@@ -43,20 +51,24 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 							if version == nil {
 								@GetVersionError()
 							}
-							if version != nil && semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
+							if version != nil {
 								<div class="flex items-center justify-between">
-									<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", version.IsCritical), templ.KV("bg-blue-700", !version.IsCritical) }>
-										if version.IsCritical {
-											{ i18n.T(ctx, "admin.update.agents.critical") }
-										} else {
-											{ i18n.T(ctx, "admin.update.agents.available") }
-										}
-									</p>
-									if version != nil {
-										<form class="flex items-center gap-4">
-											<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
-											<input id="selectedAgents" type="hidden" name="selectedAgents"/>
-											<input name="version" type="hidden" value={ version.ID }/>
+									if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
+										<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", version.IsCritical), templ.KV("bg-blue-700", !version.IsCritical) }>
+											if version.IsCritical {
+												{ i18n.T(ctx, "admin.update.agents.critical") }
+											} else {
+												{ i18n.T(ctx, "admin.update.agents.available") }
+											}
+										</p>
+									} else {
+										<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
+									}
+									<form class="flex items-center gap-4">
+										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+										<input id="selectedAgents" type="hidden" name="selectedAgents"/>
+										<input name="version" type="hidden" value={ version.ID }/>
+										if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
 											<button
 												id="update-all-button"
 												title={ i18n.T(ctx, "UpdateAll") }
@@ -73,43 +85,38 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 													{ i18n.T(ctx, "Update") }
 												</div>
 											</button>
-											<button
-												id="rollback-all-button"
-												title={ i18n.T(ctx, "RollbackAll") }
-												type="button"
-												class="uk-button uk-button-default"
-												hx-post="/admin/rollback-agents/confirm"
-												hx-push-url="true"
-												hx-target="#main"
-												hx-swap="outerHTML"
-												disabled?={ f.SelectedItems == 0 }
-											>
-												<div class="flex items-center gap-2">
-													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5 rotate-180" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "Rollback") }
-												</div>
-											</button>
-										</form>
+										}
+										<button
+											id="rollback-all-button"
+											title={ i18n.T(ctx, "RollbackAll") }
+											type="button"
+											class="uk-button uk-button-default"
+											hx-post="/admin/rollback-agents/confirm"
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											disabled?={ f.SelectedItems == 0 }
+										>
+											<div class="flex items-center gap-2">
+												<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5 rotate-180" uk-cloack></uk-icon>
+												{ i18n.T(ctx, "Rollback") }
+											</div>
+										</button>
+									</form>
+								</div>
+								<p class="uk-text-small">
+									if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
+										{ i18n.T(ctx, "admin.update.agents.new_version_available") }
+									} else {
+										{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
 									}
-								</div>
-								<p class="uk-text-small">
-									{ i18n.T(ctx, "admin.update.agents.new_version_available") }
-									<a href={ templ.URL(version.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ version.ID }</a>
-								</p>
-								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
-							}
-							if version != nil && semver.Compare("v" + version.ID, "v" + higherVersion) == 0 {
-								<div class="flex">
-									<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
-								</div>
-								<p class="uk-text-small">
-									{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
 									<a href={ templ.URL(version.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ version.ID }</a>
 								</p>
 								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
 							}
 							<hr class="uk-divider-icon"/>
 							<div class="flex items-center gap-4">
+								@partials.RefreshPage("/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
 								@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
 									return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
 								})

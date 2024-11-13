@@ -77,7 +77,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 					<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
 						<div class="flex flex-col gap-4">
 							<div class="flex justify-end">
-								@partials.RefreshPage(string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime)
+								@partials.RefreshPage(string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
 							</div>
 							<div>
 								if p.NItems > 0 {

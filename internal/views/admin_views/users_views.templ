@@ -35,7 +35,7 @@ templ Users(c echo.Context, users []*ent.User, p partials.PaginationAndSort, f f
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.RegisterOptions) == 0
 							})
-							@partials.RefreshPage("/admin", "#main", "outerHTML", "post", refresh)
+							@partials.RefreshPage("/admin", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(users) > 0 {
 							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">

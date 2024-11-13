@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,6 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
-	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -21,7 +21,9 @@ import (
 
 func (h *Handler) UpdateAgents(c echo.Context) error {
 	var err error
-	var agents []*ent.Agent
+
+	successMessage := ""
+	errorMessage := ""
 
 	// Get latest version
 	channel, err := h.Model.GetDefaultUpdateChannel()
@@ -38,11 +40,11 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 		if agents == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
 		if version == nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.get_version_error"), false))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
 		}
 
 		updateRequest := openuem_nats.OpenUEMUpdateRequest{}
@@ -69,17 +71,134 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		for _, a := range strings.Split(agents, ",") {
 			data, err := json.Marshal(updateRequest)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+				errorMessage = err.Error()
 			}
 
-			if _, err := h.NATSConnection.Request("agentupdate."+a, data, 10*time.Second); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+			if _, err := h.JetStream.Publish(context.Background(), "agentupdate."+a, data); err != nil {
+				errorMessage = err.Error()
 			}
+
+			/* if _, err := h.NATSConnection.Request("agentupdate."+a, data, 10*time.Second); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+			} */
 		}
 
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "admin.update.agents.success")))
+		successMessage = i18n.T(c.Request().Context(), "admin.update.agents.success")
 	}
 
+	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
+}
+
+func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
+	version := c.FormValue("version")
+	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
+}
+
+func (h *Handler) RollbackAgents(c echo.Context) error {
+	var err error
+
+	successMessage := ""
+	errorMessage := ""
+
+	// Get latest version
+	channel, err := h.Model.GetDefaultUpdateChannel()
+	if err != nil {
+		log.Println("[ERROR]: could not get updates channel settings")
+		channel = "stable"
+	}
+
+	version, err := GetLatestVersion(channel)
+	if err != nil {
+		log.Println("[ERROR]: could not get latest version information")
+	}
+
+	// TODO agent selection, right now is hardcoded for my test
+	selectedAgents := c.FormValue("agents")
+	if selectedAgents == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
+	}
+
+	rollbackRequest := openuem_nats.OpenUEMRollbackRequest{}
+
+	if c.FormValue("rollback-agent-date") == "" {
+		rollbackRequest.RollbackNow = true
+	} else {
+		scheduledTime := c.FormValue("update-agent-date")
+		rollbackRequest.RollbackAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
+		if err != nil {
+			log.Println("[INFO]: could not parse scheduled time as 24h time")
+			rollbackRequest.RollbackAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
+			if err != nil {
+				log.Println("[INFO]: could not parse scheduled time as AM/PM time")
+
+				// Fallback to update now
+				rollbackRequest.RollbackNow = true
+			}
+		}
+	}
+
+	for _, a := range strings.Split(selectedAgents, ",") {
+		data, err := json.Marshal(rollbackRequest)
+		if err != nil {
+			errorMessage = err.Error()
+		}
+
+		if _, err := h.JetStream.Publish(context.Background(), "agentrollback."+a, data); err != nil {
+			errorMessage = err.Error()
+		}
+
+		/* if _, err := h.NATSConnection.Request("agentrollback."+a, data, 10*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		} */
+	}
+
+	successMessage = i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")
+
+	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
+}
+
+func (h *Handler) RollbackAgentsConfirm(c echo.Context) error {
+	return RenderConfirm(c, partials.ConfirmRollbackAgents())
+}
+
+func GetLatestVersion(channel string) (*admin_views.Version, error) {
+	// TODO specify the channel
+	url := "http://localhost:8888/" + channel
+
+	client := http.Client{
+		Timeout: time.Second * 8,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", "openuem-console")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
+
+	body, readErr := io.ReadAll(res.Body)
+	if readErr != nil {
+		return nil, err
+	}
+
+	version := admin_views.Version{}
+	if err := json.Unmarshal(body, &version); err != nil {
+		return nil, err
+	}
+
+	return &version, nil
+}
+
+func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Version, successMessage, errorMessage string) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -129,7 +248,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	}
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
-	agents, err = h.Model.GetAgentsByPage(p, f)
+	agents, err := h.Model.GetAgentsByPage(p, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -154,94 +273,11 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion, versions, availableOSes, appliedTags)))
-}
-
-func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
-	version := c.FormValue("version")
-	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
-}
-
-func (h *Handler) RollbackAgents(c echo.Context) error {
-	var err error
-
-	// TODO agent selection, right now is hardcoded for my test
-	agents := c.FormValue("agents")
-	if agents == "" {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
-	}
-
-	rollbackRequest := openuem_nats.OpenUEMRollbackRequest{}
-
-	if c.FormValue("rollback-agent-date") == "" {
-		rollbackRequest.RollbackNow = true
-	} else {
-		scheduledTime := c.FormValue("update-agent-date")
-		rollbackRequest.RollbackAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
-		if err != nil {
-			log.Println("[INFO]: could not parse scheduled time as 24h time")
-			rollbackRequest.RollbackAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
-			if err != nil {
-				log.Println("[INFO]: could not parse scheduled time as AM/PM time")
-
-				// Fallback to update now
-				rollbackRequest.RollbackNow = true
-			}
-		}
-	}
-
-	for _, a := range strings.Split(agents, ",") {
-		data, err := json.Marshal(rollbackRequest)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		if _, err := h.NATSConnection.Request("agentrollback."+a, data, 10*time.Second); err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-	}
-
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")))
-
-}
-
-func (h *Handler) RollbackAgentsConfirm(c echo.Context) error {
-	return RenderConfirm(c, partials.ConfirmRollbackAgents())
-}
-
-func GetLatestVersion(channel string) (*admin_views.Version, error) {
-	// TODO specify the channel
-	url := "http://localhost:8888/" + channel
-
-	client := http.Client{
-		Timeout: time.Second * 8,
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
-		return nil, err
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
 	}
 
-	req.Header.Set("User-Agent", "openuem-console")
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	body, readErr := io.ReadAll(res.Body)
-	if readErr != nil {
-		return nil, err
-	}
-
-	version := admin_views.Version{}
-	if err := json.Unmarshal(body, &version); err != nil {
-		return nil, err
-	}
-
-	return &version, nil
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion, versions, availableOSes, appliedTags, refreshTime, successMessage, errorMessage)))
 }

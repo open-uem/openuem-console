@@ -52,7 +52,7 @@ templ Dashboard(data DashboardData) {
 				@Chart("Agents By OS Version", "Agent distribution by operating system version", data.Charts.AgentByOsVersion)
 			</div>
 			<div class="flex justify-end">
-				@partials.RefreshPage("/dashboard", "#main", "outerHTML", "get", data.RefreshTime)
+				@partials.RefreshPage("/dashboard", "#main", "outerHTML", "get", data.RefreshTime, true)
 			</div>
 			<div class="flex gap-2 justify-start">
 				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
