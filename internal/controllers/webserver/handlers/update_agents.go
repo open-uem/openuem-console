@@ -24,14 +24,18 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	var agents []*ent.Agent
 
 	// Get latest version
-	// TODO be able to select channel
-	version, err := GetLatestVersion("stable")
+	channel, err := h.Model.GetDefaultUpdateChannel()
 	if err != nil {
-		log.Println("[INFO]: could not get latest version information")
+		log.Println("[ERROR]: could not get updates channel settings")
+		channel = "stable"
+	}
+
+	version, err := GetLatestVersion(channel)
+	if err != nil {
+		log.Println("[ERROR]: could not get latest version information")
 	}
 
 	if c.Request().Method == "POST" {
-		// TODO agent selection, right now is hardcoded for my test
 		agents := c.FormValue("agents")
 		if agents == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))

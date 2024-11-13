@@ -97,6 +97,21 @@ func (m *Model) UpdateSessionLifetime(settingsId, sessionLifetime int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetSessionLifetimeInMinutes(sessionLifetime).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultUpdateChannel() (string, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldUpdateChannel).Only(context.Background())
+	if err != nil {
+		return "", err
+	}
+
+	return settings.UpdateChannel, nil
+}
+
+func (m *Model) UpdateOpenUEMChannel(settingsId int, updateChannel string) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetUpdateChannel(updateChannel).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().Select(
@@ -107,6 +122,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldNatsRequestTimeoutSeconds,
 		settings.FieldRefreshTimeInMinutes,
 		settings.FieldSessionLifetimeInMinutes,
+		settings.FieldUpdateChannel,
 	)
 
 	settings, err := query.Only(context.Background())
@@ -133,4 +149,5 @@ type GeneralSettings struct {
 	NATSTimeout     int
 	Refresh         int
 	SessionLifetime int
+	UpdateChannel   string
 }

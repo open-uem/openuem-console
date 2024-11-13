@@ -19,6 +19,7 @@ en:
   Deploy: "Deploy"
   Description: "Description"
   DeselectAll: "Deselect All"
+  Devel: "Devel"
   Disabled: "Disabled"
   Disconnect: "Disconnect"
   Download: "Download"
@@ -63,11 +64,13 @@ en:
     other: "Sessions"
   Size: "Size"
   SortBy: "Sort by %s"
+  Stable: "Stable"
   Status: "Status"
   Summary: "Summary"
   Tag:
     one: "Tag"
     other: "Tags"
+  Testing: "Testing"
   Unknown: "Unknown"
   Update: "Update"
   UpdatedYes: "Updated"
@@ -450,6 +453,9 @@ en:
     session_lifetime_title: Session Lifetime
     session_lifetime_description: Session lifetime in minutes. Once that time expires the session will be closed
     session_lifetime_invalid: Session lifetime is not valid
+    update_channel_title: Updates channel
+    update_channel_description: Channel used to check and download OpenUEM's updates
+    update_channel_invalid: Channel is not valid
 
   notes:
     updated: "Notes have been updated"

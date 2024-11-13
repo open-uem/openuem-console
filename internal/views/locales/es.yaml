@@ -20,6 +20,7 @@ es:
   Deploy: "Despliegue de software"
   Description: "Descripción"
   DeselectAll: "Deseleccionar todos"
+  Devel: "Desarrollo"
   Disabled: "Desactivado"
   Disconnect: "Desconectar"
   Edit: "Editar"
@@ -64,11 +65,13 @@ es:
     other: "Sesiones"
   Size: "Tamaño"
   SortBy: "Ordenar por %s"
+  Stable: "Estable"
   Status: "Estado"
   Summary: "Resumen"
   Tag:
     one: "Etiqueta"
     other: "Etiquetas"
+  Testing: "Pruebas"
   Unknown: "Desconocido"
   Update: "Actualizar"
   UpdatedYes: "Actualizado"
@@ -448,6 +451,9 @@ es:
     session_lifetime_title: Tiempo de vida de la sesión
     session_lifetime_description: Tiempo de vida de la sesión en minutos pasado el cual se cerrará la sesión
     session_lifetime_invalid: Tiempo de vida de sesión no válido
+    update_channel_title: Canal de actualizaciones
+    update_channel_description: Canal utilizado para la comprobación y descarga de actualizaciones de OpenUEM
+    update_channel_invalid: Canal no válido
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

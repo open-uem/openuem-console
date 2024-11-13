@@ -158,6 +158,32 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings) {
 									</form>
 								</td>
 							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select name="update-channel" class="uk-select">
+											<option value="stable" selected?={ settings.UpdateChannel == "stable" }>{ i18n.T(ctx,"Stable") }</option>
+											<option value="devel" selected?={ settings.UpdateChannel == "devel" }>{ i18n.T(ctx,"Devel") }</option>
+											<option value="testing" selected?={ settings.UpdateChannel == "testing" }>{ i18n.T(ctx,"Testing") }</option>
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-7"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-7" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
 						</table>
 					</div>
 				</div>

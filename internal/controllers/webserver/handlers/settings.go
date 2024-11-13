@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
+
+var UpdateChannels = []string{"stable", "devel", "testing"}
 
 func (h *Handler) GeneralSettings(c echo.Context) error {
 	var err error
@@ -62,6 +65,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.reload")))
 		}
 
+		if settings.UpdateChannel != "" {
+			if err := h.Model.UpdateOpenUEMChannel(settings.ID, settings.UpdateChannel); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -86,6 +95,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	certYear := c.FormValue("cert-years")
 	refresh := c.FormValue("refresh")
 	sessionLifetime := c.FormValue("session-lifetime")
+	updateChannel := c.FormValue("update-channel")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -152,6 +162,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		if settings.SessionLifetime <= 0 {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
+	}
+
+	if updateChannel != "" {
+		if !slices.Contains(UpdateChannels, updateChannel) {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.upload_channel_invalid"))
+		}
+		settings.UpdateChannel = updateChannel
 	}
 
 	return &settings, nil
