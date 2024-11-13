@@ -5,6 +5,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/go-echarts/go-echarts/v2/render"
 	"github.com/invopop/ctxi18n/i18n"
+	"strconv"
 )
 
 type DashboardCharts struct {
@@ -15,15 +16,286 @@ type DashboardCharts struct {
 	Top10Apps           render.ChartSnippet
 }
 
-templ Dashboard(charts DashboardCharts) {
+type DashboardData struct {
+	Charts                    *DashboardCharts
+	NOutdatedVersions         int
+	NPendingUpdates           int
+	NInactiveAntiviri         int
+	NOutdatedDatabaseAntiviri int
+	NNoAutoUpdate             int
+	NSupportedVNC             int
+	NVendors                  int
+	NPrinters                 int
+	NAppliedTags              int
+	NDisabledAgents           int
+	NApps                     int
+	NDeployments              int
+	NOpenUEMUsers             int
+	NSessions                 int
+	NUsernames                int
+	RefreshTime               int
+	NAgentsNotReportedIn24h   int
+}
+
+templ Dashboard(data DashboardData) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Dashboard", Url: "/dashboard"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
 			<h3 class="uk-card-title">{ i18n.T(ctx, "Dashboard") }</h3>
 			<div class="flex gap-2 mt-4">
-				@Chart("Agents By Last Contact", "Agent distribution by last contact date", charts.AgentByLastReport)
-				@Chart("Agents By OS", "Agent distribution by operating system", charts.AgentByOs)
-				@Chart("Agents By OS Version", "Agent distribution by operating system version", charts.AgentByOsVersion)
+				@Chart("Agents By Last Contact", "Agent distribution by last contact date", data.Charts.AgentByLastReport)
+				<div class="hidden 2xl:block">
+					@Chart("Agents By OS", "Agent distribution by operating system", data.Charts.AgentByOs)
+				</div>
+				@Chart("Agents By OS Version", "Agent distribution by operating system version", data.Charts.AgentByOsVersion)
+			</div>
+			<div class="flex justify-end">
+				@partials.RefreshPage("/dashboard", "#main", "outerHTML", "get", data.RefreshTime)
+			</div>
+			<div class="flex gap-2 justify-start">
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+					<tbody>
+						<tr>
+							<th class="!align-middle">
+								{ i18n.T(ctx, "dashboard.no_reported_in_last_24h") }
+							</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/agents?sortBy=last_contact&sortOrder=asc"
+									hx-get="/agents?sortBy=last_contact&sortOrder=asc"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NAgentsNotReportedIn24h > 0) }
+								>{ strconv.Itoa(data.NAgentsNotReportedIn24h) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">
+								{ i18n.T(ctx, "dashboard.outdated_agents") }
+							</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/update-agents"
+									hx-get="/admin/update-agents"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>{ strconv.Itoa(data.NOutdatedVersions) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_disabled_agents") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/agents?filterByEnabledAgent1"
+									hx-get="/agents?filterByEnabledAgent1"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NDisabledAgents) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.pending_update_agents") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/security/updates?filterByPendingUpdate0=Yes"
+									hx-get="/security/updates?filterByPendingUpdate0=Yes"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NPendingUpdates > 0) }
+								>{ strconv.Itoa(data.NPendingUpdates) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.no_auto_update") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation"
+									hx-get="/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NNoAutoUpdate > 0) }
+								>{ strconv.Itoa(data.NNoAutoUpdate) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.disabled_antivirus") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/security?filterByAntivirusEnabled1=Disabled"
+									hx-get="/security?filterByAntivirusEnabled1=Disabled"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NInactiveAntiviri > 0) }
+								>
+									{ strconv.Itoa(data.NInactiveAntiviri) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.outdated_antivirus") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/security?filterByAntivirusUpdated1=UpdatedNo"
+									hx-get="/security?filterByAntivirusUpdated1=UpdatedNo"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NOutdatedDatabaseAntiviri > 0) }
+								>
+									{ strconv.Itoa(data.NOutdatedDatabaseAntiviri) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">
+								{ i18n.T(ctx, "dashboard.num_sessions") }
+							</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/sessions"
+									hx-get="/admin/sessions"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>{ strconv.Itoa(data.NSessions) }</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+					<tbody>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.vnc") }</th>
+							<td class="!align-middle text-center">
+								{ strconv.Itoa(data.NSupportedVNC) }
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_vendor") }</th>
+							<td class="!align-middle text-center">
+								{ strconv.Itoa(data.NVendors) }
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_printers") }</th>
+							<td class="!align-middle text-center">
+								{ strconv.Itoa(data.NPrinters) }
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_os_users") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/computers"
+									hx-get="/computers"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NUsernames) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_apps_found") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/software"
+									hx-get="/software"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NApps) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_deployments") }</th>
+							<td class="!align-middle text-center">
+								{ strconv.Itoa(data.NDeployments) }
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_openuem_users") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/users"
+									hx-get="/admin/users"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NOpenUEMUsers) }
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_applied_tags") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/tags"
+									hx-get="/admin/tags"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NAppliedTags) }
+								</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				/* TODO these are mock hardcoded values that require information from real status check */
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+					<tbody>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.nats_server_status") }</th>
+							<td class="!align-middle text-center">
+								@partials.Status("up")
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.openuem_updater_api_status") }</th>
+							<td class="!align-middle text-center">
+								@partials.Status("up")
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.agent_worker_status") }</th>
+							<td class="!align-middle text-center">
+								@partials.Status("up")
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.notification_worker_status") }</th>
+							<td class="!align-middle text-center">
+								@partials.Status("down")
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.cert_manager_worker_status") }</th>
+							<td class="!align-middle text-center">
+								@partials.Status("unknown")
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</main>

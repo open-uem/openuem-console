@@ -23,6 +23,7 @@ es:
   Devel: "Desarrollo"
   Disabled: "Desactivado"
   Disconnect: "Desconectar"
+  Down: "Caído"
   Edit: "Editar"
   Enabled: "Activado"
   Example: "Ejemplo"
@@ -73,6 +74,7 @@ es:
     other: "Etiquetas"
   Testing: "Pruebas"
   Unknown: "Desconocido"
+  Up: "Operativo"
   Update: "Actualizar"
   UpdatedYes: "Actualizado"
   UpdatedNo: "No actualizado"
@@ -499,6 +501,28 @@ es:
         confirm_rollback_when: "Si lo desea puede especificar el día y la hora a la que desea que se haga la regresión en los agentes, de lo contrario la regresión se realizará lo antes posible"
         agents_cant_be_empty: "La variable agentes no puede contener un array vacío"
         rollback_success: "Se ha enviado una petición para reaizar una regresión del agente de OpenUEM"
+  dashboard:
+    outdated_agents: Agentes ejecutando versiones anticuadas
+    no_auto_update: Equipos que no descargan/instalan actualizaciones automáticamente
+    pending_update_agents: Equipos con actualizaciones del sistema pendientes
+    disabled_antivirus: Equipos sin sistema de antivirus activo
+    outdated_antivirus: Equipos con bases de datos de virus desactualizadas
+    nats_server_status: Estado del servidor de NATS
+    openuem_updater_api_status: Estado del API de OpenUEM Updater
+    agent_worker_status: Estado del Procesador de Agentes
+    notification_worker_status: Estado del Procesador de Notificaciones
+    cert_manager_worker_status: Estado del Gestor de Certificados
+    vnc: Equipos que permiten conexión por VNC
+    num_vendor: Número de fabricantes de equipos encontrados
+    num_printers: Número de impresoras diferentes encontradas
+    num_applied_tags: Número de etiquetas aplicadas
+    num_disabled_agents: Agentes desactivados
+    num_apps_found: Número de aplicaciones encontradas
+    num_deployments: Despliegues de software realizados con OpenUEM
+    num_openuem_users: Número de usuarios de OpenUEM
+    num_sessions: Número de sesiones abiertas en la consola
+    num_os_users: Número de usuarios con un equipo asignado
+    no_reported_in_last_24h: Agentes que no han informado desde hace más de 24h
 
   pagination:
     title: "Elem. por página"

@@ -35,7 +35,7 @@ func AgentsByOsVersion(ctx context.Context, agents []models.Agent, countAllAgent
 		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: "19%", Top: "43%", TitleStyle: &textStyle}),
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
 		charts.WithInitializationOpts(opts.Initialization{
-			Width:  "450px",
+			Width:  "480px",
 			Height: "300px",
 		}),
 	)

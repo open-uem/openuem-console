@@ -10326,11 +10326,6 @@ th.uk-text-break, td.uk-text-break {
   background-color: rgb(148 163 184 / var(--tw-bg-opacity));
 }
 
-.hover\:text-blue-500:hover {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-
 .hover\:text-foreground:hover {
   color: hsl(var(--foreground));
 }
@@ -10406,5 +10401,23 @@ th.uk-text-break, td.uk-text-break {
 
   .md\:gap-8 {
     gap: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:block {
+    display: block;
+  }
+}
+
+@media (min-width: 1536px) {
+  .\32xl\:block {
+    display: block;
   }
 }

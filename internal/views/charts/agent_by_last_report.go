@@ -38,7 +38,7 @@ func AgentsByLastReportDate(ctx context.Context, countReportedLast24, countAllAg
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
 		charts.WithColorsOpts(opts.Colors{"#48C639", "#C63948"}),
 		charts.WithInitializationOpts(opts.Initialization{
-			Width:  "450px",
+			Width:  "480px",
 			Height: "300px",
 		}),
 	)

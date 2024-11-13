@@ -393,3 +393,11 @@ func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
 
 	return query.Strings(context.Background())
 }
+
+func (m *Model) CountAllDeployments() (int, error) {
+	return m.Client.Deployment.Query().Count(context.Background())
+}
+
+func (m *Model) CountAllOSUsernames() (int, error) {
+	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Count(context.Background())
+}

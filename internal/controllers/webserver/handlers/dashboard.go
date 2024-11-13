@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/doncicuto/openuem-console/internal/views/charts"
@@ -10,12 +11,105 @@ import (
 )
 
 func (h *Handler) Dashboard(c echo.Context) error {
-	myCharts, err := h.generateCharts(c)
+	var err error
+	data := dashboard_views.DashboardData{}
+
+	data.Charts, err = h.generateCharts(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(*myCharts)))
+	data.NOutdatedVersions, err = h.Model.CountOutdatedAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NPendingUpdates, err = h.Model.CountPendingUpdateAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NInactiveAntiviri, err = h.Model.CountDisabledAntivirusAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NOutdatedDatabaseAntiviri, err = h.Model.CountOutdatedAntivirusDatabaseAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NNoAutoUpdate, err = h.Model.CountNoAutoupdateAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NSupportedVNC, err = h.Model.CountVNCSupportedAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NVendors, err = h.Model.CountDifferentVendor()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NPrinters, err = h.Model.CountDifferentPrinters()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	appliedTags, err := h.Model.GetAppliedTags()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	data.NAppliedTags = len(appliedTags)
+
+	data.NDisabledAgents, err = h.Model.CountDisabledAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NApps, err = h.Model.CountAllApps(filters.ApplicationsFilter{})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NDeployments, err = h.Model.CountAllDeployments()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NOpenUEMUsers, err = h.Model.CountAllUsers(filters.UserFilter{})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NSessions, err = h.Model.CountAllSessions()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.NUsernames, err = h.Model.CountAllOSUsernames()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	data.RefreshTime, err = h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		data.RefreshTime = 5
+	}
+
+	data.NAgentsNotReportedIn24h, err = h.Model.CountAgentsNotReportedLast24h()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		data.RefreshTime = 5
+	}
+
+	// TODO - Get components status
+
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data)))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

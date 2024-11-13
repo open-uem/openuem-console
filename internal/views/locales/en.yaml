@@ -22,6 +22,7 @@ en:
   Devel: "Devel"
   Disabled: "Disabled"
   Disconnect: "Disconnect"
+  Down: "Down"
   Download: "Download"
   Edit: "Edit"
   Enabled: "Enabled"
@@ -72,6 +73,7 @@ en:
     other: "Tags"
   Testing: "Testing"
   Unknown: "Unknown"
+  Up: "Up"
   Update: "Update"
   UpdatedYes: "Updated"
   UpdatedNo: "Not Updated"
@@ -502,6 +504,28 @@ en:
         confirm_rollback_when: "If you wish, you can specify the day and time that you want the agents to perform the roll back, otherwise the roll back will start as soon as possible"
         agents_cant_be_empty: "Agents can't be an empty string"
         rollback_success: "A request to rollback the OpenUEM agent version has been sent"
+  dashboard:
+    outdated_agents: Agents running outdated versions
+    no_auto_update: Endpoints that dosn't download/install system updates automatically
+    pending_update_agents: Endpoints with pending system updates
+    disabled_antivirus: Endpoints without an active antivirus system
+    outdated_antivirus: Endpoints running outdated virus databases
+    nats_server_status: NATS Server status
+    openuem_updater_api_status: OpenUEM Updater API status
+    agent_worker_status: Agent Worker status
+    notification_worker_status: Notification Worker status
+    cert_manager_worker_status: Cert Manager Worker status
+    vnc: Endpoints that support VNC connection
+    num_vendor: Number of different equipment vendors
+    num_printers: Number of different printers found
+    num_applied_tags: Number of tags applied
+    num_disabled_agents: Disabled agents
+    num_apps_found: Applications found
+    num_deployments: Software deployments performed using OpenUEM
+    num_openuem_users: Number of OpenUEM users
+    num_sessions: Number of sessions opened in the console
+    num_os_users: Number of users with and endpoint assigned
+    no_reported_in_last_24h: Agents that haven't reported in the last 24h
 
   pagination:
     title: "Items per page"

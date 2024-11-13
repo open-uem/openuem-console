@@ -1,0 +1,26 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+templ Status(status string) {
+	switch status {
+		case "up":
+			<div
+				class="p-1 rounded-full w-4 h-4 bg-green-500"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "Up")) }
+			></div>
+		case "down":
+			<div
+				class="p-1 rounded-full w-4 h-4 bg-red-500"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "Down")) }
+			></div>
+		case "unknown":
+			<div
+				class="p-1 rounded-full w-4 h-4 bg-orange-500"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "Unknown")) }
+			></div>
+	}
+}

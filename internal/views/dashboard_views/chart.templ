@@ -4,8 +4,6 @@ import "github.com/go-echarts/go-echarts/v2/render"
 
 templ Chart(title, description string, chart render.ChartSnippet) {
 	<div class="grow">
-		/* 		<h4 class="uk-card-title">{ title }</h4>
-		<p class="uk-margin-small-top uk-text-small">{ description }</p> */
 		<div class="flex mt-4 justify-center">
 			@templ.Raw(chart.Element)
 			@templ.Raw(chart.Script)

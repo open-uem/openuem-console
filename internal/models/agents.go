@@ -11,10 +11,14 @@ import (
 	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
+	"github.com/doncicuto/openuem_ent/antivirus"
+	"github.com/doncicuto/openuem_ent/computer"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 	"github.com/doncicuto/openuem_ent/predicate"
+	"github.com/doncicuto/openuem_ent/printer"
 	"github.com/doncicuto/openuem_ent/systemupdate"
 	"github.com/doncicuto/openuem_ent/tag"
+	"github.com/doncicuto/openuem_nats"
 )
 
 type Agent struct {
@@ -193,6 +197,14 @@ func (m *Model) CountAgentsReportedLast24h() (int, error) {
 	return count, err
 }
 
+func (m *Model) CountAgentsNotReportedLast24h() (int, error) {
+	count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1))).Count(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
 func (m *Model) CountAgentsByWindowsUpdateStatus() ([]Agent, error) {
 	agents := []Agent{}
 	err := m.Client.SystemUpdate.Query().GroupBy(systemupdate.FieldStatus).Aggregate(ent.Count()).Scan(context.Background(), &agents)
@@ -251,4 +263,45 @@ func (m *Model) GetHigherAgentVersionInstalled() (string, error) {
 		return "", err
 	}
 	return data.Version, nil
+}
+
+func (m *Model) CountOutdatedAgents() (int, error) {
+	version, err := m.GetHigherAgentVersionInstalled()
+	if err != nil {
+		return 0, err
+	}
+
+	return m.Client.Agent.Query().Where(agent.VersionLT(version)).Count(context.Background())
+}
+
+func (m *Model) CountPendingUpdateAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true))).Count(context.Background())
+}
+
+func (m *Model) CountDisabledAntivirusAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false))).Count(context.Background())
+}
+
+func (m *Model) CountOutdatedAntivirusDatabaseAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false))).Count(context.Background())
+}
+
+func (m *Model) CountNoAutoupdateAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.StatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION)))).Count(context.Background())
+}
+
+func (m *Model) CountVNCSupportedAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.Not(agent.Vnc(""))).Count(context.Background())
+}
+
+func (m *Model) CountDifferentVendor() (int, error) {
+	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Count(context.Background())
+}
+
+func (m *Model) CountDifferentPrinters() (int, error) {
+	return m.Client.Printer.Query().Select(printer.FieldName).Unique(true).Count(context.Background())
+}
+
+func (m *Model) CountDisabledAgents() (int, error) {
+	return m.Client.Agent.Query().Where(agent.Enabled(false)).Count(context.Background())
 }
