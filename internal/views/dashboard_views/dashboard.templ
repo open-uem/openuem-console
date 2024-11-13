@@ -35,6 +35,8 @@ type DashboardData struct {
 	NUsernames                int
 	RefreshTime               int
 	NAgentsNotReportedIn24h   int
+	NUpgradableAgents         int
+	OpenUEMUpdaterAPIStatus   string
 }
 
 templ Dashboard(data DashboardData) {
@@ -83,6 +85,21 @@ templ Dashboard(data DashboardData) {
 									hx-push-url="true"
 									class="uk-text-bold underline"
 								>{ strconv.Itoa(data.NOutdatedVersions) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">
+								{ i18n.T(ctx, "dashboard.num_upgradable_agents") }
+							</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/update-agents"
+									hx-get="/admin/update-agents"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>{ strconv.Itoa(data.NUpgradableAgents) }</a>
 							</td>
 						</tr>
 						<tr>
@@ -273,7 +290,7 @@ templ Dashboard(data DashboardData) {
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.openuem_updater_api_status") }</th>
 							<td class="!align-middle text-center">
-								@partials.Status("up")
+								@partials.Status(data.OpenUEMUpdaterAPIStatus)
 							</td>
 						</tr>
 						<tr>

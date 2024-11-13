@@ -107,6 +107,26 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		data.RefreshTime = 5
 	}
 
+	// Get latest version
+	channel, err := h.Model.GetDefaultUpdateChannel()
+	if err != nil {
+		log.Println("[ERROR]: could not get updates channel settings")
+		channel = "stable"
+	}
+
+	version, err := GetLatestVersion(channel)
+	if err != nil {
+		log.Println("[ERROR]: could not get latest version information")
+		data.OpenUEMUpdaterAPIStatus = "down"
+		data.NUpgradableAgents = -1
+	} else {
+		data.OpenUEMUpdaterAPIStatus = "up"
+		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(version.ID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	// TODO - Get components status
 
 	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data)))

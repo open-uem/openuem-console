@@ -271,6 +271,10 @@ func (m *Model) CountOutdatedAgents() (int, error) {
 		return 0, err
 	}
 
+	return m.CountUpgradableAgents(version)
+}
+
+func (m *Model) CountUpgradableAgents(version string) (int, error) {
 	return m.Client.Agent.Query().Where(agent.VersionLT(version)).Count(context.Background())
 }
 
