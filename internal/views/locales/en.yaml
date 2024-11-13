@@ -490,8 +490,12 @@ en:
         critical: "Critical Update"
         available: "Update Available"
         confirm_update_selected: "Do you want to continue updating the selected agents to versión %s?"
-        confirm_update_all: "Do you want to continue updating ALL the agents to versión %s?"
-        confirm_specify_when: "Please, specify when do you wish the agents to be updated"
+        confirm_update_all: "Do you want to continue updating ALL selected agents to versión %s?"
+        confirm_specify_when: "If you wish, you can specify the day and time that you want the agents to install the update, otherwise the update will start as soon as possible"
+        confirm_rollback_all: "Do you want to continue rolling back ALL selected agents to the previous running version?"
+        confirm_rollback_when: "If you wish, you can specify the day and time that you want the agents to perform the roll back, otherwise the roll back will start as soon as possible"
+        agents_cant_be_empty: "Agents can't be an empty string"
+        rollback_success: "A request to rollback the OpenUEM agent version has been sent"
 
   pagination:
     title: "Items per page"

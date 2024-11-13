@@ -52,8 +52,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/settings", h.GeneralSettings, h.IsAuthenticated)
 	e.GET("/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
 	e.POST("/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
-	e.POST("/admin/update-agents/confirm-selected", h.UpdateAgentsConfirmSelected, h.IsAuthenticated)
-	e.POST("/admin/update-agents/confirm-all", h.UpdateAgentsConfirmAll, h.IsAuthenticated)
+	e.POST("/admin/update-agents/confirm", h.UpdateAgentsConfirm, h.IsAuthenticated)
+	e.POST("/admin/rollback-agents", h.RollbackAgents, h.IsAuthenticated)
+	e.POST("/admin/rollback-agents/confirm", h.RollbackAgentsConfirm, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

@@ -62,7 +62,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												title={ i18n.T(ctx, "UpdateAll") }
 												type="button"
 												class="uk-button uk-button-default"
-												hx-post="/admin/update-agents/confirm-all"
+												hx-post="/admin/update-agents/confirm"
 												hx-push-url="false"
 												hx-target="#main"
 												hx-swap="outerHTML"
@@ -78,7 +78,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												title={ i18n.T(ctx, "RollbackAll") }
 												type="button"
 												class="uk-button uk-button-default"
-												hx-post="/admin/update-agents/confirm-rollback-all"
+												hx-post="/admin/rollback-agents/confirm"
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"

@@ -488,7 +488,11 @@ es:
         available: "Actualización disponible"
         confirm_update_selected: "¿Desea continuar con la actualización de los agentes seleccionados a la versión %s?"
         confirm_update_all: "¿Desea continuar con la actualización de TODOS los agentes seleccionados a la versión %s?"
-        confirm_specify_when: "Por favor, especifique cuando desea que se actualicen los agentes"
+        confirm_specify_when: "Si lo desea puede especificar el día y la hora a la que desea que se actualicen los agentes, de lo contrario la actualización se realizará lo antes posible"
+        confirm_rollback_all: "¿Desea volver a la versión que se ejecutaba anteriormente para TODOS los agentes seleccionados?"
+        confirm_rollback_when: "Si lo desea puede especificar el día y la hora a la que desea que se haga la regresión en los agentes, de lo contrario la regresión se realizará lo antes posible"
+        agents_cant_be_empty: "La variable agentes no puede contener un array vacío"
+        rollback_success: "Se ha enviado una petición para reaizar una regresión del agente de OpenUEM"
 
   pagination:
     title: "Elem. por página"

@@ -30,6 +30,52 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		log.Println("[INFO]: could not get latest version information")
 	}
 
+	if c.Request().Method == "POST" {
+		// TODO agent selection, right now is hardcoded for my test
+		agents := c.FormValue("agents")
+		if agents == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
+		}
+
+		if version == nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.get_version_error"), false))
+		}
+
+		updateRequest := openuem_nats.OpenUEMUpdateRequest{}
+		updateRequest.DownloadFrom = version.FileURL
+		updateRequest.DownloadHash = version.Checksum
+
+		if c.FormValue("update-agent-date") == "" {
+			updateRequest.UpdateNow = true
+		} else {
+			scheduledTime := c.FormValue("update-agent-date")
+			updateRequest.UpdateAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
+			if err != nil {
+				log.Println("[INFO]: could not parse scheduled time as 24h time")
+				updateRequest.UpdateAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
+				if err != nil {
+					log.Println("[INFO]: could not parse scheduled time as AM/PM time")
+
+					// Fallback to update now
+					updateRequest.UpdateNow = true
+				}
+			}
+		}
+
+		for _, a := range strings.Split(agents, ",") {
+			data, err := json.Marshal(updateRequest)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+			}
+
+			if _, err := h.NATSConnection.Request("agentupdate."+a, data, 10*time.Second); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+			}
+		}
+
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "admin.update.agents.success")))
+	}
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -94,27 +140,6 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if c.Request().Method == "POST" {
-		// TODO agent selection, right now is hardcoded for my test
-		agentId := "1ed69271-79c6-4a15-b2d0-c13763170ddf"
-
-		updateRequest := openuem_nats.OpenUEMUpdateRequest{}
-		updateRequest.DownloadFrom = version.FileURL
-		updateRequest.DownloadHash = version.Checksum
-		updateRequest.UpdateNow = true
-
-		data, err := json.Marshal(updateRequest)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		if _, err := h.NATSConnection.Request("agentupdate."+agentId, data, 10*time.Second); err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "admin.update.agents.success")))
-	}
-
 	settings, err := h.Model.GetGeneralSettings()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -128,25 +153,56 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion, versions, availableOSes, appliedTags)))
 }
 
-func (h *Handler) UpdateAgentsConfirmSelected(c echo.Context) error {
+func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 	version := c.FormValue("version")
-
-	/* f := filters.AgentFilter{}
-
-
-	countAgents, err := h.Model.CountAllAgents(f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	selectedAgents := c.FormValue("filterBySelectedItems") */
-
-	return RenderConfirm(c, partials.ConfirmUpdateAgents(version, false))
+	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
 }
 
-func (h *Handler) UpdateAgentsConfirmAll(c echo.Context) error {
-	version := c.FormValue("version")
-	return RenderConfirm(c, partials.ConfirmUpdateAgents(version, true))
+func (h *Handler) RollbackAgents(c echo.Context) error {
+	var err error
+
+	// TODO agent selection, right now is hardcoded for my test
+	agents := c.FormValue("agents")
+	if agents == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
+	}
+
+	rollbackRequest := openuem_nats.OpenUEMRollbackRequest{}
+
+	if c.FormValue("rollback-agent-date") == "" {
+		rollbackRequest.RollbackNow = true
+	} else {
+		scheduledTime := c.FormValue("update-agent-date")
+		rollbackRequest.RollbackAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
+		if err != nil {
+			log.Println("[INFO]: could not parse scheduled time as 24h time")
+			rollbackRequest.RollbackAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
+			if err != nil {
+				log.Println("[INFO]: could not parse scheduled time as AM/PM time")
+
+				// Fallback to update now
+				rollbackRequest.RollbackNow = true
+			}
+		}
+	}
+
+	for _, a := range strings.Split(agents, ",") {
+		data, err := json.Marshal(rollbackRequest)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agentrollback."+a, data, 10*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+	}
+
+	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")))
+
+}
+
+func (h *Handler) RollbackAgentsConfirm(c echo.Context) error {
+	return RenderConfirm(c, partials.ConfirmRollbackAgents())
 }
 
 func GetLatestVersion(channel string) (*admin_views.Version, error) {
