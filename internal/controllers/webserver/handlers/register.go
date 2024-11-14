@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
@@ -157,13 +158,13 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
 	if _, err := h.JetStream.Publish(context.Background(), "notification.confirm_email", data); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-
-	/* if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	} */
 
 	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful()))
 }

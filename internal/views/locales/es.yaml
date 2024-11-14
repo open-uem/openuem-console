@@ -533,6 +533,8 @@ es:
     num_os_users: Número de usuarios con un equipo asignado
     no_reported_in_last_24h: Agentes que no han informado desde hace más de 24h
     num_upgradable_agents: Agentes que pueden ser actualizados
+  nats:
+    not_connected: "Esta acción no puede ejecutarse ahora, no estamos conectados con el servicio NATS, por favor inténtelo de nuevo en unos minutos"
 
   pagination:
     title: "Elem. por página"

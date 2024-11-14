@@ -3,6 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/doncicuto/openuem-console/internal/views/charts"
 	"github.com/doncicuto/openuem-console/internal/views/dashboard_views"
@@ -127,7 +129,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		}
 	}
 
-	// TODO - Get components status
+	h.CheckNATSComponentStatus(&data)
 
 	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data)))
 }
@@ -174,4 +176,47 @@ func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardChar
 	ch.AgentBySystemUpdate = charts.AgentsBySystemUpdate(c.Request().Context(), agents, countAllAgents)
 
 	return &ch, nil
+}
+
+func (h *Handler) CheckNATSComponentStatus(data *dashboard_views.DashboardData) {
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		data.NATSServerStatus = "down"
+		data.AgentWorkerStatus = "down"
+		data.NotificationWorkerStatus = "down"
+		data.CertManagerWorkerStatus = "down"
+	} else {
+		data.NATSServerStatus = "up"
+		data.AgentWorkerStatus = "up"
+		data.NotificationWorkerStatus = "up"
+		data.CertManagerWorkerStatus = "up"
+
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := h.NATSConnection.Request("ping.agentworker", nil, 1*time.Second); err != nil {
+				data.AgentWorkerStatus = "down"
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := h.NATSConnection.Request("ping.notificationworker", nil, 1*time.Second); err != nil {
+				data.NotificationWorkerStatus = "down"
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := h.NATSConnection.Request("ping.certmanagerworker", nil, 1*time.Second); err != nil {
+				data.CertManagerWorkerStatus = "down"
+			}
+		}()
+
+		wg.Wait()
+	}
 }

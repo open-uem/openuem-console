@@ -145,6 +145,10 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return fmt.Errorf("uuid cannot be empty")
 	}
 
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
 	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, 10*time.Second); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -169,6 +173,10 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	go func() {
+		if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+			log.Printf("[ERROR]: %s", i18n.T(c.Request().Context(), "nats.not_connected"))
+		}
+
 		if _, err := h.NATSConnection.Request("agent.report."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 			log.Printf("[ERROR]: %v", err)
 		}
@@ -179,6 +187,10 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
+
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
 
 	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -199,6 +211,10 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 		return h.ListAgents(c, "", err.Error())
 	}
 
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
 	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -210,6 +226,10 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
+
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
 
 	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))

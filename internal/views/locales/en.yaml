@@ -536,6 +536,8 @@ en:
     num_os_users: Number of users with and endpoint assigned
     no_reported_in_last_24h: Agents that haven't reported in the last 24h
     num_upgradable_agents: Agents that can be upgraded
+  nats:
+    not_connected: "This action cannot be executed now, we're not connected to the NATS server, please try again in a few minutes"
 
   pagination:
     title: "Items per page"

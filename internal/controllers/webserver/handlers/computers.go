@@ -428,6 +428,10 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
 	err = h.NATSConnection.Publish("agent.installpackage."+agentId, data)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -461,6 +465,10 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
 	err = h.NATSConnection.Publish("agent.updatepackage."+agentId, data)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -492,6 +500,10 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	data, err := json.Marshal(action)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
 	err = h.NATSConnection.Publish("agent.uninstallpackage."+agentId, data)

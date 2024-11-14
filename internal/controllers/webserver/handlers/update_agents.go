@@ -72,22 +72,28 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			data, err := json.Marshal(updateRequest)
 			if err != nil {
 				errorMessage = err.Error()
+				break
+			}
+
+			if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+				errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
+				break
 			}
 
 			if _, err := h.JetStream.Publish(context.Background(), "agentupdate."+a, data); err != nil {
 				errorMessage = err.Error()
+				break
 			}
 
 			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_update", version.ID); err != nil {
 				errorMessage = err.Error()
+				break
 			}
-
-			/* if _, err := h.NATSConnection.Request("agentupdate."+a, data, 10*time.Second); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), false))
-			} */
 		}
 
-		successMessage = i18n.T(c.Request().Context(), "admin.update.agents.success")
+		if errorMessage == "" {
+			successMessage = i18n.T(c.Request().Context(), "admin.update.agents.success")
+		}
 	}
 
 	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
@@ -145,22 +151,28 @@ func (h *Handler) RollbackAgents(c echo.Context) error {
 		data, err := json.Marshal(rollbackRequest)
 		if err != nil {
 			errorMessage = err.Error()
+			break
+		}
+
+		if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+			errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
+			break
 		}
 
 		if _, err := h.JetStream.Publish(context.Background(), "agentrollback."+a, data); err != nil {
 			errorMessage = err.Error()
+			break
 		}
 
 		if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_rollback", ""); err != nil {
 			errorMessage = err.Error()
+			break
 		}
-
-		/* if _, err := h.NATSConnection.Request("agentrollback."+a, data, 10*time.Second); err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		} */
 	}
 
-	successMessage = i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")
+	if errorMessage == "" {
+		successMessage = i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")
+	}
 
 	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
 }

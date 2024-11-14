@@ -8,32 +8,26 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/danieljoos/wincred"
 	"github.com/doncicuto/openuem-console/internal/controllers/authserver"
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
 	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_nats"
 	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
-	"github.com/nats-io/nats.go"
 	"golang.org/x/sys/windows/registry"
 )
 
 type Worker struct {
 	Model                 *models.Model
 	Logger                *openuem_utils.OpenUEMLogger
-	NATSConnection        *nats.Conn
-	NATSConnectJob        gocron.Job
 	DBConnectJob          gocron.Job
 	TaskScheduler         gocron.Scheduler
 	DBUrl                 string
 	CACertPath            string
 	ConsoleCertPath       string
 	ConsolePrivateKeyPath string
-	NATSServers           string
 	JWTKey                string
 	SessionManager        *sessions.SessionManager
 	WebServer             *webserver.WebServer
@@ -43,6 +37,7 @@ type Worker struct {
 	AuthPort              string
 	ServerName            string
 	Domain                string
+	NATSServers           string
 }
 
 func NewWorker(logName string) *Worker {
@@ -68,12 +63,6 @@ func (w *Worker) StartWorker() {
 	// Start a job to try to connect with the database
 	if err := w.StartDBConnectJob(); err != nil {
 		log.Printf("[ERROR]: could not start DB connect job, reason: %s", err.Error())
-		return
-	}
-
-	// Start a job to try to connect with NATS
-	if err := w.StartNATSConnectJob(); err != nil {
-		log.Printf("[ERROR]: could not start NATS connect job, reason: %s", err.Error())
 		return
 	}
 
@@ -116,7 +105,7 @@ func (w *Worker) StartWorker() {
 	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes)
 
 	// HTTPS web server
-	w.WebServer = webserver.New(w.Model, w.NATSConnection, w.SessionManager, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain)
+	w.WebServer = webserver.New(w.Model, w.NATSServers, w.SessionManager, w.TaskScheduler, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain)
 	go func() {
 		if err := w.WebServer.Serve(":"+consolePort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
@@ -211,12 +200,6 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 	defer k.Close()
 
-	w.NATSServers, err = openuem_utils.GetValueFromRegistry(k, "NATSServers")
-	if err != nil {
-		log.Println("[ERROR]: could not read NATS servers from registry")
-		return err
-	}
-
 	w.ServerName, err = openuem_utils.GetValueFromRegistry(k, "ConsoleServer")
 	if err != nil {
 		log.Println("[ERROR]: could not read console server name from registry")
@@ -241,43 +224,12 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	return nil
-}
-
-func (w *Worker) StartNATSConnectJob() error {
-	var err error
-
-	w.NATSConnection, err = openuem_nats.ConnectWithNATS(w.NATSServers, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath)
-	if err == nil {
-		return nil
-	}
-	log.Printf("[ERROR]: could not connect to NATS %v", err)
-
-	w.NATSConnectJob, err = w.TaskScheduler.NewJob(
-		gocron.DurationJob(
-			time.Duration(time.Duration(2*time.Minute)),
-		),
-		gocron.NewTask(
-			func() {
-				if w.NATSConnection == nil {
-					w.NATSConnection, err = openuem_nats.ConnectWithNATS(w.NATSServers, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath)
-					if err != nil {
-						log.Printf("[ERROR]: could not connect to NATS %v", err)
-						return
-					}
-				}
-
-				if err := w.TaskScheduler.RemoveJob(w.NATSConnectJob.ID()); err != nil {
-					return
-				}
-			},
-		),
-	)
+	w.NATSServers, err = openuem_utils.GetValueFromRegistry(k, "NATSServers")
 	if err != nil {
-		log.Fatalf("[FATAL]: could not start the NATS connect job: %v", err)
+		log.Println("[ERROR]: could not read NATS servers from registry")
 		return err
 	}
-	log.Printf("[INFO]: new NATS connect job has been scheduled every %d minutes", 2)
+
 	return nil
 }
 

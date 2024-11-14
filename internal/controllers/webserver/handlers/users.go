@@ -191,6 +191,10 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 		return err
 	}
 
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return fmt.Errorf(i18n.T(c.Request().Context(), "nats.not_connected"))
+	}
+
 	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
 		return err
 	}
@@ -267,6 +271,10 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 	data, err := json.Marshal(certRequest)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
 	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
@@ -352,6 +360,10 @@ func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) e
 	data, err := json.Marshal(notification)
 	if err != nil {
 		return err
+	}
+
+	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		return fmt.Errorf(i18n.T(c.Request().Context(), "nats.not_connected"))
 	}
 
 	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {

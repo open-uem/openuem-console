@@ -36,6 +36,10 @@ type DashboardData struct {
 	RefreshTime               int
 	NAgentsNotReportedIn24h   int
 	NUpgradableAgents         int
+	NATSServerStatus          string
+	AgentWorkerStatus         string
+	NotificationWorkerStatus  string
+	CertManagerWorkerStatus   string
 	OpenUEMUpdaterAPIStatus   string
 }
 
@@ -278,13 +282,12 @@ templ Dashboard(data DashboardData) {
 						</tr>
 					</tbody>
 				</table>
-				/* TODO these are mock hardcoded values that require information from real status check */
 				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
 					<tbody>
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.nats_server_status") }</th>
 							<td class="!align-middle text-center">
-								@partials.Status("up")
+								@partials.Status(data.NATSServerStatus)
 							</td>
 						</tr>
 						<tr>
@@ -296,19 +299,19 @@ templ Dashboard(data DashboardData) {
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.agent_worker_status") }</th>
 							<td class="!align-middle text-center">
-								@partials.Status("up")
+								@partials.Status(data.AgentWorkerStatus)
 							</td>
 						</tr>
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.notification_worker_status") }</th>
 							<td class="!align-middle text-center">
-								@partials.Status("down")
+								@partials.Status(data.NotificationWorkerStatus)
 							</td>
 						</tr>
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.cert_manager_worker_status") }</th>
 							<td class="!align-middle text-center">
-								@partials.Status("unknown")
+								@partials.Status(data.CertManagerWorkerStatus)
 							</td>
 						</tr>
 					</tbody>
