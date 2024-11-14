@@ -78,6 +78,10 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 				errorMessage = err.Error()
 			}
 
+			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_update", version.ID); err != nil {
+				errorMessage = err.Error()
+			}
+
 			/* if _, err := h.NATSConnection.Request("agentupdate."+a, data, 10*time.Second); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			} */
@@ -144,6 +148,10 @@ func (h *Handler) RollbackAgents(c echo.Context) error {
 		}
 
 		if _, err := h.JetStream.Publish(context.Background(), "agentrollback."+a, data); err != nil {
+			errorMessage = err.Error()
+		}
+
+		if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_rollback", ""); err != nil {
 			errorMessage = err.Error()
 		}
 

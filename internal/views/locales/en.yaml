@@ -504,6 +504,15 @@ en:
         confirm_rollback_when: "If you wish, you can specify the day and time that you want the agents to perform the roll back, otherwise the roll back will start as soon as possible"
         agents_cant_be_empty: "Agents can't be an empty string"
         rollback_success: "A request to rollback the OpenUEM agent version has been sent"
+        task_update: "Update to version"
+        task_rollback: "Rollback to previous version"
+        task_status: "Task Status"
+        task_status_error: "Error"
+        task_status_pending: "Pending"
+        task_status_success: "Success"
+        task_last_execution: "Last execution"
+        task_description: "Task Description"
+        task_result: "Task Result"
   dashboard:
     outdated_agents: Agents running outdated versions
     no_auto_update: Endpoints that dosn't download/install system updates automatically

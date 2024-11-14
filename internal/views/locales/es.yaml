@@ -501,6 +501,15 @@ es:
         confirm_rollback_when: "Si lo desea puede especificar el día y la hora a la que desea que se haga la regresión en los agentes, de lo contrario la regresión se realizará lo antes posible"
         agents_cant_be_empty: "La variable agentes no puede contener un array vacío"
         rollback_success: "Se ha enviado una petición para reaizar una regresión del agente de OpenUEM"
+        task_update: "Actualizar a la versión"
+        task_rollback: "Volver a versión anterior"
+        task_status: "Estado de la tarea"
+        task_status_error: "Error"
+        task_status_pending: "Pendiente"
+        task_status_success: "Éxito"
+        task_description: "Descr. Tarea"
+        task_last_execution: "Ult ejecución"
+        task_result: "Result. Tarea"
   dashboard:
     outdated_agents: Agentes ejecutando versiones anticuadas
     no_auto_update: Equipos que no descargan/instalan actualizaciones automáticamente

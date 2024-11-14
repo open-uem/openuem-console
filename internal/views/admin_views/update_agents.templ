@@ -68,24 +68,22 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
 										<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 										<input name="version" type="hidden" value={ version.ID }/>
-										if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
-											<button
-												id="update-all-button"
-												title={ i18n.T(ctx, "UpdateAll") }
-												type="button"
-												class="uk-button uk-button-default"
-												hx-post="/admin/update-agents/confirm"
-												hx-push-url="false"
-												hx-target="#main"
-												hx-swap="outerHTML"
-												disabled?={ f.SelectedItems == 0 }
-											>
-												<div class="flex items-center gap-2">
-													<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "Update") }
-												</div>
-											</button>
-										}
+										<button
+											id="update-all-button"
+											title={ i18n.T(ctx, "UpdateAll") }
+											type="button"
+											class="uk-button uk-button-default"
+											hx-post="/admin/update-agents/confirm"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											disabled?={ f.SelectedItems == 0 }
+										>
+											<div class="flex items-center gap-2">
+												<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												{ i18n.T(ctx, "Update") }
+											</div>
+										</button>
 										<button
 											id="rollback-all-button"
 											title={ i18n.T(ctx, "RollbackAll") }
@@ -227,6 +225,18 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 														@filters.FilterByTags(c, p, f, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 													</div>
 												</th>
+												<th>
+													{ i18n.T(ctx, "admin.update.agents.task_status") }
+												</th>
+												<th>
+													{ i18n.T(ctx, "admin.update.agents.task_description") }
+												</th>
+												<th>
+													{ i18n.T(ctx, "admin.update.agents.task_last_execution") }
+												</th>
+												<th>
+													{ i18n.T(ctx, "admin.update.agents.task_result") }
+												</th>
 											</tr>
 										</thead>
 										for _, agent := range agents {
@@ -314,7 +324,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 														</div>
 													}
 												</td>
-												<td>
+												<td class="!align-middle">
 													switch agent.Os {
 														case "windows":
 															<i class="ri-windows-fill ri-2x text-blue-600"></i>
@@ -324,6 +334,29 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												</td>
 												<td class="flex flex-wrap gap-2">
 													@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
+												</td>
+												if len(agent.UpdateTaskStatus) > 0 {
+													<td class="!align-middle">{ i18n.T(ctx, agent.UpdateTaskStatus) }</td>
+												} else {
+													<td class="!align-middle"></td>
+												}
+												if len(agent.UpdateTaskDescription) > 0 {
+													<td class="!align-middle">
+														{ i18n.T(ctx, agent.UpdateTaskDescription) }
+														<span class="uk-text-bold">{ agent.UpdateTaskVersion }</span>
+													</td>
+												} else {
+													<td class="!align-middle"></td>
+												}
+												if !agent.UpdateTaskExecution.IsZero() {
+													<td class="!align-middle">
+														{ agent.UpdateTaskExecution.Format("02/01/2006 15:04:05") }
+													</td>
+												} else {
+													<td class="!align-middle"></td>
+												}
+												<td class="!align-middle">
+													{ agent.UpdateTaskResult }
 												</td>
 											</tr>
 										}

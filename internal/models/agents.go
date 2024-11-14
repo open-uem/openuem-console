@@ -309,3 +309,12 @@ func (m *Model) CountDifferentPrinters() (int, error) {
 func (m *Model) CountDisabledAgents() (int, error) {
 	return m.Client.Agent.Query().Where(agent.Enabled(false)).Count(context.Background())
 }
+
+func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string) error {
+	return m.Client.Agent.UpdateOneID(agentId).
+		SetUpdateTaskStatus(status).
+		SetUpdateTaskDescription(description).
+		SetUpdateTaskExecution(time.Time{}).
+		SetUpdateTaskVersion(version).
+		SetUpdateTaskResult("").Exec(context.Background())
+}
