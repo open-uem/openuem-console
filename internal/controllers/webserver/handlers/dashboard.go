@@ -120,7 +120,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 	if err != nil {
 		log.Println("[ERROR]: could not get latest version information")
 		data.OpenUEMUpdaterAPIStatus = "down"
-		data.NUpgradableAgents = -1
+		data.NUpgradableAgents = 0
 	} else {
 		data.OpenUEMUpdaterAPIStatus = "up"
 		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(version.ID)

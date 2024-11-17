@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
@@ -17,7 +16,7 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 	var err error
 
 	// Try to download at start
-	if err := downloadWgetDB(); err != nil {
+	if err := w.DownloadWgetDB(); err != nil {
 		log.Printf("[ERROR]: could not get index.db, reason: %v", err)
 	} else {
 		log.Println("[INFO]: winget index.db has been downloaded")
@@ -30,7 +29,7 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 		),
 		gocron.NewTask(
 			func() {
-				if err := downloadWgetDB(); err != nil {
+				if err := w.DownloadWgetDB(); err != nil {
 					log.Printf("[ERROR]: could not get index.db, reason: %v", err)
 					return
 				}
@@ -45,23 +44,15 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 	return nil
 }
 
-func downloadWgetDB() error {
+func (w *Worker) DownloadWgetDB() error {
 	url := "https://cdn.winget.microsoft.com/cache/source.msix"
 
-	// Create the file
-	cwd, err := GetWd()
-	if err != nil {
-		return err
-	}
-
-	tmpDir := filepath.Join(cwd, "tmp")
-
 	// If we're in development don't download
-	if strings.HasSuffix(cwd, "tmp") {
+	if os.Getenv("DEVEL") == "true" {
 		return nil
 	}
 
-	zipPath := filepath.Join(tmpDir, "winget.zip")
+	zipPath := filepath.Join(w.WinGetDBFolder, "winget.zip")
 	out, err := os.Create(zipPath)
 	if err != nil {
 		return err
@@ -98,7 +89,7 @@ func downloadWgetDB() error {
 			}
 			defer src.Close()
 
-			dst, err := os.Create(filepath.Join(tmpDir, "index.db"))
+			dst, err := os.Create(filepath.Join(w.WinGetDBFolder, "index.db"))
 			if err != nil {
 				return err
 			}

@@ -30,9 +30,14 @@ func AgentsByOsVersion(ctx context.Context, agents []models.Agent, countAllAgent
 		}),
 	)
 
+	leftTitle := "19.5%"
+	if countAllAgents < 10 {
+		leftTitle = "22%"
+	}
+
 	textStyle := opts.TextStyle{FontSize: 36}
 	pie.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: "19%", Top: "43%", TitleStyle: &textStyle}),
+		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: leftTitle, Top: "43%", TitleStyle: &textStyle}),
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Width:  "480px",

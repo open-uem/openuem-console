@@ -33,6 +33,7 @@ require (
 	golang.org/x/crypto v0.28.0
 	golang.org/x/mod v0.20.0
 	golang.org/x/sys v0.26.0
+	gopkg.in/ini.v1 v1.67.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
 

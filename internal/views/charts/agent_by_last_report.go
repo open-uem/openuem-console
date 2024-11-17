@@ -32,10 +32,15 @@ func AgentsByLastReportDate(ctx context.Context, countReportedLast24, countAllAg
 		}),
 	)
 
+	leftTitle := "19.5%"
+	if countAllAgents < 10 {
+		leftTitle = "22%"
+	}
+
 	textStyle := opts.TextStyle{FontSize: 36}
 	pie.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: "19%", Top: "43%", TitleStyle: &textStyle}),
-		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
+		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: leftTitle, Top: "43%", TitleStyle: &textStyle}),
+		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "50%"}),
 		charts.WithColorsOpts(opts.Colors{"#48C639", "#C63948"}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Width:  "480px",

@@ -44,7 +44,7 @@ func StartConsoleFlags() []cli.Flag {
 			Name:    "server-name",
 			Usage:   "the server name like example.com or localhost",
 			EnvVars: []string{"SERVER_NAME"},
-			Value:   "1323",
+			Value:   "localhost",
 		},
 		&cli.StringFlag{
 			Name:    "console-port",
