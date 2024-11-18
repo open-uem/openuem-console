@@ -36,8 +36,10 @@ templ ErrorPage(code, message string) {
 							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "404":
 							<uk-icon hx-history="false" icon="search-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "503":
+						case "500":
 							<uk-icon hx-history="false" icon="bomb" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "503":
+							<uk-icon hx-history="false" icon="clock-alert" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "401":
 							<uk-icon hx-history="false" icon="ticket-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "405":
