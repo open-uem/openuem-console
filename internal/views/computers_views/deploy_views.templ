@@ -121,8 +121,8 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 						<td class="!align-middle">{ p.Name }</td>
 						<td class="!align-middle">
 							<form>
-								<input type="hidden" name="packageId" value={ p.ID }/>
-								<input type="hidden" name="packageName" value={ p.Name }/>
+								<input type="hidden" name="filterByPackageId" value={ p.ID }/>
+								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
 								<button
 									type="submit"
 									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
@@ -188,8 +188,8 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 					<td class="!align-middle">{ item.Updated.Format("02/01/2006 15:04:05") }</td>
 					<td class="!align-middle">
 						<form>
-							<input type="hidden" name="packageId" value={ item.PackageID }/>
-							<input type="hidden" name="packageName" value={ item.Name }/>
+							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
+							<input type="hidden" name="filterByPackageName" value={ item.Name }/>
 							<button
 								type="submit"
 								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/update", agentId))) }
@@ -203,8 +203,8 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 					</td>
 					<td class="!align-middle">
 						<form>
-							<input type="hidden" name="packageId" value={ item.PackageID }/>
-							<input type="hidden" name="packageName" value={ item.Name }/>
+							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
+							<input type="hidden" name="filterByPackageName" value={ item.Name }/>
 							<button
 								type="submit"
 								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/uninstall", agentId))) }

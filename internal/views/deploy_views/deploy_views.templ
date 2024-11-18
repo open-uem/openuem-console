@@ -3,6 +3,7 @@ package deploy_views
 import (
 	"fmt"
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
@@ -28,6 +29,7 @@ templ Deploy(install bool) {
 				} else {
 					@DeployNavbar("uninstall")
 				}
+				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -153,28 +155,24 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 						</td>
 						<td>{ p.Name }</td>
 						<td>
-							<form>
+							<form
+								hx-get="/deploy/selectpackagedeployment"
+								hx-push-url="true"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								<input type="hidden" name="filterByPackageId" value={ p.ID }/>
+								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
 								if install {
-									<button
-										type="submit"
-										hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=true&packageId=%s&packageName=%s", p.ID, p.Name))) }
-										hx-push-url="true"
-										hx-target="#main"
-										hx-swap="outerHTML"
-									>
-										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
-									</button>
+									<input type="hidden" name="filterByInstallationType" value="true"/>
 								} else {
-									<button
-										type="submit"
-										hx-get={ string(templ.URL(fmt.Sprintf("/deploy/selectpackagedeployment?install=false&packageId=%s&packageName=%s", p.ID, p.Name))) }
-										hx-push-url="true"
-										hx-target="#main"
-										hx-swap="outerHTML"
-									>
-										<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
-									</button>
+									<input type="hidden" name="filterByInstallationType" value="false"/>
 								}
+								<button
+									type="submit"
+								>
+									<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+								</button>
 							</form>
 						</td>
 					</tr>
@@ -189,7 +187,7 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, packageId, packageName string, agents []*openuem_ent.Agent, install bool) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
 		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}})
@@ -224,46 +222,23 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 							}
 							<span class="uk-text-bolder">{ packageName }</span>
 						</p>
-						<form>
-							<input type="hidden" name="install" value={ strconv.FormatBool(install) }/>
-							<input type="hidden" name="packageId" value={ packageId }/>
-							<input type="hidden" name="packageName" value={ packageName }/>
+						<form
+							hx-post="/deploy/selectpackagedeployment"
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="false"
+						>
+							<input type="hidden" name="filterByInstallationType" value={ strconv.FormatBool(install) }/>
+							<input type="hidden" name="filterByPackageId" value={ packageId }/>
+							<input type="hidden" name="filterByPackageName" value={ packageName }/>
+							<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 							<input id="checkedItems" type="hidden" name="checkedItems"/>
 							<button
 								id="deploy-package"
 								type="button"
 								class="uk-button uk-button-primary mt-4"
-								disabled
-								hx-post="/deploy/selectpackagedeployment"
-								hx-target="#main"
-								hx-swap="innerHTML"
-								_="
-								on click															
-									set storedItems to [] as Array
-									if sessionStorage.checkedItems exists then														
-										set storedItems to sessionStorage.checkedItems as Object
-									end		
-
-									get storedItems.splice(0)
-									set sessionStorage.checkedItems to storedItems as JSON
-									repeat in <input[title='check-agent']/>
-										set it.checked to value
-									end
-									set (<input[name='select-all']/>).checked to false
-									add @disabled to me
-								end
-
-								on load
-									set storedItems to [] as Array
-									if sessionStorage.checkedItems exists then														
-										set storedItems to sessionStorage.checkedItems as Object
-									end
-									
-									if storedItems.length > 0 then
-										remove @disabled from me
-									end
-								end
-							"
+								disabled?={ f.SelectedItems == 0 }
 							>
 								<uk-icon hx-history="false" icon="package-plus" custom-class="h-5 w-5 mr-4" uk-cloak></uk-icon>
 								if install {
@@ -275,123 +250,187 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, pack
 						</form>
 					</div>
 					<div class="uk-card-body mt-8 mb-2">
+						<div class="flex items-center gap-4">
+							@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+								return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
+							})
+							<button
+								id="select-all"
+								title={ i18n.T(ctx, "SelectAll") }
+								type="button"
+								class="uk-button uk-button-default flex items-center gap-2"
+								_={ fmt.Sprintf(`on click 
+												repeat in <input[type='checkbox']/>
+													if it.checked is false then
+														it.click()
+													end
+												end
+												set storedItems to %s as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+												set #filterBySelectedItems.value to '%d'
+												set #items-selected.innerHTML to '%d'
+												remove @disabled from <button[id$=-all-button]/>
+											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
+							>
+								{ i18n.T(ctx, "SelectAll") }
+							</button>
+							<button
+								id="deselect-all"
+								title={ i18n.T(ctx, "DeselectAll") }
+								type="button"
+								class="uk-button uk-button-default flex items-center gap-2"
+								_="on click 
+												repeat in <input[type='checkbox']/>
+													if it.checked is true then
+														it.click()
+													end
+												end
+												set storedItems to [] as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+												set #filterBySelectedItems.value to '0'
+												set #items-selected.innerHTML to '0'
+												add @disabled to <button[id$=-all-button]/>
+											end"
+							>
+								{ i18n.T(ctx, "DeselectAll") }
+							</button>
+							<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+						</div>
 						if len(agents) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
-								<thead>
-									<tr>
-										<th>
-											<input
-												name="select-all"
-												class="uk-checkbox"
-												type="checkbox"
-												_="on click  
-           										set value to ((<input[name='select-all']:checked/>).length == 0)
-												repeat in <input[title='check-agent']/>
-													set it.checked to value
-													it.click()
-												end
-												
-												if ((<input[title='check-agent']:checked/>).length > 0) then
-													remove @disabled from #deploy-package
-												else
-													add @disabled to #deploy-package
-												end
-												"
-											/>
-										</th>
-										<th>
-											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "agents.hostname") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
-											</div>
-										</th>
-										<th>
-											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "agents.os") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
-											</div>
-										</th>
-									</tr>
-								</thead>
-								for _, agent := range agents {
-									<tr>
-										<td>
-											<input
-												title="check-agent"
-												name={ agent.ID }
-												class="uk-checkbox"
-												type="checkbox"
-												_="
-												on click													
-													set storedItems to [] as Array
-													if sessionStorage.checkedItems exists then														
-														set storedItems to sessionStorage.checkedItems as Object
-													end																								
-
-													if me.checked then
-														set index to storedItems.indexOf(my name)														
-														if index < 0 then 															
-															append my name to storedItems
-															set sessionStorage.checkedItems	to storedItems as JSON
-														end														
-													else
-														set index to storedItems.indexOf(my name)														
-														if index >= 0 then 															
-															get storedItems.splice(index, 1)															
+							<div class="flex flex-col gap-2">
+								<table
+									class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-4"
+									_="on load
+											if #filterBySelectedItems.value is '0' then
+												set storedItems to [] as Array
+												set sessionStorage.selectedAgents to storedItems as JSON
+											end
+										end"
+								>
+									<thead>
+										<tr>
+											<th>
+												<input
+													id="select-all-in-page"
+													name="select-all-in-page"
+													class="uk-checkbox"
+													type="checkbox"
+													_="on click
+														repeat in <input[title='check-agent']/>																
+															if it.checked !== #select-all-in-page.checked then
+																it.click()
+															end
 														end
 
-														if no storedItems then 
+														if ((<input[title='check-agent']:checked/>).length > 0) then
+															remove @disabled from <button[id$='-all-button']/>
+														else
+															add @disabled to <button[id$='-all-button']/>
+														end
+													"
+												/>
+											</th>
+											<th>
+												<div class="flex gap-1 items-center">
+													<span>{ i18n.T(ctx, "agents.hostname") }</span>
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+												</div>
+											</th>
+											<th>
+												<div class="flex gap-1 items-center">
+													<span>{ i18n.T(ctx, "agents.os") }</span>
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+												</div>
+											</th>
+										</tr>
+									</thead>
+									for _, agent := range agents {
+										<tr>
+											<td>
+												<input
+													title="check-agent"
+													name={ agent.ID }
+													class="uk-checkbox"
+													type="checkbox"
+													_={ fmt.Sprintf(`
+														on click
 															set storedItems to [] as Array
+															if sessionStorage.selectedAgents exists then														
+																set storedItems to sessionStorage.selectedAgents as Object
+															end																								
+
+															set index to storedItems.indexOf(my name)		
+															if me.checked then
+																increment #filterBySelectedItems.value by 1
+																set #items-selected.innerHTML to #filterBySelectedItems.value
+																if index < 0 then 															
+																	append my name to storedItems
+																	set sessionStorage.selectedAgents to storedItems as JSON
+																end														
+															else
+																decrement #filterBySelectedItems.value by 1
+																set #items-selected.innerHTML to #filterBySelectedItems.value
+																set index to storedItems.indexOf(my name)														
+																if index >= 0 then 															
+																	get storedItems.splice(index, 1)															
+																end															
+																
+																if no storedItems then 
+																	set storedItems to [] as Array
+																	set #filterBySelectedItems.value to '0'
+																end
+
+																set sessionStorage.selectedAgents to storedItems as JSON 
+															end
+
+															if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
+																remove @disabled from <button[id$='-all-button']/>
+															else
+																add @disabled to <button[id$='-all-button']/>
+															end
+
+															if #select-all-in-page.checked is true and me.checked is false then
+																set #select-all-in-page.checked to false
+															end
+
+															if #select-all-in-page.checked is false and (<input[title='check-agent']:checked/>).length === %d then
+																set #select-all-in-page.checked to true
+															end
+
+															set #selectedAgents.value to storedItems.length
 														end
 
-														set sessionStorage.checkedItems to storedItems as JSON 
-													end
+														on load
+															set storedItems to [] as Array
+															if sessionStorage.selectedAgents exists then
+																set storedItems to sessionStorage.selectedAgents as Object												
+															end
 
-													if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
-														remove @disabled from #deploy-package
-													else
-														add @disabled to #deploy-package
-													end
+															set index to storedItems.indexOf(my name)														
+															if index >= 0 then
+																set me.checked to true
+															end
 
-													if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
-														set (<input[name='select-all']/>).checked to true
-													else
-														set (<input[name='select-all']/>).checked to false
-													end
+															if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
+																set #select-all-in-page.checked to true
+															end
 
-													set #checkedItems.value to storedItems as JSON 
-												end
-
-												on load
-													set storedItems to [] as Array
-													if sessionStorage.checkedItems exists then
-														set storedItems to sessionStorage.checkedItems as Object												
-													end
-
-													set index to storedItems.indexOf(my name)														
-													if index >= 0 then
-														set me.checked to true
-													end
-
-													if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
-														set (<input[name='select-all']/>).checked to true
-													end
-
-													set #checkedItems.value to storedItems as JSON 
-												end
-												"
-											/>
-										</td>
-										<td>{ agent.Hostname }</td>
-										switch agent.Os {
-											case "windows":
-												<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-											case "linux":
-												<td></td>
-										}
-									</tr>
-								}
-							</table>
+															set #selectedAgents.value to storedItems.length
+														end
+													`,p.PageSize) }
+												/>
+											</td>
+											<td>{ agent.Hostname }</td>
+											switch agent.Os {
+												case "windows":
+													<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
+												case "linux":
+													<td></td>
+											}
+										</tr>
+									}
+								</table>
+							</div>
 							@partials.Pagination(c, p, "#main", "outerHTML", "[name^='package']")
 						} else {
 							<p class="uk-text-small uk-text-muted">

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
+	"strings"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/deploy_views"
@@ -53,13 +55,31 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	var err error
 
-	packageId := c.QueryParam("packageId")
-	packageName := c.QueryParam("packageName")
-	installParam := c.QueryParam("install")
+	packageId := c.FormValue("filterByPackageId")
+	packageName := c.FormValue("filterByPackageName")
+	installParam := c.FormValue("filterByInstallationType")
 
 	if packageId == "" || packageName == "" || installParam == "" {
 		return RenderError(c, partials.ErrorMessage("required params not found", true))
 	}
+
+	f := filters.AgentFilter{}
+
+	nSelectedItems := c.FormValue("filterBySelectedItems")
+	f.SelectedItems, err = strconv.Atoi(nSelectedItems)
+	if err != nil {
+		f.SelectedItems = 0
+	}
+
+	tmpAllAgents := []string{}
+	allAgents, err := h.Model.GetAllAgents(f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	for _, a := range allAgents {
+		tmpAllAgents = append(tmpAllAgents, "\""+a.ID+"\"")
+	}
+	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -80,7 +100,13 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, packageId, packageName, agents, install)))
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, agents, install, refreshTime)))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
