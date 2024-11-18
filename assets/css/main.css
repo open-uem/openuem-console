@@ -10404,18 +10404,6 @@ th.uk-text-break, td.uk-text-break {
   }
 }
 
-@media (min-width: 1024px) {
-  .lg\:block {
-    display: block;
-  }
-}
-
-@media (min-width: 1280px) {
-  .xl\:block {
-    display: block;
-  }
-}
-
 @media (min-width: 1536px) {
   .\32xl\:block {
     display: block;
