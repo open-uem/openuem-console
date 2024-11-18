@@ -29,6 +29,7 @@ func main() {
 	if strings.HasSuffix(cwd, "tmp") {
 		w.DownloadDir = filepath.Join(cwd, "download")
 	}
+
 	if err := w.CreateDowloadTempDir(); err != nil {
 		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
 	}

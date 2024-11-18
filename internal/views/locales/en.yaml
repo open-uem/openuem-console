@@ -151,6 +151,7 @@ en:
     filter_by_last_contact: "Filter by last contact"
     filter_by_agent_os: "Filter by agent os"
     filter_by_enabled: "Filter by enabled agent status"
+    no_selected_agents_to_deploy: "no selected agents to deploy package"
   inventory:
     hardware:
       title: "Hardware"

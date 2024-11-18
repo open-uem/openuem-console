@@ -4,10 +4,13 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/doncicuto/openuem-console/internal/common"
+	"github.com/doncicuto/openuem_utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -27,9 +30,21 @@ func startConsole(cCtx *cli.Context) error {
 		log.Printf("[ERROR]: could not generate config for OpenUEM Console: %v", err)
 	}
 
+	// Get working directory
+	cwd, err := openuem_utils.GetWd()
+	if err != nil {
+		log.Fatal("[FATAL]: could not get working directory")
+	}
+
 	// Create temp directory for downloads
+	worker.DownloadDir = filepath.Join(cwd, "tmp", "download")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.DownloadDir = filepath.Join(cwd, "download")
+	}
+	log.Printf("[INFO]: path %s", worker.DownloadDir)
+
 	if err := worker.CreateDowloadTempDir(); err != nil {
-		log.Printf("[ERROR]: could not create download temp dir: %v", err)
+		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
 	}
 
 	// Save pid to PIDFILE

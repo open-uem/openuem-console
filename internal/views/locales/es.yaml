@@ -152,6 +152,7 @@ es:
     filter_by_last_contact: "Filtrar por último contacto"
     filter_by_agent_os: "Filtrar por sistema operativo de agente"
     filter_by_enabled: "Filtrar por estado de activación del agente"
+    no_selected_agents_to_deploy: "no se han seleccionado agentes para desplegar el paquete"
   inventory:
     hardware:
       title: "Hardware"

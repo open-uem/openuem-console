@@ -144,17 +144,17 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 									type="button"
 									class="uk-button uk-button-default flex items-center gap-2"
 									_="on click 
-												repeat in <input[type='checkbox']/>
-													if it.checked is true then
-														it.click()
-													end
-												end
-												set storedItems to [] as Array
-												set sessionStorage.selectedAgents to storedItems as JSON
-												set #filterBySelectedItems.value to '0'
-												set #items-selected.innerHTML to '0'
-												add @disabled to <button[id$=-all-button]/>
-											end"
+										repeat in <input[type='checkbox']/>
+											if it.checked is true then
+												it.click()
+											end
+										end
+										set storedItems to [] as Array
+										set sessionStorage.selectedAgents to storedItems as JSON
+										set #filterBySelectedItems.value to '0'
+										set #items-selected.innerHTML to '0'
+										add @disabled to <button[id$=-all-button]/>
+									end"
 								>
 									{ i18n.T(ctx, "DeselectAll") }
 								</button>

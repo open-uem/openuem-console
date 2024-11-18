@@ -110,15 +110,14 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
-	checkedItems := c.FormValue("checkedItems")
-	packageId := c.FormValue("packageId")
-	packageName := c.FormValue("packageName")
-	installParam := c.FormValue("install")
-	var agents []string
+	checkedItems := c.FormValue("selectedAgents")
+	packageId := c.FormValue("filterByPackageId")
+	packageName := c.FormValue("filterByPackageName")
+	installParam := c.FormValue("filterByInstallationType")
 
-	err := json.Unmarshal([]byte(checkedItems), &agents)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	agents := strings.Split(checkedItems, ",")
+	if len(agents) == 0 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_selected_agents_to_deploy"), true))
 	}
 
 	install, err := strconv.ParseBool(installParam)
@@ -159,6 +158,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 	}
 
+	// TODO - Show success message but show new list with unchecked items
 	if install {
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "install.requested")))
 	} else {
