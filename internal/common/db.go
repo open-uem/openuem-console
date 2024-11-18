@@ -27,7 +27,7 @@ func (w *Worker) StartDBConnectJob() error {
 	// Create task
 	w.DBConnectJob, err = w.TaskScheduler.NewJob(
 		gocron.DurationJob(
-			time.Duration(time.Duration(2*time.Minute)),
+			time.Duration(time.Duration(30*time.Second)),
 		),
 		gocron.NewTask(
 			func() {
