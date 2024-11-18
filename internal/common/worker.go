@@ -47,7 +47,7 @@ func (w *Worker) StartWorker() {
 	// Start Task Scheduler
 	w.TaskScheduler, err = gocron.NewScheduler()
 	if err != nil {
-		log.Printf("[ERROR]: could not create task scheduler, reason: %s", err.Error())
+		log.Fatalf("[FATAL]: could not create task scheduler, reason: %s", err.Error())
 		return
 	}
 	w.TaskScheduler.Start()
@@ -55,7 +55,7 @@ func (w *Worker) StartWorker() {
 
 	// Start a job to try to connect with the database
 	if err := w.StartDBConnectJob(); err != nil {
-		log.Printf("[ERROR]: could not start DB connect job, reason: %s", err.Error())
+		log.Fatalf("[FATAL]: could not start DB connect job, reason: %s", err.Error())
 		return
 	}
 
