@@ -2,7 +2,6 @@ package common
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/doncicuto/openuem-console/internal/controllers/authserver"
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
@@ -71,50 +70,6 @@ func (w *Worker) StartWorker() {
 		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
 		return
 	}
-
-	// Get port information
-	consolePort := "1323"
-	if w.ConsolePort != "" {
-		consolePort = w.ConsolePort
-	}
-
-	authPort := "1324"
-	if w.AuthPort != "" {
-		authPort = w.AuthPort
-	}
-
-	// Get server name
-	serverName := "localhost"
-	if w.ServerName != "" {
-		serverName = w.ServerName
-	}
-
-	// Session handler
-	sessionLifetimeInMinutes, err := w.Model.GetDefaultSessionLifetime()
-	if err != nil {
-		log.Printf("[ERROR]: could not get session lifetime from database, reason: %v", err.Error())
-		sessionLifetimeInMinutes = 1440
-	}
-
-	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes)
-
-	// HTTPS web server
-	w.WebServer = webserver.New(w.Model, w.NATSServers, w.SessionManager, w.TaskScheduler, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain)
-	go func() {
-		if err := w.WebServer.Serve(":"+consolePort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
-			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
-		}
-	}()
-	log.Println("[INFO]: console is running")
-
-	// HTTPS auth server
-	w.AuthServer = authserver.New(w.Model, w.SessionManager, w.CACertPath, serverName, consolePort, authPort)
-	go func() {
-		if err := w.AuthServer.Serve(":"+authPort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
-			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
-		}
-	}()
-	log.Println("[INFO]: auth server is running")
 }
 
 func (w *Worker) StopWorker() {

@@ -35,7 +35,6 @@ func main() {
 	// Keep the connection alive
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	log.Println("[INFO]: the Console and Auth servers are ready and waiting for requests")
 	<-done
 
 	w.StopWorker()
