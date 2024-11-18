@@ -115,7 +115,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 
 		if install {
-			if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 			}
 
@@ -123,7 +123,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
-			if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 			}
 

@@ -28,7 +28,7 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		}
 
 		// Notification Worker must reload its smtp settings
-		if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 

@@ -22,8 +22,8 @@ require (
 	github.com/invopop/ctxi18n v0.8.1
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/mdlayher/wol v0.0.0-20220221231636-b763a792253a
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.37.0
@@ -57,16 +57,12 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
-	github.com/josharian/native v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mdlayher/ethernet v0.0.0-20190313224307-5b5fc417d966 // indirect
-	github.com/mdlayher/packet v1.0.0 // indirect
-	github.com/mdlayher/socket v0.2.1 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect

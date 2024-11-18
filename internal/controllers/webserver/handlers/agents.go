@@ -173,7 +173,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	go func() {
-		if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			log.Printf("[ERROR]: %s", i18n.T(c.Request().Context(), "nats.not_connected"))
 		}
 
@@ -188,7 +188,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
@@ -211,7 +211,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 		return h.ListAgents(c, "", err.Error())
 	}
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
@@ -227,7 +227,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 

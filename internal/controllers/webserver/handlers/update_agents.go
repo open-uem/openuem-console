@@ -75,7 +75,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 				break
 			}
 
-			if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
 				break
 			}
@@ -154,7 +154,7 @@ func (h *Handler) RollbackAgents(c echo.Context) error {
 			break
 		}
 
-		if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
 			break
 		}

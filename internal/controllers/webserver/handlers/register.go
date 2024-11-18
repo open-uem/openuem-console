@@ -158,7 +158,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 

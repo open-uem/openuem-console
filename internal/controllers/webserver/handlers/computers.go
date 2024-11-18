@@ -16,7 +16,7 @@ import (
 	"github.com/gomarkdown/markdown"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/mdlayher/wol"
+	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -428,7 +428,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
@@ -465,7 +465,7 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
@@ -502,7 +502,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if h.NATSConnection == nil || h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
@@ -522,7 +522,7 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "GET" {
@@ -532,21 +532,18 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 	}
 
 	mac := c.FormValue("MACAddress")
-	hwAddress, err := net.ParseMAC(mac)
-	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
+	if _, err := net.ParseMAC(mac); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	ip := c.FormValue("IPAddress")
-
-	wolClient, err := wol.NewClient()
+	packet, err := gowol.NewMagicPacket(mac)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	err = wolClient.Wake(ip+":0", hwAddress)
-	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers")))
+	// send wol to broadcast
+	if err := packet.Send("255.255.255.255"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
