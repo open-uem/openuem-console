@@ -14,14 +14,14 @@ templ ComputerMetadata(c echo.Context, p partials.PaginationAndSort, agent *open
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
-				}
 				<div class="flex gap-2 items-center">
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
 				@ComputersNavbar(agent.ID, "metadata", confirmDelete)
+				if confirmDelete {
+					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+				}
 				<div id="error" class="hidden"></div>
 				@partials.SuccessMessage(successMessage)
 				<div class="uk-card uk-card-default">
