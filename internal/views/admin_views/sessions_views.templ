@@ -82,7 +82,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										<td>
 											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d", index) }>
+												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 													<li>
 														<a
 															hx-get={ string(templ.URL(fmt.Sprintf("/admin/sessions/%s/delete", session.ID))) }

@@ -22,18 +22,18 @@ templ FilterByDate(c echo.Context, p partials.PaginationAndSort, field, title, f
 			<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 			<input type="hidden" name="sortBy" value={ p.SortBy }/>
 			<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
-			<label class="mx-2 w-full" for={ fmt.Sprintf("filter%sDateFrom", field) }>{ i18n.T(ctx, "DateFrom") }</label>
+			<label class="mx-2 w-full" for={ fmt.Sprintf("filterBy%sDateFrom", field) }>{ i18n.T(ctx, "DateFrom") }</label>
 			<input
-				id={ fmt.Sprintf("filter%sDateFrom", field) }
-				name={ fmt.Sprintf("filter%sDateFrom", field) }
+				id={ fmt.Sprintf("filterBy%sDateFrom", field) }
+				name={ fmt.Sprintf("filterBy%sDateFrom", field) }
 				type="date"
 				value={ from }
 				class="mx-2 uk-input"
 			/>
-			<label class="mx-2 w-full" for={ fmt.Sprintf("filter%sDateTo", field) }>{ i18n.T(ctx, "DateTo") }</label>
+			<label class="mx-2 w-full" for={ fmt.Sprintf("filterBy%sDateTo", field) }>{ i18n.T(ctx, "DateTo") }</label>
 			<input
-				id={ fmt.Sprintf("filter%sDateTo", field) }
-				name={ fmt.Sprintf("filter%sDateTo", field) }
+				id={ fmt.Sprintf("filterBy%sDateTo", field) }
+				name={ fmt.Sprintf("filterBy%sDateTo", field) }
 				type="date"
 				value={ to }
 				class="mx-2 uk-input w-full"
@@ -52,7 +52,7 @@ templ FilterByDate(c echo.Context, p partials.PaginationAndSort, field, title, f
 			>
 				{ i18n.T(ctx, "Filter") }
 			</button>
-			@ClearFilter(c, fmt.Sprintf("filter%sDate", field), target, swap, disableFunc)
+			@ClearFilter(c, fmt.Sprintf("filterBy%sDate", field), target, swap, disableFunc)
 		</form>
 	</div>
 }

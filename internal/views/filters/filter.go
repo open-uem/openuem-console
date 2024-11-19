@@ -54,3 +54,12 @@ type SystemUpdatesFilter struct {
 	LastInstallTo        string
 	PendingUpdateOptions []string
 }
+
+type CertificateFilter struct {
+	Serial      string
+	TypeOptions []string
+	Description string
+	ExpiryFrom  string
+	ExpiryTo    string
+	Username    string
+}

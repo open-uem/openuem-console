@@ -108,20 +108,20 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	lastSearchFrom := c.FormValue("filterLastSearchDateFrom")
+	lastSearchFrom := c.FormValue("filterByLastSearchDateFrom")
 	if lastSearchFrom != "" {
 		f.LastSearchFrom = lastSearchFrom
 	}
-	lastSearchTo := c.FormValue("filterLastSearchDateTo")
+	lastSearchTo := c.FormValue("filterByLastSearchDateTo")
 	if lastSearchTo != "" {
 		f.LastSearchTo = lastSearchTo
 	}
 
-	lastInstallFrom := c.FormValue("filterLastInstallDateFrom")
+	lastInstallFrom := c.FormValue("filterByLastInstallDateFrom")
 	if lastInstallFrom != "" {
 		f.LastInstallFrom = lastInstallFrom
 	}
-	lastInstallTo := c.FormValue("filterLastInstallDateTo")
+	lastInstallTo := c.FormValue("filterByLastInstallDateTo")
 	if lastInstallTo != "" {
 		f.LastInstallTo = lastInstallTo
 	}

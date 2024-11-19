@@ -1,0 +1,152 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/doncicuto/openuem-console/internal/views/filters"
+	"github.com/doncicuto/openuem-console/internal/views/layout"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"time"
+)
+
+templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.CertificateFilter, certTypes []string, certificates []*openuem_ent.Certificate, successMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Certificates", Url: "/admin/certificates"}})
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("certificates")
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div id="confirm" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "certificates.title") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "certificates.description") }
+						</p>
+					</div>
+					<div class="uk-card-body flex flex-col gap-4">
+						<div class="flex justify-between mt-8">
+							@filters.ClearFilters("/admin/certificates", "#main", "outerHTML", func() bool {
+								return f.Serial == "" && len(f.TypeOptions) == 0 &&
+									f.Description == "" && f.Username == "" &&
+									f.ExpiryFrom == "" && f.ExpiryTo == ""
+							})
+						</div>
+						if len(certificates) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "Serial") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Serial"), "serial", "alpha", "#main", "outerHTML")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "Type") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Type"), "type", "alpha", "#main", "outerHTML")
+												@filters.FilterByOptions(c, p, "Type", "certificates.filter_by_types", certTypes, f.TypeOptions, "#main", "outerHTML", false, func() bool {
+													return len(f.TypeOptions) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "Description") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Description"), "description", "alpha", "#main", "outerHTML")
+												@filters.FilterByText(c, p, "Description", f.Description, "certificates.filter_by_description", "#main", "outerHTML")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "Expiry") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Expiry"), "expiry", "time", "#main", "outerHTML")
+												@filters.FilterByDate(c, p, "Expiry", "certificates.filter_by_expiry", f.ExpiryFrom, f.ExpiryTo, "#main", "outerHTML", func() bool { return f.ExpiryFrom == "" && f.ExpiryTo == "" })
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "agents.username") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML")
+												@filters.FilterByText(c, p, "Username", f.Username, "certificates.filter_by_username", "#main", "outerHTML")
+											</div>
+										</th>
+									</tr>
+								</thead>
+								for index, certificate := range certificates {
+									<tr>
+										<td>{ fmt.Sprintf("%d",certificate.ID) }</td>
+										<td>{ certificate.Type.String() }</td>
+										<td>{ certificate.Description }</td>
+										<td>
+											if certificate.Expiry.IsZero() {
+												-
+											} else {
+												<div class="flex gap-2 items-center">
+													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ certificate.Expiry.Local().Format("02/01/2006") }</span>
+													if IsCertificateAboutToExpire(certificate.Expiry) {
+														@partials.AlertIcon(i18n.T(ctx, "certificates.about_to_expiry"))
+													}
+												</div>
+											}
+										</td>
+										<td class="underline">
+											<a
+												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", certificate.UID)) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", certificate.UID))) }
+												hx-target="#main"
+												hx-push-url="true"
+												hx-swap="outerHTML"
+											>{ certificate.UID }</a>
+										</td>
+										<td>
+											@partials.MoreButton(index)
+											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+													<li>
+														<form
+															hx-post="/admin/certificates"
+															hx-target="#main"
+															hx-swap="outerHTML"
+															hx-push-url="false"
+														>
+															<input type="hidden" name="serial" value={ fmt.Sprintf("%d", certificate.ID) }/>
+															<button class="flex items-center gap-2 p-2"><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 uk-text-danger" uk-cloack></uk-icon>{ i18n.T(ctx, "Revoke") }</button>
+														</form>
+													</li>
+												</ul>
+											</div>
+										</td>
+									</tr>
+								}
+							</table>
+							@partials.Pagination(c, p, "#main", "outerHTML", "")
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "sessions.nosessions") }
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ CertificatesIndex(title string, cmp templ.Component) {
+	@layout.Base("admin") {
+		@cmp
+	}
+}
+
+func IsCertificateAboutToExpire(expiry time.Time) bool {
+	return time.Now().AddDate(0, 2, 0).After(expiry)
+}

@@ -125,6 +125,10 @@ func (m *Model) ConfirmEmail(uid string) error {
 	return m.Client.User.Update().SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Where(user.ID(uid)).Exec(context.Background())
 }
 
+func (m *Model) UserSetRevokedCertificate(uid string) error {
+	return m.Client.User.Update().SetRegister(openuem_nats.REGISTER_REVOKED).Where(user.ID(uid)).Exec(context.Background())
+}
+
 func (m *Model) ConfirmLogIn(uid string) error {
 	return m.Client.User.Update().SetRegister(openuem_nats.REGISTER_COMPLETE).SetCertClearPassword("").Where(user.ID(uid)).Exec(context.Background())
 }

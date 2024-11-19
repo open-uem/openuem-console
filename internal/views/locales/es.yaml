@@ -27,6 +27,7 @@ es:
   Edit: "Editar"
   Enabled: "Activado"
   Example: "Ejemplo"
+  Expiry: "Caducidad"
   Filter: "Filtrar"
   General Settings: "Conf. General"
   Install: "Instalar"
@@ -52,6 +53,7 @@ es:
   Rename: "Renombrar"
   Required: "Requerido"
   Reset: "Reestablecer"
+  Revoke: "Revocar"
   Rollback: "Volver a versión anterior"
   RollbackAll: "Retroceder todos"
   RollbackSelected: "Retroceder seleccionados"
@@ -61,6 +63,7 @@ es:
   SelectAll: "Seleccionar todos"
   SelectCountry: "Seleccione un país"
   Send: "Enviar"
+  Serial: "Número de serie"
   Session:
     one: "Sesión"
     other: "Sesiones"
@@ -73,6 +76,7 @@ es:
     one: "Etiqueta"
     other: "Etiquetas"
   Testing: "Pruebas"
+  Type: "Tipo"
   Unknown: "Desconocido"
   Up: "Operativo"
   Update: "Actualizar"
@@ -330,6 +334,7 @@ es:
     review_request: "Revisar solicitud"
     pending_email_confirmation: "Confirmación de email pendiente"
     certificate_sent: "Certificado enviado"
+    certificate_revoked: "Certificado revocado"
     role: "Rol"
     uid: "ID Usuario"
     title: "Usuarios"
@@ -404,6 +409,18 @@ es:
     optional_description: "Descripción opcional..."
     confirm_delete: "¿Está seguro de que quiere eliminar este metadato, tenga en cuenta que esta operación es destructiva y eliminará cualquier valor de este metadato asociado a los equipos gestionados por OpenUEM"
     edit: "Edite el nombre y/o la descripción del metadato de acuerdo a sus necesidades"
+  certificates:
+    title: "Certificados"
+    description: "Esta es la lista de certificados digitales utilizados por los distintos componentes y usuarios de OpenUEM. Si tuviera conocimiento de que un certificado ha sido comprometido puede revocarlo"
+    about_to_expiry: "Este certificado expirará pronto"
+    filter_by_serial: "Filtrar por número de serie..."
+    filter_by_username: "Filtrar por usuario..."
+    filter_by_description: "Filtrar por descripción..."
+    filter_by_types: "Filtrar por tipo certificado..."
+    filter_by_expiry: "Filtrar por fecha de caducidad..."
+    confirm_revocation: "Confirme que quiere revocar este certificado. Esta acción es irreversible y este certificado será considerado no válido para la autenticación. En el caso de los certificados de usuario, si genera un nuevo certificado desde el apartado de usuarios la acción de revocación del anterior certificado se llevará a cabo automáticamente"
+    revocation_success: "El certificado ha sido revocado"
+    no_serial: "No se ha indicado el número de serie del certificado en la petición"
   smtp:
     title: SMTP
     description: "Configura tu proveedor SMTP para poder enviar notificaciones por email"
@@ -490,9 +507,6 @@ es:
     filter_by_pendingupdate: "Filtrar por estado de actualizaciones pendientes"
     filter_by_updatestatus: "Filtrar por estado de actualización"
     show_updates_history: "Mostrar historial de actualizaciones recientes"
-  certificates:
-    title: "Certificados"
-    description: "Esta es la lista de certificados generados por la CA de OpenUEM con información de su fecha de expiración"
   admin:
     update:
       agents:

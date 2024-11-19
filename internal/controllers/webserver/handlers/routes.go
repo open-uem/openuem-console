@@ -55,6 +55,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/update-agents/confirm", h.UpdateAgentsConfirm, h.IsAuthenticated)
 	e.POST("/admin/rollback-agents", h.RollbackAgents, h.IsAuthenticated)
 	e.POST("/admin/rollback-agents/confirm", h.RollbackAgentsConfirm, h.IsAuthenticated)
+	e.GET("/admin/certificates", h.ListCertificates, h.IsAuthenticated)
+	e.POST("/admin/certificates", h.CertificateConfirmRevocation, h.IsAuthenticated)
+	e.DELETE("/admin/certificates", h.RevocateCertificate, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

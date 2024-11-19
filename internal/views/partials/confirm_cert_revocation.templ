@@ -1,0 +1,41 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ ConfirmCertRevocation(serial string) {
+	<div class="uk-alert border-red-600 text-red-600" uk-alert>
+		<div class="uk-alert-description p-2">
+			<form class="flex flex-col gap-2">
+				<input id="cert-serial" type="hidden" name="serial" value={ serial }/>
+				<p class="uk-text-bold">
+					{ i18n.T(ctx, "certificates.confirm_revocation") }
+				</p>
+				<div class="flex justify-start gap-6">
+					<button
+						hx-delete="/admin/certificates"
+						hx-push-url="false"
+						hx-target="#main"
+						hx-swap="outerHTML"
+						htmx-indicator="#update-spinner"
+						hx-include="#cert-serial"
+						class="uk-button bg-red-600 text-white hover:bg-red-500"
+					>
+						{ i18n.T(ctx, "Confirm") }
+						<div id="update-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+					</button>
+					<button
+						title={ i18n.T(ctx, "Cancel") }
+						type="button"
+						class="uk-button uk-button-default"
+						hx-get="/admin/certificates"
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						{ i18n.T(ctx, "Cancel") }
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}

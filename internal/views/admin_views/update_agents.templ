@@ -319,9 +319,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												<td class="flex items-center gap-2 !align-middle">
 													{ agent.Version }
 													if semver.Compare("v" + agent.Version, "v"+ higherVersion) < 0 {
-														<div uk-tooltip={ i18n.T(ctx, "admin.update.agents.outdated") }>
-															<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
-														</div>
+														@partials.AlertIcon(i18n.T(ctx, "admin.update.agents.outdated"))
 													}
 												</td>
 												<td class="!align-middle">

@@ -199,7 +199,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 templ AddActionsButton(agent *ent.Agent, index int) {
 	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-		<ul class="uk-dropdown-nav uk-nav">
+		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 			if agent.Enabled {
 				<li>
 					<a

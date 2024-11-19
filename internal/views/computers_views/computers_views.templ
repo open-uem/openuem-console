@@ -136,7 +136,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 								<td class="!align-middle">
 									@partials.MoreButton(index)
 									<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-										<ul class="uk-dropdown-nav uk-nav">
+										<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 											<li>
 												<a
 													hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }

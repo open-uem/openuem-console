@@ -50,11 +50,11 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	contactFrom := c.FormValue("filterContactDateFrom")
+	contactFrom := c.FormValue("filterByContactDateFrom")
 	if contactFrom != "" {
 		f.ContactFrom = contactFrom
 	}
-	contactTo := c.FormValue("filterContactDateTo")
+	contactTo := c.FormValue("filterByContactDateTo")
 	if contactTo != "" {
 		f.ContactTo = contactTo
 	}

@@ -55,20 +55,20 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		f.Phone = phoneFilter
 	}
 
-	createdFrom := c.FormValue("filterCreatedDateFrom")
+	createdFrom := c.FormValue("filterByCreatedDateFrom")
 	if createdFrom != "" {
 		f.CreatedFrom = createdFrom
 	}
-	createdTo := c.FormValue("filterCreatedDateTo")
+	createdTo := c.FormValue("filterByCreatedDateTo")
 	if createdTo != "" {
 		f.CreatedTo = createdTo
 	}
 
-	modifiedFrom := c.FormValue("filterModifiedDateFrom")
+	modifiedFrom := c.FormValue("filterByModifiedDateFrom")
 	if modifiedFrom != "" {
 		f.ModifiedFrom = modifiedFrom
 	}
-	modifiedTo := c.FormValue("filterModifiedDateTo")
+	modifiedTo := c.FormValue("filterByModifiedDateTo")
 	if modifiedTo != "" {
 		f.ModifiedTo = modifiedTo
 	}
