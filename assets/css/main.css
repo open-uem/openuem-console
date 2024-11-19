@@ -9630,6 +9630,14 @@ th.uk-text-break, td.uk-text-break {
   height: 100vh;
 }
 
+.h-3 {
+  height: 0.75rem;
+}
+
+.h-10 {
+  height: 2.5rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
 }
@@ -10148,6 +10156,10 @@ th.uk-text-break, td.uk-text-break {
 
 .\!align-middle {
   vertical-align: middle !important;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .text-2xl {

@@ -33,60 +33,65 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 				</div>
 				<div class="uk-flex gap-8">
 					<div class="uk-card uk-card-body uk-card-default w-5/12 p-6">
-						<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_search") }</p>
-						<div class="w-1/2 mb-4">
-							<form
-								class="uk-search uk-search-default w-full flex items-center gap-4"
-								_="on load
+						<div class="flex flex-col gap-4">
+							<div class="mb-4">
+								<form
+									class="uk-search uk-search-default w-full flex items-center gap-4"
+									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
+									hx-target="#deploy-search-results"
+									hx-push-url="false"
+									hx-swap="innerHTML"
+									_="on load
 										set emptyArray to [] as Array
 										set sessionStorage.checkedItems to emptyArray as JSON
 									end
 								"
-							>
-								<span uk-search-icon></span>
-								<input
-									name="filterByAppName"
-									class="uk-search-input"
-									type="search"
-									placeholder={ i18n.T(ctx, "Search") }
-									aria-label="Search"
-									_="on keyup
+								>
+									<span uk-search-icon></span>
+									<input
+										name="filterByAppName"
+										class="uk-search-input"
+										type="search"
+										placeholder={ i18n.T(ctx, "agents.deploy_search") }
+										aria-label="Search"
+										_="on keyup
 										if my.value.length > 3 then
 											remove @disabled from #search-packages
 										else
 											add @disabled to #search-packages
 										end
 									end"
-								/>
-								<button
-									id="search-packages"
-									type="submit"
-									class="uk-button uk-button-primary"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
-									hx-target="#deploy-search-results"
-									hx-push-url="false"
-									hx-swap="innerHTML"
-									disabled
-								>
-									{ i18n.T(ctx, "Search") }
-								</button>
-							</form>
+									/>
+									<button
+										id="search-packages"
+										type="submit"
+										class="uk-button uk-button-primary"
+										disabled
+									>
+										{ i18n.T(ctx, "Search") }
+									</button>
+								</form>
+							</div>
+							<div id="deploy-search-results"></div>
 						</div>
-						<div id="deploy-search-results"></div>
 					</div>
 					<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
 						<div class="flex flex-col gap-4">
-							<div class="flex justify-end">
+							<div class="flex justify-between items-center">
+								<p class="uk-text-small uk-text-muted">
+									if p.NItems > 0 {
+										{ i18n.T(ctx, "agents.deploy_list") }
+									} else {
+										{ i18n.T(ctx, "agents.no_deployments") }
+									}
+								</p>
 								@partials.RefreshPage(string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
 							</div>
 							<div>
 								if p.NItems > 0 {
-									<p class="uk-text-small uk-text-muted mb-6">{ i18n.T(ctx, "agents.deploy_list") }</p>
 									<div id="deployments-results">
 										@DeploymentsTable(c, p, agent.ID, deployments)
 									</div>
-								} else {
-									<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_deployments") }</p>
 								}
 							</div>
 						</div>

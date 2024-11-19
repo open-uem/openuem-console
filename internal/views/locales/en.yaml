@@ -126,7 +126,7 @@ en:
     deploy_success: "A request to install the package as soon as possible has been sent to the agent, check later if the package was deployed successfully"
     update_success: "A request to update the package as soon as possible has been sent to the agent, check later if the package was updated successfully"
     uninstall_success: "A request to uninstall the package as soon as possible has been sent to the agent, check later if the package was uninstalled successfully"
-    deploy_list: "This is the list of packages that has been deployed"
+    deploy_list: "Packages deployed by OpenUEM in this endpoint"
     deploy_install_date: "Installed"
     deploy_updated_date: "Updated"
     already_deployed: "This package has already been deployed, you can however update or uninstall it from the deployments table"
@@ -152,6 +152,7 @@ en:
     filter_by_agent_os: "Filter by agent os"
     filter_by_enabled: "Filter by enabled agent status"
     no_selected_agents_to_deploy: "no selected agents to deploy package"
+    no_empty_id: "agent id cannot be empty"
   inventory:
     hardware:
       title: "Hardware"

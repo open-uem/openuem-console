@@ -366,7 +366,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	search := c.FormValue("filterByAppName")
@@ -397,11 +397,11 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	packageId := c.FormValue("packageId")
-	packageName := c.FormValue("packageName")
+	packageId := c.FormValue("filterByPackageId")
+	packageName := c.FormValue("filterByPackageName")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
@@ -443,11 +443,11 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	packageId := c.FormValue("packageId")
-	packageName := c.FormValue("packageName")
+	packageId := c.FormValue("filterByPackageId")
+	packageName := c.FormValue("filterByPackageName")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
@@ -480,11 +480,11 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	packageId := c.FormValue("packageId")
-	packageName := c.FormValue("packageName")
+	packageId := c.FormValue("filterByPackageId")
+	packageName := c.FormValue("filterByPackageName")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
@@ -517,7 +517,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 func (h *Handler) WakeOnLan(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)

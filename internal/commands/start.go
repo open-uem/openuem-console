@@ -41,7 +41,6 @@ func startConsole(cCtx *cli.Context) error {
 	if strings.HasSuffix(cwd, "tmp") {
 		worker.DownloadDir = filepath.Join(cwd, "download")
 	}
-	log.Printf("[INFO]: path %s", worker.DownloadDir)
 
 	if err := worker.CreateDowloadTempDir(); err != nil {
 		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)

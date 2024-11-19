@@ -8,6 +8,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem-console/internal/views/security_views"
 	"github.com/doncicuto/openuem_nats"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
@@ -166,7 +167,7 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)

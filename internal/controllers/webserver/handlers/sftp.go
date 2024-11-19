@@ -16,6 +16,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_utils"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -33,7 +34,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -92,7 +93,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 func (h *Handler) NewFolder(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -136,7 +137,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -187,7 +188,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -246,14 +247,14 @@ func (h *Handler) RenameItem(c echo.Context) error {
 func (h *Handler) DeleteMany(c echo.Context) error {
 	removeForm := new(CheckedItemsForm)
 	if err := c.Bind(removeForm); err != nil {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	items := slices.Concat(removeForm.FolderCheck, removeForm.FileCheck)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -318,7 +319,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	// Destination
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -383,7 +384,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -444,7 +445,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -498,7 +499,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 	// Get form values
 	deleteForm := new(CheckedItemsForm)
 	if err := c.Bind(deleteForm); err != nil {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	if deleteForm.Cwd == "" {
@@ -512,7 +513,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("agent id cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)

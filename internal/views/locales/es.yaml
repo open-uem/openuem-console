@@ -127,7 +127,7 @@ es:
     deploy_success: "Se ha enviado una petición al agente para instalar el paquete tan pronto como sea posible, compruebe más tarde si el paquete fue desplegado con éxito"
     update_success: "Se ha enviado una petición al agente para actualizar el paquete tan pronto como sea posible, compruebe más tarde si el paquete fue actualizado con éxito"
     uninstall_success: "Se ha enviado una petición al agente para desinstalar el paquete tan pronto como sea posible, compruebe más tarde si el paquete fue desinstalado con éxito"
-    deploy_list: "Esta es la lista de los paquetes que han sido desplegados"
+    deploy_list: "Paquetes desplegados desde OpenUEM en este equipo"
     deploy_install_date: "Instalado"
     deploy_updated_date: "Actualizado"
     already_deployed: "Este paquete ya ha sido desplegado, sin embargo puede actualizarlo o instalarlo desde la tabla de paquetes desplegados"
@@ -153,6 +153,7 @@ es:
     filter_by_agent_os: "Filtrar por sistema operativo de agente"
     filter_by_enabled: "Filtrar por estado de activación del agente"
     no_selected_agents_to_deploy: "no se han seleccionado agentes para desplegar el paquete"
+    no_empty_id: "el id de agente no puede estar vacío"
   inventory:
     hardware:
       title: "Hardware"
