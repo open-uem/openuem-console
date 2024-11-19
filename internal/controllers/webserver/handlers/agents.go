@@ -182,7 +182,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.force_run_success")))
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "")
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {

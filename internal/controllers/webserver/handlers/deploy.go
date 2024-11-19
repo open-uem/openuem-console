@@ -16,11 +16,11 @@ import (
 )
 
 func (h *Handler) DeployInstall(c echo.Context) error {
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(true)))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(true, "")))
 }
 
 func (h *Handler) DeployUninstall(c echo.Context) error {
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(false)))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(false, "")))
 }
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
@@ -158,10 +158,9 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 	}
 
-	// TODO - Show success message but show new list with unchecked items
 	if install {
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "install.requested")))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(true, i18n.T(c.Request().Context(), "install.requested"))))
 	} else {
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "uninstall.requested")))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(false, i18n.T(c.Request().Context(), "uninstall.requested"))))
 	}
 }

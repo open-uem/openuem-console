@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-templ Deploy(install bool) {
+templ Deploy(install bool, successMessage string) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
 		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}})
@@ -29,7 +29,11 @@ templ Deploy(install bool) {
 				} else {
 					@DeployNavbar("uninstall")
 				}
-				<div id="success" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -169,9 +173,19 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 									<input type="hidden" name="filterByInstallationType" value="false"/>
 								}
 								<button
+									class={ templ.KV("text-green-600", install), templ.KV("text-red-600", !install) }
+									if install {
+										title={ i18n.T(ctx, "agents.install_package") }
+									} else {
+										title={ i18n.T(ctx, "agents.uninstall_package") }
+									}
 									type="submit"
 								>
-									<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+									if install {
+										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6" uk-cloack></uk-icon>
+									} else {
+										<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6" uk-cloack></uk-icon>
+									}
 								</button>
 							</form>
 						</td>
@@ -225,7 +239,6 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 						<form
 							hx-post="/deploy/selectpackagedeployment"
 							hx-target="#main"
-							hx-swap="innerHTML"
 							hx-push-url="true"
 							hx-target="#main"
 							hx-swap="outerHTML"
@@ -245,8 +258,13 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 							<button
 								id="deploy-package"
+								if install {
+									title={ i18n.T(ctx, "Install") }
+								} else {
+									title={ i18n.T(ctx, "Uninstall") }
+								}
 								type="submit"
-								class="uk-button uk-button-primary mt-4"
+								class={ "uk-button mt-4", templ.KV("uk-button-primary", install), templ.KV("uk-button-danger", !install) }
 								disabled?={ f.SelectedItems == 0 }
 							>
 								<uk-icon hx-history="false" icon="package-plus" custom-class="h-5 w-5 mr-4" uk-cloak></uk-icon>

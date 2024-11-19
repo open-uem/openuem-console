@@ -330,7 +330,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.edit.success")))
+		return h.ListUsers(c, i18n.T(c.Request().Context(), "users.edit.success"), "")
 	}
 
 	defaultCountry, err := h.Model.GetDefaultCountry()
@@ -452,5 +452,5 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_users", strings.Join(errors, ",")), false))
 	}
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "users.import_success")))
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.import_success"), "")
 }

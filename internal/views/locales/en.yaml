@@ -153,6 +153,8 @@ en:
     filter_by_enabled: "Filter by enabled agent status"
     no_selected_agents_to_deploy: "no selected agents to deploy package"
     no_empty_id: "agent id cannot be empty"
+    install_package: "Install this package"
+    uninstall_package: "Uninstall this package"
   inventory:
     hardware:
       title: "Hardware"

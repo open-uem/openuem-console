@@ -154,6 +154,8 @@ es:
     filter_by_enabled: "Filtrar por estado de activación del agente"
     no_selected_agents_to_deploy: "no se han seleccionado agentes para desplegar el paquete"
     no_empty_id: "el id de agente no puede estar vacío"
+    install_package: "Instalar este paquete"
+    uninstall_package: "Desinstalar este paquete"
   inventory:
     hardware:
       title: "Hardware"
@@ -482,6 +484,9 @@ es:
     filter_by_pendingupdate: "Filtrar por estado de actualizaciones pendientes"
     filter_by_updatestatus: "Filtrar por estado de actualización"
     show_updates_history: "Mostrar historial de actualizaciones recientes"
+  certificates:
+    title: "Certificados"
+    description: "Esta es la lista de certificados generados por la CA de OpenUEM con información de su fecha de expiración"
   admin:
     update:
       agents:
