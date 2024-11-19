@@ -460,6 +460,12 @@ es:
     update_channel_title: Canal de actualizaciones
     update_channel_description: Canal utilizado para la comprobación y descarga de actualizaciones de OpenUEM
     update_channel_invalid: Canal no válido
+    agent_frequency_title: Frecuencia de informes de los agentes
+    agent_frequency_description: Los agentes enviarán periódicamente un informe con la frecuencia indicada en minutos
+    agent_frequency_invalid: La frecuencia de generación de informes del agente no es válida
+    agent_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
+    agent_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
+    agent_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

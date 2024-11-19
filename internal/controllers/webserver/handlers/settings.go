@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_nats"
 	"github.com/go-playground/validator/v10"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -71,6 +73,46 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if settings.AgentFrequency != 0 {
+			// Get current frequency
+			currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
+			}
+
+			config := openuem_nats.Config{}
+			config.AgentFrequency = settings.AgentFrequency
+			data, err := json.Marshal(config)
+			if err != nil {
+				return err
+			}
+
+			if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_error"), true))
+			}
+
+			if err := h.Model.UpdateAgentFrequency(settings.ID, settings.AgentFrequency); err != nil {
+				// Rollback communication
+				config := openuem_nats.Config{}
+				config.AgentFrequency = currentFrequency
+				data, err := json.Marshal(config)
+				if err != nil {
+					return err
+				}
+
+				if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_error"), true))
+				}
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agent_frequency_could_not_be_saved"), true))
+			}
+
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_success")))
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -96,6 +138,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	refresh := c.FormValue("refresh")
 	sessionLifetime := c.FormValue("session-lifetime")
 	updateChannel := c.FormValue("update-channel")
+	agentFrequency := c.FormValue("agent-frequency")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -169,6 +212,17 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.upload_channel_invalid"))
 		}
 		settings.UpdateChannel = updateChannel
+	}
+
+	if agentFrequency != "" {
+		settings.AgentFrequency, err = strconv.Atoi(agentFrequency)
+		if err != nil {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
+		}
+
+		if settings.AgentFrequency <= 0 {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
+		}
 	}
 
 	return &settings, nil

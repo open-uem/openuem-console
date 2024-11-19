@@ -97,6 +97,21 @@ func (m *Model) UpdateSessionLifetime(settingsId, sessionLifetime int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetSessionLifetimeInMinutes(sessionLifetime).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultAgentFrequency() (int, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldAgentReportFrequenceInMinutes).Only(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	return settings.AgentReportFrequenceInMinutes, nil
+}
+
+func (m *Model) UpdateAgentFrequency(settingsId, frequency int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetAgentReportFrequenceInMinutes(frequency).Exec(context.Background())
+}
+
 func (m *Model) GetDefaultUpdateChannel() (string, error) {
 	var err error
 
@@ -123,6 +138,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldRefreshTimeInMinutes,
 		settings.FieldSessionLifetimeInMinutes,
 		settings.FieldUpdateChannel,
+		settings.FieldAgentReportFrequenceInMinutes,
 	)
 
 	settings, err := query.Only(context.Background())
@@ -150,4 +166,5 @@ type GeneralSettings struct {
 	Refresh         int
 	SessionLifetime int
 	UpdateChannel   string
+	AgentFrequency  int
 }

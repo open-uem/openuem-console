@@ -462,6 +462,12 @@ en:
     update_channel_title: Updates channel
     update_channel_description: Channel used to check and download OpenUEM's updates
     update_channel_invalid: Channel is not valid
+    agent_frequency_title: Agents report frequency
+    agent_frequency_description: Agents will send new reports periodically according to the frequence set in minutes
+    agent_frequency_invalid: Agent report frequency is not valid
+    agent_frequency_success: A new frequency has been communicated to the agents
+    agent_frequency_could_not_be_saved: The new frequency could not be saved to the database
+    agent_frequency_error: The new frequency cannot be communicated to the agents now, retry later
 
   notes:
     updated: "Notes have been updated"
