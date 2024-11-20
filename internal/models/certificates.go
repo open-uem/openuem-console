@@ -46,6 +46,11 @@ func (m *Model) CountAllCertificates(f filters.CertificateFilter) (int, error) {
 	return count, nil
 }
 
+func (m *Model) CountCertificatesAboutToexpire() (int, error) {
+	// Certificates that expires in two months
+	return m.Client.Certificate.Query().Where(certificate.ExpiryLT(time.Now().AddDate(0, 2, 0))).Count(context.Background())
+}
+
 func (m *Model) GetCertificatesByPage(p partials.PaginationAndSort, f filters.CertificateFilter) ([]*ent.Certificate, error) {
 	query := m.Client.Certificate.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 

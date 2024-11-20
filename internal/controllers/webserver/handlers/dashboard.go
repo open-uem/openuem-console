@@ -109,6 +109,11 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		data.RefreshTime = 5
 	}
 
+	data.NCertificatesAboutToExpire, err = h.Model.CountCertificatesAboutToexpire()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	// Get latest version
 	channel, err := h.Model.GetDefaultUpdateChannel()
 	if err != nil {

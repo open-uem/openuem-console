@@ -17,30 +17,31 @@ type DashboardCharts struct {
 }
 
 type DashboardData struct {
-	Charts                    *DashboardCharts
-	NOutdatedVersions         int
-	NPendingUpdates           int
-	NInactiveAntiviri         int
-	NOutdatedDatabaseAntiviri int
-	NNoAutoUpdate             int
-	NSupportedVNC             int
-	NVendors                  int
-	NPrinters                 int
-	NAppliedTags              int
-	NDisabledAgents           int
-	NApps                     int
-	NDeployments              int
-	NOpenUEMUsers             int
-	NSessions                 int
-	NUsernames                int
-	RefreshTime               int
-	NAgentsNotReportedIn24h   int
-	NUpgradableAgents         int
-	NATSServerStatus          string
-	AgentWorkerStatus         string
-	NotificationWorkerStatus  string
-	CertManagerWorkerStatus   string
-	OpenUEMUpdaterAPIStatus   string
+	Charts                     *DashboardCharts
+	NOutdatedVersions          int
+	NPendingUpdates            int
+	NInactiveAntiviri          int
+	NOutdatedDatabaseAntiviri  int
+	NNoAutoUpdate              int
+	NSupportedVNC              int
+	NVendors                   int
+	NPrinters                  int
+	NAppliedTags               int
+	NDisabledAgents            int
+	NApps                      int
+	NDeployments               int
+	NOpenUEMUsers              int
+	NSessions                  int
+	NUsernames                 int
+	RefreshTime                int
+	NAgentsNotReportedIn24h    int
+	NUpgradableAgents          int
+	NATSServerStatus           string
+	AgentWorkerStatus          string
+	NotificationWorkerStatus   string
+	CertManagerWorkerStatus    string
+	OpenUEMUpdaterAPIStatus    string
+	NCertificatesAboutToExpire int
 }
 
 templ Dashboard(data DashboardData) {
@@ -178,6 +179,25 @@ templ Dashboard(data DashboardData) {
 							</td>
 						</tr>
 						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.certificates_to_expire") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/admin/certificates"
+									hx-get="/admin/certificates"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NCertificatesAboutToExpire > 0) }
+								>
+									{ strconv.Itoa(data.NCertificatesAboutToExpire) }
+								</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+					<tbody>
+						<tr>
 							<th class="!align-middle">
 								{ i18n.T(ctx, "dashboard.num_sessions") }
 							</th>
@@ -192,10 +212,6 @@ templ Dashboard(data DashboardData) {
 								>{ strconv.Itoa(data.NSessions) }</a>
 							</td>
 						</tr>
-					</tbody>
-				</table>
-				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
-					<tbody>
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.vnc") }</th>
 							<td class="!align-middle text-center">
