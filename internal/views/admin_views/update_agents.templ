@@ -10,19 +10,27 @@ import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/mod/semver"
 	"strconv"
+	"time"
 )
 
-type Version struct {
-	ID              string `json:"id,omitempty"`
-	Channel         string `json:"channel,omitempty"`
-	Summary         string `json:"summary,omitempty"`
-	ReleaseNotesURL string `json:"release_notes,omitempty"`
-	FileURL         string `json:"file_url,omitempty"`
-	Checksum        string `json:"checksum,omitempty"`
-	IsCritical      bool   `json:"is_critical,omitempty"`
+type FileInfo struct {
+	Arch     string `json:"arch,omitempty"`
+	Os       string `json:"os,omitempty"`
+	FileURL  string `json:"file_url,omitempty"`
+	Checksum string `json:"checksum,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, version *Version, higherVersion string, versions, availableOSes []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
+type LatestRelease struct {
+	Version         string     `json:"version,omitempty"`
+	Channel         string     `json:"channel,omitempty"`
+	Summary         string     `json:"summary,omitempty"`
+	ReleaseNotesURL string     `json:"release_notes,omitempty"`
+	ReleaseDate     time.Time  `json:"release_date,omitempty"`
+	Files           []FileInfo `json:"files,omitempty"`
+	IsCritical      bool       `json:"is_critical,omitempty"`
+}
+
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *LatestRelease, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -48,14 +56,14 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 					</div>
 					<div class="uk-card-body">
 						<div class="flex flex-col gap-4 mt-4">
-							if version == nil {
+							if latestRelease == nil {
 								@GetVersionError()
 							}
-							if version != nil {
+							if latestRelease != nil {
 								<div class="flex items-center justify-between">
-									if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
-										<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", version.IsCritical), templ.KV("bg-blue-700", !version.IsCritical) }>
-											if version.IsCritical {
+									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
+										<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", latestRelease.IsCritical), templ.KV("bg-blue-700", !latestRelease.IsCritical) }>
+											if latestRelease.IsCritical {
 												{ i18n.T(ctx, "admin.update.agents.critical") }
 											} else {
 												{ i18n.T(ctx, "admin.update.agents.available") }
@@ -64,67 +72,39 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 									} else {
 										<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
 									}
-									<form class="flex items-center gap-4">
-										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
-										<input id="selectedAgents" type="hidden" name="selectedAgents"/>
-										<input name="version" type="hidden" value={ version.ID }/>
-										<button
-											id="update-all-button"
-											title={ i18n.T(ctx, "UpdateAll") }
-											type="button"
-											class="uk-button uk-button-default"
-											hx-post="/admin/update-agents/confirm"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											disabled?={ f.SelectedItems == 0 }
-										>
-											<div class="flex items-center gap-2">
-												<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-												{ i18n.T(ctx, "Update") }
-											</div>
-										</button>
-										<button
-											id="rollback-all-button"
-											title={ i18n.T(ctx, "RollbackAll") }
-											type="button"
-											class="uk-button uk-button-default"
-											hx-post="/admin/rollback-agents/confirm"
-											hx-push-url="true"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											disabled?={ f.SelectedItems == 0 }
-										>
-											<div class="flex items-center gap-2">
-												<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5 rotate-180" uk-cloack></uk-icon>
-												{ i18n.T(ctx, "Rollback") }
-											</div>
-										</button>
-									</form>
 								</div>
 								<p class="uk-text-small">
-									if semver.Compare("v" + version.ID, "v" + higherVersion) == 1 {
+									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
 										{ i18n.T(ctx, "admin.update.agents.new_version_available") }
 									} else {
 										{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
 									}
-									<a href={ templ.URL(version.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ version.ID }</a>
+									<a href={ templ.URL(latestRelease.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ latestRelease.Version }</a>
 								</p>
-								<p class="uk-text-small uk-text-italic">{ version.Summary } </p>
+								if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
+									<p class="uk-text-small">
+										{ i18n.T(ctx, "admin.update.agents.new_version_date") }
+										{ latestRelease.ReleaseDate.Format("2006-01-02") }
+									</p>
+								}
+								<p class="uk-text-small uk-text-italic">{ latestRelease.Summary } </p>
 							}
 							<hr class="uk-divider-icon"/>
-							<div class="flex items-center gap-4">
-								@partials.RefreshPage("/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
-								@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
-									return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
-								})
-								<button
-									id="select-all"
-									title={ i18n.T(ctx, "SelectAll") }
-									type="button"
-									class="uk-button uk-button-default flex items-center gap-2"
-									_={ fmt.Sprintf(`on click 
-												repeat in <input[type='checkbox']/>
+							<div class="flex justify-between">
+								<div class="flex items-center gap-4">
+									@partials.RefreshPage("/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
+									@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+										return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
+											len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
+											len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionFrom) == 0
+									})
+									<button
+										id="select-all"
+										title={ i18n.T(ctx, "SelectAll") }
+										type="button"
+										class="uk-button uk-button-default flex items-center gap-2"
+										_={ fmt.Sprintf(`on click 
+												repeat in <input[id^='check-']/>
 													if it.checked is false then
 														it.click()
 													end
@@ -133,17 +113,19 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 												set sessionStorage.selectedAgents to storedItems as JSON
 												set #filterBySelectedItems.value to '%d'
 												set #items-selected.innerHTML to '%d'
-												remove @disabled from <button[id$=-all-button]/>
+												if #filterBySelectedRelease.value is not empty then
+													remove @disabled from #update-all-button
+												end
 											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
-								>
-									{ i18n.T(ctx, "SelectAll") }
-								</button>
-								<button
-									id="deselect-all"
-									title={ i18n.T(ctx, "DeselectAll") }
-									type="button"
-									class="uk-button uk-button-default flex items-center gap-2"
-									_="on click 
+									>
+										{ i18n.T(ctx, "SelectAll") }
+									</button>
+									<button
+										id="deselect-all"
+										title={ i18n.T(ctx, "DeselectAll") }
+										type="button"
+										class="uk-button uk-button-default flex items-center gap-2"
+										_="on click 
 										repeat in <input[type='checkbox']/>
 											if it.checked is true then
 												it.click()
@@ -155,10 +137,53 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 										set #items-selected.innerHTML to '0'
 										add @disabled to <button[id$=-all-button]/>
 									end"
-								>
-									{ i18n.T(ctx, "DeselectAll") }
-								</button>
-								<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+									>
+										{ i18n.T(ctx, "DeselectAll") }
+									</button>
+									<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+								</div>
+								<form class="flex items-center gap-4">
+									<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+									<input id="selectedAgents" type="hidden" name="selectedAgents"/>
+									<input id="filterBySelectedRelease" type="hidden" name="filterBySelectedRelease" value={ f.SelectedRelease }/>
+									<select
+										class="uk-select"
+										_="on change
+											if sessionStorage.selectedAgents exists then														
+												set storedItems to sessionStorage.selectedAgents as Object
+											end		
+
+											set #filterBySelectedRelease.value to my.value
+											if #filterBySelectedRelease.value is not empty and ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
+												remove @disabled from #update-all-button
+											else
+												add @disabled to #update-all-button
+											end
+										end"
+										title={ i18n.T(ctx, "admin.update.agents.select_release") }
+									>
+										<option value="">{ i18n.T(ctx, "admin.update.agents.select_release") }</option>
+										for _,r := range allReleases {
+											<option value={ r.Version } selected?={ r.Version == f.SelectedRelease }>{ r.Version }</option>
+										}
+									</select>
+									<button
+										id="update-all-button"
+										title={ i18n.T(ctx, "UpdateAll") }
+										type="button"
+										class="uk-button uk-button-primary"
+										hx-post="/admin/update-agents/confirm"
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+										disabled?={ f.SelectedItems == 0 || len(f.SelectedRelease) == 0 }
+									>
+										<div class="flex items-center gap-2">
+											<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+											{ i18n.T(ctx, "Update") }
+										</div>
+									</button>
+								</form>
 							</div>
 							if len(agents) > 0 {
 								<div class="flex flex-col gap-2">
@@ -175,74 +200,83 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 											<tr>
 												<th>
 													<input
-														id="select-all-in-page"
-														name="select-all-in-page"
+														id="check-all-in-page"
+														name="check-all-in-page"
 														class="uk-checkbox"
 														type="checkbox"
 														_="on click
 															repeat in <input[title='check-agent']/>																
-																if it.checked !== #select-all-in-page.checked then
+																if it.checked !== #check-all-in-page.checked then
 																	it.click()
 																end
 															end
 
-															if ((<input[title='check-agent']:checked/>).length > 0) then
-																remove @disabled from <button[id$='-all-button']/>
+															if ((<input[title='check-agent']:checked/>).length > 0) and #filterBySelectedRelease.value is not empty then
+																remove @disabled from #update-all-button
 															else
-																add @disabled to <button[id$='-all-button']/>
+																add @disabled to #update-all-button
 															end
 														"
 													/>
 												</th>
-												<th>
+												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.hostname") }</span>
 														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
 														@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 													</div>
 												</th>
-												<th>
+												<th class="w-1/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.version") }</span>
 														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
-														@filters.FilterByOptions(c, p, "Version", "Version", versions, f.Versions, "#main", "outerHTML", false, func() bool {
-															return len(f.Versions) == 0
+														@filters.FilterByOptions(c, p, "Release", "admin.update.agents.filter_by_release", availableReleases, f.Releases, "#main", "outerHTML", false, func() bool {
+															return len(f.Releases) == 0
 														})
 													</div>
 												</th>
-												<th>
-													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "agents.os") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
-														@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
-															return len(f.AgentOSVersions) == 0
-														})
-													</div>
-												</th>
-												<th>
+												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														{ i18n.T(ctx, "Tag.other") }
-														@filters.FilterByTags(c, p, f, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
+														@filters.FilterByTags(c, p, f.Tags, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 													</div>
 												</th>
-												<th>
-													{ i18n.T(ctx, "admin.update.agents.task_status") }
+												<th class="w-1/12">
+													<div class="flex gap-1 items-center">
+														{ i18n.T(ctx, "admin.update.agents.task_status") }
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "taskStatus", "alpha", "#main", "outerHTML")
+														@filters.FilterByOptions(c, p, "TaskStatus", "admin.update.agents.filter_by_status", availableTaskStatus, f.TaskStatus, "#main", "outerHTML", true, func() bool {
+															return len(f.TaskStatus) == 0
+														})
+													</div>
 												</th>
-												<th>
-													{ i18n.T(ctx, "admin.update.agents.task_description") }
+												<th class="w-2/12">
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx,  "admin.update.agents.task_description") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_description"), "taskDescription", "alpha", "#main", "outerHTML")
+													</div>
 												</th>
-												<th>
-													{ i18n.T(ctx, "admin.update.agents.task_last_execution") }
+												<th class="w-2/12">
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "admin.update.agents.task_last_execution") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_last_execution"), "taskLastExecution", "time", "#main", "outerHTML")
+														@filters.FilterByDate(c, p, "LastExecution", "admin.update.agents.filter_by_task_execution", f.TaskLastExecutionFrom, f.TaskLastExecutionTo, "#main", "outerHTML", func() bool { return f.TaskLastExecutionFrom == "" && f.TaskLastExecutionTo == "" })
+													</div>
 												</th>
-												<th>
-													{ i18n.T(ctx, "admin.update.agents.task_result") }
+												<th class="w-2/12">
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "admin.update.agents.task_result") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_result"), "taskResult", "alpha", "#main", "outerHTML")
+														@filters.FilterByText(c, p, "TaskResult", f.TaskResult, "admin.update.agents.filter_by_task_result", "#main", "outerHTML")
+													</div>
 												</th>
 											</tr>
 										</thead>
 										for _, agent := range agents {
-											<tr>
+											<tr class="h-16">
 												<td class="!align-middle">
 													<input
+														id={ "check-agent-" + agent.ID }
 														title="check-agent"
 														name={ agent.ID }
 														class="uk-checkbox"
@@ -278,18 +312,18 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 																	set sessionStorage.selectedAgents to storedItems as JSON 
 																end
 
-																if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
-																	remove @disabled from <button[id$='-all-button']/>
+																if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) and #filterBySelectedRelease.value is not empty then
+																	remove @disabled from #update-all-button
 																else
-																	add @disabled to <button[id$='-all-button']/>
+																	add @disabled to #update-all-button
 																end
 
-																if #select-all-in-page.checked is true and me.checked is false then
-																	set #select-all-in-page.checked to false
+																if #check-all-in-page.checked is true and me.checked is false then
+																	set #check-all-in-page.checked to false
 																end
 
-																if #select-all-in-page.checked is false and (<input[title='check-agent']:checked/>).length === %d then
-																	set #select-all-in-page.checked to true
+																if #check-all-in-page.checked is false and (<input[title='check-agent']:checked/>).length === %d then
+																	set #check-all-in-page.checked to true
 																end
 
 																set #selectedAgents.value to storedItems.length
@@ -307,7 +341,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 																end
 
 																if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
-																	set #select-all-in-page.checked to true
+																	set #check-all-in-page.checked to true
 																end
 
 																set #selectedAgents.value to storedItems.length
@@ -316,25 +350,28 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 													/>
 												</td>
 												<td class="!align-middle">{ agent.Hostname }</td>
-												<td class="flex items-center gap-2 !align-middle">
-													{ agent.Version }
-													if semver.Compare("v" + agent.Version, "v"+ higherVersion) < 0 {
-														@partials.AlertIcon(i18n.T(ctx, "admin.update.agents.outdated"))
-													}
+												<td class="!align-middle">
+													<div class="flex items-center gap-2">
+														{ agent.Edges.Release.Version }
+														if semver.Compare("v" + agent.Edges.Release.Version, "v"+ higherReleaseApplied.Version) < 0 {
+															@partials.AlertIcon(i18n.T(ctx, "admin.update.agents.outdated"))
+														}
+													</div>
 												</td>
 												<td class="!align-middle">
-													switch agent.Os {
-														case "windows":
-															<i class="ri-windows-fill ri-2x text-blue-600"></i>
-														case "linux":
-															<span></span>
-													}
-												</td>
-												<td class="flex flex-wrap gap-2">
-													@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
+													<div class="flex flex-wrap gap-2">
+														@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/admin/update-agents", "#main", "outerHTML")
+													</div>
 												</td>
 												if len(agent.UpdateTaskStatus) > 0 {
-													<td class="!align-middle">{ i18n.T(ctx, agent.UpdateTaskStatus) }</td>
+													<td
+														class={
+															"!align-middle uk-text-bold",
+															templ.KV("text-red-600", agent.UpdateTaskStatus == "admin.update.agents.task_status_error"),
+															templ.KV("text-orange-600", agent.UpdateTaskStatus == "admin.update.agents.task_status_pending"),
+															templ.KV("text-green-600", agent.UpdateTaskStatus == "admin.update.agents.task_status_success"),
+														}
+													>{ i18n.T(ctx, agent.UpdateTaskStatus) }</td>
 												} else {
 													<td class="!align-middle"></td>
 												}
@@ -357,6 +394,21 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Agent
 													{ agent.UpdateTaskResult }
 												</td>
 											</tr>
+										}
+										if len(agents) < p.PageSize {
+											for i:=0; i < p.PageSize - len(agents); i++ {
+												<tr class="h-16">
+													<td class="!align-middle"></td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+													<td class="!align-middle">-</td>
+												</tr>
+											}
 										}
 									</table>
 								</div>
@@ -389,4 +441,8 @@ templ UpdateAgentsIndex(title string, cmp templ.Component) {
 	@layout.Base("admin") {
 		@cmp
 	}
+}
+
+func newReleaseAvailable(newReleaseVersion, higherReleaseAppliedVersion string) bool {
+	return semver.Compare("v"+newReleaseVersion, "v"+higherReleaseAppliedVersion) == 1
 }

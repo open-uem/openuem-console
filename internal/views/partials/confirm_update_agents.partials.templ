@@ -30,6 +30,7 @@ templ ConfirmUpdateAgents(version string) {
 							if sessionStorage.selectedAgents exists then														
 								set storedItems to sessionStorage.selectedAgents as Object
 								get storedItems.toString() put it into event.detail.parameters['agents']
+								put #filterBySelectedRelease.value into event.detail.parameters['filterBySelectedRelease']
 							end
 						end"
 					>

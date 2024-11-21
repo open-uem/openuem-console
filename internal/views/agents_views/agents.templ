@@ -138,7 +138,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th class="w-1/4">
 				<div class="flex gap-1 items-center">
 					{ i18n.T(ctx, "Tag.other") }
-					@filters.FilterByTags(c, p, f, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
+					@filters.FilterByTags(c, p, f.Tags, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 				</div>
 			</th>
 			<th class="w-1/6">
@@ -182,7 +182,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 						<span></span>
 				}
 			</td>
-			<td class="!align-middle">{ agent.Version }</td>
+			<td class="!align-middle">{ agent.Edges.Release.Version }</td>
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
 				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")

@@ -21,9 +21,6 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	// DEBUG - TEST set pageSize to 1
-	// p.PageSize = 1
-
 	// Get filters values
 	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")

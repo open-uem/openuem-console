@@ -15,6 +15,7 @@ type AgentFilter struct {
 	WithApplication       string
 	SelectedItems         int
 	SelectedAllAgents     string
+	SelectedRelease       string
 }
 
 type ApplicationsFilter struct {
@@ -62,4 +63,17 @@ type CertificateFilter struct {
 	ExpiryFrom  string
 	ExpiryTo    string
 	Username    string
+}
+
+type UpdateAgentsFilter struct {
+	Hostname              string
+	Releases              []string
+	Tags                  []int
+	TaskStatus            []string
+	TaskResult            string
+	TaskLastExecutionFrom string
+	TaskLastExecutionTo   string
+	SelectedItems         int
+	SelectedAllAgents     string
+	SelectedRelease       string
 }

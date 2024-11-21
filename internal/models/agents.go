@@ -8,7 +8,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/antivirus"
@@ -16,6 +15,7 @@ import (
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 	"github.com/doncicuto/openuem_ent/predicate"
 	"github.com/doncicuto/openuem_ent/printer"
+	"github.com/doncicuto/openuem_ent/release"
 	"github.com/doncicuto/openuem_ent/systemupdate"
 	"github.com/doncicuto/openuem_ent/tag"
 	"github.com/doncicuto/openuem_nats"
@@ -44,7 +44,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	var err error
 	var apps []*ent.Agent
 
-	query := m.Client.Agent.Query().WithTags().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	// Apply filters
 	applyAgentFilters(query, f)
@@ -64,9 +64,9 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 		}
 	case "version":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldVersion)).All(context.Background())
+			apps, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderAsc())).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldVersion)).All(context.Background())
+			apps, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderDesc())).All(context.Background())
 		}
 	case "last_contact":
 		if p.SortOrder == "asc" {
@@ -97,7 +97,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 }
 
 func (m *Model) GetAgentById(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithTags().WithComputer().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -128,10 +128,6 @@ func (m *Model) GetAgentsUsedOSes() ([]string, error) {
 	return m.Client.Agent.Query().Unique(true).Select(agent.FieldOs).Strings(context.Background())
 }
 
-func (m *Model) GetAgentsVersions() ([]string, error) {
-	return m.Client.Agent.Query().Unique(true).Select(agent.FieldVersion).Strings(context.Background())
-}
-
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Hostname) > 0 {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))
@@ -147,9 +143,9 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		}
 	}
 
-	if len(f.Versions) > 0 {
+	/* if len(f.Versions) > 0 {
 		query = query.Where(agent.VersionIn(f.Versions...))
-	}
+	} */
 
 	if len(f.AgentOSVersions) > 0 {
 		query = query.Where(agent.OsIn(f.AgentOSVersions...))
@@ -254,30 +250,6 @@ func (m *Model) RemoveTagFromAgent(agentId, tagId string) error {
 	return m.Client.Agent.UpdateOneID(agentId).RemoveTagIDs(id).Exec(context.Background())
 }
 
-func (m *Model) GetHigherAgentVersionInstalled() (string, error) {
-	data, err := m.Client.Agent.Query().Select(agent.FieldVersion).Order(ent.Desc(agent.FieldVersion)).First(context.Background())
-	if err != nil {
-		if openuem_ent.IsNotFound(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	return data.Version, nil
-}
-
-func (m *Model) CountOutdatedAgents() (int, error) {
-	version, err := m.GetHigherAgentVersionInstalled()
-	if err != nil {
-		return 0, err
-	}
-
-	return m.CountUpgradableAgents(version)
-}
-
-func (m *Model) CountUpgradableAgents(version string) (int, error) {
-	return m.Client.Agent.Query().Where(agent.VersionLT(version)).Count(context.Background())
-}
-
 func (m *Model) CountPendingUpdateAgents() (int, error) {
 	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true))).Count(context.Background())
 }
@@ -317,4 +289,123 @@ func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string
 		SetUpdateTaskExecution(time.Time{}).
 		SetUpdateTaskVersion(version).
 		SetUpdateTaskResult("").Exec(context.Background())
+}
+
+func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.UpdateAgentsFilter) ([]*ent.Agent, error) {
+	var err error
+	var agents []*ent.Agent
+
+	query := m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+
+	// Apply filters
+	applyUpdateAgentsFilters(query, f)
+
+	switch p.SortBy {
+	case "hostname":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
+		}
+	case "version":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderAsc())).All(context.Background())
+		} else {
+			agents, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderDesc())).All(context.Background())
+		}
+	case "taskStatus":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldUpdateTaskStatus)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldUpdateTaskStatus)).All(context.Background())
+		}
+	case "taskDescription":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldUpdateTaskDescription)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldUpdateTaskDescription)).All(context.Background())
+		}
+	case "taskLastExecution":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldUpdateTaskExecution)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldUpdateTaskExecution)).All(context.Background())
+		}
+	case "taskResult":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldUpdateTaskResult)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldUpdateTaskResult)).All(context.Background())
+		}
+	default:
+		agents, err = query.Order(ent.Desc(agent.FieldUpdateTaskExecution)).All(context.Background())
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
+func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter) (int, error) {
+	query := m.Client.Agent.Query()
+
+	applyUpdateAgentsFilters(query, f)
+
+	count, err := query.Count(context.Background())
+	return count, err
+}
+
+func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, error) {
+	query := m.Client.Agent.Query()
+	// Apply filters
+	applyUpdateAgentsFilters(query, f)
+
+	agents, err := query.All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
+func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
+	if len(f.Hostname) > 0 {
+		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+	}
+
+	if len(f.Releases) > 0 {
+		query = query.Where(agent.HasReleaseWith(release.VersionIn(f.Releases...)))
+	}
+
+	if len(f.Tags) > 0 {
+		predicates := []predicate.Agent{}
+		for _, id := range f.Tags {
+			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
+		}
+		if len(predicates) > 0 {
+			query = query.Where(agent.And(predicates...))
+		}
+	}
+
+	if len(f.TaskStatus) > 0 {
+		query = query.Where(agent.UpdateTaskStatusIn(f.TaskStatus...))
+	}
+
+	if len(f.TaskResult) > 0 {
+		query = query.Where(agent.UpdateTaskResultContainsFold(f.TaskResult))
+	}
+
+	if len(f.TaskLastExecutionFrom) > 0 {
+		from, err := time.Parse("2006-01-02", f.TaskLastExecutionFrom)
+		if err == nil {
+			query = query.Where(agent.UpdateTaskExecutionGTE(from))
+		}
+	}
+
+	if len(f.TaskLastExecutionTo) > 0 {
+		to, err := time.Parse("2006-01-02", f.TaskLastExecutionTo)
+		if err == nil {
+			query = query.Where(agent.UpdateTaskExecutionLTE(to))
+		}
+	}
 }

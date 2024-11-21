@@ -92,7 +92,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 								<th class="w-3/12">
 									<div class="flex gap-1 items-center">
 										{ i18n.T(ctx, "Tag.other") }
-										@filters.FilterByTags(c, p, f, "#main", "outerHTML", availableTags, func() bool { return len(f.Tags) == 0 })
+										@filters.FilterByTags(c, p, f.Tags, "#main", "outerHTML", availableTags, func() bool { return len(f.Tags) == 0 })
 									</div>
 								</th>
 								<th><span class="sr-only">{ i18n.T(ctx, "Actions") }</span></th>

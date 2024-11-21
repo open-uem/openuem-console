@@ -19,6 +19,10 @@ func (w *Worker) StartDBConnectJob() error {
 	if err == nil {
 		log.Println("[INFO]: connection established with database")
 
+		if err := w.Model.CreateInitialSettings(); err != nil {
+			log.Println("[WARN]: could not create initial settings")
+		}
+
 		w.StartConsoleService()
 		return nil
 	}
@@ -40,6 +44,10 @@ func (w *Worker) StartDBConnectJob() error {
 
 				if err := w.TaskScheduler.RemoveJob(w.DBConnectJob.ID()); err != nil {
 					return
+				}
+
+				if err := w.Model.CreateInitialSettings(); err != nil {
+					log.Println("[WARN]: could not create initial settings")
 				}
 
 				w.StartConsoleService()

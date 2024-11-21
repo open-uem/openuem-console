@@ -157,6 +157,18 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 	return settings, nil
 }
 
+func (m *Model) CreateInitialSettings() error {
+	nSettings, err := m.Client.Settings.Query().Count(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if nSettings == 0 {
+		return m.Client.Settings.Create().Exec(context.Background())
+	}
+	return nil
+}
+
 type GeneralSettings struct {
 	ID              int
 	Country         string

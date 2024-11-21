@@ -32,7 +32,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		channel = "stable"
 	}
 
-	version, err := GetLatestVersion(channel)
+	release, err := h.GetLatestRelease(channel)
 	if err != nil {
 		log.Println("[ERROR]: could not get latest version information")
 	}
@@ -40,63 +40,93 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 		if agents == "" {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		if version == nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
+
 		}
 
-		updateRequest := openuem_nats.OpenUEMUpdateRequest{}
-		updateRequest.DownloadFrom = version.FileURL
-		updateRequest.DownloadHash = version.Checksum
-
-		if c.FormValue("update-agent-date") == "" {
-			updateRequest.UpdateNow = true
-		} else {
-			scheduledTime := c.FormValue("update-agent-date")
-			updateRequest.UpdateAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
-			if err != nil {
-				log.Println("[INFO]: could not parse scheduled time as 24h time")
-				updateRequest.UpdateAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
-				if err != nil {
-					log.Println("[INFO]: could not parse scheduled time as AM/PM time")
-
-					// Fallback to update now
-					updateRequest.UpdateNow = true
-				}
-			}
+		sr := c.FormValue("filterBySelectedRelease")
+		if sr == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.release_cant_be_empty"), false))
 		}
 
 		for _, a := range strings.Split(agents, ",") {
-			data, err := json.Marshal(updateRequest)
+
+			agentInfo, err := h.Model.GetAgentById(a)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), false))
+			}
+
+			arch := ""
+			switch agentInfo.Edges.Computer.ProcessorArch {
+			case "x64":
+				arch = "amd64"
+			}
+
+			releaseToBeApplied, err := h.Model.GetAgentsReleaseByType(channel, agentInfo.Os, arch, sr)
 			if err != nil {
 				errorMessage = err.Error()
 				break
+			}
+
+			updateRequest := openuem_nats.OpenUEMUpdateRequest{}
+			updateRequest.DownloadFrom = releaseToBeApplied.FileURL
+			updateRequest.DownloadHash = releaseToBeApplied.Checksum
+
+			if c.FormValue("update-agent-date") == "" {
+				updateRequest.UpdateNow = true
+			} else {
+				scheduledTime := c.FormValue("update-agent-date")
+				updateRequest.UpdateAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
+				if err != nil {
+					log.Println("[INFO]: could not parse scheduled time as 24h time")
+					updateRequest.UpdateAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
+					if err != nil {
+						log.Println("[INFO]: could not parse scheduled time as AM/PM time")
+						// Fallback to update now
+						updateRequest.UpdateNow = true
+					}
+				}
+			}
+
+			data, err := json.Marshal(updateRequest)
+			if err != nil {
+				errorMessage = err.Error()
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+					log.Println("[ERROR]: could not save update task info")
+				}
+				continue
 			}
 
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
-				break
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+					log.Println("[ERROR]: could not save update task info")
+				}
+				continue
 			}
 
 			if _, err := h.JetStream.Publish(context.Background(), "agentupdate."+a, data); err != nil {
-				errorMessage = err.Error()
-				break
+				errorMessage = i18n.T(c.Request().Context(), "admin.update.agents.cannot_send_request")
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+					log.Println("[ERROR]: could not save update task info")
+				}
+				continue
 			}
 
-			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_update", version.ID); err != nil {
-				errorMessage = err.Error()
-				break
+			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_update", releaseToBeApplied.Version); err != nil {
+				log.Println("[ERROR]: could not save update task info")
+				continue
 			}
 		}
 
 		if errorMessage == "" {
 			successMessage = i18n.T(c.Request().Context(), "admin.update.agents.success")
+		} else {
+			errorMessage = i18n.T(c.Request().Context(), "admin.update.agents.some_errors_found")
 		}
 	}
 
-	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
+	return h.ShowUpdateAgentList(c, release, successMessage, errorMessage)
 }
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
@@ -104,84 +134,7 @@ func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
 }
 
-func (h *Handler) RollbackAgents(c echo.Context) error {
-	var err error
-
-	successMessage := ""
-	errorMessage := ""
-
-	// Get latest version
-	channel, err := h.Model.GetDefaultUpdateChannel()
-	if err != nil {
-		log.Println("[ERROR]: could not get updates channel settings")
-		channel = "stable"
-	}
-
-	version, err := GetLatestVersion(channel)
-	if err != nil {
-		log.Println("[ERROR]: could not get latest version information")
-	}
-
-	// TODO agent selection, right now is hardcoded for my test
-	selectedAgents := c.FormValue("agents")
-	if selectedAgents == "" {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.agents_cant_be_empty"), false))
-	}
-
-	rollbackRequest := openuem_nats.OpenUEMRollbackRequest{}
-
-	if c.FormValue("rollback-agent-date") == "" {
-		rollbackRequest.RollbackNow = true
-	} else {
-		scheduledTime := c.FormValue("update-agent-date")
-		rollbackRequest.RollbackAt, err = time.ParseInLocation("2006-01-02T15:04", scheduledTime, time.Local)
-		if err != nil {
-			log.Println("[INFO]: could not parse scheduled time as 24h time")
-			rollbackRequest.RollbackAt, err = time.Parse("2006-01-02T15:04PM", scheduledTime)
-			if err != nil {
-				log.Println("[INFO]: could not parse scheduled time as AM/PM time")
-
-				// Fallback to update now
-				rollbackRequest.RollbackNow = true
-			}
-		}
-	}
-
-	for _, a := range strings.Split(selectedAgents, ",") {
-		data, err := json.Marshal(rollbackRequest)
-		if err != nil {
-			errorMessage = err.Error()
-			break
-		}
-
-		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-			errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
-			break
-		}
-
-		if _, err := h.JetStream.Publish(context.Background(), "agentrollback."+a, data); err != nil {
-			errorMessage = err.Error()
-			break
-		}
-
-		if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_rollback", ""); err != nil {
-			errorMessage = err.Error()
-			break
-		}
-	}
-
-	if errorMessage == "" {
-		successMessage = i18n.T(c.Request().Context(), "admin.update.agents.rollback_success")
-	}
-
-	return h.ShowUpdateAgentList(c, version, successMessage, errorMessage)
-}
-
-func (h *Handler) RollbackAgentsConfirm(c echo.Context) error {
-	return RenderConfirm(c, partials.ConfirmRollbackAgents())
-}
-
-func GetLatestVersion(channel string) (*admin_views.Version, error) {
+func (h *Handler) GetLatestRelease(channel string) (*admin_views.LatestRelease, error) {
 	// TODO specify the channel
 	url := "http://localhost:8888/" + channel
 
@@ -210,47 +163,59 @@ func GetLatestVersion(channel string) (*admin_views.Version, error) {
 		return nil, err
 	}
 
-	version := admin_views.Version{}
-	if err := json.Unmarshal(body, &version); err != nil {
+	release := admin_views.LatestRelease{}
+	if err := json.Unmarshal(body, &release); err != nil {
 		return nil, err
 	}
 
-	return &version, nil
+	// Add this release as available
+	if err := h.Model.SaveNewReleaseAvailable(release); err != nil {
+		return nil, err
+	}
+
+	return &release, nil
 }
 
-func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Version, successMessage, errorMessage string) error {
+func (h *Handler) ShowUpdateAgentList(c echo.Context, release *admin_views.LatestRelease, successMessage, errorMessage string) error {
+	var err error
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
 	// Get filters values
-	f := filters.AgentFilter{}
+	f := filters.UpdateAgentsFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
+	f.TaskResult = c.FormValue("filterByTaskResult")
+	f.SelectedRelease = c.FormValue("filterBySelectedRelease")
 
-	versions, err := h.Model.GetAgentsVersions()
+	allReleases, err := h.Model.GetAgentsReleases()
 	if err != nil {
-		return err
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+
 	}
-	filteredVersions := []string{}
-	for index := range versions {
-		value := c.FormValue(fmt.Sprintf("filterByVersion%d", index))
+
+	availableReleases := []string{}
+	for _, r := range allReleases {
+		availableReleases = append(availableReleases, r.Version)
+	}
+
+	filteredReleases := []string{}
+	for index := range allReleases {
+		value := c.FormValue(fmt.Sprintf("filterByRelease%d", index))
 		if value != "" {
-			filteredVersions = append(filteredVersions, value)
+			filteredReleases = append(filteredReleases, value)
 		}
 	}
-	f.Versions = filteredVersions
+	f.Releases = filteredReleases
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
-	if err != nil {
-		return err
-	}
-	filteredAgentOSes := []string{}
-	for index := range availableOSes {
-		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+	availableTaskStatus := []string{"admin.update.agents.task_status_success", "admin.update.agents.task_status_pending", "admin.update.agents.task_status_error"}
+	filteredTaskStatus := []string{}
+	for index := range availableTaskStatus {
+		value := c.FormValue(fmt.Sprintf("filterByTaskStatus%d", index))
 		if value != "" {
-			filteredAgentOSes = append(filteredAgentOSes, value)
+			filteredTaskStatus = append(filteredTaskStatus, value)
 		}
 	}
-	f.AgentOSVersions = filteredAgentOSes
+	f.TaskStatus = filteredTaskStatus
 
 	nSelectedItems := c.FormValue("filterBySelectedItems")
 	f.SelectedItems, err = strconv.Atoi(nSelectedItems)
@@ -259,7 +224,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Versi
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllAgents(f)
+	allAgents, err := h.Model.GetAllUpdateAgents(f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -268,17 +233,42 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Versi
 	}
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
-	agents, err := h.Model.GetAgentsByPage(p, f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
 	appliedTags, err := h.Model.GetAppliedTags()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllAgents(f)
+	for _, tag := range appliedTags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
+
+	lastExecutionFrom := c.FormValue("filterByLastExecutionDateFrom")
+	if lastExecutionFrom != "" {
+		f.TaskLastExecutionFrom = lastExecutionFrom
+	}
+
+	lastExecutionTo := c.FormValue("filterByLastExecutionDateTo")
+	if lastExecutionTo != "" {
+		f.TaskLastExecutionTo = lastExecutionTo
+	}
+
+	tagId := c.FormValue("tagId")
+	agentId := c.FormValue("agentId")
+	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
+		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+	}
+
+	p.NItems, err = h.Model.CountAllUpdateAgents(f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	agents, err := h.Model.GetUpdateAgentsByPage(p, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -288,7 +278,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Versi
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	higherVersion, err := h.Model.GetHigherAgentVersionInstalled()
+	higherVersion, err := h.Model.GetHigherAgentReleaseInstalled()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -299,5 +289,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, version *admin_views.Versi
 		refreshTime = 5
 	}
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, version, higherVersion, versions, availableOSes, appliedTags, refreshTime, successMessage, errorMessage)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
 }
