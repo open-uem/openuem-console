@@ -361,6 +361,7 @@ es:
     import_wrong_country: País %s en la fila %d debe ser un código ISO3166 Alpha2 de dos letras
     import_wrong_email: Email en la fila %d debe contener una dirección válida
     import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
+    admin_cannot_be_removed: "El usuario admin no puede ser eliminado"
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"

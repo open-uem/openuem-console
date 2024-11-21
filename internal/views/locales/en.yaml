@@ -364,6 +364,7 @@ en:
     import_wrong_country: Country %s in row %d must be a valid two letter ISO3166 Alpha2 code
     import_wrong_email: Email in row %d must be a valid address
     import_wrong_users: "We encountered errors for the following users: %s"
+    admin_cannot_be_removed: "The admin user cannot be removed"
   updates:
     title: "Security Updates"
     description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"

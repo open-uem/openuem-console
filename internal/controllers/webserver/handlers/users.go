@@ -206,6 +206,10 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 
 func (h *Handler) DeleteUser(c echo.Context) error {
 	uid := c.Param("uid")
+
+	if uid == "admin" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.admin_cannot_be_removed"), false))
+	}
 	_, err := h.Model.GetUserById(uid)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
