@@ -33,17 +33,15 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
 					if agent.IP != "" && agent.Vnc != "" {
-						<div id="vnc" class="uk-card uk-card-body uk-card-default">
-							<button
-								class="uk-button uk-button-primary"
-								hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
-								hx-target="#vnc"
-								hx-swap="innerHTML"
-								type="button"
-							>
-								{ i18n.T(ctx, "Connect") }
-							</button>
-						</div>
+						<button
+							class="uk-button uk-button-primary"
+							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
+							hx-target="#vnc"
+							hx-swap="innerHTML"
+							type="button"
+						>
+							{ i18n.T(ctx, "Connect") }
+						</button>
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "agents.no_supported_vnc") }
