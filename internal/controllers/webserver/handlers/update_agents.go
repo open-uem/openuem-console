@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -136,8 +137,13 @@ func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 }
 
 func (h *Handler) GetLatestRelease(channel string) (*admin_views.LatestRelease, error) {
-	// TODO specify the channel
-	url := "http://localhost:8888/" + channel
+
+	if !slices.Contains([]string{"stable", "testing", "devel"}, channel) {
+		return nil, fmt.Errorf("channel is not valid")
+	}
+
+	// Check release against our API
+	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestAgentRelease&channel=%s", channel)
 
 	client := http.Client{
 		Timeout: time.Second * 8,
