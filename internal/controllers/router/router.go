@@ -18,6 +18,7 @@ import (
 	"github.com/invopop/ctxi18n"
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
+	etag "github.com/pablor21/echo-etag/v4"
 )
 
 func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.Echo {
@@ -90,6 +91,9 @@ func staticAssets(e *echo.Echo, cwd string) string {
 	} else {
 		assetsPath = filepath.Join(cwd, "assets")
 	}
+
+	//Etag middleware so no-cache can make use of no-cache
+	e.Use(etag.Etag())
 
 	// nosniff + no-cache
 	customHeaderMw := func(next echo.HandlerFunc) echo.HandlerFunc {
