@@ -104,7 +104,7 @@ func staticAssets(e *echo.Echo, cwd string) string {
 		}
 	}
 
-	e.Add(http.MethodGet, "/static*", echo.StaticDirectoryHandler(os.DirFS(assetsPath), false), customHeaderMw)
+	e.Add(http.MethodGet, "/assets*", echo.StaticDirectoryHandler(os.DirFS(assetsPath), false), customHeaderMw)
 
 	return assetsPath
 }
