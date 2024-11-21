@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -289,5 +290,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, release *admin_views.Lates
 		refreshTime = 5
 	}
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, l, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
 }

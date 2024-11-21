@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/agents_views"
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -106,7 +107,9 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		refreshTime = 5
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

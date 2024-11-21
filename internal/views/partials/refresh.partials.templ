@@ -2,14 +2,15 @@ package partials
 
 import (
 	"fmt"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"time"
 )
 
-templ RefreshPage(url, target, swap, method string, refreshTime int, showTime bool) {
+templ RefreshPage(l locales.Translator, url, target, swap, method string, refreshTime int, showTime bool) {
 	<div class="flex gap-4 items-center">
 		if showTime {
-			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", time.Now().Format("15:04:05")) }</span>
+			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", l.FmtDateMedium(time.Now())) }</span>
 		}
 		<button
 			type="button"

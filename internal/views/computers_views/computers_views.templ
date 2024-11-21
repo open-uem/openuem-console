@@ -7,12 +7,13 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"strings"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int) {
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -32,7 +33,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
 							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0
 					})
-					@partials.RefreshPage("/computers", "#main", "outerHTML", "post", refreshTime, true)
+					@partials.RefreshPage(l, "/computers", "#main", "outerHTML", "post", refreshTime, true)
 				</div>
 				if len(agents) > 0 {
 					<form class="mt-5 mb-2">

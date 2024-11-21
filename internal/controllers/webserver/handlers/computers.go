@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/computers_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -53,7 +54,10 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(agent, p, confirmDelete)))
+
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(p, l, agent, confirmDelete)))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
@@ -312,7 +316,9 @@ func (h *Handler) Computers(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, l, computers, versions, vendors, models, tags, availableOSes, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context) error {
@@ -347,8 +353,10 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	l := views.GetTranslatorForDates(c)
+
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -357,7 +365,7 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, confirmDelete, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, l, agent, deployments, confirmDelete, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {

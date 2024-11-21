@@ -5,12 +5,13 @@ import (
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"strconv"
 )
 
-templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int) {
+templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, l locales.Translator, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: "/security"}, {Title: "Antivirus", Url: "/security/antivirus"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -32,7 +33,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
 							
 							})
-							@partials.RefreshPage("/security", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(l, "/security", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(antiviri) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">

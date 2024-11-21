@@ -17,6 +17,7 @@ require (
 	github.com/go-echarts/go-echarts/v2 v2.4.1
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
+	github.com/gohugoio/locales v0.14.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8
 	github.com/invopop/ctxi18n v0.8.1

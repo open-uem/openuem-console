@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -56,7 +57,10 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, certTypes, certificates, successMessage)))
+
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, l, certTypes, certificates, successMessage)))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {

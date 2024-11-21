@@ -5,12 +5,13 @@ import (
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -85,12 +86,12 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *openue
 										{ i18n.T(ctx, "agents.no_deployments") }
 									}
 								</p>
-								@partials.RefreshPage(string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
+								@partials.RefreshPage(l, string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
 							</div>
 							<div>
 								if p.NItems > 0 {
 									<div id="deployments-results">
-										@DeploymentsTable(c, p, agent.ID, deployments)
+										@DeploymentsTable(c, p, l, agent.ID, deployments)
 									</div>
 								}
 							</div>
@@ -151,7 +152,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 	}
 }
 
-templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*openuem_ent.Deployment) {
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agentId string, packages []*openuem_ent.Deployment) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 		<thead>
 			<tr>
@@ -189,8 +190,8 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 						@partials.Brand(strings.ToLower(item.Name), "")
 					</td>
 					<td class="!align-middle">{ item.Name }</td>
-					<td class="!align-middle">{ item.Installed.Format("02/01/2006 15:04:05") }</td>
-					<td class="!align-middle">{ item.Updated.Format("02/01/2006 15:04:05") }</td>
+					<td class="!align-middle">{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) } </td>
+					<td class="!align-middle">{ l.FmtDateMedium(item.Updated) + " " + l.FmtTimeShort(item.Updated) }</td>
 					<td class="!align-middle">
 						<form>
 							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>

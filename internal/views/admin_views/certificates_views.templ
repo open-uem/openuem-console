@@ -6,12 +6,13 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"time"
 )
 
-templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.CertificateFilter, certTypes []string, certificates []*openuem_ent.Certificate, successMessage string) {
+templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.CertificateFilter, l locales.Translator, certTypes []string, certificates []*openuem_ent.Certificate, successMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Certificates", Url: "/admin/certificates"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -91,7 +92,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 												-
 											} else {
 												<div class="flex gap-2 items-center">
-													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ certificate.Expiry.Local().Format("02/01/2006") }</span>
+													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ l.FmtDateLong(certificate.Expiry.Local()) }</span>
 													if IsCertificateAboutToExpire(certificate.Expiry) {
 														@partials.AlertIcon(i18n.T(ctx, "certificates.about_to_expiry"))
 													}

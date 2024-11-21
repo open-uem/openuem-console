@@ -6,6 +6,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/mod/semver"
@@ -30,7 +31,7 @@ type LatestRelease struct {
 	IsCritical      bool       `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *LatestRelease, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, l locales.Translator, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *LatestRelease, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -84,7 +85,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 								if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
 									<p class="uk-text-small">
 										{ i18n.T(ctx, "admin.update.agents.new_version_date") }
-										{ latestRelease.ReleaseDate.Format("2006-01-02") }
+										{ l.FmtDateMedium(latestRelease.ReleaseDate) }
 									</p>
 								}
 								<p class="uk-text-small uk-text-italic">{ latestRelease.Summary } </p>
@@ -92,7 +93,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 							<hr class="uk-divider-icon"/>
 							<div class="flex justify-between">
 								<div class="flex items-center gap-4">
-									@partials.RefreshPage("/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
+									@partials.RefreshPage(l, "/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
 									@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
 										return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
 											len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
@@ -385,7 +386,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												}
 												if !agent.UpdateTaskExecution.IsZero() {
 													<td class="!align-middle">
-														{ agent.UpdateTaskExecution.Format("02/01/2006 15:04:05") }
+														{ l.FmtDateMedium(agent.UpdateTaskExecution.Local()) + " " + l.FmtTimeShort(agent.UpdateTaskExecution.Local()) }
 													</td>
 												} else {
 													<td class="!align-middle"></td>

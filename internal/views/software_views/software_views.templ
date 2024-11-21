@@ -5,13 +5,14 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"strconv"
 	"strings"
 )
 
-templ Software(c echo.Context, p partials.PaginationAndSort, apps []models.App, f filters.ApplicationsFilter, refresh int) {
+templ Software(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsFilter, l locales.Translator, apps []models.App, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Software", i18n.Default("Software")), Url: "/software"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -26,7 +27,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, apps []models.App, 
 					@filters.ClearFilters("/software", "#main", "outerHTML", func() bool {
 						return f.AppName == "" && f.Vendor == ""
 					})
-					@partials.RefreshPage("/software", "#main", "outerHTML", "get", refresh, true)
+					@partials.RefreshPage(l, "/software", "#main", "outerHTML", "get", refresh, true)
 				</div>
 				if len(apps) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">

@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -103,7 +104,9 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		refreshTime = 5
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, users, p, f, successMessage, errMessage, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, l, users, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {

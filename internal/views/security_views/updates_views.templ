@@ -5,11 +5,12 @@ import (
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
-templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
+templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, l locales.Translator, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -32,7 +33,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									f.LastInstallFrom == "" && f.LastInstallTo == "" &&
 									len(f.PendingUpdateOptions) == 0
 							})
-							@partials.RefreshPage("/security/updates", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(l, "/security/updates", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(systemUpdates) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
@@ -110,8 +111,8 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 												}
 											</td>
 											<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
-											<td>{ systemUpdate.LastSearch.Format("02/01/2006 15:04:05") }</td>
-											<td>{ systemUpdate.LastInstall.Format("02/01/2006 15:04:05") }</td>
+											<td>{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
+											<td>{ l.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + l.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
 											if systemUpdate.PendingUpdates {
 												<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
 											} else {

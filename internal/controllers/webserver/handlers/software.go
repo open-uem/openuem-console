@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem-console/internal/views/software_views"
@@ -51,5 +52,7 @@ func (h *Handler) Software(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, apps, f, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, f, l, apps, refreshTime)))
 }

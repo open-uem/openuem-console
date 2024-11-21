@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/charts"
 	"github.com/doncicuto/openuem-console/internal/views/dashboard_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -136,7 +137,9 @@ func (h *Handler) Dashboard(c echo.Context) error {
 
 	h.CheckNATSComponentStatus(&data)
 
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data, l)))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

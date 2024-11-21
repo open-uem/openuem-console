@@ -6,13 +6,14 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/mssola/useragent"
 	"log"
 )
 
-templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAndSort, successMessage, errMessage string, codec scs.Codec) {
+templ Sessions(c echo.Context, p partials.PaginationAndSort, l locales.Translator, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -77,7 +78,7 @@ templ Sessions(c echo.Context, sessions []*ent.Sessions, p partials.PaginationAn
 										if session.Expiry.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ session.Expiry.Local().Format("02/01/2006 15:04:05") }</td>
+											<td>{ l.FmtDateMedium(session.Expiry.Local()) + " " + l.FmtTimeShort(session.Expiry.Local()) }</td>
 										}
 										<td>
 											@partials.MoreButton(index)

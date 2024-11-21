@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/doncicuto/openuem-console/internal/views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem-console/internal/views/security_views"
@@ -82,7 +83,9 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, f, antiviri, detectedAntiviri, availableOSes, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, f, l, antiviri, detectedAntiviri, availableOSes, refreshTime)))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
@@ -161,7 +164,9 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, f, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, f, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
@@ -193,9 +198,11 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security")))
 	}
 
+	l := views.GetTranslatorForDates(c)
+
 	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates))
+		return RenderView(c, security_views.LatestUpdates(c, p, l, agent, updates))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, l, agent, updates)))
 }

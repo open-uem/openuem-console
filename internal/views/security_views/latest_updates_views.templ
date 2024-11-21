@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
-templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update) {
+templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agent *ent.Agent, updates []*ent.Update) {
 	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "updates_history.title") } </title>
 	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}, {Title: agent.Hostname, Url: fmt.Sprintf("/security/%s/updates", agent.ID)}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -45,7 +46,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 								for _, update := range updates {
 									<tr>
 										<td>{ update.Title }</td>
-										<td>{ update.Date.Format("02/01/2006") }</td>
+										<td>{ l.FmtDateMedium(update.Date) }</td>
 										<td><a class="underline text-blue-500" target="_blank" rel="noopener" href={ templ.URL(update.SupportURL) }>{ update.SupportURL }</a></td>
 									</tr>
 								}

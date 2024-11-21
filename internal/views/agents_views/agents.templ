@@ -6,11 +6,12 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -37,12 +38,12 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
 							f.ContactFrom == "" && f.ContactTo == ""
 					})
-					@partials.RefreshPage("/agents", "#main", "outerHTML", "post", refresh, true)
+					@partials.RefreshPage(l, "/agents", "#main", "outerHTML", "post", refresh, true)
 				</div>
 				if len(agents) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
-						@AgentsTableHead(c, p, f, appliedTags, availableOSes)
-						@AgentsTableBody(p, agents, availableTags)
+						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
+						@AgentsTableBody(p, l, agents, availableTags)
 					</table>
 					@partials.Pagination(c, p, "#main", "outerHTML", "[name^='filter']")
 				} else {
@@ -91,7 +92,7 @@ templ AgentsIndex(title string, cmp templ.Component) {
 	}
 }
 
-templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, tags []*ent.Tag, availableOSes []string) {
+templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, tags []*ent.Tag, availableOSes []string) {
 	<thead>
 		<tr>
 			<th class="w-1/6">
@@ -157,7 +158,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</thead>
 }
 
-templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []*ent.Tag) {
+templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag) {
 	for index, agent := range agents {
 		<tr>
 			<td
@@ -188,7 +189,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
 				@partials.AddTagButton(p, tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
 			</td>
-			<td class="!align-middle">{ agent.LastContact.Local().Format("02/01/2006 15:04:05") }</td>
+			<td class="!align-middle">{ l.FmtDateMedium(agent.LastContact.Local()) + " " + l.FmtTimeShort(agent.LastContact.Local()) } </td>
 			<td class="!align-middle">
 				@AddActionsButton(agent, index)
 			</td>
