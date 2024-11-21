@@ -106,7 +106,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, l, users, successMessage, errMessage, refreshTime)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -115,7 +115,7 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, defaultCountry)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -341,7 +341,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, user, defaultCountry)))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {

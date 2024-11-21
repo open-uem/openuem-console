@@ -6,5 +6,5 @@ import (
 )
 
 func (h *Handler) RemoteWorkers(c echo.Context) error {
-	return RenderView(c, remote_workers_views.RemoteWorkersIndex("| Remote Workers", remote_workers_views.RemoteWorkers()))
+	return RenderView(c, remote_workers_views.RemoteWorkersIndex("| Remote Workers", remote_workers_views.RemoteWorkers(h.SessionManager)))
 }

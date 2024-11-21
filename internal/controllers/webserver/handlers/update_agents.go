@@ -298,5 +298,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, release *admin_views.Lates
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, l, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
 }

@@ -139,7 +139,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data, l)))
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(h.SessionManager, l, data)))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

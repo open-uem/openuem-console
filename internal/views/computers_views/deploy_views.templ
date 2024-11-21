@@ -2,6 +2,7 @@ package computers_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
@@ -11,8 +12,8 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

@@ -29,7 +29,7 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec)))
+	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {

@@ -2,6 +2,7 @@ package admin_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -31,8 +32,8 @@ type LatestRelease struct {
 	IsCritical      bool       `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, l locales.Translator, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *LatestRelease, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}})
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, sm *sessions.SessionManager, l locales.Translator, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *LatestRelease, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

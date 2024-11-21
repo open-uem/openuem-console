@@ -2,6 +2,7 @@ package computers_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
@@ -9,8 +10,8 @@ import (
 
 var connectVNCHandle = templ.NewOnceHandle()
 
-templ RemoteAssistance(agent *ent.Agent, p partials.PaginationAndSort, confirmDelete bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
+templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager, agent *ent.Agent, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -30,23 +31,25 @@ templ RemoteAssistance(agent *ent.Agent, p partials.PaginationAndSort, confirmDe
 						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.vnc_description") }</p>
 					</div>
 				</div>
-				if agent.IP != "" && agent.Vnc != "" {
-					<div id="vnc" class="uk-card uk-card-body uk-card-default">
-						<button
-							class="uk-button uk-button-primary"
-							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
-							hx-target="#vnc"
-							hx-swap="innerHTML"
-							type="button"
-						>
-							{ i18n.T(ctx, "Connect") }
-						</button>
-					</div>
-				} else {
-					<p class="uk-text-small uk-text-muted m-6">
-						{ i18n.T(ctx, "agents.no_supported_vnc") }
-					</p>
-				}
+				<div class="uk-card uk-card-body uk-card-default">
+					if agent.IP != "" && agent.Vnc != "" {
+						<div id="vnc" class="uk-card uk-card-body uk-card-default">
+							<button
+								class="uk-button uk-button-primary"
+								hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
+								hx-target="#vnc"
+								hx-swap="innerHTML"
+								type="button"
+							>
+								{ i18n.T(ctx, "Connect") }
+							</button>
+						</div>
+					} else {
+						<p class="uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "agents.no_supported_vnc") }
+						</p>
+					}
+				</div>
 			</div>
 		</div>
 	</main>

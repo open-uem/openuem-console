@@ -2,6 +2,7 @@ package agents_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -11,8 +12,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}})
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -56,16 +57,16 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 	</main>
 }
 
-templ AgentsConfirmDelete(agent *ent.Agent) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}})
+templ AgentsConfirmDelete(sm *sessions.SessionManager, agent *ent.Agent) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		@partials.ConfirmDelete(i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
 		@AgentInfo(agent)
 	</main>
 }
 
-templ AgentsConfirmDisable(agent *ent.Agent) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}})
+templ AgentsConfirmDisable(sm *sessions.SessionManager, agent *ent.Agent) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
 		@partials.ConfirmDisable(i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable")
 		@AgentInfo(agent)

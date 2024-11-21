@@ -2,6 +2,7 @@ package admin_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
@@ -10,8 +11,8 @@ import (
 	"math/rand"
 )
 
-templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Tags", Url: "/admin/tags"}})
+templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, tags []*ent.Tag) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Tags", Url: "/admin/tags"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

@@ -60,7 +60,7 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, l, certTypes, certificates, successMessage)))
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage)))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {

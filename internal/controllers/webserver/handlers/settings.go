@@ -121,7 +121,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings)))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, settings)))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {

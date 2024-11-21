@@ -1,7 +1,9 @@
 package partials
 
-templ Error(err, title, url string) {
-	@Header([]Breadcrumb{{Title: title, Url: url}})
+import "github.com/doncicuto/openuem-console/internal/controllers/sessions"
+
+templ Error(err, title, url string, sm *sessions.SessionManager) {
+	@Header([]Breadcrumb{{Title: title, Url: url}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-alert uk-alert-danger" uk-alert>
 			<div class="uk-alert-description uk-text-large p-4">

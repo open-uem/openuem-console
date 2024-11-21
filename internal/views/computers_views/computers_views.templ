@@ -2,6 +2,7 @@ package computers_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/models"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
@@ -13,8 +14,8 @@ import (
 	"strings"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}})
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">

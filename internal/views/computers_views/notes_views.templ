@@ -2,14 +2,15 @@ package computers_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
-templ Notes(c echo.Context, agent *openuem_ent.Agent, markdown, renderedMarkdown string, p partials.PaginationAndSort, confirmDelete bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}})
+templ Notes(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, agent *openuem_ent.Agent, markdown, renderedMarkdown string, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

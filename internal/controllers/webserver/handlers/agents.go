@@ -109,7 +109,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
@@ -122,7 +122,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
@@ -166,7 +166,7 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {

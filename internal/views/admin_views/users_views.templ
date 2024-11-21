@@ -2,6 +2,7 @@ package admin_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
@@ -14,8 +15,8 @@ import (
 	"strings"
 )
 
-templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
+templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -289,8 +290,8 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 	</main>
 }
 
-templ NewUser(c echo.Context, defaultCountry string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
+templ NewUser(c echo.Context, sm *sessions.SessionManager, defaultCountry string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -392,8 +393,8 @@ templ NewUser(c echo.Context, defaultCountry string) {
 	</main>
 }
 
-templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}})
+templ EditUser(c echo.Context, sm *sessions.SessionManager, user *openuem_ent.User, defaultCountry string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

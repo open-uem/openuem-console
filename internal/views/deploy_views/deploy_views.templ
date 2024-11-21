@@ -2,6 +2,7 @@ package deploy_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	models "github.com/doncicuto/openuem-console/internal/models/winget"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/layout"
@@ -13,13 +14,13 @@ import (
 	"strings"
 )
 
-templ Deploy(install bool, successMessage string) {
+templ Deploy(sm *sessions.SessionManager, install bool, successMessage string) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}})
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}}, sm)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}})
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}}, sm)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -201,13 +202,13 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}})
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}}, sm)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}, {Title: packageName, Url: ""}})
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}, {Title: packageName, Url: ""}}, sm)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
