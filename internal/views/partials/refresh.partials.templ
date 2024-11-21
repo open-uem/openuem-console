@@ -10,7 +10,7 @@ import (
 templ RefreshPage(l locales.Translator, url, target, swap, method string, refreshTime int, showTime bool) {
 	<div class="flex gap-4 items-center">
 		if showTime {
-			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", l.FmtDateMedium(time.Now())) }</span>
+			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", l.FmtDateMedium(time.Now()) + " " + l.FmtTimeShort(time.Now())) }</span>
 		}
 		<button
 			type="button"
