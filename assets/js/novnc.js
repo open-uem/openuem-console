@@ -72,8 +72,7 @@ function connectToServer() {
   // By default, use the host and port of server that served this file
   /* const host = readQueryVariable('host', window.location.hostname); */
 
-  const host =
-    document.getElementById("vncHostname").value || "lothlorien.openuem.eu";
+  const host = document.getElementById("vncHostname").value;
   const port = document.getElementById("vncPort").value || "1443";
   const password =
     document.getElementById("vncPIN").getElementsByTagName("input")[6].value ||
