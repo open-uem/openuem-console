@@ -19,6 +19,8 @@ templ Manufacturer(brand string) {
 		<i class="si si-vmware si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "lenovo") {
 		<i class="si si-lenovo si--color uk-cloak text-5xl"></i>
+	} else if strings.Contains(brand, "microsoft") {
+		<i class="ri-windows-fill ri-2x text-blue-600"></i>
 	} else {
 		<span>{ strings.ToUpper(brand) }</span>
 	}
