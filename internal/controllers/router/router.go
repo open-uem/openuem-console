@@ -84,7 +84,6 @@ func staticAssets(e *echo.Echo, cwd string) string {
 	var assetsPath string
 
 	// Static assets + Headers (Ref: https://github.com/labstack/echo/issues/1902#issuecomment-2435145166)
-	// TODO - Replace with a better cache approach like immutable
 	if strings.HasSuffix(cwd, "tmp") {
 		// DEVEL
 		assetsPath = filepath.Join(filepath.Dir(cwd), "assets")
@@ -92,7 +91,8 @@ func staticAssets(e *echo.Echo, cwd string) string {
 		assetsPath = filepath.Join(cwd, "assets")
 	}
 
-	//Etag middleware so no-cache can make use of no-cache
+	// Etag middleware so no-cache can make use of no-cache
+	// Ref: https://github.com/pablor21/echo-etag
 	e.Use(etag.Etag())
 
 	// nosniff + no-cache

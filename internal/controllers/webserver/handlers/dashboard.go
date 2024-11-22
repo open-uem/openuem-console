@@ -17,6 +17,26 @@ func (h *Handler) Dashboard(c echo.Context) error {
 	var err error
 	data := dashboard_views.DashboardData{}
 
+	// Get latest version
+	channel, err := h.Model.GetDefaultUpdateChannel()
+	if err != nil {
+		log.Println("[ERROR]: could not get updates channel settings")
+		channel = "stable"
+	}
+
+	release, err := h.GetLatestRelease(channel)
+	if err != nil {
+		log.Println("[ERROR]: could not get latest version information")
+		data.OpenUEMUpdaterAPIStatus = "down"
+		data.NUpgradableAgents = 0
+	} else {
+		data.OpenUEMUpdaterAPIStatus = "up"
+		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(release.Version)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	data.Charts, err = h.generateCharts(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -113,26 +133,6 @@ func (h *Handler) Dashboard(c echo.Context) error {
 	data.NCertificatesAboutToExpire, err = h.Model.CountCertificatesAboutToexpire()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// Get latest version
-	channel, err := h.Model.GetDefaultUpdateChannel()
-	if err != nil {
-		log.Println("[ERROR]: could not get updates channel settings")
-		channel = "stable"
-	}
-
-	release, err := h.GetLatestRelease(channel)
-	if err != nil {
-		log.Println("[ERROR]: could not get latest version information")
-		data.OpenUEMUpdaterAPIStatus = "down"
-		data.NUpgradableAgents = 0
-	} else {
-		data.OpenUEMUpdaterAPIStatus = "up"
-		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(release.Version)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
 	}
 
 	h.CheckNATSComponentStatus(&data)

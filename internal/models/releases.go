@@ -10,7 +10,7 @@ import (
 )
 
 func (m *Model) GetAgentsReleases() ([]*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.HasAgents()).Order(ent.Desc(release.FieldVersion)).All(context.Background())
+	return m.Client.Release.Query().Order(ent.Desc(release.FieldVersion)).All(context.Background())
 }
 
 func (m *Model) GetAgentsReleaseByType(channel, os, arch, version string) (*openuem_ent.Release, error) {
@@ -30,7 +30,7 @@ func (m *Model) GetHigherAgentReleaseInstalled() (*ent.Release, error) {
 
 func (m *Model) CountOutdatedAgents() (int, error) {
 	release, err := m.GetHigherAgentReleaseInstalled()
-	if err != nil {
+	if err != nil || release == nil {
 		return 0, err
 	}
 

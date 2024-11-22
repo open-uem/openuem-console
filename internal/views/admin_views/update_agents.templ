@@ -57,55 +57,56 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 						</p>
 					</div>
 					<div class="uk-card-body">
-						<div class="flex flex-col gap-4 mt-4">
-							if latestRelease == nil {
-								@GetVersionError()
-							}
-							if latestRelease != nil {
-								<div class="flex items-center justify-between">
-									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
-										<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", latestRelease.IsCritical), templ.KV("bg-blue-700", !latestRelease.IsCritical) }>
-											if latestRelease.IsCritical {
-												{ i18n.T(ctx, "admin.update.agents.critical") }
-											} else {
-												{ i18n.T(ctx, "admin.update.agents.available") }
-											}
-										</p>
-									} else {
-										<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
-									}
-								</div>
-								<p class="uk-text-small">
-									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
-										{ i18n.T(ctx, "admin.update.agents.new_version_available") }
-									} else {
-										{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
-									}
-									<a href={ templ.URL(latestRelease.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ latestRelease.Version }</a>
-								</p>
-								if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
-									<p class="uk-text-small">
-										{ i18n.T(ctx, "admin.update.agents.new_version_date") }
-										{ l.FmtDateMedium(latestRelease.ReleaseDate) }
-									</p>
+						if len(agents) > 0 {
+							<div class="flex flex-col gap-4 mt-4">
+								if latestRelease == nil {
+									@GetVersionError()
 								}
-								<p class="uk-text-small uk-text-italic">{ latestRelease.Summary } </p>
-							}
-							<hr class="uk-divider-icon"/>
-							<div class="flex justify-between">
-								<div class="flex items-center gap-4">
-									@partials.RefreshPage(l, "/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
-									@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
-										return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
-											len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
-											len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionFrom) == 0
-									})
-									<button
-										id="select-all"
-										title={ i18n.T(ctx, "SelectAll") }
-										type="button"
-										class="uk-button uk-button-default flex items-center gap-2"
-										_={ fmt.Sprintf(`on click 
+								if latestRelease != nil {
+									<div class="flex items-center justify-between">
+										if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
+											<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", latestRelease.IsCritical), templ.KV("bg-blue-700", !latestRelease.IsCritical) }>
+												if latestRelease.IsCritical {
+													{ i18n.T(ctx, "admin.update.agents.critical") }
+												} else {
+													{ i18n.T(ctx, "admin.update.agents.available") }
+												}
+											</p>
+										} else {
+											<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.agents.current") }</p>
+										}
+									</div>
+									<p class="uk-text-small">
+										if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
+											{ i18n.T(ctx, "admin.update.agents.new_version_available") }
+										} else {
+											{ i18n.T(ctx, "admin.update.agents.no_new_version_available") }
+										}
+										<a href={ templ.URL(latestRelease.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ latestRelease.Version }</a>
+									</p>
+									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
+										<p class="uk-text-small">
+											{ i18n.T(ctx, "admin.update.agents.new_version_date") }
+											{ l.FmtDateMedium(latestRelease.ReleaseDate) }
+										</p>
+									}
+									<p class="uk-text-small uk-text-italic">{ latestRelease.Summary } </p>
+								}
+								<hr class="uk-divider-icon"/>
+								<div class="flex justify-between">
+									<div class="flex items-center gap-4">
+										@partials.RefreshPage(l, "/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
+										@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+											return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
+												len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
+												len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionFrom) == 0
+										})
+										<button
+											id="select-all"
+											title={ i18n.T(ctx, "SelectAll") }
+											type="button"
+											class="uk-button uk-button-default flex items-center gap-2"
+											_={ fmt.Sprintf(`on click 
 												repeat in <input[id^='check-']/>
 													if it.checked is false then
 														it.click()
@@ -119,15 +120,15 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 													remove @disabled from #update-all-button
 												end
 											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
-									>
-										{ i18n.T(ctx, "SelectAll") }
-									</button>
-									<button
-										id="deselect-all"
-										title={ i18n.T(ctx, "DeselectAll") }
-										type="button"
-										class="uk-button uk-button-default flex items-center gap-2"
-										_="on click 
+										>
+											{ i18n.T(ctx, "SelectAll") }
+										</button>
+										<button
+											id="deselect-all"
+											title={ i18n.T(ctx, "DeselectAll") }
+											type="button"
+											class="uk-button uk-button-default flex items-center gap-2"
+											_="on click 
 										repeat in <input[type='checkbox']/>
 											if it.checked is true then
 												it.click()
@@ -137,20 +138,20 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 										set sessionStorage.selectedAgents to storedItems as JSON
 										set #filterBySelectedItems.value to '0'
 										set #items-selected.innerHTML to '0'
-										add @disabled to <button[id$=-all-button]/>
+										add @disabled to #update-all-button
 									end"
-									>
-										{ i18n.T(ctx, "DeselectAll") }
-									</button>
-									<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
-								</div>
-								<form class="flex items-center gap-4">
-									<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
-									<input id="selectedAgents" type="hidden" name="selectedAgents"/>
-									<input id="filterBySelectedRelease" type="hidden" name="filterBySelectedRelease" value={ f.SelectedRelease }/>
-									<select
-										class="uk-select"
-										_="on change
+										>
+											{ i18n.T(ctx, "DeselectAll") }
+										</button>
+										<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+									</div>
+									<form class="flex items-center gap-4">
+										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+										<input id="selectedAgents" type="hidden" name="selectedAgents"/>
+										<input id="filterBySelectedRelease" type="hidden" name="filterBySelectedRelease" value={ f.SelectedRelease }/>
+										<select
+											class="uk-select"
+											_="on change
 											if sessionStorage.selectedAgents exists then														
 												set storedItems to sessionStorage.selectedAgents as Object
 											end		
@@ -162,32 +163,31 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												add @disabled to #update-all-button
 											end
 										end"
-										title={ i18n.T(ctx, "admin.update.agents.select_release") }
-									>
-										<option value="">{ i18n.T(ctx, "admin.update.agents.select_release") }</option>
-										for _,r := range allReleases {
-											<option value={ r.Version } selected?={ r.Version == f.SelectedRelease }>{ r.Version }</option>
-										}
-									</select>
-									<button
-										id="update-all-button"
-										title={ i18n.T(ctx, "UpdateAll") }
-										type="button"
-										class="uk-button uk-button-primary"
-										hx-post="/admin/update-agents/confirm"
-										hx-push-url="false"
-										hx-target="#main"
-										hx-swap="outerHTML"
-										disabled?={ f.SelectedItems == 0 || len(f.SelectedRelease) == 0 }
-									>
-										<div class="flex items-center gap-2">
-											<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
-											{ i18n.T(ctx, "Update") }
-										</div>
-									</button>
-								</form>
-							</div>
-							if len(agents) > 0 {
+											title={ i18n.T(ctx, "admin.update.agents.select_release") }
+										>
+											<option value="">{ i18n.T(ctx, "admin.update.agents.select_release") }</option>
+											for _,r := range allReleases {
+												<option value={ r.Version } selected?={ r.Version == f.SelectedRelease }>{ r.Version }</option>
+											}
+										</select>
+										<button
+											id="update-all-button"
+											title={ i18n.T(ctx, "UpdateAll") }
+											type="button"
+											class="uk-button uk-button-primary"
+											hx-post="/admin/update-agents/confirm"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											disabled?={ f.SelectedItems == 0 || len(f.SelectedRelease) == 0 }
+										>
+											<div class="flex items-center gap-2">
+												<uk-icon hx-history="false" icon="arrows-up-from-line" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												{ i18n.T(ctx, "Update") }
+											</div>
+										</button>
+									</form>
+								</div>
 								<div class="flex flex-col gap-2">
 									<table
 										class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-4"
@@ -415,8 +415,12 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 									</table>
 								</div>
 								@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
-							}
-						</div>
+							</div>
+						} else {
+							<p class="uk-text-small uk-text-muted mt-4">
+								{ i18n.T(ctx, "agents.no_agents") }
+							</p>
+						}
 					</div>
 				</div>
 			</div>
