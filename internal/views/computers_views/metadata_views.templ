@@ -107,7 +107,7 @@ templ MetadataTable(c echo.Context, p partials.PaginationAndSort, agentId string
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "")
+	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "get", "")
 }
 
 func SearchValue(metadataId int, data []*openuem_ent.Metadata) string {

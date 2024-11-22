@@ -414,7 +414,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "#main", "outerHTML", "[name=search]")
+								@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">

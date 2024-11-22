@@ -25,12 +25,32 @@ type page struct {
 	Disabled bool
 }
 
-templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include string) {
+templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url string) {
 	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
 			<form
-				hx-get={ c.Request().URL.Path }
+				if method == "get" {
+					if url !="" {
+						hx-get={ string(templ.URL(url)) }
+					} else {
+						hx-get={ c.Request().URL.Path }
+					}
+				}
+				if method == "post" {
+					if url !="" {
+						hx-post={ string(templ.URL(url)) }
+					} else {
+						hx-post={ c.Request().URL.Path }
+					}
+				}
+				if method == "delete" {
+					if url !="" {
+						hx-delete={ string(templ.URL(url)) }
+					} else {
+						hx-delete={ c.Request().URL.Path }
+					}
+				}
 				hx-push-url="true"
 				hx-target={ target }
 				hx-swap={ swap }
@@ -60,7 +80,27 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 				if p.CurrentPage > 1 {
 					<li class="cursor-pointer">
 						<form
-							hx-get={ c.Request().URL.Path }
+							if method == "get" {
+								if url !="" {
+									hx-get={ string(templ.URL(url)) }
+								} else {
+									hx-get={ c.Request().URL.Path }
+								}
+							}
+							if method == "post" {
+								if url !="" {
+									hx-post={ string(templ.URL(url)) }
+								} else {
+									hx-post={ c.Request().URL.Path }
+								}
+							}
+							if method == "delete" {
+								if url !="" {
+									hx-delete={ string(templ.URL(url)) }
+								} else {
+									hx-delete={ c.Request().URL.Path }
+								}
+							}
 							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }
@@ -94,7 +134,27 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 					templ.KV("uk-active", page.Active) }
 					>
 						<form
-							hx-get={ c.Request().URL.Path }
+							if method == "get" {
+								if url !="" {
+									hx-get={ string(templ.URL(url)) }
+								} else {
+									hx-get={ c.Request().URL.Path }
+								}
+							}
+							if method == "post" {
+								if url !="" {
+									hx-post={ string(templ.URL(url)) }
+								} else {
+									hx-post={ c.Request().URL.Path }
+								}
+							}
+							if method == "delete" {
+								if url !="" {
+									hx-delete={ string(templ.URL(url)) }
+								} else {
+									hx-delete={ c.Request().URL.Path }
+								}
+							}
 							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }
@@ -116,7 +176,27 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, include stri
 				if p.CurrentPage * p.PageSize < p.NItems {
 					<li class="cursor-pointer">
 						<form
-							hx-get={ c.Request().URL.Path }
+							if method == "get" {
+								if url !="" {
+									hx-get={ string(templ.URL(url)) }
+								} else {
+									hx-get={ c.Request().URL.Path }
+								}
+							}
+							if method == "post" {
+								if url !="" {
+									hx-post={ string(templ.URL(url)) }
+								} else {
+									hx-post={ c.Request().URL.Path }
+								}
+							}
+							if method == "delete" {
+								if url !="" {
+									hx-delete={ string(templ.URL(url)) }
+								} else {
+									hx-delete={ c.Request().URL.Path }
+								}
+							}
 							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }

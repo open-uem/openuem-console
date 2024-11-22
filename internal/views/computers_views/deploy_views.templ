@@ -145,7 +145,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "[name^='filterBy']")
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId))
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -227,5 +227,5 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "")
+	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy", agentId))
 }

@@ -135,7 +135,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "")
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }
