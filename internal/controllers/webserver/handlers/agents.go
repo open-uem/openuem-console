@@ -149,7 +149,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, 10*time.Second); err != nil {
+	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -216,12 +216,10 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 	}
 
 	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	// TODO - Proxy port should not be hardcoded?
-	return RenderView(c, computers_views.VNC(agentId, agent.Hostname, "1443", h.Domain))
-
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, h.SessionManager)))
 }
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {

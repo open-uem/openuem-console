@@ -13,20 +13,17 @@ templ ErrorPage(code, message string) {
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
 			<title>OpenUEM | { message }</title>
-			<link
-				href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
-				rel="stylesheet"
-			/>
+			<link rel="stylesheet" href="/assets/css/remixicon.min.css" type="text/css"/>
+			<link rel="stylesheet" href="/assets/css/simple-icons.min.css" type="text/css"/>
+			<link rel="stylesheet" href="/assets/css/markdown.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/main.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/flag-icons.min.css" type="text/css"/>
-			<link
-				rel="stylesheet"
-				href="https://unpkg.com/franken-ui@1.1.0/dist/css/core.min.css"
-			/>
-			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
-			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js" type="module"></script>
-			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js" type="module"></script>
+			<script src="/assets/js/_hyperscript.min.js"></script>
+			<script src="/assets/js/core.iife.js" type="module"></script>
+			<script src="/assets/js/icon.iife.js" type="module"></script>
+			<script src="/assets/js/htmx.min.js"></script>
 			<script src="/assets/js/echarts.min.js"></script>
+			<script src="/assets/js/openuem.js" type="module"></script>
 		</head>
 		<body>
 			<main class="flex items-center justify-center h-screen w-screen">
@@ -39,7 +36,7 @@ templ ErrorPage(code, message string) {
 						case "500":
 							<uk-icon hx-history="false" icon="bomb" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "503":
-							<uk-icon hx-history="false" icon="clock-alert" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+							<uk-icon hx-history="false" icon="circle-alert" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "401":
 							<uk-icon hx-history="false" icon="ticket-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "405":

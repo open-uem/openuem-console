@@ -2,38 +2,54 @@ package computers_views
 
 import (
 	"fmt"
+	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
+	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
 )
 
-templ VNC(agentId, hostname, port, domainSuffix string) {
-	<div class="flex gap-4 items-center my-4">
-		<div id="vncConnectPanel" class="flex gap-4 items-center">
-			<span>PIN: </span>
-			<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
-			<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">{ i18n.T(ctx, "Authenticate") }</button>
+templ VNC(agent *openuem_ent.Agent, domainSuffix string, sm *sessions.SessionManager) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
+	<main id="main" class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				<div id="error"></div>
+				<div id="vnc" class="flex flex-col gap-2">
+					<div class="flex gap-4 items-center my-4">
+						<div id="vncConnectPanel" class="flex gap-4 items-center">
+							<span>PIN: </span>
+							<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
+							<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">{ i18n.T(ctx, "Authenticate") }</button>
+						</div>
+						<input id="vncHostname" type="hidden" value={ agent.Hostname + "." + domainSuffix }/>
+						<input id="vncPort" type="hidden" value={ agent.VncProxyPort }/>
+						<button
+							class="uk-button uk-button-danger"
+							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/stopvnc", agent.ID))) }
+							hx-target="#vnc"
+							hx-swap="innerHTML"
+						>
+							{ i18n.T(ctx, "Disconnect") }
+						</button>
+					</div>
+					<div id="status" class="uk-text-muted uk-text-small"></div>
+					<div id="screen"></div>
+				</div>
+			</div>
 		</div>
-		<input id="vncHostname" type="hidden" value={ hostname + "." + domainSuffix }/>
-		<input id="vncPort" type="hidden" value={ port }/>
-		<button
-			class="uk-button uk-button-danger"
-			hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/stopvnc", agentId))) }
-			hx-target="#vnc"
-			hx-swap="innerHTML"
-		>
-			{ i18n.T(ctx, "Disconnect") }
-		</button>
-	</div>
-	<div id="status" class="uk-text-muted uk-text-small"></div>
-	<div id="screen"></div>
+	</main>
+	<script type="module" src="/assets/js/novnc.js"></script>
 }
 
 templ VNCConnect(agentId string) {
-	<button
-		class="uk-button uk-button-primary"
-		hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agentId))) }
-		hx-target="#vnc"
-		hx-swap="innerHTML"
-	>
-		{ i18n.T(ctx, "Connect") }
-	</button>
+	<div>
+		<button
+			class="uk-button uk-button-primary"
+			hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agentId))) }
+			hx-target="#main"
+			hx-swap="outerHTML"
+		>
+			{ i18n.T(ctx, "Connect") }
+		</button>
+	</div>
 }

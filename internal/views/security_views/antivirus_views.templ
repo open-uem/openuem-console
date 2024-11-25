@@ -111,16 +111,30 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 														<span></span>
 												}
 											</td>
-											<td>{ antivirus.Name }</td>
+											<td>
+												if len(antivirus.Name) == 0 {
+													{ i18n.T(ctx, "Unknown") }
+												} else {
+													{ antivirus.Name }
+												}
+											</td>
 											if antivirus.IsActive {
 												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
 											} else {
-												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												if len(antivirus.Name) == 0 {
+													<td><uk-icon hx-history="false" icon="shield-question" custom-class="mx-auto h-5 w-5 text-orange-600" uk-cloack></uk-icon></td>
+												} else {
+													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												}
 											}
 											if antivirus.IsUpdated {
 												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
 											} else {
-												<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												if len(antivirus.Name) == 0 {
+													<td><uk-icon hx-history="false" icon="shield-question" custom-class="mx-auto h-5 w-5 text-orange-600" uk-cloack></uk-icon></td>
+												} else {
+													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+												}
 											}
 										</tr>
 									}

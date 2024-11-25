@@ -50,7 +50,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 									</div>
 								</th>
-								<th class="w-1/12">
+								<th>
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "agents.os") }</span>
 										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
@@ -59,7 +59,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 										})
 									</div>
 								</th>
-								<th class="w-1/12">
+								<th>
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "agents.version") }</span>
 										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")

@@ -185,6 +185,11 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 				s.OrderBy(sql.Desc(computer.FieldModel))
 			}).Scan(context.Background(), &computers)
 		}
+	default:
+		err = query.Modify(func(s *sql.Selector) {
+			mainQuery(s, p)
+			s.OrderBy(sql.Desc(agent.FieldLastContact))
+		}).Scan(context.Background(), &computers)
 	}
 	if err != nil {
 		return nil, err

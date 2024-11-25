@@ -18,7 +18,7 @@ templ LogicalDisks(p partials.PaginationAndSort, sm *sessions.SessionManager, ag
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
-				@ComputersNavbar(agent.ID, "logical-disks", confirmDelete)
+				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
@@ -43,7 +43,9 @@ templ LogicalDisks(p partials.PaginationAndSort, sm *sessions.SessionManager, ag
 									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
-									<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
+									if  agent.SftpPort != "" {
+										<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
+									}
 								</tr>
 							</thead>
 							for i, disk := range agent.Edges.Logicaldisks {
@@ -67,23 +69,25 @@ templ LogicalDisks(p partials.PaginationAndSort, sm *sessions.SessionManager, ag
 									<td class="!align-middle">
 										@partials.BitlockerStatus(disk.BitlockerStatus)
 									</td>
-									<td class="!align-middle">
-										<form>
-											<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
-											<button
-												class="flex gap-2 items-center"
-												type="button"
-												hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
-												hx-target="#main"
-												hx-push-url="false"
-												hx-swap="outerHTML"
-												hx-indicator={ fmt.Sprintf("#file-browser-%d", i) }
-											>
-												<uk-icon icon="folder-open" custom-class="h-5 w-5 text-yellow-700 fill-yellow-500" hx-history="false" uk-cloak></uk-icon>
-												<div id={ fmt.Sprintf("file-browser-%d", i) } class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
-											</button>
-										</form>
-									</td>
+									if  agent.SftpPort != "" {
+										<td class="!align-middle">
+											<form>
+												<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
+												<button
+													class="flex gap-2 items-center"
+													type="button"
+													hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
+													hx-target="#main"
+													hx-push-url="false"
+													hx-swap="outerHTML"
+													hx-indicator={ fmt.Sprintf("#file-browser-%d", i) }
+												>
+													<uk-icon icon="folder-open" custom-class="h-5 w-5 text-yellow-700 fill-yellow-500" hx-history="false" uk-cloak></uk-icon>
+													<div id={ fmt.Sprintf("file-browser-%d", i) } class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+												</button>
+											</form>
+										</td>
+									}
 								</tr>
 							}
 						</table>

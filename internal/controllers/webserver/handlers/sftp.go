@@ -53,7 +53,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -106,7 +106,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -149,7 +149,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -201,7 +201,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -267,7 +267,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -332,7 +332,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -397,7 +397,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -458,7 +458,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -526,7 +526,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key)
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -642,7 +642,7 @@ func sortFiles(files []fs.FileInfo) {
 
 }
 
-func connectWithSFTP(IPAddress string, key *rsa.PrivateKey) (*sftp.Client, *ssh.Client, error) {
+func connectWithSFTP(IPAddress string, key *rsa.PrivateKey, sftpPort string) (*sftp.Client, *ssh.Client, error) {
 	signer, err := ssh.NewSignerFromKey(key)
 	if err != nil {
 		return nil, nil, err
@@ -656,7 +656,7 @@ func connectWithSFTP(IPAddress string, key *rsa.PrivateKey) (*sftp.Client, *ssh.
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	conn, err := ssh.Dial("tcp", IPAddress+":2022", config)
+	conn, err := ssh.Dial("tcp", IPAddress+":"+sftpPort, config)
 	if err != nil {
 		return nil, nil, err
 	}

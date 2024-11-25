@@ -19,7 +19,7 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
-				@ComputersNavbar(agent.ID, "remote-assistance", confirmDelete)
+				@ComputersNavbar(agent.ID, "remote-assistance", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
@@ -32,16 +32,17 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if agent.IP != "" && agent.Vnc != "" {
-						<button
-							class="uk-button uk-button-primary"
-							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
-							hx-target="#vnc"
-							hx-swap="innerHTML"
-							type="button"
-						>
-							{ i18n.T(ctx, "Connect") }
-						</button>
+					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 {
+						<div id="vnc">
+							<a
+								class="uk-button uk-button-primary"
+								target="_blank"
+								rel="noopener"
+								href={ templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID)) }
+							>
+								{ i18n.T(ctx, "Connect") }
+							</a>
+						</div>
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "agents.no_supported_vnc") }

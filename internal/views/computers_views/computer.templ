@@ -19,7 +19,7 @@ templ Computer(p partials.PaginationAndSort, sm *sessions.SessionManager, agent 
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
-				@ComputersNavbar(agent.ID, "hardware", confirmDelete)
+				@ComputersNavbar(agent.ID, "hardware", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}

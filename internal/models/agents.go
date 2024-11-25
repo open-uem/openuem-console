@@ -97,7 +97,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 }
 
 func (m *Model) GetAgentById(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithTags().WithComputer().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}

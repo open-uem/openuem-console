@@ -14,11 +14,10 @@ function connectedToServer(e) {
 
 // This function is called when we are disconnected
 function disconnectedFromServer(e) {
-  console.log(e);
   if (e.detail.clean) {
     status("Disconnected");
   } else {
-    status("Wrong authentication");
+    status("Wrong authentication or server could not be reached");
 
     let inputs = document
       .getElementById("vncPIN")

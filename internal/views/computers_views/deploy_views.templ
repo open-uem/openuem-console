@@ -21,7 +21,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
-				@ComputersNavbar(agent.ID, "deploy", confirmDelete)
+				@ComputersNavbar(agent.ID, "deploy", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
@@ -33,72 +33,80 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.deploy_description") }</p>
 					</div>
 				</div>
-				<div class="uk-flex gap-8">
-					<div class="uk-card uk-card-body uk-card-default w-5/12 p-6">
-						<div class="flex flex-col gap-4">
-							<div class="mb-4">
-								<form
-									class="uk-search uk-search-default w-full flex items-center gap-4"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
-									hx-target="#deploy-search-results"
-									hx-push-url="false"
-									hx-swap="innerHTML"
-									_="on load
+				if !strings.Contains(agent.Edges.Operatingsystem.Version, "Windows Server ") {
+					<div class="uk-flex gap-8">
+						<div class="uk-card uk-card-body uk-card-default w-5/12 p-6">
+							<div class="flex flex-col gap-4">
+								<div class="mb-4">
+									<form
+										class="uk-search uk-search-default w-full flex items-center gap-4"
+										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
+										hx-target="#deploy-search-results"
+										hx-push-url="false"
+										hx-swap="innerHTML"
+										_="on load
 										set emptyArray to [] as Array
 										set sessionStorage.checkedItems to emptyArray as JSON
 									end
 								"
-								>
-									<span uk-search-icon></span>
-									<input
-										name="filterByAppName"
-										class="uk-search-input"
-										type="search"
-										placeholder={ i18n.T(ctx, "agents.deploy_search") }
-										aria-label="Search"
-										_="on keyup
+									>
+										<span uk-search-icon></span>
+										<input
+											name="filterByAppName"
+											class="uk-search-input"
+											type="search"
+											placeholder={ i18n.T(ctx, "agents.deploy_search") }
+											aria-label="Search"
+											_="on keyup
 										if my.value.length > 3 then
 											remove @disabled from #search-packages
 										else
 											add @disabled to #search-packages
 										end
 									end"
-									/>
-									<button
-										id="search-packages"
-										type="submit"
-										class="uk-button uk-button-primary"
-										disabled
-									>
-										{ i18n.T(ctx, "Search") }
-									</button>
-								</form>
+										/>
+										<button
+											id="search-packages"
+											type="submit"
+											class="uk-button uk-button-primary"
+											disabled
+										>
+											{ i18n.T(ctx, "Search") }
+										</button>
+									</form>
+								</div>
+								<div id="deploy-search-results"></div>
 							</div>
-							<div id="deploy-search-results"></div>
 						</div>
-					</div>
-					<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
-						<div class="flex flex-col gap-4">
-							<div class="flex justify-between items-center">
-								<p class="uk-text-small uk-text-muted">
+						<div class="uk-card uk-card-body uk-card-default w-7/12 p-6">
+							<div class="flex flex-col gap-4">
+								<div class="flex justify-between items-center">
+									<p class="uk-text-small uk-text-muted">
+										if p.NItems > 0 {
+											{ i18n.T(ctx, "agents.deploy_list") }
+										} else {
+											{ i18n.T(ctx, "agents.no_deployments") }
+										}
+									</p>
+									@partials.RefreshPage(l, string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
+								</div>
+								<div>
 									if p.NItems > 0 {
-										{ i18n.T(ctx, "agents.deploy_list") }
-									} else {
-										{ i18n.T(ctx, "agents.no_deployments") }
+										<div id="deployments-results">
+											@DeploymentsTable(c, p, l, agent.ID, deployments)
+										</div>
 									}
-								</p>
-								@partials.RefreshPage(l, string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
-							</div>
-							<div>
-								if p.NItems > 0 {
-									<div id="deployments-results">
-										@DeploymentsTable(c, p, l, agent.ID, deployments)
-									</div>
-								}
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				} else {
+					<div class="uk-card uk-card-body uk-card-default">
+						<p class="uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "agents.sw_deploy_not_supported") }
+						</p>
+					</div>
+				}
 			</div>
 		</div>
 	</main>

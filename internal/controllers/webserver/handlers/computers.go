@@ -190,7 +190,7 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager)))
 	}
 
-	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
+	agent, err := h.Model.GetAgentOSInfo(agentId)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager)))
 	}
@@ -265,12 +265,6 @@ func (h *Handler) Computers(c echo.Context) error {
 
 	if c.FormValue("filterByApplication") != "" {
 		f.WithApplication = c.FormValue("filterByApplication")
-	}
-
-	// Default sort
-	if p.SortBy == "" {
-		p.SortBy = "hostname"
-		p.SortOrder = "desc"
 	}
 
 	tags, err := h.Model.GetAllTags()

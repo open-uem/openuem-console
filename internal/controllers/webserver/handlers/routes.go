@@ -18,7 +18,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/agents/:uuid/enabled", h.AgentEnable, h.IsAuthenticated)
 	e.POST("/agents/:uuid/forcereport", h.AgentForceRun, h.IsAuthenticated)
 	e.POST("/agents/:uuid/disable", h.AgentConfirmDisable, h.IsAuthenticated)
-	e.POST("/agents/:uuid/startvnc", h.AgentStartVNC, h.IsAuthenticated)
+	e.GET("/agents/:uuid/startvnc", h.AgentStartVNC, h.IsAuthenticated)
 	e.POST("/agents/:uuid/stopvnc", h.AgentStopVNC, h.IsAuthenticated)
 	e.DELETE("/agents/:uuid", h.AgentConfirmDelete, h.IsAuthenticated)
 

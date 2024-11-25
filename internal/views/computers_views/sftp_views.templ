@@ -19,7 +19,7 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, agent 
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 				</div>
-				@ComputersNavbar(agent.ID, "logical-disks", false)
+				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.file_browser.title") }</h3>
