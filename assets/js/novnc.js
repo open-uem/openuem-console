@@ -64,6 +64,19 @@ htmx.onLoad(function () {
   document
     .getElementById("connectVNC")
     ?.addEventListener("click", connectToServer);
+
+  document
+    .getElementById("disconnectVNC")
+    ?.addEventListener("click", disconnectFromServer);
+
+  // Check if unload (browser close or window close) and user didn't disconnect session
+  window.addEventListener("beforeunload", function (event) {
+    // Let's click on disconnect if the disconnect button is not hidden
+    let disconnectButton = document.getElementById("disconnectVNC");
+    if (!disconnectButton.classList.contains("hidden")) {
+      disconnectButton.click();
+    }
+  });
 });
 
 function connectToServer() {
@@ -113,4 +126,8 @@ function connectToServer() {
   rfb.scaleViewport = readQueryVariable("scale", false);
 
   document.getElementById("vncConnectPanel").classList.add("uk-hidden");
+}
+
+function disconnectFromServer() {
+  rfb.disconnect();
 }

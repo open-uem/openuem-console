@@ -208,22 +208,31 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentOSInfo(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, true, h.SessionManager)))
 	}
 
-	if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, h.SessionManager)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, h.SessionManager)))
 }
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentOSInfo(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -233,6 +242,5 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, computers_views.VNCConnect(agentId))
-
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, h.SessionManager)))
 }

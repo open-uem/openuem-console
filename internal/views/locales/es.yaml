@@ -9,6 +9,7 @@ es:
   Clear:
     one: "Limpiar filtro"
     other: "Limpiar filtros"
+  Close: "Cerrar ventana"
   Computers: "Equipos"
   Confirm: "Confirmar"
   Connect: "Conectar"
@@ -122,6 +123,7 @@ es:
     no_vnc: "Ninguno"
     vnc_title: "Asistencia remota"
     vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario. Utilice el PIN para autenticar su sesión."
+    vnc_new_tab: "Abrir la sesión en una nueva pestaña"
     no_supported_vnc: "No está disponible la asistencia remota, o bien no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
     deploy_description: "OpenUEM puede desplegar software en sus equipos de forma automática. Busque un paquete disponible en el repositorio e instálelo o seleccione un paquete desplegado para actualizarlo o desinstalarlo"
     deploy_search: "Busque un paquete por su nombre para instalarlo"

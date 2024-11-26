@@ -8,6 +8,7 @@ en:
   Clear:
     one: "Clear Filter"
     other: "Clear Filters"
+  Close: "Close window"
   Computers: "Computers"
   Confirm: "Confirm"
   Connect: "Connect"
@@ -121,6 +122,7 @@ en:
     no_vnc: "None"
     vnc_title: "Remote Assistance"
     vnc_description: "Initiate a remote assistance session. If the session can be established a PIN will be shown to the user. Use that PIN as the password for the connection."
+    vnc_new_tab: "Open session in a new tab"
     no_supported_vnc: "Remote Assistance is not available, IP address is not assigned to the agent, no user is logged in or no supported VNC server is installed"
     deploy_description: "OpenUEM can deploy software to your computers automatically. Search an available package in the repository and install it or selected a deployed package to update or uninstall it"
     deploy_search: "Search a package by its name to install it"
