@@ -150,7 +150,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {
 	ch := dashboard_views.DashboardCharts{}
 
-	countAllAgents, err := h.Model.CountAllAgents(filters.AgentFilter{})
+	countAllAgents, err := h.Model.CountAllAgents(filters.AgentFilter{}, true)
 	if err != nil {
 		return nil, err
 	}

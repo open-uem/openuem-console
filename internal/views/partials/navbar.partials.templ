@@ -15,8 +15,14 @@ templ NavBar(active string) {
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Dashboard")) }
 				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "dashboard"), templ.KV("text-muted-foreground hover:text-foreground", active != "dashboard") }
+				_="on htmx:beforeRequest add .hidden to #dashboard-icon then remove .hidden from #dashboard-spin"
 			>
-				<uk-icon hx-history="false" icon="layout-dashboard" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<div id="dashboard-icon" class="">
+					<uk-icon hx-history="false" icon="layout-dashboard" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</div>
+				<div id="dashboard-spin" class="hidden">
+					<uk-icon hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+				</div>
 				<span class="sr-only">{ i18n.T(ctx, "Dashboard") }</span>
 			</a>
 			<a

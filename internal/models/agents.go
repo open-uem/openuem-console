@@ -42,12 +42,17 @@ func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	return agents, nil
 }
 
-func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]*ent.Agent, error) {
+func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFilter, excludeWaitingForAdmissionAgents bool) ([]*ent.Agent, error) {
 	var err error
 	var apps []*ent.Agent
+	var query *ent.AgentQuery
 
 	// Info from agents waiting for admission won't be shown
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	if excludeWaitingForAdmissionAgents {
+		query = m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	} else {
+		query = m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	}
 
 	// Apply filters
 	applyAgentFilters(query, f)
@@ -125,9 +130,15 @@ func (m *Model) CountAgentsByOS() ([]Agent, error) {
 	return agents, err
 }
 
-func (m *Model) CountAllAgents(f filters.AgentFilter) (int, error) {
+func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmissionAgents bool) (int, error) {
+	var query *ent.AgentQuery
+
 	// Info from agents waiting for admission won't be shown
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	if excludeWaitingForAdmissionAgents {
+		query = m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	} else {
+		query = m.Client.Agent.Query()
+	}
 
 	applyAgentFilters(query, f)
 

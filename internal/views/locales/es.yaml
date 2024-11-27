@@ -6,6 +6,7 @@ es:
   Antivirus: "Antivirus"
   Authenticate: "Autenticarse"
   Cancel: "Cancelar"
+  Certificates: "Certificados"
   Clear:
     one: "Limpiar filtro"
     other: "Limpiar filtros"

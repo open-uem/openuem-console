@@ -5,6 +5,7 @@ en:
   Antivirus: "Antivirus"
   Authenticate: "Authenticate"
   Cancel: "Cancel"
+  Certificates: "Certificates"
   Clear:
     one: "Clear Filter"
     other: "Clear Filters"

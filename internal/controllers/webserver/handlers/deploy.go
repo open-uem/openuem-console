@@ -85,12 +85,12 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p.GetPaginationAndSortParams(c)
 
 	p.SortBy = "hostname"
-	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{})
+	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p, filters.AgentFilter{})
+	agents, err := h.Model.GetAgentsByPage(p, filters.AgentFilter{}, true)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}

@@ -91,12 +91,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		}
 	}
 
-	agents, err = h.Model.GetAgentsByPage(p, f)
+	agents, err = h.Model.GetAgentsByPage(p, f, false)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllAgents(f)
+	p.NItems, err = h.Model.CountAllAgents(f, false)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
