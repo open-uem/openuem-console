@@ -11,7 +11,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-users-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-users-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "User.other") }
 			</a>
 		</li>
@@ -22,7 +25,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-sessions-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-sessions-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "Session.other") }
 			</a>
 		</li>
@@ -33,7 +39,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-tags-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-tags-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "Tag.other") }
 			</a>
 		</li>
@@ -44,7 +53,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-smtp-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-smtp-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "smtp.title") }
 			</a>
 		</li>
@@ -55,7 +67,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-metadata-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-metadata-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "Metadata") }
 			</a>
 		</li>
@@ -66,7 +81,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-settings-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-settings-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "General Settings") }
 			</a>
 		</li>
@@ -77,7 +95,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-update-agents-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-update-agents-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "admin.update.agents.title") }
 			</a>
 		</li>
@@ -88,7 +109,10 @@ templ ConfigNavbar(active string) {
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
+				hx-indicator="#admin-certificates-spinner"
+				class="flex items-center gap-1"
 			>
+				<uk-icon id="admin-certificates-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "certificates.title") }
 			</a>
 		</li>
