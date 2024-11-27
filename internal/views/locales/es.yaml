@@ -2,6 +2,7 @@ es:
   Agents: "Agentes"
   Actions: "Acciones"
   Add: "Añadir"
+  Admit: "Admitir"
   Advanced Settings: "Conf. Avanzada"
   Antivirus: "Antivirus"
   Authenticate: "Autenticarse"
@@ -155,6 +156,7 @@ es:
     force_run_success: "El agente consultará y enviará la nueva información, consúltela en unos minutos"
     has_been_enabled: "El agente ha sido activado"
     has_been_disabled: "El agente ha sido desactivado"
+    has_been_admitted: "El agente ha sido admitido y ya puede ser gestionado desde OpenUEM"
     confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
     filter_by_last_contact: "Filtrar por último contacto"
     filter_by_agent_os: "Filtrar por sistema operativo de agente"
@@ -289,6 +291,7 @@ es:
     agent_disable: "¿Está seguro de que quiere desactivar este agente? El agente no enviará más información hasta que vuelva a ser activado"
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
     session_delete: "¿Está seguro de que quiere borrar esta sesión? El usuario tendrá que iniciar sesión nuevamente"
+    agent_admit: "¿Está seguro de que quiere admitir este agente? Al admitir el agente se podrá gestionar desde OpenUEM y su información aparecerá en las distintas vistas"
   forms:
     required: "Este campo no puede estar vacío"
   login:

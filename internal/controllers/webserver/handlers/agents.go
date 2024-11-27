@@ -118,7 +118,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 		return h.ListAgents(c, "", "an error ocurred getting uuid param")
 	}
 
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
@@ -162,11 +162,20 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 
 func (h *Handler) AgentDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(h.SessionManager, agent)))
+}
+
+func (h *Handler) AgentAdmit(c echo.Context) error {
+	agentId := c.Param("uuid")
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return h.ListAgents(c, "", err.Error())
+	}
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmAdmission(h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -203,10 +212,28 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
 }
 
+func (h *Handler) AgentConfirmAdmission(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	/* if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
+	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	} */
+
+	if err := h.Model.EnableAgent(agentId); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "")
+}
+
 func (h *Handler) AgentStartVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -229,7 +256,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 func (h *Handler) AgentStopVNC(c echo.Context) error {
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

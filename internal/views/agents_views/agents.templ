@@ -75,12 +75,23 @@ templ AgentsConfirmDisable(sm *sessions.SessionManager, agent *ent.Agent) {
 	</main>
 }
 
+templ AgentsConfirmAdmission(sm *sessions.SessionManager, agent *ent.Agent) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+		@partials.ConfirmAdmission(i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
+		@AgentInfo(agent)
+	</main>
+}
+
 templ AgentInfo(agent *ent.Agent) {
 	<div class="uk-width-1-2@m uk-card uk-card-default">
 		<div class="uk-card-body">
-			<table class="uk-table uk-table-striped border border-gray-400!important mt-6">
+			<table class="uk-table uk-table-striped border border-gray-400!important mt-2">
 				<tr><th>{ i18n.T(ctx, "agents.hostname") }</th><td>{ agent.Hostname }</td></tr>
-				<tr><th>{ i18n.T(ctx, "agents.last_contact") }</th><td>{ agent.LastContact.Local().String() }</td></tr>
+				<tr><th>{ i18n.T(ctx, "agents.manufacturer") }</th><td>{ agent.Edges.Computer.Manufacturer }</td></tr>
+				<tr><th>{ i18n.T(ctx, "Serial") }</th><td>{ agent.Edges.Computer.Serial }</td></tr>
+				<tr><th>{ i18n.T(ctx, "inventory.network_adapters.mac_address") }</th><td>{ agent.MAC }</td></tr>
+				<tr><th>{ i18n.T(ctx, "inventory.network_adapters.ip_address") }</th><td>{ agent.IP }</td></tr>
 				<tr><th>{ i18n.T(ctx, "OperatingSystem") }</th><td>{ agent.Os }</td></tr>
 				<tr><th>{ i18n.T(ctx, "agents.version") }</th><td>{ agent.Edges.Operatingsystem.Version }</td></tr>
 				<tr><th>{ i18n.T(ctx, "agents.username") }</th><td>{ agent.Edges.Operatingsystem.Username }</td></tr>
@@ -212,7 +223,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 			if agent.Status == "WaitingForAdmission" {
 				<li>
 					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/admit", agent.ID))) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/admit", agent.ID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>

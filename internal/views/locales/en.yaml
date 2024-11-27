@@ -2,6 +2,7 @@ en:
   Agents: "Agents"
   Actions: "Actions"
   Add: "Add"
+  Admit: "Admit"
   Antivirus: "Antivirus"
   Authenticate: "Authenticate"
   Cancel: "Cancel"
@@ -154,6 +155,7 @@ en:
     force_run_success: "Agent will run a report anf send new information, check it again in a few minutes"
     has_been_enabled: "The agent has been enabled"
     has_been_disabled: "The agent has been disabled"
+    has_been_admitted: "The agent has been admitted and now it can be managed from OpenUEM"
     confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
     filter_by_last_contact: "Filter by last contact"
     filter_by_agent_os: "Filter by agent os"
@@ -291,6 +293,7 @@ en:
     agent_disable: "Are you sure that you want to disable this agent? The agent won't report more information until you enable it again"
     agent_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
     session_delete: "Are you sure that you want to delete this session? The user will have to log in again"
+    agent_admit: "Are you sure that you want to give admission to this agent? By doing this, the agent can be managed from OpenUEM and its information will show in the different views available"
   forms:
     required: "This field cannot be empty"
   login:

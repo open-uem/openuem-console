@@ -246,7 +246,7 @@ func (m *Model) DeleteAgent(agentId string) error {
 }
 
 func (m *Model) EnableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetEnabled(true).Save(context.Background())
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetStatus(agent.StatusEnabled).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func (m *Model) EnableAgent(agentId string) error {
 }
 
 func (m *Model) DisableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetEnabled(false).Save(context.Background())
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetStatus(agent.StatusDisabled).Save(context.Background())
 	if err != nil {
 		return err
 	}
