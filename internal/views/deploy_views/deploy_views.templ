@@ -283,12 +283,13 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
 								return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
 							})
-							<button
-								id="select-all"
-								title={ i18n.T(ctx, "SelectAll") }
-								type="button"
-								class="uk-button uk-button-default flex items-center gap-2"
-								_={ fmt.Sprintf(`on click 
+							if len(agents) > 0 {
+								<button
+									id="select-all"
+									title={ i18n.T(ctx, "SelectAll") }
+									type="button"
+									class="uk-button uk-button-default flex items-center gap-2"
+									_={ fmt.Sprintf(`on click 
 												repeat in <input[type='checkbox']/>
 													if it.checked is false then
 														it.click()
@@ -300,15 +301,15 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 												set #items-selected.innerHTML to '%d'
 												remove @disabled from #deploy-package
 											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
-							>
-								{ i18n.T(ctx, "SelectAll") }
-							</button>
-							<button
-								id="deselect-all"
-								title={ i18n.T(ctx, "DeselectAll") }
-								type="button"
-								class="uk-button uk-button-default flex items-center gap-2"
-								_="on click 
+								>
+									{ i18n.T(ctx, "SelectAll") }
+								</button>
+								<button
+									id="deselect-all"
+									title={ i18n.T(ctx, "DeselectAll") }
+									type="button"
+									class="uk-button uk-button-default flex items-center gap-2"
+									_="on click 
 												repeat in <input[type='checkbox']/>
 													if it.checked is true then
 														it.click()
@@ -320,10 +321,11 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 												set #items-selected.innerHTML to '0'
 												add @disabled to #deploy-package
 											end"
-							>
-								{ i18n.T(ctx, "DeselectAll") }
-							</button>
-							<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+								>
+									{ i18n.T(ctx, "DeselectAll") }
+								</button>
+								<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+							}
 						</div>
 						if len(agents) > 0 {
 							<div class="flex flex-col gap-2">
@@ -462,7 +464,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							</div>
 							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
 						} else {
-							<p class="uk-text-small uk-text-muted">
+							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "agents.no_agents") }
 							</p>
 						}

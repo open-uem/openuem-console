@@ -3,7 +3,7 @@ package filters
 type AgentFilter struct {
 	Hostname              string
 	Versions              []string
-	AgentEnabledOptions   []string
+	AgentStatusOptions    []string
 	AgentOSVersions       []string
 	Tags                  []int
 	OSVersions            []string

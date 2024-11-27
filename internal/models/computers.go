@@ -32,7 +32,8 @@ type Computer struct {
 
 func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
 
-	query := m.Client.Agent.Query()
+	// Agents that haven't been admitted yet should not appear
+	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -106,7 +107,8 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 	var err error
 	var computers []Computer
 
-	query := m.Client.Agent.Query()
+	// Agents that haven't been admitted yet should not appear
+	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -404,5 +406,5 @@ func (m *Model) CountAllDeployments() (int, error) {
 }
 
 func (m *Model) CountAllOSUsernames() (int, error) {
-	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Count(context.Background())
+	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Where(operatingsystem.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
 }

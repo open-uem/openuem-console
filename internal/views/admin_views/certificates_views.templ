@@ -133,7 +133,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
 						} else {
 							<p class="uk-text-small uk-text-muted">
-								{ i18n.T(ctx, "sessions.nosessions") }
+								{ i18n.T(ctx, "certificates.no_certificates") }
 							</p>
 						}
 					</div>

@@ -93,6 +93,11 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	data.NWaitingForAdmission, err = h.Model.CountWaitingForAdmissionAgents()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	data.NApps, err = h.Model.CountAllApps(filters.ApplicationsFilter{})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -150,12 +155,6 @@ func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardChar
 		return nil, err
 	}
 
-	topApps, err := h.Model.GetTop10InstalledApps()
-	if err != nil {
-		return nil, err
-	}
-	ch.Top10Apps = charts.Top10Apps(topApps)
-
 	agents, err := h.Model.CountAgentsByOS()
 	if err != nil {
 		return nil, err
@@ -175,13 +174,6 @@ func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardChar
 	}
 
 	ch.AgentByLastReport = charts.AgentsByLastReportDate(c.Request().Context(), countAgents, countAllAgents)
-
-	agents, err = h.Model.CountAgentsByWindowsUpdateStatus()
-	if err != nil {
-		return nil, err
-	}
-
-	ch.AgentBySystemUpdate = charts.AgentsBySystemUpdate(c.Request().Context(), agents, countAllAgents)
 
 	return &ch, nil
 }

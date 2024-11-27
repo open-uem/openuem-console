@@ -24,7 +24,7 @@ func AgentsByLastReportDate(ctx context.Context, countReportedLast24, countAllAg
 	}
 
 	// put data into chart
-	pie.AddSeries(i18n.T(ctx, "charts.os_version"), pieData).SetSeriesOptions(
+	pie.AddSeries(i18n.T(ctx, "charts.last_report"), pieData).SetSeriesOptions(
 		charts.WithLabelOpts(opts.Label{Show: opts.Bool(false), Formatter: "{b}: {c}"}),
 		charts.WithPieChartOpts(opts.PieChart{
 			Radius: []string{"40%", "75%"},

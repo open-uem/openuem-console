@@ -19,7 +19,8 @@ type App struct {
 }
 
 func (m *Model) CountAgentApps(agentId string) (int, error) {
-	count, err := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId))).Count(context.Background())
+	// Info from agents waiting for admission won't be shown
+	count, err := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -29,7 +30,8 @@ func (m *Model) CountAgentApps(agentId string) (int, error) {
 func (m *Model) CountAllApps(f filters.ApplicationsFilter) (int, error) {
 	var apps []App
 
-	query := m.Client.App.Query()
+	// Info from agents waiting for admission won't be shown
+	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission)))
 
 	applyAppsFilters(query, f)
 
@@ -41,8 +43,8 @@ func (m *Model) CountAllApps(f filters.ApplicationsFilter) (int, error) {
 }
 
 func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort) ([]*ent.App, error) {
-
-	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	// Info from agents waiting for admission won't be shown
+	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.StatusNEQ(agent.StatusWaitingForAdmission))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	switch p.SortBy {
 	case "name":
@@ -86,7 +88,8 @@ func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.Applicatio
 	var apps []App
 	var err error
 
-	query := m.Client.App.Query()
+	// Info from agents waiting for admission won't be shown
+	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission)))
 
 	applyAppsFilters(query, f)
 

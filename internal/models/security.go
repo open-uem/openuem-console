@@ -34,23 +34,28 @@ type SystemUpdate struct {
 }
 
 func mainAntivirusQuery(s *sql.Selector, p partials.PaginationAndSort) {
+	// Info from agents waiting for admission won't be shown
 	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, antivirus.FieldName, antivirus.FieldIsActive, antivirus.FieldIsUpdated).
 		LeftJoin(sql.Table(antivirus.Table)).
 		On(agent.FieldID, antivirus.OwnerColumn).
+		Where(sql.And(sql.NEQ(agent.FieldStatus, agent.StatusWaitingForAdmission))).
 		Limit(p.PageSize).
 		Offset((p.CurrentPage - 1) * p.PageSize)
 }
 
 func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, systemupdate.FieldStatus, systemupdate.FieldLastInstall, systemupdate.FieldLastSearch, systemupdate.FieldPendingUpdates).
+	// Info from agents waiting for admission won't be shown
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, `"t1"."status"`, systemupdate.FieldLastInstall, systemupdate.FieldLastSearch, systemupdate.FieldPendingUpdates).
 		LeftJoin(sql.Table(systemupdate.Table)).
 		On(agent.FieldID, systemupdate.OwnerColumn).
+		Where(sql.And(sql.NEQ(`"agents"."status"`, agent.StatusWaitingForAdmission))).
 		Limit(p.PageSize).
 		Offset((p.CurrentPage - 1) * p.PageSize)
 }
 
 func (m *Model) CountAllAntiviri(f filters.AntivirusFilter) (int, error) {
-	query := m.Client.Agent.Query()
+	// Info from agents waiting for admission won't be shown
+	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
 
 	applyAntiviriFilters(query, f)
 
@@ -363,5 +368,5 @@ func (m *Model) GetLatestUpdates(agentId string, p partials.PaginationAndSort) (
 }
 
 func (m *Model) GetDetectedAntiviri() ([]string, error) {
-	return m.Client.Antivirus.Query().Unique(true).Select(antivirus.FieldName).Strings(context.Background())
+	return m.Client.Antivirus.Query().Unique(true).Where(antivirus.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Select(antivirus.FieldName).Strings(context.Background())
 }

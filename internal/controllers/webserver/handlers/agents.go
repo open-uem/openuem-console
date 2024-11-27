@@ -26,14 +26,14 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	f := filters.AgentFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
-	filteredAgentEnabledOptions := []string{}
-	for index := range []string{"Enabled", "Disabled"} {
-		value := c.FormValue(fmt.Sprintf("filterByEnabledAgent%d", index))
+	filteredAgentStatusOptions := []string{}
+	for index := range agents_views.AgentStatus {
+		value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
 		if value != "" {
-			filteredAgentEnabledOptions = append(filteredAgentEnabledOptions, value)
+			filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
 		}
 	}
-	f.AgentEnabledOptions = filteredAgentEnabledOptions
+	f.AgentStatusOptions = filteredAgentStatusOptions
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes()
 	if err != nil {

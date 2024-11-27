@@ -90,6 +90,7 @@ en:
   Value: "Value"
   Version: "Version"
   View: "View"
+  WaitingForAdmission: "Waiting for Admission"
   Search: "Search"
   Computer: "Computer"
   OS: "OS"
@@ -117,6 +118,8 @@ en:
     enabled: "Enabled"
     disabled: "Disabled"
     no_agents: "No agents were found for this query"
+    no_endpoint: "No endpoints were found for this query"
+    admit: "Admit"
     force_run: "Force Report"
     vnc: "VNC server"
     no_vnc: "None"
@@ -153,7 +156,7 @@ en:
     confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
     filter_by_last_contact: "Filter by last contact"
     filter_by_agent_os: "Filter by agent os"
-    filter_by_enabled: "Filter by enabled agent status"
+    filter_by_status: "Filter by agent status"
     no_selected_agents_to_deploy: "no selected agents to deploy package"
     no_empty_id: "agent id cannot be empty"
     install_package: "Install this package"
@@ -390,7 +393,7 @@ en:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"
     expiry: "Expiry"
-    nosessions: "No sessions have been created yet"
+    nosessions: "No sessions have been found for this query"
     title: "Sessions"
     token: "Token"
     user_agent: "Browser / OS"
@@ -424,6 +427,7 @@ en:
     confirm_revocation: "Confirm that you want to revocate this certificate. This action is irreversible and this certificate will no longer be valid for authentication"
     revocation_success: "The certificate has been revoked"
     no_serial: "No certificate serial number was found in the request"
+    no_certificates: "No certificates have been found for this request"
   smtp:
     title: SMTP
     description: "Configure your SMTP provider in order to send email notifications"
@@ -568,6 +572,7 @@ en:
     num_printers: Number of different printers found
     num_applied_tags: Number of tags applied
     num_disabled_agents: Disabled agents
+    num_waiting_for_admission: Agents waiting for admission
     num_apps_found: Applications found
     num_deployments: Software deployments performed using OpenUEM
     num_openuem_users: Number of OpenUEM users

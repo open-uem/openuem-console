@@ -30,6 +30,7 @@ type DashboardData struct {
 	NPrinters                  int
 	NAppliedTags               int
 	NDisabledAgents            int
+	NWaitingForAdmission       int
 	NApps                      int
 	NDeployments               int
 	NOpenUEMUsers              int
@@ -110,11 +111,26 @@ templ Dashboard(sm *sessions.SessionManager, l locales.Translator, data Dashboar
 							</td>
 						</tr>
 						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_waiting_for_admission") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href="/agents?filterByStatusAgent1=WaitingForAdmission"
+									hx-get="/agents?filterByStatusAgent1=WaitingForAdmission"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("uk-text-danger", data.NWaitingForAdmission > 0) }
+								>
+									{ strconv.Itoa(data.NWaitingForAdmission) }
+								</a>
+							</td>
+						</tr>
+						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_disabled_agents") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href="/agents?filterByEnabledAgent1"
-									hx-get="/agents?filterByEnabledAgent1"
+									href="/agents?filterByStatusAgent1=Disabled"
+									hx-get="/agents?filterByStatusAgent1=Disabled"
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"

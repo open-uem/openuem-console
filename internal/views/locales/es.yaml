@@ -91,6 +91,7 @@ es:
   Value: "Valor"
   Version: "Versión"
   View: "Ver"
+  WaitingForAdmission: "Esperando Admisión"
   Search: "Buscar"
   Computer: "Equipo"
   OS: "S.O"
@@ -118,7 +119,9 @@ es:
     enabled: "Activado"
     disabled: "Desactivado"
     no_agents: "No se han encontrado agentes para esta consulta"
+    no_endpoints: "No se han encontrado equipos para esta consulta"
     force_run: "Forzar Informe"
+    admit: "Admitir"
     vnc: "Serv. VNC"
     no_vnc: "Ninguno"
     vnc_title: "Asistencia remota"
@@ -154,7 +157,7 @@ es:
     confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
     filter_by_last_contact: "Filtrar por último contacto"
     filter_by_agent_os: "Filtrar por sistema operativo de agente"
-    filter_by_enabled: "Filtrar por estado de activación del agente"
+    filter_by_status: "Filtrar por estado del agente"
     no_selected_agents_to_deploy: "no se han seleccionado agentes para desplegar el paquete"
     no_empty_id: "el id de agente no puede estar vacío"
     install_package: "Instalar este paquete"
@@ -387,7 +390,7 @@ es:
     data: "Datos"
     description: "Estas son las sesiones abiertas en la consola de OpenUEM por los usuarios autenticados"
     expiry: "Fecha Expir."
-    nosessions: "Aún no se han creado sesiones"
+    nosessions: "No se han encontrado sesiones para esta consulta"
     title: "Sesiones"
     token: "Token"
     user_agent: "Navegador / Sist. Oper"
@@ -422,6 +425,7 @@ es:
     confirm_revocation: "Confirme que quiere revocar este certificado. Esta acción es irreversible y este certificado será considerado no válido para la autenticación. En el caso de los certificados de usuario, si genera un nuevo certificado desde el apartado de usuarios la acción de revocación del anterior certificado se llevará a cabo automáticamente"
     revocation_success: "El certificado ha sido revocado"
     no_serial: "No se ha indicado el número de serie del certificado en la petición"
+    no_certificates: "No se han encontrado certificados para esta consulta"
   smtp:
     title: SMTP
     description: "Configura tu proveedor SMTP para poder enviar notificaciones por email"
@@ -565,6 +569,7 @@ es:
     num_printers: Número de impresoras diferentes encontradas
     num_applied_tags: Número de etiquetas aplicadas
     num_disabled_agents: Agentes desactivados
+    num_waiting_for_admission: Agentes esperando admisión
     num_apps_found: Número de aplicaciones encontradas
     num_deployments: Despliegues de software realizados con OpenUEM
     num_openuem_users: Número de usuarios de OpenUEM

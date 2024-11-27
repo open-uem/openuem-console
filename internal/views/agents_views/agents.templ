@@ -12,6 +12,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
+
 templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -35,7 +37,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
 					@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
-						return f.Hostname == "" && len(f.AgentEnabledOptions) == 0 &&
+						return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
 							len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
 							f.ContactFrom == "" && f.ContactTo == ""
 					})
@@ -107,11 +109,11 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
 					<div>
-						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "enabled", "alpha", "#main", "outerHTML")
+						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "status", "alpha", "#main", "outerHTML")
 					</div>
 					<div>
-						@filters.FilterByOptions(c, p, "EnabledAgent", "agents.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AgentEnabledOptions, "#main", "outerHTML", true, func() bool {
-							return len(f.AgentEnabledOptions) == 0
+						@filters.FilterByOptions(c, p, "StatusAgent", "agents.filter_by_status", AgentStatus, f.AgentStatusOptions, "#main", "outerHTML", true, func() bool {
+							return len(f.AgentStatusOptions) == 0
 						})
 					</div>
 				</div>
@@ -170,11 +172,16 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				hx-swap="outerHTML"
 			>{ agent.Hostname }</td>
 			<td class="!align-middle">
-				if agent.Enabled {
-					<uk-icon hx-history="false" icon="check" custom-class="h-6 w-6 pr-2 text-green-600" uk-cloack></uk-icon>
-				} else {
-					<uk-icon hx-history="false" icon="x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>
-				}
+				<div uk-tooltip={ i18n.T(ctx, agent.Status.String()) }>
+					switch agent.Status {
+						case "WaitingForAdmission":
+							<uk-icon hx-history="false" icon="monitor-pause" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
+						case "Enabled":
+							<uk-icon hx-history="false" icon="monitor-check" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+						case "Disabled":
+							<uk-icon hx-history="false" icon="monitor-x" custom-class="h-6 w-6 text-gray-600" uk-cloack></uk-icon>
+					}
+				</div>
 			</td>
 			<td class="!align-middle">
 				switch agent.Os {
@@ -202,7 +209,19 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
-			if agent.Enabled {
+			if agent.Status == "WaitingForAdmission" {
+				<li>
+					<a
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/admit", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						<uk-icon hx-history="false" icon="check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "agents.admit") }
+					</a>
+				</li>
+			}
+			if agent.Status == "Enabled" {
 				<li>
 					<a
 						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcereport", agent.ID))) }
@@ -214,8 +233,8 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			<li>
-				if agent.Enabled {
+			if agent.Status == "Enabled" {
+				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/disable", agent.ID))) }
 						hx-target="#main"
@@ -224,20 +243,21 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 						<uk-icon hx-history="false" icon="megaphone-off" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
 						{ i18n.T(ctx, "Disable") }
 					</a>
-				} else {
-					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
-						hx-target="#main"
-						hx-swap="outerHTML"
-						hx-indicator="#enable-spinner"
-					>
-						<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
-						{ i18n.T(ctx, "Enabled") }
-						<div id="enable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
-					</a>
-				}
-			</li>
-			if agent.IP != "" && agent.Enabled && agent.Vnc != "" {
+				</li>
+			}
+			if agent.Status == "Disabled" {
+				<a
+					hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#enable-spinner"
+				>
+					<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Enable") }
+					<div id="enable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+				</a>
+			}
+			if agent.IP != "" && agent.Status == "Enabled" && agent.Vnc != "" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", agent.ID))) }
@@ -247,7 +267,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					><uk-icon hx-history="false" icon="monitor-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Remote Assistance") }</a>
 				</li>
 			}
-			if len(agent.MAC) > 0 {
+			if agent.Status != "WaitingForAdmission" && len(agent.MAC) > 0 {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/wol", agent.ID))) }

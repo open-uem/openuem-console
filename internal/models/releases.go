@@ -6,6 +6,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem_ent"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/release"
 )
 
@@ -18,7 +19,7 @@ func (m *Model) GetAgentsReleaseByType(channel, os, arch, version string) (*open
 }
 
 func (m *Model) GetHigherAgentReleaseInstalled() (*ent.Release, error) {
-	data, err := m.Client.Release.Query().Where(release.HasAgents()).Order(ent.Desc(release.FieldVersion)).First(context.Background())
+	data, err := m.Client.Release.Query().Where(release.HasAgentsWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Order(ent.Desc(release.FieldVersion)).First(context.Background())
 	if err != nil {
 		if openuem_ent.IsNotFound(err) {
 			return nil, nil
@@ -38,7 +39,7 @@ func (m *Model) CountOutdatedAgents() (int, error) {
 }
 
 func (m *Model) CountUpgradableAgents(version string) (int, error) {
-	return m.Client.Release.Query().Where(release.VersionLT(version)).Count(context.Background())
+	return m.Client.Release.Query().Where(release.VersionLT(version), release.HasAgentsWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
 }
 
 func (m *Model) SaveNewReleaseAvailable(newRelease admin_views.LatestRelease) error {
