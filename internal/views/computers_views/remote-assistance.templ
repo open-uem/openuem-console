@@ -32,7 +32,7 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 {
+					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady {
 						<div id="vnc">
 							<a
 								class="flex gap-2 items-center uk-text-small"
@@ -44,9 +44,15 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 							</a>
 						</div>
 					} else {
-						<p class="uk-text-small uk-text-muted">
-							{ i18n.T(ctx, "agents.no_supported_vnc") }
-						</p>
+						if !agent.CertificateReady {
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "agents.no_vnc_certificate") }
+							</p>
+						} else {
+							<p class="uk-text-small uk-text-muted">
+								{ i18n.T(ctx, "agents.no_supported_vnc") }
+							</p>
+						}
 					}
 				</div>
 			</div>

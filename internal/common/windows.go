@@ -93,5 +93,35 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
+	w.OrgName, err = openuem_utils.GetValueFromRegistry(k, "OrgName")
+	if err != nil {
+		log.Println("[ERROR]: could not read Org Name from registry")
+		return err
+	}
+
+	w.OrgProvince, err = openuem_utils.GetValueFromRegistry(k, "OrgProvince")
+	if err != nil {
+		log.Println("[ERROR]: could not read Org Province from registry")
+		return err
+	}
+
+	w.OrgLocality, err = openuem_utils.GetValueFromRegistry(k, "OrgLocality")
+	if err != nil {
+		log.Println("[ERROR]: could not read Org Locality from registry")
+		return err
+	}
+
+	w.OrgAddress, err = openuem_utils.GetValueFromRegistry(k, "OrgAddress")
+	if err != nil {
+		log.Println("[ERROR]: could not read Org Address from registry")
+		return err
+	}
+
+	w.Country, err = openuem_utils.GetValueFromRegistry(k, "Country")
+	if err != nil {
+		log.Println("[ERROR]: could not read Country from registry")
+		return err
+	}
+
 	return nil
 }

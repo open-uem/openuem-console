@@ -129,6 +129,7 @@ en:
     vnc_description: "Initiate a remote assistance session. If the session can be established a PIN will be shown to the user. Use that PIN as the password for the connection."
     vnc_new_tab: "Open session in a new tab"
     no_supported_vnc: "Remote Assistance is not available, IP address is not assigned to the agent, no user is logged in or no supported VNC server is installed"
+    no_vnc_certificate: "The agent doesn't have a certificate to secure the VNC connection. If you haven't given admission to the agent do it now to create the certificate. If you already did that try to force a new report and this message still shows up, regenerate the certificate for the agent"
     deploy_description: "OpenUEM can deploy software to your computers automatically. Search an available package in the repository and install it or selected a deployed package to update or uninstall it"
     deploy_search: "Search a package by its name to install it"
     deploy_success: "A request to install the package as soon as possible has been sent to the agent, check later if the package was deployed successfully"
@@ -156,6 +157,8 @@ en:
     has_been_enabled: "The agent has been enabled"
     has_been_disabled: "The agent has been disabled"
     has_been_admitted: "The agent has been admitted and now it can be managed from OpenUEM"
+    has_been_restarted: "A request to restart the agent has been sent"
+    certs_regenerated: "A request has been made to generate again this agent's certificate"
     confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
     filter_by_last_contact: "Filter by last contact"
     filter_by_agent_os: "Filter by agent os"
@@ -165,6 +168,11 @@ en:
     install_package: "Install this package"
     uninstall_package: "Uninstall this package"
     sw_deploy_not_supported: "This agent doesn't currently support package deployment"
+    not_found: "Agent not found"
+    regenerate_cert: "Regenerate certificate"
+    restart_required: "Agent will be restarted"
+    force_restart: "Force restart"
+
   inventory:
     hardware:
       title: "Hardware"
@@ -587,6 +595,7 @@ en:
     certificates_to_expire: Certificates that expires in two months
   nats:
     not_connected: "This action cannot be executed now, we're not connected to the NATS server, please try again in a few minutes"
+    no_responder: "The agent did not receive the request, maybe it's not running or there's a communication issue, please try again in a few minutes"
 
   pagination:
     title: "Items per page"

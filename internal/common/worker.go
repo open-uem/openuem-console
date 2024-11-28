@@ -31,6 +31,11 @@ type Worker struct {
 	Domain                string
 	NATSServers           string
 	WinGetDBFolder        string
+	OrgName               string
+	OrgProvince           string
+	OrgLocality           string
+	OrgAddress            string
+	Country               string
 }
 
 func NewWorker(logName string) *Worker {

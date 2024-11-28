@@ -82,12 +82,6 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 		} else {
 			apps, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 		}
-	case "enabled":
-		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldEnabled)).All(context.Background())
-		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldEnabled)).All(context.Background())
-		}
 	case "status":
 		if p.SortOrder == "asc" {
 			apps, err = query.Order(ent.Asc(agent.FieldStatus)).All(context.Background())

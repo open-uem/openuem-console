@@ -197,6 +197,7 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
+
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(p, h.SessionManager, agent, confirmDelete)))
 }
 

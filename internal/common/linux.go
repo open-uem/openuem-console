@@ -96,5 +96,35 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 	w.NATSServers = key.String()
 
+	key, err = cfg.Section("Server").GetKey("org_name")
+	if err != nil {
+		return err
+	}
+	w.OrgName = key.String()
+
+	key, err = cfg.Section("Server").GetKey("org_province")
+	if err != nil {
+		return err
+	}
+	w.OrgProvince = key.String()
+
+	key, err = cfg.Section("Server").GetKey("org_locality")
+	if err != nil {
+		return err
+	}
+	w.OrgLocality = key.String()
+
+	key, err = cfg.Section("Server").GetKey("org_address")
+	if err != nil {
+		return err
+	}
+	w.OrgAddress = key.String()
+
+	key, err = cfg.Section("Server").GetKey("country")
+	if err != nil {
+		return err
+	}
+	w.Country = key.String()
+
 	return nil
 }

@@ -198,7 +198,7 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 		return fmt.Errorf(i18n.T(c.Request().Context(), "nats.not_connected"))
 	}
 
-	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
+	if err := h.NATSConnection.Publish("certificates.user", data); err != nil {
 		return err
 	}
 	return nil
@@ -284,7 +284,7 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if err := h.NATSConnection.Publish("certificates.new", data); err != nil {
+	if err := h.NATSConnection.Publish("certificates.user", data); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 

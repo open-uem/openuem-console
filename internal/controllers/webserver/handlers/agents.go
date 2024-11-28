@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
@@ -149,7 +151,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.NATSConnection.Request("agent.enable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+	if err := h.NATSConnection.Publish("agent.enable."+agentId, nil); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -186,7 +188,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 			log.Printf("[ERROR]: %s", i18n.T(c.Request().Context(), "nats.not_connected"))
 		}
 
-		if _, err := h.NATSConnection.Request("agent.report."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		if err := h.NATSConnection.Publish("agent.report."+agentId, nil); err != nil {
 			log.Printf("[ERROR]: %v", err)
 		}
 	}()
@@ -201,7 +203,7 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+	if err := h.NATSConnection.Publish("agent.disable."+agentId, nil); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -212,21 +214,46 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
 }
 
-func (h *Handler) AgentConfirmAdmission(c echo.Context) error {
+func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	agentId := c.Param("uuid")
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+	}
 
-	/* if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.NATSConnection.Request("agent.disable."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+	data, err := json.Marshal(openuem_nats.CertificateRequest{
+		AgentId:      agentId,
+		DNSName:      agent.Hostname + "." + h.Domain,
+		Organization: h.OrgName,
+		Province:     h.OrgProvince,
+		Locality:     h.OrgLocality,
+		Address:      h.OrgAddress,
+		Country:      h.Country,
+		YearsValid:   2,
+	})
+	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	} */
+	}
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
+	if _, err := h.NATSConnection.Request("certificates.agent."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+	}
 
 	if err := h.Model.EnableAgent(agentId); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	if regenerate {
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "")
+	}
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "")
 }
 
@@ -266,8 +293,24 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 	}
 
 	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
 	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, h.SessionManager)))
+}
+
+func (h *Handler) AgentForceRestart(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.restart."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+		}
+	}
+
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "")
 }

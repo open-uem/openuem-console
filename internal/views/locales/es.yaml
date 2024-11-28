@@ -130,6 +130,7 @@ es:
     vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario. Utilice el PIN para autenticar su sesión."
     vnc_new_tab: "Abrir la sesión en una nueva pestaña"
     no_supported_vnc: "No está disponible la asistencia remota, o bien no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
+    no_vnc_certificate: "El agente no cuenta con un certificado para proteger la conexión VNC. Si aún no ha admitido este agente, hágalo ahora para crear el certificado. Si ya lo ha hecho intente forzar un nuevo informe y si este mensaje sigue apareciendo, regenere el certificado para este agente"
     deploy_description: "OpenUEM puede desplegar software en sus equipos de forma automática. Busque un paquete disponible en el repositorio e instálelo o seleccione un paquete desplegado para actualizarlo o desinstalarlo"
     deploy_search: "Busque un paquete por su nombre para instalarlo"
     deploy_success: "Se ha enviado una petición al agente para instalar el paquete tan pronto como sea posible, compruebe más tarde si el paquete fue desplegado con éxito"
@@ -157,6 +158,8 @@ es:
     has_been_enabled: "El agente ha sido activado"
     has_been_disabled: "El agente ha sido desactivado"
     has_been_admitted: "El agente ha sido admitido y ya puede ser gestionado desde OpenUEM"
+    has_been_restarted: "Se ha enviado una petición para reiniciar el agente"
+    certs_regenerated: "Se ha creado una solicitud para generar nuevamente el certificado de este agente"
     confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
     filter_by_last_contact: "Filtrar por último contacto"
     filter_by_agent_os: "Filtrar por sistema operativo de agente"
@@ -166,6 +169,10 @@ es:
     install_package: "Instalar este paquete"
     uninstall_package: "Desinstalar este paquete"
     sw_deploy_not_supported: "Este agente no soporta actualmente el despliegue de paquetes"
+    not_found: "Agente no encontrado"
+    regenerate_cert: "Regenerar certificado"
+    restart_required: "El agente se reiniciará"
+    force_restart: "Forzar reinicio"
   inventory:
     hardware:
       title: "Hardware"
@@ -584,6 +591,7 @@ es:
     certificates_to_expire: Certificados que caducan en dos meses
   nats:
     not_connected: "Esta acción no puede ejecutarse ahora, no estamos conectados con el servicio NATS, por favor inténtelo de nuevo en unos minutos"
+    no_responder: "El agente no recibió la solicitud, puede que no se esté ejecutando o hay un problema de comunicaciones por favor inténtelo de nuevo en unos minutos"
 
   pagination:
     title: "Elem. por página"

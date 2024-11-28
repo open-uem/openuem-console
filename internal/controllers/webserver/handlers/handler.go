@@ -31,9 +31,14 @@ type Handler struct {
 	NATSConnection *nats.Conn
 	NATSConnectJob gocron.Job
 	JetStream      jetstream.JetStream
+	OrgName        string
+	OrgProvince    string
+	OrgLocality    string
+	OrgAddress     string
+	Country        string
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir, domain string) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country string) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -56,6 +61,11 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		NATSTimeout:    timeout,
 		NATSServers:    natsServers,
 		TaskScheduler:  ts,
+		OrgName:        orgName,
+		OrgProvince:    orgProvince,
+		OrgLocality:    orgLocality,
+		OrgAddress:     orgAddress,
+		Country:        country,
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect

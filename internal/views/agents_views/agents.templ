@@ -181,7 +181,14 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
-			>{ agent.Hostname }</td>
+			>
+				<div class="flex items-center gap-2">
+					{ agent.Hostname }
+					if agent.RestartRequired {
+						@partials.AlertIcon(i18n.T(ctx, "agents.restart_required"))
+					}
+				</div>
+			</td>
 			<td class="!align-middle">
 				<div uk-tooltip={ i18n.T(ctx, agent.Status.String()) }>
 					switch agent.Status {
@@ -256,16 +263,42 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
+			if agent.Status == "Enabled" {
+				<li>
+					<a
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/regeneratecerts", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						<uk-icon hx-history="false" icon="key-round" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "agents.regenerate_cert") }
+					</a>
+				</li>
+			}
+			if agent.Status == "Enabled" {
+				<li>
+					<a
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcerestart", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-indicator="#restart-spinner"
+					>
+						<uk-icon hx-history="false" icon="power" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "agents.force_restart") }
+						<div id="restart-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+					</a>
+				</li>
+			}
 			if agent.Status == "Disabled" {
 				<a
 					hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
-					hx-indicator="#enable-spinner"
+					hx-indicator="#disable-spinner"
 				>
 					<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
 					{ i18n.T(ctx, "Enable") }
-					<div id="enable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+					<div id="disable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
 				</a>
 			}
 			if agent.IP != "" && agent.Status == "Enabled" && agent.Vnc != "" {

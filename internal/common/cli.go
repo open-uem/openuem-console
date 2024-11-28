@@ -36,6 +36,11 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.AuthPort = cCtx.String("auth-port")
 	w.ServerName = cCtx.String("server-name")
 	w.Domain = cCtx.String("domain")
+	w.OrgName = cCtx.String("org-name")
+	w.OrgProvince = cCtx.String("org-province")
+	w.OrgLocality = cCtx.String("org-locality")
+	w.OrgAddress = cCtx.String("org-address")
+	w.Country = cCtx.String("country")
 
 	return nil
 }

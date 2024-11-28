@@ -64,5 +64,31 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars:  []string{"DOMAIN"},
 			Required: true,
 		},
+		&cli.StringFlag{
+			Name:     "org-name",
+			Usage:    "the name of your organization as it appears in digital certificates",
+			EnvVars:  []string{"ORGNAME"},
+			Required: true,
+		},
+		&cli.StringFlag{
+			Name:    "org-province",
+			Usage:   "the province of your organization as it appears in digital certificates",
+			EnvVars: []string{"ORGPROVINCE"},
+		},
+		&cli.StringFlag{
+			Name:    "org-locality",
+			Usage:   "the locality of your organization as it appears in digital certificates",
+			EnvVars: []string{"ORGLOCALITY"},
+		},
+		&cli.StringFlag{
+			Name:    "org-address",
+			Usage:   "the address of your organization as it appears in digital certificates",
+			EnvVars: []string{"ORGADDRESS"},
+		},
+		&cli.StringFlag{
+			Name:    "country",
+			Usage:   "the country of your organization as it appears in digital certificates",
+			EnvVars: []string{"COUNTRY"},
+		},
 	}
 }
