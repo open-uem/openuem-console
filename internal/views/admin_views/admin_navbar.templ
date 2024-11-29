@@ -116,5 +116,19 @@ templ ConfigNavbar(active string) {
 				{ i18n.T(ctx, "certificates.title") }
 			</a>
 		</li>
+		<li class={ templ.KV("uk-active", active == "restore") }>
+			<a
+				href="/admin/restore"
+				hx-get="/admin/restore"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				hx-indicator="#admin-restore-spinner"
+				class="flex items-center gap-1"
+			>
+				<uk-icon id="admin-restore-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "restore.title") }
+			</a>
+		</li>
 	</ul>
 }

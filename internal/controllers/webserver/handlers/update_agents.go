@@ -4,10 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +13,8 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/doncicuto/openuem_ent"
+	"github.com/doncicuto/openuem_ent/release"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -34,7 +33,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		channel = "stable"
 	}
 
-	release, err := h.GetLatestRelease(channel)
+	r, err := h.Model.GetLatestAgentRelease(channel)
 	if err != nil {
 		log.Println("[ERROR]: could not get latest version information")
 	}
@@ -64,7 +63,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 				arch = "amd64"
 			}
 
-			releaseToBeApplied, err := h.Model.GetAgentsReleaseByType(channel, agentInfo.Os, arch, sr)
+			releaseToBeApplied, err := h.Model.GetAgentsReleaseByType(release.ReleaseTypeAgent, channel, agentInfo.Os, arch, sr)
 			if err != nil {
 				errorMessage = err.Error()
 				break
@@ -128,7 +127,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		}
 	}
 
-	return h.ShowUpdateAgentList(c, release, successMessage, errorMessage)
+	return h.ShowUpdateAgentList(c, r, successMessage, errorMessage)
 }
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
@@ -136,54 +135,7 @@ func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
 }
 
-func (h *Handler) GetLatestRelease(channel string) (*admin_views.LatestRelease, error) {
-
-	if !slices.Contains([]string{"stable", "testing", "devel"}, channel) {
-		return nil, fmt.Errorf("channel is not valid")
-	}
-
-	// Check release against our API
-	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestAgentRelease&channel=%s", channel)
-
-	client := http.Client{
-		Timeout: time.Second * 8,
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "openuem-console")
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	body, readErr := io.ReadAll(res.Body)
-	if readErr != nil {
-		return nil, err
-	}
-
-	release := admin_views.LatestRelease{}
-	if err := json.Unmarshal(body, &release); err != nil {
-		return nil, err
-	}
-
-	// Add this release as available
-	if err := h.Model.SaveNewReleaseAvailable(release); err != nil {
-		return nil, err
-	}
-
-	return &release, nil
-}
-
-func (h *Handler) ShowUpdateAgentList(c echo.Context, release *admin_views.LatestRelease, successMessage, errorMessage string) error {
+func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -298,5 +250,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, release *admin_views.Lates
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, agents, settings, release, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
 }

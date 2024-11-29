@@ -24,6 +24,16 @@ func (w *Worker) StartDBConnectJob() error {
 		}
 
 		w.StartConsoleService()
+
+		// Start a job to check latest OpenUEM releases
+		channel, err := w.Model.GetDefaultUpdateChannel()
+		if err != nil {
+			log.Println("[ERROR]: could not get updates channel settings")
+			channel = "stable"
+		}
+		if err := w.StartCheckLatestReleasesJob(channel); err != nil {
+			log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
+		}
 		return nil
 	}
 	log.Printf("[ERROR]: could not connect with database %v", err)
@@ -51,6 +61,17 @@ func (w *Worker) StartDBConnectJob() error {
 				}
 
 				w.StartConsoleService()
+
+				// Start a job to check latest OpenUEM releases
+				channel, err := w.Model.GetDefaultUpdateChannel()
+				if err != nil {
+					log.Println("[ERROR]: could not get updates channel settings")
+					channel = "stable"
+				}
+				if err := w.StartCheckLatestReleasesJob(channel); err != nil {
+					log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
+					return
+				}
 			},
 		),
 	)

@@ -27,7 +27,7 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 
 	cwd, err := openuem_utils.GetWd()
 	if err != nil {
-		log.Fatalf("could not get working directory: %v", err)
+		log.Fatalf("[FATAL]: could not get working directory: %v", err)
 	}
 
 	// Static Assets
@@ -38,7 +38,7 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 
 	// Add i18n middleware
 	if err := ctxi18n.LoadWithDefault(locales.Content, "en"); err != nil {
-		log.Fatalf("could not load translations: %v", err)
+		log.Fatalf("[FATAL]: could not load translations: %v", err)
 	}
 	e.Use(middleware.GetLocale)
 

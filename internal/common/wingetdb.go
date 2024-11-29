@@ -25,7 +25,7 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 	// Create task
 	_, err = w.TaskScheduler.NewJob(
 		gocron.DurationJob(
-			time.Duration(time.Duration(24*time.Minute)),
+			time.Duration(time.Duration(24*time.Hour)),
 		),
 		gocron.NewTask(
 			func() {

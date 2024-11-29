@@ -36,7 +36,7 @@ func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 	command.DBUrl = cCtx.String("dburl")
 	command.Model, err = models.New(command.DBUrl)
 	if err != nil {
-		log.Fatalf("❌ could not connect to database, reason: %s", err.Error())
+		log.Fatalf("[FATAL]: could not connect to database, reason: %s", err.Error())
 	}
 
 	command.NATSServers = cCtx.String("nats-servers")

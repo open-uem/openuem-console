@@ -62,6 +62,15 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/admin/certificates", h.ListCertificates, h.IsAuthenticated)
 	e.POST("/admin/certificates", h.CertificateConfirmRevocation, h.IsAuthenticated)
 	e.DELETE("/admin/certificates", h.RevocateCertificate, h.IsAuthenticated)
+	e.GET("/admin/restore", h.Restore, h.IsAuthenticated)
+	e.GET("/admin/restore-messenger", h.RestoreMessenger, h.IsAuthenticated)
+	e.POST("/admin/restore-messenger", h.RestoreMessenger, h.IsAuthenticated)
+	e.GET("/admin/restore-updater", h.RestoreUpdater, h.IsAuthenticated)
+	e.POST("/admin/restore-updater", h.RestoreUpdater, h.IsAuthenticated)
+	e.GET("/admin/restore-agents", h.RestoreAgents, h.IsAuthenticated)
+	e.POST("/admin/restore-agents", h.RestoreAgents, h.IsAuthenticated)
+	e.GET("/admin/restore-database", h.RestoreDatabase, h.IsAuthenticated)
+	e.POST("/admin/restore-database", h.RestoreDatabase, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

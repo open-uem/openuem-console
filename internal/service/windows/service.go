@@ -15,7 +15,7 @@ import (
 func main() {
 	w := common.NewWorker("openuem-console-service.txt")
 	if err := w.GenerateConsoleConfig(); err != nil {
-		log.Fatalf("[ERROR]: could not generate config for OpenUEM console: %v", err)
+		log.Fatalf("[FATAL]: could not generate config for OpenUEM console: %v", err)
 	}
 
 	// Get working directory
@@ -31,7 +31,7 @@ func main() {
 	}
 
 	if err := w.CreateDowloadTempDir(); err != nil {
-		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
+		log.Fatalf("[FATAL]: could not create download temp dir: %v", err)
 	}
 
 	// Create winget directory for index.db

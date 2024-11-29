@@ -393,6 +393,10 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 	return agents, nil
 }
 
+func (m *Model) DeleteAllAgents() (int, error) {
+	return m.Client.Agent.Delete().Exec(context.Background())
+}
+
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
 	if len(f.Hostname) > 0 {
 		query = query.Where(agent.HostnameContainsFold(f.Hostname))

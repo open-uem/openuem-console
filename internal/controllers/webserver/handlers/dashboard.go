@@ -24,14 +24,14 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		channel = "stable"
 	}
 
-	release, err := h.GetLatestRelease(channel)
+	r, err := h.Model.GetLatestAgentRelease(channel)
 	if err != nil {
 		log.Println("[ERROR]: could not get latest version information")
 		data.OpenUEMUpdaterAPIStatus = "down"
 		data.NUpgradableAgents = 0
 	} else {
 		data.OpenUEMUpdaterAPIStatus = "up"
-		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(release.Version)
+		data.NUpgradableAgents, err = h.Model.CountUpgradableAgents(r.Version)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

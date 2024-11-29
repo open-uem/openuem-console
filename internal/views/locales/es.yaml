@@ -499,6 +499,21 @@ es:
     agent_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
     agent_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
     agent_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
+  restore:
+    title: Restaurar
+    description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal
+    agent_rollback_title: Restaurar agentes
+    agent_rollback_description: Si los agentes no informan correctamente tras aplicar una actualización bajo demanda y necesita volver a la versión previa a la actualización. Esta acción se aplicará a todos los agentes
+    messenger_rollback_title: Restaurar Messenger
+    messenger_rollback_description: Messenger se encarga de mostrar mensajes a los usuarios y se actualiza automáticamente tan pronto existe una actualización. Si se necesita se puede volver a la versión anterior
+    updater_rollback_title: Restaurar Actualizador
+    updater_rollback_description: El actualizador se encarga de actualizar los agentes (bajo demanda) y Messenger (automáticamente). Este servicio se actualiza automáticamente tan pronto existe una nueva versión. Si se necesita se puede volver a la versión anterior
+    database_title: Restaurar la base de datos
+    database_description: Si necesita eliminar de la base de datos todos los agentes y su información asociada, manteniendo los usuarios que acceden a la consola y la información de certificados
+    confirm_restore: ¿Está seguro de que desea realizar la restauración? Esta acción es irreversible
+    restore_requested: La petición de restauración se ha enviado a todos los agentes
+    confirm_delete_database: ¿Está seguro de que quiere borrar todas las tablas que contienen los agentes y su información?
+    delete_database_requested: Se ha procedido al borrado de la información
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."

@@ -502,7 +502,21 @@ en:
     agent_frequency_success: A new frequency has been communicated to the agents
     agent_frequency_could_not_be_saved: The new frequency could not be saved to the database
     agent_frequency_error: The new frequency cannot be communicated to the agents now, retry later
-
+  restore:
+    title: Restore
+    description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong
+    agent_rollback_title: Restore agentes
+    agent_rollback_description: If the agents don't work fine after an update that you applied on demand and you need to roll back to the previous version. This applies to all agents
+    messenger_rollback_title: Restore Messenger
+    messenger_rollback_description: Messenger shows message to users and is updated automatically as soon as a new version is ready. If needed you can roll back
+    updater_rollback_title: Restore Updater
+    updater_rollback_description: The updater is responsible of updating the agents (on demand) and Messenger (automatically). This updater is automatically updated if a new version is available. If needed you can roll back
+    database_title: Restore database
+    database_description: If you need to remove from the database the agents and their associated information while keeping the users that can log in the console and the certificates information
+    confirm_restore: Are you sure that you want to perform this restore action? This action is irreversible
+    restore_requested: "The restoration request has been sent to all alive agents"
+    confirm_delete_database: Are you sure that you want to delete all the tables containing agents and their information?
+    delete_database_requested: The information has been deleted
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."

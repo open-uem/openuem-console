@@ -1,0 +1,41 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ Confirm(confirmMessage, confirmUrl, cancelUrl string, warning bool) {
+	<div class={ "uk-alert flex flex-col gap-4", templ.KV("border-blue-700 text-blue-700", !warning), templ.KV("border-red-600 text-red-600", warning) } uk-alert>
+		<p>{ confirmMessage }</p>
+		<div class="flex items-center gap-4">
+			<button
+				hx-post={ confirmUrl }
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				htmx-indicator="#update-spinner"
+				class={ "uk-button text-white", templ.KV("bg-blue-700 hover:bg-blue-500", !warning), templ.KV("uk-button-danger", warning) }
+				_="on htmx:configRequest
+							set storedItems to [] as Array
+							if sessionStorage.selectedAgents exists then														
+								set storedItems to sessionStorage.selectedAgents as Object
+								get storedItems.toString() put it into event.detail.parameters['agents']
+								put #filterBySelectedRelease.value into event.detail.parameters['filterBySelectedRelease']
+							end
+						end"
+			>
+				{ i18n.T(ctx, "Confirm") }
+				<div id="confirm-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+			</button>
+			<button
+				title={ i18n.T(ctx, "Cancel") }
+				type="button"
+				class="uk-button uk-button-default"
+				hx-get={ cancelUrl }
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Cancel") }
+			</button>
+		</div>
+	</div>
+}

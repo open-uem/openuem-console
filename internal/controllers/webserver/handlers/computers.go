@@ -166,17 +166,17 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	a, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		log.Fatalf("an error ocurred querying agent: %v", err)
+		log.Fatalf("[FATAL]: an error ocurred querying agent: %v", err)
 	}
 
 	apps, err := h.Model.GetAgentAppsByPage(agentId, p)
 	if err != nil {
-		log.Fatalf("an error ocurred querying apps for agent: %v", err)
+		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
 	}
 
 	p.NItems, err = h.Model.CountAgentApps(agentId)
 	if err != nil {
-		log.Fatalf("an error ocurred querying apps for agent: %v", err)
+		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
