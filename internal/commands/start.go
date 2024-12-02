@@ -27,7 +27,7 @@ func startConsole(cCtx *cli.Context) error {
 	worker := common.NewWorker("")
 
 	if err := worker.GenerateConsoleConfigFromCLI(cCtx); err != nil {
-		log.Printf("[ERROR]: could not generate config for OpenUEM Console: %v", err)
+		log.Fatalf("[FATAL]: could not generate config for OpenUEM Console: %v", err)
 	}
 
 	// Get working directory

@@ -3,13 +3,12 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/doncicuto/openuem_ent/release"
 	"github.com/doncicuto/openuem_nats"
+	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
 )
 
@@ -65,9 +64,16 @@ func (w *Worker) GetLatestReleases(channel string) error {
 		return err
 	}
 
-	if err := conn.Publish("agent.update.updater", data); err != nil {
-		log.Printf("[ERROR]: could not send update updater message to agents, reason: %v", err)
+	agents, err := w.Model.GetAllAgentsToUpdate()
+	if err != nil {
+		log.Printf("[ERROR]: could not get agents from database, reason: %v", err)
 		return err
+	}
+
+	for _, a := range agents {
+		if err := conn.Publish("agent.update.updater."+a.ID, data); err != nil {
+			continue
+		}
 	}
 
 	latestMessengerRelease, err := w.CheckMessengerLatestReleases()
@@ -81,9 +87,10 @@ func (w *Worker) GetLatestReleases(channel string) error {
 		return err
 	}
 
-	if err := conn.Publish("agent.update.messenger", data); err != nil {
-		log.Printf("[ERROR]: could not send update messenger message to agents, reason: %v", err)
-		return err
+	for _, a := range agents {
+		if err := conn.Publish("agent.update.messenger."+a.ID, data); err != nil {
+			continue
+		}
 	}
 
 	return nil
@@ -93,7 +100,7 @@ func (w *Worker) CheckAgentLatestReleases(channel string) error {
 	// Check agent release against our API
 	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestAgentRelease&channel=%s", channel)
 
-	body, err := QueryReleasesEndpoint(url, channel)
+	body, err := openuem_utils.QueryReleasesEndpoint(url)
 	if err != nil {
 		return err
 	}
@@ -114,7 +121,7 @@ func (w *Worker) CheckUpdaterLatestReleases() (*openuem_nats.OpenUEMRelease, err
 	// Check agent release against our API
 	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestUpdaterRelease")
 
-	body, err := QueryReleasesEndpoint(url, "")
+	body, err := openuem_utils.QueryReleasesEndpoint(url)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +142,7 @@ func (w *Worker) CheckMessengerLatestReleases() (*openuem_nats.OpenUEMRelease, e
 	// Check agent release against our API
 	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestMessengerRelease")
 
-	body, err := QueryReleasesEndpoint(url, "")
+	body, err := openuem_utils.QueryReleasesEndpoint(url)
 	if err != nil {
 		return nil, err
 	}
@@ -150,33 +157,4 @@ func (w *Worker) CheckMessengerLatestReleases() (*openuem_nats.OpenUEMRelease, e
 	}
 
 	return &latestRelease, nil
-}
-
-func QueryReleasesEndpoint(url, channel string) ([]byte, error) {
-	client := http.Client{
-		Timeout: time.Second * 8,
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "openuem-console")
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	body, readErr := io.ReadAll(res.Body)
-	if readErr != nil {
-		return nil, err
-	}
-
-	return body, nil
 }

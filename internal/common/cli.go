@@ -28,6 +28,12 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 		return err
 	}
 
+	w.SFTPPrivateKeyPath = cCtx.String("sftpkey")
+	_, err = openuem_utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
+	if err != nil {
+		return err
+	}
+
 	w.NATSServers = cCtx.String("nats-servers")
 
 	w.JWTKey = cCtx.String("jwt-key")
@@ -41,6 +47,8 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.OrgLocality = cCtx.String("org-locality")
 	w.OrgAddress = cCtx.String("org-address")
 	w.Country = cCtx.String("country")
+	w.ReverseProxyAuthPort = cCtx.String("reverse-proxy-auth-port")
+	w.ReverseProxyServer = cCtx.String("reverse-proxy-server")
 
 	return nil
 }

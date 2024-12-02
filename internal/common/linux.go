@@ -44,7 +44,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 	w.ConsoleCertPath = key.String()
 	_, err = openuem_utils.ReadPEMCertificate(w.ConsoleCertPath)
 	if err != nil {
-		log.Println("[ERROR]: could not read OCSP certificate")
+		log.Println("[ERROR]: could not read Console certificate")
 		return err
 	}
 
@@ -56,7 +56,19 @@ func (w *Worker) GenerateConsoleConfig() error {
 	w.ConsolePrivateKeyPath = key.String()
 	_, err = openuem_utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
 	if err != nil {
-		log.Println("[ERROR]: could not read OCSP private key")
+		log.Println("[ERROR]: could not read Console private key")
+		return err
+	}
+
+	key, err = cfg.Section("Server").GetKey("sftp_key_path")
+	if err != nil {
+		return err
+	}
+
+	w.SFTPPrivateKeyPath = key.String()
+	_, err = openuem_utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
+	if err != nil {
+		log.Println("[ERROR]: could not read SFTP private key")
 		return err
 	}
 
@@ -125,6 +137,18 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 	w.Country = key.String()
+
+	key, err = cfg.Section("Server").GetKey("reverse_proxy_auth_port")
+	if err != nil {
+		return err
+	}
+	w.ReverseProxyAuthPort = key.String()
+
+	key, err = cfg.Section("Server").GetKey("reverse_proxy_server")
+	if err != nil {
+		return err
+	}
+	w.ReverseProxyServer = key.String()
 
 	return nil
 }

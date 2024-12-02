@@ -22,7 +22,7 @@ type AuthServer struct {
 	CACert         *x509.Certificate
 }
 
-func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePort, authPort string) *AuthServer {
+func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePort, authPort, reverseProxyAuthPort string) *AuthServer {
 	var err error
 	a := AuthServer{}
 
@@ -45,7 +45,7 @@ func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePor
 	}
 
 	// Create Handlers and register its router
-	a.Handler = handlers.NewHandler(m, s, a.CACert, server, consolePort)
+	a.Handler = handlers.NewHandler(m, s, a.CACert, server, consolePort, reverseProxyAuthPort)
 	a.Handler.Register(a.Router)
 
 	return &a

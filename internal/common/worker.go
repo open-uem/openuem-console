@@ -20,6 +20,7 @@ type Worker struct {
 	CACertPath            string
 	ConsoleCertPath       string
 	ConsolePrivateKeyPath string
+	SFTPPrivateKeyPath    string
 	JWTKey                string
 	SessionManager        *sessions.SessionManager
 	WebServer             *webserver.WebServer
@@ -36,6 +37,8 @@ type Worker struct {
 	OrgLocality           string
 	OrgAddress            string
 	Country               string
+	ReverseProxyAuthPort  string
+	ReverseProxyServer    string
 }
 
 func NewWorker(logName string) *Worker {

@@ -180,6 +180,11 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 		return err
 	}
 
+	consoleUrl := c.Request().Header.Get("Origin")
+	if h.ReverseProxyServer != "" {
+		consoleUrl = h.ReverseProxyServer
+	}
+
 	certRequest := openuem_nats.CertificateRequest{
 		Username:   user.ID,
 		FullName:   user.Name,
@@ -187,6 +192,7 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 		Country:    user.Country,
 		Password:   user.CertClearPassword,
 		YearsValid: userCertYears,
+		ConsoleURL: consoleUrl,
 	}
 
 	data, err := json.Marshal(certRequest)
@@ -266,12 +272,16 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 	}
 
 	// Now request a new certificate
+	consoleUrl := c.Request().Header.Get("Origin")
+	if h.ReverseProxyServer != "" {
+		consoleUrl = h.ReverseProxyServer
+	}
 	certRequest := openuem_nats.CertificateRequest{
 		Username:   user.ID,
 		FullName:   user.Name,
 		Email:      user.Email,
 		Country:    user.Country,
-		ConsoleURL: c.Request().Header.Get("Origin"),
+		ConsoleURL: consoleUrl,
 		YearsValid: 1,
 	}
 
@@ -308,7 +318,7 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListUsers(c, "Email has been confirmed", "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.email_confirmed"), "")
 }
 
 func (h *Handler) AskForConfirmation(c echo.Context) error {
@@ -322,7 +332,7 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListUsers(c, "A new confirmation email has been sent to "+user.Email, "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_confirmation_email_sent")+user.Email, "")
 }
 
 func (h *Handler) EditUser(c echo.Context) error {

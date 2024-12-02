@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/doncicuto/openuem-console/internal/views/admin_views"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/invopop/ctxi18n/i18n"
@@ -17,9 +19,19 @@ func (h *Handler) RestoreMessenger(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 
-		if err := h.NATSConnection.Publish("agent.rollback.messenger", nil); err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responders"), false))
+		agents, err := h.Model.GetAllAgentsToUpdate()
+		if err != nil {
+			log.Printf("[ERROR]: could not get agents from database, reason: %v", err)
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+
+		go func() {
+			for _, a := range agents {
+				if err := h.NATSConnection.Publish("agent.rollback.messenger."+a.ID, nil); err != nil {
+					continue
+				}
+			}
+		}()
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"))))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
@@ -31,9 +43,19 @@ func (h *Handler) RestoreUpdater(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 
-		if err := h.NATSConnection.Publish("agent.rollback.updater", nil); err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responders"), false))
+		agents, err := h.Model.GetAllAgentsToUpdate()
+		if err != nil {
+			log.Printf("[ERROR]: could not get agents from database, reason: %v", err)
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+
+		go func() {
+			for _, a := range agents {
+				if err := h.NATSConnection.Publish("agent.rollback.updater."+a.ID, nil); err != nil {
+					continue
+				}
+			}
+		}()
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"))))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
@@ -45,9 +67,19 @@ func (h *Handler) RestoreAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 
-		if err := h.NATSConnection.Publish("agent.rollback", nil); err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responders"), false))
+		agents, err := h.Model.GetAllAgentsToUpdate()
+		if err != nil {
+			log.Printf("[ERROR]: could not get agents from database, reason: %v", err)
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+
+		go func() {
+			for _, a := range agents {
+				if err := h.NATSConnection.Publish("agent.rollback."+a.ID, nil); err != nil {
+					continue
+				}
+			}
+		}()
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"))))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))

@@ -48,7 +48,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 	parent := c.FormValue("parent")
 	dst := c.FormValue("dst")
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -262,7 +262,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -327,7 +327,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -392,7 +392,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -453,7 +453,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}
@@ -521,7 +521,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	key, err := openuem_utils.ReadPEMPrivateKey(h.KeyPath)
+	key, err := openuem_utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return err
 	}

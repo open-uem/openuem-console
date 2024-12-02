@@ -290,16 +290,18 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 				</li>
 			}
 			if agent.Status == "Disabled" {
-				<a
-					hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
-					hx-target="#main"
-					hx-swap="outerHTML"
-					hx-indicator="#disable-spinner"
-				>
-					<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
-					{ i18n.T(ctx, "Enable") }
-					<div id="disable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
-				</a>
+				<li>
+					<a
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-indicator="#disable-spinner"
+					>
+						<uk-icon hx-history="false" icon="megaphone" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "Enable") }
+						<div id="disable-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+					</a>
+				</li>
 			}
 			if agent.IP != "" && agent.Status == "Enabled" && agent.Vnc != "" {
 				<li>

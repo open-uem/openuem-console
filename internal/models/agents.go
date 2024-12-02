@@ -28,6 +28,10 @@ type Agent struct {
 	Count   int
 }
 
+func (m *Model) GetAllAgentsToUpdate() ([]*ent.Agent, error) {
+	return m.Client.Agent.Query().All(context.Background())
+}
+
 func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	// Info from agents waiting for admission won't be shown
 

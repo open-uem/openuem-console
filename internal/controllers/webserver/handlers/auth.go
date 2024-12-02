@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -17,7 +18,16 @@ type MyCustomClaims struct {
 }
 
 func (h *Handler) Auth(c echo.Context) error {
-	return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ServerName, h.AuthPort))
+	if h.ReverseProxyAuthPort != "" {
+		u, err := url.Parse(c.Request().Referer())
+		if err != nil {
+			return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "could not parse url").Render(c.Request().Context(), c.Response().Writer)
+		}
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", u.Hostname(), h.ReverseProxyAuthPort))
+	} else {
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ServerName, h.AuthPort))
+	}
+
 }
 
 func (h *Handler) ConfirmEmail(c echo.Context) error {

@@ -379,6 +379,8 @@ es:
     import_wrong_email: Email en la fila %d debe contener una dirección válida
     import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
     admin_cannot_be_removed: "El usuario admin no puede ser eliminado"
+    new_confirmation_email_sent: "Se ha enviado un nuevo email de confirmación a "
+    email_confirmed: "La dirección de correo electrónico ha sido confirmada"
   updates:
     title: "Actualizaciones de seguridad"
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"

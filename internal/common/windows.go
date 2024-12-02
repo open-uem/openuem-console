@@ -38,14 +38,21 @@ func (w *Worker) GenerateConsoleConfig() error {
 	w.ConsoleCertPath = filepath.Join(cwd, "certificates/console/console.cer")
 	_, err = openuem_utils.ReadPEMCertificate(w.ConsoleCertPath)
 	if err != nil {
-		log.Println("[ERROR]: could not read OCSP certificate")
+		log.Println("[ERROR]: could not read Console certificate")
 		return err
 	}
 
 	w.ConsolePrivateKeyPath = filepath.Join(cwd, "certificates/console/console.key")
 	_, err = openuem_utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
 	if err != nil {
-		log.Println("[ERROR]: could not read OCSP private key")
+		log.Println("[ERROR]: could not read Console private key")
+		return err
+	}
+
+	w.SFTPPrivateKeyPath = filepath.Join(cwd, "certificates/console/sftp.key")
+	_, err = openuem_utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
+	if err != nil {
+		log.Println("[ERROR]: could not read SFTP private key")
 		return err
 	}
 
@@ -117,9 +124,21 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	w.Country, err = openuem_utils.GetValueFromRegistry(k, "Country")
+	w.Country, err = openuem_utils.GetValueFromRegistry(k, "OrgCountry")
 	if err != nil {
 		log.Println("[ERROR]: could not read Country from registry")
+		return err
+	}
+
+	w.ReverseProxyAuthPort, err = openuem_utils.GetValueFromRegistry(k, "ReverseProxyAuthPort")
+	if err != nil {
+		log.Println("[ERROR]: could not read reverse proxy auth port from registry")
+		return err
+	}
+
+	w.ReverseProxyServer, err = openuem_utils.GetValueFromRegistry(k, "ReverseProxyServer")
+	if err != nil {
+		log.Println("[ERROR]: could not read reverse proxy domain from registry")
 		return err
 	}
 

@@ -5,24 +5,50 @@ import (
 	"context"
 	"crypto"
 	"crypto/x509"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/ocsp"
 )
 
 func (h *Handler) Auth(c echo.Context) error {
-
+	var err error
+	var cert *x509.Certificate
 	certs := c.Request().TLS.PeerCertificates
 
 	if len(certs) != 1 {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Please provide valid credentials")
+		clientEncodedCert := c.Request().Header.Get("Client-Cert")
+		if clientEncodedCert != "" {
+			cleanBase64 := ""
+			if strings.Contains(clientEncodedCert, "BEGIN CERTIFICATE") {
+				// NGINX
+				cleanBase64 = strings.TrimPrefix(clientEncodedCert, ":-----BEGIN CERTIFICATE----- ")
+				cleanBase64 = strings.TrimSuffix(cleanBase64, " -----END CERTIFICATE-----:")
+				cleanBase64 = strings.ReplaceAll(cleanBase64, " ", "")
+			} else {
+				// Caddy
+				cleanBase64 = strings.Trim(clientEncodedCert, ":")
+			}
+			decoded, err := base64.StdEncoding.DecodeString(cleanBase64)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "The certificate could not be decoded")
+			}
+			cert, err = x509.ParseCertificate(decoded)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "Could not parse client certificate")
+			}
+		} else {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Please provide valid credentials")
+		}
+	} else {
+		cert = certs[0]
 	}
 
-	cert := certs[0]
 	caCert := h.CACert
 
 	uid := cert.Subject.CommonName
@@ -121,7 +147,12 @@ func (h *Handler) Auth(c echo.Context) error {
 		}
 	}
 
-	return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/dashboard", h.ServerName, h.ConsolePort))
+	if h.ReverseProxyAuthPort != "" {
+		return c.Redirect(http.StatusFound, c.Request().Referer()+"dashboard")
+	} else {
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/dashboard", h.ServerName, h.ConsolePort))
+	}
+
 }
 
 func getIssuerFromCert(cert, caCert *x509.Certificate) (*x509.Certificate, error) {

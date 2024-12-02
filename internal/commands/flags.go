@@ -19,8 +19,14 @@ func StartConsoleFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:    "key",
 			Value:   "certificates/console.key",
-			Usage:   "the path to your OCSP Console private key file in PEM format",
+			Usage:   "the path to your OpenUEM's Console private key file in PEM format",
 			EnvVars: []string{"CONSOLE_KEY_FILENAME"},
+		},
+		&cli.StringFlag{
+			Name:    "sftpkey",
+			Value:   "certificates/sftp.key",
+			Usage:   "the path to your SFTP certificate private key file in PEM format",
+			EnvVars: []string{"SFTP_KEY_FILENAME"},
 		},
 		&cli.StringFlag{
 			Name:     "nats-servers",
@@ -89,6 +95,16 @@ func StartConsoleFlags() []cli.Flag {
 			Name:    "country",
 			Usage:   "the country of your organization as it appears in digital certificates",
 			EnvVars: []string{"COUNTRY"},
+		},
+		&cli.StringFlag{
+			Name:    "reverse-proxy-auth-port",
+			Usage:   "if the console runs behind a reverse proxy, we need to set the authentication server port",
+			EnvVars: []string{"REVERSE_PROXY_AUTH_PORT"},
+		},
+		&cli.StringFlag{
+			Name:    "reverse-proxy-server",
+			Usage:   "if the console runs behind a reverse proxy, we need to know the console domain",
+			EnvVars: []string{"REVERSE_PROXY_SERVER"},
 		},
 	}
 }

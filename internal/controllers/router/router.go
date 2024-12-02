@@ -18,7 +18,6 @@ import (
 	"github.com/invopop/ctxi18n"
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
-	etag "github.com/pablor21/echo-etag/v4"
 )
 
 func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.Echo {
@@ -47,7 +46,7 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 
 	// Add CORS middleware
 	e.Use(mw.CORSWithConfig(mw.CORSConfig{
-		AllowOrigins: []string{fmt.Sprintf("https://%s:%s", server, port), fmt.Sprintf("https://localhost:%s", port)},
+		AllowOrigins: []string{fmt.Sprintf("https://%s:%s", server, port)},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
@@ -91,9 +90,11 @@ func staticAssets(e *echo.Echo, cwd string) string {
 		assetsPath = filepath.Join(cwd, "assets")
 	}
 
-	// Etag middleware so no-cache can make use of no-cache
+	// TODO Etag middleware so no-cache can make use of no-cache
 	// Ref: https://github.com/pablor21/echo-etag
-	e.Use(etag.Etag())
+	// There's an issue when using Caddy as reverse proxy ("unexpected EOF")
+	// Disable until we find if the issue is with the middleware or with Caddy
+	// e.Use(etag.Etag())
 
 	// nosniff + no-cache
 	customHeaderMw := func(next echo.HandlerFunc) echo.HandlerFunc {

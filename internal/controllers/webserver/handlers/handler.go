@@ -15,30 +15,33 @@ import (
 type Handler struct {
 	Model *models.Model
 
-	SessionManager *sessions.SessionManager
-	JWTKey         string
-	CertPath       string
-	KeyPath        string
-	CACertPath     string
-	DownloadDir    string
-	ServerName     string
-	AuthPort       string
-	ConsolePort    string
-	Domain         string
-	TaskScheduler  gocron.Scheduler
-	NATSServers    string
-	NATSTimeout    int
-	NATSConnection *nats.Conn
-	NATSConnectJob gocron.Job
-	JetStream      jetstream.JetStream
-	OrgName        string
-	OrgProvince    string
-	OrgLocality    string
-	OrgAddress     string
-	Country        string
+	SessionManager       *sessions.SessionManager
+	JWTKey               string
+	CertPath             string
+	KeyPath              string
+	SFTPKeyPath          string
+	CACertPath           string
+	DownloadDir          string
+	ServerName           string
+	AuthPort             string
+	ConsolePort          string
+	Domain               string
+	TaskScheduler        gocron.Scheduler
+	NATSServers          string
+	NATSTimeout          int
+	NATSConnection       *nats.Conn
+	NATSConnectJob       gocron.Job
+	JetStream            jetstream.JetStream
+	OrgName              string
+	OrgProvince          string
+	OrgLocality          string
+	OrgAddress           string
+	Country              string
+	ReverseProxyAuthPort string
+	ReverseProxyServer   string
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country string) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer string) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -48,28 +51,33 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 	}
 
 	h := Handler{
-		Model:          model,
-		SessionManager: s,
-		JWTKey:         jwtKey,
-		CertPath:       certPath,
-		KeyPath:        keyPath,
-		CACertPath:     caCertPath,
-		DownloadDir:    tmpDownloadDir,
-		ServerName:     server,
-		AuthPort:       authPort,
-		Domain:         domain,
-		NATSTimeout:    timeout,
-		NATSServers:    natsServers,
-		TaskScheduler:  ts,
-		OrgName:        orgName,
-		OrgProvince:    orgProvince,
-		OrgLocality:    orgLocality,
-		OrgAddress:     orgAddress,
-		Country:        country,
+		Model:                model,
+		SessionManager:       s,
+		JWTKey:               jwtKey,
+		CertPath:             certPath,
+		KeyPath:              keyPath,
+		SFTPKeyPath:          sftpKeyPath,
+		CACertPath:           caCertPath,
+		DownloadDir:          tmpDownloadDir,
+		ServerName:           server,
+		AuthPort:             authPort,
+		Domain:               domain,
+		NATSTimeout:          timeout,
+		NATSServers:          natsServers,
+		TaskScheduler:        ts,
+		OrgName:              orgName,
+		OrgProvince:          orgProvince,
+		OrgLocality:          orgLocality,
+		OrgAddress:           orgAddress,
+		Country:              country,
+		ReverseProxyAuthPort: reverseProxyAuthPort,
+		ReverseProxyServer:   reverseProxyServer,
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect
-	h.StartNATSConnectJob()
+	if err := h.StartNATSConnectJob(); err != nil {
+		log.Fatalf("[FATAL]: could not start NATS Connect job")
+	}
 
 	return &h
 }
