@@ -9,6 +9,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
 	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/doncicuto/openuem_ent/component"
 	"github.com/go-co-op/gocron/v2"
 )
 
@@ -18,6 +19,11 @@ func (w *Worker) StartDBConnectJob() error {
 	w.Model, err = models.New(w.DBUrl)
 	if err == nil {
 		log.Println("[INFO]: connection established with database")
+
+		// Save component version
+		if err := w.Model.SetComponent(component.ComponentConsole, w.Version, w.Channel); err != nil {
+			log.Fatalf("[ERROR]: could not save component information")
+		}
 
 		if err := w.Model.CreateInitialSettings(); err != nil {
 			log.Println("[WARN]: could not create initial settings")
@@ -51,6 +57,11 @@ func (w *Worker) StartDBConnectJob() error {
 					return
 				}
 				log.Println("[INFO]: connection established with database")
+
+				// Save component version
+				if err := w.Model.SetComponent(component.ComponentConsole, w.Version, w.Channel); err != nil {
+					log.Fatalf("[ERROR]: could not save component information")
+				}
 
 				if err := w.TaskScheduler.RemoveJob(w.DBConnectJob.ID()); err != nil {
 					return
