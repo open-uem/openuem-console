@@ -77,3 +77,16 @@ type UpdateAgentsFilter struct {
 	SelectedAllAgents     string
 	SelectedRelease       string
 }
+
+type UpdateComponentsFilter struct {
+	Hostname              string
+	Components            []string
+	Releases              []string
+	UpdateStatus          []string
+	UpdateMessage         string
+	UpdateWhenFrom        string
+	UpdateWhenTo          string
+	SelectedItems         int
+	SelectedAllComponents string
+	SelectedRelease       string
+}

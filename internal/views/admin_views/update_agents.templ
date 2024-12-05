@@ -99,7 +99,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 										@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
 											return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
 												len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
-												len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionFrom) == 0
+												len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionTo) == 0
 										})
 										<button
 											id="select-all"

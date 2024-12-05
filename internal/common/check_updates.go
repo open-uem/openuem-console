@@ -13,11 +13,10 @@ import (
 )
 
 func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
-	// Try to do some checks at start
 	if err := w.GetLatestReleases(channel); err != nil {
-		log.Printf("[ERROR]: could not get latest releases, reason: %v", err)
+		log.Printf("[ERROR]: could not get latest agent releases, reason: %v", err)
 	} else {
-		log.Println("[INFO]: latest releases have been checked")
+		log.Println("[INFO]: latest agent releases have been checked")
 	}
 
 	// Create task
@@ -28,7 +27,7 @@ func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
 		gocron.NewTask(
 			func() {
 				if err := w.GetLatestReleases(channel); err != nil {
-					log.Printf("[ERROR]: could not get latest releases, reason: %v", err)
+					log.Printf("[ERROR]: could not get latest agent releases, reason: %v", err)
 					return
 				}
 			},
@@ -37,7 +36,7 @@ func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("[INFO]: check latest releases job has been scheduled every 6 hours")
+	log.Println("[INFO]: check latest agent releases job has been scheduled every 6 hours")
 	return nil
 }
 

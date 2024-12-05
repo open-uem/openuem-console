@@ -102,6 +102,20 @@ templ ConfigNavbar(active string) {
 				{ i18n.T(ctx, "admin.update.agents.title") }
 			</a>
 		</li>
+		<li class={ templ.KV("uk-active", active == "update-components") }>
+			<a
+				href="/admin/update-components"
+				hx-get="/admin/update-components"
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				hx-indicator="#admin-update-components-spinner"
+				class="flex items-center gap-1"
+			>
+				<uk-icon id="admin-update-components-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "admin.update.components.title") }
+			</a>
+		</li>
 		<li class={ templ.KV("uk-active", active == "certificates") }>
 			<a
 				href="/admin/certificates"

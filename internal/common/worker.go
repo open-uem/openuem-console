@@ -42,6 +42,7 @@ type Worker struct {
 	ReverseProxyServer    string
 	Version               string
 	Channel               component.Channel
+	ServerReleasesFolder  string
 }
 
 func NewWorker(logName string) *Worker {
@@ -82,6 +83,12 @@ func (w *Worker) StartWorker() {
 	// Start a job to download Microsoft Winget database
 	if err := w.StartWinGetDBDownloadJob(); err != nil {
 		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
+		return
+	}
+
+	// Start a job to download server releases version
+	if err := w.StartServerReleasesDownloadJob(); err != nil {
+		log.Printf("[ERROR]: could not start server releases download job, reason: %s", err.Error())
 		return
 	}
 }

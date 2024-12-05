@@ -40,6 +40,12 @@ func main() {
 		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
 	}
 
+	// Create server releases directory
+	w.ServerReleasesFolder = filepath.Join(cwd, "tmp", "server-releases")
+	if err := w.CreateServerReleasesDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create server releases temp dir: %v", err)
+	}
+
 	// Configure the windows service
 	s := openuem_utils.NewOpenUEMWindowsService()
 	s.ServiceStart = w.StartWorker

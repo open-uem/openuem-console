@@ -71,6 +71,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/restore-agents", h.RestoreAgents, h.IsAuthenticated)
 	e.GET("/admin/restore-database", h.RestoreDatabase, h.IsAuthenticated)
 	e.POST("/admin/restore-database", h.RestoreDatabase, h.IsAuthenticated)
+	e.GET("/admin/update-components", h.UpdateComponents, h.IsAuthenticated)
+	e.POST("/admin/update-components", h.UpdateComponents, h.IsAuthenticated)
+	e.DELETE("/admin/update-components", h.UpdateComponents, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 

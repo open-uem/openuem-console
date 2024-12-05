@@ -23,3 +23,13 @@ func (w *Worker) CreateWingetDBDir() error {
 
 	return nil
 }
+
+func (w *Worker) CreateServerReleasesDir() error {
+	if _, err := os.Stat(w.ServerReleasesFolder); os.IsNotExist(err) {
+		if err := os.MkdirAll(w.ServerReleasesFolder, 0770); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

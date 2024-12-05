@@ -37,10 +37,42 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 		),
 	)
 	if err != nil {
-		log.Printf("[FATAL]: could not start the download directory clean job: %v", err)
+		log.Printf("[FATAL]: could not start the winget download job: %v", err)
 		return err
 	}
 	log.Println("[INFO]: download index.db job has been scheduled every day")
+	return nil
+}
+
+func (w *Worker) StartServerReleasesDownloadJob() error {
+	var err error
+
+	// Try to download server releases at start
+	if err := w.GetServerReleases(); err != nil {
+		log.Printf("[ERROR]: could not get server releases, reason: %v", err)
+	} else {
+		log.Println("[INFO]: server releases files have been downloaded")
+	}
+
+	// Create task
+	_, err = w.TaskScheduler.NewJob(
+		gocron.DurationJob(
+			time.Duration(time.Duration(6*time.Hour)),
+		),
+		gocron.NewTask(
+			func() {
+				if err := w.GetServerReleases(); err != nil {
+					log.Printf("[ERROR]: could not get server releases, reason: %v", err)
+					return
+				}
+			},
+		),
+	)
+	if err != nil {
+		log.Printf("[FATAL]: could not start the download server releases job: %v", err)
+		return err
+	}
+	log.Println("[INFO]: download server releases job has been scheduled every 6 hours")
 	return nil
 }
 

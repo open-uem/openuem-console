@@ -48,7 +48,7 @@ func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 
 func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFilter, excludeWaitingForAdmissionAgents bool) ([]*ent.Agent, error) {
 	var err error
-	var apps []*ent.Agent
+	var agents []*ent.Agent
 	var query *ent.AgentQuery
 
 	// Info from agents waiting for admission won't be shown
@@ -64,48 +64,48 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	switch p.SortBy {
 	case "hostname":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
 		}
 	case "os":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldOs)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldOs)).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldOs)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldOs)).All(context.Background())
 		}
 	case "version":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderAsc())).All(context.Background())
+			agents, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderAsc())).All(context.Background())
 		} else {
-			apps, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderDesc())).All(context.Background())
+			agents, err = query.Order(agent.ByReleaseField(release.FieldVersion, sql.OrderDesc())).All(context.Background())
 		}
 	case "last_contact":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldLastContact)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldLastContact)).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 		}
 	case "status":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldStatus)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldStatus)).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldStatus)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldStatus)).All(context.Background())
 		}
 	case "ip_address":
 		if p.SortOrder == "asc" {
-			apps, err = query.Order(ent.Asc(agent.FieldIP)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldIP)).All(context.Background())
 		} else {
-			apps, err = query.Order(ent.Desc(agent.FieldIP)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldIP)).All(context.Background())
 		}
 	default:
-		apps, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
+		agents, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 	}
 
 	if err != nil {
 		return nil, err
 	}
-	return apps, nil
+	return agents, nil
 }
 
 func (m *Model) GetAgentById(agentId string) (*ent.Agent, error) {

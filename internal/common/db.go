@@ -38,7 +38,7 @@ func (w *Worker) StartDBConnectJob() error {
 			channel = "stable"
 		}
 		if err := w.StartCheckLatestReleasesJob(channel); err != nil {
-			log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
+			log.Printf("[ERROR]: could not start check latest agent releases job, reason: %s", err.Error())
 		}
 		return nil
 	}
@@ -80,7 +80,7 @@ func (w *Worker) StartDBConnectJob() error {
 					channel = "stable"
 				}
 				if err := w.StartCheckLatestReleasesJob(channel); err != nil {
-					log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
+					log.Printf("[ERROR]: could not start check latest agent releases job, reason: %s", err.Error())
 					return
 				}
 			},

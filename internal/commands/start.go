@@ -42,6 +42,15 @@ func startConsole(cCtx *cli.Context) error {
 		worker.DownloadDir = filepath.Join(cwd, "download")
 	}
 
+	// Create server releases directory
+	worker.ServerReleasesFolder = filepath.Join(cwd, "tmp", "server-releases")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.ServerReleasesFolder = filepath.Join(cwd, "server-releases")
+	}
+	if err := worker.CreateServerReleasesDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create server releases temp dir: %v", err)
+	}
+
 	if err := worker.CreateDowloadTempDir(); err != nil {
 		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
 	}

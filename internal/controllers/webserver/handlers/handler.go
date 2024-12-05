@@ -39,6 +39,7 @@ type Handler struct {
 	Country              string
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
+	LatestServerRelease  openuem_nats.OpenUEMServerRelease
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer string) *Handler {
