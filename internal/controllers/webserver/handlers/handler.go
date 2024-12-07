@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -32,6 +33,8 @@ type Handler struct {
 	NATSConnection       *nats.Conn
 	NATSConnectJob       gocron.Job
 	JetStream            jetstream.JetStream
+	JetStreamCancelFunc  context.CancelFunc
+	AgentStream          jetstream.Stream
 	OrgName              string
 	OrgProvince          string
 	OrgLocality          string
@@ -85,14 +88,25 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 
 func (h *Handler) StartNATSConnectJob() error {
 	var err error
+	var ctx context.Context
 
 	h.NATSConnection, err = openuem_nats.ConnectWithNATS(h.NATSServers, h.CertPath, h.KeyPath, h.CACertPath)
 	if err == nil {
 		h.JetStream, err = jetstream.New(h.NATSConnection)
 		if err == nil {
-			log.Println("[INFO]: JetStream has been instantiated")
+			ctx, h.JetStreamCancelFunc = context.WithTimeout(context.Background(), 60*time.Minute)
+
+			h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+				Name:     "AGENTS_STREAM",
+				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
+			})
+			if err == nil {
+				log.Println("[INFO]: Agent Stream could be instantiated")
+				return nil
+			}
 			return nil
 		}
+
 		return nil
 	}
 	log.Printf("[ERROR]: could not connect to NATS %v", err)
@@ -109,19 +123,31 @@ func (h *Handler) StartNATSConnectJob() error {
 						log.Printf("[ERROR]: could not connect to NATS %v", err)
 						return
 					}
+				}
+
+				if h.JetStream == nil {
 					h.JetStream, err = jetstream.New(h.NATSConnection)
 					if err != nil {
 						log.Printf("[ERROR]: could not instantiate JetStream, reason: %v", err)
 						return
 					}
-				} else {
-					if h.JetStream == nil {
-						h.JetStream, err = jetstream.New(h.NATSConnection)
-						if err != nil {
-							log.Printf("[ERROR]: could not instantiate JetStream, reason: %v", err)
-							return
-						}
-					}
+				}
+
+				h.JetStream, err = jetstream.New(h.NATSConnection)
+				if err != nil {
+					log.Println("[ERROR]: JetStream could not be instantiated")
+					return
+				}
+
+				ctx, h.JetStreamCancelFunc = context.WithTimeout(context.Background(), 60*time.Minute)
+
+				h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+					Name:     "AGENTS_STREAM",
+					Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>"},
+				})
+				if err != nil {
+					log.Println("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
+					return
 				}
 
 				if err := h.TaskScheduler.RemoveJob(h.NATSConnectJob.ID()); err != nil {

@@ -1,6 +1,6 @@
 module github.com/doncicuto/openuem-console
 
-go 1.23.1
+go 1.23.4
 
 require (
 	entgo.io/ent v0.14.1
@@ -9,7 +9,6 @@ require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
-	github.com/danieljoos/wincred v1.2.2
 	github.com/doncicuto/openuem_ent v0.0.0-00010101000000-000000000000
 	github.com/doncicuto/openuem_nats v0.0.0-00010101000000-000000000000
 	github.com/doncicuto/openuem_utils v0.0.0-00010101000000-000000000000
@@ -44,6 +43,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
+	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

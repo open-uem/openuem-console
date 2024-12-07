@@ -45,53 +45,6 @@ func (w *Worker) GetLatestReleases(channel string) error {
 		return err
 	}
 
-	latestUpdaterRelease, err := w.CheckUpdaterLatestReleases()
-	if err != nil {
-		return err
-	}
-
-	// Connect with NATS
-	conn, err := openuem_nats.ConnectWithNATS(w.NATSServers, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.CACertPath)
-	if err != nil {
-		log.Printf("[ERROR]: could not connect to NATS, reason: %v", err)
-		return err
-	}
-
-	data, err := json.Marshal(latestUpdaterRelease)
-	if err != nil {
-		log.Printf("[ERROR]: could not marshall update request for updater, reason: %v", err)
-		return err
-	}
-
-	agents, err := w.Model.GetAllAgentsToUpdate()
-	if err != nil {
-		log.Printf("[ERROR]: could not get agents from database, reason: %v", err)
-		return err
-	}
-
-	for _, a := range agents {
-		if err := conn.Publish("agent.update.updater."+a.ID, data); err != nil {
-			continue
-		}
-	}
-
-	latestMessengerRelease, err := w.CheckMessengerLatestReleases()
-	if err != nil {
-		return err
-	}
-
-	data, err = json.Marshal(latestMessengerRelease)
-	if err != nil {
-		log.Printf("[ERROR]: could not marshall update request for messenger, reason: %v", err)
-		return err
-	}
-
-	for _, a := range agents {
-		if err := conn.Publish("agent.update.messenger."+a.ID, data); err != nil {
-			continue
-		}
-	}
-
 	return nil
 }
 

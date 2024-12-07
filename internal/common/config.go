@@ -1,5 +1,3 @@
-//go:build linux
-
 package common
 
 import (
@@ -19,12 +17,13 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 
 	// Open ini file
-	cfg, err := ini.Load("/etc/openuem-server/openuem.ini")
+	configFile := openuem_utils.GetConfigFile()
+	cfg, err := ini.Load(configFile)
 	if err != nil {
 		return err
 	}
 
-	key, err := cfg.Section("Server").GetKey("ca_cert_path")
+	key, err := cfg.Section("Certificates").GetKey("CACert")
 	if err != nil {
 		return err
 	}
@@ -36,7 +35,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	key, err = cfg.Section("Server").GetKey("console_cert_path")
+	key, err = cfg.Section("Certificates").GetKey("ConsoleCert")
 	if err != nil {
 		return err
 	}
@@ -48,7 +47,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	key, err = cfg.Section("Server").GetKey("console_key_path")
+	key, err = cfg.Section("Certificates").GetKey("ConsoleKey")
 	if err != nil {
 		return err
 	}
@@ -60,7 +59,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	key, err = cfg.Section("Server").GetKey("sftp_key_path")
+	key, err = cfg.Section("Certificates").GetKey("SFTPKey")
 	if err != nil {
 		return err
 	}
@@ -72,79 +71,78 @@ func (w *Worker) GenerateConsoleConfig() error {
 		return err
 	}
 
-	key, err = cfg.Section("Server").GetKey("console_jwt_key")
+	w.JWTKey, err = openuem_utils.GetJWTKey()
 	if err != nil {
 		return err
 	}
-	w.JWTKey = key.String()
 
-	key, err = cfg.Section("Server").GetKey("console_server_name")
+	key, err = cfg.Section("Console").GetKey("hostname")
 	if err != nil {
 		return err
 	}
 	w.ServerName = key.String()
 
-	key, err = cfg.Section("Server").GetKey("console_port")
+	key, err = cfg.Section("Console").GetKey("port")
 	if err != nil {
 		return err
 	}
 	w.ConsolePort = key.String()
 
-	key, err = cfg.Section("Server").GetKey("auth_port")
+	key, err = cfg.Section("Console").GetKey("authport")
 	if err != nil {
 		return err
 	}
 	w.AuthPort = key.String()
 
-	key, err = cfg.Section("Server").GetKey("domain")
+	key, err = cfg.Section("Console").GetKey("domain")
 	if err != nil {
 		return err
 	}
 	w.Domain = key.String()
 
-	key, err = cfg.Section("Server").GetKey("nats_url")
+	key, err = cfg.Section("NATS").GetKey("servers")
 	if err != nil {
 		return err
 	}
 	w.NATSServers = key.String()
 
-	key, err = cfg.Section("Server").GetKey("org_name")
+	key, err = cfg.Section("Certificates").GetKey("OrgName")
 	if err != nil {
 		return err
 	}
 	w.OrgName = key.String()
 
-	key, err = cfg.Section("Server").GetKey("org_province")
+	key, err = cfg.Section("Certificates").GetKey("OrgProvince")
 	if err != nil {
 		return err
 	}
 	w.OrgProvince = key.String()
 
-	key, err = cfg.Section("Server").GetKey("org_locality")
+	key, err = cfg.Section("Certificates").GetKey("OrgLocality")
 	if err != nil {
 		return err
 	}
 	w.OrgLocality = key.String()
 
-	key, err = cfg.Section("Server").GetKey("org_address")
+	key, err = cfg.Section("Certificates").GetKey("OrgAddress")
 	if err != nil {
 		return err
 	}
 	w.OrgAddress = key.String()
 
-	key, err = cfg.Section("Server").GetKey("country")
+	key, err = cfg.Section("Certificates").GetKey("OrgCountry")
 	if err != nil {
 		return err
 	}
 	w.Country = key.String()
 
-	key, err = cfg.Section("Server").GetKey("reverse_proxy_auth_port")
+	key, err = cfg.Section("Console").GetKey("reverseproxyauthport")
 	if err != nil {
 		return err
 	}
 	w.ReverseProxyAuthPort = key.String()
 
-	key, err = cfg.Section("Server").GetKey("reverse_proxy_server")
+	key, err = cfg.Section("Console").GetKey("reverseproxyserver")
 	if err != nil {
 		return err
 	}

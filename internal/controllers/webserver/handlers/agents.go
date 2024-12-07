@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -151,7 +152,9 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if err := h.NATSConnection.Publish("agent.enable."+agentId, nil); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := h.JetStream.Publish(ctx, "agent.enable."+agentId, nil); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -188,7 +191,9 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 			log.Printf("[ERROR]: %s", i18n.T(c.Request().Context(), "nats.not_connected"))
 		}
 
-		if err := h.NATSConnection.Publish("agent.report."+agentId, nil); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if _, err := h.JetStream.Publish(ctx, "agent.report."+agentId, nil); err != nil {
 			log.Printf("[ERROR]: %v", err)
 		}
 	}()
@@ -203,7 +208,9 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if err := h.NATSConnection.Publish("agent.disable."+agentId, nil); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := h.JetStream.Publish(ctx, "agent.disable."+agentId, nil); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
