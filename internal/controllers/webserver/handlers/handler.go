@@ -146,7 +146,7 @@ func (h *Handler) StartNATSConnectJob() error {
 					Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>"},
 				})
 				if err != nil {
-					log.Println("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
+					log.Printf("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
 					return
 				}
 
