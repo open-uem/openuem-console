@@ -39,6 +39,7 @@ en:
   Disable: "Disable"
   Enable: "Enable"
   Import: "Import"
+  In Progress: "In Progress"
   IP Address: "IP Address"
   Login: "Login"
   Logo: "Logo"
@@ -571,7 +572,8 @@ en:
         cannot_send_request: "Update request could not be sent to agent, please try again later"
         some_errors_found: "Some agents could not receive the update requests"
         rollback_success: "A request to rollback the OpenUEM agent version has been sent"
-        task_update: "Update to version"
+        task_update: "Update to version %s"
+        task_updated: "Version has been updated"
         task_rollback: "Rollback to previous version"
         task_status: "Status"
         task_status_error: "Error"
@@ -588,10 +590,17 @@ en:
         filter_by_status: "Filter by task status"
         filter_by_task_result: "Filter by task result"
         filter_by_task_execution: "Filter by last execution date"
-      components:
-        title: "Update Components"
-        description: "These are the installed OpenUEM components, including where they're installed and which version are running. You can update the components to the selected versions"
-        no_components: "No components have been found for this query"
+      servers:
+        title: "Update Servers"
+        description: "These are the installed OpenUEM servers, including where they're installed and which version are running. You can update the servers to the selected version. IMPORTANT: when updating a version, the console will be restarted so you can lost connection for a few instants until the service is restarted"
+        success: "A request to update the OpenUEM server version has been sent"
+        some_errors_found: "Some servers could not receive the update requests"
+        servers_cant_be_empty: "Servers can't be an empty string"
+        release_cant_be_empty: "Release can't be an empty string"
+        cannot_send_request: "Update request could not be sent to server, please try again later"
+        task_update: "Update to version %s"
+        task_updated: "Version has been updated"
+        no_servers: "No servers have been found for this query"
         hostname: "Hostname"
         component: "Component"
         version: "Version"
@@ -613,6 +622,8 @@ en:
         current: "Up-to-date Version"
         critical: "Critical Update"
         available: "Update Available"
+        confirm_update_selected: "Do you want to continue updating the selected servers to versión %s?"
+        confirm_update_all: "Do you want to continue updating ALL selected servers to versión %s?"
   dashboard:
     outdated_agents: Agents running outdated versions
     no_auto_update: Endpoints that dosn't download/install system updates automatically

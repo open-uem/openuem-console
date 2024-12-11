@@ -35,6 +35,7 @@ type Handler struct {
 	JetStream            jetstream.JetStream
 	JetStreamCancelFunc  context.CancelFunc
 	AgentStream          jetstream.Stream
+	ServerStream         jetstream.Stream
 	OrgName              string
 	OrgProvince          string
 	OrgLocality          string
@@ -42,7 +43,7 @@ type Handler struct {
 	Country              string
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
-	LatestServerRelease  openuem_nats.OpenUEMServerRelease
+	LatestServerRelease  openuem_nats.OpenUEMRelease
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer string) *Handler {
@@ -102,14 +103,26 @@ func (h *Handler) StartNATSConnectJob() error {
 			})
 			if err == nil {
 				log.Println("[INFO]: Agent Stream could be instantiated")
-				return nil
-			}
-			return nil
-		}
 
-		return nil
+				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+					Name:     "SERVERS_STREAM",
+					Subjects: []string{"server.update.>"},
+				})
+				if err == nil {
+					log.Println("[INFO]: Agent Stream could be instantiated")
+					return nil
+				} else {
+					log.Printf("[ERROR]: Server Stream could not be instantiated, reason: %v", err)
+				}
+			} else {
+				log.Printf("[ERROR]: Agent Stream could not be instantiated, reason: %v", err)
+			}
+		} else {
+			log.Printf("[ERROR]: could not create Jetstream connection, reason: %v", err)
+		}
+	} else {
+		log.Printf("[ERROR]: could not connect to NATS, reason: %v", err)
 	}
-	log.Printf("[ERROR]: could not connect to NATS %v", err)
 
 	h.NATSConnectJob, err = h.TaskScheduler.NewJob(
 		gocron.DurationJob(
@@ -147,6 +160,15 @@ func (h *Handler) StartNATSConnectJob() error {
 				})
 				if err != nil {
 					log.Printf("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
+					return
+				}
+
+				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+					Name:     "SERVERS_STREAM",
+					Subjects: []string{"server.update.>"},
+				})
+				if err != nil {
+					log.Printf("[ERROR]: Server Stream could not be created or updated, reason: %v", err)
 					return
 				}
 

@@ -1,4 +1,4 @@
-package components
+package servers
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"github.com/doncicuto/openuem_utils"
 )
 
-func GetLatestServerRelease() (*openuem_nats.OpenUEMServerRelease, error) {
+func GetLatestServerRelease() (*openuem_nats.OpenUEMRelease, error) {
 	cwd, err := openuem_utils.GetWd()
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func GetLatestServerRelease() (*openuem_nats.OpenUEMServerRelease, error) {
 		return nil, err
 	}
 
-	r := openuem_nats.OpenUEMServerRelease{}
+	r := openuem_nats.OpenUEMRelease{}
 	if err := json.Unmarshal(data, &r); err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func GetLatestServerRelease() (*openuem_nats.OpenUEMServerRelease, error) {
 	return &r, nil
 }
 
-func GetServerReleases() (map[string]openuem_nats.OpenUEMServerRelease, error) {
+func GetServerReleases() (*openuem_nats.OpenUEMRelease, error) {
 	cwd, err := openuem_utils.GetWd()
 	if err != nil {
 		return nil, err
@@ -63,10 +63,10 @@ func GetServerReleases() (map[string]openuem_nats.OpenUEMServerRelease, error) {
 		return nil, err
 	}
 
-	var r = map[string]openuem_nats.OpenUEMServerRelease{}
+	var r = openuem_nats.OpenUEMRelease{}
 	if err := json.Unmarshal(data, &r); err != nil {
 		return nil, err
 	}
 
-	return r, nil
+	return &r, nil
 }

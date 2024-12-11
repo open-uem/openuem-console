@@ -36,12 +36,16 @@ func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("[INFO]: check latest agent releases job has been scheduled every 6 hours")
+	log.Println("[INFO]: check latest releases job has been scheduled every 6 hours")
 	return nil
 }
 
 func (w *Worker) GetLatestReleases(channel string) error {
 	if err := w.CheckAgentLatestReleases(channel); err != nil {
+		return err
+	}
+
+	if err := w.CheckServerLatestReleases(channel); err != nil {
 		return err
 	}
 
@@ -69,44 +73,23 @@ func (w *Worker) CheckAgentLatestReleases(channel string) error {
 	return nil
 }
 
-func (w *Worker) CheckUpdaterLatestReleases() (*openuem_nats.OpenUEMRelease, error) {
-	// Check agent release against our API
-	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestUpdaterRelease")
+func (w *Worker) CheckServerLatestReleases(channel string) error {
+	// Check server release against our API
+	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestServerRelease&channel=%s", channel)
 
 	body, err := openuem_utils.QueryReleasesEndpoint(url)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	latestRelease := openuem_nats.OpenUEMRelease{}
-	if err := json.Unmarshal(body, &latestRelease); err != nil {
-		return nil, err
+	latestServerRelease := openuem_nats.OpenUEMRelease{}
+	if err := json.Unmarshal(body, &latestServerRelease); err != nil {
+		return err
 	}
 
-	if err := w.Model.SaveNewReleaseAvailable(release.ReleaseTypeUpdater, latestRelease); err != nil {
-		return nil, err
+	if err := w.Model.SaveNewReleaseAvailable(release.ReleaseTypeServer, latestServerRelease); err != nil {
+		return err
 	}
 
-	return &latestRelease, nil
-}
-
-func (w *Worker) CheckMessengerLatestReleases() (*openuem_nats.OpenUEMRelease, error) {
-	// Check agent release against our API
-	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestMessengerRelease")
-
-	body, err := openuem_utils.QueryReleasesEndpoint(url)
-	if err != nil {
-		return nil, err
-	}
-
-	latestRelease := openuem_nats.OpenUEMRelease{}
-	if err := json.Unmarshal(body, &latestRelease); err != nil {
-		return nil, err
-	}
-
-	if err := w.Model.SaveNewReleaseAvailable(release.ReleaseTypeMessenger, latestRelease); err != nil {
-		return nil, err
-	}
-
-	return &latestRelease, nil
+	return nil
 }

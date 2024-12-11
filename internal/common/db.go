@@ -9,7 +9,6 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
 	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_ent/component"
 	"github.com/go-co-op/gocron/v2"
 )
 
@@ -21,7 +20,7 @@ func (w *Worker) StartDBConnectJob() error {
 		log.Println("[INFO]: connection established with database")
 
 		// Save component version
-		if err := w.Model.SetComponent(component.ComponentConsole, w.Version, w.Channel); err != nil {
+		if err := w.Model.SetServer(w.Version, w.Channel); err != nil {
 			log.Fatalf("[ERROR]: could not save component information")
 		}
 
@@ -38,7 +37,7 @@ func (w *Worker) StartDBConnectJob() error {
 			channel = "stable"
 		}
 		if err := w.StartCheckLatestReleasesJob(channel); err != nil {
-			log.Printf("[ERROR]: could not start check latest agent releases job, reason: %s", err.Error())
+			log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
 		}
 		return nil
 	}
@@ -58,8 +57,8 @@ func (w *Worker) StartDBConnectJob() error {
 				}
 				log.Println("[INFO]: connection established with database")
 
-				// Save component version
-				if err := w.Model.SetComponent(component.ComponentConsole, w.Version, w.Channel); err != nil {
+				// Save server version
+				if err := w.Model.SetServer(w.Version, w.Channel); err != nil {
 					log.Fatalf("[ERROR]: could not save component information")
 				}
 
@@ -80,7 +79,7 @@ func (w *Worker) StartDBConnectJob() error {
 					channel = "stable"
 				}
 				if err := w.StartCheckLatestReleasesJob(channel); err != nil {
-					log.Printf("[ERROR]: could not start check latest agent releases job, reason: %s", err.Error())
+					log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
 					return
 				}
 			},

@@ -100,7 +100,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 	w.Domain = key.String()
 
-	key, err = cfg.Section("NATS").GetKey("servers")
+	key, err = cfg.Section("NATS").GetKey("NATSServer")
 	if err != nil {
 		return err
 	}

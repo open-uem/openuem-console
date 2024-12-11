@@ -7,7 +7,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/layout"
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	"github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/component"
+	"github.com/doncicuto/openuem_ent/server"
 	"github.com/doncicuto/openuem_nats"
 	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
@@ -16,12 +16,12 @@ import (
 	"strconv"
 )
 
-templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateComponentsFilter, sm *sessions.SessionManager, l locales.Translator, components []*openuem_ent.Component, allComponents []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMServerRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.components.title"), Url: "/admin/update-components"}}, sm)
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, components []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []*openuem_ent.Release, allStatus []string, refresh int, successMessage, errorMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "/admin/update-servers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("update-components")
+				@ConfigNavbar("update-servers")
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -35,9 +35,9 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 				<div id="confirm" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "admin.update.components.title") } </h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "admin.update.servers.title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
-							{ i18n.T(ctx, "admin.update.components.description") }
+							{ i18n.T(ctx, "admin.update.servers.description") }
 						</p>
 					</div>
 					<div class="uk-card-body">
@@ -51,26 +51,26 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 										if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
 											<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", latestServerRelease.IsCritical), templ.KV("bg-blue-700", !latestServerRelease.IsCritical) }>
 												if latestServerRelease.IsCritical {
-													{ i18n.T(ctx, "admin.update.components.critical") }
+													{ i18n.T(ctx, "admin.update.servers.critical") }
 												} else {
-													{ i18n.T(ctx, "admin.update.components.available") }
+													{ i18n.T(ctx, "admin.update.servers.available") }
 												}
 											</p>
 										} else {
-											<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.components.current") }</p>
+											<p class="rounded-full px-4 py-1 text-white bg-green-600">{ i18n.T(ctx, "admin.update.servers.current") }</p>
 										}
 									</div>
 									<p class="uk-text-small">
 										if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
-											{ i18n.T(ctx, "admin.update.components.new_version_available") }
+											{ i18n.T(ctx, "admin.update.servers.new_version_available") }
 										} else {
-											{ i18n.T(ctx, "admin.update.components.no_new_version_available") }
+											{ i18n.T(ctx, "admin.update.servers.no_new_version_available") }
 										}
 										<a href={ templ.URL(latestServerRelease.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ latestServerRelease.Version }</a>
 									</p>
 									if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
 										<p class="uk-text-small">
-											{ i18n.T(ctx, "admin.update.components.new_version_date") }
+											{ i18n.T(ctx, "admin.update.servers.new_version_date") }
 											{ l.FmtDateMedium(latestServerRelease.ReleaseDate) }
 										</p>
 									}
@@ -79,9 +79,9 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 								<hr class="uk-divider-icon"/>
 								<div class="flex justify-between">
 									<div class="flex items-center gap-4">
-										@partials.RefreshPage(l, "/admin/update-components", "#main", "outerHTML", "get", refresh, false)
-										@filters.ClearFilters("/admin/update-components", "#main", "outerHTML", func() bool {
-											return f.Hostname == "" && len(f.Components) == 0 && len(f.Releases) == 0 &&
+										@partials.RefreshPage(l, "/admin/update-servers", "#main", "outerHTML", "get", refresh, false)
+										@filters.ClearFilters("/admin/update-servers", "#main", "outerHTML", func() bool {
+											return f.Hostname == "" && len(f.Releases) == 0 &&
 												len(f.UpdateStatus) == 0 && f.UpdateMessage == "" &&
 												len(f.UpdateWhenFrom) == 0 && len(f.UpdateWhenTo) == 0
 										})
@@ -97,13 +97,13 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 													end
 												end
 												set storedItems to %s as Array
-												set sessionStorage.selectedComponents to storedItems as JSON
+												set sessionStorage.selectedServers to storedItems as JSON
 												set #filterBySelectedItems.value to '%d'
 												set #items-selected.innerHTML to '%d'
 												if #filterBySelectedRelease.value is not empty then
 													remove @disabled from #update-all-button
 												end
-											end`, f.SelectedAllComponents, p.NItems, p.NItems) }
+											end`, f.SelectedAllServers, p.NItems, p.NItems) }
 										>
 											{ i18n.T(ctx, "SelectAll") }
 										</button>
@@ -119,7 +119,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 											end
 										end
 										set storedItems to [] as Array
-										set sessionStorage.selectedComponents to storedItems as JSON
+										set sessionStorage.selectedServers to storedItems as JSON
 										set #filterBySelectedItems.value to '0'
 										set #items-selected.innerHTML to '0'
 										add @disabled to #update-all-button
@@ -131,27 +131,27 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 									</div>
 									<form class="flex items-center gap-4">
 										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
-										<input id="selectedComponents" type="hidden" name="selectedComponents"/>
+										<input id="selectedServers" type="hidden" name="selectedServers"/>
 										<input id="filterBySelectedRelease" type="hidden" name="filterBySelectedRelease" value={ f.SelectedRelease }/>
 										<select
 											class="uk-select"
 											_="on change
-											if sessionStorage.selectedComponents exists then														
-												set storedItems to sessionStorage.selectedComponents as Object
+											if sessionStorage.selectedServers exists then														
+												set storedItems to sessionStorage.selectedServers as Object
 											end		
 
 											set #filterBySelectedRelease.value to my.value
-											if #filterBySelectedRelease.value is not empty and ((<input[title='check-component']:checked/>).length > 0 or storedItems.length > 0) then
+											if #filterBySelectedRelease.value is not empty and ((<input[title='check-server']:checked/>).length > 0 or storedItems.length > 0) then
 												remove @disabled from #update-all-button
 											else
 												add @disabled to #update-all-button
 											end
 										end"
-											title={ i18n.T(ctx, "admin.update.components.select_release") }
+											title={ i18n.T(ctx, "admin.update.servers.select_release") }
 										>
-											<option value="">{ i18n.T(ctx, "admin.update.components.select_release") }</option>
+											<option value="">{ i18n.T(ctx, "admin.update.servers.select_release") }</option>
 											for _,r := range allReleases {
-												<option value={ r } selected?={ r == f.SelectedRelease }>{ r }</option>
+												<option value={ r.Version } selected?={ r.Version == f.SelectedRelease }>{ r.Version }</option>
 											}
 										</select>
 										<button
@@ -159,7 +159,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 											title={ i18n.T(ctx, "UpdateAll") }
 											type="button"
 											class="uk-button uk-button-primary"
-											hx-post="/admin/update-components/confirm"
+											hx-post="/admin/update-servers/confirm"
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -178,7 +178,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 										_="on load
 											if #filterBySelectedItems.value is '0' then
 												set storedItems to [] as Array
-												set sessionStorage.selectedComponents to storedItems as JSON
+												set sessionStorage.selectedServers to storedItems as JSON
 											end
 										end"
 									>
@@ -191,13 +191,13 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 														class="uk-checkbox"
 														type="checkbox"
 														_="on click
-															repeat in <input[title='check-component']/>																
+															repeat in <input[title='check-server']/>																
 																if it.checked !== #check-all-in-page.checked then
 																	it.click()
 																end
 															end
 
-															if ((<input[title='check-component']:checked/>).length > 0) and #filterBySelectedRelease.value is not empty then
+															if ((<input[title='check-server']:checked/>).length > 0) and #filterBySelectedRelease.value is not empty then
 																remove @disabled from #update-all-button
 															else
 																add @disabled to #update-all-button
@@ -207,50 +207,41 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.hostname") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.hostname"), "hostname", "alpha", "#main", "outerHTML")
-														@filters.FilterByText(c, p, "Hostname", f.Hostname, "admin.update.components.filter_by_hostname", "#main", "outerHTML")
+														<span>{ i18n.T(ctx, "admin.update.servers.hostname") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.hostname"), "hostname", "alpha", "#main", "outerHTML")
+														@filters.FilterByText(c, p, "Hostname", f.Hostname, "admin.update.servers.filter_by_hostname", "#main", "outerHTML")
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.component") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.component"), "component", "alpha", "#main", "outerHTML")
-														@filters.FilterByOptions(c, p, "Component", "admin.update.components.filter_by_component", allComponents, f.Components, "#main", "outerHTML", false, func() bool {
-															return len(f.Components) == 0
-														})
-													</div>
-												</th>
-												<th>
-													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.version") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.version"), "version", "alpha", "#main", "outerHTML")
-														@filters.FilterByOptions(c, p, "Release", "admin.update.components.filter_by_release", appliedReleases, f.Releases, "#main", "outerHTML", false, func() bool {
+														<span>{ i18n.T(ctx, "admin.update.servers.version") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.version"), "version", "alpha", "#main", "outerHTML")
+														@filters.FilterByOptions(c, p, "Release", "admin.update.servers.filter_by_release", appliedReleases, f.Releases, "#main", "outerHTML", false, func() bool {
 															return len(f.Releases) == 0
 														})
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.update_status") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.update_status"), "status", "alpha", "#main", "outerHTML")
-														@filters.FilterByOptions(c, p, "UpdateStatus", "admin.update.components.filter_by_status", allStatus, f.UpdateStatus, "#main", "outerHTML", true, func() bool {
+														<span>{ i18n.T(ctx, "admin.update.servers.update_status") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_status"), "status", "alpha", "#main", "outerHTML")
+														@filters.FilterByOptions(c, p, "UpdateStatus", "admin.update.servers.filter_by_status", allStatus, f.UpdateStatus, "#main", "outerHTML", true, func() bool {
 															return len(f.Releases) == 0
 														})
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.update_info") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.update_info"), "info", "alpha", "#main", "outerHTML")
-														@filters.FilterByText(c, p, "UpdateMessage", f.UpdateMessage, "admin.update.components.filter_by_message", "#main", "outerHTML")
+														<span>{ i18n.T(ctx, "admin.update.servers.update_info") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_info"), "info", "alpha", "#main", "outerHTML")
+														@filters.FilterByText(c, p, "UpdateMessage", f.UpdateMessage, "admin.update.servers.filter_by_message", "#main", "outerHTML")
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "admin.update.components.update_when") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.components.filter_by_when"), "when", "alpha", "#main", "outerHTML")
-														@filters.FilterByDate(c, p, "UpdateWhen", "admin.update.components.filter_by_when", f.UpdateWhenFrom, f.UpdateWhenTo, "#main", "outerHTML", func() bool { return f.UpdateWhenFrom == "" && f.UpdateWhenTo == "" })
+														<span>{ i18n.T(ctx, "admin.update.servers.update_when") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.filter_by_when"), "when", "alpha", "#main", "outerHTML")
+														@filters.FilterByDate(c, p, "UpdateWhen", "admin.update.servers.filter_by_when", f.UpdateWhenFrom, f.UpdateWhenTo, "#main", "outerHTML", func() bool { return f.UpdateWhenFrom == "" && f.UpdateWhenTo == "" })
 													</div>
 												</th>
 											</tr>
@@ -259,16 +250,16 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 											<tr class="h-16">
 												<td class="!align-middle">
 													<input
-														id={ "check-component-" + strconv.Itoa(c.ID) }
-														title="check-component"
+														id={ "check-server-" + strconv.Itoa(c.ID) }
+														title="check-server"
 														name={ strconv.Itoa(c.ID) }
 														class="uk-checkbox"
 														type="checkbox"
 														_={ fmt.Sprintf(`
 															on click
 																set storedItems to [] as Array
-																if sessionStorage.selectedComponents exists then														
-																	set storedItems to sessionStorage.selectedComponents as Object
+																if sessionStorage.selectedServers exists then														
+																	set storedItems to sessionStorage.selectedServers as Object
 																end																								
 
 																set index to storedItems.indexOf(my name)		
@@ -277,7 +268,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 																	set #items-selected.innerHTML to #filterBySelectedItems.value
 																	if index < 0 then 															
 																		append my name to storedItems
-																		set sessionStorage.selectedComponents to storedItems as JSON
+																		set sessionStorage.selectedServers to storedItems as JSON
 																	end														
 																else
 																	decrement #filterBySelectedItems.value by 1
@@ -292,10 +283,10 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 																		set #filterBySelectedItems.value to '0'
 																	end
 
-																	set sessionStorage.selectedComponents to storedItems as JSON 
+																	set sessionStorage.selectedServers to storedItems as JSON 
 																end
 
-																if ((<input[title='check-component']:checked/>).length > 0 or storedItems.length > 0) and #filterBySelectedRelease.value is not empty then
+																if ((<input[title='check-server']:checked/>).length > 0 or storedItems.length > 0) and #filterBySelectedRelease.value is not empty then
 																	remove @disabled from #update-all-button
 																else
 																	add @disabled to #update-all-button
@@ -305,17 +296,17 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 																	set #check-all-in-page.checked to false
 																end
 
-																if #check-all-in-page.checked is false and (<input[title='check-component']:checked/>).length === %d then
+																if #check-all-in-page.checked is false and (<input[title='check-server']:checked/>).length === %d then
 																	set #check-all-in-page.checked to true
 																end
 
-																set #selectedComponents.value to storedItems.length
+																set #selectedServers.value to storedItems.length
 															end
 
 															on load
 																set storedItems to [] as Array
-																if sessionStorage.selectedComponents exists then
-																	set storedItems to sessionStorage.selectedComponents as Object												
+																if sessionStorage.selectedServers exists then
+																	set storedItems to sessionStorage.selectedServers as Object												
 																end
 
 																set index to storedItems.indexOf(my name)														
@@ -323,22 +314,21 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 																	set me.checked to true
 																end
 
-																if ((<input[title='check-component']:checked/>).length == (<input[title='check-component']/>).length) then
+																if ((<input[title='check-server']:checked/>).length == (<input[title='check-server']/>).length) then
 																	set #check-all-in-page.checked to true
 																end
 
-																set #selectedComponents.value to storedItems.length
+																set #selectedServers.value to storedItems.length
 															end
 														`,p.PageSize) }
 													/>
 												</td>
 												<td class="!align-middle">{ c.Hostname }</td>
-												<td class="!align-middle">{ c.Component.String() }</td>
 												<td class="!align-middle">
 													<div class="flex items-center gap-2">
 														{ c.Version }
 														if semver.Compare("v" + c.Version, "v"+ higherRelease) < 0 {
-															@partials.AlertIcon(i18n.T(ctx, "admin.update.components.outdated"))
+															@partials.AlertIcon(i18n.T(ctx, "admin.update.servers.outdated"))
 														}
 													</div>
 												</td>
@@ -347,9 +337,9 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 														<span
 															class={
 																"!align-middle uk-text-bold",
-																templ.KV("text-red-600", c.UpdateStatus == component.UpdateStatusError),
-																templ.KV("text-orange-600", c.UpdateStatus == component.UpdateStatusPending),
-																templ.KV("text-green-600", c.UpdateStatus == component.UpdateStatusSuccess),
+																templ.KV("text-red-600", c.UpdateStatus == server.UpdateStatusError),
+																templ.KV("text-orange-600", c.UpdateStatus == server.UpdateStatusPending),
+																templ.KV("text-green-600", c.UpdateStatus == server.UpdateStatusSuccess),
 															}
 														>
 															{ i18n.T(ctx, c.UpdateStatus.String()) }
@@ -383,7 +373,6 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
-													<td class="!align-middle">-</td>
 												</tr>
 											}
 										}
@@ -393,7 +382,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
-								{ i18n.T(ctx, "admin.update.components.no_components") }
+								{ i18n.T(ctx, "admin.update.servers.no_components") }
 							</p>
 						}
 					</div>
@@ -403,7 +392,7 @@ templ UpdateComponents(c echo.Context, p partials.PaginationAndSort, f filters.U
 	</main>
 }
 
-templ UpdateComponentsIndex(title string, cmp templ.Component) {
+templ UpdateServersIndex(title string, cmp templ.Component) {
 	@layout.Base("admin") {
 		@cmp
 	}
@@ -418,12 +407,12 @@ templ GetServerVersionError() {
 			<a href class="uk-alert-close" uk-close _="on click toggle .hidden on #error-getting-version"></a>
 			<div class="flex gap-2 items-center uk-alert-description">
 				<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2" uk-cloack></uk-icon>
-				<span>{ i18n.T(ctx, "admin.update.components.get_version_error") }</span>
+				<span>{ i18n.T(ctx, "admin.update.servers.get_version_error") }</span>
 			</div>
 		</div>
 	</div>
 }
 
-func newServerReleaseAailable(newReleaseVersion, higherRelease string) bool {
+func newServerReleaseAvailable(newReleaseVersion, higherRelease string) bool {
 	return semver.Compare("v"+newReleaseVersion, "v"+higherRelease) == 1
 }

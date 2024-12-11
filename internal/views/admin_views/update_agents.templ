@@ -379,8 +379,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												}
 												if len(agent.UpdateTaskDescription) > 0 {
 													<td class="!align-middle">
-														{ i18n.T(ctx, agent.UpdateTaskDescription) }
-														<span class="uk-text-bold">{ agent.UpdateTaskVersion }</span>
+														{ agent.UpdateTaskDescription }
 													</td>
 												} else {
 													<td class="!align-middle"></td>
@@ -401,7 +400,6 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 											for i:=0; i < p.PageSize - len(agents); i++ {
 												<tr class="h-16">
 													<td class="!align-middle"></td>
-													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>

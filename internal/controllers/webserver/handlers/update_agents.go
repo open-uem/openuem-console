@@ -92,7 +92,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			data, err := json.Marshal(updateRequest)
 			if err != nil {
 				errorMessage = err.Error()
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.task_status_error", releaseToBeApplied.Version); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
@@ -100,21 +100,21 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "nats.not_connected", releaseToBeApplied.Version); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
 			}
 
-			if _, err := h.JetStream.Publish(context.Background(), "agentupdate."+a, data); err != nil {
+			if _, err := h.JetStream.Publish(context.Background(), "agent.update."+a, data); err != nil {
 				errorMessage = i18n.T(c.Request().Context(), "admin.update.agents.cannot_send_request")
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", errorMessage, releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.cannot_send_request", releaseToBeApplied.Version); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
 			}
 
-			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", "admin.update.agents.task_update", releaseToBeApplied.Version); err != nil {
+			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", i18n.T(c.Request().Context(), "admin.update.agents.task_update", releaseToBeApplied.Version), releaseToBeApplied.Version); err != nil {
 				log.Println("[ERROR]: could not save update task info")
 				continue
 			}

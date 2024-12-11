@@ -40,6 +40,7 @@ es:
   Download: "Descargar"
   Enable: "Activar"
   Import: "Import"
+  In Progress: "En progreso"
   IP Address: "Dirección IP"
   Login: "Inicio de sesión"
   Logo: "Logo"
@@ -568,7 +569,8 @@ es:
         cannot_send_request: "La petición de actualización no pudo enviarse al agente, inténtelo más tarde"
         some_errors_found: "Algunos agentes no pudieron recibir las peticiones de actualización"
         rollback_success: "Se ha enviado una petición para reaizar una regresión del agente de OpenUEM"
-        task_update: "Actualizar a la versión"
+        task_update: "Actualizar a la versión %s"
+        task_updated: "La versión ha sido actualizada"
         task_rollback: "Volver a versión anterior"
         task_status: "Estado"
         task_status_error: "Error"
@@ -585,10 +587,17 @@ es:
         filter_by_status: "Filtrar por estado tarea"
         filter_by_task_result: "Filtrar por resultado de la tarea"
         filter_by_task_execution: "Filtrar por fecha de última ejecución"
-      components:
-        title: "Actualizar componentes"
-        description: "Estos son los componentes de OpenUEM instalados, incluyendo dónde se encuentran instaladoes y qué versión están ejecutando. Puede actualizar los componentes a las versiones seleccionadas"
-        no_components: "No se han encontrado componentes para esta consulta"
+      servers:
+        title: "Actualizar servidores"
+        description: "Estos son los servidores de OpenUEM instalados, incluyendo dónde se encuentran y qué versión están ejecutando. Puede actualizar los servidores a la versión seleccionada. IMPORTANTE: al actualizar la versión, la consola se reiniciará por lo que puede perder la conexión por unos instantes hasta que el servicio se reinicie"
+        success: "Se ha enviado una petición para actualizar la versión del servidor de OpenUEM"
+        some_errors_found: "Algunos servidores no pudieron recibir las peticiones de actualización"
+        servers_cant_be_empty: "La variable servidores no puede contener una cadena vacía"
+        release_cant_be_empty: "La versión no puede contener una cadena vacía"
+        cannot_send_request: "La petición de actualización no pudo enviarse al servidor, inténtelo más tarde"
+        task_update: "Actualizar a la versión %s"
+        task_updated: "La versión ha sido actualizada"
+        no_servers: "No se han encontrado servidores para esta consulta"
         hostname: "Nombre equipo"
         component: "Componente"
         version: "Versión"
@@ -610,6 +619,8 @@ es:
         current: "Versión al día"
         critical: "Actualización crítica"
         available: "Actualización disponible"
+        confirm_update_all: "¿Desea continuar con la actualización de TODOS los servidores seleccionados a la versión %s?"
+        confirm_specify_when: "Si lo desea puede especificar el día y la hora a la que desea que se actualicen los servidores, de lo contrario la actualización se realizará lo antes posible"
   dashboard:
     outdated_agents: Agentes ejecutando versiones anticuadas
     no_auto_update: Equipos que no descargan/instalan actualizaciones automáticamente
