@@ -130,7 +130,7 @@ templ ConfigNavbar(active string) {
 				{ i18n.T(ctx, "certificates.title") }
 			</a>
 		</li>
-		<li class={ templ.KV("uk-active", active == "restore") }>
+		/* <li class={ templ.KV("uk-active", active == "restore") }>
 			<a
 				href="/admin/restore"
 				hx-get="/admin/restore"
@@ -143,6 +143,6 @@ templ ConfigNavbar(active string) {
 				<uk-icon id="admin-restore-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "restore.title") }
 			</a>
-		</li>
+		</li> */
 	</ul>
 }
