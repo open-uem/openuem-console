@@ -10147,6 +10147,10 @@ th.uk-text-break, td.uk-text-break {
   padding-top: 1.5rem;
 }
 
+.pr-6 {
+  padding-right: 1.5rem;
+}
+
 .text-left {
   text-align: left;
 }

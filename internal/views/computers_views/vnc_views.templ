@@ -15,10 +15,10 @@ templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected bool, sm *ses
 			<div class="uk-card-body uk-flex uk-flex-column gap-1">
 				<div id="error" class="hidden"></div>
 				<div id="vnc" class="flex flex-col">
-					<div class="flex items-center gap-2 mb-4">
+					<div class="flex items-center gap-2">
 						<button
 							title={ i18n.T(ctx, "Connect") }
-							class={ "uk-button uk-button-primary flex items-center gap-2", templ.KV("hidden", connected) }
+							class={ "uk-button uk-button-primary flex items-center gap-2 pr-6", templ.KV("hidden", connected) }
 							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
