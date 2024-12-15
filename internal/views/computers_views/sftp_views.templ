@@ -201,7 +201,7 @@ templ DownloadIcon(agent *openuem_ent.Agent, cwd, parent string) {
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
-			hx-include="input[name$='-check']"
+			hx-include="input[name^='check-']"
 			hx-indicator="#spinner"
 			_="on htmx:afterRequest remove .htmx-request from #spinner"
 		>
@@ -238,7 +238,7 @@ templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
-			hx-include="input[name$='-check']"
+			hx-include="input[name^='check-']"
 			hx-indicator="#spinner"
 		>
 			{ i18n.T(ctx, "Confirm") }
@@ -290,7 +290,7 @@ templ FileBrowser(files []fs.FileInfo, agent *openuem_ent.Agent, cwd, parent str
 
 templ FileCheckBox(fileName string) {
 	<input
-		name="folder-check"
+		name="check-folder"
 		class="uk-checkbox"
 		type="checkbox"
 		value={ fileName }
@@ -305,7 +305,7 @@ templ FileCheckBox(fileName string) {
 					remove @disabled from #download
 				else
 					set checked to false
-					repeat in <input[name$='-check']/>
+					repeat in <input[name^='check-']/>
 						if it.checked then
 							set checked to true
 							break
@@ -347,7 +347,7 @@ templ ActionDropDown(agent *openuem_ent.Agent, cwd, parent string, file fs.FileI
 		uk-dropdown="mode: click"
 		_="on hide 
 			add .hidden to <input[name='newName']/>
-			add .hidden to <button[name$='Rename']/>
+			add .hidden to <button[name^='rename']/>
 		end"
 	>
 		<ul class="uk-dropdown-nav uk-nav">
@@ -449,15 +449,15 @@ templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 			placeholder={ i18n.T(ctx, "inventory.file_browser.new_name") }
 			_="on keyup
 				if my value's length > 0 then 
-					remove .hidden from <button[name$='Rename']/>
+					remove .hidden from <button[name^='rename']/>
 				else
-					add .hidden to <button[name$='Rename']/>
+					add .hidden to <button[name^='rename']/>
 				end
 			end"
 		/>
 		<button
 			type="button"
-			name="confirmRename"
+			name="renameConfirm"
 			class="uk-button uk-button-primary hidden"
 			if isDir {
 				hx-put={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
@@ -474,12 +474,11 @@ templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 		</button>
 		<button
 			type="reset"
-			name="cancelRename"
+			name="renameCancel"
 			class="uk-button uk-button-default hidden mx-2"
 			_="on click
 				add .hidden to <input[name='newName']/>
-				add .hidden to <button[name='confirmRename']/>
-				add .hidden to me
+				add .hidden to <button[name^='rename']/>				
 			end"
 		>
 			{ i18n.T(ctx, "Cancel") }
