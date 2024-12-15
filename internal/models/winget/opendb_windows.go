@@ -12,13 +12,13 @@ import (
 	"github.com/doncicuto/openuem_utils"
 )
 
-func openWingetDB() (*sql.DB, error) {
+func OpenWingetDB() (*sql.DB, error) {
 	cwd, err := openuem_utils.GetWd()
 	if err != nil {
 		return nil, err
 	}
 
-	tmpDir := filepath.Join(cwd, "tmp")
+	tmpDir := filepath.Join(cwd, "tmp", "winget")
 	if strings.HasSuffix(cwd, "tmp") {
 		tmpDir = cwd
 	}

@@ -17,7 +17,7 @@ func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployP
 	var err error
 
 	// Open Winget DB
-	db, err := openWingetDB()
+	db, err := OpenWingetDB()
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployP
 func CountPackages(packageName string) (int, error) {
 
 	// Open Winget DB
-	db, err := openWingetDB()
+	db, err := OpenWingetDB()
 	if err != nil {
 		return 0, err
 	}

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func openWingetDB() (*sql.DB, error) {
+func OpenWingetDB() (*sql.DB, error) {
 	tmpDir := "/tmp/winget"
 
 	indexPath := filepath.Join(tmpDir, "index.db")
