@@ -61,7 +61,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.S
 									}
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "innerHTML", "get", "")
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "updates_history.no_info") }
