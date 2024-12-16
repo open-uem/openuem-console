@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, components []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []*openuem_ent.Release, allStatus []string, refresh int, successMessage, errorMessage string) {
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []*openuem_ent.Release, allStatus []string, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "/admin/update-servers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -41,7 +41,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 						</p>
 					</div>
 					<div class="uk-card-body">
-						if len(components) > 0 {
+						if len(servers) > 0 {
 							<div class="flex flex-col gap-4 mt-4">
 								if latestServerRelease == nil {
 									@GetServerVersionError()
@@ -244,15 +244,20 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 														@filters.FilterByDate(c, p, "UpdateWhen", "admin.update.servers.filter_by_when", f.UpdateWhenFrom, f.UpdateWhenTo, "#main", "outerHTML", func() bool { return f.UpdateWhenFrom == "" && f.UpdateWhenTo == "" })
 													</div>
 												</th>
+												<th>
+													<div class="flex gap-1 items-center">
+														<span>{ i18n.T(ctx, "Components") }</span>
+													</div>
+												</th>
 											</tr>
 										</thead>
-										for _, c := range components {
+										for _, s := range servers {
 											<tr class="h-16">
 												<td class="!align-middle">
 													<input
-														id={ "check-server-" + strconv.Itoa(c.ID) }
+														id={ "check-server-" + strconv.Itoa(s.ID) }
 														title="check-server"
-														name={ strconv.Itoa(c.ID) }
+														name={ strconv.Itoa(s.ID) }
 														class="uk-checkbox"
 														type="checkbox"
 														_={ fmt.Sprintf(`
@@ -323,51 +328,74 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 														`,p.PageSize) }
 													/>
 												</td>
-												<td class="!align-middle">{ c.Hostname }</td>
+												<td class="!align-middle">{ s.Hostname }</td>
 												<td class="!align-middle">
 													<div class="flex items-center gap-2">
-														{ c.Version }
-														if semver.Compare("v" + c.Version, "v"+ higherRelease) < 0 {
+														{ s.Version }
+														if semver.Compare("v" + s.Version, "v"+ higherRelease) < 0 {
 															@partials.AlertIcon(i18n.T(ctx, "admin.update.servers.outdated"))
 														}
 													</div>
 												</td>
 												<td class="!align-middle">
-													if c.UpdateStatus != "" {
+													if s.UpdateStatus != "" {
 														<span
 															class={
 																"!align-middle uk-text-bold",
-																templ.KV("text-red-600", c.UpdateStatus == server.UpdateStatusError),
-																templ.KV("text-orange-600", c.UpdateStatus == server.UpdateStatusPending),
-																templ.KV("text-green-600", c.UpdateStatus == server.UpdateStatusSuccess),
+																templ.KV("text-red-600", s.UpdateStatus == server.UpdateStatusError),
+																templ.KV("text-orange-600", s.UpdateStatus == server.UpdateStatusPending),
+																templ.KV("text-green-600", s.UpdateStatus == server.UpdateStatusSuccess),
 															}
 														>
-															{ i18n.T(ctx, c.UpdateStatus.String()) }
+															{ i18n.T(ctx, s.UpdateStatus.String()) }
 														</span>
 													} else {
 														{ "-" }
 													}
 												</td>
 												<td class="!align-middle">
-													if c.UpdateMessage != "" {
-														{ c.UpdateMessage }
+													if s.UpdateMessage != "" {
+														{ s.UpdateMessage }
 													} else {
 														{ "-" }
 													}
 												</td>
 												<td class="!align-middle">
-													if !c.UpdateWhen.IsZero() {
-														{ l.FmtDateMedium(c.UpdateWhen.Local()) + " " + l.FmtTimeShort(c.UpdateWhen.Local()) }
+													if !s.UpdateWhen.IsZero() {
+														{ l.FmtDateMedium(s.UpdateWhen.Local()) + " " + l.FmtTimeShort(s.UpdateWhen.Local()) }
 													} else {
 														{ "-" }
 													}
 												</td>
+												<td class="!align-middle">
+													<div class="flex items-center gap-2">
+														if s.NatsComponent {
+															<div uk-tooltip="NATS"><uk-icon hx-history="false" icon="messages-square" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+														if s.OcspComponent {
+															<div uk-tooltip="OCSP"><uk-icon hx-history="false" icon="ticket-check" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+														if s.ConsoleComponent {
+															<div uk-tooltip="Console"><uk-icon hx-history="false" icon="monitor-cog" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+														if s.AgentWorkerComponent {
+															<div uk-tooltip="Agent Worker"><uk-icon hx-history="false" icon="satellite-dish" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+														if s.NotificationWorkerComponent {
+															<div uk-tooltip="Notification Worker"><uk-icon hx-history="false" icon="megaphone" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+														if s.CertManagerWorkerComponent {
+															<div uk-tooltip="Cert Manager Worker"><uk-icon hx-history="false" icon="book-key" custom-class="h-4 w-4" uk-cloack></uk-icon></div>
+														}
+													</div>
+												</td>
 											</tr>
 										}
-										if len(components) < p.PageSize {
-											for i:=0; i < p.PageSize - len(components); i++ {
+										if len(servers) < p.PageSize {
+											for i:=0; i < p.PageSize - len(servers); i++ {
 												<tr class="h-16">
 													<td class="!align-middle"></td>
+													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
@@ -382,7 +410,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
-								{ i18n.T(ctx, "admin.update.servers.no_components") }
+								{ i18n.T(ctx, "admin.update.servers.no_servers") }
 							</p>
 						}
 					</div>
