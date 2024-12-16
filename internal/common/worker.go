@@ -7,7 +7,6 @@ import (
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
 	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
 	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_ent/server"
 	"github.com/doncicuto/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
 )
@@ -40,8 +39,6 @@ type Worker struct {
 	Country               string
 	ReverseProxyAuthPort  string
 	ReverseProxyServer    string
-	Version               string
-	Channel               server.Channel
 	ServerReleasesFolder  string
 }
 
@@ -51,8 +48,6 @@ func NewWorker(logName string) *Worker {
 		worker.Logger = openuem_utils.NewLogger(logName)
 	}
 
-	worker.Version = VERSION
-	worker.Channel = CHANNEL
 	return &worker
 }
 
