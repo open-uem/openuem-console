@@ -8,7 +8,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 )
 
-templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected bool, sm *sessions.SessionManager) {
+templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, sm)
 	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -33,22 +33,39 @@ templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected bool, sm *ses
 						>
 							{ i18n.T(ctx, "Close") }
 						</button>
-						<div id="vncConnectPanel" class={ "flex gap-4 items-center", templ.KV("hidden", !connected) }>
-							<span>PIN: </span>
-							<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
-							<button type="button" class="uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">{ i18n.T(ctx, "Authenticate") }</button>
+						<div id="vncConnectPanel" class={ "flex gap-4 items-center my-4", templ.KV("hidden", !connected) }>
+							if requestPIN {
+								<span>PIN: </span>
+								<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
+							} else {
+								<div class="hidden" id="vncPIN">
+									<input type="hidden"/>
+									<input type="hidden"/>
+									<input type="hidden"/>
+									<input type="hidden"/>
+									<input type="hidden"/>
+									<input type="hidden"/>
+									<input type="hidden" name="vncPIN" value={ pin }/>
+								</div>
+							}
+							<button type="button" class="flex items-center gap-2 uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">
+								<uk-icon hx-history="false" icon="key" custom-class="h-4 w-4" uk-cloack></uk-icon>
+								{ i18n.T(ctx, "Authenticate") }
+							</button>
 						</div>
 						<input id="vncHostname" type="hidden" value={ agent.Hostname + "." + domainSuffix }/>
 						<input id="vncPort" type="hidden" value={ agent.VncProxyPort }/>
 						<button
 							id="disconnectVNC"
-							class={ "uk-button uk-button-danger flex items-center gap-2", templ.KV("hidden", !connected) }
+							class={ "uk-button uk-button-danger flex items-center gap-2 my-4", templ.KV("hidden", !connected) }
 							hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/stopvnc", agent.ID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
 							htmx-indicator="#vnc-disconnect-spinner"
 						>
-							<uk-icon id="vnc-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon> { i18n.T(ctx, "Disconnect") }
+							<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-4 w-4" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "Disconnect") }
+							<uk-icon id="vnc-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 						</button>
 						<div id="status" class="uk-text-muted uk-text-small"></div>
 					</div>

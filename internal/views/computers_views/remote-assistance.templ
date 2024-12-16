@@ -40,7 +40,7 @@ templ RemoteAssistance(p partials.PaginationAndSort, sm *sessions.SessionManager
 								rel="noopener"
 								href={ templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID)) }
 							>
-								<uk-icon hx-history="false" icon="external-link" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
+								<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
 							</a>
 						</div>
 					} else {

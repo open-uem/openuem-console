@@ -134,6 +134,8 @@ en:
     vnc_title: "Remote Assistance"
     vnc_description: "Initiate a remote assistance session. If the session can be established a PIN will be shown to the user. Use that PIN as the password for the connection."
     vnc_new_tab: "Open session in a new tab"
+    vnc_pin_not_generated: "Could not generate PIN for VNC connection"
+    vnc_could_not_marshal: "The VNC session request could not be prepared"
     no_supported_vnc: "Remote Assistance is not available, IP address is not assigned to the agent, no user is logged in or no supported VNC server is installed"
     no_vnc_certificate: "The agent doesn't have a certificate to secure the VNC connection. If you haven't given admission to the agent do it now to create the certificate. If you already did that try to force a new report and this message still shows up, regenerate the certificate for the agent"
     deploy_description: "OpenUEM can deploy software to your computers automatically. Search an available package in the repository and install it or selected a deployed package to update or uninstall it"
@@ -510,6 +512,11 @@ en:
     agent_frequency_success: A new frequency has been communicated to the agents
     agent_frequency_could_not_be_saved: The new frequency could not be saved to the database
     agent_frequency_error: The new frequency cannot be communicated to the agents now, retry later
+    request_pin_title: Request VNC PIN to user
+    request_pin_description: When a VNC session starts, it's required to ask the user the PIN that is shown in the screen
+    request_pin_invalid: The chosen option is not valid
+    request_pin_could_not_be_saved: PIN request option could not be saved to the database
+    request_pin_could_not_be_read: Request PIN option could not be read from database
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong

@@ -10131,6 +10131,10 @@ th.uk-text-break, td.uk-text-break {
   padding-right: 0.5rem;
 }
 
+.pr-6 {
+  padding-right: 1.5rem;
+}
+
 .pr-8 {
   padding-right: 2rem;
 }
@@ -10145,10 +10149,6 @@ th.uk-text-break, td.uk-text-break {
 
 .pt-6 {
   padding-top: 1.5rem;
-}
-
-.pr-6 {
-  padding-right: 1.5rem;
 }
 
 .text-left {

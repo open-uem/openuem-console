@@ -135,6 +135,8 @@ es:
     vnc_title: "Asistencia remota"
     vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario. Utilice el PIN para autenticar su sesión."
     vnc_new_tab: "Abrir la sesión en una nueva pestaña"
+    vnc_pin_not_generated: "No se pudo generar un PIN para la conexión VNC"
+    vnc_could_not_marshal: "No se pudo preparar la petición de sesión VNC"
     no_supported_vnc: "No está disponible la asistencia remota, o bien no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
     no_vnc_certificate: "El agente no cuenta con un certificado para proteger la conexión VNC. Si aún no ha admitido este agente, hágalo ahora para crear el certificado. Si ya lo ha hecho intente forzar un nuevo informe y si este mensaje sigue apareciendo, regenere el certificado para este agente"
     deploy_description: "OpenUEM puede desplegar software en sus equipos de forma automática. Busque un paquete disponible en el repositorio e instálelo o seleccione un paquete desplegado para actualizarlo o desinstalarlo"
@@ -507,6 +509,11 @@ es:
     agent_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
     agent_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
     agent_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
+    request_pin_title: Solicitar PIN al usuario
+    request_pin_description: Cuando se realice una conexión VNC se pedirá al usuario el PIN que se muestra en su pantalla
+    request_pin_invalid: La opción seleccionada no es válida
+    request_pin_could_not_be_saved: La opción de petición de PIN no ha podido guardarse en la base de datos
+    request_pin_could_not_be_read: La opción de petición de PIN no ha podido leerse de la base de datos
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

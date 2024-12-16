@@ -14,6 +14,7 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_nats"
+	"github.com/doncicuto/openuem_utils"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
@@ -277,14 +278,37 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 
-		if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		// Check if PIN is optional or not
+		requestPIN, err := h.Model.GetDefaultRequestVNCPIN()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.request_pin_could_not_be_read"), false))
+		}
+
+		// Create new random PIN
+		pin, err := openuem_utils.GenerateRandomPIN()
+		if err != nil {
+			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))
+		}
+
+		vncConn := openuem_nats.VNCConnection{}
+		vncConn.NotifyUser = requestPIN
+		vncConn.PIN = pin
+
+		data, err := json.Marshal(vncConn)
+		if err != nil {
+			log.Printf("[ERROR]: could not marshall VNC connection data, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_could_not_marshal"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, true, h.SessionManager)))
+		return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager)))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, h.SessionManager)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager)))
 }
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {
@@ -303,7 +327,7 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, h.SessionManager)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager)))
 }
 
 func (h *Handler) AgentForceRestart(c echo.Context) error {

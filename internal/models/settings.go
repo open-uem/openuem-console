@@ -123,6 +123,21 @@ func (m *Model) GetDefaultUpdateChannel() (string, error) {
 	return settings.UpdateChannel, nil
 }
 
+func (m *Model) UpdateRequestVNCPIN(settingsId int, requestPIN bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetRequestVncPin(requestPIN).Exec(context.Background())
+}
+
+func (m *Model) GetDefaultRequestVNCPIN() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldRequestVncPin).Only(context.Background())
+	if err != nil {
+		return true, err
+	}
+
+	return settings.RequestVncPin, nil
+}
+
 func (m *Model) UpdateOpenUEMChannel(settingsId int, updateChannel string) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetUpdateChannel(updateChannel).Exec(context.Background())
 }
@@ -139,6 +154,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldSessionLifetimeInMinutes,
 		settings.FieldUpdateChannel,
 		settings.FieldAgentReportFrequenceInMinutes,
+		settings.FieldRequestVncPin,
 	)
 
 	settings, err := query.Only(context.Background())
@@ -179,4 +195,5 @@ type GeneralSettings struct {
 	SessionLifetime int
 	UpdateChannel   string
 	AgentFrequency  int
+	RequestVNCPIN   bool
 }

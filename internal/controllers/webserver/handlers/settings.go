@@ -113,6 +113,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_success")))
 		}
 
+		if c.FormValue("request-pin") != "" {
+			if err := h.Model.UpdateRequestVNCPIN(settings.ID, settings.RequestVNCPIN); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.request_pin_could_not_be_saved"), true))
+			}
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -139,6 +145,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	sessionLifetime := c.FormValue("session-lifetime")
 	updateChannel := c.FormValue("update-channel")
 	agentFrequency := c.FormValue("agent-frequency")
+	requestPIN := c.FormValue("request-pin")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -222,6 +229,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 
 		if settings.AgentFrequency <= 0 {
 			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
+		}
+	}
+
+	if requestPIN != "" {
+		settings.RequestVNCPIN, err = strconv.ParseBool(requestPIN)
+		if err != nil {
+			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.request_pin_invalid"))
 		}
 	}
 
