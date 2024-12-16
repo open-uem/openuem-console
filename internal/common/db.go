@@ -19,11 +19,6 @@ func (w *Worker) StartDBConnectJob() error {
 	if err == nil {
 		log.Println("[INFO]: connection established with database")
 
-		// Save component version
-		if err := w.Model.SetServer(w.Version, w.Channel); err != nil {
-			log.Fatalf("[ERROR]: could not save component information")
-		}
-
 		if err := w.Model.CreateInitialSettings(); err != nil {
 			log.Println("[WARN]: could not create initial settings")
 		}
@@ -56,11 +51,6 @@ func (w *Worker) StartDBConnectJob() error {
 					return
 				}
 				log.Println("[INFO]: connection established with database")
-
-				// Save server version
-				if err := w.Model.SetServer(w.Version, w.Channel); err != nil {
-					log.Fatalf("[ERROR]: could not save component information")
-				}
 
 				if err := w.TaskScheduler.RemoveJob(w.DBConnectJob.ID()); err != nil {
 					return

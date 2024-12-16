@@ -2,8 +2,6 @@ package models
 
 import (
 	"context"
-	"os"
-	"runtime"
 	"time"
 
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -85,27 +83,6 @@ func (m *Model) GetUpdateServersByPage(p partials.PaginationAndSort, f filters.U
 
 func (m *Model) GetHigherServerReleaseInstalled() (string, error) {
 	return m.Client.Server.Query().Unique(true).Order(ent.Desc(server.FieldVersion)).Select(server.FieldVersion).String(context.Background())
-}
-
-func (m *Model) SetServer(version string, channel server.Channel) error {
-	hostname, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-
-	exists := true
-	s, err := m.Client.Server.Query().Where(server.Hostname(hostname), server.Arch(runtime.GOARCH), server.Os(runtime.GOOS), server.Version(version), server.ChannelEQ(channel)).Only(context.Background())
-	if err != nil {
-		if !openuem_ent.IsNotFound(err) {
-			return err
-		}
-		exists = false
-	}
-
-	if !exists {
-		return m.Client.Server.Create().SetHostname(hostname).SetArch(runtime.GOARCH).SetOs(runtime.GOOS).SetVersion(version).SetChannel(channel).Exec(context.Background())
-	}
-	return m.Client.Server.Update().SetHostname(hostname).SetArch(runtime.GOARCH).SetOs(runtime.GOOS).SetVersion(version).SetChannel(channel).Where(server.ID(s.ID)).Exec(context.Background())
 }
 
 func (m *Model) GetAppliedReleases() ([]string, error) {
