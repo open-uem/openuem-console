@@ -316,7 +316,7 @@ func (h *Handler) Computers(c echo.Context) error {
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, computers, versions, vendors, models, tags, availableOSes, refreshTime)))
 }
 
-func (h *Handler) ComputerDeploy(c echo.Context) error {
+func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -360,7 +360,7 @@ func (h *Handler) ComputerDeploy(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, confirmDelete, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, successMessage, confirmDelete, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -440,7 +440,12 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.deploy_success")))
+	if err := h.Model.SaveDeployInfo(&action); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	c.Request().Method = "GET"
+	return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.deploy_success"))
 }
 
 func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
@@ -477,7 +482,12 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.update_success")))
+	if err := h.Model.SaveDeployInfo(&action); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	c.Request().Method = "GET"
+	return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.update_success"))
 }
 
 func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
@@ -514,7 +524,12 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.uninstall_success")))
+	if err := h.Model.SaveDeployInfo(&action); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	c.Request().Method = "GET"
+	return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.uninstall_success"))
 }
 
 func (h *Handler) WakeOnLan(c echo.Context) error {

@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, confirmDelete bool, refreshTime int) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, successMessage string, confirmDelete bool, refreshTime int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -26,7 +26,11 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div id="error" class="hidden"></div>
-				<div id="success" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "Deploy") }</h3>
@@ -199,8 +203,22 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 						@partials.Brand(strings.ToLower(item.Name), "")
 					</td>
 					<td class="!align-middle">{ item.Name }</td>
-					<td class="!align-middle">{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) } </td>
-					<td class="!align-middle">{ l.FmtDateMedium(item.Updated) + " " + l.FmtTimeShort(item.Updated) }</td>
+					<td class="!align-middle">
+						if item.Installed.IsZero() {
+							{ i18n.T(ctx, "In Progress") }
+						} else {
+							{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) }
+						}
+					</td>
+					<td class="!align-middle">
+						if !item.Installed.IsZero() {
+							if item.Updated.IsZero() {
+								{ i18n.T(ctx, "In Progress") }
+							} else {
+								{ l.FmtDateMedium(item.Updated) + " " + l.FmtTimeShort(item.Updated) }
+							}
+						}
+					</td>
 					<td class="!align-middle">
 						<form>
 							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
@@ -211,6 +229,8 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
+								disabled?={ item.Installed.IsZero() }
+								class={ templ.KV("opacity-25", item.Installed.IsZero()) }
 							>
 								<uk-icon hx-history="false" icon="package-check" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 							</button>
@@ -226,6 +246,8 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
+								disabled?={ item.Installed.IsZero() }
+								class={ templ.KV("opacity-25", item.Installed.IsZero()) }
 							>
 								<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
 							</button>

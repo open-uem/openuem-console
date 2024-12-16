@@ -10287,6 +10287,10 @@ th.uk-text-break, td.uk-text-break {
   text-decoration-line: underline;
 }
 
+.opacity-25 {
+  opacity: 0.25;
+}
+
 .blur {
   --tw-blur: blur(8px);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);

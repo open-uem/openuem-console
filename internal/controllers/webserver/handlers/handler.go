@@ -102,14 +102,14 @@ func (h *Handler) StartNATSConnectJob() error {
 				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
 			})
 			if err == nil {
-				log.Println("[INFO]: Agent Stream could be instantiated")
+				log.Println("[INFO]: agent stream could be instantiated")
 
 				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 					Name:     "SERVERS_STREAM",
 					Subjects: []string{"server.update.>"},
 				})
 				if err == nil {
-					log.Println("[INFO]: Agent Stream could be instantiated")
+					log.Println("[INFO]: server stream could be instantiated")
 					return nil
 				} else {
 					log.Printf("[ERROR]: Server Stream could not be instantiated, reason: %v", err)

@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -15,6 +16,7 @@ import (
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 	"github.com/doncicuto/openuem_ent/predicate"
 	"github.com/doncicuto/openuem_ent/tag"
+	"github.com/doncicuto/openuem_nats"
 )
 
 type Computer struct {
@@ -407,4 +409,35 @@ func (m *Model) CountAllDeployments() (int, error) {
 
 func (m *Model) CountAllOSUsernames() (int, error) {
 	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Where(operatingsystem.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
+}
+
+func (m *Model) SaveDeployInfo(data *openuem_nats.DeployAction) error {
+	timeZero := time.Date(0001, 1, 1, 00, 00, 00, 00, time.UTC)
+
+	if data.Action == "install" {
+		return m.Client.Deployment.Create().
+			SetInstalled(timeZero).
+			SetUpdated(timeZero).
+			SetPackageID(data.PackageId).
+			SetName(data.PackageName).
+			SetVersion(data.PackageVersion).
+			SetOwnerID(data.AgentId).
+			Exec(context.Background())
+	}
+
+	if data.Action == "update" {
+		return m.Client.Deployment.Update().
+			SetUpdated(timeZero).
+			Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId)))).
+			Exec(context.Background())
+	}
+
+	if data.Action == "uninstall" {
+		return m.Client.Deployment.Update().
+			SetInstalled(timeZero).
+			Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId)))).
+			Exec(context.Background())
+	}
+
+	return nil
 }
