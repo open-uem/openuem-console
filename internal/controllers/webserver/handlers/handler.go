@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
@@ -44,6 +45,7 @@ type Handler struct {
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
 	LatestServerRelease  openuem_nats.OpenUEMRelease
+	Replicas             int
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer string) *Handler {
@@ -54,6 +56,9 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		timeout = 20
 		log.Println("[ERROR]: could not get NATS request timeout from database")
 	}
+
+	// Get Replicas number
+	replicas := strings.Split(natsServers, ",")
 
 	h := Handler{
 		Model:                model,
@@ -77,6 +82,7 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		Country:              country,
 		ReverseProxyAuthPort: reverseProxyAuthPort,
 		ReverseProxyServer:   reverseProxyServer,
+		Replicas:             len(replicas),
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect
@@ -100,6 +106,7 @@ func (h *Handler) StartNATSConnectJob() error {
 			h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 				Name:     "AGENTS_STREAM",
 				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
+				Replicas: h.Replicas,
 			})
 			if err == nil {
 				log.Println("[INFO]: agent stream could be instantiated")
@@ -107,6 +114,7 @@ func (h *Handler) StartNATSConnectJob() error {
 				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 					Name:     "SERVERS_STREAM",
 					Subjects: []string{"server.update.>"},
+					Replicas: h.Replicas,
 				})
 				if err == nil {
 					log.Println("[INFO]: server stream could be instantiated")
@@ -157,6 +165,7 @@ func (h *Handler) StartNATSConnectJob() error {
 				h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 					Name:     "AGENTS_STREAM",
 					Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>"},
+					Replicas: h.Replicas,
 				})
 				if err != nil {
 					log.Printf("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
@@ -166,6 +175,7 @@ func (h *Handler) StartNATSConnectJob() error {
 				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 					Name:     "SERVERS_STREAM",
 					Subjects: []string{"server.update.>"},
+					Replicas: h.Replicas,
 				})
 				if err != nil {
 					log.Printf("[ERROR]: Server Stream could not be created or updated, reason: %v", err)
