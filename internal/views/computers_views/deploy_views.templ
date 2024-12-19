@@ -229,8 +229,6 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
-								disabled?={ item.Installed.IsZero() }
-								class={ templ.KV("opacity-25", item.Installed.IsZero()) }
 							>
 								<uk-icon hx-history="false" icon="package-check" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 							</button>
@@ -246,8 +244,6 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
-								disabled?={ item.Installed.IsZero() }
-								class={ templ.KV("opacity-25", item.Installed.IsZero()) }
 							>
 								<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
 							</button>

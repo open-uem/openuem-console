@@ -103,19 +103,29 @@ func (h *Handler) StartNATSConnectJob() error {
 		if err == nil {
 			ctx, h.JetStreamCancelFunc = context.WithTimeout(context.Background(), 60*time.Minute)
 
-			h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+			agentStreamConfig := jetstream.StreamConfig{
 				Name:     "AGENTS_STREAM",
 				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
-				Replicas: h.Replicas,
-			})
+			}
+
+			if h.Replicas > 1 {
+				agentStreamConfig.Replicas = h.Replicas
+			}
+
+			h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, agentStreamConfig)
 			if err == nil {
 				log.Println("[INFO]: agent stream could be instantiated")
 
-				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+				serverStreamConfig := jetstream.StreamConfig{
 					Name:     "SERVERS_STREAM",
 					Subjects: []string{"server.update.>"},
-					Replicas: h.Replicas,
-				})
+				}
+
+				if h.Replicas > 1 {
+					serverStreamConfig.Replicas = h.Replicas
+				}
+
+				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, serverStreamConfig)
 				if err == nil {
 					log.Println("[INFO]: server stream could be instantiated")
 					return nil
@@ -162,21 +172,31 @@ func (h *Handler) StartNATSConnectJob() error {
 
 				ctx, h.JetStreamCancelFunc = context.WithTimeout(context.Background(), 60*time.Minute)
 
-				h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+				agentStreamConfig := jetstream.StreamConfig{
 					Name:     "AGENTS_STREAM",
-					Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>"},
-					Replicas: h.Replicas,
-				})
+					Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
+				}
+
+				if h.Replicas > 1 {
+					agentStreamConfig.Replicas = h.Replicas
+				}
+
+				h.AgentStream, err = h.JetStream.CreateOrUpdateStream(ctx, agentStreamConfig)
 				if err != nil {
 					log.Printf("[ERROR]: Agent Stream could not be created or updated, reason: %v", err)
 					return
 				}
 
-				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
+				serverStreamConfig := jetstream.StreamConfig{
 					Name:     "SERVERS_STREAM",
 					Subjects: []string{"server.update.>"},
-					Replicas: h.Replicas,
-				})
+				}
+
+				if h.Replicas > 1 {
+					serverStreamConfig.Replicas = h.Replicas
+				}
+
+				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, serverStreamConfig)
 				if err != nil {
 					log.Printf("[ERROR]: Server Stream could not be created or updated, reason: %v", err)
 					return
