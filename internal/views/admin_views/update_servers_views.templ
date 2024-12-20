@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string) {
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease *openuem_ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "/admin/update-servers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -48,7 +48,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 								}
 								if latestServerRelease != nil {
 									<div class="flex items-center justify-between">
-										if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
+										if newServerReleaseAvailable(latestServerRelease.Version, higherRelease) {
 											<p class={ "rounded-full px-4 py-1 text-white", templ.KV("bg-red-500", latestServerRelease.IsCritical), templ.KV("bg-blue-700", !latestServerRelease.IsCritical) }>
 												if latestServerRelease.IsCritical {
 													{ i18n.T(ctx, "admin.update.servers.critical") }
@@ -61,14 +61,14 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										}
 									</div>
 									<p class="uk-text-small">
-										if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
+										if newServerReleaseAvailable(latestServerRelease.Version, higherRelease) {
 											{ i18n.T(ctx, "admin.update.servers.new_version_available") }
 										} else {
 											{ i18n.T(ctx, "admin.update.servers.no_new_version_available") }
 										}
 										<a href={ templ.URL(latestServerRelease.ReleaseNotesURL) } class="underline uk-text-default uk-text-bold text-blue-700" target="_blank" rel="noopener">{ latestServerRelease.Version }</a>
 									</p>
-									if newReleaseAvailable(latestServerRelease.Version, higherRelease) {
+									if newServerReleaseAvailable(latestServerRelease.Version, higherRelease) {
 										<p class="uk-text-small">
 											{ i18n.T(ctx, "admin.update.servers.new_version_date") }
 											{ l.FmtDateMedium(latestServerRelease.ReleaseDate) }
@@ -332,7 +332,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 												<td class="!align-middle">
 													<div class="flex items-center gap-2">
 														{ s.Version }
-														if semver.Compare("v" + s.Version, "v"+ higherRelease) < 0 {
+														if semver.Compare("v" + s.Version, "v"+ higherRelease.Version) < 0 {
 															@partials.AlertIcon(i18n.T(ctx, "admin.update.servers.outdated"))
 														}
 													</div>
@@ -441,6 +441,9 @@ templ GetServerVersionError() {
 	</div>
 }
 
-func newServerReleaseAvailable(newReleaseVersion, higherRelease string) bool {
-	return semver.Compare("v"+newReleaseVersion, "v"+higherRelease) == 1
+func newServerReleaseAvailable(newReleaseVersion string, higherRelease *openuem_ent.Server) bool {
+	if higherRelease.UpdateStatus.String() == "Pending" {
+		return true
+	}
+	return semver.Compare("v"+newReleaseVersion, "v"+higherRelease.Version) == 1
 }
