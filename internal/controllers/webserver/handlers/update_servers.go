@@ -229,7 +229,7 @@ func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, 
 		refreshTime = 5
 	}
 
-	latestServerRelease, err := model.GetLatestServerRelease()
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
