@@ -47,13 +47,13 @@ func (m *Model) CountUpgradableAgents(version string) (int, error) {
 }
 
 func (m *Model) SaveNewReleaseAvailable(releaseType release.ReleaseType, newRelease openuem_nats.OpenUEMRelease) error {
-	exists, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(releaseType), release.Version(newRelease.Version)).Exist(context.Background())
-	if err != nil {
-		return err
-	}
+	for _, file := range newRelease.Files {
+		exists, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(releaseType), release.Os(file.Os), release.Arch(file.Arch), release.Version(newRelease.Version)).Exist(context.Background())
+		if err != nil {
+			return err
+		}
 
-	if !exists {
-		for _, file := range newRelease.Files {
+		if !exists {
 			err := m.Client.Release.Create().
 				SetReleaseType(releaseType).
 				SetVersion(newRelease.Version).

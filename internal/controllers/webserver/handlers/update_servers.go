@@ -44,7 +44,6 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 		servers := c.FormValue("servers")
 		if servers == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.servers.servers_cant_be_empty"), false))
-
 		}
 
 		sr := c.FormValue("filterBySelectedRelease")
@@ -126,7 +125,8 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 		if errorMessage == "" {
 			successMessage = i18n.T(c.Request().Context(), "admin.update.servers.success")
 		} else {
-			errorMessage = i18n.T(c.Request().Context(), "admin.update.servers.some_errors_found")
+			log.Println("[ERROR]:", errorMessage)
+			errorMessage = i18n.T(c.Request().Context(), "admin.update.servers.some_errors_found") + ": " + errorMessage
 		}
 	}
 

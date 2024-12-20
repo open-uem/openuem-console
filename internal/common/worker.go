@@ -80,12 +80,6 @@ func (w *Worker) StartWorker() {
 		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
 		return
 	}
-
-	// Start a job to download server releases version
-	if err := w.StartServerReleasesDownloadJob(); err != nil {
-		log.Printf("[ERROR]: could not start server releases download job, reason: %s", err.Error())
-		return
-	}
 }
 
 func (w *Worker) StopWorker() {

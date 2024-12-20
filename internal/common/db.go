@@ -31,6 +31,12 @@ func (w *Worker) StartDBConnectJob() error {
 			log.Println("[ERROR]: could not get updates channel settings")
 			channel = "stable"
 		}
+
+		// Start a job to download server releases version
+		if err := w.StartServerReleasesDownloadJob(); err != nil {
+			log.Printf("[ERROR]: could not start server releases download job, reason: %s", err.Error())
+		}
+
 		if err := w.StartCheckLatestReleasesJob(channel); err != nil {
 			log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
 		}
@@ -68,6 +74,13 @@ func (w *Worker) StartDBConnectJob() error {
 					log.Println("[ERROR]: could not get updates channel settings")
 					channel = "stable"
 				}
+
+				// Start a job to download server releases version
+				if err := w.StartServerReleasesDownloadJob(); err != nil {
+					log.Printf("[ERROR]: could not start server releases download job, reason: %s", err.Error())
+					return
+				}
+
 				if err := w.StartCheckLatestReleasesJob(channel); err != nil {
 					log.Printf("[ERROR]: could not start check latest releases job, reason: %s", err.Error())
 					return

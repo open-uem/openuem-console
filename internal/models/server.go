@@ -16,8 +16,8 @@ func (m *Model) GetLatestServerRelease(channel string) (*openuem_ent.Release, er
 	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
 }
 
-func (m *Model) GetServerReleases() ([]*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(ent.Desc(release.FieldVersion)).All(context.Background())
+func (m *Model) GetServerReleases() ([]string, error) {
+	return m.Client.Release.Query().Unique(true).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
 }
 
 func (m *Model) CountAllUpdateServers(f filters.UpdateServersFilter) (int, error) {

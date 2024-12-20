@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []*openuem_ent.Release, allStatus []string, refresh int, successMessage, errorMessage string) {
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease string, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "/admin/update-servers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -151,7 +151,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										>
 											<option value="">{ i18n.T(ctx, "admin.update.servers.select_release") }</option>
 											for _,r := range allReleases {
-												<option value={ r.Version } selected?={ r.Version == f.SelectedRelease }>{ r.Version }</option>
+												<option value={ r } selected?={ r == f.SelectedRelease }>{ r }</option>
 											}
 										</select>
 										<button
