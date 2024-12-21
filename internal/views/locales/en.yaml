@@ -632,6 +632,10 @@ en:
         available: "Update Available"
         confirm_update_selected: "Do you want to continue updating the selected servers to versión %s?"
         confirm_update_all: "Do you want to continue updating ALL selected servers to versión %s?"
+        confirm_delete: "Do you want to remove this server from the updates table?. Note that you'll have to uninstall by hand OpenUEM on that server"
+        server_deleted: "The server was removed"
+        could_not_parse_server_id: "The server id could not be parsed"
+        could_not_delete: "The server could not be deleted, reason: %s"
   dashboard:
     outdated_agents: Agents running outdated versions
     no_auto_update: Endpoints that dosn't download/install system updates automatically

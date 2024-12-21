@@ -161,3 +161,7 @@ func (m *Model) GetServerById(serverId int) (*ent.Server, error) {
 func (m *Model) GetServersReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
 	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release_type), release.Channel(channel), release.Os(os), release.Arch(arch), release.Version(version)).Only(context.Background())
 }
+
+func (m *Model) DeleteServer(serverId int) error {
+	return m.Client.Server.DeleteOneID(serverId).Exec(context.Background())
+}

@@ -130,12 +130,35 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 		}
 	}
 
+	if c.Request().Method == "DELETE" {
+		id := c.Param("serverId")
+		serverId, err := strconv.Atoi(id)
+		if err != nil {
+			errorMessage = i18n.T(c.Request().Context(), "admin.update.servers.could_not_parse_server_id")
+		}
+
+		if err := h.Model.DeleteServer(serverId); err != nil {
+			errorMessage = i18n.T(c.Request().Context(), "admin.update.servers.could_not_delete", err.Error())
+		}
+
+		successMessage = i18n.T(c.Request().Context(), "admin.update.servers.server_deleted")
+	}
+
 	return h.ShowUpdateServersList(c, r, successMessage, errorMessage)
+}
+
+func (h *Handler) DeleteServer(c echo.Context) error {
+	return nil
 }
 
 func (h *Handler) UpdateServersConfirm(c echo.Context) error {
 	version := c.FormValue("version")
 	return RenderConfirm(c, partials.ConfirmUpdateServers(version))
+}
+
+func (h *Handler) DeleteServerConfirm(c echo.Context) error {
+	server := c.Param("serverId")
+	return RenderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "admin.update.servers.confirm_delete"), "/admin/update-servers", "/admin/update-servers/"+server))
 }
 
 func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {

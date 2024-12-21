@@ -629,6 +629,10 @@ es:
         available: "Actualización disponible"
         confirm_update_all: "¿Desea continuar con la actualización de TODOS los servidores seleccionados a la versión %s?"
         confirm_specify_when: "Si lo desea puede especificar el día y la hora a la que desea que se actualicen los servidores, de lo contrario la actualización se realizará lo antes posible"
+        confirm_delete: "¿Desea eliminar este servidor de la tabla de actualizaciones? Tenga en cuenta que deberá desinstalar manualmente OpenUEM de dicho equipo"
+        server_deleted: "El servidor fue eliminado"
+        could_not_parse_server_id: "No se pudo convertir el id del servidor"
+        could_not_delete: "El servidor no pudo eliminarse, razón: %s"
   dashboard:
     outdated_agents: Agentes ejecutando versiones anticuadas
     no_auto_update: Equipos que no descargan/instalan actualizaciones automáticamente

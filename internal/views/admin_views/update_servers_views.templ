@@ -251,7 +251,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 												</th>
 											</tr>
 										</thead>
-										for _, s := range servers {
+										for i, s := range servers {
 											<tr class="h-16">
 												<td class="!align-middle">
 													<input
@@ -389,6 +389,9 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 														}
 													</div>
 												</td>
+												<td class="!align-middle">
+													@addServerActionsButtons(s.ID, i)
+												</td>
 											</tr>
 										}
 										if len(servers) < p.PageSize {
@@ -401,6 +404,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
 													<td class="!align-middle">-</td>
+													<td class="!align-middle"></td>
 												</tr>
 											}
 										}
@@ -446,4 +450,19 @@ func newServerReleaseAvailable(newReleaseVersion string, higherRelease *openuem_
 		return true
 	}
 	return semver.Compare("v"+newReleaseVersion, "v"+higherRelease.Version) == 1
+}
+
+templ addServerActionsButtons(serverId, index int) {
+	@partials.MoreButton(index)
+	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+			<li>
+				<a
+					hx-post={ string(templ.URL(fmt.Sprintf("/admin/confirm-delete-server/%d", serverId))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+			</li>
+		</ul>
+	</div>
 }

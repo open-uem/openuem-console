@@ -73,8 +73,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/restore-database", h.RestoreDatabase, h.IsAuthenticated)
 	e.GET("/admin/update-servers", h.UpdateServers, h.IsAuthenticated)
 	e.POST("/admin/update-servers", h.UpdateServers, h.IsAuthenticated)
-	e.DELETE("/admin/update-servers", h.UpdateServers, h.IsAuthenticated)
+	e.DELETE("/admin/update-servers/:serverId", h.UpdateServers, h.IsAuthenticated)
 	e.POST("/admin/update-servers/confirm", h.UpdateServersConfirm, h.IsAuthenticated)
+	e.POST("/admin/confirm-delete-server/:serverId", h.DeleteServerConfirm, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 
