@@ -80,6 +80,10 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 									title={ i18n.T(ctx, "users.add") }
 									type="button"
 									class="uk-button uk-button-primary text-white"
+									hx-get="/admin/users/new"
+									hx-target="#main"
+									hx-push-url="false"
+									hx-swap="outerHTML"
 								>
 									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
 								</button>
