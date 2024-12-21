@@ -76,45 +76,45 @@ func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {
 	settings.MailFrom = c.FormValue("mail-from")
 
 	if settingsId == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.id_cannot_be_empty"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.id_cannot_be_empty"))
 	}
 
 	settings.ID, err = strconv.Atoi(settingsId)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.id_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.id_invalid"))
 	}
 
 	if settings.Server == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.server_cannot_be_empty"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.server_cannot_be_empty"))
 	}
 
 	if errs := validate.Var(settings.Server, "hostname"); errs != nil {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.server_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.server_invalid"))
 	}
 
 	if port == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.port_cannot_be_empty"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.port_cannot_be_empty"))
 	}
 
 	settings.Port, err = strconv.Atoi(port)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.port_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.port_invalid"))
 	}
 
 	if settings.Port < 0 || settings.Port > 65535 {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.port_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.port_invalid"))
 	}
 
 	if !slices.Contains(admin_views.AuthTypes, settings.Auth) {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.auth_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.auth_invalid"))
 	}
 
 	if settings.MailFrom == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.mailfrom_cannot_be_empty"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.mailfrom_cannot_be_empty"))
 	}
 
 	if errs := validate.Var(settings.MailFrom, "email"); errs != nil {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "smtp.mailfrom_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.mailfrom_invalid"))
 	}
 
 	return &settings, nil

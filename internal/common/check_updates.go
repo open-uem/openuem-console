@@ -15,28 +15,17 @@ import (
 func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
 	if err := w.GetLatestReleases(channel); err != nil {
 		log.Printf("[ERROR]: could not get latest agent releases, reason: %v", err)
+		w.DownloadLatestReleaseJobDuration = 2 * time.Minute
 	} else {
 		log.Println("[INFO]: latest agent releases have been checked")
+		w.DownloadLatestReleaseJobDuration = 6 * time.Hour
 	}
 
 	// Create task
-	_, err := w.TaskScheduler.NewJob(
-		gocron.DurationJob(
-			time.Duration(time.Duration(6*time.Hour)),
-		),
-		gocron.NewTask(
-			func() {
-				if err := w.GetLatestReleases(channel); err != nil {
-					log.Printf("[ERROR]: could not get latest agent releases, reason: %v", err)
-					return
-				}
-			},
-		),
-	)
-	if err != nil {
+	if err := w.StartDownloadLatestAgentReleaseJob(channel); err != nil {
 		return err
 	}
-	log.Println("[INFO]: check latest releases job has been scheduled every 6 hours")
+	log.Println("[INFO]: check latest releases job has been scheduled every ", w.DownloadLatestReleaseJobDuration.String())
 	return nil
 }
 
@@ -91,5 +80,40 @@ func (w *Worker) CheckServerLatestReleases(channel string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (w *Worker) StartDownloadLatestAgentReleaseJob(channel string) error {
+	var err error
+	var jobDuration time.Duration
+	w.DownloadLatestReleaseJob, err = w.TaskScheduler.NewJob(
+		gocron.DurationJob(
+			time.Duration(w.DownloadLatestReleaseJobDuration.Nanoseconds()),
+		),
+		gocron.NewTask(
+			func() {
+				if err := w.GetLatestReleases(channel); err != nil {
+					log.Printf("[ERROR]: could not get latest agent releases, reason: %v", err)
+					jobDuration = 2 * time.Minute
+				} else {
+					jobDuration = 6 * time.Hour
+				}
+
+				if jobDuration.String() == w.DownloadLatestReleaseJobDuration.String() {
+					return
+				}
+
+				w.DownloadLatestReleaseJobDuration = jobDuration
+				w.TaskScheduler.RemoveJob(w.DownloadLatestReleaseJob.ID())
+				if err := w.StartDownloadLatestAgentReleaseJob(channel); err == nil {
+					log.Println("[INFO]: download latest agent releases job has been re-scheduled every " + w.DownloadLatestReleaseJobDuration.String())
+				}
+			},
+		),
+	)
+	if err != nil {
+		log.Printf("[ERROR]: could not schedule latest agent releases job, reason: %v", err)
+		return err
+	}
 	return nil
 }

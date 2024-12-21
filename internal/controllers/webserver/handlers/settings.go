@@ -148,17 +148,17 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	requestPIN := c.FormValue("request-pin")
 
 	if settingsId == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
 	}
 
 	settings.ID, err = strconv.Atoi(settingsId)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.id_invalid"))
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_invalid"))
 	}
 
 	if country != "" {
 		if errs := validate.Var(country, "iso3166_1_alpha2"); errs != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.country_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.country_invalid"))
 		}
 		settings.Country = country
 	}
@@ -166,28 +166,28 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	if certYear != "" {
 		settings.UserCertYears, err = strconv.Atoi(certYear)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.cert_years_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.cert_years_invalid"))
 		}
 
 		if settings.UserCertYears <= 0 {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.cert_years_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.cert_years_invalid"))
 		}
 	}
 
 	if natsTimeout != "" {
 		settings.NATSTimeout, err = strconv.Atoi(natsTimeout)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.nats_timeout_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.nats_timeout_invalid"))
 		}
 
 		if settings.NATSTimeout <= 0 {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.nats_timeout_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.nats_timeout_invalid"))
 		}
 	}
 
 	if maxUploadSize != "" {
 		if !strings.HasSuffix(maxUploadSize, "M") && !strings.HasSuffix(maxUploadSize, "K") && !strings.HasSuffix(maxUploadSize, "G") {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.max_upload_size_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.max_upload_size_invalid"))
 		}
 		settings.MaxUploadSize = maxUploadSize
 	}
@@ -195,28 +195,28 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	if refresh != "" {
 		settings.Refresh, err = strconv.Atoi(refresh)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 
 		if settings.Refresh <= 0 {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 	}
 
 	if sessionLifetime != "" {
 		settings.SessionLifetime, err = strconv.Atoi(sessionLifetime)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 
 		if settings.SessionLifetime <= 0 {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
 		}
 	}
 
 	if updateChannel != "" {
 		if !slices.Contains(UpdateChannels, updateChannel) {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.upload_channel_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.upload_channel_invalid"))
 		}
 		settings.UpdateChannel = updateChannel
 	}
@@ -224,18 +224,18 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	if agentFrequency != "" {
 		settings.AgentFrequency, err = strconv.Atoi(agentFrequency)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
 		}
 
 		if settings.AgentFrequency <= 0 {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.agent_frequency_invalid"))
 		}
 	}
 
 	if requestPIN != "" {
 		settings.RequestVNCPIN, err = strconv.ParseBool(requestPIN)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.T(c.Request().Context(), "settings.request_pin_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.request_pin_invalid"))
 		}
 	}
 

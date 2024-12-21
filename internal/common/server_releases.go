@@ -2,10 +2,13 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/doncicuto/openuem_utils"
+	"github.com/go-co-op/gocron/v2"
 )
 
 func (w *Worker) GetServerReleases() error {
@@ -40,5 +43,57 @@ func (w *Worker) GetServerReleases() error {
 		return err
 	}
 
+	return nil
+}
+
+func (w *Worker) StartServerReleasesDownloadJob() error {
+	// Try to download server releases at start
+	if err := w.GetServerReleases(); err != nil {
+		log.Printf("[ERROR]: could not get server releases, reason: %v", err)
+		w.DownloadServerReleasesJobDuration = 2 * time.Minute
+	} else {
+		log.Println("[INFO]: server releases files have been downloaded")
+		w.DownloadServerReleasesJobDuration = 6 * time.Hour
+	}
+
+	// Create task
+	if err := w.StartDownloadServerReleasesJob(); err == nil {
+		log.Println("[INFO]: download server releases job has been scheduled every " + w.DownloadServerReleasesJobDuration.String())
+	}
+	return nil
+}
+
+func (w *Worker) StartDownloadServerReleasesJob() error {
+	var err error
+	var jobDuration time.Duration
+	w.DownloadServerReleasesJob, err = w.TaskScheduler.NewJob(
+		gocron.DurationJob(
+			time.Duration(w.DownloadServerReleasesJobDuration),
+		),
+		gocron.NewTask(
+			func() {
+				if err := w.GetServerReleases(); err != nil {
+					log.Printf("[ERROR]: could not get server releases, reason: %v", err)
+					jobDuration = 2 * time.Minute
+				} else {
+					jobDuration = 6 * time.Hour
+				}
+
+				if jobDuration.String() == w.DownloadServerReleasesJobDuration.String() {
+					return
+				}
+
+				w.DownloadServerReleasesJobDuration = jobDuration
+				w.TaskScheduler.RemoveJob(w.DownloadServerReleasesJob.ID())
+				if err := w.StartDownloadServerReleasesJob(); err == nil {
+					log.Println("[INFO]: download server releases job has been re-scheduled every " + w.DownloadServerReleasesJobDuration.String())
+				}
+			},
+		),
+	)
+	if err != nil {
+		log.Printf("[ERROR]: could not schedule Server Releases Job, reason: %v", err)
+		return err
+	}
 	return nil
 }

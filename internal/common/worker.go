@@ -2,6 +2,7 @@ package common
 
 import (
 	"log"
+	"time"
 
 	"github.com/doncicuto/openuem-console/internal/controllers/authserver"
 	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
@@ -12,34 +13,40 @@ import (
 )
 
 type Worker struct {
-	Model                 *models.Model
-	Logger                *openuem_utils.OpenUEMLogger
-	DBConnectJob          gocron.Job
-	TaskScheduler         gocron.Scheduler
-	DBUrl                 string
-	CACertPath            string
-	ConsoleCertPath       string
-	ConsolePrivateKeyPath string
-	SFTPPrivateKeyPath    string
-	JWTKey                string
-	SessionManager        *sessions.SessionManager
-	WebServer             *webserver.WebServer
-	AuthServer            *authserver.AuthServer
-	DownloadDir           string
-	ConsolePort           string
-	AuthPort              string
-	ServerName            string
-	Domain                string
-	NATSServers           string
-	WinGetDBFolder        string
-	OrgName               string
-	OrgProvince           string
-	OrgLocality           string
-	OrgAddress            string
-	Country               string
-	ReverseProxyAuthPort  string
-	ReverseProxyServer    string
-	ServerReleasesFolder  string
+	Model                             *models.Model
+	Logger                            *openuem_utils.OpenUEMLogger
+	DBConnectJob                      gocron.Job
+	TaskScheduler                     gocron.Scheduler
+	DBUrl                             string
+	CACertPath                        string
+	ConsoleCertPath                   string
+	ConsolePrivateKeyPath             string
+	SFTPPrivateKeyPath                string
+	JWTKey                            string
+	SessionManager                    *sessions.SessionManager
+	WebServer                         *webserver.WebServer
+	AuthServer                        *authserver.AuthServer
+	DownloadDir                       string
+	ConsolePort                       string
+	AuthPort                          string
+	ServerName                        string
+	Domain                            string
+	NATSServers                       string
+	WinGetDBFolder                    string
+	OrgName                           string
+	OrgProvince                       string
+	OrgLocality                       string
+	OrgAddress                        string
+	Country                           string
+	ReverseProxyAuthPort              string
+	ReverseProxyServer                string
+	ServerReleasesFolder              string
+	DownloadWingetDBJob               gocron.Job
+	DownloadWingetJobDuration         time.Duration
+	DownloadServerReleasesJob         gocron.Job
+	DownloadServerReleasesJobDuration time.Duration
+	DownloadLatestReleaseJob          gocron.Job
+	DownloadLatestReleaseJobDuration  time.Duration
 }
 
 func NewWorker(logName string) *Worker {

@@ -13,66 +13,21 @@ import (
 )
 
 func (w *Worker) StartWinGetDBDownloadJob() error {
-	var err error
-
 	// Try to download at start
 	if err := w.DownloadWgetDB(); err != nil {
 		log.Printf("[ERROR]: could not get index.db, reason: %v", err)
+		w.DownloadWingetJobDuration = 5 * time.Second
 	} else {
 		log.Println("[INFO]: winget index.db has been downloaded")
+		w.DownloadWingetJobDuration = 24 * time.Hour
 	}
 
 	// Create task
-	_, err = w.TaskScheduler.NewJob(
-		gocron.DurationJob(
-			time.Duration(time.Duration(24*time.Hour)),
-		),
-		gocron.NewTask(
-			func() {
-				if err := w.DownloadWgetDB(); err != nil {
-					log.Printf("[ERROR]: could not get index.db, reason: %v", err)
-					return
-				}
-			},
-		),
-	)
-	if err != nil {
-		log.Printf("[FATAL]: could not start the winget download job: %v", err)
+	if err := w.StartDownloadWingetDBJob(); err != nil {
+		log.Printf("[ERROR]: could not start the winget download job: %v", err)
 		return err
 	}
-	log.Println("[INFO]: download index.db job has been scheduled every day")
-	return nil
-}
-
-func (w *Worker) StartServerReleasesDownloadJob() error {
-	var err error
-
-	// Try to download server releases at start
-	if err := w.GetServerReleases(); err != nil {
-		log.Printf("[ERROR]: could not get server releases, reason: %v", err)
-	} else {
-		log.Println("[INFO]: server releases files have been downloaded")
-	}
-
-	// Create task
-	_, err = w.TaskScheduler.NewJob(
-		gocron.DurationJob(
-			time.Duration(time.Duration(6*time.Hour)),
-		),
-		gocron.NewTask(
-			func() {
-				if err := w.GetServerReleases(); err != nil {
-					log.Printf("[ERROR]: could not get server releases, reason: %v", err)
-					return
-				}
-			},
-		),
-	)
-	if err != nil {
-		log.Printf("[FATAL]: could not start the download server releases job: %v", err)
-		return err
-	}
-	log.Println("[INFO]: download server releases job has been scheduled every 6 hours")
+	log.Println("[INFO]: download index.db job has been scheduled every ", w.DownloadWingetJobDuration.String())
 	return nil
 }
 
@@ -138,4 +93,39 @@ func (w *Worker) DownloadWgetDB() error {
 
 	// Remove temp ZIP file
 	return os.Remove(zipPath)
+}
+
+func (w *Worker) StartDownloadWingetDBJob() error {
+	var err error
+	var jobDuration time.Duration
+	w.DownloadWingetDBJob, err = w.TaskScheduler.NewJob(
+		gocron.DurationJob(
+			time.Duration(w.DownloadWingetJobDuration),
+		),
+		gocron.NewTask(
+			func() {
+				if err := w.DownloadWgetDB(); err != nil {
+					log.Printf("[ERROR]: could not get index.db, reason: %v", err)
+					jobDuration = 2 * time.Minute
+				} else {
+					jobDuration = 24 * time.Hour
+				}
+
+				if jobDuration.String() == w.DownloadWingetJobDuration.String() {
+					return
+				}
+
+				w.DownloadWingetJobDuration = jobDuration
+				w.TaskScheduler.RemoveJob(w.DownloadWingetDBJob.ID())
+				if err := w.StartDownloadWingetDBJob(); err == nil {
+					log.Println("[INFO]: download winget db job has been re-scheduled every " + w.DownloadWingetJobDuration.String())
+				}
+			},
+		),
+	)
+	if err != nil {
+		log.Printf("[ERROR]: could not schedule winget db Job, reason: %v", err)
+		return err
+	}
+	return nil
 }

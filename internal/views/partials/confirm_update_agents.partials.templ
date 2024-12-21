@@ -1,7 +1,6 @@
 package partials
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"time"
 )
@@ -17,7 +16,7 @@ templ ConfirmUpdateAgents(version string) {
 					{ i18n.T(ctx, "admin.update.agents.confirm_specify_when") }
 				</p>
 				<div class="flex justify-start gap-6">
-					<input class="uk-input w-1/6" name="update-agent-date" type="datetime-local" min={ fmt.Sprintf(time.Now().Format("2006-01-02T15:03")) }/>
+					<input class="uk-input w-1/6" name="update-agent-date" type="datetime-local" min={ time.Now().Format("2006-01-02T15:03") }/>
 					<button
 						hx-post="/admin/update-agents"
 						hx-push-url="true"
