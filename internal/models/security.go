@@ -181,7 +181,7 @@ func applyAntiviriFilters(query *ent.AgentQuery, f filters.AntivirusFilter) {
 }
 
 func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter) (int, error) {
-	query := m.Client.Agent.Query()
+	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
 
 	applySystemUpdatesFilters(query, f)
 
