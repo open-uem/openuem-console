@@ -3,9 +3,9 @@ package partials
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"net/url"
 	"slices"
 	"strconv"
-	"net/url"
 )
 
 const PAGE_SIZE = 5
@@ -26,7 +26,7 @@ type page struct {
 	Disabled bool
 }
 
-templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url string) {
+templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url string, comesFromDialog bool) {
 	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
@@ -35,7 +35,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					if url != "" {
 						hx-get={ string(templ.URL(url)) }
 					} else {
-						if GetCurrentUri(c) != "" {
+						if comesFromDialog {
 							hx-get={ GetCurrentUri(c) }
 						} else {
 							hx-get={ c.Request().URL.Path }
@@ -46,7 +46,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					if url != "" {
 						hx-post={ string(templ.URL(url)) }
 					} else {
-						if GetCurrentUri(c) != "" {
+						if comesFromDialog {
 							hx-post={ GetCurrentUri(c) }
 						} else {
 							hx-post={ c.Request().URL.Path }
@@ -57,7 +57,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					if url !="" {
 						hx-delete={ string(templ.URL(url)) }
 					} else {
-						if GetCurrentUri(c) != "" {
+						if comesFromDialog {
 							hx-delete={ GetCurrentUri(c) }
 						} else {
 							hx-delete={ c.Request().URL.Path }
@@ -97,7 +97,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-get={ GetCurrentUri(c) }
 									} else {
 										hx-get={ c.Request().URL.Path }
@@ -108,7 +108,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-post={ GetCurrentUri(c) }
 									} else {
 										hx-post={ c.Request().URL.Path }
@@ -119,7 +119,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-delete={ GetCurrentUri(c) }
 									} else {
 										hx-delete={ c.Request().URL.Path }
@@ -163,7 +163,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-get={ GetCurrentUri(c) }
 									} else {
 										hx-get={ c.Request().URL.Path }
@@ -174,7 +174,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-post={ GetCurrentUri(c) }
 									} else {
 										hx-post={ c.Request().URL.Path }
@@ -185,7 +185,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-delete={ GetCurrentUri(c) }
 									} else {
 										hx-delete={ c.Request().URL.Path }
@@ -217,7 +217,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-get={ GetCurrentUri(c) }
 									} else {
 										hx-get={ c.Request().URL.Path }
@@ -228,7 +228,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-post={ GetCurrentUri(c) }
 									} else {
 										hx-post={ c.Request().URL.Path }
@@ -239,7 +239,7 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									if GetCurrentUri(c) != "" {
+									if comesFromDialog {
 										hx-delete={ GetCurrentUri(c) }
 									} else {
 										hx-delete={ c.Request().URL.Path }

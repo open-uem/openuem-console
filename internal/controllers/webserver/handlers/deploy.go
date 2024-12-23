@@ -25,6 +25,8 @@ func (h *Handler) DeployUninstall(c echo.Context) error {
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	var err error
+	comesFromDialog := false
+
 	search := c.FormValue("filterByAppName")
 	if search == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
@@ -49,11 +51,12 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, comesFromDialog))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	var err error
+	comesFromDialog := false
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
@@ -106,7 +109,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, packageId, packageName, agents, install, refreshTime)))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, packageId, packageName, agents, install, refreshTime, comesFromDialog)))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {

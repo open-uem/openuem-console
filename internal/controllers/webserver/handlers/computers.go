@@ -149,6 +149,8 @@ func (h *Handler) Monitors(c echo.Context) error {
 
 func (h *Handler) Apps(c echo.Context) error {
 	var err error
+	comesFromDialog := false
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -180,7 +182,7 @@ func (h *Handler) Apps(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, h.SessionManager, a, apps, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, h.SessionManager, a, apps, confirmDelete, comesFromDialog)))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -203,6 +205,7 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 
 func (h *Handler) Computers(c echo.Context) error {
 	var err error
+	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -286,6 +289,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+		comesFromDialog = true
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
@@ -293,6 +297,7 @@ func (h *Handler) Computers(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+		comesFromDialog = true
 	}
 
 	computers, err := h.Model.GetComputersByPage(p, f)
@@ -313,10 +318,12 @@ func (h *Handler) Computers(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, computers, versions, vendors, models, tags, availableOSes, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, computers, versions, vendors, models, tags, availableOSes, refreshTime, comesFromDialog)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
+	comesFromDialog := false
+
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -351,7 +358,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments, comesFromDialog))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -360,10 +367,12 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, successMessage, confirmDelete, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, successMessage, confirmDelete, refreshTime, comesFromDialog)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
+	comesFromDialog := false
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -394,7 +403,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
+	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, comesFromDialog))
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
@@ -569,6 +578,7 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 
 func (h *Handler) ComputerMetadata(c echo.Context) error {
 	var data []*openuem_ent.Metadata
+	comesFromDialog := false
 	successMessage := ""
 
 	agentId := c.Param("uuid")
@@ -648,7 +658,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, agent, data, orgMetadata, confirmDelete, successMessage)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, agent, data, orgMetadata, confirmDelete, successMessage, comesFromDialog)))
 }
 
 func (h *Handler) Notes(c echo.Context) error {

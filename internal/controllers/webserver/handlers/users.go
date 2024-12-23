@@ -31,9 +31,8 @@ type NewUser struct {
 	Country string `form:"country"`
 }
 
-func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
+func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
 	var err error
-
 	f := filters.UserFilter{}
 
 	usernameFilter := c.FormValue("filterByUsername")
@@ -106,7 +105,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime, comesFromDialog)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -154,7 +153,7 @@ func (h *Handler) AddUser(c echo.Context) error {
 	}
 
 	successMessage = i18n.T(c.Request().Context(), "new.user.success")
-	return h.ListUsers(c, successMessage, errMessage)
+	return h.ListUsers(c, successMessage, errMessage, true)
 }
 
 func (h *Handler) RequestUserCertificate(c echo.Context) error {
@@ -171,7 +170,7 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
-	return h.ListUsers(c, successMessage, "")
+	return h.ListUsers(c, successMessage, "", false)
 }
 
 func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent.User) error {
@@ -233,7 +232,7 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		successMessage := i18n.T(c.Request().Context(), "users.deleted")
-		return h.ListUsers(c, successMessage, "")
+		return h.ListUsers(c, successMessage, "", true)
 	}
 
 	if err := h.Model.RevokeCertificate(cert, "user has been deleted", ocsp.CessationOfOperation); err != nil {
@@ -246,7 +245,7 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.deleted")
-	return h.ListUsers(c, successMessage, "")
+	return h.ListUsers(c, successMessage, "", true)
 }
 
 func (h *Handler) RenewUserCertificate(c echo.Context) error {
@@ -299,7 +298,7 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 	}
 
 	successMessage := i18n.T(c.Request().Context(), "users.certificate_requested")
-	return h.ListUsers(c, successMessage, "")
+	return h.ListUsers(c, successMessage, "", false)
 }
 
 func (h *Handler) SetEmailConfirmed(c echo.Context) error {
@@ -318,7 +317,7 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.email_confirmed"), "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.email_confirmed"), "", false)
 }
 
 func (h *Handler) AskForConfirmation(c echo.Context) error {
@@ -332,7 +331,7 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_confirmation_email_sent")+user.Email, "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_confirmation_email_sent")+user.Email, "", false)
 }
 
 func (h *Handler) EditUser(c echo.Context) error {
@@ -347,7 +346,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return h.ListUsers(c, i18n.T(c.Request().Context(), "users.edit.success"), "")
+		return h.ListUsers(c, i18n.T(c.Request().Context(), "users.edit.success"), "", false)
 	}
 
 	defaultCountry, err := h.Model.GetDefaultCountry()
@@ -469,5 +468,5 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_users", strings.Join(errors, ",")), false))
 	}
 
-	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.import_success"), "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.import_success"), "", false)
 }

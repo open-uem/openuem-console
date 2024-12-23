@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *ent.Agent, updates []*ent.Update) {
+templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *ent.Agent, updates []*ent.Update, comesFromDialog bool) {
 	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "updates_history.title") } </title>
 	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}, {Title: agent.Hostname, Url: fmt.Sprintf("/security/%s/updates", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -61,7 +61,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.S
 									}
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "updates_history.no_info") }

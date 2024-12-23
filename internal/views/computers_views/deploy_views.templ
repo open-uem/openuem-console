@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, successMessage string, confirmDelete bool, refreshTime int) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, comesFromDialog bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -97,7 +97,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 								<div>
 									if p.NItems > 0 {
 										<div id="deployments-results">
-											@DeploymentsTable(c, p, l, agent.ID, deployments)
+											@DeploymentsTable(c, p, l, agent.ID, deployments, comesFromDialog)
 										</div>
 									}
 								</div>
@@ -116,7 +116,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort, comesFromDialog bool) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
@@ -157,7 +157,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId))
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId), comesFromDialog)
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -165,7 +165,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 	}
 }
 
-templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agentId string, packages []*openuem_ent.Deployment) {
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agentId string, packages []*openuem_ent.Deployment, comesFromDialog bool) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 		<thead>
 			<tr>
@@ -253,5 +253,5 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy", agentId))
+	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy", agentId), comesFromDialog)
 }

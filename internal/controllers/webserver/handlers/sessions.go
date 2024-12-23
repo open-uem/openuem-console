@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
+func (h *Handler) ListSessions(c echo.Context, successMessage string, comesFromDialog bool) error {
 	var err error
 
 	errMessage := ""
@@ -29,7 +29,7 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec)))
+	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec, comesFromDialog)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {
@@ -51,5 +51,5 @@ func (h *Handler) SessionConfirmDelete(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return h.ListSessions(c, i18n.T(c.Request().Context(), "success.session_delete"))
+	return h.ListSessions(c, i18n.T(c.Request().Context(), "success.session_delete"), true)
 }

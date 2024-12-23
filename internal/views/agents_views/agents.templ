@@ -14,7 +14,7 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int, comesFromDialog bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -48,7 +48,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
 						@AgentsTableBody(p, l, agents, availableTags)
 					</table>
-					@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
+					@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }

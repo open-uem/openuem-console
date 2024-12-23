@@ -14,6 +14,7 @@ import (
 func (h *Handler) Software(c echo.Context) error {
 	var err error
 	var apps []models.App
+	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -54,5 +55,5 @@ func (h *Handler) Software(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, f, h.SessionManager, l, apps, refreshTime)))
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, f, h.SessionManager, l, apps, refreshTime, comesFromDialog)))
 }

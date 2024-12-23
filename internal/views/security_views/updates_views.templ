@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, sm *sessions.SessionManager, l locales.Translator, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
+templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, sm *sessions.SessionManager, l locales.Translator, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, comesFromDialog bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -135,7 +135,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", "")
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }
