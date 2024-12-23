@@ -20,6 +20,7 @@ templ ConfirmAdmission(confirm, cancelURL, admitURL string) {
 					hx-post={ string(templ.URL(admitURL)) }
 					hx-target="#main"
 					hx-swap="outerHTML"
+					hx-push-url="false"
 					htmx-indicator="#admit-spinner"
 					class="uk-button bg-blue-700 text-white hover:bg-blue-500"
 				>

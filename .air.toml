@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "tmp/main start  --domain local.openuem.eu --org-name OpenUEM --org-province Valladolid --org-locality Valladolid --country ES --jwt-key supers3cr3t --nats-servers nats-server:4433 --cacert tmp/ca.cer --server-name localhost --cert tmp/console.cer --key tmp/console.key --sftpkey tmp/sftp.key" 
+  bin = "tmp/main start  --domain local.openuem.eu --org-name OpenUEM --org-province Valladolid --org-locality Valladolid --country ES --jwt-key supers3cr3t --nats-servers nats-server:4433 --cacert tmp/ca.cer --server-name casiopea.openuem.eu --cert tmp/console.cer --key tmp/console.key --sftpkey tmp/sftp.key" 
   cmd = "go build -o ./tmp/main ./main.go"
   delay = 1000
   exclude_dir = ["assets", "tmp", "internal/views/typescript", "internal/views/tailwind"]

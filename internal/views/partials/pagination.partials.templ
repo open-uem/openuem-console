@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"slices"
 	"strconv"
+	"net/url"
 )
 
 const PAGE_SIZE = 5
@@ -31,24 +32,36 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
 			<form
 				if method == "get" {
-					if url !="" {
+					if url != "" {
 						hx-get={ string(templ.URL(url)) }
 					} else {
-						hx-get={ c.Request().URL.Path }
+						if GetCurrentUri(c) != "" {
+							hx-get={ GetCurrentUri(c) }
+						} else {
+							hx-get={ c.Request().URL.Path }
+						}
 					}
 				}
 				if method == "post" {
-					if url !="" {
+					if url != "" {
 						hx-post={ string(templ.URL(url)) }
 					} else {
-						hx-post={ c.Request().URL.Path }
+						if GetCurrentUri(c) != "" {
+							hx-post={ GetCurrentUri(c) }
+						} else {
+							hx-post={ c.Request().URL.Path }
+						}
 					}
 				}
 				if method == "delete" {
 					if url !="" {
 						hx-delete={ string(templ.URL(url)) }
 					} else {
-						hx-delete={ c.Request().URL.Path }
+						if GetCurrentUri(c) != "" {
+							hx-delete={ GetCurrentUri(c) }
+						} else {
+							hx-delete={ c.Request().URL.Path }
+						}
 					}
 				}
 				hx-push-url="true"
@@ -84,21 +97,33 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									hx-get={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-get={ GetCurrentUri(c) }
+									} else {
+										hx-get={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "post" {
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									hx-post={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-post={ GetCurrentUri(c) }
+									} else {
+										hx-post={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "delete" {
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									hx-delete={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-delete={ GetCurrentUri(c) }
+									} else {
+										hx-delete={ c.Request().URL.Path }
+									}
 								}
 							}
 							hx-push-url="true"
@@ -138,21 +163,33 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									hx-get={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-get={ GetCurrentUri(c) }
+									} else {
+										hx-get={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "post" {
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									hx-post={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-post={ GetCurrentUri(c) }
+									} else {
+										hx-post={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "delete" {
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									hx-delete={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-delete={ GetCurrentUri(c) }
+									} else {
+										hx-delete={ c.Request().URL.Path }
+									}
 								}
 							}
 							hx-push-url="true"
@@ -180,21 +217,33 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 								if url !="" {
 									hx-get={ string(templ.URL(url)) }
 								} else {
-									hx-get={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-get={ GetCurrentUri(c) }
+									} else {
+										hx-get={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "post" {
 								if url !="" {
 									hx-post={ string(templ.URL(url)) }
 								} else {
-									hx-post={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-post={ GetCurrentUri(c) }
+									} else {
+										hx-post={ c.Request().URL.Path }
+									}
 								}
 							}
 							if method == "delete" {
 								if url !="" {
 									hx-delete={ string(templ.URL(url)) }
 								} else {
-									hx-delete={ c.Request().URL.Path }
+									if GetCurrentUri(c) != "" {
+										hx-delete={ GetCurrentUri(c) }
+									} else {
+										hx-delete={ c.Request().URL.Path }
+									}
 								}
 							}
 							hx-push-url="true"
@@ -359,4 +408,15 @@ func (p *PaginationAndSort) GetPaginationEntries() []page {
 	})
 
 	return pages
+}
+
+func GetCurrentUri(c echo.Context) string {
+	currentUrl := c.Request().Header.Get("Hx-Current-Url")
+
+	u, err := url.Parse(currentUrl)
+	if err != nil {
+		return ""
+	}
+
+	return u.Path
 }
