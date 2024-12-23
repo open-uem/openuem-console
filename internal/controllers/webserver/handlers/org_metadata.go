@@ -15,7 +15,7 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	p.NItems, err = h.Model.CountAllTags()
+	p.NItems, err = h.Model.CountAllOrgMetadata()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
