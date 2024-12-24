@@ -14,11 +14,6 @@ func (h *Handler) TagManager(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	p.NItems, err = h.Model.CountAllTags()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
 	if c.Request().Method == "POST" {
 		tagId := c.FormValue("tagId")
 		tag := c.FormValue("tag")
@@ -57,6 +52,11 @@ func (h *Handler) TagManager(c echo.Context) error {
 		if err := h.Model.DeleteTag(id); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+	}
+
+	p.NItems, err = h.Model.CountAllTags()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	tags, err := h.Model.GetTagsByPage(p)

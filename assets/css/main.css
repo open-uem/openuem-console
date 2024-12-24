@@ -1867,7 +1867,8 @@ video {
 
 .uk-background-fixed {
   background-attachment: fixed;
-  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
 }
 
 .uk-background-blend-multiply {
@@ -8090,6 +8091,7 @@ ul.uk-nav-sub {
 
 .uk-sticky-fixed {
   margin: 0 !important;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
@@ -9279,7 +9281,8 @@ th.uk-text-break, td.uk-text-break {
   border: 0 !important;
   margin: 0 !important;
   overflow: hidden !important;
-  clip-path: inset(50%) !important;
+  -webkit-clip-path: inset(50%) !important;
+          clip-path: inset(50%) !important;
   white-space: nowrap !important;
 }
 
@@ -10285,10 +10288,6 @@ th.uk-text-break, td.uk-text-break {
 
 .underline {
   text-decoration-line: underline;
-}
-
-.opacity-25 {
-  opacity: 0.25;
 }
 
 .blur {

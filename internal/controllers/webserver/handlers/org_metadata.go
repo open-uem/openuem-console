@@ -15,11 +15,6 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
-	p.NItems, err = h.Model.CountAllOrgMetadata()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
 	if c.Request().Method == "POST" {
 		orgMetadataId := c.FormValue("orgMetadataId")
 		name := c.FormValue("name")
@@ -57,6 +52,11 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		comesFromDialog = true
+	}
+
+	p.NItems, err = h.Model.CountAllOrgMetadata()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	data, err := h.Model.GetOrgMetadataByPage(p)
