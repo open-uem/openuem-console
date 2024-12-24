@@ -203,6 +203,11 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 		for _, agentId := range strings.Split(agents, ",") {
 
 			agent, err := h.Model.GetAgentById(agentId)
+			if err != nil {
+				log.Println("[ERROR]: ", err.Error())
+				errorsFound = true
+				continue
+			}
 
 			if agent.Status == "WaitingForAdmission" {
 				if err != nil {
@@ -260,6 +265,92 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 	}
 
 	return RenderConfirm(c, partials.ConfirmAdmitAgents(c.Request().Referer()))
+}
+
+func (h *Handler) AgentsEnable(c echo.Context) error {
+	errorsFound := false
+
+	if c.Request().Method == "POST" {
+		agents := c.FormValue("agents")
+
+		for _, agentId := range strings.Split(agents, ",") {
+			agent, err := h.Model.GetAgentById(agentId)
+			if err != nil {
+				log.Println("[ERROR]: ", err.Error())
+				errorsFound = true
+				continue
+			}
+
+			if agent.Status == "Disabled" {
+				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))
+					errorsFound = true
+					continue
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				if _, err := h.JetStream.Publish(ctx, "agent.enable."+agentId, nil); err != nil {
+					log.Println("[ERROR]: ", err.Error())
+					errorsFound = true
+					continue
+				}
+
+				if err := h.Model.EnableAgent(agentId); err != nil {
+					log.Println("[ERROR]: ", err.Error())
+					errorsFound = true
+					continue
+				}
+			}
+		}
+		if errorsFound {
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_enabled"))
+		}
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "")
+	}
+
+	return RenderConfirm(c, partials.ConfirmEnableAgents(c.Request().Referer()))
+}
+
+func (h *Handler) AgentsDisable(c echo.Context) error {
+	errorsFound := false
+
+	if c.Request().Method == "POST" {
+
+		agents := c.FormValue("agents")
+
+		for _, agentId := range strings.Split(agents, ",") {
+			agent, err := h.Model.GetAgentById(agentId)
+			if err != nil {
+				log.Println("[ERROR]: ", err.Error())
+				errorsFound = true
+				continue
+			}
+
+			if agent.Status == "Enabled" {
+				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				if _, err := h.JetStream.Publish(ctx, "agent.disable."+agentId, nil); err != nil {
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
+				}
+
+				if err := h.Model.DisableAgent(agentId); err != nil {
+					return RenderError(c, partials.ErrorMessage(err.Error(), false))
+				}
+			}
+		}
+		if errorsFound {
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_disabled"))
+		}
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_disabled"), "")
+
+	}
+
+	return RenderConfirm(c, partials.ConfirmDisableAgents(c.Request().Referer()))
 }
 
 func (h *Handler) AgentAdmit(c echo.Context) error {

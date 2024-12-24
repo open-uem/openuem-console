@@ -166,7 +166,11 @@ en:
     has_been_disabled: "The agent has been disabled"
     has_been_admitted: "The agent has been admitted and now it can be managed from OpenUEM"
     have_been_admitted: "The agents have been admitted and now they can be managed from OpenUEM"
+    have_been_enabled: "The agents have been enabled"
+    have_been_disabled: "The agents have been disabled"
     some_could_not_be_admitted: "Some agents could not be admitted, check console logs"
+    some_could_not_be_enabled: "Some agents could not be enabled, check console logs"
+    some_could_not_be_disabled: "Some agents could not be disabled, check console logs"
     has_been_restarted: "A request to restart the agent has been sent"
     certs_regenerated: "A request has been made to generate again this agent's certificate"
     confirm_delete: "Are you sure that you want to delete this agent and all its associated information? Note that this action is irreversible and it's considered destructive"
@@ -314,6 +318,8 @@ en:
     session_delete: "Are you sure that you want to delete this session? The user will have to log in again"
     agent_admit: "Are you sure that you want to give admission to this agent? By doing this, the agent can be managed from OpenUEM and its information will show in the different views available"
     agents_admit: "Are you sure that you want to give admission to these agents? By doing this, these agents can be managed from OpenUEM and their information will show in the different views available"
+    agents_enable: "Are you sure that you want to enable these agents?"
+    agents_disable: "Are you sure that you want to disable these agents? These agents won't report more information until you enable them again"
   forms:
     required: "This field cannot be empty"
   login:

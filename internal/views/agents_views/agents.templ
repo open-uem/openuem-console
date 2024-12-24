@@ -38,7 +38,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					<div class="flex items-center gap-2">
+					<div class="flex items-center gap-4">
 						@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
 							return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
 								len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
@@ -61,6 +61,8 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 												set #items-selected.innerHTML to '%d'
 												
 												remove @disabled from #admit-all-button
+												remove @disabled from #enable-all-button
+												remove @disabled from #disable-all-button
 												
 											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
 						>
@@ -82,6 +84,8 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 										set #filterBySelectedItems.value to '0'
 										set #items-selected.innerHTML to '0'
 										add @disabled to #admit-all-button
+										add @disabled to #enable-all-button
+										add @disabled to #disable-all-button
 									end"
 						>
 							{ i18n.T(ctx, "DeselectAll") }
@@ -94,7 +98,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								id="admit-all-button"
 								title={ i18n.T(ctx, "Admit") }
 								type="button"
-								class="uk-button uk-button-primary"
+								class="uk-button uk-button-default"
 								hx-get="/agents/admit"
 								hx-push-url="false"
 								hx-target="#main"
@@ -104,6 +108,38 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								<div class="flex items-center gap-2">
 									<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5" uk-cloack></uk-icon>
 									{ i18n.T(ctx, "Admit") }
+								</div>
+							</button>
+							<button
+								id="enable-all-button"
+								title={ i18n.T(ctx, "Enable") }
+								type="button"
+								class="uk-button uk-button-default"
+								hx-get="/agents/enable"
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								disabled?={ f.SelectedItems == 0 }
+							>
+								<div class="flex items-center gap-2">
+									<uk-icon hx-history="false" icon="megaphone" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "Enable") }
+								</div>
+							</button>
+							<button
+								id="disable-all-button"
+								title={ i18n.T(ctx, "Disable") }
+								type="button"
+								class="uk-button uk-button-default"
+								hx-get="/agents/disable"
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								disabled?={ f.SelectedItems == 0 }
+							>
+								<div class="flex items-center gap-2">
+									<uk-icon hx-history="false" icon="megaphone-off" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "Disable") }
 								</div>
 							</button>
 						</form>
@@ -197,10 +233,14 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 							end
 						end
 
-						if ((<input[title='check-agent']:checked/>).length > 0) then
-							remove @disabled from #admit-all-button
-						else
+						if (#filterBySelectedItems.value is '0') then
 							add @disabled to #admit-all-button
+							add @disabled to #enable-all-button
+							add @disabled to #disable-all-button
+						else
+							remove @disabled from #admit-all-button
+							remove @disabled from #enable-all-button
+							remove @disabled from #disable-all-button
 						end
 					"
 				/>
@@ -311,8 +351,12 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 
 							if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
 								remove @disabled from #admit-all-button
+								remove @disabled from #enable-all-button
+								remove @disabled from #disable-all-button
 							else
 								add @disabled to #admit-all-button
+								add @disabled to #enable-all-button
+								add @disabled to #disable-all-button
 							end
 
 							if #check-all-in-page.checked is true and me.checked is false then
