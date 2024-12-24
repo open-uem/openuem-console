@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, data []*ent.OrgMetadata, comesFromDialog bool) {
+templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, data []*ent.OrgMetadata) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Metadata", Url: "/admin/metadata"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -22,7 +22,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 				<div id="confirm-orgmetadata-delete" class="uk-alert uk-alert-danger hidden" uk-alert>
 					@ConfirmOrgMetadataDeletion()
 				</div>
-				<div id="edit-orgmetadata-dialog" class="uk-alert border border-blue-700 bg-blue-50 hidden" uk-alert>
+				<div id="edit-orgmetadata-dialog" class="uk-alert border border-blue-700 hidden" uk-alert>
 					@EditOrgMetadata()
 				</div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -66,11 +66,11 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 												title="edit org metadata"
 												type="button"
 												_={ fmt.Sprintf(`on click 
-                                                    remove .hidden from #edit-orgmetadata-dialog
-                                                    set #edit-orgmetadata-id.value to "%d"
-                                                    set #edit-orgmetadata-name.value to "%s"
-                                                    set #edit-orgmetadata-description.value to "%s"
-                                                end`, item.ID, item.Name, item.Description) }
+																						remove .hidden from #edit-orgmetadata-dialog
+																						set #edit-orgmetadata-id.value to "%d"
+																						set #edit-orgmetadata-name.value to "%s"
+																						set #edit-orgmetadata-description.value to "%s"
+																				end`, item.ID, item.Name, item.Description) }
 											>
 												<uk-icon hx-history="false" icon="pencil" custom-class="h-5 w-5" uk-cloack></uk-icon>
 											</button>
@@ -88,7 +88,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "metadata.no_metadata") }

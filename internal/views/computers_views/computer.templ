@@ -6,11 +6,12 @@ import (
 	"github.com/doncicuto/openuem-console/internal/views/partials"
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 	"strconv"
 	"strings"
 )
 
-templ Computer(p partials.PaginationAndSort, sm *sessions.SessionManager, agent *ent.Agent, confirmDelete bool) {
+templ Computer(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, agent *ent.Agent, confirmDelete bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -21,7 +22,7 @@ templ Computer(p partials.PaginationAndSort, sm *sessions.SessionManager, agent 
 				</div>
 				@ComputersNavbar(agent.ID, "hardware", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">

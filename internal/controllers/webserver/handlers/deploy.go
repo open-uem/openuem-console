@@ -25,7 +25,6 @@ func (h *Handler) DeployUninstall(c echo.Context) error {
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	var err error
-	comesFromDialog := false
 
 	search := c.FormValue("filterByAppName")
 	if search == "" {
@@ -51,12 +50,11 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, comesFromDialog))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
@@ -109,7 +107,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, packageId, packageName, agents, install, refreshTime, comesFromDialog)))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, packageId, packageName, agents, install, refreshTime)))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {

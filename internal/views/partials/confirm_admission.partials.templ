@@ -2,8 +2,9 @@ package partials
 
 import "github.com/invopop/ctxi18n/i18n"
 
-templ ConfirmAdmission(confirm, cancelURL, admitURL string) {
+templ ConfirmAdmission(confirm, cancelURL, admitURL, referer string) {
 	<div class="uk-alert border-blue-600 text-blue-500" uk-alert>
+		<input type="hidden" name="referer" value={ referer }/>
 		<div class="uk-alert-description p-2">
 			{ confirm }
 			<div class="flex gap-6 pt-6">
@@ -22,6 +23,7 @@ templ ConfirmAdmission(confirm, cancelURL, admitURL string) {
 					hx-swap="outerHTML"
 					hx-push-url="false"
 					htmx-indicator="#admit-spinner"
+					hx-include="input[name='referer']"
 					class="uk-button bg-blue-700 text-white hover:bg-blue-500"
 				>
 					{ i18n.T(ctx, "Admit") }

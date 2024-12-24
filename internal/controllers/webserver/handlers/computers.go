@@ -36,7 +36,7 @@ func (h *Handler) Computer(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
@@ -57,7 +57,7 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(p, h.SessionManager, l, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, h.SessionManager, l, agent, confirmDelete)))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
@@ -74,7 +74,7 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -92,7 +92,7 @@ func (h *Handler) Printers(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
@@ -109,7 +109,7 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
@@ -127,7 +127,7 @@ func (h *Handler) Shares(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
@@ -144,12 +144,11 @@ func (h *Handler) Monitors(c echo.Context) error {
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -182,7 +181,7 @@ func (h *Handler) Apps(c echo.Context) error {
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, h.SessionManager, a, apps, confirmDelete, comesFromDialog)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, h.SessionManager, a, apps, confirmDelete)))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -200,12 +199,11 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(p, h.SessionManager, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, h.SessionManager, agent, confirmDelete)))
 }
 
-func (h *Handler) Computers(c echo.Context) error {
+func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	var err error
-	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -289,7 +287,6 @@ func (h *Handler) Computers(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		comesFromDialog = true
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
@@ -297,7 +294,6 @@ func (h *Handler) Computers(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		comesFromDialog = true
 	}
 
 	computers, err := h.Model.GetComputersByPage(p, f)
@@ -318,12 +314,10 @@ func (h *Handler) Computers(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, computers, versions, vendors, models, tags, availableOSes, refreshTime, comesFromDialog)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
-	comesFromDialog := false
-
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -358,7 +352,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments, comesFromDialog))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -367,12 +361,10 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, successMessage, confirmDelete, refreshTime, comesFromDialog)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, agent, deployments, successMessage, confirmDelete, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
-	comesFromDialog := false
-
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
 
@@ -403,7 +395,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, comesFromDialog))
+	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
@@ -555,7 +547,7 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
 		p := partials.PaginationAndSort{}
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(p, h.SessionManager, agent, confirmDelete)))
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(c, p, h.SessionManager, agent, confirmDelete)))
 	}
 
 	mac := c.FormValue("MACAddress")
@@ -578,7 +570,6 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 
 func (h *Handler) ComputerMetadata(c echo.Context) error {
 	var data []*openuem_ent.Metadata
-	comesFromDialog := false
 	successMessage := ""
 
 	agentId := c.Param("uuid")
@@ -658,7 +649,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, agent, data, orgMetadata, confirmDelete, successMessage, comesFromDialog)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, agent, data, orgMetadata, confirmDelete, successMessage)))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
@@ -687,4 +678,18 @@ func (h *Handler) Notes(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, h.SessionManager, agent, agent.Notes, renderedMarkdown, confirmDelete)))
+}
+
+func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return h.ListAgents(c, "", "an error ocurred getting uuid param")
+	}
+
+	err := h.Model.DeleteAgent(agentId)
+	if err != nil {
+		return h.ListAgents(c, "", err.Error())
+	}
+
+	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"))
 }

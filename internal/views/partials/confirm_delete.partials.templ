@@ -2,10 +2,11 @@ package partials
 
 import "github.com/invopop/ctxi18n/i18n"
 
-templ ConfirmDelete(confirm, cancelURL, deleteURL string) {
+templ ConfirmDelete(confirm, cancelURL, deleteURL, referer string) {
 	<div id="confirm">
-		<div id="confirm-message" class="uk-alert uk-alert-danger" uk-alert>
+		<div id="confirm-message" class="uk-alert uk-alert-danger mt-8" uk-alert>
 			<div class="uk-alert-description p-2">
+				<input type="hidden" name="referer" value={ referer }/>
 				{ confirm }
 				<div class="flex gap-6 pt-6">
 					if cancelURL != "" {
@@ -27,6 +28,7 @@ templ ConfirmDelete(confirm, cancelURL, deleteURL string) {
 						hx-delete={ string(templ.URL(deleteURL)) }
 						hx-target="#main"
 						hx-swap="outerHTML"
+						hx-include="input[name='referer']"
 						class="uk-button uk-button-danger"
 					>
 						{ i18n.T(ctx, "Delete") }

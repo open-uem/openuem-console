@@ -22,7 +22,6 @@ import (
 
 func (h *Handler) UpdateAgents(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	successMessage := ""
 	errorMessage := ""
@@ -118,7 +117,6 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 				log.Println("[ERROR]: could not save update task info")
 				continue
 			}
-			comesFromDialog = true
 		}
 
 		if errorMessage == "" {
@@ -128,7 +126,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 		}
 	}
 
-	return h.ShowUpdateAgentList(c, r, successMessage, errorMessage, comesFromDialog)
+	return h.ShowUpdateAgentList(c, r, successMessage, errorMessage)
 }
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
@@ -136,7 +134,7 @@ func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
 }
 
-func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string, comesFromDialog bool) error {
+func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -251,5 +249,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage, comesFromDialog)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage)))
 }

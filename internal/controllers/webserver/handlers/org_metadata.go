@@ -10,7 +10,6 @@ import (
 
 func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -51,7 +50,6 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		if err := h.Model.DeleteOrgMetadata(id); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		comesFromDialog = true
 	}
 
 	p.NItems, err = h.Model.CountAllOrgMetadata()
@@ -64,5 +62,5 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, h.SessionManager, data, comesFromDialog)))
+	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, h.SessionManager, data)))
 }

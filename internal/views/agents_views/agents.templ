@@ -14,7 +14,7 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int, comesFromDialog bool) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -48,7 +48,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
 						@AgentsTableBody(p, l, agents, availableTags)
 					</table>
-					@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
+					@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }
@@ -59,26 +59,26 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 	</main>
 }
 
-templ AgentsConfirmDelete(sm *sessions.SessionManager, agent *ent.Agent) {
+templ AgentsConfirmDelete(c echo.Context, sm *sessions.SessionManager, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
-	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+		@partials.ConfirmDelete(i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID, c.Request().Referer())
 		@AgentInfo(agent)
 	</main>
 }
 
-templ AgentsConfirmDisable(sm *sessions.SessionManager, agent *ent.Agent) {
+templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
-		@partials.ConfirmDisable(i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable")
+		@partials.ConfirmDisable(i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable", c.Request().Referer())
 		@AgentInfo(agent)
 	</main>
 }
 
-templ AgentsConfirmAdmission(sm *sessions.SessionManager, agent *ent.Agent) {
+templ AgentsConfirmAdmission(c echo.Context, sm *sessions.SessionManager, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
-		@partials.ConfirmAdmission(i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
+		@partials.ConfirmAdmission(i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit", c.Request().Referer())
 		@AgentInfo(agent)
 	</main>
 }

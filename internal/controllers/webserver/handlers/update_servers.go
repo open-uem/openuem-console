@@ -24,7 +24,6 @@ import (
 
 func (h *Handler) UpdateServers(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 	successMessage := ""
 	errorMessage := ""
 
@@ -128,7 +127,6 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 			log.Println("[ERROR]:", errorMessage)
 			errorMessage = i18n.T(c.Request().Context(), "admin.update.servers.some_errors_found") + ": " + errorMessage
 		}
-		comesFromDialog = true
 	}
 
 	if c.Request().Method == "DELETE" {
@@ -143,10 +141,9 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 		}
 
 		successMessage = i18n.T(c.Request().Context(), "admin.update.servers.server_deleted")
-		comesFromDialog = true
 	}
 
-	return h.ShowUpdateServersList(c, r, successMessage, errorMessage, comesFromDialog)
+	return h.ShowUpdateServersList(c, r, successMessage, errorMessage)
 }
 
 func (h *Handler) DeleteServer(c echo.Context) error {
@@ -160,10 +157,10 @@ func (h *Handler) UpdateServersConfirm(c echo.Context) error {
 
 func (h *Handler) DeleteServerConfirm(c echo.Context) error {
 	server := c.Param("serverId")
-	return RenderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "admin.update.servers.confirm_delete"), "/admin/update-servers", "/admin/update-servers/"+server))
+	return RenderConfirm(c, partials.ConfirmDelete(i18n.T(c.Request().Context(), "admin.update.servers.confirm_delete"), "/admin/update-servers", "/admin/update-servers/"+server, c.Request().Referer()))
 }
 
-func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string, comesFromDialog bool) error {
+func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -261,5 +258,5 @@ func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, 
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, h.SessionManager, l, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage, comesFromDialog)))
+	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, h.SessionManager, l, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage)))
 }

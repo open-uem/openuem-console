@@ -15,7 +15,6 @@ import (
 
 func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -86,12 +85,11 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, f, h.SessionManager, l, antiviri, detectedAntiviri, availableOSes, refreshTime, comesFromDialog)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, f, h.SessionManager, l, antiviri, detectedAntiviri, availableOSes, refreshTime)))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 	var err error
-	comesFromDialog := false
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c)
@@ -168,12 +166,10 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, f, h.SessionManager, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime, comesFromDialog)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, f, h.SessionManager, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
-	comesFromDialog := false
-
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -205,8 +201,8 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates, comesFromDialog))
+		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates, comesFromDialog)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates)))
 }

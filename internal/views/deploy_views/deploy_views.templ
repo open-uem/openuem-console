@@ -137,7 +137,7 @@ templ DeployIndex(title string, cmp templ.Component) {
 	}
 }
 
-templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.Context, p partials.PaginationAndSort, comesFromDialog bool) {
+templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.Context, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
@@ -194,7 +194,7 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", "", comesFromDialog)
+		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", c.FormValue("referer"))
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -202,7 +202,7 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int, comesFromDialog bool) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
 		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}}, sm)
@@ -462,7 +462,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									}
 								</table>
 							</div>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "agents.no_agents") }

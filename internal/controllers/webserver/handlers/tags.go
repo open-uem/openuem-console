@@ -64,5 +64,5 @@ func (h *Handler) TagManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, tags, false)))
+	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, tags)))
 }

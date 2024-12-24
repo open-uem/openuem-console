@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int, comesFromDialog bool) {
+templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -280,7 +280,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 								}
 							</table>
 							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
+								@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
 							}
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">

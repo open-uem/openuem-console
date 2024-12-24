@@ -19,7 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
+func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) error {
 	var err error
 	var agents []*ent.Agent
 
@@ -113,40 +113,37 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime, comesFromDialog)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
-	comesFromDialog := true
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param", comesFromDialog)
+		return h.ListAgents(c, "", "an error ocurred getting uuid param")
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), comesFromDialog)
+		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(h.SessionManager, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
-	comesFromDialog := true
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param", true)
+		return h.ListAgents(c, "", "an error ocurred getting uuid param")
 	}
 
 	err := h.Model.DeleteAgent(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), comesFromDialog)
+		return h.ListAgents(c, "", err.Error())
 	}
 
-	return h.ListAgents(c, "Agent was deleted successfully", "", comesFromDialog)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.deleted"), "")
 }
 
 func (h *Handler) AgentEnable(c echo.Context) error {
-	comesFromDialog := true
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -167,28 +164,25 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "", comesFromDialog)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "")
 }
 
 func (h *Handler) AgentDisable(c echo.Context) error {
-	comesFromDialog := true
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), comesFromDialog)
+		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(h.SessionManager, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentAdmit(c echo.Context) error {
-	comesFromDialog := true
-
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), comesFromDialog)
+		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmAdmission(h.SessionManager, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmAdmission(c, h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -206,11 +200,10 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "")
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
-	comesFromDialog := true
 	agentId := c.Param("uuid")
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
@@ -227,11 +220,10 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "", comesFromDialog)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
 }
 
 func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
-	comesFromDialog := true
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
@@ -269,9 +261,9 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	}
 
 	if regenerate {
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", comesFromDialog)
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "")
 	}
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "", comesFromDialog)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "")
 }
 
 func (h *Handler) AgentStartVNC(c echo.Context) error {
@@ -352,5 +344,5 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 		}
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "")
 }

@@ -20,7 +20,7 @@ templ Notes(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMa
 				</div>
 				@ComputersNavbar(agent.ID, "notes", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
 				}
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>

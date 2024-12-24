@@ -14,7 +14,7 @@ import (
 	"log"
 )
 
-templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec, comesFromDialog bool) {
+templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "Session.other"), Url: "/admin/sessions"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -98,7 +98,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", "", comesFromDialog)
+							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "sessions.nosessions") }
@@ -111,10 +111,10 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 	</main>
 }
 
-templ SessionsDelete(session *ent.Sessions, codec scs.Codec, sm *sessions.SessionManager) {
+templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, sm *sessions.SessionManager) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID)
+		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID, c.Request().Referer())
 		/* @SessionInfo(session, codec) */
 	</main>
 }
