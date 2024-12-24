@@ -35,6 +35,20 @@ func (m *Model) GetAllAgentsToUpdate() ([]*ent.Agent, error) {
 func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	// Info from agents waiting for admission won't be shown
 
+	query := m.Client.Agent.Query()
+	// Apply filters
+	applyAgentFilters(query, f)
+
+	agents, err := query.All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
+func (m *Model) GetAdmittedAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
+	// Info from agents waiting for admission won't be shown
+
 	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
 	// Apply filters
 	applyAgentFilters(query, f)

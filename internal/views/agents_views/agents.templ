@@ -10,6 +10,7 @@ import (
 	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"strconv"
 )
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
@@ -22,6 +23,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 		} else {
 			<div id="success" class="hidden"></div>
 		}
+		<div id="confirm" class="hidden"></div>
 		if errMessage != "" {
 			@partials.ErrorMessage(errMessage, true)
 		} else {
@@ -36,15 +38,88 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
-						return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
-							len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
-							f.ContactFrom == "" && f.ContactTo == ""
-					})
+					<div class="flex items-center gap-2">
+						@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
+							return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
+								len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
+								f.ContactFrom == "" && f.ContactTo == ""
+						})
+						<button
+							id="select-all"
+							title={ i18n.T(ctx, "SelectAll") }
+							type="button"
+							class="uk-button uk-button-default flex items-center gap-2"
+							_={ fmt.Sprintf(`on click 
+												repeat in <input[id^='check-']/>
+													if it.checked is false then
+														it.click()
+													end
+												end
+												set storedItems to %s as Array
+												set sessionStorage.selectedAgentsFromList to storedItems as JSON
+												set #filterBySelectedItems.value to '%d'
+												set #items-selected.innerHTML to '%d'
+												
+												remove @disabled from #admit-all-button
+												
+											end`, f.SelectedAllAgents, p.NItems, p.NItems) }
+						>
+							{ i18n.T(ctx, "SelectAll") }
+						</button>
+						<button
+							id="deselect-all"
+							title={ i18n.T(ctx, "DeselectAll") }
+							type="button"
+							class="uk-button uk-button-default flex items-center gap-2"
+							_="on click 
+										repeat in <input[type='checkbox']/>
+											if it.checked is true then
+												it.click()
+											end
+										end
+										set storedItems to [] as Array
+										set sessionStorage.selectedAgentsFromList to storedItems as JSON
+										set #filterBySelectedItems.value to '0'
+										set #items-selected.innerHTML to '0'
+										add @disabled to #admit-all-button
+									end"
+						>
+							{ i18n.T(ctx, "DeselectAll") }
+						</button>
+						<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+						<form class="flex items-center gap-4">
+							<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
+							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
+							<button
+								id="admit-all-button"
+								title={ i18n.T(ctx, "Admit") }
+								type="button"
+								class="uk-button uk-button-primary"
+								hx-get="/agents/admit"
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								disabled?={ f.SelectedItems == 0 }
+							>
+								<div class="flex items-center gap-2">
+									<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "Admit") }
+								</div>
+							</button>
+						</form>
+					</div>
 					@partials.RefreshPage(l, "/agents", "#main", "outerHTML", "post", refresh, true)
 				</div>
 				if len(agents) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
+					<table
+						class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important"
+						_="on load
+							if #filterBySelectedItems.value is '0' then
+								set storedItems to [] as Array
+								set sessionStorage.selectedAgentsFromList to storedItems as JSON
+							end
+						end"
+					>
 						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
 						@AgentsTableBody(p, l, agents, availableTags)
 					</table>
@@ -75,7 +150,7 @@ templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, agent *e
 	</main>
 }
 
-templ AgentsConfirmAdmission(c echo.Context, sm *sessions.SessionManager, agent *ent.Agent) {
+templ AgentConfirmAdmission(c echo.Context, sm *sessions.SessionManager, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
 		@partials.ConfirmAdmission(i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit", c.Request().Referer())
@@ -109,6 +184,27 @@ templ AgentsIndex(title string, cmp templ.Component) {
 templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, tags []*ent.Tag, availableOSes []string) {
 	<thead>
 		<tr>
+			<th>
+				<input
+					id="check-all-in-page"
+					name="check-all-in-page"
+					class="uk-checkbox"
+					type="checkbox"
+					_="on click
+						repeat in <input[title='check-agent']/>																
+							if it.checked !== #check-all-in-page.checked then
+								it.click()
+							end
+						end
+
+						if ((<input[title='check-agent']:checked/>).length > 0) then
+							remove @disabled from #admit-all-button
+						else
+							add @disabled to #admit-all-button
+						end
+					"
+				/>
+			</th>
 			<th class="w-1/6">
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
@@ -175,6 +271,81 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag) {
 	for index, agent := range agents {
 		<tr>
+			<td class="!align-middle">
+				<input
+					id={ "check-agent-" + agent.ID }
+					title="check-agent"
+					name={ agent.ID }
+					class="uk-checkbox"
+					type="checkbox"
+					_={ fmt.Sprintf(`
+						on click
+							set storedItems to [] as Array
+							if sessionStorage.selectedAgentsFromList exists then														
+								set storedItems to sessionStorage.selectedAgentsFromList as Object
+							end																								
+
+							set index to storedItems.indexOf(my name)		
+							if me.checked then
+								increment #filterBySelectedItems.value by 1
+								set #items-selected.innerHTML to #filterBySelectedItems.value
+								if index < 0 then 															
+									append my name to storedItems
+									set sessionStorage.selectedAgentsFromList to storedItems as JSON
+								end														
+							else
+								decrement #filterBySelectedItems.value by 1
+								set #items-selected.innerHTML to #filterBySelectedItems.value
+								set index to storedItems.indexOf(my name)														
+								if index >= 0 then 															
+									get storedItems.splice(index, 1)															
+								end															
+								
+								if no storedItems then 
+									set storedItems to [] as Array
+									set #filterBySelectedItems.value to '0'
+								end
+
+								set sessionStorage.selectedAgentsFromList to storedItems as JSON 
+							end
+
+							if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then
+								remove @disabled from #admit-all-button
+							else
+								add @disabled to #admit-all-button
+							end
+
+							if #check-all-in-page.checked is true and me.checked is false then
+								set #check-all-in-page.checked to false
+							end
+
+							if #check-all-in-page.checked is false and (<input[title='check-agent']:checked/>).length === %d then
+								set #check-all-in-page.checked to true
+							end
+
+							set #selectedAgents.value to storedItems.length
+						end
+
+						on load
+							set storedItems to [] as Array
+							if sessionStorage.selectedAgentsFromList exists then
+								set storedItems to sessionStorage.selectedAgentsFromList as Object												
+							end
+
+							set index to storedItems.indexOf(my name)														
+							if index >= 0 then
+								set me.checked to true
+							end
+
+							if ((<input[title='check-agent']:checked/>).length == (<input[title='check-agent']/>).length) then
+								set #check-all-in-page.checked to true
+							end
+
+							set #selectedAgents.value to storedItems.length
+						end
+					`,p.PageSize) }
+				/>
+			</td>
 			<td
 				class="!align-middle underline hover:cursor-pointer"
 				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
@@ -220,6 +391,9 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				@AddActionsButton(agent, index)
 			</td>
 		</tr>
+	}
+	if len(agents) < p.PageSize {
+		@EmptyAgentRows(p.PageSize, len(agents))
 	}
 }
 
@@ -334,4 +508,20 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 			</li>
 		</ul>
 	</div>
+}
+
+templ EmptyAgentRows(pageSize, nItems int) {
+	for i:=0; i < pageSize - nItems; i++ {
+		<tr>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+			<td class="!align-middle">-</td>
+		</tr>
+	}
 }

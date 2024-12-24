@@ -13,6 +13,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
 	e.POST("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
 	e.DELETE("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
+	e.GET("/agents/admit", h.AgentsAdmit, h.IsAuthenticated)
+	e.POST("/agents/admit", h.AgentsAdmit, h.IsAuthenticated)
 	e.GET("/agents/:uuid/delete", h.AgentDelete, h.IsAuthenticated)
 	e.GET("/agents/:uuid/disable", h.AgentDisable, h.IsAuthenticated)
 	e.GET("/agents/:uuid/admit", h.AgentAdmit, h.IsAuthenticated)

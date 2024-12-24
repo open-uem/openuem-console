@@ -73,7 +73,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllAgents(f)
+	allAgents, err := h.Model.GetAdmittedAgents(f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

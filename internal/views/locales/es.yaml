@@ -166,6 +166,8 @@ es:
     has_been_enabled: "El agente ha sido activado"
     has_been_disabled: "El agente ha sido desactivado"
     has_been_admitted: "El agente ha sido admitido y ya puede ser gestionado desde OpenUEM"
+    have_been_admitted: "Los agentes han sido admitidos y ya pueden ser gestionados desde OpenUEM"
+    some_could_not_be_admitted: "Algunos agentes no pudieron ser admitidos, compruebe los logs de la consola"
     has_been_restarted: "Se ha enviado una petición para reiniciar el agente"
     certs_regenerated: "Se ha creado una solicitud para generar nuevamente el certificado de este agente"
     confirm_delete: "¿Está seguro de que desea borrar este agente y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
@@ -309,6 +311,7 @@ es:
     agent_delete: "¿Está seguro de que quiere borrar este agente y toda la información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
     session_delete: "¿Está seguro de que quiere borrar esta sesión? El usuario tendrá que iniciar sesión nuevamente"
     agent_admit: "¿Está seguro de que quiere admitir este agente? Al admitir el agente se podrá gestionar desde OpenUEM y su información aparecerá en las distintas vistas"
+    agents_admit: "¿Está seguro de que quiere admitir estos agentes? Al admitir los agentes se podrán gestionar desde OpenUEM y su información aparecerá en las distintas vistas"
   forms:
     required: "Este campo no puede estar vacío"
   login:

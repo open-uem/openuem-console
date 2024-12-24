@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/doncicuto/openuem-console/internal/views"
@@ -95,6 +97,22 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		}
 	}
 
+	nSelectedItems := c.FormValue("filterBySelectedItems")
+	f.SelectedItems, err = strconv.Atoi(nSelectedItems)
+	if err != nil {
+		f.SelectedItems = 0
+	}
+
+	tmpAllAgents := []string{}
+	allAgents, err := h.Model.GetAllAgents(f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	for _, a := range allAgents {
+		tmpAllAgents = append(tmpAllAgents, "\""+a.ID+"\"")
+	}
+	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
+
 	agents, err = h.Model.GetAgentsByPage(p, f, false)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -176,13 +194,81 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, agent)))
 }
 
+func (h *Handler) AgentsAdmit(c echo.Context) error {
+	errorsFound := false
+
+	if c.Request().Method == "POST" {
+		agents := c.FormValue("agents")
+
+		for _, agentId := range strings.Split(agents, ",") {
+
+			agent, err := h.Model.GetAgentById(agentId)
+
+			if agent.Status == "WaitingForAdmission" {
+				if err != nil {
+					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "agents.not_found"))
+					errorsFound = true
+					continue
+				}
+
+				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))
+					errorsFound = true
+					continue
+				}
+
+				data, err := json.Marshal(openuem_nats.CertificateRequest{
+					AgentId:      agentId,
+					DNSName:      agent.Hostname + "." + h.Domain,
+					Organization: h.OrgName,
+					Province:     h.OrgProvince,
+					Locality:     h.OrgLocality,
+					Address:      h.OrgAddress,
+					Country:      h.Country,
+					YearsValid:   2,
+				})
+				if err != nil {
+					log.Println("[ERROR]: ", err.Error())
+					errorsFound = true
+					continue
+				}
+
+				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))
+					errorsFound = true
+					continue
+				}
+
+				if _, err := h.NATSConnection.Request("certificates.agent."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.no_responder"))
+					errorsFound = true
+					continue
+				}
+
+				if err := h.Model.EnableAgent(agentId); err != nil {
+					log.Println("[ERROR]: ", err.Error())
+					errorsFound = true
+					continue
+				}
+			}
+		}
+
+		if errorsFound {
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_admitted"))
+		}
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "")
+	}
+
+	return RenderConfirm(c, partials.ConfirmAdmitAgents(c.Request().Referer()))
+}
+
 func (h *Handler) AgentAdmit(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error())
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmAdmission(c, h.SessionManager, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
