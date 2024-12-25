@@ -10,12 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, data []*ent.OrgMetadata, serversExists bool) {
+templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, data []*ent.OrgMetadata, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Metadata", Url: "/admin/metadata"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("metadata", serversExists)
+				@ConfigNavbar("metadata", agentsExists, serversExists)
 				<div id="confirm" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>

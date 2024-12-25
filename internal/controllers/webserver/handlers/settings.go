@@ -127,11 +127,16 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, settings, serversExists)))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, settings, agentsExists, serversExists)))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {

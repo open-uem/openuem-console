@@ -10,11 +10,16 @@ import (
 )
 
 func (h *Handler) Restore(c echo.Context) error {
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, "", serversExists)))
+	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, "", agentsExists, serversExists)))
 }
 
 func (h *Handler) RestoreMessenger(c echo.Context) error {
@@ -37,11 +42,16 @@ func (h *Handler) RestoreMessenger(c echo.Context) error {
 			}
 		}()
 
+		agentsExists, err := h.Model.AgentsExists()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
 		serversExists, err := h.Model.ServersExists()
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
 }
@@ -66,12 +76,17 @@ func (h *Handler) RestoreUpdater(c echo.Context) error {
 			}
 		}()
 
+		agentsExists, err := h.Model.AgentsExists()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
 		serversExists, err := h.Model.ServersExists()
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
 }
@@ -96,11 +111,16 @@ func (h *Handler) RestoreAgents(c echo.Context) error {
 			}
 		}()
 
+		agentsExists, err := h.Model.AgentsExists()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
 		serversExists, err := h.Model.ServersExists()
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))
 }
@@ -112,11 +132,16 @@ func (h *Handler) RestoreDatabase(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responders"), false))
 		}
 
+		agentsExists, err := h.Model.AgentsExists()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
 		serversExists, err := h.Model.ServersExists()
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.delete_database_requested"), serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_delete_database"), "/admin/restore-database", "/admin/restore", true))
 }

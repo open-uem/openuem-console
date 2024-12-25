@@ -258,9 +258,14 @@ func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, 
 
 	l := views.GetTranslatorForDates(c)
 
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, h.SessionManager, l, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage, serversExists)))
+	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, h.SessionManager, l, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage, agentsExists, serversExists)))
 }

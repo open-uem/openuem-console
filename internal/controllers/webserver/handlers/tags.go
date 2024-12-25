@@ -64,9 +64,14 @@ func (h *Handler) TagManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, tags, serversExists)))
+	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, tags, agentsExists, serversExists)))
 }

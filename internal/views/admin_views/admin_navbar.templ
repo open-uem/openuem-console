@@ -2,7 +2,7 @@ package admin_views
 
 import "github.com/invopop/ctxi18n/i18n"
 
-templ ConfigNavbar(active string, serversExists bool) {
+templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "users") }>
 			<a
@@ -90,13 +90,15 @@ templ ConfigNavbar(active string, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "update-agents") }>
 			<a
-				href="/admin/update-agents"
-				hx-get="/admin/update-agents"
+				if agentsExists {
+					href="/admin/update-agents"
+					hx-get="/admin/update-agents"
+				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 				hx-indicator="#admin-update-agents-spinner"
-				class="flex items-center gap-1"
+				class={ "flex items-center gap-1", templ.KV("opacity-35", !agentsExists) }
 			>
 				<uk-icon id="admin-update-agents-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "admin.update.agents.title") }

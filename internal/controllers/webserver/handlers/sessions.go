@@ -29,11 +29,16 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 
 	l := views.GetTranslatorForDates(c)
 
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec, serversExists)))
+	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec, agentsExists, serversExists)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {

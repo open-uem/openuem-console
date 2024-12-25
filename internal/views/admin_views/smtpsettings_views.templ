@@ -10,12 +10,12 @@ import (
 	"strconv"
 )
 
-templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, settings *openuem_ent.Settings, serversExists bool) {
+templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, settings *openuem_ent.Settings, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "SMTP Settings", Url: "/admin/smtp"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("smtp", serversExists)
+				@ConfigNavbar("smtp", agentsExists, serversExists)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">

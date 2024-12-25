@@ -16,12 +16,12 @@ import (
 	"strconv"
 )
 
-templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease *openuem_ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string, serversExists bool) {
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, sm *sessions.SessionManager, l locales.Translator, servers []*openuem_ent.Server, allServers []string, higherRelease *openuem_ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "/admin/update-servers"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("update-servers", serversExists)
+				@ConfigNavbar("update-servers", agentsExists, serversExists)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {

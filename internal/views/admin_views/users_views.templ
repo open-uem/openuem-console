@@ -15,12 +15,12 @@ import (
 	"strings"
 )
 
-templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int, serversExists bool) {
+templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, users []*ent.User, successMessage, errMessage string, refresh int, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -294,12 +294,12 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 	</main>
 }
 
-templ NewUser(c echo.Context, sm *sessions.SessionManager, defaultCountry string, serversExists bool) {
+templ NewUser(c echo.Context, sm *sessions.SessionManager, defaultCountry string, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists)
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -397,12 +397,12 @@ templ NewUser(c echo.Context, sm *sessions.SessionManager, defaultCountry string
 	</main>
 }
 
-templ EditUser(c echo.Context, sm *sessions.SessionManager, user *openuem_ent.User, defaultCountry string, serversExists bool) {
+templ EditUser(c echo.Context, sm *sessions.SessionManager, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">

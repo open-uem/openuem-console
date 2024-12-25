@@ -32,12 +32,12 @@ type LatestRelease struct {
 	IsCritical      bool       `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, sm *sessions.SessionManager, l locales.Translator, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *openuem_ent.Release, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string, serversExists bool) {
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, sm *sessions.SessionManager, l locales.Translator, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *openuem_ent.Release, higherReleaseApplied *openuem_ent.Release, allReleases []*openuem_ent.Release, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("update-agents", serversExists)
+				@ConfigNavbar("update-agents", agentsExists, serversExists)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {

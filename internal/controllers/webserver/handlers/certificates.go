@@ -65,7 +65,12 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage, serversExists)))
+	agentsExists, err := h.Model.AgentsExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage, agentsExists, serversExists)))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {

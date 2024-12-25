@@ -411,6 +411,10 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 	return agents, nil
 }
 
+func (m *Model) AgentsExists() (bool, error) {
+	return m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).Exist(context.Background())
+}
+
 func (m *Model) DeleteAllAgents() (int, error) {
 	return m.Client.Agent.Delete().Exec(context.Background())
 }
