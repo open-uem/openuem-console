@@ -204,17 +204,12 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 
 			agent, err := h.Model.GetAgentById(agentId)
 			if err != nil {
-				log.Println("[ERROR]: ", err.Error())
+				log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "agents.not_found"))
 				errorsFound = true
 				continue
 			}
 
 			if agent.Status == "WaitingForAdmission" {
-				if err != nil {
-					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "agents.not_found"))
-					errorsFound = true
-					continue
-				}
 
 				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))

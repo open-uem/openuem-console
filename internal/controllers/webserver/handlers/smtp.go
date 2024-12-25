@@ -44,7 +44,11 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, h.SessionManager, settings)))
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, h.SessionManager, settings, serversExists)))
 }
 
 func (h *Handler) TestSMTPSettings(c echo.Context) error {

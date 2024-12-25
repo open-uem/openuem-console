@@ -105,7 +105,12 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime)))
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime, serversExists)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -114,7 +119,11 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, defaultCountry)))
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, defaultCountry, serversExists)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -354,7 +363,11 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, user, defaultCountry)))
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, user, defaultCountry, serversExists)))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {
