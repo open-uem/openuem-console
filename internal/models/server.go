@@ -165,3 +165,7 @@ func (m *Model) GetServersReleaseByType(release_type release.ReleaseType, channe
 func (m *Model) DeleteServer(serverId int) error {
 	return m.Client.Server.DeleteOneID(serverId).Exec(context.Background())
 }
+
+func (m *Model) ServersExists() (bool, error) {
+	return m.Client.Server.Query().Exist(context.Background())
+}

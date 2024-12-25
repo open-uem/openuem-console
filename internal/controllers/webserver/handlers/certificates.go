@@ -60,7 +60,12 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage)))
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage, serversExists)))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {
