@@ -138,6 +138,15 @@ templ NavBar(active string) {
 				<span class="sr-only">Reports</span>
 			</a> */
 			<a
+				href="https://docs.openuem.eu"
+				target="_blank"
+				rel="noopener"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Help")) }
+				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
+			>
+				<uk-icon hx-history="false" icon="circle-help" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			</a>
+			<a
 				href="/logout"
 				hx-post="/logout"
 				hx-push-url="false"
