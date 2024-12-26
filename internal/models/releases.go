@@ -10,6 +10,14 @@ import (
 	"github.com/doncicuto/openuem_nats"
 )
 
+func (m *Model) GetLatestServerRelease(channel string) (*openuem_ent.Release, error) {
+	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
+}
+
+func (m *Model) GetServerReleases() ([]string, error) {
+	return m.Client.Release.Query().Unique(true).Order(ent.Desc(release.FieldVersion)).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
+}
+
 func (m *Model) GetLatestAgentRelease(channel string) (*openuem_ent.Release, error) {
 	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
 }
@@ -19,6 +27,10 @@ func (m *Model) GetAgentsReleases() ([]*openuem_ent.Release, error) {
 }
 
 func (m *Model) GetAgentsReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
+	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release_type), release.Channel(channel), release.Os(os), release.Arch(arch), release.Version(version)).Only(context.Background())
+}
+
+func (m *Model) GetServersReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
 	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release_type), release.Channel(channel), release.Os(os), release.Arch(arch), release.Version(version)).Only(context.Background())
 }
 
