@@ -22,8 +22,8 @@ func (m *Model) GetLatestAgentRelease(channel string) (*openuem_ent.Release, err
 	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
 }
 
-func (m *Model) GetAgentsReleases() ([]*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).All(context.Background())
+func (m *Model) GetAgentsReleases() ([]string, error) {
+	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).Select(release.FieldVersion).Strings(context.Background())
 }
 
 func (m *Model) GetAgentsReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
