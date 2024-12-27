@@ -405,8 +405,8 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				</div>
 			</td>
 			<td class="!align-middle">
-				<div uk-tooltip={ i18n.T(ctx, agent.Status.String()) }>
-					switch agent.Status {
+				<div uk-tooltip={ i18n.T(ctx, agent.AgentStatus.String()) }>
+					switch agent.AgentStatus {
 						case "WaitingForAdmission":
 							<uk-icon hx-history="false" icon="monitor-pause" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
 						case "Enabled":
@@ -445,7 +445,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
-			if agent.Status == "WaitingForAdmission" {
+			if agent.AgentStatus == "WaitingForAdmission" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/admit", agent.ID))) }
@@ -457,7 +457,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.Status == "Enabled" {
+			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
 						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcereport", agent.ID))) }
@@ -469,7 +469,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.Status == "Enabled" {
+			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/disable", agent.ID))) }
@@ -481,7 +481,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.Status == "Enabled" {
+			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
 						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/regeneratecerts", agent.ID))) }
@@ -493,7 +493,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.Status == "Enabled" {
+			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
 						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcerestart", agent.ID))) }
@@ -507,7 +507,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.Status == "Disabled" {
+			if agent.AgentStatus == "Disabled" {
 				<li>
 					<a
 						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
@@ -521,7 +521,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.IP != "" && agent.Status == "Enabled" && agent.Vnc != "" {
+			if agent.IP != "" && agent.AgentStatus == "Enabled" && agent.Vnc != "" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", agent.ID))) }
@@ -531,7 +531,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					><uk-icon hx-history="false" icon="monitor-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Remote Assistance") }</a>
 				</li>
 			}
-			if agent.Status != "WaitingForAdmission" && len(agent.MAC) > 0 {
+			if agent.AgentStatus != "WaitingForAdmission" && len(agent.MAC) > 0 {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/wol", agent.ID))) }

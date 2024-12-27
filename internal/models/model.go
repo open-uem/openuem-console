@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	ent "github.com/doncicuto/openuem_ent"
+	"github.com/doncicuto/openuem_ent/migrate"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -26,10 +27,12 @@ func New(dbUrl string) (*Model, error) {
 
 	model.Client = ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
 
-	// TODO Automatic migrations only in development
+	// TODO Automatic migrations only in non-stable versions
 	ctx := context.Background()
 	if os.Getenv("ENV") != "prod" {
-		if err := model.Client.Schema.Create(ctx); err != nil {
+		if err := model.Client.Schema.Create(ctx,
+			migrate.WithDropIndex(true),
+			migrate.WithDropColumn(true)); err != nil {
 			return nil, err
 		}
 	}

@@ -111,7 +111,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 														<span></span>
 												}
 											</td>
-											<td>{ i18n.T(ctx,systemUpdate.Status) }</td>
+											<td>{ i18n.T(ctx,systemUpdate.SystemUpdateStatus) }</td>
 											<td>{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
 											<td>{ l.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + l.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
 											if systemUpdate.PendingUpdates {

@@ -49,7 +49,7 @@ func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 func (m *Model) GetAdmittedAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	// Info from agents waiting for admission won't be shown
 
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 	// Apply filters
 	applyAgentFilters(query, f)
 
@@ -67,7 +67,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 
 	// Info from agents waiting for admission won't be shown
 	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 	} else {
 		query = m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 	}
@@ -102,9 +102,9 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 		}
 	case "status":
 		if p.SortOrder == "asc" {
-			agents, err = query.Order(ent.Asc(agent.FieldStatus)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldAgentStatus)).All(context.Background())
 		} else {
-			agents, err = query.Order(ent.Desc(agent.FieldStatus)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldAgentStatus)).All(context.Background())
 		}
 	case "ip_address":
 		if p.SortOrder == "asc" {
@@ -134,7 +134,7 @@ func (m *Model) CountAgentsByOS() ([]Agent, error) {
 	// Info from agents waiting for admission won't be shown
 	agents := []Agent{}
 	err := m.Client.Agent.Query().Modify(func(s *sql.Selector) {
-		s.Select(agent.FieldOs, sql.As(sql.Count("os"), "count")).Where(sql.And(sql.NEQ(agent.FieldStatus, agent.StatusWaitingForAdmission))).GroupBy("os").OrderBy("count")
+		s.Select(agent.FieldOs, sql.As(sql.Count("os"), "count")).Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission))).GroupBy("os").OrderBy("count")
 	}).Scan(context.Background(), &agents)
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmission
 
 	// Info from agents waiting for admission won't be shown
 	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 	} else {
 		query = m.Client.Agent.Query()
 	}
@@ -169,15 +169,15 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 
 	if len(f.AgentStatusOptions) > 0 {
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "WaitingForAdmission" {
-			query = query.Where(agent.StatusEQ(agent.StatusWaitingForAdmission))
+			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission))
 		}
 
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "Enabled" {
-			query = query.Where(agent.StatusEQ(agent.StatusEnabled))
+			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusEnabled))
 		}
 
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "Disabled" {
-			query = query.Where(agent.StatusEQ(agent.StatusDisabled))
+			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusDisabled))
 		}
 	}
 
@@ -217,7 +217,7 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 func (m *Model) CountAgentsByOSVersion() ([]Agent, error) {
 	// Info from agents waiting for admission won't be shown
 	agents := []Agent{}
-	err := m.Client.OperatingSystem.Query().Where(operatingsystem.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).GroupBy(operatingsystem.FieldVersion).Aggregate(ent.Count()).Scan(context.Background(), &agents)
+	err := m.Client.OperatingSystem.Query().Where(operatingsystem.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).GroupBy(operatingsystem.FieldVersion).Aggregate(ent.Count()).Scan(context.Background(), &agents)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func (m *Model) CountAgentsByOSVersion() ([]Agent, error) {
 }
 
 func (m *Model) CountAgentsReportedLast24h() (int, error) {
-	count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -233,7 +233,7 @@ func (m *Model) CountAgentsReportedLast24h() (int, error) {
 }
 
 func (m *Model) CountAgentsNotReportedLast24h() (int, error) {
-	count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1)), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -242,7 +242,7 @@ func (m *Model) CountAgentsNotReportedLast24h() (int, error) {
 
 func (m *Model) CountAgentsByWindowsUpdateStatus() ([]Agent, error) {
 	agents := []Agent{}
-	err := m.Client.SystemUpdate.Query().GroupBy(systemupdate.FieldStatus).Aggregate(ent.Count()).Scan(context.Background(), &agents)
+	err := m.Client.SystemUpdate.Query().GroupBy(systemupdate.FieldSystemUpdateStatus).Aggregate(ent.Count()).Scan(context.Background(), &agents)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +258,7 @@ func (m *Model) DeleteAgent(agentId string) error {
 }
 
 func (m *Model) EnableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetStatus(agent.StatusEnabled).Save(context.Background())
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -266,7 +266,7 @@ func (m *Model) EnableAgent(agentId string) error {
 }
 
 func (m *Model) DisableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetStatus(agent.StatusDisabled).Save(context.Background())
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusDisabled).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -290,39 +290,39 @@ func (m *Model) RemoveTagFromAgent(agentId, tagId string) error {
 }
 
 func (m *Model) CountPendingUpdateAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true)), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) CountDisabledAntivirusAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) CountOutdatedAntivirusDatabaseAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) CountNoAutoupdateAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.StatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION))), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.SystemUpdateStatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION))), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) CountVNCSupportedAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.StatusNEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) CountDifferentVendor() (int, error) {
-	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
+	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
 }
 
 func (m *Model) CountDifferentPrinters() (int, error) {
-	return m.Client.Printer.Query().Select(printer.FieldName).Unique(true).Where(printer.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
+	return m.Client.Printer.Query().Select(printer.FieldName).Unique(true).Where(printer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
 }
 
 func (m *Model) CountDisabledAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.StatusEQ(agent.StatusDisabled)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusDisabled)).Count(context.Background())
 }
 
 func (m *Model) CountWaitingForAdmissionAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.StatusEQ(agent.StatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
 func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string) error {
@@ -338,7 +338,7 @@ func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.Up
 	var err error
 	var agents []*ent.Agent
 
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	// Apply filters
 	applyUpdateAgentsFilters(query, f)
@@ -391,7 +391,7 @@ func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.Up
 }
 
 func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter) (int, error) {
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 
 	applyUpdateAgentsFilters(query, f)
 
@@ -400,7 +400,7 @@ func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter) (int, error) 
 }
 
 func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, error) {
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 	// Apply filters
 	applyUpdateAgentsFilters(query, f)
 
@@ -412,7 +412,7 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 }
 
 func (m *Model) AgentsExists() (bool, error) {
-	return m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission)).Exist(context.Background())
+	return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Exist(context.Background())
 }
 
 func (m *Model) DeleteAllAgents() (int, error) {

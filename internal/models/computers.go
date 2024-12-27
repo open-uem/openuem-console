@@ -35,7 +35,7 @@ type Computer struct {
 func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
 
 	// Agents that haven't been admitted yet should not appear
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -110,7 +110,7 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 	var computers []Computer
 
 	// Agents that haven't been admitted yet should not appear
-	query := m.Client.Agent.Query().Where(agent.StatusNEQ(agent.StatusWaitingForAdmission))
+	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -408,7 +408,7 @@ func (m *Model) CountAllDeployments() (int, error) {
 }
 
 func (m *Model) CountAllOSUsernames() (int, error) {
-	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Where(operatingsystem.HasOwnerWith(agent.StatusNEQ(agent.StatusWaitingForAdmission))).Count(context.Background())
+	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Where(operatingsystem.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
 }
 
 func (m *Model) SaveDeployInfo(data *openuem_nats.DeployAction) error {

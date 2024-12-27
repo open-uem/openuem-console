@@ -209,7 +209,7 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 				continue
 			}
 
-			if agent.Status == "WaitingForAdmission" {
+			if agent.AgentStatus == "WaitingForAdmission" {
 
 				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))
@@ -276,7 +276,7 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 				continue
 			}
 
-			if agent.Status == "Disabled" {
+			if agent.AgentStatus == "Disabled" {
 				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.not_connected"))
 					errorsFound = true
@@ -322,7 +322,7 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 				continue
 			}
 
-			if agent.Status == "Enabled" {
+			if agent.AgentStatus == "Enabled" {
 				if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 				}
