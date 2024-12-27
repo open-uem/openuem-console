@@ -11,8 +11,6 @@ import (
 	"github.com/doncicuto/openuem_ent/enttest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type SessionsTestSuite struct {
