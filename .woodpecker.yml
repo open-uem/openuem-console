@@ -1,6 +1,5 @@
 steps:
   clone:
-  git:
     image: woodpeckerci/plugin-git
     settings:
       recursive: true
