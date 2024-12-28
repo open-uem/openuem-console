@@ -1,14 +1,10 @@
-when:
-  - event: push
-    branch: main
-
 steps:
   clone:
-    git:
-      image: woodpeckerci/plugin-git
-      settings:
-        recursive: true
-        submodule-update-remote: true
+  git:
+    image: woodpeckerci/plugin-git
+    settings:
+      recursive: true
+      submodule-update-remote: true
   publish:
     image: woodpeckerci/plugin-docker-buildx
     settings:
