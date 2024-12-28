@@ -1,3 +1,7 @@
+when:
+  - event: push
+    branch: main
+
 steps:
   clone:
     image: woodpeckerci/plugin-git
