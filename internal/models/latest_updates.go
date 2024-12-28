@@ -29,6 +29,8 @@ func (m *Model) GetLatestUpdates(agentId string, p partials.PaginationAndSort) (
 		} else {
 			query = query.Order(ent.Desc(update.FieldDate))
 		}
+	default:
+		query = query.Order(ent.Desc(update.FieldDate))
 	}
 
 	updates, err := query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
