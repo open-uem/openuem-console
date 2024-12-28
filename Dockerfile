@@ -1,5 +1,7 @@
 FROM golang:latest AS build
 COPY . ./
+RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN templ generate
 RUN go build -o "/bin/openuem-console" .
 
 FROM debian:latest
