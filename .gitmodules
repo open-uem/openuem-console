@@ -1,9 +1,9 @@
 [submodule "internal/models/ent"]
 	path = internal/models/ent
-	url = git@github.com:doncicuto/openuem-ent.git
+	url = https://github.com:doncicuto/openuem-ent.git
 [submodule "internal/controllers/nats"]
 	path = internal/controllers/nats
-	url = git@github.com:doncicuto/openuem-nats.git
+	url = https://github.com:doncicuto/openuem-nats.git
 [submodule "internal/controllers/utils"]
 	path = internal/controllers/utils
-	url = git@github.com:doncicuto/openuem-utils.git
+	url = https://github.com:doncicuto/openuem-utils.git
