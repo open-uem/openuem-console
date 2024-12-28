@@ -3,7 +3,7 @@ steps:
     image: woodpeckerci/plugin-docker-buildx
     settings:
       platforms: linux/amd64
-      tag: latest
+      auto_tag: true
       username:
         from_secret: docker_username
       password:
