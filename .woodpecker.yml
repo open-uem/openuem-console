@@ -1,3 +1,7 @@
+when:
+  - event: push
+    branch: main
+
 steps:
   publish:
     image: woodpeckerci/plugin-docker-buildx
