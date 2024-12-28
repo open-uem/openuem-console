@@ -7,7 +7,8 @@ steps:
     image: woodpeckerci/plugin-docker-buildx
     settings:
       platforms: linux/amd64
-      tags: v0.1.0
+      repo: openuem-console
+      tags: latest
       username:
         from_secret: docker_username
       password:
