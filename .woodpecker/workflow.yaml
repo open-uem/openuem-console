@@ -1,0 +1,15 @@
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    settings:
+      recursive: true
+      submodule-update-remote: true
+  publish:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      platforms: linux/amd64
+      tags: latest
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
