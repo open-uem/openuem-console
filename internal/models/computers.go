@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/doncicuto/openuem-console/internal/views/filters"
@@ -11,12 +10,9 @@ import (
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/app"
 	"github.com/doncicuto/openuem_ent/computer"
-	"github.com/doncicuto/openuem_ent/deployment"
-	"github.com/doncicuto/openuem_ent/metadata"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 	"github.com/doncicuto/openuem_ent/predicate"
 	"github.com/doncicuto/openuem_ent/tag"
-	"github.com/doncicuto/openuem_nats"
 )
 
 type Computer struct {
@@ -318,63 +314,6 @@ func (m *Model) GetAgentMonitorsInfo(agentId string) (*ent.Agent, error) {
 	return agent, nil
 }
 
-func (m *Model) GetDeploymentsForAgent(agentId string, p partials.PaginationAndSort) ([]*ent.Deployment, error) {
-	query := m.Client.Deployment.Query().Where(deployment.HasOwnerWith(agent.ID(agentId)))
-
-	switch p.SortBy {
-	case "name":
-		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(deployment.FieldName))
-		} else {
-			query = query.Order(ent.Desc(deployment.FieldName))
-		}
-	case "installation":
-		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(deployment.FieldInstalled))
-		} else {
-			query = query.Order(ent.Desc(deployment.FieldInstalled))
-		}
-	case "updated":
-		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(deployment.FieldUpdated))
-		} else {
-			query = query.Order(ent.Desc(deployment.FieldUpdated))
-		}
-	}
-
-	deployments, err := query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return deployments, nil
-}
-
-func (m *Model) CountDeploymentsForAgent(agentId string) (int, error) {
-	return m.Client.Deployment.Query().Where(deployment.HasOwnerWith(agent.ID(agentId))).Count(context.Background())
-}
-
-func (m *Model) DeploymentAlreadyInstalled(agentId, packageId string) (bool, error) {
-	return m.Client.Deployment.Query().Where(deployment.And(deployment.PackageID(packageId), deployment.HasOwnerWith(agent.ID(agentId)))).Exist(context.Background())
-}
-
-func (m *Model) GetMetadataForAgent(agentId string, p partials.PaginationAndSort) ([]*ent.Metadata, error) {
-	query := m.Client.Metadata.Query().WithOrg().WithOwner().Where(metadata.HasOwnerWith(agent.ID(agentId)))
-
-	data, err := query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-func (m *Model) CountMetadataForAgent(agentId string) (int, error) {
-	return m.Client.Metadata.Query().Where(metadata.HasOwnerWith(agent.ID(agentId))).Count(context.Background())
-}
-
-func (m *Model) SaveMetadata(agentId string, metadataId int, value string) error {
-	return m.Client.Metadata.Create().SetOwnerID(agentId).SetOrgID(metadataId).SetValue(value).OnConflict(sql.ConflictColumns(metadata.OwnerColumn, metadata.OrgColumn)).UpdateNewValues().Exec(context.Background())
-}
-
 func (m *Model) SaveNotes(agentId string, notes string) error {
 	return m.Client.Agent.UpdateOneID(agentId).SetNotes(notes).Exec(context.Background())
 }
@@ -391,53 +330,4 @@ func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
 	}
 
 	return query.Strings(context.Background())
-}
-
-func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
-	query := m.Client.OperatingSystem.Query().Unique(true).Select(operatingsystem.FieldVersion)
-
-	if len(f.AgentOSVersions) > 0 {
-		query.Where(operatingsystem.TypeIn(f.AgentOSVersions...))
-	}
-
-	return query.Strings(context.Background())
-}
-
-func (m *Model) CountAllDeployments() (int, error) {
-	return m.Client.Deployment.Query().Count(context.Background())
-}
-
-func (m *Model) CountAllOSUsernames() (int, error) {
-	return m.Client.OperatingSystem.Query().Select(operatingsystem.FieldUsername).Unique(true).Where(operatingsystem.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
-}
-
-func (m *Model) SaveDeployInfo(data *openuem_nats.DeployAction) error {
-	timeZero := time.Date(0001, 1, 1, 00, 00, 00, 00, time.UTC)
-
-	if data.Action == "install" {
-		return m.Client.Deployment.Create().
-			SetInstalled(timeZero).
-			SetUpdated(timeZero).
-			SetPackageID(data.PackageId).
-			SetName(data.PackageName).
-			SetVersion(data.PackageVersion).
-			SetOwnerID(data.AgentId).
-			Exec(context.Background())
-	}
-
-	if data.Action == "update" {
-		return m.Client.Deployment.Update().
-			SetUpdated(timeZero).
-			Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId)))).
-			Exec(context.Background())
-	}
-
-	if data.Action == "uninstall" {
-		return m.Client.Deployment.Update().
-			SetInstalled(timeZero).
-			Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId)))).
-			Exec(context.Background())
-	}
-
-	return nil
 }
