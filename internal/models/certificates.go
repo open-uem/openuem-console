@@ -122,14 +122,13 @@ func applyCertificateFilters(query *ent.CertificateQuery, f filters.CertificateF
 	}
 
 	if len(f.ExpiryTo) > 0 {
-		to, err := time.Parse("2006-01-02", f.ExpiryFrom)
+		to, err := time.Parse("2006-01-02", f.ExpiryTo)
 		if err == nil {
 			query = query.Where(certificate.ExpiryLTE(to))
 		}
 	}
 
 	if len(f.Username) > 0 {
-		query = query.Where(certificate.DescriptionContainsFold(f.Username))
+		query = query.Where(certificate.UIDContainsFold(f.Username))
 	}
-
 }
