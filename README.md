@@ -22,4 +22,4 @@ We can execute `git submodule update --remote` to update our submodule with late
 
 This repository has been connected with Woodpecker CI thanks to the file .woodpecker.yml
 
-A Cloudflare tunnel is used to run CI pipelines
+A Cloudflare tunnel is used to run CI pipelines in my local environment
