@@ -331,3 +331,7 @@ func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
 
 	return query.Strings(context.Background())
 }
+
+func (m *Model) CountDifferentVendor() (int, error) {
+	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
+}

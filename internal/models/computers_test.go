@@ -390,6 +390,12 @@ func (suite *ComputersTestSuite) TestGetComputerModels() {
 	assert.Equal(suite.T(), allModels, items, "should get two computer models")
 }
 
+func (suite *ComputersTestSuite) TestCountDifferentVendor() {
+	count, err := suite.model.CountDifferentVendor()
+	assert.NoError(suite.T(), err, "should count different vendors")
+	assert.Equal(suite.T(), 7, count, "should count 7 different vendors")
+}
+
 func TestComputersTestSuite(t *testing.T) {
 	suite.Run(t, new(ComputersTestSuite))
 }

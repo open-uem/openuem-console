@@ -48,6 +48,12 @@ func (suite *OperatingSystemsTestSuite) SetupTest() {
 	suite.p = partials.PaginationAndSort{CurrentPage: 1, PageSize: 5}
 }
 
+func (suite *ComputersTestSuite) TestCountAgentsByOSVersion() {
+	agents, err := suite.model.CountAgentsByOSVersion()
+	assert.NoError(suite.T(), err, "should count all agents by os version")
+	assert.Equal(suite.T(), 7, len(agents), "should count 7 agents by os versions")
+}
+
 func (suite *ComputersTestSuite) TestCountAllOSUsernames() {
 	count, err := suite.model.CountAllOSUsernames()
 	assert.NoError(suite.T(), err, "should count all usernames")

@@ -4,9 +4,20 @@ import (
 	"context"
 
 	"github.com/doncicuto/openuem-console/internal/views/filters"
+	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/operatingsystem"
 )
+
+func (m *Model) CountAgentsByOSVersion() ([]Agent, error) {
+	// Info from agents waiting for admission won't be shown
+	agents := []Agent{}
+	err := m.Client.OperatingSystem.Query().Where(operatingsystem.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).GroupBy(operatingsystem.FieldVersion).Aggregate(ent.Count()).Scan(context.Background(), &agents)
+	if err != nil {
+		return nil, err
+	}
+	return agents, err
+}
 
 func (m *Model) GetOSVersions(f filters.AgentFilter) ([]string, error) {
 	query := m.Client.OperatingSystem.Query().Unique(true).Select(operatingsystem.FieldVersion)

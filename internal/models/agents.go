@@ -11,10 +11,7 @@ import (
 	ent "github.com/doncicuto/openuem_ent"
 	"github.com/doncicuto/openuem_ent/agent"
 	"github.com/doncicuto/openuem_ent/antivirus"
-	"github.com/doncicuto/openuem_ent/computer"
-	"github.com/doncicuto/openuem_ent/operatingsystem"
 	"github.com/doncicuto/openuem_ent/predicate"
-	"github.com/doncicuto/openuem_ent/printer"
 	"github.com/doncicuto/openuem_ent/release"
 	"github.com/doncicuto/openuem_ent/systemupdate"
 	"github.com/doncicuto/openuem_ent/tag"
@@ -214,16 +211,6 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	}
 }
 
-func (m *Model) CountAgentsByOSVersion() ([]Agent, error) {
-	// Info from agents waiting for admission won't be shown
-	agents := []Agent{}
-	err := m.Client.OperatingSystem.Query().Where(operatingsystem.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).GroupBy(operatingsystem.FieldVersion).Aggregate(ent.Count()).Scan(context.Background(), &agents)
-	if err != nil {
-		return nil, err
-	}
-	return agents, err
-}
-
 func (m *Model) CountAgentsReportedLast24h() (int, error) {
 	count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 	if err != nil {
@@ -238,15 +225,6 @@ func (m *Model) CountAgentsNotReportedLast24h() (int, error) {
 		return 0, err
 	}
 	return count, err
-}
-
-func (m *Model) CountAgentsByWindowsUpdateStatus() ([]Agent, error) {
-	agents := []Agent{}
-	err := m.Client.SystemUpdate.Query().GroupBy(systemupdate.FieldSystemUpdateStatus).Aggregate(ent.Count()).Scan(context.Background(), &agents)
-	if err != nil {
-		return nil, err
-	}
-	return agents, err
 }
 
 func (m *Model) DeleteAgent(agentId string) error {
@@ -309,20 +287,20 @@ func (m *Model) CountVNCSupportedAgents() (int, error) {
 	return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
 }
 
-func (m *Model) CountDifferentVendor() (int, error) {
-	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
-}
-
-func (m *Model) CountDifferentPrinters() (int, error) {
-	return m.Client.Printer.Query().Select(printer.FieldName).Unique(true).Where(printer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
-}
-
 func (m *Model) CountDisabledAgents() (int, error) {
 	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusDisabled)).Count(context.Background())
 }
 
 func (m *Model) CountWaitingForAdmissionAgents() (int, error) {
 	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+}
+
+func (m *Model) AgentsExists() (bool, error) {
+	return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Exist(context.Background())
+}
+
+func (m *Model) DeleteAllAgents() (int, error) {
+	return m.Client.Agent.Delete().Exec(context.Background())
 }
 
 func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string) error {
@@ -409,14 +387,6 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 		return nil, err
 	}
 	return agents, nil
-}
-
-func (m *Model) AgentsExists() (bool, error) {
-	return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Exist(context.Background())
-}
-
-func (m *Model) DeleteAllAgents() (int, error) {
-	return m.Client.Agent.Delete().Exec(context.Background())
 }
 
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
