@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	models "github.com/doncicuto/openuem-console/internal/models/winget"
-	"github.com/doncicuto/openuem-console/internal/views/deploy_views"
-	"github.com/doncicuto/openuem-console/internal/views/filters"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem_nats"
+	models "github.com/open-uem/openuem-console/internal/models/winget"
+	"github.com/open-uem/openuem-console/internal/views/deploy_views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem_nats"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )

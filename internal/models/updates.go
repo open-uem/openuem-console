@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/doncicuto/openuem-console/internal/views/filters"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	ent "github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/agent"
-	"github.com/doncicuto/openuem_ent/systemupdate"
+	"github.com/open-uem/openuem-console/internal/views/filters"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	ent "github.com/open-uem/openuem_ent"
+	"github.com/open-uem/openuem_ent/agent"
+	"github.com/open-uem/openuem_ent/systemupdate"
 )
 
 type SystemUpdate struct {

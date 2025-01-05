@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/doncicuto/openuem-console/internal/common"
-	"github.com/doncicuto/openuem_utils"
+	"github.com/open-uem/openuem-console/internal/common"
+	"github.com/open-uem/openuem_utils"
 	"golang.org/x/sys/windows/svc"
 )
 

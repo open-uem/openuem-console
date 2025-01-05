@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem_ent/agent"
-	"github.com/doncicuto/openuem_ent/enttest"
-	"github.com/doncicuto/openuem_nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem_ent/agent"
+	"github.com/open-uem/openuem_ent/enttest"
+	"github.com/open-uem/openuem_nats"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

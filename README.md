@@ -14,7 +14,7 @@ We use esbuild to create a JS bundle for the project: `npm run build`
 
 ## Submodules
 
-This repository uses the github.com/doncicuto/openuem_ent which contains Ent entities.
+This repository uses the github.com/open-uem/openuem_ent which contains Ent entities.
 
 We can execute `git submodule update --remote` to update our submodule with latest changes
 

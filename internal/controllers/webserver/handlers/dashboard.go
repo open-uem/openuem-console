@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/views"
-	"github.com/doncicuto/openuem-console/internal/views/charts"
-	"github.com/doncicuto/openuem-console/internal/views/dashboard_views"
-	"github.com/doncicuto/openuem-console/internal/views/filters"
+	"github.com/open-uem/openuem-console/internal/views"
+	"github.com/open-uem/openuem-console/internal/views/charts"
+	"github.com/open-uem/openuem-console/internal/views/dashboard_views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/labstack/echo/v4"
 )
 

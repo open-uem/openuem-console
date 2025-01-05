@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
-	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_nats"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem_nats"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"

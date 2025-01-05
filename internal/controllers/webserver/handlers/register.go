@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem-console/internal/views/register_views"
-	"github.com/doncicuto/openuem_nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/views/register_views"
+	"github.com/open-uem/openuem_nats"
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"

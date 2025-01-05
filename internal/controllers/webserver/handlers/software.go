@@ -3,11 +3,11 @@ package handlers
 import (
 	"log"
 
-	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem-console/internal/views"
-	"github.com/doncicuto/openuem-console/internal/views/filters"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem-console/internal/views/software_views"
+	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/views/software_views"
 	"github.com/labstack/echo/v4"
 )
 

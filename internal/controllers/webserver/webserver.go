@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/doncicuto/openuem-console/internal/controllers/router"
-	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
-	"github.com/doncicuto/openuem-console/internal/controllers/webserver/handlers"
-	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/controllers/router"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/controllers/webserver/handlers"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/labstack/echo/v4"
 )

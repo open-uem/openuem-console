@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 
-	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 	_ "github.com/mattn/go-sqlite3"
 )
 

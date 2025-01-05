@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/doncicuto/openuem-console/internal/views/remote_workers_views"
+	"github.com/open-uem/openuem-console/internal/views/remote_workers_views"
 	"github.com/labstack/echo/v4"
 )
 

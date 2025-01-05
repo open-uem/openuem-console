@@ -3,8 +3,8 @@ package commands
 import (
 	"log"
 
-	"github.com/doncicuto/openuem-console/internal/models"
-	"github.com/doncicuto/openuem_utils"
+	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem_utils"
 	"github.com/urfave/cli/v2"
 )
 

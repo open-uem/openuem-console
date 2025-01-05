@@ -1,6 +1,6 @@
 package partials
 
-import "github.com/doncicuto/openuem-console/internal/controllers/sessions"
+import "github.com/open-uem/openuem-console/internal/controllers/sessions"
 
 templ Error(err, title, url string, sm *sessions.SessionManager) {
 	@Header([]Breadcrumb{{Title: title, Url: url}}, sm)

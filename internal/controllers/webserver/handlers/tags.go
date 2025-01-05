@@ -3,8 +3,8 @@ package handlers
 import (
 	"strconv"
 
-	"github.com/doncicuto/openuem-console/internal/views/admin_views"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/labstack/echo/v4"
 )
 

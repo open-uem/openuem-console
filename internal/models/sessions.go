@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	ent "github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	ent "github.com/open-uem/openuem_ent"
+	"github.com/open-uem/openuem_ent/sessions"
 )
 
 func (m *Model) CountAllSessions() (int, error) {

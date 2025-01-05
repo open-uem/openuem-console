@@ -13,9 +13,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/doncicuto/openuem-console/internal/views/computers_views"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem_utils"
+	"github.com/open-uem/openuem-console/internal/views/computers_views"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem_utils"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/sftp"

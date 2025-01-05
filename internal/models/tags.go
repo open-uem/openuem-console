@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	ent "github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/tag"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	ent "github.com/open-uem/openuem_ent"
+	"github.com/open-uem/openuem_ent/tag"
 )
 
 func (m *Model) GetAllTags() ([]*ent.Tag, error) {

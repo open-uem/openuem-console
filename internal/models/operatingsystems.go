@@ -3,10 +3,10 @@ package models
 import (
 	"context"
 
-	"github.com/doncicuto/openuem-console/internal/views/filters"
-	ent "github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/agent"
-	"github.com/doncicuto/openuem_ent/operatingsystem"
+	"github.com/open-uem/openuem-console/internal/views/filters"
+	ent "github.com/open-uem/openuem_ent"
+	"github.com/open-uem/openuem_ent/agent"
+	"github.com/open-uem/openuem_ent/operatingsystem"
 )
 
 func (m *Model) CountAgentsByOSVersion() ([]Agent, error) {

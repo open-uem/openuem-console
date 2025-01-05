@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/doncicuto/openuem-console/internal/common"
+	"github.com/open-uem/openuem-console/internal/common"
 )
 
 func main() {

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/views"
-	"github.com/doncicuto/openuem-console/internal/views/register_views"
+	"github.com/open-uem/openuem-console/internal/views"
+	"github.com/open-uem/openuem-console/internal/views/register_views"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )

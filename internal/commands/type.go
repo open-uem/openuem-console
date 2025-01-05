@@ -3,7 +3,7 @@ package commands
 import (
 	"crypto/x509"
 
-	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/nats-io/nats.go"
 )
 

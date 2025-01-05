@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 
-	"github.com/doncicuto/openuem_ent"
-	"github.com/doncicuto/openuem_ent/settings"
+	"github.com/open-uem/openuem_ent"
+	"github.com/open-uem/openuem_ent/settings"
 )
 
 func (m *Model) GetSMTPSettings() (*openuem_ent.Settings, error) {

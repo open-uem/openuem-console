@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 
-	"github.com/doncicuto/openuem_ent/printer"
+	"github.com/open-uem/openuem_ent/printer"
 )
 
 func (m *Model) CountDifferentPrinters() (int, error) {

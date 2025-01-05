@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/doncicuto/openuem-console/internal/controllers/authserver"
-	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
-	"github.com/doncicuto/openuem-console/internal/controllers/webserver"
-	"github.com/doncicuto/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/controllers/authserver"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/controllers/webserver"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/go-co-op/gocron/v2"
 )
 

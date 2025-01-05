@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/doncicuto/openuem_utils"
+	"github.com/open-uem/openuem_utils"
 )
 
 func OpenWingetDB() (*sql.DB, error) {

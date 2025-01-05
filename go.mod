@@ -1,4 +1,4 @@
-module github.com/doncicuto/openuem-console
+module github.com/open-uem/openuem-console
 
 go 1.23.4
 
@@ -10,9 +10,9 @@ require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
-	github.com/doncicuto/openuem_ent v0.0.0-00010101000000-000000000000
-	github.com/doncicuto/openuem_nats v0.0.0-00010101000000-000000000000
-	github.com/doncicuto/openuem_utils v0.0.0-00010101000000-000000000000
+	github.com/open-uem/openuem_ent v0.0.0-00010101000000-000000000000
+	github.com/open-uem/openuem_nats v0.0.0-00010101000000-000000000000
+	github.com/open-uem/openuem_utils v0.0.0-00010101000000-000000000000
 	github.com/go-co-op/gocron/v2 v2.14.0
 	github.com/go-echarts/go-echarts/v2 v2.4.6
 	github.com/go-playground/form/v4 v4.2.1
@@ -88,8 +88,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/doncicuto/openuem_ent => ./internal/models/ent
+replace github.com/open-uem/openuem_ent => ./internal/models/ent
 
-replace github.com/doncicuto/openuem_nats => ./internal/controllers/nats
+replace github.com/open-uem/openuem_nats => ./internal/controllers/nats
 
-replace github.com/doncicuto/openuem_utils => ./internal/controllers/utils
+replace github.com/open-uem/openuem_utils => ./internal/controllers/utils

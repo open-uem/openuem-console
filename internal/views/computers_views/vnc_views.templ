@@ -2,10 +2,10 @@ package computers_views
 
 import (
 	"fmt"
-	"github.com/doncicuto/openuem-console/internal/controllers/sessions"
-	"github.com/doncicuto/openuem-console/internal/views/partials"
-	"github.com/doncicuto/openuem_ent"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem_ent"
 )
 
 templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager) {
