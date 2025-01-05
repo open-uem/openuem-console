@@ -10,9 +10,6 @@ require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
-	github.com/open-uem/openuem_ent v0.0.0-00010101000000-000000000000
-	github.com/open-uem/openuem_nats v0.0.0-00010101000000-000000000000
-	github.com/open-uem/openuem_utils v0.0.0-00010101000000-000000000000
 	github.com/go-co-op/gocron/v2 v2.14.0
 	github.com/go-echarts/go-echarts/v2 v2.4.6
 	github.com/go-playground/form/v4 v4.2.1
@@ -71,6 +68,9 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nats-io/nkeys v0.4.9 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406 // indirect
+	github.com/open-uem/nats v0.0.0-20250105115437-3eca4264073e // indirect
+	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
@@ -87,9 +87,3 @@ require (
 	golang.org/x/tools v0.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/open-uem/openuem_ent => ./internal/models/ent
-
-replace github.com/open-uem/openuem_nats => ./internal/controllers/nats
-
-replace github.com/open-uem/openuem_utils => ./internal/controllers/utils

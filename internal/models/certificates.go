@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"time"
 
+	ent "github.com/open-uem/ent"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/certificate"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/certificate"
 )
 
 func (m *Model) GetCertificateByUID(uid string) (*openuem_ent.Certificate, error) {

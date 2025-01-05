@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 
-	"github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/settings"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/settings"
 )
 
 func (m *Model) GetMaxUploadSize() (string, error) {

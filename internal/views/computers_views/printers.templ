@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
 )
 
 templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, agent *ent.Agent, confirmDelete bool) {

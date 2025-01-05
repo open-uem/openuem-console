@@ -3,11 +3,11 @@ package models
 import (
 	"context"
 
-	"github.com/open-uem/openuem_ent"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/release"
-	"github.com/open-uem/openuem_nats"
+	ent "github.com/open-uem/ent"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/release"
+	openuem_nats "github.com/open-uem/nats"
 )
 
 func (m *Model) GetLatestServerRelease(channel string) (*openuem_ent.Release, error) {

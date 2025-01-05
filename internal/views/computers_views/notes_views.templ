@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
 )
 
 templ Notes(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, agent *openuem_ent.Agent, markdown, renderedMarkdown string, confirmDelete bool) {

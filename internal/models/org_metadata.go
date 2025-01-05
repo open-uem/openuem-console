@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/orgmetadata"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/orgmetadata"
 )
 
 func (m *Model) GetAllOrgMetadata() ([]*ent.OrgMetadata, error) {

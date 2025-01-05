@@ -3,21 +3,21 @@ package common
 import (
 	"log"
 
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 	"gopkg.in/ini.v1"
 )
 
 func (w *Worker) GenerateConsoleConfig() error {
 	var err error
 
-	w.DBUrl, err = openuem_utils.CreatePostgresDatabaseURL()
+	w.DBUrl, err = utils.CreatePostgresDatabaseURL()
 	if err != nil {
 		log.Printf("[ERROR]: %v", err)
 		return err
 	}
 
 	// Open ini file
-	configFile := openuem_utils.GetConfigFile()
+	configFile := utils.GetConfigFile()
 	cfg, err := ini.Load(configFile)
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 
 	w.CACertPath = key.String()
-	_, err = openuem_utils.ReadPEMCertificate(w.CACertPath)
+	_, err = utils.ReadPEMCertificate(w.CACertPath)
 	if err != nil {
 		log.Printf("[ERROR]: could not read CA certificate in %s", w.CACertPath)
 		return err
@@ -41,7 +41,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 
 	w.ConsoleCertPath = key.String()
-	_, err = openuem_utils.ReadPEMCertificate(w.ConsoleCertPath)
+	_, err = utils.ReadPEMCertificate(w.ConsoleCertPath)
 	if err != nil {
 		log.Println("[ERROR]: could not read Console certificate")
 		return err
@@ -53,7 +53,7 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 
 	w.ConsolePrivateKeyPath = key.String()
-	_, err = openuem_utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
+	_, err = utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
 	if err != nil {
 		log.Println("[ERROR]: could not read Console private key")
 		return err
@@ -65,13 +65,13 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 
 	w.SFTPPrivateKeyPath = key.String()
-	_, err = openuem_utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
+	_, err = utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
 	if err != nil {
 		log.Println("[ERROR]: could not read SFTP private key")
 		return err
 	}
 
-	w.JWTKey, err = openuem_utils.GetJWTKey()
+	w.JWTKey, err = utils.GetJWTKey()
 	if err != nil {
 		return err
 	}

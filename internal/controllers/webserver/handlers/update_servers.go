@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/release"
+	"github.com/open-uem/ent/server"
+	openuem_nats "github.com/open-uem/nats"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/release"
-	"github.com/open-uem/openuem_ent/server"
-	"github.com/open-uem/openuem_nats"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) UpdateServers(c echo.Context) error {

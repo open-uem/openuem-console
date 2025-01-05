@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/open-uem/openuem_nats"
+	openuem_nats "github.com/open-uem/nats"
 )
 
 func GetLatestServerReleaseFromAPI(tmpDir string) (*openuem_nats.OpenUEMRelease, error) {

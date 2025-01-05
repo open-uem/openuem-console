@@ -9,16 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_nats"
-	"github.com/open-uem/openuem_utils"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/labstack/echo/v4"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) error {
@@ -458,7 +458,7 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 		}
 
 		// Create new random PIN
-		pin, err := openuem_utils.GenerateRandomPIN()
+		pin, err := utils.GenerateRandomPIN()
 		if err != nil {
 			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))

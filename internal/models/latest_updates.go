@@ -3,10 +3,10 @@ package models
 import (
 	"context"
 
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/update"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/update"
 )
 
 func (m *Model) CountLatestUpdates(agentId string) (int, error) {

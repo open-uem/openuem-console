@@ -4,17 +4,17 @@ import (
 	"log"
 	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/open-uem/openuem-console/internal/controllers/authserver"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/open-uem/openuem_utils"
-	"github.com/go-co-op/gocron/v2"
+	"github.com/open-uem/utils"
 )
 
 type Worker struct {
 	Model                             *models.Model
-	Logger                            *openuem_utils.OpenUEMLogger
+	Logger                            *utils.OpenUEMLogger
 	DBConnectJob                      gocron.Job
 	TaskScheduler                     gocron.Scheduler
 	DBUrl                             string
@@ -52,7 +52,7 @@ type Worker struct {
 func NewWorker(logName string) *Worker {
 	worker := Worker{}
 	if logName != "" {
-		worker.Logger = openuem_utils.NewLogger(logName)
+		worker.Logger = utils.NewLogger(logName)
 	}
 
 	return &worker

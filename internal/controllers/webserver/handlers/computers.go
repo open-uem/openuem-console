@@ -7,18 +7,18 @@ import (
 	"net"
 	"strconv"
 
-	models "github.com/open-uem/openuem-console/internal/models/winget"
-	"github.com/open-uem/openuem-console/internal/views"
-	"github.com/open-uem/openuem-console/internal/views/computers_views"
-	"github.com/open-uem/openuem-console/internal/views/filters"
-	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_nats"
 	"github.com/gomarkdown/markdown"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
+	openuem_ent "github.com/open-uem/ent"
+	openuem_nats "github.com/open-uem/nats"
+	models "github.com/open-uem/openuem-console/internal/models/winget"
+	"github.com/open-uem/openuem-console/internal/views"
+	"github.com/open-uem/openuem-console/internal/views/computers_views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Computer(c echo.Context) error {

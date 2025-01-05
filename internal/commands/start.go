@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/open-uem/openuem-console/internal/common"
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -31,7 +31,7 @@ func startConsole(cCtx *cli.Context) error {
 	}
 
 	// Get working directory
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		log.Fatal("[FATAL]: could not get working directory")
 	}

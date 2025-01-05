@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"entgo.io/ent/dialect/sql"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/antivirus"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/antivirus"
 )
 
 type Antivirus struct {

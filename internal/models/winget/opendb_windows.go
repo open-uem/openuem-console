@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 )
 
 func OpenWingetDB() (*sql.DB, error) {
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		return nil, err
 	}

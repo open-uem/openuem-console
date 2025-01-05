@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/enttest"
+	"github.com/open-uem/ent/server"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/enttest"
-	"github.com/open-uem/openuem_ent/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

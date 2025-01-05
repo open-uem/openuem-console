@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	openuem_nats "github.com/open-uem/nats"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_nats"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) DeployInstall(c echo.Context) error {

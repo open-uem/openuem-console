@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/open-uem/openuem-console/internal/common"
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 	"golang.org/x/sys/windows/svc"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Get working directory
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		log.Fatal("[FATAL]: could not get working directory")
 	}
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	// Configure the windows service
-	s := openuem_utils.NewOpenUEMWindowsService()
+	s := utils.NewOpenUEMWindowsService()
 	s.ServiceStart = w.StartWorker
 	s.ServiceStop = w.StopWorker
 

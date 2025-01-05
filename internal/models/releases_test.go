@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/enttest"
+	"github.com/open-uem/ent/release"
+	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/enttest"
-	"github.com/open-uem/openuem_ent/release"
-	"github.com/open-uem/openuem_nats"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

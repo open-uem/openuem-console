@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/user"
+	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/user"
-	"github.com/open-uem/openuem_nats"
 )
 
 func (m *Model) CountAllUsers(f filters.UserFilter) (int, error) {

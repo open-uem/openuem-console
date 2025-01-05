@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/deployment"
+	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/deployment"
-	"github.com/open-uem/openuem_nats"
 )
 
 func (m *Model) GetDeploymentsForAgent(agentId string, p partials.PaginationAndSort) ([]*ent.Deployment, error) {

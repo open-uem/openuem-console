@@ -6,12 +6,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/controllers/authserver/handlers"
 	"github.com/open-uem/openuem-console/internal/controllers/router"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/open-uem/openuem_utils"
-	"github.com/labstack/echo/v4"
+	"github.com/open-uem/utils"
 )
 
 type AuthServer struct {
@@ -39,7 +39,7 @@ func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePor
 	// Session Manager
 	a.SessionManager = s
 
-	a.CACert, err = openuem_utils.ReadPEMCertificate(caCert)
+	a.CACert, err = utils.ReadPEMCertificate(caCert)
 	if err != nil {
 		log.Fatal(err)
 	}

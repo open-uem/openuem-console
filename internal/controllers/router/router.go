@@ -10,21 +10,21 @@ import (
 	"strings"
 
 	session "github.com/canidam/echo-scs-session"
+	"github.com/invopop/ctxi18n"
+	"github.com/labstack/echo/v4"
+	mw "github.com/labstack/echo/v4/middleware"
 	"github.com/open-uem/openuem-console/internal/controllers/router/middleware"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/locales"
-	"github.com/open-uem/openuem_utils"
-	"github.com/invopop/ctxi18n"
-	"github.com/labstack/echo/v4"
-	mw "github.com/labstack/echo/v4/middleware"
+	"github.com/open-uem/utils"
 )
 
 func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.Echo {
 
 	e := echo.New()
 
-	cwd, err := openuem_utils.GetWd()
+	cwd, err := utils.GetWd()
 	if err != nil {
 		log.Fatalf("[FATAL]: could not get working directory: %v", err)
 	}

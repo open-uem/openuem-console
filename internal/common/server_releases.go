@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/open-uem/openuem_utils"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/open-uem/utils"
 )
 
 func (w *Worker) GetServerReleases() error {
@@ -19,7 +19,7 @@ func (w *Worker) GetServerReleases() error {
 
 	url := fmt.Sprintf("https://releases.openuem.eu/api?action=latestServerRelease&channel=%s", settings.UpdateChannel)
 
-	body, err := openuem_utils.QueryReleasesEndpoint(url)
+	body, err := utils.QueryReleasesEndpoint(url)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (w *Worker) GetServerReleases() error {
 
 	url = fmt.Sprintf("https://releases.openuem.eu/api?action=allServerReleases&channel=%s", settings.UpdateChannel)
 
-	body, err = openuem_utils.QueryReleasesEndpoint(url)
+	body, err = utils.QueryReleasesEndpoint(url)
 	if err != nil {
 		return err
 	}

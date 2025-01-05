@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -12,21 +12,21 @@ func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 	var err error
 
 	log.Println("... reading CA certificate", cCtx.String("cacert"))
-	command.CACert, err = openuem_utils.ReadPEMCertificate(cCtx.String("cacert"))
+	command.CACert, err = utils.ReadPEMCertificate(cCtx.String("cacert"))
 	if err != nil {
 		return err
 	}
 	command.CACertPath = cCtx.String("cacert")
 
 	log.Println("... reading console's certificate", cCtx.String("cert"))
-	_, err = openuem_utils.ReadPEMCertificate(cCtx.String("cert"))
+	_, err = utils.ReadPEMCertificate(cCtx.String("cert"))
 	if err != nil {
 		return err
 	}
 	command.CertPath = cCtx.String("cert")
 
 	log.Println("... reading console's private key", cCtx.String("key"))
-	_, err = openuem_utils.ReadPEMPrivateKey(cCtx.String("key"))
+	_, err = utils.ReadPEMPrivateKey(cCtx.String("key"))
 	if err != nil {
 		return err
 	}

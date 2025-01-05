@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/open-uem/openuem_utils"
+	"github.com/open-uem/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -11,25 +11,25 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.DBUrl = cCtx.String("dburl")
 
 	w.CACertPath = cCtx.String("cacert")
-	_, err = openuem_utils.ReadPEMCertificate(w.CACertPath)
+	_, err = utils.ReadPEMCertificate(w.CACertPath)
 	if err != nil {
 		return err
 	}
 
 	w.ConsoleCertPath = cCtx.String("cert")
-	_, err = openuem_utils.ReadPEMCertificate(w.ConsoleCertPath)
+	_, err = utils.ReadPEMCertificate(w.ConsoleCertPath)
 	if err != nil {
 		return err
 	}
 
 	w.ConsolePrivateKeyPath = cCtx.String("key")
-	_, err = openuem_utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
+	_, err = utils.ReadPEMPrivateKey(w.ConsolePrivateKeyPath)
 	if err != nil {
 		return err
 	}
 
 	w.SFTPPrivateKeyPath = cCtx.String("sftpkey")
-	_, err = openuem_utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
+	_, err = utils.ReadPEMPrivateKey(w.SFTPPrivateKeyPath)
 	if err != nil {
 		return err
 	}

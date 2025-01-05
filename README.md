@@ -12,12 +12,6 @@ We use npm to generate tailwind css: `npm run watch-css`
 
 We use esbuild to create a JS bundle for the project: `npm run build`
 
-## Submodules
-
-This repository uses the github.com/open-uem/openuem_ent which contains Ent entities.
-
-We can execute `git submodule update --remote` to update our submodule with latest changes
-
 ## Woodpecker
 
 This repository has been connected with Woodpecker CI thanks to the file .woodpecker.yml

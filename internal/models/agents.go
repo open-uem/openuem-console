@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/antivirus"
+	"github.com/open-uem/ent/predicate"
+	"github.com/open-uem/ent/release"
+	"github.com/open-uem/ent/systemupdate"
+	"github.com/open-uem/ent/tag"
+	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	ent "github.com/open-uem/openuem_ent"
-	"github.com/open-uem/openuem_ent/agent"
-	"github.com/open-uem/openuem_ent/antivirus"
-	"github.com/open-uem/openuem_ent/predicate"
-	"github.com/open-uem/openuem_ent/release"
-	"github.com/open-uem/openuem_ent/systemupdate"
-	"github.com/open-uem/openuem_ent/tag"
-	"github.com/open-uem/openuem_nats"
 )
 
 type Agent struct {
