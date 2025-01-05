@@ -25,6 +25,9 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.38.0
+	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406
+	github.com/open-uem/nats v0.0.0-20250105115437-3eca4264073e
+	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5
 	github.com/pkg/sftp v1.13.7
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
@@ -68,9 +71,6 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nats-io/nkeys v0.4.9 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406 // indirect
-	github.com/open-uem/nats v0.0.0-20250105115437-3eca4264073e // indirect
-	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
