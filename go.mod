@@ -5,12 +5,12 @@ go 1.23.4
 require (
 	entgo.io/ent v0.14.1
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/a-h/templ v0.2.793
+	github.com/a-h/templ v0.3.819
 	github.com/alexedwards/scs/pgxstore v0.0.0-20240316134038-7e11d57e8885
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
-	github.com/go-co-op/gocron/v2 v2.14.0
+	github.com/go-co-op/gocron/v2 v2.14.1
 	github.com/go-echarts/go-echarts/v2 v2.4.6
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.23.0
@@ -18,7 +18,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gomarkdown/markdown v0.0.0-20241205020045-f7e15b2f3e62
 	github.com/invopop/ctxi18n v0.9.0
-	github.com/jackc/pgx/v5 v5.7.1
+	github.com/jackc/pgx/v5 v5.7.2
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
 	github.com/mattn/go-sqlite3 v1.14.24
@@ -26,7 +26,7 @@ require (
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.38.0
 	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406
-	github.com/open-uem/nats v0.0.0-20250105115437-3eca4264073e
+	github.com/open-uem/nats v0.0.0-20250105132553-e063a8022512
 	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5
 	github.com/pkg/sftp v1.13.7
 	github.com/stretchr/testify v1.10.0
@@ -34,7 +34,7 @@ require (
 	github.com/wneessen/go-mail v0.5.2
 	golang.org/x/crypto v0.31.0
 	golang.org/x/mod v0.22.0
-	golang.org/x/sys v0.28.0
+	golang.org/x/sys v0.29.0
 	gopkg.in/ini.v1 v1.67.0
 	software.sslmate.com/src/go-pkcs12 v0.5.0
 )
@@ -49,7 +49,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/jonboulle/clockwork v0.4.0 // indirect
+	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
@@ -78,12 +78,12 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
-	github.com/zclconf/go-cty v1.15.1 // indirect
-	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
+	github.com/zclconf/go-cty v1.16.0 // indirect
+	golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/time v0.8.0 // indirect
+	golang.org/x/time v0.9.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
