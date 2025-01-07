@@ -65,6 +65,7 @@ en:
   Save: "Save"
   Schedule: "Schedule"
   Security: "Security"
+  SelectedItems: "%s items have been selected"
   SelectAll: "Select All"
   SelectCountry: "Select a country"
   Send: "Send"

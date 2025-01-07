@@ -127,7 +127,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										>
 											{ i18n.T(ctx, "DeselectAll") }
 										</button>
-										<p class="uk-text-small">{ "Se han seleccionado " } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { " elementos" }</p>
+										<p class="uk-text-small">{ i18n.T(ctx, "Selected", strconv.Itoa(f.SelectedItems)) }</p>
 									</div>
 									<form class="flex items-center gap-4">
 										<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>

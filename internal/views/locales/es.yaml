@@ -66,6 +66,7 @@ es:
   Save: "Guardar"
   Schedule: "Programar"
   Security: "Seguridad"
+  SelectedItems: "Se han seleccionado %s elementos"
   SelectAll: "Seleccionar todos"
   SelectCountry: "Seleccione un país"
   Send: "Enviar"
