@@ -90,7 +90,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						>
 							{ i18n.T(ctx, "DeselectAll") }
 						</button>
-						<p class="uk-text-small">{ i18n.T(ctx, "Selected") } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { i18n.T(ctx, "Items") }</p>
+							<p class="uk-text-small"><span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { i18n.T(ctx, "Items") }</p>
 						<form class="flex items-center gap-4">
 							<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
 							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
