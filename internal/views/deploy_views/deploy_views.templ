@@ -324,7 +324,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 								>
 									{ i18n.T(ctx, "DeselectAll") }
 								</button>
-								<p class="uk-text-small">{ i18n.T(ctx, "SelectedItems", strconv.Itoa(f.SelectedItems)) }</p>
+								<p class="uk-text-small">{ i18n.T(ctx, "Selected") } <span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { i18n.T(ctx, "Items") }</p>
 							}
 						</div>
 						if len(agents) > 0 {
