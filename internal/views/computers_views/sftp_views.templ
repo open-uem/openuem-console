@@ -406,7 +406,7 @@ templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileIn
 			hx-push-url="false"
 			hx-indicator={ fmt.Sprintf("#download-spinner-%d", i) }
 			_={ fmt.Sprintf(`on htmx:afterRequest
-				remove .htmx-request from <div[id='download-spinner-%d']/>
+				remove .htmx-request from <uk-icon[id='download-spinner-%d']/>
 				call #action-dropdown-%d.click()
 			end
 			`, i, i) }
