@@ -25,8 +25,8 @@ import (
 type CheckedItemsForm struct {
 	Cwd         string   `form:"cwd" query:"cwd"`
 	Dst         string   `form:"dst" query:"dst"`
-	FolderCheck []string `form:"folder-check" query:"folder-check"`
-	FileCheck   []string `form:"file-check" query:"file-check"`
+	FolderCheck []string `form:"check-folder" query:"check-folder"`
+	FileCheck   []string `form:"check-file" query:"check-file"`
 	Parent      string   `form:"parent" query:"parent"`
 }
 
@@ -503,12 +503,12 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 	}
 
 	if deleteForm.Cwd == "" {
-		return RenderError(c, partials.ErrorMessage("cwd cannot be empty", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.cwd_cannot_be_empty"), false))
 	}
 
 	items := slices.Concat(deleteForm.FolderCheck, deleteForm.FileCheck)
 	if len(items) == 0 {
-		return RenderError(c, partials.ErrorMessage("no items were checked", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_items_were_checked"), false))
 	}
 
 	agentId := c.Param("uuid")
