@@ -55,7 +55,11 @@ func (m *Model) CountOutdatedAgents() (int, error) {
 }
 
 func (m *Model) CountUpgradableAgents(version string) (int, error) {
-	return m.Client.Release.Query().Where(release.VersionLT(version), release.ReleaseTypeEQ(release.ReleaseTypeAgent), release.HasAgentsWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
+	return m.Client.Agent.Query().
+		Where(
+			agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission),
+			agent.HasReleaseWith(release.VersionLT(version)),
+		).Count(context.Background())
 }
 
 func (m *Model) SaveNewReleaseAvailable(releaseType release.ReleaseType, newRelease openuem_nats.OpenUEMRelease) error {

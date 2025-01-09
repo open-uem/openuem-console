@@ -132,7 +132,12 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			PackageId:   packageId,
 			PackageName: packageName,
 			Repository:  "winget",
-			Action:      "install",
+		}
+
+		if install {
+			action.Action = "install"
+		} else {
+			action.Action = "uninstall"
 		}
 
 		actionBytes, err := json.Marshal(action)

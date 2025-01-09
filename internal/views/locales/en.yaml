@@ -652,7 +652,7 @@ en:
         could_not_delete: "The server could not be deleted, reason: %s"
   dashboard:
     outdated_agents: Agents running outdated versions
-    no_auto_update: Endpoints that dosn't download/install system updates automatically
+    no_auto_update: Endpoints that doesn't download/install system updates automatically
     pending_update_agents: Endpoints with pending system updates
     disabled_antivirus: Endpoints without an active antivirus system
     outdated_antivirus: Endpoints running outdated virus databases
