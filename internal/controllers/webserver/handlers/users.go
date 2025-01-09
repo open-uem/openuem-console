@@ -479,7 +479,7 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 		user.Phone = record[4]
 		user.CertClearPassword = pkcs12.DefaultPassword
 
-		err = h.Model.AddUser(user.ID, user.Name, user.Email, user.Phone, user.Country)
+		err = h.Model.AddImportedUser(user.ID, user.Name, user.Email, user.Phone, user.Country)
 		if err != nil {
 			// TODO manage duplicate key error
 			errors = append(errors, err.Error())
