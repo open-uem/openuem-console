@@ -130,7 +130,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 }
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
-	version := c.FormValue("version")
+	version := c.FormValue("filterBySelectedRelease")
 	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
 }
 

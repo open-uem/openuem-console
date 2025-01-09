@@ -151,7 +151,7 @@ func (h *Handler) DeleteServer(c echo.Context) error {
 }
 
 func (h *Handler) UpdateServersConfirm(c echo.Context) error {
-	version := c.FormValue("version")
+	version := c.FormValue("filterBySelectedRelease")
 	return RenderConfirm(c, partials.ConfirmUpdateServers(version))
 }
 
