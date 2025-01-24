@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/invopop/ctxi18n/i18n"
-	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
@@ -14,7 +14,7 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 	errMessage := ""
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	p.NItems, err = h.Model.CountAllSessions()
 	if err != nil {

@@ -256,10 +256,10 @@ func NewPaginationAndSort() PaginationAndSort {
 	}
 }
 
-func (p *PaginationAndSort) GetPaginationAndSortParams(c echo.Context) {
+func (p *PaginationAndSort) GetPaginationAndSortParams(page, pageSize, sortBy, sortOrder, currentSortBy string) {
 	var err error
 
-	if p.CurrentPage, err = strconv.Atoi(c.FormValue("page")); err != nil {
+	if p.CurrentPage, err = strconv.Atoi(page); err != nil {
 		p.CurrentPage = 1
 	}
 
@@ -267,13 +267,13 @@ func (p *PaginationAndSort) GetPaginationAndSortParams(c echo.Context) {
 		p.CurrentPage = 1
 	}
 
-	if p.PageSize, err = strconv.Atoi(c.FormValue("pageSize")); err != nil {
+	if p.PageSize, err = strconv.Atoi(pageSize); err != nil {
 		p.PageSize = PAGE_SIZE
 	}
 	p.PageSize = min(p.PageSize, MAX_PAGE_SIZE)
-	p.SortBy = c.FormValue("sortBy")
-	p.SortOrder = c.FormValue("sortOrder")
-	p.CurrentSortBy = c.FormValue("currentSortBy")
+	p.SortBy = sortBy
+	p.SortOrder = sortOrder
+	p.CurrentSortBy = currentSortBy
 	if !slices.Contains([]string{"asc", "desc"}, p.SortOrder) {
 		p.SortOrder = "desc"
 	}

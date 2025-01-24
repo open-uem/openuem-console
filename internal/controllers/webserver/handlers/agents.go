@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -21,22 +22,58 @@ import (
 	"github.com/open-uem/utils"
 )
 
-func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) error {
+func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, gotoPage1 bool) error {
 	var err error
 	var agents []*ent.Agent
 
+	currentPage := c.FormValue("page")
+	pageSize := c.FormValue("pageSize")
+	sortBy := c.FormValue("sortBy")
+	sortOrder := c.FormValue("sortOrder")
+	currentSortBy := c.FormValue("currentSortBy")
+
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+
+	if gotoPage1 {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			currentPage = "1"
+			pageSize = u.Query().Get("pageSize")
+			sortBy = u.Query().Get("sortBy")
+			sortOrder = u.Query().Get("sortOrder")
+			currentSortBy = u.Query().Get("currentSortBy")
+		}
+	}
+
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
 
 	// Get filters values
 	f := filters.AgentFilter{}
-	f.Hostname = c.FormValue("filterByHostname")
+
+	if gotoPage1 {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			f.Hostname = u.Query().Get("filterByHostname")
+		}
+	} else {
+		f.Hostname = c.FormValue("filterByHostname")
+	}
 
 	filteredAgentStatusOptions := []string{}
 	for index := range agents_views.AgentStatus {
-		value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
-		if value != "" {
-			filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
+		if gotoPage1 {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByStatusAgent%d", index))
+				if value != "" {
+					filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
+			if value != "" {
+				filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
+			}
 		}
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
@@ -47,20 +84,44 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
-		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
-		if value != "" {
-			filteredAgentOSes = append(filteredAgentOSes, value)
+		if gotoPage1 {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByAgentOS%d", index))
+				if value != "" {
+					filteredAgentOSes = append(filteredAgentOSes, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+			if value != "" {
+				filteredAgentOSes = append(filteredAgentOSes, value)
+			}
 		}
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	contactFrom := c.FormValue("filterByContactDateFrom")
-	if contactFrom != "" {
-		f.ContactFrom = contactFrom
-	}
-	contactTo := c.FormValue("filterByContactDateTo")
-	if contactTo != "" {
-		f.ContactTo = contactTo
+	if gotoPage1 {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			contactFrom := u.Query().Get("filterByContactDateFrom")
+			if contactFrom != "" {
+				f.ContactFrom = contactFrom
+			}
+			contactTo := u.Query().Get("filterByContactDateTo")
+			if contactTo != "" {
+				f.ContactTo = contactTo
+			}
+		}
+	} else {
+		contactFrom := c.FormValue("filterByContactDateFrom")
+		if contactFrom != "" {
+			f.ContactFrom = contactFrom
+		}
+		contactTo := c.FormValue("filterByContactDateTo")
+		if contactTo != "" {
+			f.ContactTo = contactTo
+		}
 	}
 
 	availableTags, err := h.Model.GetAllTags()
@@ -75,9 +136,20 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		errMessage = err.Error()
 	}
 
-	for _, tag := range appliedTags {
-		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
-			f.Tags = append(f.Tags, tag.ID)
+	if gotoPage1 {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			for _, tag := range appliedTags {
+				if u.Query().Get(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+					f.Tags = append(f.Tags, tag.ID)
+				}
+			}
+		}
+	} else {
+		for _, tag := range appliedTags {
+			if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+				f.Tags = append(f.Tags, tag.ID)
+			}
 		}
 	}
 
@@ -97,10 +169,21 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 		}
 	}
 
-	nSelectedItems := c.FormValue("filterBySelectedItems")
-	f.SelectedItems, err = strconv.Atoi(nSelectedItems)
-	if err != nil {
-		f.SelectedItems = 0
+	if gotoPage1 {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			nSelectedItems := u.Query().Get("filterBySelectedItems")
+			f.SelectedItems, err = strconv.Atoi(nSelectedItems)
+			if err != nil {
+				f.SelectedItems = 0
+			}
+		}
+	} else {
+		nSelectedItems := c.FormValue("filterBySelectedItems")
+		f.SelectedItems, err = strconv.Atoi(nSelectedItems)
+		if err != nil {
+			f.SelectedItems = 0
+		}
 	}
 
 	tmpAllAgents := []string{}
@@ -131,18 +214,31 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string) 
 
 	l := views.GetTranslatorForDates(c)
 
+	if gotoPage1 {
+		currentUrl := c.Request().Header.Get("Hx-Current-Url")
+		if currentUrl != "" {
+			if u, err := url.Parse(currentUrl); err == nil {
+				q := u.Query()
+				q.Del("page")
+				q.Add("page", "1")
+				u.RawQuery = q.Encode()
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)), u)
+			}
+		}
+	}
+
 	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param")
+		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return h.ListAgents(c, "", err.Error(), false)
 	}
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, agent)))
 }
@@ -150,15 +246,15 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param")
+		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
 	}
 
 	err := h.Model.DeleteAgent(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.deleted"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.deleted"), "", true)
 }
 
 func (h *Handler) AgentEnable(c echo.Context) error {
@@ -182,14 +278,14 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "", true)
 }
 
 func (h *Handler) AgentDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return h.ListAgents(c, "", err.Error(), false)
 	}
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, agent)))
 }
@@ -250,13 +346,17 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					errorsFound = true
 					continue
 				}
+			} else {
+				log.Printf("[ERROR]: agent %s is not in a valid state\n", agentId)
+				errorsFound = true
+				continue
 			}
 		}
 
 		if errorsFound {
-			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_admitted"))
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_admitted"), true)
 		}
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "")
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "", true)
 	}
 
 	return RenderConfirm(c, partials.ConfirmAdmitAgents(c.Request().Referer()))
@@ -296,12 +396,16 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 					errorsFound = true
 					continue
 				}
+			} else {
+				log.Printf("[ERROR]: agent %s is not in a valid state\n", agentId)
+				errorsFound = true
+				continue
 			}
 		}
 		if errorsFound {
-			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_enabled"))
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_enabled"), true)
 		}
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "")
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "", true)
 	}
 
 	return RenderConfirm(c, partials.ConfirmEnableAgents(c.Request().Referer()))
@@ -336,12 +440,16 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 				if err := h.Model.DisableAgent(agentId); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
+			} else {
+				log.Printf("[ERROR]: agent %s is not in a valid state\n", agentId)
+				errorsFound = true
+				continue
 			}
 		}
 		if errorsFound {
-			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_disabled"))
+			return h.ListAgents(c, "", i18n.T(c.Request().Context(), "agents.some_could_not_be_disabled"), true)
 		}
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_disabled"), "")
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_disabled"), "", true)
 
 	}
 
@@ -352,7 +460,7 @@ func (h *Handler) AgentAdmit(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return h.ListAgents(c, "", err.Error(), false)
 	}
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, agent)))
 }
@@ -372,7 +480,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", false)
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
@@ -392,7 +500,7 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_disabled"), "", true)
 }
 
 func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
@@ -433,9 +541,9 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	}
 
 	if regenerate {
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "")
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", false)
 	}
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "", true)
 }
 
 func (h *Handler) AgentStartVNC(c echo.Context) error {
@@ -516,5 +624,5 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 		}
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "")
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
 }

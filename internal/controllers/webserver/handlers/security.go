@@ -17,7 +17,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Get filters values
 	f := filters.AntivirusFilter{}
@@ -92,7 +92,7 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Get filters values
 	f := filters.SystemUpdatesFilter{}
@@ -181,7 +181,7 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	}
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	if p.SortBy == "" {
 		p.SortBy = "name"

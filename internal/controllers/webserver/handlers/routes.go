@@ -10,9 +10,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/auth", h.Auth)
 	e.GET("/auth/confirm/:token", h.ConfirmEmail)
 
-	e.GET("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
-	e.POST("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
-	e.DELETE("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "") }, h.IsAuthenticated)
+	e.GET("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)
+	e.POST("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)
+	e.DELETE("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)
 	e.GET("/agents/admit", h.AgentsAdmit, h.IsAuthenticated)
 	e.POST("/agents/admit", h.AgentsAdmit, h.IsAuthenticated)
 	e.GET("/agents/enable", h.AgentsEnable, h.IsAuthenticated)

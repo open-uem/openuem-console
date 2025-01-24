@@ -13,7 +13,7 @@ templ ConfirmAdmitAgents(referer string) {
 				<div class="flex justify-start gap-6">
 					<button
 						hx-post="/agents/admit"
-						hx-push-url="true"
+						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
 						htmx-indicator="#update-spinner"

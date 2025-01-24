@@ -32,7 +32,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	}
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Default sort
 	if p.SortBy == "" {
@@ -83,7 +83,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	p.SortBy = "hostname"
 	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true)

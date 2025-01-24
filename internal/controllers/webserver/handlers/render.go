@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"net/url"
+
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
@@ -9,6 +11,14 @@ func RenderView(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	return cmp.Render(c.Request().Context(), c.Response().Writer)
+}
+
+func RenderViewWithReplaceUrl(c echo.Context, cmp templ.Component, url *url.URL) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set("HX-Replace-Url", url.String())
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 

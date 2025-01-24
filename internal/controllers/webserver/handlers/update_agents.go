@@ -137,7 +137,7 @@ func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Get filters values
 	f := filters.UpdateAgentsFilter{}

@@ -3,16 +3,16 @@ package handlers
 import (
 	"strconv"
 
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	if c.Request().Method == "POST" {
 		orgMetadataId := c.FormValue("orgMetadataId")

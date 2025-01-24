@@ -151,7 +151,7 @@ func (h *Handler) Apps(c echo.Context) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Default sort
 	if p.SortBy == "" {
@@ -206,7 +206,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	var err error
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Get filters values
 	f := filters.AgentFilter{}
@@ -325,7 +325,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	}
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -366,7 +366,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -579,7 +579,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 	}
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -683,12 +683,12 @@ func (h *Handler) Notes(c echo.Context) error {
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param")
+		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
 	}
 
 	err := h.Model.DeleteAgent(agentId)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error())
+		return h.ListAgents(c, "", err.Error(), false)
 	}
 
 	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"))

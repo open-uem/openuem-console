@@ -83,7 +83,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 	f.RegisterOptions = filteredRegisterStatus
 
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	p.NItems, err = h.Model.CountAllUsers(f)
 	if err != nil {
