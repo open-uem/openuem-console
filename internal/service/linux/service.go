@@ -28,10 +28,9 @@ func main() {
 
 	if err := w.GenerateConsoleConfig(); err != nil {
 		log.Printf("[ERROR]: could not generate config for OpenUEM console: %v", err)
-	}
-
-	if err := w.StartGenerateConsoleConfigJob(); err != nil {
-		log.Fatalf("[FATAL]: could not start job to generate config for OpenUEM console: %v", err)
+		if err := w.StartGenerateConsoleConfigJob(); err != nil {
+			log.Fatalf("[FATAL]: could not start job to generate config for OpenUEM console: %v", err)
+		}
 	}
 
 	// Create temp directory for downloads
