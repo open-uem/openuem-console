@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/open-uem/openuem-console/internal/controllers/authserver"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/go-co-op/gocron/v2"
 )
 
 func (w *Worker) StartDBConnectJob() error {
@@ -92,7 +92,7 @@ func (w *Worker) StartDBConnectJob() error {
 		log.Fatalf("[FATAL]: could not start the DB connect job: %v", err)
 		return err
 	}
-	log.Printf("[INFO]: new DB connect job has been scheduled every %d minutes", 2)
+	log.Printf("[INFO]: new DB connect job has been scheduled every %d seconds", 30)
 	return nil
 }
 
