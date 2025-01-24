@@ -129,6 +129,8 @@ github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406 h1:2T8yV+WHghZZS7lvAZ
 github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406/go.mod h1:e8mHL9J0EYdHiv9HqvIWRrJdWGlEdirm5LA4qWop2zQ=
 github.com/open-uem/nats v0.0.0-20250105132553-e063a8022512 h1:nU6zdBBwx0ZCjXdyp9g9X6ms1DioIDrtPVQpaB09IJo=
 github.com/open-uem/nats v0.0.0-20250105132553-e063a8022512/go.mod h1:sxGFf8LgdiGQ5KbI508pHOPO1tQHphVpww7Jk5z8FEk=
+github.com/open-uem/nats v0.0.0-20250124054349-0a9058f44dfe h1:gMleIjyYYHeGqJCo/t9DqRex3Z6+7LUicEldIDNS6eA=
+github.com/open-uem/nats v0.0.0-20250124054349-0a9058f44dfe/go.mod h1:sxGFf8LgdiGQ5KbI508pHOPO1tQHphVpww7Jk5z8FEk=
 github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5 h1:EsMEGiRRtb0vJCdpczs8YkJIOvUpyxxI1P49AzBn9g4=
 github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5/go.mod h1:R2LdbpDQixQPMa4a6yuZsYFPANQzXU8EPzQD7/1iQXk=
 github.com/pkg/sftp v1.13.7 h1:uv+I3nNJvlKZIQGSr8JVQLNHFU9YhhNpvC14Y6KgmSM=

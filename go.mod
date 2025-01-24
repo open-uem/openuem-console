@@ -26,7 +26,7 @@ require (
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.38.0
 	github.com/open-uem/ent v0.0.0-20250105121453-5b3092896406
-	github.com/open-uem/nats v0.0.0-20250105132553-e063a8022512
+	github.com/open-uem/nats v0.0.0-20250124054349-0a9058f44dfe
 	github.com/open-uem/utils v0.0.0-20250105115248-b0599a18d2b5
 	github.com/pkg/sftp v1.13.7
 	github.com/stretchr/testify v1.10.0

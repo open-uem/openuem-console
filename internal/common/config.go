@@ -2,7 +2,9 @@ package common
 
 import (
 	"log"
+	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/open-uem/utils"
 	"gopkg.in/ini.v1"
 )
@@ -148,5 +150,37 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 	w.ReverseProxyServer = key.String()
 
+	return nil
+}
+
+func (w *Worker) StartGenerateConsoleConfigJob() error {
+	var err error
+
+	// Create task for getting the worker config
+	w.ConfigJob, err = w.TaskScheduler.NewJob(
+		gocron.DurationJob(
+			time.Duration(time.Duration(1*time.Minute)),
+		),
+		gocron.NewTask(
+			func() {
+				err = w.GenerateConsoleConfig()
+				if err != nil {
+					log.Printf("[ERROR]: could not generate config for console, reason: %v", err)
+					return
+				}
+
+				log.Println("[INFO]: console's config has been successfully generated")
+				if err := w.TaskScheduler.RemoveJob(w.ConfigJob.ID()); err != nil {
+					return
+				}
+				return
+			},
+		),
+	)
+	if err != nil {
+		log.Fatalf("[FATAL]: could not start the generate console config job: %v", err)
+		return err
+	}
+	log.Printf("[INFO]: new generate console config job has been scheduled every %d minute", 1)
 	return nil
 }

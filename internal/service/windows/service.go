@@ -7,15 +7,32 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/open-uem/openuem-console/internal/common"
 	"github.com/open-uem/utils"
 	"golang.org/x/sys/windows/svc"
 )
 
 func main() {
+	var err error
+
 	w := common.NewWorker("openuem-console-service.txt")
+
+	// Start Task Scheduler
+	w.TaskScheduler, err = gocron.NewScheduler()
+	if err != nil {
+		log.Fatalf("[FATAL]: could not create task scheduler, reason: %s", err.Error())
+		return
+	}
+	w.TaskScheduler.Start()
+	log.Println("[INFO]: task scheduler has been started")
+
 	if err := w.GenerateConsoleConfig(); err != nil {
-		log.Fatalf("[FATAL]: could not generate config for OpenUEM console: %v", err)
+		log.Printf("[ERROR]: could not generate config for OpenUEM console: %v", err)
+	}
+
+	if err := w.StartGenerateConsoleConfigJob(); err != nil {
+		log.Fatalf("[FATAL]: could not start job to generate config for OpenUEM console: %v", err)
 	}
 
 	// Get working directory

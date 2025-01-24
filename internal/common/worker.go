@@ -16,6 +16,7 @@ type Worker struct {
 	Model                             *models.Model
 	Logger                            *utils.OpenUEMLogger
 	DBConnectJob                      gocron.Job
+	ConfigJob                         gocron.Job
 	TaskScheduler                     gocron.Scheduler
 	DBUrl                             string
 	CACertPath                        string
@@ -59,17 +60,6 @@ func NewWorker(logName string) *Worker {
 }
 
 func (w *Worker) StartWorker() {
-	var err error
-
-	// Start Task Scheduler
-	w.TaskScheduler, err = gocron.NewScheduler()
-	if err != nil {
-		log.Fatalf("[FATAL]: could not create task scheduler, reason: %s", err.Error())
-		return
-	}
-	w.TaskScheduler.Start()
-	log.Println("[INFO]: task scheduler has been started")
-
 	// Start a job to try to connect with the database
 	if err := w.StartDBConnectJob(); err != nil {
 		log.Fatalf("[FATAL]: could not start DB connect job, reason: %s", err.Error())
