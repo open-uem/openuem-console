@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/invopop/ctxi18n/i18n"
@@ -533,7 +534,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.uninstall_success"))
 }
 
-func (h *Handler) WakeOnLan(c echo.Context) error {
+func (h *Handler) PowerManagement(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -547,25 +548,97 @@ func (h *Handler) WakeOnLan(c echo.Context) error {
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
 		p := partials.PaginationAndSort{}
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.WakeOnLan(c, p, h.SessionManager, agent, confirmDelete)))
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, h.SessionManager, agent, confirmDelete)))
 	}
 
-	mac := c.FormValue("MACAddress")
-	if _, err := net.ParseMAC(mac); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	action := c.Param("action")
+	if action == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_power_action"), false))
 	}
 
-	packet, err := gowol.NewMagicPacket(mac)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
+	switch action {
+	case "wol":
+		mac := c.FormValue("MACAddress")
+		if _, err := net.ParseMAC(mac); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 
-	// send wol to broadcast
-	if err := packet.Send("255.255.255.255"); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
+		packet, err := gowol.NewMagicPacket(mac)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
+		// send wol to broadcast
+		if err := packet.Send("255.255.255.255"); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.wol_success")))
+	case "off":
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		action := openuem_nats.RebootOrRestart{}
+		var whenTime time.Time
+		when := c.FormValue("when")
+		if when != "" {
+			whenTime, err = time.ParseInLocation("2006-01-02T15:04", when, time.Local)
+			if err != nil {
+				log.Println("[INFO]: could not parse scheduled time as 24h time")
+				whenTime, err = time.Parse("2006-01-02T15:04PM", when)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_parse_action_time"), false))
+				}
+			}
+			action.Date = whenTime
+		}
+
+		data, err := json.Marshal(action)
+		if err != nil {
+			log.Printf("[ERROR]: could not marshall the Power Off request, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.poweroff_could_not_marshal"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.poweroff."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
+		}
+
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.poweroff_success")))
+	case "reboot":
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		action := openuem_nats.RebootOrRestart{}
+		var whenTime time.Time
+		when := c.FormValue("when")
+		if when != "" {
+			whenTime, err = time.ParseInLocation("2006-01-02T15:04", when, time.Local)
+			if err != nil {
+				log.Println("[INFO]: could not parse scheduled time as 24h time")
+				whenTime, err = time.Parse("2006-01-02T15:04PM", when)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_parse_action_time"), false))
+				}
+			}
+			action.Date = whenTime
+		}
+
+		data, err := json.Marshal(action)
+		if err != nil {
+			log.Printf("[ERROR]: could not marshall the Reboot request, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.reboot_could_not_marshal"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.reboot."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
+		}
+
+		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "agents.reboot_success")))
+	default:
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_allowed_power_action"), false))
+	}
 }
 
 func (h *Handler) ComputerMetadata(c echo.Context) error {

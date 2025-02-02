@@ -1867,8 +1867,7 @@ video {
 
 .uk-background-fixed {
   background-attachment: fixed;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .uk-background-blend-multiply {
@@ -8091,7 +8090,6 @@ ul.uk-nav-sub {
 
 .uk-sticky-fixed {
   margin: 0 !important;
-  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
@@ -9281,8 +9279,7 @@ th.uk-text-break, td.uk-text-break {
   border: 0 !important;
   margin: 0 !important;
   overflow: hidden !important;
-  -webkit-clip-path: inset(50%) !important;
-          clip-path: inset(50%) !important;
+  clip-path: inset(50%) !important;
   white-space: nowrap !important;
 }
 
@@ -9785,6 +9782,10 @@ th.uk-text-break, td.uk-text-break {
           user-select: all;
 }
 
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -9795,6 +9796,10 @@ th.uk-text-break, td.uk-text-break {
 
 .items-start {
   align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
 }
 
 .items-center {
