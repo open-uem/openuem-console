@@ -22,6 +22,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 		} else {
 			<div id="success" class="hidden"></div>
 		}
+		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
 				<h3 class="uk-card-title"><span>{ i18n.T(ctx, "Computers") }</span></h3>
@@ -203,7 +204,7 @@ templ ComputerActions(index int, agent models.Computer) {
 			if len(agent.MAC) > 0 {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/wol", agent.ID))) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power", agent.ID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -212,6 +213,26 @@ templ ComputerActions(index int, agent models.Computer) {
 					</a>
 				</li>
 			}
+			<li>
+				<a
+					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power", agent.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					<uk-icon hx-history="false" icon="rotate-cw" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.reboot") }
+				</a>
+			</li>
+			<li>
+				<a
+					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power", agent.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					<uk-icon hx-history="false" icon="power-off" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.shutdown") }
+				</a>
+			</li>
 		</ul>
 	</div>
 }

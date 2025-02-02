@@ -114,6 +114,7 @@ en:
   Remote Assistance: "Remote Assistance"
   Yes: "Yes"
   No: "No"
+  When: "When"
   WOL: "Wake On Lan"
   agents:
     title: "Agents"
@@ -191,6 +192,19 @@ en:
     restart_required: "Agent will be restarted"
     force_restart: "Force restart"
     deleted: "Agent was deleted successfully"
+    reboot: "Reboot the computer"
+    shutdown: "Power off the computer"
+    power_title: "Power Management"
+    power_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up, reboot the computer or shut down the computer. Leave the time fields empty to run the action now."
+    no_empty_power_action: "No power action has been specified"
+    no_allowed_power_action: "No allowed power action has been specified"
+    poweroff: "Power Off"
+    reboot_short: "Reboot"
+    poweroff_success: "A request to power off the computer has been sent, check later if the computer has been powered off"
+    reboot_success: "A request to reboot the computer has been sent, check later if the computer has been rebooted"
+    poweroff_could_not_marshal: "The Power Off action could not be prepared"
+    reboot_could_not_marshal: "The Reboot action could not be prepared"
+    could_not_parse_action_time: "Could not parse action time"
   inventory:
     hardware:
       title: "Hardware"
@@ -678,6 +692,7 @@ en:
   nats:
     not_connected: "This action cannot be executed now, we're not connected to the NATS server, please try again in a few minutes"
     no_responder: "The agent did not receive the request, maybe it's not running or there's a communication issue, please try again in a few minutes"
+    request_error: "The request could not be sent to the agent, reason: %s"
 
   pagination:
     title: "Items per page"
