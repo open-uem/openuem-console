@@ -92,6 +92,17 @@ templ NavBar(active string) {
 			<span class="sr-only">Network Printers</span>
 		</a> */
 			<a
+				href="/reports"
+				hx-get="/reports"
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Reports")) }
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "reports"), templ.KV("text-muted-foreground hover:text-foreground", active != "reports") }
+			>
+				<uk-icon hx-history="false" icon="clipboard-list" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">Reports</span>
+			</a>
+			<a
 				href="/agents"
 				hx-get="/agents"
 				hx-push-url="true"
@@ -125,17 +136,6 @@ templ NavBar(active string) {
 			>
 				<uk-icon hx-history="false" icon="scroll-text" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				<span class="sr-only">Logs</span>
-			</a> */
-			/* 			<a
-				href="/reports"
-				hx-get="/reports"
-				hx-push-url="true"
-				hx-target="body"
-				uk-tooltip="title: Logs; pos: right"
-				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "settings"), templ.KV("text-muted-foreground hover:text-foreground", active != "settings") }
-			>
-				<uk-icon hx-history="false" icon="clipboard-list" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				<span class="sr-only">Reports</span>
 			</a> */
 			<a
 				href="https://openuem.eu"

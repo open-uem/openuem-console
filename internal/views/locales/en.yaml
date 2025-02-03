@@ -60,6 +60,7 @@ en:
   Refresh: "Refresh"
   Release Notes: "Release Notes"
   Rename: "Rename"
+  Reports: "Reports"
   Required: "Required"
   Reset: "Reset"
   Revoke: "Revoke"
@@ -439,6 +440,8 @@ en:
     date: "Installation Date"
     support_url: "Support URL"
     no_info: "No updates history available yet"
+  reports:
+    description: "Export information from OpenUEM using the following predefined reports"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"

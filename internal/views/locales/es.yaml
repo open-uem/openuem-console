@@ -61,6 +61,7 @@ es:
   Refresh: "Refrescar"
   Release Notes: "Nota de lanzamiento"
   Rename: "Renombrar"
+  Reports: "Informes"
   Required: "Requerido"
   Reset: "Reestablecer"
   Revoke: "Revocar"
@@ -436,6 +437,8 @@ es:
     date: "Fecha Instalación"
     support_url: "URL de soporte"
     no_info: "El historial de actualizaciones no está disponible aún"
+  reports:
+    description: "Exporte información desde OpenUEM utilizando los siguientes informes predefinidos"
   sessions:
     data: "Datos"
     description: "Estas son las sesiones abiertas en la consola de OpenUEM por los usuarios autenticados"
