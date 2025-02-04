@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
 
 	"github.com/johnfercher/maroto/v2"
-	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
 	"github.com/johnfercher/maroto/v2/pkg/components/text"
@@ -18,6 +18,7 @@ import (
 	"github.com/johnfercher/maroto/v2/pkg/props"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/reports_views"
@@ -31,12 +32,21 @@ func (h *Handler) GenerateReport(c echo.Context, successMessage string) error {
 
 	dstPath := filepath.Join(h.DownloadDir, "report_test.pdf")
 
-	allAgents, err := h.Model.GetAllAgents(filters.AgentFilter{})
+	f, err := h.GetAgentFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+	}
+
+	allAgents, err := h.Model.GetAllAgents(*f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage("could not get all agents", false))
 	}
 
-	m := GetMaroto(allAgents)
+	m, err := GetAgentsReport(allAgents)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+	}
+
 	document, err := m.Generate()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage("could not generate report", false))
@@ -54,7 +64,7 @@ func (h *Handler) GenerateReport(c echo.Context, successMessage string) error {
 	return c.String(http.StatusOK, "")
 }
 
-func GetMaroto(agents []*ent.Agent) core.Maroto {
+func GetAgentsReport(agents []*ent.Agent) (core.Maroto, error) {
 	cfg := config.NewBuilder().
 		WithPageNumber().
 		WithLeftMargin(10).
@@ -66,9 +76,8 @@ func GetMaroto(agents []*ent.Agent) core.Maroto {
 	mrt := maroto.New(cfg)
 	m := maroto.NewMetricsDecorator(mrt)
 
-	err := m.RegisterHeader(getPageHeader())
-	if err != nil {
-		log.Fatal(err.Error())
+	if err := m.RegisterHeader(getPageHeader()); err != nil {
+		return nil, err
 	}
 
 	m.AddRows(text.NewRow(10, "Agents List", props.Text{
@@ -79,7 +88,7 @@ func GetMaroto(agents []*ent.Agent) core.Maroto {
 
 	m.AddRows(getTransactions(agents)...)
 
-	return m
+	return m, nil
 }
 
 func getTransactions(agents []*ent.Agent) []core.Row {
@@ -119,11 +128,10 @@ func getTransactions(agents []*ent.Agent) []core.Row {
 }
 
 func getPageHeader() core.Row {
-	return row.New(20).Add(
+	return row.New(10).Add(
 		image.NewFromFileCol(3, "assets/img/openuem.png", props.Rect{
-			Percent: 50,
+			Percent: 75,
 		}),
-		col.New(6),
 	)
 }
 
@@ -149,4 +157,54 @@ func getWhiteColor() *props.Color {
 		Green: 255,
 		Blue:  255,
 	}
+}
+
+func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) {
+	f := filters.AgentFilter{}
+
+	f.Hostname = c.FormValue("filterByHostname")
+
+	filteredAgentStatusOptions := []string{}
+	for index := range agents_views.AgentStatus {
+		value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
+		if value != "" {
+			filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
+		}
+	}
+	f.AgentStatusOptions = filteredAgentStatusOptions
+
+	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	if err != nil {
+		return nil, err
+	}
+	filteredAgentOSes := []string{}
+	for index := range availableOSes {
+		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+		if value != "" {
+			filteredAgentOSes = append(filteredAgentOSes, value)
+		}
+	}
+	f.AgentOSVersions = filteredAgentOSes
+
+	appliedTags, err := h.Model.GetAppliedTags()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tag := range appliedTags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
+
+	contactFrom := c.FormValue("filterByContactDateFrom")
+	if contactFrom != "" {
+		f.ContactFrom = contactFrom
+	}
+	contactTo := c.FormValue("filterByContactDateTo")
+	if contactTo != "" {
+		f.ContactTo = contactTo
+	}
+
+	return &f, nil
 }

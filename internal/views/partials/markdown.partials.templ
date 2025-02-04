@@ -14,12 +14,12 @@ templ MarkdownNavbar(agentId, renderedMarkdown string) {
 					title="edit"
 					class="p-2 uk-button uk-button-secondary flex gap-2"
 					_="on click                    
-                    remove .hidden from #view
-                    add .hidden to #edit
-                    remove @disabled from <button[id^='markdown-']/>
-                    add .hidden to #rendered-markdown
-                    remove .hidden from #notes
-                end"
+						remove .hidden from #view
+						add .hidden to #edit
+						remove @disabled from <button[id^='markdown-']/>
+						add .hidden to #rendered-markdown
+						remove .hidden from #notes
+					end"
 				>
 					<uk-icon id="markdown-action" hx-history="false" icon="pen" custom-class="h-4 w-4 " uk-cloack></uk-icon>
 					{ i18n.T(ctx, "Edit") }
@@ -36,12 +36,12 @@ templ MarkdownNavbar(agentId, renderedMarkdown string) {
 					hx-swap="innerHTML"
 					hx-include="[name='markdown']"
 					_="on click
-                    remove .hidden from #edit
-                    add .hidden to #view
-                    add @disabled to <button[id^='markdown-']/>
-                    add .hidden to #notes
-                    remove .hidden from #rendered-markdown
-                end"
+						remove .hidden from #edit
+						add .hidden to #view
+						add @disabled to <button[id^='markdown-']/>
+						add .hidden to #notes
+						remove .hidden from #rendered-markdown
+					end"
 				>
 					<uk-icon id="markdown-action" hx-history="false" icon="eye" custom-class="h-4 w-4 " uk-cloack></uk-icon>
 					{ i18n.T(ctx, "View") }
