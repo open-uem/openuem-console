@@ -442,6 +442,7 @@ en:
     no_info: "No updates history available yet"
   reports:
     description: "Export information from OpenUEM using the following predefined reports"
+    agents: "Generate agents report"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"

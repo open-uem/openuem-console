@@ -439,6 +439,7 @@ es:
     no_info: "El historial de actualizaciones no está disponible aún"
   reports:
     description: "Exporte información desde OpenUEM utilizando los siguientes informes predefinidos"
+    agents: "Generar informe de agentes"
   sessions:
     data: "Datos"
     description: "Estas son las sesiones abiertas en la consola de OpenUEM por los usuarios autenticados"

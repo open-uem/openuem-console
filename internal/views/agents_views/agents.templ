@@ -49,7 +49,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						_="on htmx:afterRequest	remove .htmx-request from #report-spinner"
 					>
 						<button
-							title="Generate agents report"
+							title={ i18n.T(ctx, "reports.agents") }
 							class="flex items-center gap-2"
 							id="report-button"
 							class="flex items-center gap-2"

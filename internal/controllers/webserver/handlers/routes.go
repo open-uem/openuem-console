@@ -148,7 +148,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/email/:email/exists", h.EmailExists)
 
 	e.GET("/reports", func(c echo.Context) error { return h.Reports(c, "") }, h.IsAuthenticated)
-	e.POST("/reports", func(c echo.Context) error { return h.GenerateReport(c, "") }, h.IsAuthenticated)
+	e.POST("/reports", func(c echo.Context) error { return h.GenerateAgentsReport(c, "") }, h.IsAuthenticated)
 
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.POST("/security", h.ListAntivirusStatus, h.IsAuthenticated)

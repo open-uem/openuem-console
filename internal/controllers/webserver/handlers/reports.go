@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/johnfercher/maroto/v2"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
@@ -28,9 +29,10 @@ func (h *Handler) Reports(c echo.Context, successMessage string) error {
 	return RenderView(c, reports_views.ReportsIndex("| Reports", reports_views.Reports(c, h.SessionManager, successMessage)))
 }
 
-func (h *Handler) GenerateReport(c echo.Context, successMessage string) error {
+func (h *Handler) GenerateAgentsReport(c echo.Context, successMessage string) error {
 
-	dstPath := filepath.Join(h.DownloadDir, "report_test.pdf")
+	fileName := uuid.NewString() + ".pdf"
+	dstPath := filepath.Join(h.DownloadDir, fileName)
 
 	f, err := h.GetAgentFilters(c)
 	if err != nil {
@@ -58,7 +60,7 @@ func (h *Handler) GenerateReport(c echo.Context, successMessage string) error {
 	}
 
 	// Redirect to file
-	url := "/download/report_test.pdf"
+	url := "/download/" + fileName
 	c.Response().Header().Set("HX-Redirect", url)
 
 	return c.String(http.StatusOK, "")
