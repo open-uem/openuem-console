@@ -63,10 +63,18 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	var query *ent.AgentQuery
 
 	// Info from agents waiting for admission won't be shown
-	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	if p.PageSize != 0 {
+		if excludeWaitingForAdmissionAgents {
+			query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		} else {
+			query = m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		}
 	} else {
-		query = m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		if excludeWaitingForAdmissionAgents {
+			query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease()
+		} else {
+			query = m.Client.Agent.Query().WithTags().WithRelease()
+		}
 	}
 
 	// Apply filters

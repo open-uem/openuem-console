@@ -39,7 +39,10 @@ func (h *Handler) GenerateAgentsReport(c echo.Context, successMessage string) er
 		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
 	}
 
-	allAgents, err := h.Model.GetAllAgents(*f)
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allAgents, err := h.Model.GetAgentsByPage(p, *f, true)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage("could not get all agents", false))
 	}
@@ -108,10 +111,19 @@ func getTransactions(agents []*ent.Agent) []core.Row {
 	var contentsRow []core.Row
 
 	for i, agent := range agents {
+		osImage := ""
+		switch agent.Os {
+		case "windows":
+			osImage = "assets/img/os/windows.png"
+		}
+
 		r := row.New(4).Add(
 			text.NewCol(2, agent.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			text.NewCol(2, string(agent.AgentStatus), props.Text{Size: 8, Align: align.Center}),
-			text.NewCol(2, agent.Os, props.Text{Size: 8, Align: align.Center}),
+			image.NewFromFileCol(2, osImage, props.Rect{
+				Center:  true,
+				Percent: 75,
+			}),
 			text.NewCol(2, agent.Edges.Release.Version, props.Text{Size: 8, Align: align.Center}),
 			text.NewCol(2, agent.IP, props.Text{Size: 8, Align: align.Center}),
 			text.NewCol(2, agent.LastContact.Format("2006-01-02 15:03"), props.Text{Size: 8, Align: align.Center}),
