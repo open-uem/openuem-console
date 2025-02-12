@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/johnfercher/maroto/v2"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
@@ -19,6 +20,7 @@ import (
 	"github.com/johnfercher/maroto/v2/pkg/props"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -47,7 +49,7 @@ func (h *Handler) GenerateAgentsReport(c echo.Context, successMessage string) er
 		return RenderError(c, partials.ErrorMessage("could not get all agents", false))
 	}
 
-	m, err := GetAgentsReport(allAgents)
+	m, err := GetAgentsReport(c, allAgents)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
 	}
@@ -69,7 +71,7 @@ func (h *Handler) GenerateAgentsReport(c echo.Context, successMessage string) er
 	return c.String(http.StatusOK, "")
 }
 
-func GetAgentsReport(agents []*ent.Agent) (core.Maroto, error) {
+func GetAgentsReport(c echo.Context, agents []*ent.Agent) (core.Maroto, error) {
 	cfg := config.NewBuilder().
 		WithPageNumber().
 		WithLeftMargin(10).
@@ -85,26 +87,26 @@ func GetAgentsReport(agents []*ent.Agent) (core.Maroto, error) {
 		return nil, err
 	}
 
-	m.AddRows(text.NewRow(10, "Agents List", props.Text{
+	m.AddRows(text.NewRow(10, "Agents", props.Text{
 		Top:   3,
 		Style: fontstyle.Bold,
 		Align: align.Center,
 	}))
 
-	m.AddRows(getTransactions(agents)...)
+	m.AddRows(getAgentsTransactions(c, agents)...)
 
 	return m, nil
 }
 
-func getTransactions(agents []*ent.Agent) []core.Row {
+func getAgentsTransactions(c echo.Context, agents []*ent.Agent) []core.Row {
 	rows := []core.Row{
 		row.New(5).Add(
-			text.NewCol(2, "Hostname", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, "Status", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, "Version", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, "IP Address", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, "Last Contact", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "Status"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.os"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.version"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "IP Address"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.last_contact"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
 		).WithStyle(&props.Cell{BackgroundColor: getDarkGreenColor()}),
 	}
 
@@ -139,38 +141,6 @@ func getTransactions(agents []*ent.Agent) []core.Row {
 	rows = append(rows, contentsRow...)
 
 	return rows
-}
-
-func getPageHeader() core.Row {
-	return row.New(10).Add(
-		image.NewFromFileCol(3, "assets/img/openuem.png", props.Rect{
-			Percent: 75,
-		}),
-	)
-}
-
-func getDarkGreenColor() *props.Color {
-	return &props.Color{
-		Red:   0,
-		Green: 117,
-		Blue:  0,
-	}
-}
-
-func getLightGreenColor() *props.Color {
-	return &props.Color{
-		Red:   143,
-		Green: 204,
-		Blue:  143,
-	}
-}
-
-func getWhiteColor() *props.Color {
-	return &props.Color{
-		Red:   255,
-		Green: 255,
-		Blue:  255,
-	}
 }
 
 func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) {
@@ -221,4 +191,211 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	}
 
 	return &f, nil
+}
+
+func (h *Handler) GenerateComputersReport(c echo.Context, successMessage string) error {
+
+	fileName := uuid.NewString() + ".pdf"
+	dstPath := filepath.Join(h.DownloadDir, fileName)
+
+	f, err := h.GetComputerFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allComputers, err := h.Model.GetComputersByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not get all computers", false))
+	}
+
+	m, err := GetComputersReport(c, allComputers)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+	}
+
+	document, err := m.Generate()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not generate report", false))
+	}
+
+	err = document.Save(dstPath)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func GetComputersReport(c echo.Context, computers []models.Computer) (core.Maroto, error) {
+	cfg := config.NewBuilder().
+		WithPageNumber().
+		WithLeftMargin(10).
+		WithTopMargin(10).
+		WithOrientation(orientation.Horizontal).
+		WithRightMargin(10).
+		Build()
+
+	mrt := maroto.New(cfg)
+	m := maroto.NewMetricsDecorator(mrt)
+
+	if err := m.RegisterHeader(getPageHeader()); err != nil {
+		return nil, err
+	}
+
+	m.AddRows(text.NewRow(10, "Computers", props.Text{
+		Top:   3,
+		Style: fontstyle.Bold,
+		Align: align.Center,
+	}))
+
+	m.AddRows(getComputersTransactions(c, computers)...)
+
+	return m, nil
+}
+
+func getComputersTransactions(c echo.Context, computers []models.Computer) []core.Row {
+	rows := []core.Row{
+		row.New(5).Add(
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(1, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.version"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.username"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(1, i18n.T(c.Request().Context(), "agents.manufacturer"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.model"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, "S/N", props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+		).WithStyle(&props.Cell{BackgroundColor: getDarkGreenColor()}),
+	}
+
+	var contentsRow []core.Row
+
+	for i, computer := range computers {
+		osImage := ""
+		switch computer.OS {
+		case "windows":
+			osImage = "assets/img/os/windows.png"
+		}
+
+		r := row.New(4).Add(
+			text.NewCol(2, computer.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
+			image.NewFromFileCol(1, osImage, props.Rect{
+				Center:  true,
+				Percent: 75,
+			}),
+			text.NewCol(2, computer.Version, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(2, computer.Username, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(1, computer.Manufacturer, props.Text{Size: 7, Align: align.Left}),
+			text.NewCol(2, computer.Model, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(2, computer.Serial, props.Text{Size: 7, Align: align.Left}),
+		)
+		if i%2 == 0 {
+			gray := getLightGreenColor()
+			r.WithStyle(&props.Cell{BackgroundColor: gray})
+		}
+
+		contentsRow = append(contentsRow, r)
+	}
+
+	rows = append(rows, contentsRow...)
+
+	return rows
+}
+
+func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, error) {
+	f := filters.AgentFilter{}
+
+	f.Hostname = c.FormValue("filterByHostname")
+	f.Username = c.FormValue("filterByUsername")
+
+	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	if err != nil {
+		return nil, err
+	}
+	filteredAgentOSes := []string{}
+	for index := range availableOSes {
+		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+		if value != "" {
+			filteredAgentOSes = append(filteredAgentOSes, value)
+		}
+	}
+	f.AgentOSVersions = filteredAgentOSes
+
+	versions, err := h.Model.GetOSVersions(f)
+	if err != nil {
+		return nil, err
+	}
+	filteredVersions := []string{}
+	for index := range versions {
+		value := c.FormValue(fmt.Sprintf("filterByOSVersion%d", index))
+		if value != "" {
+			filteredVersions = append(filteredVersions, value)
+		}
+	}
+	f.OSVersions = filteredVersions
+
+	filteredComputerManufacturers := []string{}
+	vendors, err := h.Model.GetComputerManufacturers()
+	if err != nil {
+		return nil, err
+	}
+	for index := range vendors {
+		value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
+		if value != "" {
+			filteredComputerManufacturers = append(filteredComputerManufacturers, value)
+		}
+	}
+	f.ComputerManufacturers = filteredComputerManufacturers
+
+	filteredComputerModels := []string{}
+	models, err := h.Model.GetComputerModels(f)
+	if err != nil {
+		return nil, err
+	}
+	for index := range models {
+		value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
+		if value != "" {
+			filteredComputerModels = append(filteredComputerModels, value)
+		}
+	}
+	f.ComputerModels = filteredComputerModels
+
+	return &f, nil
+}
+
+func getPageHeader() core.Row {
+	return row.New(10).Add(
+		image.NewFromFileCol(3, "assets/img/openuem.png", props.Rect{
+			Percent: 75,
+		}),
+	)
+}
+
+func getDarkGreenColor() *props.Color {
+	return &props.Color{
+		Red:   0,
+		Green: 117,
+		Blue:  0,
+	}
+}
+
+func getLightGreenColor() *props.Color {
+	return &props.Color{
+		Red:   143,
+		Green: 204,
+		Blue:  143,
+	}
+}
+
+func getWhiteColor() *props.Color {
+	return &props.Color{
+		Red:   255,
+		Green: 255,
+		Blue:  255,
+	}
 }

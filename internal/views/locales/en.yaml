@@ -127,6 +127,7 @@ en:
     username: "Username"
     manufacturer: "Manufacturer"
     model: "Model"
+    serial: "S/N"
     enabled: "Enabled"
     disabled: "Disabled"
     no_agents: "No agents were found for this query"
@@ -442,7 +443,8 @@ en:
     no_info: "No updates history available yet"
   reports:
     description: "Export information from OpenUEM using the following predefined reports"
-    agents: "Generate agents report"
+    agents: "Generate agents' report"
+    computers: "Generate computers' report"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"
