@@ -190,6 +190,17 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 		f.ContactTo = contactTo
 	}
 
+	tags, err := h.Model.GetAllTags()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tag := range tags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
+
 	return &f, nil
 }
 
@@ -364,6 +375,17 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 		}
 	}
 	f.ComputerModels = filteredComputerModels
+
+	tags, err := h.Model.GetAllTags()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tag := range tags {
+		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+			f.Tags = append(f.Tags, tag.ID)
+		}
+	}
 
 	return &f, nil
 }
