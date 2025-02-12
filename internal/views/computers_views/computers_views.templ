@@ -45,6 +45,8 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 						hx-include="input[name^='filterBy']"
 						_="on htmx:afterRequest	remove .htmx-request from #report-spinner"
 					>
+						<input type="hidden" name="sortBy" value={ p.SortBy }/>
+						<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
 						<button
 							title={ i18n.T(ctx, "reports.computers") }
 							class="flex items-center gap-2"
