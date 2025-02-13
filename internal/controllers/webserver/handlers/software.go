@@ -25,23 +25,17 @@ func (h *Handler) Software(c echo.Context) error {
 	}
 
 	// Get filters
-	filterByName := c.FormValue("filterByAppName")
-	filterByPublisher := c.FormValue("filterByAppPublisher")
-
-	f := filters.ApplicationsFilter{}
-	if filterByName != "" {
-		f.AppName = filterByName
-	}
-	if filterByPublisher != "" {
-		f.Vendor = filterByPublisher
-	}
-
-	apps, err = h.Model.GetAppsByPage(p, f)
+	f, err := h.GetSoftwareFilters(c)
 	if err != nil {
 		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
 	}
 
-	p.NItems, err = h.Model.CountAllApps(f)
+	apps, err = h.Model.GetAppsByPage(p, *f)
+	if err != nil {
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
+	}
+
+	p.NItems, err = h.Model.CountAllApps(*f)
 	if err != nil {
 		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
 	}
@@ -54,5 +48,21 @@ func (h *Handler) Software(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, f, h.SessionManager, l, apps, refreshTime)))
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, *f, h.SessionManager, l, apps, refreshTime)))
+}
+
+func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilter, error) {
+	// Get filters
+	filterByName := c.FormValue("filterByAppName")
+	filterByPublisher := c.FormValue("filterByAppPublisher")
+
+	f := filters.ApplicationsFilter{}
+	if filterByName != "" {
+		f.AppName = filterByName
+	}
+	if filterByPublisher != "" {
+		f.Vendor = filterByPublisher
+	}
+
+	return &f, nil
 }

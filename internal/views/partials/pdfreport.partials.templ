@@ -1,0 +1,31 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ PDFReportButton(p PaginationAndSort, url string, title string) {
+	<form
+		class="flex gap-2"
+		hx-post={ url }
+		hx-push-url="false"
+		hx-target="#main"
+		hx-swap="outerHTML"
+		hx-indicator="#report-spinner"
+		hx-include="input[name^='filterBy']"
+		_="on htmx:afterRequest	remove .htmx-request from #report-spinner"
+	>
+		<input type="hidden" name="sortBy" value={ p.SortBy }/>
+		<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
+		<button
+			title={ i18n.T(ctx, title) }
+			class="flex items-center gap-2"
+			id="report-button"
+			class="flex items-center gap-2"
+			type="submit"
+		>
+			<i id="pdf" class="ri-file-pdf-2-fill ri-3x text-red-600 hover:text-red-400"></i>
+			<div id="report-spinner" class="htmx-indicator">
+				<uk-icon hx-history="false" icon="loader-circle" custom-class="h-8 w-8 animate-spin text-red-600" uk-cloack></uk-icon>
+			</div>
+		</button>
+	</form>
+}

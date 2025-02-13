@@ -35,31 +35,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							<p class="uk-text-small uk-text-bold underline">{ i18n.T(ctx, "computers.filter_by_application", f.WithApplication) }</p>
 						}
 					</div>
-					<form
-						class="flex gap-2"
-						hx-post="/reports/computers"
-						hx-push-url="false"
-						hx-target="#main"
-						hx-swap="outerHTML"
-						hx-indicator="#report-spinner"
-						hx-include="input[name^='filterBy']"
-						_="on htmx:afterRequest	remove .htmx-request from #report-spinner"
-					>
-						<input type="hidden" name="sortBy" value={ p.SortBy }/>
-						<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
-						<button
-							title={ i18n.T(ctx, "reports.computers") }
-							class="flex items-center gap-2"
-							id="report-button"
-							class="flex items-center gap-2"
-							type="submit"
-						>
-							<i id="pdf" class="ri-file-pdf-2-fill ri-3x text-red-600 hover:text-red-400"></i>
-							<div id="report-spinner" class="htmx-indicator">
-								<uk-icon hx-history="false" icon="loader-circle" custom-class="h-8 w-8 animate-spin text-red-600" uk-cloack></uk-icon>
-							</div>
-						</button>
-					</form>
+					@partials.PDFReportButton(p, "/reports/computers", "reports.computers")
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">

@@ -445,6 +445,9 @@ en:
     description: "Export information from OpenUEM using the following predefined reports"
     agents: "Generate agents' report"
     computers: "Generate computers' report"
+    antivirus: "Generate antivirus systems' report"
+    updates: "Generate system updates' report"
+    software: "Generate software report"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"

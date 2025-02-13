@@ -22,10 +22,15 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "antivirus.title") }</h3>
-						<p class="uk-margin-small-top uk-text-small">
-							{ i18n.T(ctx, "antivirus.description") }
-						</p>
+						<div class="flex justify-between items-center">
+							<div class="flex flex-col">
+								<h3 class="uk-card-title">{ i18n.T(ctx, "antivirus.title") }</h3>
+								<p class="uk-margin-small-top uk-text-small">
+									{ i18n.T(ctx, "antivirus.description") }
+								</p>
+							</div>
+							@partials.PDFReportButton(p, "/reports/antivirus", "reports.antivirus")
+						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">

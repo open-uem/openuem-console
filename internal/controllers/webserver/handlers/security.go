@@ -20,12 +20,111 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	// Get filters values
+	f, availableOSes, detectedAntiviri, err := h.GetAntiviriFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	antiviri, err := h.Model.GetAntiviriByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	p.NItems, err = h.Model.CountAllAntiviri(*f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, h.SessionManager, l, antiviri, detectedAntiviri, availableOSes, refreshTime)))
+}
+
+func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
+	var err error
+
+	p := partials.NewPaginationAndSort()
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+
+	// Get filters values
+	f, availableOSes, availableUpdateStatus, err := h.GetSystemUpdatesFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	systemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	p.NItems, err = h.Model.CountAllSystemUpdates(*f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, h.SessionManager, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
+}
+
+func (h *Handler) ListLatestUpdates(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage("could not find agent info", false))
+	}
+
+	p := partials.NewPaginationAndSort()
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+
+	if p.SortBy == "" {
+		p.SortBy = "name"
+		p.SortOrder = "asc"
+	}
+
+	p.NItems, err = h.Model.CountLatestUpdates(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	updates, err := h.Model.GetLatestUpdates(agentId, p)
+	if err != nil {
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security", h.SessionManager)))
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	if c.Request().Method == "POST" {
+		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates)))
+}
+
+func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {
+	// Get filters values
 	f := filters.AntivirusFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes()
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
@@ -38,7 +137,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 
 	detectedAntiviri, err := h.Model.GetDetectedAntiviri()
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return nil, nil, nil, err
 	}
 	filteredAntiviri := []string{}
 	for index := range detectedAntiviri {
@@ -67,40 +166,17 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	}
 	f.AntivirusUpdatedOptions = filteredUpdateStatus
 
-	antiviri, err := h.Model.GetAntiviriByPage(p, f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	p.NItems, err = h.Model.CountAllAntiviri(f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		log.Println("[ERROR]: could not get refresh time from database")
-		refreshTime = 5
-	}
-
-	l := views.GetTranslatorForDates(c)
-
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, f, h.SessionManager, l, antiviri, detectedAntiviri, availableOSes, refreshTime)))
+	return &f, availableOSes, detectedAntiviri, nil
 }
 
-func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
-	var err error
-
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
-
+func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdatesFilter, []string, []string, error) {
 	// Get filters values
 	f := filters.SystemUpdatesFilter{}
 	f.Hostname = c.FormValue("filterByHostname")
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes()
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
@@ -148,61 +224,5 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 	}
 	f.UpdateStatus = filteredUpdateStatus
 
-	systemUpdates, err := h.Model.GetSystemUpdatesByPage(p, f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	p.NItems, err = h.Model.CountAllSystemUpdates(f)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	refreshTime, err := h.Model.GetDefaultRefreshTime()
-	if err != nil {
-		log.Println("[ERROR]: could not get refresh time from database")
-		refreshTime = 5
-	}
-
-	l := views.GetTranslatorForDates(c)
-
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, f, h.SessionManager, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
-}
-
-func (h *Handler) ListLatestUpdates(c echo.Context) error {
-	agentId := c.Param("uuid")
-	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
-	}
-
-	agent, err := h.Model.GetAgentById(agentId)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not find agent info", false))
-	}
-
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
-
-	if p.SortBy == "" {
-		p.SortBy = "name"
-		p.SortOrder = "asc"
-	}
-
-	p.NItems, err = h.Model.CountLatestUpdates(agentId)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	updates, err := h.Model.GetLatestUpdates(agentId, p)
-	if err != nil {
-		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security", h.SessionManager)))
-	}
-
-	l := views.GetTranslatorForDates(c)
-
-	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates))
-	}
-
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates)))
+	return &f, availableOSes, availableUpdateStatus, err
 }

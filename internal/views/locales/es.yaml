@@ -441,6 +441,10 @@ es:
   reports:
     description: "Exporte información desde OpenUEM utilizando los siguientes informes predefinidos"
     agents: "Generar informe de agentes"
+    computers: "Generar informe de equipos"
+    antivirus: "Generar informe de sistemas de antivirus"
+    updates: "Generar informe de actualizaciones del sistema"
+    software: "Generar informe de software"
   sessions:
     data: "Datos"
     description: "Estas son las sesiones abiertas en la consola de OpenUEM por los usuarios autenticados"

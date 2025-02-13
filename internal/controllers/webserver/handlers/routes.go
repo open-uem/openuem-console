@@ -147,9 +147,11 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/user/:uid/exists", h.UIDExists)
 	e.GET("/email/:email/exists", h.EmailExists)
 
-	e.GET("/reports", func(c echo.Context) error { return h.Reports(c, "") }, h.IsAuthenticated)
-	e.POST("/reports/agents", func(c echo.Context) error { return h.GenerateAgentsReport(c, "") }, h.IsAuthenticated)
-	e.POST("/reports/computers", func(c echo.Context) error { return h.GenerateComputersReport(c, "") }, h.IsAuthenticated)
+	e.POST("/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
+	e.POST("/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)
+	e.POST("/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
+	e.POST("/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
+	e.POST("/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
 
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.POST("/security", h.ListAntivirusStatus, h.IsAuthenticated)

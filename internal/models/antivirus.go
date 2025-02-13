@@ -25,9 +25,11 @@ func mainAntivirusQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, antivirus.FieldName, antivirus.FieldIsActive, antivirus.FieldIsUpdated).
 		LeftJoin(sql.Table(antivirus.Table)).
 		On(agent.FieldID, antivirus.OwnerColumn).
-		Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission))).
-		Limit(p.PageSize).
-		Offset((p.CurrentPage - 1) * p.PageSize)
+		Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission)))
+
+	if p.PageSize != 0 {
+		s.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	}
 }
 
 func (m *Model) CountAllAntiviri(f filters.AntivirusFilter) (int, error) {
