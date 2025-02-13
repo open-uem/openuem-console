@@ -32,7 +32,7 @@ func (m *Model) GetAllAgentsToUpdate() ([]*ent.Agent, error) {
 func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	// Info from agents waiting for admission won't be shown
 
-	query := m.Client.Agent.Query()
+	query := m.Client.Agent.Query().WithRelease()
 	// Apply filters
 	applyAgentFilters(query, f)
 
@@ -64,9 +64,13 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 
 	// Info from agents waiting for admission won't be shown
 	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease()
 	} else {
-		query = m.Client.Agent.Query().WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+		query = m.Client.Agent.Query().WithTags().WithRelease()
+	}
+
+	if p.PageSize != 0 {
+		query = query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 	}
 
 	// Apply filters

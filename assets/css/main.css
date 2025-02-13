@@ -9782,10 +9782,6 @@ th.uk-text-break, td.uk-text-break {
           user-select: all;
 }
 
-.flex-row-reverse {
-  flex-direction: row-reverse;
-}
-
 .flex-col {
   flex-direction: column;
 }
@@ -10367,6 +10363,11 @@ th.uk-text-break, td.uk-text-break {
 
 .hover\:text-foreground:hover {
   color: hsl(var(--foreground));
+}
+
+.hover\:text-red-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(248 113 113 / var(--tw-text-opacity));
 }
 
 .dark\:brightness-\[0\.2\]:is(.dark *) {

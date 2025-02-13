@@ -25,6 +25,7 @@ type Computer struct {
 	Username     string
 	Manufacturer string
 	Model        string
+	Serial       string
 	Tags         []*ent.Tag
 }
 
@@ -44,13 +45,15 @@ func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).
-		On(agent.FieldID, operatingsystem.OwnerColumn).
-		Limit(p.PageSize).
-		Offset((p.CurrentPage - 1) * p.PageSize)
+		On(agent.FieldID, operatingsystem.OwnerColumn)
+
+	if p.PageSize != 0 {
+		s.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	}
 }
 
 /* func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]*ent.Agent, error) {
