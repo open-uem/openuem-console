@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -15,7 +16,7 @@ func (w *Worker) StartDownloadCleanJob() error {
 	// Create task
 	_, err = w.TaskScheduler.NewJob(
 		gocron.DurationJob(
-			time.Duration(time.Duration(60*time.Minute)),
+			time.Duration(time.Duration(5*time.Minute)),
 		),
 		gocron.NewTask(
 			func() {
@@ -26,7 +27,17 @@ func (w *Worker) StartDownloadCleanJob() error {
 						return
 					}
 					for _, d := range dir {
-						os.RemoveAll(path.Join([]string{w.DownloadDir, d.Name()}...))
+						fileName := path.Join(w.DownloadDir, d.Name())
+						info, err := os.Stat(fileName)
+						if err != nil {
+							log.Printf("[ERROR]: could not read the download directory contents: %v", err)
+							continue
+						}
+						if info.ModTime().Before(time.Now().Add(-1 * time.Minute)) {
+							os.RemoveAll(fileName)
+						} else {
+							fmt.Println(info.ModTime(), info.ModTime().Before(time.Now().Add(-1*time.Minute)))
+						}
 					}
 				}
 			},
@@ -36,6 +47,6 @@ func (w *Worker) StartDownloadCleanJob() error {
 		log.Printf("[FATAL]: could not start the download directory clean job: %v", err)
 		return err
 	}
-	log.Println("[INFO]: download directory clean job has been scheduled every 60 minutes")
+	log.Println("[INFO]: download directory clean job has been scheduled every 5 minutes")
 	return nil
 }
