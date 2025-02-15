@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type DeployPackage struct {
