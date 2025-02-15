@@ -19,5 +19,5 @@ func OpenWingetDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
 	}
 
-	return sql.Open("sqlite3", indexPath)
+	return sql.Open("sqlite", indexPath)
 }

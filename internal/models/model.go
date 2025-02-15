@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	_ "github.com/mattn/go-sqlite3"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/migrate"
 )
@@ -31,12 +30,6 @@ func New(dbUrl string, driverName string) (*Model, error) {
 			return nil, fmt.Errorf("could not connect with Postgres database: %v", err)
 		}
 		model.Client = ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
-	case "sqlite3":
-		db, err = sql.Open("sqlite3", dbUrl)
-		if err != nil {
-			return nil, fmt.Errorf("could not connect with SQLite database: %v", err)
-		}
-		model.Client = ent.NewClient(ent.Driver(entsql.OpenDB(dialect.SQLite, db)))
 	default:
 		return nil, fmt.Errorf("unsupported DB driver")
 	}
