@@ -26,6 +26,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/reports_views"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) Reports(c echo.Context) error {
@@ -704,8 +705,13 @@ func getSoftwareTransactions(apps []models.App) []core.Row {
 }
 
 func getPageHeader(title string) core.Row {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Fatal("[FATAL]: could not get working directory")
+	}
+
 	return row.New(10).Add(
-		image.NewFromFileCol(3, "assets/img/openuem.png", props.Rect{
+		image.NewFromFileCol(3, filepath.Join(cwd, "assets", "img", "openuem.png"), props.Rect{
 			Percent: 75,
 		}),
 		text.NewCol(6, title, props.Text{
@@ -741,17 +747,26 @@ func getWhiteColor() *props.Color {
 }
 
 func getCheckEmoji(value bool) string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Fatal("[FATAL]: could not get working directory")
+	}
+
 	if value {
-		return "assets/img/reports/check.png"
+		return filepath.Join(cwd, "assets", "img", "reports", "check.png")
 	} else {
 		return "assets/img/reports/x.png"
 	}
 }
 
 func getWarningEmoji(value bool) string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Fatal("[FATAL]: could not get working directory")
+	}
 	if value {
-		return "assets/img/reports/warning.png"
+		return filepath.Join(cwd, "assets", "img", "reports", "warning.png")
 	} else {
-		return "assets/img/reports/check.png"
+		return filepath.Join(cwd, "assets", "img", "reports", "check.png")
 	}
 }
