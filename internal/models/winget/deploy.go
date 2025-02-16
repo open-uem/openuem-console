@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	_ "modernc.org/sqlite"
 )
 
 type DeployPackage struct {
@@ -108,5 +108,5 @@ func OpenWingetDB(indexPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
 	}
 
-	return sql.Open("sqlite", indexPath)
+	return sql.Open("sqlite3", indexPath)
 }

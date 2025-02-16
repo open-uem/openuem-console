@@ -9,7 +9,8 @@ steps:
       platforms: linux/amd64
       repo: openuem/openuem-console
       tags:
-        - devel
+        - 0.2.1
+        - latest
       username:
         from_secret: docker_username
       password:
