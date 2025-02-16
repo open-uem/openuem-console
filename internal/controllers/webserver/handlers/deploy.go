@@ -40,12 +40,12 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p)
+	packages, err := models.SearchPackages(search, p, h.WingetFolder)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = models.CountPackages(search)
+	p.NItems, err = models.CountPackages(search, h.WingetFolder)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}

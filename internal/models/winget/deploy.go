@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	_ "modernc.org/sqlite"
@@ -12,12 +14,12 @@ type DeployPackage struct {
 	Name string
 }
 
-func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployPackage, error) {
+func SearchPackages(packageName string, p partials.PaginationAndSort, wingetFolder string) ([]DeployPackage, error) {
 	var rows *sql.Rows
 	var err error
 
 	// Open Winget DB
-	db, err := OpenWingetDB()
+	db, err := OpenWingetDB(wingetFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +66,10 @@ func SearchPackages(packageName string, p partials.PaginationAndSort) ([]DeployP
 	return packages, nil
 }
 
-func CountPackages(packageName string) (int, error) {
+func CountPackages(packageName string, indexPath string) (int, error) {
 
 	// Open Winget DB
-	db, err := OpenWingetDB()
+	db, err := OpenWingetDB(indexPath)
 	if err != nil {
 		return 0, err
 	}
@@ -98,4 +100,13 @@ func CountPackages(packageName string) (int, error) {
 	}
 
 	return count, nil
+}
+
+func OpenWingetDB(indexPath string) (*sql.DB, error) {
+	// Open Winget Community Repository index database
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
+	}
+
+	return sql.Open("sqlite", indexPath)
 }

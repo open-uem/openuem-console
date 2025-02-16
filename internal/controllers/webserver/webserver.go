@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-co-op/gocron/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/controllers/router"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver/handlers"
 	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/go-co-op/gocron/v2"
-	"github.com/labstack/echo/v4"
 )
 
 type WebServer struct {
@@ -19,7 +19,7 @@ type WebServer struct {
 	SessionManager *sessions.SessionManager
 }
 
-func New(m *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder string) *WebServer {
+func New(m *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder string) *WebServer {
 	var err error
 	w := WebServer{}
 
@@ -34,7 +34,7 @@ func New(m *models.Model, natsServers string, s *sessions.SessionManager, ts goc
 	w.Router = router.New(s, server, consolePort, maxUploadSize)
 
 	// Create Handler and register its router
-	w.Handler = handlers.NewHandler(m, natsServers, s, ts, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder)
+	w.Handler = handlers.NewHandler(m, natsServers, s, ts, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder)
 	w.Handler.Register(w.Router)
 
 	// Add the session manager
