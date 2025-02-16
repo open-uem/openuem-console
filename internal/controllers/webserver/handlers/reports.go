@@ -115,7 +115,7 @@ func getAgentsTransactions(agents []*ent.Agent) []core.Row {
 		osImage := ""
 		switch agent.Os {
 		case "windows":
-			osImage = "assets/img/os/windows.png"
+			osImage = getWindowsPNG()
 		}
 
 		r := row.New(4).Add(
@@ -286,7 +286,7 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 		osImage := ""
 		switch computer.OS {
 		case "windows":
-			osImage = "assets/img/os/windows.png"
+			osImage = getWindowsPNG()
 		}
 
 		r := row.New(4).Add(
@@ -467,7 +467,7 @@ func getAntiviriTransactions(antiviri []models.Antivirus) []core.Row {
 		osImage := ""
 		switch antivirus.OS {
 		case "windows":
-			osImage = "assets/img/os/windows.png"
+			osImage = getWindowsPNG()
 		}
 
 		r := row.New(4).Add(
@@ -581,7 +581,7 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 		osImage := ""
 		switch update.OS {
 		case "windows":
-			osImage = "assets/img/os/windows.png"
+			osImage = getWindowsPNG()
 		}
 
 		r := row.New(4).Add(
@@ -755,7 +755,7 @@ func getCheckEmoji(value bool) string {
 	if value {
 		return filepath.Join(cwd, "assets", "img", "reports", "check.png")
 	} else {
-		return "assets/img/reports/x.png"
+		return filepath.Join(cwd, "assets", "img", "reports", "x.png")
 	}
 }
 
@@ -769,4 +769,12 @@ func getWarningEmoji(value bool) string {
 	} else {
 		return filepath.Join(cwd, "assets", "img", "reports", "check.png")
 	}
+}
+
+func getWindowsPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Fatal("[FATAL]: could not get working directory")
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "windows.png")
 }
