@@ -6,7 +6,7 @@ steps:
   publish:
     image: woodpeckerci/plugin-docker-buildx
     settings:
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64
       repo: openuem/openuem-console
       tags:
         - devel

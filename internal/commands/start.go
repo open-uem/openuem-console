@@ -42,6 +42,9 @@ func startConsole(cCtx *cli.Context) error {
 	if strings.HasSuffix(cwd, "tmp") {
 		worker.DownloadDir = filepath.Join(cwd, "download")
 	}
+	if err := worker.CreateDowloadTempDir(); err != nil {
+		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
+	}
 
 	// Create server releases directory
 	worker.ServerReleasesFolder = filepath.Join(cwd, "tmp", "server-releases")
@@ -52,8 +55,13 @@ func startConsole(cCtx *cli.Context) error {
 		log.Fatalf("[FATAL]: could not create server releases temp dir: %v", err)
 	}
 
-	if err := worker.CreateDowloadTempDir(); err != nil {
-		log.Fatalf("[ERROR]: could not create download temp dir: %v", err)
+	// Create winget directory
+	worker.WinGetDBFolder = filepath.Join(cwd, "tmp", "winget")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.ServerReleasesFolder = filepath.Join(cwd, "winget")
+	}
+	if err := worker.CreateWingetDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
 	}
 
 	// Save pid to PIDFILE
