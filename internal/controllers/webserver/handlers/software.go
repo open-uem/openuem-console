@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/models"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -24,20 +25,25 @@ func (h *Handler) Software(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	// Get filters
 	f, err := h.GetSoftwareFilters(c)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	apps, err = h.Model.GetAppsByPage(p, *f)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	p.NItems, err = h.Model.CountAllApps(*f)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager)))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", "/software", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -48,7 +54,7 @@ func (h *Handler) Software(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, *f, h.SessionManager, l, apps, refreshTime)))
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, *f, h.SessionManager, l, h.Version, latestServerRelease.Version, apps, refreshTime)))
 }
 
 func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilter, error) {

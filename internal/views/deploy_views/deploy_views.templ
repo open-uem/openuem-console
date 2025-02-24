@@ -14,13 +14,13 @@ import (
 	"strings"
 )
 
-templ Deploy(sm *sessions.SessionManager, install bool, successMessage string) {
+templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, install bool, successMessage string) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}}, sm)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}}, sm, currentVersion, latestVersion)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}}, sm)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}}, sm, currentVersion, latestVersion)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -202,13 +202,13 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, currentVersion, latestVersion string, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}}, sm)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}}, sm, currentVersion, latestVersion)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}, {Title: packageName, Url: ""}}, sm)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}, {Title: packageName, Url: ""}}, sm, currentVersion, latestVersion)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -324,7 +324,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 								>
 									{ i18n.T(ctx, "DeselectAll") }
 								</button>
-									<p class="uk-text-small"><span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { i18n.T(ctx, "Items") }</p>
+								<p class="uk-text-small"><span id="items-selected" class="uk-text-bold">{ strconv.Itoa(f.SelectedItems) }</span> { i18n.T(ctx, "Items") }</p>
 							}
 						</div>
 						if len(agents) > 0 {

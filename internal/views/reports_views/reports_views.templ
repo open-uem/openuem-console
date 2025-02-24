@@ -8,8 +8,8 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Reports(c echo.Context, sm *sessions.SessionManager, successMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: "/reports"}}, sm)
+templ Reports(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, successMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: "/reports"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)

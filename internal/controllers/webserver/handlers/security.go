@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -43,7 +44,12 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, h.SessionManager, l, antiviri, detectedAntiviri, availableOSes, refreshTime)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, h.SessionManager, l, h.Version, latestServerRelease.Version, antiviri, detectedAntiviri, availableOSes, refreshTime)))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
@@ -76,7 +82,12 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, h.SessionManager, l, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, h.SessionManager, l, h.Version, latestServerRelease.Version, systemUpdates, availableOSes, availableUpdateStatus, refreshTime)))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
@@ -103,18 +114,23 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	updates, err := h.Model.GetLatestUpdates(agentId, p)
 	if err != nil {
-		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security", h.SessionManager)))
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", "/security", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates))
+		return RenderView(c, security_views.LatestUpdates(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, agent, updates))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, agent, updates)))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, agent, updates)))
 }
 
 func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {

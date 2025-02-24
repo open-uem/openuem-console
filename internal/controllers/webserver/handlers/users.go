@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 	openuem_ent "github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -115,7 +116,12 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, users, successMessage, errMessage, refreshTime, agentsExists, serversExists)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, users, successMessage, errMessage, refreshTime, agentsExists, serversExists)))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -133,7 +139,13 @@ func (h *Handler) NewUser(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, defaultCountry, agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, h.Version, latestServerRelease.Version, defaultCountry, agentsExists, serversExists)))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -382,7 +394,13 @@ func (h *Handler) EditUser(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, user, defaultCountry, agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, h.Version, latestServerRelease.Version, user, defaultCountry, agentsExists, serversExists)))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -70,7 +71,12 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, l, certTypes, certificates, successMessage, agentsExists, serversExists)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, h.Version, latestServerRelease.Version, l, certTypes, certificates, successMessage, agentsExists, serversExists)))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {

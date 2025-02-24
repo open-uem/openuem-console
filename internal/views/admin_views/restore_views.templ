@@ -8,8 +8,8 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Restore(c echo.Context, sm *sessions.SessionManager, successMessage string, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "restore.title"), Url: "/admin/restore"}}, sm)
+templ Restore(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, successMessage string, agentsExists, serversExists bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "restore.title"), Url: "/admin/restore"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

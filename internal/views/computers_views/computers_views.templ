@@ -14,8 +14,8 @@ import (
 	"strings"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int, successMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}}, sm)
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int, successMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)

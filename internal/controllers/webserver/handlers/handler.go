@@ -48,9 +48,10 @@ type Handler struct {
 	Replicas             int
 	ServerReleasesFolder string
 	WingetFolder         string
+	Version              string
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder string) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, version string) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -87,6 +88,7 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		Replicas:             len(replicas),
 		ServerReleasesFolder: serverReleasesFolder,
 		WingetFolder:         wingetFolder,
+		Version:              version,
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect

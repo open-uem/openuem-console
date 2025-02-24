@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -73,5 +74,11 @@ func (h *Handler) TagManager(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, tags, agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, h.SessionManager, h.Version, latestServerRelease.Version, tags, agentsExists, serversExists)))
 }

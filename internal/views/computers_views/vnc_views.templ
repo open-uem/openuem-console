@@ -8,8 +8,8 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, sm)
+templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager, currentVersion, latestVersion string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, sm, currentVersion, latestVersion)
 	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-1">
