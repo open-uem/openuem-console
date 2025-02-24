@@ -467,6 +467,7 @@ en:
     edit_tag: "Edit the tag according to your needs"
     add_tags: "Add tags!"
     filter_by: "Filter by tags"
+    count: "# Agents"
   metadata:
     description: "Here you can define the metadata that you want to add to your computers and which are valuable to your organization. You could add your org's inventory number to an computer. The metadata that you create here will be available in the Metadata table inside your computer's view"
     no_metadata: "No metadata for your org has been defined yet"
