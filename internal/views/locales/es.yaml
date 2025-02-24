@@ -552,6 +552,12 @@ es:
     request_pin_invalid: La opción seleccionada no es válida
     request_pin_could_not_be_saved: La opción de petición de PIN no ha podido guardarse en la base de datos
     request_pin_could_not_be_read: La opción de petición de PIN no ha podido leerse de la base de datos
+    add_tag_admitted_title: Añadir una etiqueta a los agentes admitidos
+    add_tag_admitted_description: Cuando se admite un agente añadir la siguiente etiqueta automáticamente. Usar la opción vacía para evitar el etiquetado
+    add_tag_select: Seleccione una etiqueta
+    add_tag_admitted_could_not_be_saved: No se pudo guardar la etiqueta asociada a un agente recientemente admitido
+    add_tag_admitted_could_not_be_cleared: No se pudo desasignar la etiqueta para los agentes recientemente admitidos
+    add_tag_invalid: The tag id is not valid
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

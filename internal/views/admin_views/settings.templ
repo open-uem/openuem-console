@@ -3,6 +3,7 @@ package admin_views
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
@@ -10,7 +11,7 @@ import (
 	"strconv"
 )
 
-templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, settings *openuem_ent.Settings, agentsExists, serversExists bool) {
+templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "General Settings"), Url: "/admin/settings"}}, sm)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -228,6 +229,37 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, settings *ope
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-9" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.add_tag_admitted_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.add_tag_admitted_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select class="uk-select" name="admitted-agent-tag">
+											<option value="-1"></option>
+											for _, tag := range tags {
+												if settings.Edges.Tag != nil {
+													<option value={ strconv.Itoa(tag.ID) } selected?={ tag.ID == settings.Edges.Tag.ID }>{ tag.Tag }</option>
+												} else {
+													<option value={ strconv.Itoa(tag.ID) }>{ tag.Tag }</option>
+												}
+											}
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-10"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-10" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 										</button>
 									</form>
 								</td>

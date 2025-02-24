@@ -131,7 +131,7 @@ en:
     enabled: "Enabled"
     disabled: "Disabled"
     no_agents: "No agents were found for this query"
-    no_endpoint: "No endpoints were found for this query"
+    no_endpoints: "No endpoints were found for this query"
     admit: "Admit"
     force_run: "Force Report"
     vnc: "VNC server"
@@ -554,6 +554,12 @@ en:
     request_pin_invalid: The chosen option is not valid
     request_pin_could_not_be_saved: PIN request option could not be saved to the database
     request_pin_could_not_be_read: Request PIN option could not be read from database
+    add_tag_admitted_title: Add a tag to admitted agents
+    add_tag_admitted_description: When an agent is admitted add the following tag to it automatically. Use empty option to avoid tagging
+    add_tag_select: Select a tag
+    add_tag_admitted_could_not_be_saved: The tag associated to a recently admitted agent could not be saved
+    add_tag_admitted_could_not_be_cleared: Could not unassign the tag for recently admitted agents
+    add_tag_invalid: The tag id is not valid
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong

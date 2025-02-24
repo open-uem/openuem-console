@@ -346,6 +346,21 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					errorsFound = true
 					continue
 				}
+
+				if settings, err := h.Model.GetGeneralSettings(); err != nil {
+					log.Println("[ERROR]: ", err.Error())
+					errorsFound = true
+					continue
+				} else {
+					if settings.Edges.Tag != nil {
+						if err := h.Model.AddTagToAgent(agentId, strconv.Itoa(settings.Edges.Tag.ID)); err != nil {
+							log.Println("[ERROR]: ", err.Error())
+							errorsFound = true
+							continue
+						}
+					}
+				}
+
 			} else {
 				log.Printf("[ERROR]: agent %s is not in a valid state\n", agentId)
 				errorsFound = true
