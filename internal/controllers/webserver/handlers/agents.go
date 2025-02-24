@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
@@ -214,6 +215,11 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 
 	l := views.GetTranslatorForDates(c)
 
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	if gotoPage1 {
 		currentUrl := c.Request().Header.Get("Hx-Current-Url")
 		if currentUrl != "" {
@@ -222,12 +228,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
@@ -240,7 +246,13 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, agent)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
@@ -287,7 +299,13 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, agent)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
 }
 
 func (h *Handler) AgentsAdmit(c echo.Context) error {
@@ -477,7 +495,13 @@ func (h *Handler) AgentAdmit(c echo.Context) error {
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, agent)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -569,6 +593,11 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	if c.Request().Method == "POST" {
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -601,10 +630,10 @@ func (h *Handler) AgentStartVNC(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager)))
+		return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
 }
 
 func (h *Handler) AgentStopVNC(c echo.Context) error {
@@ -623,7 +652,12 @@ func (h *Handler) AgentStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, agents_views.AgentsIndex("| Agents", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
 }
 
 func (h *Handler) AgentForceRestart(c echo.Context) error {

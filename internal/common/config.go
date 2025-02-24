@@ -150,6 +150,12 @@ func (w *Worker) GenerateConsoleConfig() error {
 	}
 	w.ReverseProxyServer = key.String()
 
+	key, err = cfg.Section("Server").GetKey("Version")
+	if err != nil {
+		return err
+	}
+	w.Version = key.String()
+
 	return nil
 }
 

@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -38,7 +39,13 @@ func (h *Handler) ListSessions(c echo.Context, successMessage string) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, s, successMessage, errMessage, h.SessionManager.Manager.Codec, agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.SessionsIndex(" | Sessions", admin_views.Sessions(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, s, successMessage, errMessage, h.SessionManager.Manager.Codec, agentsExists, serversExists)))
 }
 
 func (h *Handler) SessionDelete(c echo.Context) error {

@@ -3,10 +3,11 @@ package handlers
 import (
 	"log"
 
-	"github.com/open-uem/openuem-console/internal/views/admin_views"
-	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
+	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Restore(c echo.Context) error {
@@ -19,7 +20,13 @@ func (h *Handler) Restore(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, "", agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, "", agentsExists, serversExists)))
 }
 
 func (h *Handler) RestoreMessenger(c echo.Context) error {
@@ -51,7 +58,13 @@ func (h *Handler) RestoreMessenger(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+
+		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
 }
@@ -86,7 +99,12 @@ func (h *Handler) RestoreUpdater(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
 }
@@ -120,7 +138,13 @@ func (h *Handler) RestoreAgents(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+
+		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))
 }
@@ -141,7 +165,13 @@ func (h *Handler) RestoreDatabase(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
-		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists)))
+
+		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists)))
 	}
 	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_delete_database"), "/admin/restore-database", "/admin/restore", true))
 }

@@ -6,11 +6,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/labstack/echo/v4"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/charts"
 	"github.com/open-uem/openuem-console/internal/views/dashboard_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
-	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Dashboard(c echo.Context) error {
@@ -144,7 +146,12 @@ func (h *Handler) Dashboard(c echo.Context) error {
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(h.SessionManager, l, data)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(h.SessionManager, l, h.Version, latestServerRelease.Version, data)))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

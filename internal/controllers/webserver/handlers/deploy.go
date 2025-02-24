@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -16,11 +17,21 @@ import (
 )
 
 func (h *Handler) DeployInstall(c echo.Context) error {
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, true, "")))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, true, "")))
 }
 
 func (h *Handler) DeployUninstall(c echo.Context) error {
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, false, "")))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, false, "")))
 }
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
@@ -107,7 +118,12 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, packageId, packageName, agents, install, refreshTime)))
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, h.Version, latestServerRelease.Version, packageId, packageName, agents, install, refreshTime)))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
@@ -172,9 +188,14 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 	}
 
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	if install {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, true, i18n.T(c.Request().Context(), "install.requested"))))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, true, i18n.T(c.Request().Context(), "install.requested"))))
 	} else {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, false, i18n.T(c.Request().Context(), "uninstall.requested"))))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, false, i18n.T(c.Request().Context(), "uninstall.requested"))))
 	}
 }

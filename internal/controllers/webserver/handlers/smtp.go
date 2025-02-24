@@ -5,12 +5,13 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/open-uem/openuem-console/internal/models"
-	"github.com/open-uem/openuem-console/internal/views/admin_views"
-	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/go-playground/validator/v10"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/models"
+	model "github.com/open-uem/openuem-console/internal/models/servers"
+	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/wneessen/go-mail"
 )
 
@@ -53,7 +54,13 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, h.SessionManager, settings, agentsExists, serversExists)))
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, h.SessionManager, h.Version, latestServerRelease.Version, settings, agentsExists, serversExists)))
 }
 
 func (h *Handler) TestSMTPSettings(c echo.Context) error {

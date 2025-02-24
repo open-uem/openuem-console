@@ -48,6 +48,7 @@ type Worker struct {
 	DownloadServerReleasesJobDuration time.Duration
 	DownloadLatestReleaseJob          gocron.Job
 	DownloadLatestReleaseJobDuration  time.Duration
+	Version                           string
 }
 
 func NewWorker(logName string) *Worker {

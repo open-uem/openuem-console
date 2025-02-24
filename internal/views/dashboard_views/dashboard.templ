@@ -47,8 +47,8 @@ type DashboardData struct {
 	NCertificatesAboutToExpire int
 }
 
-templ Dashboard(sm *sessions.SessionManager, l locales.Translator, data DashboardData) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Dashboard", Url: "/dashboard"}}, sm)
+templ Dashboard(sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, data DashboardData) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Dashboard", Url: "/dashboard"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
 			<h3 class="uk-card-title">{ i18n.T(ctx, "Dashboard") }</h3>
