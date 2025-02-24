@@ -465,6 +465,7 @@ es:
     edit_tag: "Edite la etiqueta de acuerdo con sus necesidades"
     add_tags: "¡Añada etiquetas!"
     filter_by: "Filtrar por etiquetas"
+    count: "Num. Agentes"
   metadata:
     description: "Aquí puede definir los metadatos que quiere añadir a sus equipos y que son valiosos para su organización. Por ejemplo puede añadir a un equipo el número de inventario de su organización. Los metadatos que cree aquí estarán disponibles en la pestaña Metadatos de la vista de su equipo"
     no_metadata: "Aún no ha definido metadatos para su organización"

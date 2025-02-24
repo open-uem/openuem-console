@@ -9,6 +9,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"math/rand"
+	"strconv"
 )
 
 templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, tags []*ent.Tag, agentsExists, serversExists bool) {
@@ -39,7 +40,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
 								<thead>
 									<tr>
-										<th class="w-1/4">
+										<th class="w-1/6">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Tag.one") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Tag.one"), "tag", "alpha", "#main", "outerHTML")
@@ -51,9 +52,14 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "tags.descr"), "description", "alpha", "#main", "outerHTML")
 											</div>
 										</th>
-										<th class="w-1/4">
+										<th class="w-1/6">
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "tags.color") }</span>
+											</div>
+										</th>
+										<th class="w-1/6">
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "tags.count") }</span>
 											</div>
 										</th>
 										<th>
@@ -72,6 +78,13 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 												title="color"
 												class={ "rounded-full px-5 py-1 text-white inline-block", fmt.Sprintf("bg-%s-500", tag.Color) }
 											>{ i18n.T(ctx, "Example") }</div>
+										</td>
+										<td class="!aling-middle">
+											if tag.Edges.Owner != nil {
+												{ strconv.Itoa(len(tag.Edges.Owner)) }
+											} else {
+												{ "0" }
+											}
 										</td>
 										<td class="flex gap-4 items-center mt-1">
 											<button
