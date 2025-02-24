@@ -119,6 +119,18 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if c.FormValue("admitted-agent-tag") != "" {
+			if settings.Tag == -1 {
+				if err := h.Model.RemoveAdmittedTag(settings.ID); err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.add_tag_admitted_could_not_be_cleared"), true))
+				}
+			} else {
+				if err := h.Model.AddAdmittedTag(settings.ID, settings.Tag); err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.add_tag_admitted_could_not_be_saved"), true))
+				}
+			}
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -136,7 +148,13 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, settings, agentsExists, serversExists)))
+
+	allTags, err := h.Model.GetAllTags()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, settings, agentsExists, serversExists, allTags)))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
@@ -155,6 +173,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	updateChannel := c.FormValue("update-channel")
 	agentFrequency := c.FormValue("agent-frequency")
 	requestPIN := c.FormValue("request-pin")
+	admittedTag := c.FormValue("admitted-agent-tag")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -245,6 +264,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.RequestVNCPIN, err = strconv.ParseBool(requestPIN)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.request_pin_invalid"))
+		}
+	}
+
+	if admittedTag != "" {
+		settings.Tag, err = strconv.Atoi(admittedTag)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.add_tag_invalid"))
 		}
 	}
 

@@ -144,7 +144,7 @@ func (m *Model) UpdateOpenUEMChannel(settingsId int, updateChannel string) error
 
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
-	query := m.Client.Settings.Query().Select(
+	query := m.Client.Settings.Query().WithTag().Select(
 		settings.FieldID,
 		settings.FieldCountry,
 		settings.FieldMaxUploadSize,
@@ -155,6 +155,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldUpdateChannel,
 		settings.FieldAgentReportFrequenceInMinutes,
 		settings.FieldRequestVncPin,
+		settings.TagColumn,
 	)
 
 	settings, err := query.Only(context.Background())
@@ -185,6 +186,14 @@ func (m *Model) CreateInitialSettings() error {
 	return nil
 }
 
+func (m *Model) AddAdmittedTag(settingsId int, tag int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetTagID(tag).Exec(context.Background())
+}
+
+func (m *Model) RemoveAdmittedTag(settingsId int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).ClearTag().Exec(context.Background())
+}
+
 type GeneralSettings struct {
 	ID              int
 	Country         string
@@ -196,4 +205,5 @@ type GeneralSettings struct {
 	UpdateChannel   string
 	AgentFrequency  int
 	RequestVNCPIN   bool
+	Tag             int
 }
