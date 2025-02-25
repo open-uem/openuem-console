@@ -19,6 +19,11 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 				<div class="flex gap-2 items-center">
 					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
+					if agent.IsRemote {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</span>
+					}
 				</div>
 				@ComputersNavbar(agent.ID, "remote-assistance", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
@@ -33,7 +38,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady {
+					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && !agent.IsRemote {
 						<div id="vnc">
 							<a
 								class="flex gap-2 items-center uk-text-small"

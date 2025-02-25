@@ -43,7 +43,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 					@filters.ClearFilters("/computers", "#main", "outerHTML", func() bool {
 						return f.Hostname == "" && len(f.AgentOSVersions) == 0 &&
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
-							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0
+							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0
 					})
 					@partials.RefreshPage(l, "/computers", "#main", "outerHTML", "post", refreshTime, true)
 				</div>
@@ -72,11 +72,20 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 
 templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string) {
 	<tr>
-		<th class="w-2/12">
+		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.hostname") }</span>
 				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
 				@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
+			</div>
+		</th>
+		<th>
+			<div class="flex gap-1 items-center">
+				<span>{ i18n.T(ctx, "agents.remote") }</span>
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML")
+				@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
+					return len(f.IsRemote) == 0
+				})
 			</div>
 		</th>
 		<th>
@@ -97,14 +106,14 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				})
 			</div>
 		</th>
-		<th class="w-2/12">
+		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.username") }</span>
 				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML")
 				@filters.FilterByText(c, p, "Username", f.Username, "computers.filter_by_username", "#main", "outerHTML")
 			</div>
 		</th>
-		<th class="w-1/12">
+		<th>
 			<div class="flex gap-2 items-center justify-center">
 				<span>{ i18n.T(ctx, "agents.manufacturer") }</span>
 				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.manufacturer"), "manufacturer", "alpha", "#main", "outerHTML")
@@ -113,14 +122,14 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				})
 			</div>
 		</th>
-		<th class="w-2/12 flex gap-2 items-center">
+		<th class="flex gap-2 items-center">
 			<span>{ i18n.T(ctx, "agents.model") }</span>
 			@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.model"), "model", "alpha", "#main", "outerHTML")
 			@filters.FilterByOptions(c, p, "ComputerModel", "computers.filter_by_model", models, f.ComputerModels, "#main", "outerHTML", false, func() bool {
 				return len(f.ComputerModels) == 0
 			})
 		</th>
-		<th class="w-3/12">
+		<th>
 			<div class="flex gap-1 items-center">
 				{ i18n.T(ctx, "Tag.other") }
 				@filters.FilterByTags(c, p, f.Tags, "#main", "outerHTML", availableTags, func() bool { return len(f.Tags) == 0 })
@@ -140,6 +149,13 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>{ agent.Hostname }</td>
+			<td class="!align-middle">
+				if agent.Is_Remote {
+					<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+						<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+					</span>
+				}
+			</td>
 			<td class="!align-middle">
 				switch agent.OS {
 					case "windows":

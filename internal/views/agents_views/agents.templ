@@ -47,7 +47,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
 							return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
 								len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
-								f.ContactFrom == "" && f.ContactTo == ""
+								f.ContactFrom == "" && f.ContactTo == "" && len(f.IsRemote) == 0
 						})
 						<button
 							id="select-all"
@@ -250,14 +250,23 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 					"
 				/>
 			</th>
-			<th class="w-1/6">
+			<th>
+				<div class="flex gap-1 items-center">
+					<span>{ i18n.T(ctx, "agents.remote") }</span>
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML")
+					@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
+						return len(f.IsRemote) == 0
+					})
+				</div>
+			</th>
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
 					@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 				</div>
 			</th>
-			<th class="w-1/12">
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
 					<div>
@@ -270,7 +279,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 					</div>
 				</div>
 			</th>
-			<th class="w-1/12">
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
@@ -279,25 +288,25 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 					})
 				</div>
 			</th>
-			<th class="w-1/12">
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.version") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
 				</div>
 			</th>
-			<th class="w-1/6">
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "IP Address") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML")
 				</div>
 			</th>
-			<th class="w-1/4">
+			<th>
 				<div class="flex gap-1 items-center">
 					{ i18n.T(ctx, "Tag.other") }
 					@filters.FilterByTags(c, p, f.Tags, "#main", "outerHTML", tags, func() bool { return len(f.Tags) == 0 })
 				</div>
 			</th>
-			<th class="w-1/6">
+			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.last_contact") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML")
@@ -394,6 +403,13 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 						end
 					`,p.PageSize) }
 				/>
+			</td>
+			<td class="!align-middle">
+				if agent.IsRemote {
+					<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+						<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+					</span>
+				}
 			</td>
 			<td
 				class="!align-middle underline hover:cursor-pointer"

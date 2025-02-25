@@ -26,6 +26,7 @@ type Computer struct {
 	Manufacturer string
 	Model        string
 	Serial       string
+	Is_Remote    bool
 	Tags         []*ent.Tag
 }
 
@@ -45,7 +46,7 @@ func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial, agent.FieldIsRemote).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).
@@ -188,6 +189,18 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 				s.OrderBy(sql.Desc(computer.FieldModel))
 			}).Scan(context.Background(), &computers)
 		}
+	case "remote":
+		if p.SortOrder == "asc" {
+			err = query.Modify(func(s *sql.Selector) {
+				mainQuery(s, p)
+				s.OrderBy(sql.Asc(agent.FieldIsRemote))
+			}).Scan(context.Background(), &computers)
+		} else {
+			err = query.Modify(func(s *sql.Selector) {
+				mainQuery(s, p)
+				s.OrderBy(sql.Desc(agent.FieldIsRemote))
+			}).Scan(context.Background(), &computers)
+		}
 	default:
 		err = query.Modify(func(s *sql.Selector) {
 			mainQuery(s, p)
@@ -248,6 +261,16 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 
 	if len(f.WithApplication) > 0 {
 		query = query.Where(agent.HasAppsWith(app.Name(f.WithApplication)))
+	}
+
+	if len(f.IsRemote) > 0 {
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Remote" {
+			query = query.Where(agent.IsRemote(true))
+		}
+
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Local" {
+			query = query.Where(agent.IsRemote(false))
+		}
 	}
 
 	if len(f.Tags) > 0 {
