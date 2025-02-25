@@ -16,6 +16,7 @@ type AgentFilter struct {
 	SelectedItems         int
 	SelectedAllAgents     string
 	SelectedRelease       string
+	IsRemote              []string
 }
 
 type ApplicationsFilter struct {

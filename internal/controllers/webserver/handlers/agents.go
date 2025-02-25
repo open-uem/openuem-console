@@ -102,6 +102,15 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
+	filteredIsRemote := []string{}
+	for index := range []string{"Remote", "Local"} {
+		value := c.FormValue(fmt.Sprintf("filterByIsRemote%d", index))
+		if value != "" {
+			filteredIsRemote = append(filteredIsRemote, value)
+		}
+	}
+	f.IsRemote = filteredIsRemote
+
 	if gotoPage1 {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {

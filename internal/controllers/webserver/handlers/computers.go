@@ -312,6 +312,15 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	}
 	f.ComputerModels = filteredComputerModels
 
+	filteredIsRemote := []string{}
+	for index := range []string{"Remote", "Local"} {
+		value := c.FormValue(fmt.Sprintf("filterByIsRemote%d", index))
+		if value != "" {
+			filteredIsRemote = append(filteredIsRemote, value)
+		}
+	}
+	f.IsRemote = filteredIsRemote
+
 	if c.FormValue("filterByApplication") != "" {
 		f.WithApplication = c.FormValue("filterByApplication")
 	}

@@ -147,6 +147,8 @@ github.com/open-uem/ent v0.0.0-20250214102310-33a8a847d229 h1:Racbg7tsq8P5jXZ0nL
 github.com/open-uem/ent v0.0.0-20250214102310-33a8a847d229/go.mod h1:axtXtA/4FJhn1JgK+qqbYsS3ly9Ec2Ts4TgBXTxikWQ=
 github.com/open-uem/ent v0.0.0-20250224090630-e68c8b00fdc5 h1:Vb6LJDOvo8V4UhV8vrsLJUAGLC68AlCnK1wbDfgUo/E=
 github.com/open-uem/ent v0.0.0-20250224090630-e68c8b00fdc5/go.mod h1:axtXtA/4FJhn1JgK+qqbYsS3ly9Ec2Ts4TgBXTxikWQ=
+github.com/open-uem/ent v0.0.0-20250225084914-d46c51bc6f85 h1:lEBcy5xehkZnY8pfxjRYxbylHh6JePLlnIUliuQ8BGY=
+github.com/open-uem/ent v0.0.0-20250225084914-d46c51bc6f85/go.mod h1:axtXtA/4FJhn1JgK+qqbYsS3ly9Ec2Ts4TgBXTxikWQ=
 github.com/open-uem/nats v0.0.0-20250124054349-0a9058f44dfe h1:gMleIjyYYHeGqJCo/t9DqRex3Z6+7LUicEldIDNS6eA=
 github.com/open-uem/nats v0.0.0-20250124054349-0a9058f44dfe/go.mod h1:sxGFf8LgdiGQ5KbI508pHOPO1tQHphVpww7Jk5z8FEk=
 github.com/open-uem/utils v0.0.0-20250214102216-df5a38667d0a h1:IJMOUchNqFzwJE8yvaWZakHBqCY5LGTvy5e90aBVEIE=

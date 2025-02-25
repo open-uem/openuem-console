@@ -113,6 +113,12 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 		} else {
 			agents, err = query.Order(ent.Desc(agent.FieldIP)).All(context.Background())
 		}
+	case "remote":
+		if p.SortOrder == "asc" {
+			agents, err = query.Order(ent.Asc(agent.FieldIsRemote)).All(context.Background())
+		} else {
+			agents, err = query.Order(ent.Desc(agent.FieldIsRemote)).All(context.Background())
+		}
 	default:
 		agents, err = query.Order(ent.Desc(agent.FieldLastContact)).All(context.Background())
 	}
@@ -185,6 +191,16 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	/* if len(f.Versions) > 0 {
 		query = query.Where(agent.VersionIn(f.Versions...))
 	} */
+
+	if len(f.IsRemote) > 0 {
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Remote" {
+			query = query.Where(agent.IsRemote(true))
+		}
+
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Local" {
+			query = query.Where(agent.IsRemote(false))
+		}
+	}
 
 	if len(f.AgentOSVersions) > 0 {
 		query = query.Where(agent.OsIn(f.AgentOSVersions...))
