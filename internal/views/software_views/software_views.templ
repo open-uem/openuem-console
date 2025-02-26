@@ -65,7 +65,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 						for _, app := range apps {
 							<tr class="h-16">
 								<td class="uk-width-1-6 text-center !align-middle">
-									@partials.Brand(strings.ToLower(app.Name), "")
+									@partials.Brand(strings.ToLower(app.Name), strings.ToLower(app.Publisher))
 								</td>
 								<td class="uk-width-1-3 !align-middle">{ app.Name }</td>
 								<td class="uk-width-1-3 !align-middle">{ app.Publisher }</td>

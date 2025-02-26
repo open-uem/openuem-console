@@ -46,11 +46,14 @@ func (suite *AppsTestSuite) SetupTest() {
 }
 
 func (suite *AppsTestSuite) TestCountAgentApps() {
-	count, err := suite.model.CountAgentApps("agent1")
+
+	f := filters.ApplicationsFilter{}
+
+	count, err := suite.model.CountAgentApps("agent1", f)
 	assert.NoError(suite.T(), err, "should count agent apps")
 	assert.Equal(suite.T(), 7, count, "should count 7 apps")
 
-	count, err = suite.model.CountAgentApps("agent9")
+	count, err = suite.model.CountAgentApps("agent9", f)
 	assert.NoError(suite.T(), err, "should count agent apps")
 	assert.Equal(suite.T(), 0, count, "should count 0 apps")
 }
@@ -70,10 +73,11 @@ func (suite *AppsTestSuite) TestCountAllApps() {
 }
 
 func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
+	f := filters.ApplicationsFilter{}
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "asc"
-	items, err := suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err := suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", i), item.Name)
@@ -81,7 +85,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", 6-i), item.Name)
@@ -89,7 +93,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("version%d", i), item.Version)
@@ -97,7 +101,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("version%d", 6-i), item.Version)
@@ -105,7 +109,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -113,7 +117,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", 6-i), item.Publisher)
@@ -121,7 +125,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "installation"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -129,7 +133,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "installation"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)

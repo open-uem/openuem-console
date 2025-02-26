@@ -28,6 +28,7 @@ type AgentFilter struct {
 type ApplicationsFilter struct {
 	AppName string
 	Vendor  string
+	Version string
 }
 
 type UserFilter struct {
