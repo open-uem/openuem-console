@@ -71,7 +71,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 								<td class="uk-width-1-3 !align-middle">{ app.Publisher }</td>
 								<td class="uk-width-1-6 !align-middle text-center">
 									<form>
-										<input type="hidden" id="filterByApplication" name="filterByApplication" value={ app.Name }/>
+										<input type="hidden" id="selectedApp" name="selectedApp" value={ app.Name }/>
 										<span
 											class="underline cursor-pointer"
 											hx-post="/computers"

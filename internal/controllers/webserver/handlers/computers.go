@@ -407,13 +407,17 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	}
 	f.IsRemote = filteredIsRemote
 
-	if c.FormValue("filterByApplication") != "" {
-		if comesFromDialog {
-			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
-			if err == nil {
-				f.WithApplication = u.Query().Get("filterByApplication")
-			}
-		} else {
+	if c.FormValue("selectedApp") != "" {
+		f.WithApplication = c.FormValue("selectedApp")
+	}
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			f.WithApplication = u.Query().Get("filterByApplication")
+		}
+	} else {
+		if c.FormValue("filterByApplication") != "" {
 			f.WithApplication = c.FormValue("filterByApplication")
 		}
 	}
