@@ -305,6 +305,7 @@ en:
     logo: "Logo"
     filter_by_name: "Filter by app name..."
     filter_by_publisher: "Filter by publisher..."
+    filter_by_version: "Filter by version..."
   antivirus:
     title: "Antivirus"
     description: "This is the information about antivirus reported by the agents that have contacted with OpenUEM server."

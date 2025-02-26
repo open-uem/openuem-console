@@ -304,6 +304,7 @@ es:
     logo: "Logo"
     filter_by_name: "Filtrar por nombre de app..."
     filter_by_publisher: "Filtrar por desarrollador..."
+    filter_by_version: "Filtrar por versión..."
   antivirus:
     title: "Antivirus"
     description: "Esta es la información sobre los sistemas de antivirus informada por los agentes de OpenUEM que han contactado"

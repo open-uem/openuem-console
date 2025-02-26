@@ -213,18 +213,24 @@ func (h *Handler) Apps(c echo.Context) error {
 		log.Fatalf("[FATAL]: an error ocurred querying agent: %v", err)
 	}
 
-	apps, err := h.Model.GetAgentAppsByPage(agentId, p)
+	// Get filters
+	f, err := h.GetSoftwareFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f)
 	if err != nil {
 		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
 	}
 
-	p.NItems, err = h.Model.CountAgentApps(agentId)
+	p.NItems, err = h.Model.CountAgentApps(agentId, *f)
 	if err != nil {
 		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, h.SessionManager, h.Version, latestServerRelease.Version, a, apps, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, h.SessionManager, h.Version, latestServerRelease.Version, a, apps, confirmDelete)))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {

@@ -9,14 +9,14 @@ templ Brand(name, publisher string) {
 		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "adobe") {
 		<i class="si si-adobe si--color uk-cloak text-2xl"></i>
-	} else if strings.Contains(name, "amd") || strings.Contains(publisher, "amd") {
-		<i class="si si-amd si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "autofirma") {
 		<uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "db browser") {
 		<uk-icon hx-history="false" icon="database" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "fnmt") {
 		<uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
+	} else if strings.Contains(name, ".net") {
+		<i class="si si-dotnet si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "nvidia") {
 		<i class="si si-nvidia si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(publisher, "nvidia") {
@@ -27,6 +27,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-asus si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "bitdefender") {
 		<i class="si si-bitdefender si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "cisco") || strings.Contains(publisher, "cisco") {
+		<i class="si si-cisco si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "citrix") || strings.Contains(publisher, "citrix") {
 		<i class="si si-citrix si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "dell") {
@@ -39,11 +41,15 @@ templ Brand(name, publisher string) {
 		<i class="si si-docker si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "filezilla") {
 		<i class="si si-filezilla si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "fortinet") || strings.Contains(publisher, "fortinet") {
+		<i class="si si-fortinet si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "git") {
 		<i class="si si-git si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "gmail") {
+		<i class="si si-gmail si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "google chrome") {
 		<i class="si si-googlechrome si--color uk-cloak text-2xl"></i>
-	} else if strings.Contains(name, "google") {
+	} else if strings.Contains(name, "google") || strings.Contains(publisher, "google") {
 		<i class="si si-google si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "go") {
 		<i class="si si-go si--color uk-cloak text-2xl"></i>
@@ -85,11 +91,15 @@ templ Brand(name, publisher string) {
 		<i class="si si-notepadplusplus si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "office") {
 		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
+	} else if strings.Contains(name, "openuem") {
+		<img src="/favicon.ico" class="h-6 w-6 mx-auto" alt="openuem"/>
 	} else if strings.Contains(name, "openvpn") {
 		<i class="si si-openvpn si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "palo alto") || strings.Contains(publisher, "palo alto") {
 		<i class="si si-paloaltonetworks si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "pgadmin") {
+		<i class="si si-postgresql si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "postgresql") {
 		<i class="si si-postgresql si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "putty") {
 		<uk-icon hx-history="false" icon="globe-lock" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
@@ -111,12 +121,18 @@ templ Brand(name, publisher string) {
 		<i class="si si-vmware si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "windows") {
 		<i class="ri-windows-fill ri-2x text-blue-600"></i>
-	} else if strings.Contains(name, "zettir") {
-		<i class="si si-zettir si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "youtube") {
+		<i class="si si-youtube si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "zettlr") {
+		<i class="si si-zettlr si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "zoom") {
 		<i class="si si-zoom si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "amd") || strings.Contains(publisher, "amd") {
+		<i class="si si-amd si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "audio") {
 		<uk-icon hx-history="false" icon="headphones" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
+	} else if strings.Contains(publisher, "microsoft") {
+		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
 	} else {
 		<uk-icon hx-history="false" icon="app-window" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	}

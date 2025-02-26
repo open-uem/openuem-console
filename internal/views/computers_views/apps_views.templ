@@ -6,11 +6,12 @@ import (
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
 
-templ Apps(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, apps []*ent.App, confirmDelete bool) {
+templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsFilter, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, apps []*ent.App, confirmDelete bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -46,18 +47,21 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Name") }</span>
 											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#main", "outerHTML")
+											@filters.FilterByText(c, p, "AppName", f.AppName, "apps.filter_by_name", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-1/12">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Version") }</span>
 											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Version"), "version", "alpha", "#main", "outerHTML")
+											@filters.FilterByText(c, p, "AppVersion", f.Version, "apps.filter_by_version", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-1/3">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Publisher") }</span>
 											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Publisher"), "publisher", "alpha", "#main", "outerHTML")
+											@filters.FilterByText(c, p, "AppPublisher", f.Vendor, "apps.filter_by_publisher", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-2/12">

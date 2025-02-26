@@ -18,9 +18,14 @@ type App struct {
 	Count     int
 }
 
-func (m *Model) CountAgentApps(agentId string) (int, error) {
+func (m *Model) CountAgentApps(agentId string, f filters.ApplicationsFilter) (int, error) {
 	// Info from agents waiting for admission won't be shown
-	count, err := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
+
+	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)))
+
+	applyAppsFilters(query, f)
+
+	count, err := query.Count(context.Background())
 	if err != nil {
 		return 0, err
 	}
@@ -42,9 +47,11 @@ func (m *Model) CountAllApps(f filters.ApplicationsFilter) (int, error) {
 	return len(apps), err
 }
 
-func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort) ([]*ent.App, error) {
+func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort, f filters.ApplicationsFilter) ([]*ent.App, error) {
 	// Info from agents waiting for admission won't be shown
 	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+
+	applyAppsFilters(query, f)
 
 	switch p.SortBy {
 	case "name":
@@ -160,5 +167,9 @@ func applyAppsFilters(query *ent.AppQuery, f filters.ApplicationsFilter) {
 
 	if len(f.Vendor) > 0 {
 		query.Where(app.PublisherContainsFold(f.Vendor))
+	}
+
+	if len(f.Version) > 0 {
+		query.Where(app.VersionContainsFold(f.Version))
 	}
 }

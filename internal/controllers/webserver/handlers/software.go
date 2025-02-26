@@ -61,6 +61,7 @@ func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilte
 	// Get filters
 	filterByName := c.FormValue("filterByAppName")
 	filterByPublisher := c.FormValue("filterByAppPublisher")
+	filterByVersion := c.FormValue("filterByAppVersion")
 
 	f := filters.ApplicationsFilter{}
 	if filterByName != "" {
@@ -68,6 +69,10 @@ func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilte
 	}
 	if filterByPublisher != "" {
 		f.Vendor = filterByPublisher
+	}
+
+	if filterByVersion != "" {
+		f.Version = filterByVersion
 	}
 
 	return &f, nil
