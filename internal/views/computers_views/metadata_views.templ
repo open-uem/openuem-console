@@ -26,7 +26,7 @@ templ ComputerMetadata(c echo.Context, p partials.PaginationAndSort, sm *session
 				</div>
 				@ComputersNavbar(agent.ID, "metadata", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
+					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div id="error" class="hidden"></div>
 				@partials.SuccessMessage(successMessage)
@@ -112,7 +112,7 @@ templ MetadataTable(c echo.Context, p partials.PaginationAndSort, agentId string
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "get", c.FormValue("referer"))
+	@partials.Pagination(c, p, "get", "#metadata", "innerHTML", fmt.Sprintf("/computers/%s/metadata", agentId))
 }
 
 func SearchValue(metadataId int, data []*openuem_ent.Metadata) string {

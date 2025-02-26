@@ -26,7 +26,7 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 				</div>
 				@ComputersNavbar(agent.ID, "software", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
+					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -102,7 +102,7 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 								}
 							}
 						</table>
-						@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", fmt.Sprintf("/computers/%s/software", agent.ID))
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "inventory.apps.no_apps") }

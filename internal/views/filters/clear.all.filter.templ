@@ -6,7 +6,7 @@ templ ClearFilters(url, target, swap string, disableFunc func() bool) {
 	<button
 		type="button"
 		class="uk-button uk-button-default"
-		hx-push-url="false"
+		hx-push-url="true"
 		hx-get={ url }
 		hx-target={ target }
 		hx-swap={ swap }

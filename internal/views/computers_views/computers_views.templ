@@ -59,7 +59,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							@ComputersBody(p, agents, availableTags)
 						</tbody>
 					</table>
-					@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/computers")
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_endpoints") }
@@ -207,7 +207,7 @@ templ ComputerActions(index int, agent models.Computer) {
 			<li>
 				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s?delete=true", agent.ID))) }
-					hx-push-url="true"
+					hx-push-url="false"
 					hx-target="#main"
 					hx-swap="outerHTML"
 				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Delete") }</a>
@@ -261,6 +261,7 @@ templ ComputerActions(index int, agent models.Computer) {
 templ EmptyComputerRows(pageSize, nItems int) {
 	for i:=0; i < pageSize - nItems; i++ {
 		<tr class="h-16">
+			<td class="!align-middle">-</td>
 			<td class="!align-middle">-</td>
 			<td class="!align-middle">-</td>
 			<td class="!align-middle">-</td>

@@ -66,7 +66,7 @@ func (h *Handler) RestoreMessenger(c echo.Context) error {
 
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
-	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
 }
 
 func (h *Handler) RestoreUpdater(c echo.Context) error {
@@ -106,7 +106,7 @@ func (h *Handler) RestoreUpdater(c echo.Context) error {
 
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
-	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
 }
 
 func (h *Handler) RestoreAgents(c echo.Context) error {
@@ -146,7 +146,7 @@ func (h *Handler) RestoreAgents(c echo.Context) error {
 
 		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
 	}
-	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))
 }
 
 func (h *Handler) RestoreDatabase(c echo.Context) error {
@@ -173,5 +173,5 @@ func (h *Handler) RestoreDatabase(c echo.Context) error {
 
 		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists)))
 	}
-	return RenderConfirm(c, partials.Confirm(i18n.T(c.Request().Context(), "restore.confirm_delete_database"), "/admin/restore-database", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_delete_database"), "/admin/restore-database", "/admin/restore", true))
 }

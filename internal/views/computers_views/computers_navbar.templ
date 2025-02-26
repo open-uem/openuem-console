@@ -12,11 +12,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/hardware?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/hardware?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/hardware", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/hardware", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -28,9 +29,11 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/os?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/os?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/os", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/os", id))) }
+					hx-push-url="true"
 				}
 				hx-push-url="true"
 				hx-target="#main"
@@ -44,11 +47,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/monitors?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/monitors?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/monitors?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/monitors", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -60,11 +64,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/logical-disks?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/logical-disks", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -76,11 +81,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/shares?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/shares?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/shares", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/shares", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -92,11 +98,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/network-adapters?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/network-adapters?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/network-adapters", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/network-adapters", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -108,11 +115,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/printers?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/printers?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/printers", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/printers", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -124,11 +132,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/software?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/software?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/software", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/software", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -140,11 +149,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/deploy?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/deploy", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -157,11 +167,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 					if confirmDelete {
 						href={ templ.URL(fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id)) }
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id))) }
+						hx-push-url="false"
 					} else {
 						href={ templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", id)) }
 						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", id))) }
+						hx-push-url="true"
 					}
-					hx-push-url="true"
 					hx-target="#main"
 					hx-swap="outerHTML"
 				>
@@ -174,11 +185,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/power?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/power", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -190,11 +202,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/notes?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/notes?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/notes", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/notes", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
@@ -206,11 +219,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				if confirmDelete {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/metadata?delete=true", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/metadata?delete=true", id))) }
+					hx-push-url="false"
 				} else {
 					href={ templ.URL(fmt.Sprintf("/computers/%s/metadata", id)) }
 					hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/metadata", id))) }
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>

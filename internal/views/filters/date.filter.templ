@@ -41,7 +41,7 @@ templ FilterByDate(c echo.Context, p partials.PaginationAndSort, field, title, f
 			<button
 				type="button"
 				class="uk-button uk-button-primary mx-2 w-full"
-				hx-get={ c.Request().URL.Path }
+				hx-get={ GetPaginationUrl(c) }
 				hx-push-url="true"
 				hx-target={ target }
 				hx-swap={ swap }

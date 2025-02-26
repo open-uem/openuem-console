@@ -71,7 +71,7 @@ templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, 
 									placeholder={ i18n.T(ctx, "Search") }
 									aria-label="Search"
 									_="on keyup
-										if my value's length > 3 then
+										if my value's length > 1 then
 											remove @disabled from #search-packages
 										else
 											add @disabled to #search-packages
@@ -90,6 +90,7 @@ templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, 
 									hx-push-url="true"
 									hx-target="#deploy-search-results"
 									hx-swap="innerHTML"
+									hx-include="input[name^='filterBy']"
 									disabled
 								>
 									{ i18n.T(ctx, "Search") }
@@ -194,7 +195,11 @@ templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.C
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", c.FormValue("referer"))
+		if install {
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", "/deploy/searchinstall")
+		} else {
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", "/deploy/searchuninstall")
+		}
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -462,7 +467,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									}
 								</table>
 							</div>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/deploy/selectpackagedeployment")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "agents.no_agents") }

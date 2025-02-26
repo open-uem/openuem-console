@@ -132,7 +132,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
 	version := c.FormValue("filterBySelectedRelease")
-	return RenderConfirm(c, partials.ConfirmUpdateAgents(version))
+	return RenderConfirm(c, partials.ConfirmUpdateAgents(c, version))
 }
 
 func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {

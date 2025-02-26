@@ -98,7 +98,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/sessions")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "sessions.nosessions") }
@@ -114,8 +114,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, sm *sessions.SessionManager, currentVersion, latestVersion string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID, c.Request().Referer())
-		/* @SessionInfo(session, codec) */
+		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID)
 	</main>
 }
 

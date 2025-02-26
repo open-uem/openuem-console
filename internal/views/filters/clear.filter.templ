@@ -11,7 +11,7 @@ templ ClearFilter(c echo.Context, field, target, swap string, disableFunc func()
 		type="button"
 		class="uk-button uk-button-default mx-2 w-full"
 		hx-push-url="true"
-		hx-get={ c.Request().URL.Path }
+		hx-get={ GetPaginationUrl(c) }
 		hx-target={ target }
 		hx-swap={ swap }
 		hx-include="input[name^='filterBy']"

@@ -168,7 +168,7 @@ en:
     metadata_no_metadata: "No metadata has been defined for your organization"
     metadata_insert_value: "Introduce a value..."
     metadata_save_success: "Metadata value has been saved"
-    force_run_success: "Agent will run a report anf send new information, check it again in a few minutes"
+    force_run_success: "Agent will run a report and send new information, check it again in a few minutes"
     has_been_enabled: "The agent has been enabled"
     has_been_disabled: "The agent has been disabled"
     has_been_admitted: "The agent has been admitted and now it can be managed from OpenUEM"

@@ -410,7 +410,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/update-servers")
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
