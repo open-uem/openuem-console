@@ -1,8 +1,11 @@
 package partials
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+)
 
-templ Confirm(confirmMessage, confirmUrl, cancelUrl string, warning bool) {
+templ Confirm(c echo.Context, confirmMessage, confirmUrl, cancelUrl string, warning bool) {
 	<div class={ "uk-alert flex flex-col gap-4", templ.KV("border-blue-700 text-blue-700", !warning), templ.KV("border-red-600 text-red-600", warning) } uk-alert>
 		<p>{ confirmMessage }</p>
 		<div class="flex items-center gap-4">
@@ -29,7 +32,7 @@ templ Confirm(confirmMessage, confirmUrl, cancelUrl string, warning bool) {
 				title={ i18n.T(ctx, "Cancel") }
 				type="button"
 				class="uk-button uk-button-default"
-				hx-get={ cancelUrl }
+				hx-get={ GetCurrentUrl(c, cancelUrl) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"

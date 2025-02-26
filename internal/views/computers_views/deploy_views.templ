@@ -28,7 +28,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 				</div>
 				@ComputersNavbar(agent.ID, "deploy", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
+					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div id="error" class="hidden"></div>
 				if successMessage != "" {
@@ -162,7 +162,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []models.Deplo
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "#deploy-search-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId))
+		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId))
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -258,5 +258,5 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "#deployments-results", "innerHTML", "post", fmt.Sprintf("/computers/%s/deploy", agentId))
+	@partials.Pagination(c, p, "post", "#deployments-results", "innerHTML", fmt.Sprintf("/computers/%s/deploy", agentId))
 }

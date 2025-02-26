@@ -115,7 +115,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/tags")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "tags.no_tags") }

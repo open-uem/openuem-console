@@ -3,9 +3,9 @@ package partials
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"net/url"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 const PAGE_SIZE = 5
@@ -26,33 +26,22 @@ type page struct {
 	Disabled bool
 }
 
-templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url string) {
+templ Pagination(c echo.Context, p PaginationAndSort, method, target, swap, url string) {
 	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
 			<form
 				if method == "get" {
-					if url != "" {
-						hx-get={ string(templ.URL(url)) }
-					} else {
-						hx-get={ c.Request().URL.Path }
-					}
+					hx-get={ GetPaginationUrl(c, url) }
 				}
 				if method == "post" {
-					if url != "" {
-						hx-post={ string(templ.URL(url)) }
-					} else {
-						hx-post={ c.Request().URL.Path }
-					}
+					hx-post={ GetPaginationUrl(c, url) }
 				}
-				if method == "delete" {
-					if url !="" {
-						hx-delete={ string(templ.URL(url)) }
-					} else {
-						hx-delete={ c.Request().URL.Path }
-					}
+				if target == "innerHTML" {
+					hx-push-url="false"
+				} else {
+					hx-push-url="true"
 				}
-				hx-push-url="true"
 				hx-target={ target }
 				hx-swap={ swap }
 				hx-include="input[name^='filterBy']"
@@ -82,27 +71,16 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					<li class="cursor-pointer">
 						<form
 							if method == "get" {
-								if url !="" {
-									hx-get={ string(templ.URL(url)) }
-								} else {
-									hx-get={ c.Request().URL.Path }
-								}
+								hx-get={ GetPaginationUrl(c, url) }
 							}
 							if method == "post" {
-								if url !="" {
-									hx-post={ string(templ.URL(url)) }
-								} else {
-									hx-post={ c.Request().URL.Path }
-								}
+								hx-post={ GetPaginationUrl(c, url) }
 							}
-							if method == "delete" {
-								if url !="" {
-									hx-delete={ string(templ.URL(url)) }
-								} else {
-									hx-delete={ c.Request().URL.Path }
-								}
+							if target == "innerHTML" {
+								hx-push-url="false"
+							} else {
+								hx-push-url="true"
 							}
-							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
@@ -136,27 +114,16 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					>
 						<form
 							if method == "get" {
-								if url !="" {
-									hx-get={ string(templ.URL(url)) }
-								} else {
-									hx-get={ c.Request().URL.Path }
-								}
+								hx-get={ GetPaginationUrl(c, url) }
 							}
 							if method == "post" {
-								if url !="" {
-									hx-post={ string(templ.URL(url)) }
-								} else {
-									hx-post={ c.Request().URL.Path }
-								}
+								hx-post={ GetPaginationUrl(c, url) }
 							}
-							if method == "delete" {
-								if url !="" {
-									hx-delete={ string(templ.URL(url)) }
-								} else {
-									hx-delete={ c.Request().URL.Path }
-								}
+							if target == "innerHTML" {
+								hx-push-url="false"
+							} else {
+								hx-push-url="true"
 							}
-							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
@@ -178,27 +145,16 @@ templ Pagination(c echo.Context, p PaginationAndSort, target, swap, method, url 
 					<li class="cursor-pointer">
 						<form
 							if method == "get" {
-								if url !="" {
-									hx-get={ string(templ.URL(url)) }
-								} else {
-									hx-get={ c.Request().URL.Path }
-								}
+								hx-get={ GetPaginationUrl(c, url) }
 							}
 							if method == "post" {
-								if url !="" {
-									hx-post={ string(templ.URL(url)) }
-								} else {
-									hx-post={ c.Request().URL.Path }
-								}
+								hx-post={ GetPaginationUrl(c, url) }
 							}
-							if method == "delete" {
-								if url !="" {
-									hx-delete={ string(templ.URL(url)) }
-								} else {
-									hx-delete={ c.Request().URL.Path }
-								}
+							if target == "innerHTML" {
+								hx-push-url="false"
+							} else {
+								hx-push-url="true"
 							}
-							hx-push-url="true"
 							hx-target={ target }
 							hx-swap={ swap }
 							hx-include="input[name^='filterBy']"
@@ -362,13 +318,20 @@ func (p *PaginationAndSort) GetPaginationEntries() []page {
 	return pages
 }
 
-func GetCurrentUri(c echo.Context) string {
+func GetCurrentUrl(c echo.Context, url string) string {
 	currentUrl := c.Request().Header.Get("Hx-Current-Url")
 
-	u, err := url.Parse(currentUrl)
-	if err != nil {
-		return ""
+	if currentUrl != "" && strings.Contains(currentUrl, url) {
+		return currentUrl
 	}
 
-	return u.Path
+	return url
+}
+
+func GetPaginationUrl(c echo.Context, url string) string {
+	if url != "" {
+		return string(templ.URL(url))
+	}
+
+	return c.Request().URL.Path
 }

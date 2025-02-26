@@ -99,7 +99,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 							}
 						}
 					</table>
-					@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/software")
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "apps.no_apps") }

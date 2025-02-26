@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -249,16 +250,50 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
 }
 
-func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
+func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {
 	var err error
 
+	currentPage := c.FormValue("page")
+	pageSize := c.FormValue("pageSize")
+	sortBy := c.FormValue("sortBy")
+	sortOrder := c.FormValue("sortOrder")
+	currentSortBy := c.FormValue("currentSortBy")
+
 	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			currentPage = "1"
+			pageSize = u.Query().Get("pageSize")
+			sortBy = u.Query().Get("sortBy")
+			sortOrder = u.Query().Get("sortOrder")
+			currentSortBy = u.Query().Get("currentSortBy")
+		}
+	}
+
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
 
 	// Get filters values
 	f := filters.AgentFilter{}
-	f.Hostname = c.FormValue("filterByHostname")
-	f.Username = c.FormValue("filterByUsername")
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			f.Hostname = u.Query().Get("filterByHostname")
+		}
+	} else {
+		f.Hostname = c.FormValue("filterByHostname")
+	}
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			f.Username = u.Query().Get("filterByUsername")
+		}
+	} else {
+		f.Username = c.FormValue("filterByUsername")
+	}
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes()
 	if err != nil {
@@ -266,10 +301,21 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
-		value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
-		if value != "" {
-			filteredAgentOSes = append(filteredAgentOSes, value)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByAgentOS%d", index))
+				if value != "" {
+					filteredAgentOSes = append(filteredAgentOSes, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByAgentOS%d", index))
+			if value != "" {
+				filteredAgentOSes = append(filteredAgentOSes, value)
+			}
 		}
+
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
@@ -279,9 +325,19 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	}
 	filteredVersions := []string{}
 	for index := range versions {
-		value := c.FormValue(fmt.Sprintf("filterByOSVersion%d", index))
-		if value != "" {
-			filteredVersions = append(filteredVersions, value)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByOSVersion%d", index))
+				if value != "" {
+					filteredVersions = append(filteredVersions, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByOSVersion%d", index))
+			if value != "" {
+				filteredVersions = append(filteredVersions, value)
+			}
 		}
 	}
 	f.OSVersions = filteredVersions
@@ -292,9 +348,19 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	for index := range vendors {
-		value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
-		if value != "" {
-			filteredComputerManufacturers = append(filteredComputerManufacturers, value)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByComputerManufacturer%d", index))
+				if value != "" {
+					filteredComputerManufacturers = append(filteredComputerManufacturers, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByComputerManufacturer%d", index))
+			if value != "" {
+				filteredComputerManufacturers = append(filteredComputerManufacturers, value)
+			}
 		}
 	}
 	f.ComputerManufacturers = filteredComputerManufacturers
@@ -305,24 +371,51 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	for index := range models {
-		value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
-		if value != "" {
-			filteredComputerModels = append(filteredComputerModels, value)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByComputerModel%d", index))
+				if value != "" {
+					filteredComputerModels = append(filteredComputerModels, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByComputerModel%d", index))
+			if value != "" {
+				filteredComputerModels = append(filteredComputerModels, value)
+			}
 		}
 	}
 	f.ComputerModels = filteredComputerModels
 
 	filteredIsRemote := []string{}
 	for index := range []string{"Remote", "Local"} {
-		value := c.FormValue(fmt.Sprintf("filterByIsRemote%d", index))
-		if value != "" {
-			filteredIsRemote = append(filteredIsRemote, value)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				value := u.Query().Get(fmt.Sprintf("filterByIsRemote%d", index))
+				if value != "" {
+					filteredIsRemote = append(filteredIsRemote, value)
+				}
+			}
+		} else {
+			value := c.FormValue(fmt.Sprintf("filterByIsRemote%d", index))
+			if value != "" {
+				filteredIsRemote = append(filteredIsRemote, value)
+			}
 		}
 	}
 	f.IsRemote = filteredIsRemote
 
 	if c.FormValue("filterByApplication") != "" {
-		f.WithApplication = c.FormValue("filterByApplication")
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				f.WithApplication = u.Query().Get("filterByApplication")
+			}
+		} else {
+			f.WithApplication = c.FormValue("filterByApplication")
+		}
 	}
 
 	tags, err := h.Model.GetAllTags()
@@ -331,8 +424,17 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	}
 
 	for _, tag := range tags {
-		if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
-			f.Tags = append(f.Tags, tag.ID)
+		if comesFromDialog {
+			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+			if err == nil {
+				if u.Query().Get(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+					f.Tags = append(f.Tags, tag.ID)
+				}
+			}
+		} else {
+			if c.FormValue(fmt.Sprintf("filterByTag%d", tag.ID)) != "" {
+				f.Tags = append(f.Tags, tag.ID)
+			}
 		}
 	}
 
@@ -374,6 +476,19 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string) error {
 	}
 
 	l := views.GetTranslatorForDates(c)
+
+	if comesFromDialog {
+		currentUrl := c.Request().Header.Get("Hx-Current-Url")
+		if currentUrl != "" {
+			if u, err := url.Parse(currentUrl); err == nil {
+				q := u.Query()
+				q.Del("page")
+				q.Add("page", "1")
+				u.RawQuery = q.Encode()
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage)), u)
+			}
+		}
+	}
 
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage)))
 }
@@ -844,5 +959,5 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"))
+	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"), true)
 }

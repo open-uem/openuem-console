@@ -26,7 +26,7 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, sm *sessions.Se
 				</div>
 				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
+					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">

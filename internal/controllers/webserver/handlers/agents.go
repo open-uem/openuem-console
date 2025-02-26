@@ -23,7 +23,7 @@ import (
 	"github.com/open-uem/utils"
 )
 
-func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, gotoPage1 bool) error {
+func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
 	var err error
 	var agents []*ent.Agent
 
@@ -35,7 +35,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 
 	p := partials.NewPaginationAndSort()
 
-	if gotoPage1 {
+	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
 			currentPage = "1"
@@ -51,7 +51,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	// Get filters values
 	f := filters.AgentFilter{}
 
-	if gotoPage1 {
+	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
 			f.Hostname = u.Query().Get("filterByHostname")
@@ -62,7 +62,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 
 	filteredAgentStatusOptions := []string{}
 	for index := range agents_views.AgentStatus {
-		if gotoPage1 {
+		if comesFromDialog {
 			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 			if err == nil {
 				value := u.Query().Get(fmt.Sprintf("filterByStatusAgent%d", index))
@@ -85,7 +85,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
-		if gotoPage1 {
+		if comesFromDialog {
 			u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 			if err == nil {
 				value := u.Query().Get(fmt.Sprintf("filterByAgentOS%d", index))
@@ -111,7 +111,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.IsRemote = filteredIsRemote
 
-	if gotoPage1 {
+	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
 			contactFrom := u.Query().Get("filterByContactDateFrom")
@@ -146,7 +146,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		errMessage = err.Error()
 	}
 
-	if gotoPage1 {
+	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
 			for _, tag := range appliedTags {
@@ -179,7 +179,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	if gotoPage1 {
+	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
 			nSelectedItems := u.Query().Get("filterBySelectedItems")
@@ -229,7 +229,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if gotoPage1 {
+	if comesFromDialog {
 		currentUrl := c.Request().Header.Get("Hx-Current-Url")
 		if currentUrl != "" {
 			if u, err := url.Parse(currentUrl); err == nil {
@@ -401,7 +401,7 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmAdmitAgents(c.Request().Referer()))
+	return RenderConfirm(c, partials.ConfirmAdmitAgents(c))
 }
 
 func (h *Handler) AgentsEnable(c echo.Context) error {
@@ -450,7 +450,7 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmEnableAgents(c.Request().Referer()))
+	return RenderConfirm(c, partials.ConfirmEnableAgents(c))
 }
 
 func (h *Handler) AgentsDisable(c echo.Context) error {
@@ -495,7 +495,7 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 
 	}
 
-	return RenderConfirm(c, partials.ConfirmDisableAgents(c.Request().Referer()))
+	return RenderConfirm(c, partials.ConfirmDisableAgents(c))
 }
 
 func (h *Handler) AgentAdmit(c echo.Context) error {

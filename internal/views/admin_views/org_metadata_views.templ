@@ -88,7 +88,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "#main", "outerHTML", "get", c.FormValue("referer"))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/metadata")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "metadata.no_metadata") }

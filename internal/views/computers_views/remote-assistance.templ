@@ -27,7 +27,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 				</div>
 				@ComputersNavbar(agent.ID, "remote-assistance", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID, c.Request().Referer())
+					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>

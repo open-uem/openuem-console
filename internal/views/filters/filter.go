@@ -1,5 +1,11 @@
 package filters
 
+import (
+	"net/url"
+
+	"github.com/labstack/echo/v4"
+)
+
 type AgentFilter struct {
 	Hostname              string
 	Versions              []string
@@ -89,4 +95,24 @@ type UpdateServersFilter struct {
 	SelectedItems      int
 	SelectedAllServers string
 	SelectedRelease    string
+}
+
+func GetPaginationUrl(c echo.Context) string {
+	// If Hx-Replace-Url is set in the header that means that we come from a dialog
+	// and that we force to go to page 1, to avoid going to a non-existent page
+	// due to a filter and we must keep the filters, also we add a check
+	// to be sure that we're in the right url associated with the pagination
+
+	replaceUrl := c.Response().Header().Get("Hx-Replace-Url")
+	if replaceUrl != "" {
+		if u, err := url.Parse(replaceUrl); err == nil {
+			q := u.Query()
+			q.Del("page")
+			q.Del("pageSize")
+			u.RawQuery = q.Encode()
+			return u.String()
+		}
+	}
+
+	return c.Request().URL.Path
 }

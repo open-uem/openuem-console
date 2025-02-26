@@ -95,9 +95,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/deploy/selectpackagedeployment", h.SelectPackageDeployment, h.IsAuthenticated)
 	e.POST("/deploy/selectpackagedeployment", h.DeployPackageToSelectedAgents, h.IsAuthenticated)
 
-	e.GET("/computers", func(c echo.Context) error { return h.ComputersList(c, "") }, h.IsAuthenticated)
-	e.POST("/computers", func(c echo.Context) error { return h.ComputersList(c, "") }, h.IsAuthenticated)
-	e.DELETE("/computers", func(c echo.Context) error { return h.ComputersList(c, "") }, h.IsAuthenticated)
+	e.GET("/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
+	e.POST("/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
+	e.DELETE("/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.GET("/computers/:uuid", h.Computer, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid", h.ComputerConfirmDelete, h.IsAuthenticated)
 	e.GET("/computers/:uuid/software", h.Apps, h.IsAuthenticated)

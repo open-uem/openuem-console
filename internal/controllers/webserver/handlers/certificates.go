@@ -85,7 +85,7 @@ func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "certificates.no_serial"), true))
 	}
 
-	return RenderConfirm(c, partials.ConfirmCertRevocation(serial))
+	return RenderConfirm(c, partials.ConfirmCertRevocation(c, serial))
 }
 
 func (h *Handler) RevocateCertificate(c echo.Context) error {

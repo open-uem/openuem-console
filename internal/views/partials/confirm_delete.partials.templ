@@ -1,17 +1,19 @@
 package partials
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+)
 
-templ ConfirmDelete(confirm, cancelURL, deleteURL, referer string) {
+templ ConfirmDelete(c echo.Context, confirm, cancelURL, deleteURL string) {
 	<div id="confirm">
 		<div id="confirm-message" class="uk-alert uk-alert-danger mt-8" uk-alert>
 			<div class="uk-alert-description p-2">
-				<input type="hidden" name="referer" value={ referer }/>
 				{ confirm }
 				<div class="flex gap-6 pt-6">
 					if cancelURL != "" {
 						<button
-							hx-get={ string(templ.URL(cancelURL)) }
+							hx-get={ GetCurrentUrl(c, cancelURL) }
 							hx-push-url="true"
 							hx-target="#main"
 							hx-swap="outerHTML"
@@ -28,7 +30,6 @@ templ ConfirmDelete(confirm, cancelURL, deleteURL, referer string) {
 						hx-delete={ string(templ.URL(deleteURL)) }
 						hx-target="#main"
 						hx-swap="outerHTML"
-						hx-include="input[name='referer']"
 						class="uk-button uk-button-danger"
 					>
 						{ i18n.T(ctx, "Delete") }
