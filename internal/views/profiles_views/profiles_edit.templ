@@ -1,0 +1,205 @@
+package profiles_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+)
+
+templ EditProfile(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, currentVersion, latestVersion, successMessage string, confirmDelete bool) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: "/profiles"}, {Title: profile.Name}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		if successMessage != "" {
+			@partials.SuccessMessage(successMessage)
+		}
+		<div id="error" class="hidden"></div>
+		if confirmDelete {
+			@partials.ConfirmDelete(c, i18n.T(ctx, "tasks.confirm_delete"), fmt.Sprintf("/profiles/%d", profile.ID), "/tasks/"+taskId)
+		}
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "profiles.edit.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "profiles.edit.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body">
+				<div class="flex flex-col gap-4">
+					<div class="flex flex-col gap-4 mt-6">
+						<label class="uk-form-label" for="profile-description">
+							{ i18n.T(ctx, "profiles.new.profile") }
+						</label>
+						<div class="uk-form-controls">
+							<textarea
+								id="profile-description"
+								name="profile-description"
+								class="uk-textarea w-1/2"
+								rows="2"
+								placeholder={ i18n.T(ctx, "profiles.new.text") }
+								aria-label="Profile's description"
+								autocomplete="off"
+								autocorrect="off"
+								autocapitalize="off"
+								spellcheck="false"
+							>
+								{ profile.Name }
+							</textarea>
+						</div>
+						<div class="flex gap-8">
+							<div>
+								<label class="uk-form-label" for="profile-assignment">
+									{ i18n.T(ctx, "profiles.select_assignment") }
+								</label>
+								<div class="uk-form-controls">
+									<select
+										class="uk-select"
+										id="profile-assignment"
+										name="profile-assignment"
+										_="
+                                    on change
+                                        if my.value is 'dontApplyToAll' then hide #profile-tags with visibility end
+                                        if my.value is 'applyToAll' then hide #profile-tags with visibility end
+                                        if my.value is 'useTags' then show #profile-tags with visibility end
+                                    end
+                                "
+									>
+										<option value={ "dontApplyToAll" } selected?={ !profile.ApplyToAll && (profile.Edges.Tags == nil || len(profile.Edges.Tags) == 0) }>{ i18n.T(ctx, "profiles.dont_assign") }</option>
+										<option value={ "applyToAll" } selected?={ profile.ApplyToAll }>{ i18n.T(ctx, "profiles.assign_all") }</option>
+										<option value={ "useTags" } selected?={ profile.Edges.Tags != nil && len(profile.Edges.Tags) > 0 }>{ i18n.T(ctx, "profiles.assign_tags") }</option>
+									</select>
+								</div>
+							</div>
+							<div>
+								<div id="profile-tags" class={ templ.KV("invisible", profile.Edges.Tags == nil || len(profile.Edges.Tags) == 0), templ.KV("visible", len(profile.Edges.Tags) > 0) }>
+									<label class="uk-form-label" for="profile-tags-section">
+										{ i18n.T(ctx, "profiles.edit.select_tags") }
+									</label>
+									<div class="uk-form-controls">
+										<div id="profile-tags-section" class="flex flex-wrap gap-2">
+											@partials.ShowAppliedTags(profile.Edges.Tags, strconv.Itoa(profile.ID), p, fmt.Sprintf("/profiles/%d/tags", profile.ID), "#main", "outerHTML")
+											@partials.AddTagButton(p, availableTags, profile.Edges.Tags, strconv.Itoa(profile.ID), fmt.Sprintf("/profiles/%d/tags", profile.ID), "post", "#main", "outerHTML")
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="flex gap-4 my-2">
+							<button
+								type="submit"
+								class="uk-button uk-button-primary"
+								hx-post={ string(templ.URL(fmt.Sprintf("/profiles/%d", profile.ID))) }
+								hx-target="#main"
+								hx-swap="outerHTML"
+								hx-push-url="false"
+								hx-include="#profile-description, #profile-assignment"
+							>
+								{ i18n.T(ctx, "profiles.edit.save") }
+							</button>
+							<button
+								title={ i18n.T(ctx, "profiles.add") }
+								type="button"
+								class="uk-button uk-button-default"
+								hx-get={ string(templ.URL(fmt.Sprintf("/tasks/%d/new", profile.ID))) }
+								hx-target="#main"
+								hx-push-url="false"
+								hx-swap="outerHTML"
+							>
+								<uk-icon icon="square-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "profiles.edit.add_task") }
+							</button>
+						</div>
+					</div>
+					if profile.Edges.Tasks == nil || len(profile.Edges.Tasks) == 0 {
+						<p class="uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "profiles.edit.no_tasks") }
+						</p>
+					} else {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
+							<thead>
+								<tr>
+									<th class="w-1/12"></th>
+									<th class="w-5/12">
+										<div class="flex gap-1 items-center">
+											<span>{ i18n.T(ctx, "profiles.edit.task_description") }</span>
+										</div>
+									</th>
+									<th class="w-5/12">{ i18n.T(ctx, "More info") }</th>
+									<th class="w-1/12"></th>
+								</tr>
+							</thead>
+							for index, task := range tasks {
+								<tr>
+									<td class="!align-middle">
+										@TaskTypeIcon(task.Type.String())
+									</td>
+									<td
+										class="!align-middle underline hover:cursor-pointer"
+									>
+										<a
+											href={ templ.URL(fmt.Sprintf("/tasks/%d", task.ID)) }
+											hx-get={ string(templ.URL(fmt.Sprintf("/tasks/%d", task.ID))) }
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+										>{ task.Name }</a>
+									</td>
+									<td>
+										switch task.Type.String() {
+											case "winget_install", "winget_delete":
+												<span>{ task.PackageName }</span>
+											case "add_registry_key", "remove_registry_key", "update_registry_key_default_value":
+												<span>{ task.RegistryKey }</span>
+											case "add_registry_key_value", "remove_registry_key_value":
+												<span>{ task.RegistryKey + " <- " + task.RegistryKeyValueName }</span>
+											default:
+												<span>-</span>
+										}
+									</td>
+									<td>
+										@partials.MoreButton(index)
+										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+												<li>
+													<a
+														hx-get={ string(templ.URL(fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, task.ID))) }
+														hx-target="#main"
+														hx-swap="outerHTML"
+													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+												</li>
+											</ul>
+										</div>
+									</td>
+								</tr>
+							}
+						</table>
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", fmt.Sprintf("/profiles/%d", profile.ID))
+					}
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ TaskTypeIcon(taskType string) {
+	switch taskType {
+		case "winget_install":
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_install") } uk-cloack></uk-icon>
+		case "winget_delete":
+			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_delete") } uk-cloack></uk-icon>
+		case "execute_command":
+			<uk-icon hx-history="false" icon="play" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.execute_command") } uk-cloack></uk-icon>
+		case "add_registry_key", "add_registry_key_value":
+			<uk-icon hx-history="false" icon="book-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_registry_key") } uk-cloack></uk-icon>
+		case "remove_registry_key", "remove_registry_key_value":
+			<uk-icon hx-history="false" icon="book-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_registry_key") } uk-cloack></uk-icon>
+		case "update_registry_key_default_value":
+			<uk-icon hx-history="false" icon="book-up2" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.update_registry_key_default_value") } uk-cloack></uk-icon>
+	}
+}

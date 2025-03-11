@@ -1,0 +1,58 @@
+package profiles_views
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ NewProfile(sm *sessions.SessionManager, currentVersion, latestVersion string) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: "/profiles"}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "profiles.new.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "profiles.new.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body">
+				<form
+					class="uk-form-stacked my-6"
+					hx-post="/profiles/new"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-push-url="false"
+				>
+					<label class="uk-form-label" for="profile-description">
+						{ i18n.T(ctx, "profiles.new.profile") }
+					</label>
+					<div class="uk-form-controls">
+						<textarea
+							id="profile-description"
+							name="profile-description"
+							class="uk-textarea w-1/2"
+							rows="2"
+							placeholder={ i18n.T(ctx, "profiles.new.text") }
+							aria-label="Profile's description"
+							autocomplete="off"
+							autocorrect="off"
+							autocapitalize="off"
+							spellcheck="false"
+						></textarea>
+					</div>
+					<div class="uk-form-controls my-4">
+						<button type="submit" class="uk-button uk-button-primary">
+							{ i18n.T(ctx, "profiles.new.create") }
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+}

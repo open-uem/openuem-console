@@ -43,21 +43,21 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 								<th>
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "apps.name") }</span>
-										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.name"), "name", "alpha", "#main", "outerHTML")
+										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.name"), "name", "alpha", "#main", "outerHTML", "get")
 										@filters.FilterByText(c, p, "AppName", f.AppName, "apps.filter_by_name", "#main", "outerHTML")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-1 items-center">
 										<span>{ i18n.T(ctx, "apps.publisher") }</span>
-										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.publisher"), "publisher", "alpha", "#main", "outerHTML")
+										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.publisher"), "publisher", "alpha", "#main", "outerHTML", "get")
 										@filters.FilterByText(c, p, "AppPublisher", f.Vendor, "apps.filter_by_publisher", "#main", "outerHTML")
 									</div>
 								</th>
 								<th>
 									<div class="flex gap-1 items-center justify-center">
 										<span>{ i18n.T(ctx, "apps.num_installations") }</span>
-										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.num_installations"), "installations", "numeric", "#main", "outerHTML")
+										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "apps.num_installations"), "installations", "numeric", "#main", "outerHTML", "get")
 									</div>
 								</th>
 							</tr>

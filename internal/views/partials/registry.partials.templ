@@ -1,0 +1,136 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/wingetcfg/wingetcfg"
+)
+
+templ RegistryComponent(task *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div id="registry-key-section" class={ templ.KV("hidden", !IsRegistryTask(task)) }>
+			<label class="uk-form-label" for="registry-key">
+				{ i18n.T(ctx, "tasks.registry_key") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="registry-key"
+				name="registry-key"
+				placeholder={ i18n.T(ctx, "tasks.introduce_registry_key", `HKEY_USERS\.DEFAULT\Control Panel\Keyboard`) }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_registry_key") }
+				if task != nil {
+					value={ task.RegistryKey }
+				}
+			/>
+		</div>
+		<div id="registry-key-value-name-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "add_registry_key_value" && task.Type.String() != "remove_registry_key_value")) }>
+			<label class="uk-form-label" for="registry-value-name">
+				{ i18n.T(ctx, "tasks.registry_value_name") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="registry-value-name"
+				name="registry-value-name"
+				placeholder={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
+				if task != nil {
+					value={ task.RegistryKeyValueName }
+				}
+			/>
+		</div>
+		<div id="registry-value-types-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value")) }>
+			@RegistryTypes(task)
+		</div>
+		<div id="registry-value-data-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value" && task.Type.String() != "remove_registry_key_value")) }>
+			<label class="uk-form-label" for="registry-value-data">
+				{ i18n.T(ctx, "tasks.registry_value_data") }
+			</label>
+			<div class="uk-form-controls">
+				<textarea
+					id="registry-value-data"
+					name="registry-value-data"
+					class="uk-textarea"
+					rows="2"
+					placeholder={ i18n.T(ctx, "tasks.new.text") }
+					aria-label={ i18n.T(ctx, "tasks.registry_value_data") }
+					autocomplete="off"
+					autocorrect="off"
+					autocapitalize="off"
+					spellcheck="false"
+				>
+					if task != nil {
+						{ task.RegistryKeyValueData }
+					}
+				</textarea>
+			</div>
+		</div>
+		<div id="registry-key-force-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "remove_registry_key")) }>
+			<div class="flex items-center space-x-2">
+				<input
+					class="uk-toggle-switch uk-toggle-switch-primary"
+					id="registry-key-force"
+					name="registry-key-force"
+					type="checkbox"
+					checked?={ task != nil && task.RegistryForce }
+				/>
+				<label class="uk-form-label" for="registry-key-force">{ i18n.T(ctx, "tasks.force_registry_key") }</label>
+			</div>
+		</div>
+		<div id="registry-value-force-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value")) }>
+			<div class="flex items-center space-x-2">
+				<input
+					class="uk-toggle-switch uk-toggle-switch-primary"
+					id="registry-value-force"
+					name="registry-value-force"
+					type="checkbox"
+					checked?={ task != nil && task.RegistryForce }
+				/>
+				<label class="uk-form-label" for="registry-value-force">{ i18n.T(ctx, "tasks.force_registry_value") }</label>
+			</div>
+		</div>
+	</div>
+}
+
+templ RegistryTypes(task *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div>
+			<label class="uk-form-label" for="registry-value-type">{ i18n.T(ctx, "tasks.registry_value_type") }</label>
+			<select
+				id="registry-value-type"
+				name="registry-value-type"
+				class="uk-select"
+				_={ fmt.Sprintf(`
+                    on change
+                        if my.value is '%s' or my.value is '%s' then 
+                            remove .hidden from #registry-hex-section
+                        else
+                            add .hidden to #registry-hex-section
+                        end
+                    end`,  wingetcfg.RegistryValueTypeDWord, wingetcfg.RegistryValueTypeQWord) }
+			>
+				<option value="">{ i18n.T(ctx, "tasks.choose_registry_type") }</option>
+				<option value={ wingetcfg.RegistryValueTypeString } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeString }>{ wingetcfg.RegistryValueTypeString }</option>
+				<option value={ wingetcfg.RegistryValueTypeDWord } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeDWord }>{ wingetcfg.RegistryValueTypeDWord }</option>
+				<option value={ wingetcfg.RegistryValueTypeQWord } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeQWord }>{ wingetcfg.RegistryValueTypeQWord }</option>
+				<option value={ wingetcfg.RegistryValueTypeMultistring } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeMultistring }>{ wingetcfg.RegistryValueTypeMultistring }</option>
+			</select>
+		</div>
+		<div id="registry-hex-section" class={ templ.KV("hidden", task != nil && task.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeDWord && task.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeQWord) }>
+			<div class="flex items-center space-x-2">
+				<input
+					class="uk-toggle-switch uk-toggle-switch-primary"
+					id="registry-hex"
+					name="registry-hex"
+					type="checkbox"
+					checkbox?={ task != nil && task.RegistryHex }
+				/>
+				<label class="uk-form-label" for="registry-hex">{ i18n.T(ctx, "tasks.registry_hex") }</label>
+			</div>
+		</div>
+	</div>
+}

@@ -43,92 +43,92 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 							})
 							@partials.RefreshPage(l, "/admin", "#main", "outerHTML", "post", refresh, true)
 						</div>
-						if len(users) > 0 {
-							<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
-								<button
-									id="import"
-									title={ i18n.T(ctx, "Upload") }
-									type="button"
-									class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
-								>
-									<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.import") }
-								</button>
-								<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-									<form
-										class="flex flex-col gap-4 p-4 w-96"
-										hx-encoding="multipart/form-data"
-										hx-post="/admin/users/import"
-										hx-target="#main"
-										hx-indicator="#upload-csv-spinner"
-										_="on htmx:afterRequest	set #csvFile.value to ''"
-									>
-										<label class="uk-text-bold" for="csvFile">{ i18n.T(ctx, "users.csv_file") }</label>
-										<input id="csvFile" name="csvFile" type="file" accept=".csv,.txt"/>
-										<p>{ i18n.T(ctx, "users.csv_description") }</p>
-										<button
-											title={ i18n.T(ctx, "Upload") }
-											type="submit"
-											class="flex gap-2 uk-button uk-button-primary"
-											_="on click call #import.click()"
-										>
-											<uk-icon id="upload-csv-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-											{ i18n.T(ctx, "Upload") }
-										</button>
-									</form>
-								</div>
-								<button
-									title={ i18n.T(ctx, "users.add") }
-									type="button"
-									class="uk-button uk-button-primary text-white"
-									hx-get="/admin/users/new"
+						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
+							<button
+								id="import"
+								title={ i18n.T(ctx, "Upload") }
+								type="button"
+								class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
+							>
+								<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.import") }
+							</button>
+							<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+								<form
+									class="flex flex-col gap-4 p-4 w-96"
+									hx-encoding="multipart/form-data"
+									hx-post="/admin/users/import"
 									hx-target="#main"
-									hx-push-url="false"
-									hx-swap="outerHTML"
+									hx-indicator="#upload-csv-spinner"
+									_="on htmx:afterRequest	set #csvFile.value to ''"
 								>
-									<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
-								</button>
+									<label class="uk-text-bold" for="csvFile">{ i18n.T(ctx, "users.csv_file") }</label>
+									<input id="csvFile" name="csvFile" type="file" accept=".csv,.txt"/>
+									<p>{ i18n.T(ctx, "users.csv_description") }</p>
+									<button
+										title={ i18n.T(ctx, "Upload") }
+										type="submit"
+										class="flex gap-2 uk-button uk-button-primary"
+										_="on click call #import.click()"
+									>
+										<uk-icon id="upload-csv-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										{ i18n.T(ctx, "Upload") }
+									</button>
+								</form>
 							</div>
+							<button
+								title={ i18n.T(ctx, "users.add") }
+								type="button"
+								class="uk-button uk-button-primary text-white"
+								hx-get="/admin/users/new"
+								hx-target="#main"
+								hx-push-url="false"
+								hx-swap="outerHTML"
+							>
+								<uk-icon icon="user-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "users.add") }
+							</button>
+						</div>
+						if len(users) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important">
 								<thead>
 									<tr>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.uid"), "uid", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.uid"), "uid", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Username", f.Username, "users.filter_by_username", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.name") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.name"), "name", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.name"), "name", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Name", f.Name, "users.filter_by_name", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.email") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.email"), "email", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.email"), "email", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Email", f.Email, "users.filter_by_email", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "register.country") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "register.country"), "country", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "register.country"), "country", "alpha", "#main", "outerHTML", "get")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.phone") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.phone"), "phone", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.phone"), "phone", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Phone", f.Phone, "users.filter_by_phone", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.register") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.register"), "register", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.register"), "register", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByOptions(c, p, "RegisterStatus", "users.filter_by_register_status", openuem_nats.RegisterPossibleStatus(), f.RegisterOptions, "#main", "outerHTML", true, func() bool {
 													return len(f.RegisterOptions) == 0
 												})
@@ -143,14 +143,14 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.created") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.created"), "created", "time", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.created"), "created", "time", "#main", "outerHTML", "get")
 												@filters.FilterByDate(c, p, "Created", "users.filter_by_creation", f.CreatedFrom, f.CreatedTo, "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.modified") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.modified"), "modified", "time", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "users.modified"), "modified", "time", "#main", "outerHTML", "get")
 												@filters.FilterByDate(c, p, "Modified", "users.filter_by_modification", f.ModifiedFrom, f.ModifiedTo, "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
 											</div>
 										</th>

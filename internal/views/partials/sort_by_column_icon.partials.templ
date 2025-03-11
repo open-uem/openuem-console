@@ -8,10 +8,14 @@ import (
 	"strings"
 )
 
-templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap string) {
+templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortIcon, target, swap, method string) {
 	<form
 		class="flex items-center"
-		hx-get={ c.Request().URL.Path }
+		if method == "post" {
+			hx-post={ c.Request().URL.Path }
+		} else {
+			hx-gett={ c.Request().URL.Path }
+		}
 		hx-push-url="true"
 		hx-target={ target }
 		hx-swap={ swap }

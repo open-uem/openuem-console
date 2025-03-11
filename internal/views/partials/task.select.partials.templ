@@ -1,0 +1,164 @@
+package partials
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"slices"
+)
+
+templ SelectTaskType(task *ent.Task) {
+	<div>
+		<label class="uk-form-label" for="task-type">
+			{ i18n.T(ctx, "tasks.task_type") }
+		</label>
+		<select
+			class="uk-select"
+			_="
+            on change 
+                if my.value is '' then
+                    add .hidden to #package-subtask
+                    add .hidden to #registry-subtask
+                end
+                if my.value is 'package_type' then 
+                    remove .hidden from #package-subtask
+                    add .hidden to #registry-subtask
+                end
+                if my.value is 'registry_type' then 
+                    add .hidden to #package-subtask
+                    remove .hidden from #registry-subtask
+                end
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_type") }</option>
+			<option value="package_type" selected?={ IsPackageTask(task) }>
+				{ i18n.T(ctx, "tasks.package_subtype") }
+			</option>
+			<option value="registry_type" selected?={ IsRegistryTask(task) }>
+				{ i18n.T(ctx, "tasks.registry_subtype") }
+			</option>
+		</select>
+	</div>
+}
+
+templ SelectPackageTaskSubtype(task *ent.Task) {
+	<div id="package-subtask" class={ templ.KV("hidden", !IsPackageTask(task)) }>
+		<label class="uk-form-label" for="task-type">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-type"
+			name="package-task-type"
+			_="
+            on change 
+                if my.value is '' then
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                end
+                if my.value is 'winget_install' then 
+                    remove .hidden from #select-package
+                    remove .hidden from #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                end
+                if my.value is 'winget_delete' then 
+                    remove .hidden from #select-package
+                    remove .hidden from #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                end
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "winget_install" } selected?={ task != nil && task.Type.String() == "winget_install" }>{ i18n.T(ctx, "tasks.winget_install") }</option>
+			<option value={ "winget_delete" } selected?={  task != nil && task.Type.String() == "winget_delete" }>{ i18n.T(ctx, "tasks.winget_delete") }</option>
+		</select>
+	</div>
+}
+
+templ SelectRegistryTaskSubtype(task *ent.Task) {
+	<div id="registry-subtask" class={ templ.KV("hidden", !IsRegistryTask(task)) }>
+		<label class="uk-form-label" for="task-type">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-type"
+			name="registry-task-type"
+			_="
+            on change 
+                if my.value is '' then
+                    add .hidden to #select-package
+                    add .hidden to <div[id^='registry'] />
+                end
+                if my.value is 'add_registry_key' then 
+                    add .hidden to #select-package
+                    remove .hidden from #registry-key-section
+                    add .hidden to #registry-key-value-name-section
+                    add .hidden to #registry-value-types-section
+                    add .hidden to #registry-value-data-section
+                    add .hidden to #registry-key-force-section
+                    add .hidden to #registry-value-force-section
+                end
+                if my.value is 'remove_registry_key' then 
+                    add .hidden to #select-package
+                    remove .hidden from #registry-key-section
+                    add .hidden to #registry-key-value-name-section
+                    add .hidden to #registry-value-types-section
+                    add .hidden to #registry-value-data-section
+                    remove .hidden from #registry-key-force-section
+                    add .hidden to #registry-value-force-section
+                end
+                if my.value is 'update_registry_key_default_value' then
+                    add .hidden to #select-package
+                    remove .hidden from #registry-key-section
+                    add .hidden to #registry-key-value-name-section
+                    remove .hidden from #registry-value-types-section
+                    remove .hidden from #registry-value-data-section
+                    add .hidden to #registry-key-force-section
+                    remove .hidden from #registry-value-force-section
+                end
+                if my.value is 'add_registry_key_value' then
+                    add .hidden to #select-package
+                    remove .hidden from #registry-key-section
+                    remove .hidden from #registry-key-value-name-section
+                    remove .hidden from #registry-value-types-section
+                    remove .hidden from #registry-value-data-section
+                    add .hidden to #registry-key-force-section
+                    remove .hidden from #registry-value-force-section
+                end
+                if my.value is 'remove_registry_key_value' then 
+                    add .hidden to #select-package
+                    remove .hidden from #registry-key-section
+                    remove .hidden from #registry-key-value-name-section
+                    add .hidden to #registry-value-types-section
+                    add .hidden to #registry-value-data-section
+                    add .hidden to #registry-key-force-section
+                    add .hidden to #registry-value-force-section
+                end
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "add_registry_key" } selected?={  task != nil && task.Type.String() == "add_registry_key" }>{ i18n.T(ctx, "tasks.add_registry_key") }</option>
+			<option value={ "add_registry_key_value" } selected?={  task != nil && task.Type.String() == "add_registry_key_value" }>{ i18n.T(ctx, "tasks.add_registry_key_value") }</option>
+			<option value={ "update_registry_key_default_value" } selected?={  task != nil && task.Type.String() == "update_registry_key_default_value" }>{ i18n.T(ctx, "tasks.update_registry_key_default_value") }</option>
+			<option value={ "remove_registry_key" } selected?={  task != nil && task.Type.String() == "remove_registry_key" }>{ i18n.T(ctx, "tasks.remove_registry_key") }</option>
+			<option value={ "remove_registry_key_value" } selected?={  task != nil && task.Type.String() == "remove_registry_key_value" }>{ i18n.T(ctx, "tasks.remove_registry_key_value") }</option>
+		</select>
+	</div>
+}
+
+func IsPackageTask(task *ent.Task) bool {
+	packageTasks := []string{"winget_install", "winget_delete"}
+	return task != nil && slices.Contains(packageTasks, task.Type.String())
+}
+
+func IsRegistryTask(task *ent.Task) bool {
+	registryTasks := []string{"add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value"}
+	return task != nil && slices.Contains(registryTasks, task.Type.String())
+}
