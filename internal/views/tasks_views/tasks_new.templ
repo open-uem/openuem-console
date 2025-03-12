@@ -55,12 +55,16 @@ templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, curren
 						@partials.SelectTaskType(nil)
 						@partials.SelectPackageTaskSubtype(nil)
 						@partials.SelectRegistryTaskSubtype(nil)
+						@partials.SelectLocalUserTaskSubtype(nil)
 					</div>
 					<div class="w-1/2 hidden" id="select-package">
 						@partials.WingetPackageSearch(nil)
 					</div>
 					<div class="w-1/2">
 						@partials.RegistryComponent(nil)
+					</div>
+					<div class="w-1/2">
+						@partials.LocalUserComponent(nil)
 					</div>
 					<div class="w-1/2">
 						@partials.CommandText()

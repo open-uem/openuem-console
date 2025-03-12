@@ -57,6 +57,7 @@ templ EditTask(c echo.Context, sm *sessions.SessionManager, profileID int, task 
 						@partials.SelectTaskType(task)
 						@partials.SelectPackageTaskSubtype(task)
 						@partials.SelectRegistryTaskSubtype(task)
+						@partials.SelectLocalUserTaskSubtype(task)
 						if task != nil {
 							<input type="hidden" name="selected-task-type" value={ task.Type.String() }/>
 						}

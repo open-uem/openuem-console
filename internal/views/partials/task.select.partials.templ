@@ -18,14 +18,33 @@ templ SelectTaskType(task *ent.Task) {
                 if my.value is '' then
                     add .hidden to #package-subtask
                     add .hidden to #registry-subtask
+                    add .hidden to #local-user-subtask
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'package_type' then 
                     remove .hidden from #package-subtask
                     add .hidden to #registry-subtask
+                    add .hidden to #local-user-subtask
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'registry_type' then 
                     add .hidden to #package-subtask
                     remove .hidden from #registry-subtask
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to #local-user-subtask
+                end
+                if my.value is 'local_user_subtype' then 
+                    add .hidden to #package-subtask
+                    add .hidden to #registry-subtask
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    remove .hidden from #local-user-subtask
                 end
             end							
         "
@@ -38,18 +57,21 @@ templ SelectTaskType(task *ent.Task) {
 			<option value="registry_type" selected?={ IsRegistryTask(task) }>
 				{ i18n.T(ctx, "tasks.registry_subtype") }
 			</option>
+			<option value="local_user_subtype" selected?={ IsLocalUserTask(task) }>
+				{ i18n.T(ctx, "tasks.local_user_subtype") }
+			</option>
 		</select>
 	</div>
 }
 
 templ SelectPackageTaskSubtype(task *ent.Task) {
 	<div id="package-subtask" class={ templ.KV("hidden", !IsPackageTask(task)) }>
-		<label class="uk-form-label" for="task-type">
+		<label class="uk-form-label" for="package-task-type">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="task-type"
+			id="package-task-type"
 			name="package-task-type"
 			_="
             on change 
@@ -57,16 +79,19 @@ templ SelectPackageTaskSubtype(task *ent.Task) {
                     add .hidden to #select-package
                     add .hidden to #package-search-section
                     add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'winget_install' then 
                     remove .hidden from #select-package
                     remove .hidden from #package-search-section
                     add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'winget_delete' then 
                     remove .hidden from #select-package
                     remove .hidden from #package-search-section
                     add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
             end							
         "
@@ -81,18 +106,20 @@ templ SelectPackageTaskSubtype(task *ent.Task) {
 
 templ SelectRegistryTaskSubtype(task *ent.Task) {
 	<div id="registry-subtask" class={ templ.KV("hidden", !IsRegistryTask(task)) }>
-		<label class="uk-form-label" for="task-type">
+		<label class="uk-form-label" for="registry-task-type">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="task-type"
+			id="registry-task-type"
 			name="registry-task-type"
 			_="
             on change 
                 if my.value is '' then
                     add .hidden to #select-package
+                    add .hidden to #package-search-section
                     add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'add_registry_key' then 
                     add .hidden to #select-package
@@ -102,6 +129,7 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-value-data-section
                     add .hidden to #registry-key-force-section
                     add .hidden to #registry-value-force-section
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'remove_registry_key' then 
                     add .hidden to #select-package
@@ -111,6 +139,7 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-value-data-section
                     remove .hidden from #registry-key-force-section
                     add .hidden to #registry-value-force-section
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'update_registry_key_default_value' then
                     add .hidden to #select-package
@@ -120,6 +149,7 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     remove .hidden from #registry-value-data-section
                     add .hidden to #registry-key-force-section
                     remove .hidden from #registry-value-force-section
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'add_registry_key_value' then
                     add .hidden to #select-package
@@ -129,6 +159,7 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     remove .hidden from #registry-value-data-section
                     add .hidden to #registry-key-force-section
                     remove .hidden from #registry-value-force-section
+                    add .hidden to <div[id^='local-user'] />
                 end
                 if my.value is 'remove_registry_key_value' then 
                     add .hidden to #select-package
@@ -138,6 +169,7 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-value-data-section
                     add .hidden to #registry-key-force-section
                     add .hidden to #registry-value-force-section
+                    add .hidden to <div[id^='local-user'] />
                 end
             end							
         "
@@ -153,6 +185,60 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
 	</div>
 }
 
+templ SelectLocalUserTaskSubtype(task *ent.Task) {
+	<div id="local-user-subtask" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
+		<label class="uk-form-label" for="local-user-task-type">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="local-user-task-type"
+			name="local-user-task-type"
+			_="
+            on change 
+                if my.value is '' then
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry']/>
+                    add .hidden to <div[id^='local-user']/>
+                end
+                if my.value is 'add_local_user' then 
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    remove .hidden from #local-user-username-section
+                    remove .hidden from #local-user-description-section
+                    remove .hidden from #local-user-fullname-section
+                    remove .hidden from #local-user-password-section
+                    remove .hidden from #local-user-disabled-section
+                    remove .hidden from #local-user-password-change-disallow-section
+                    remove .hidden from #local-user-password-change-required-section
+                    remove .hidden from #local-user-never-expires-section
+                end
+                if my.value is 'remove_local_user' then 
+                    add .hidden to #select-package
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    remove .hidden from #local-user-username-section
+                    add .hidden to #local-user-description-section
+                    add .hidden to #local-user-fullname-section
+                    add .hidden to #local-user-password-section
+                    add .hidden to #local-user-disabled-section
+                    add .hidden to #local-user-password-change-disallow-section
+                    add .hidden to #local-user-password-change-required-section
+                    add .hidden to #local-user-never-expires-section
+                end
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "add_local_user" } selected?={ task != nil && task.Type.String() == "add_local_user" }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
+			<option value={ "remove_local_user" } selected?={  task != nil && task.Type.String() == "remove_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+		</select>
+	</div>
+}
+
 func IsPackageTask(task *ent.Task) bool {
 	packageTasks := []string{"winget_install", "winget_delete"}
 	return task != nil && slices.Contains(packageTasks, task.Type.String())
@@ -161,4 +247,9 @@ func IsPackageTask(task *ent.Task) bool {
 func IsRegistryTask(task *ent.Task) bool {
 	registryTasks := []string{"add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value"}
 	return task != nil && slices.Contains(registryTasks, task.Type.String())
+}
+
+func IsLocalUserTask(task *ent.Task) bool {
+	userTasks := []string{"add_local_user", "remove_local_user"}
+	return task != nil && slices.Contains(userTasks, task.Type.String())
 }

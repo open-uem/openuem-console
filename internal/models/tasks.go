@@ -13,17 +13,25 @@ import (
 )
 
 type TaskConfig struct {
-	TaskType             string
-	ExecuteCommand       string
-	PackageID            string
-	PackageName          string
-	Description          string
-	RegistryKey          string
-	RegistryKeyValue     string
-	RegistryKeyValueType string
-	RegistryKeyValueData string
-	RegistryHex          bool
-	RegistryForce        bool
+	TaskType                          string
+	ExecuteCommand                    string
+	PackageID                         string
+	PackageName                       string
+	Description                       string
+	RegistryKey                       string
+	RegistryKeyValue                  string
+	RegistryKeyValueType              string
+	RegistryKeyValueData              string
+	RegistryHex                       bool
+	RegistryForce                     bool
+	LocalUserUsername                 string
+	LocalUserDescription              string
+	LocalUserFullName                 string
+	LocalUserPassword                 string
+	LocalUserDisabled                 bool
+	LocalUserPasswordChangeNotAllowed bool
+	LocalUserPasswordChangeRequired   bool
+	LocalUserNeverExpires             bool
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int) (int, error) {
@@ -54,6 +62,21 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).Exec(context.Background())
+	case "add_local_user":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserDescription(cfg.LocalUserDescription).
+			SetLocalUserFullname(cfg.LocalUserFullName).
+			SetLocalUserPassword(cfg.LocalUserPassword).
+			SetLocalUserDisable(cfg.LocalUserDisabled).
+			SetLocalUserPasswordChangeNotAllowed(cfg.LocalUserPasswordChangeNotAllowed).
+			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
+			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
+			Exec(context.Background())
+	case "remove_local_user":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			Exec(context.Background())
 	}
 	return fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -81,6 +104,21 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).Exec(context.Background())
+	case "add_local_user":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserDescription(cfg.LocalUserDescription).
+			SetLocalUserFullname(cfg.LocalUserFullName).
+			SetLocalUserPassword(cfg.LocalUserPassword).
+			SetLocalUserDisable(cfg.LocalUserDisabled).
+			SetLocalUserPasswordChangeNotAllowed(cfg.LocalUserPasswordChangeNotAllowed).
+			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
+			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
+			Exec(context.Background())
+	case "remove_local_user":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			Exec(context.Background())
 	}
 	return fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }

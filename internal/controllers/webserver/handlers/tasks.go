@@ -98,7 +98,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig := models.TaskConfig{}
 
-	validTasks := []string{"winget_install", "winget_delete", "add_registry_key", "remove_registry_key", "update_registry_key_default_value", "add_registry_key_value", "remove_registry_key_value"}
+	validTasks := []string{"winget_install", "winget_delete", "add_registry_key", "remove_registry_key", "update_registry_key_default_value", "add_registry_key_value", "remove_registry_key_value", "add_local_user", "remove_local_user"}
 
 	taskConfig.Description = c.FormValue("task-description")
 	if taskConfig.Description == "" {
@@ -110,6 +110,9 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 	if c.FormValue("registry-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("registry-task-type")
+	}
+	if c.FormValue("local-user-task-type") != "" {
+		taskConfig.TaskType = c.FormValue("local-user-task-type")
 	}
 	if c.FormValue("selected-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("selected-task-type")
@@ -124,6 +127,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.execute_command_not_empty"))
 	}
 
+	// Package management
+
 	taskConfig.PackageID = c.FormValue("package-id")
 	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageID == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
@@ -133,6 +138,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
 		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
+
+	// Registry management
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
 	if (taskConfig.TaskType == "add_registry_key" || taskConfig.TaskType == "remove_registry_key") && taskConfig.RegistryKey == "" {
@@ -172,6 +179,36 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 
 	if registryKeyForce == "on" || registryValueForce == "on" {
 		taskConfig.RegistryForce = true
+	}
+
+	// Local User
+	taskConfig.LocalUserUsername = c.FormValue("local-user-username")
+	if (taskConfig.TaskType == "add_local_user" || taskConfig.TaskType == "remove_local_user") && taskConfig.LocalUserUsername == "" {
+		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
+	}
+
+	taskConfig.LocalUserDescription = c.FormValue("local-user-description")
+	taskConfig.LocalUserFullName = c.FormValue("local-user-fullname")
+	taskConfig.LocalUserPassword = c.FormValue("local-user-password")
+
+	localUserDisabled := c.FormValue("local-user-disabled")
+	if localUserDisabled == "on" {
+		taskConfig.LocalUserDisabled = true
+	}
+
+	localUserPasswordChangeNotAllowed := c.FormValue("local-user-password-change-disallow")
+	if localUserPasswordChangeNotAllowed == "on" {
+		taskConfig.LocalUserPasswordChangeNotAllowed = true
+	}
+
+	localUserPasswordChangeRequired := c.FormValue("local-user-password-change-required")
+	if localUserPasswordChangeRequired == "on" {
+		taskConfig.LocalUserPasswordChangeRequired = true
+	}
+
+	localUserNeverExpires := c.FormValue("local-user-password-never-expires")
+	if localUserNeverExpires == "on" {
+		taskConfig.LocalUserDisabled = true
 	}
 
 	return &taskConfig, nil
