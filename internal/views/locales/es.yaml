@@ -568,7 +568,13 @@ es:
     add_tag_select: Seleccione una etiqueta
     add_tag_admitted_could_not_be_saved: No se pudo guardar la etiqueta asociada a un agente recientemente admitido
     add_tag_admitted_could_not_be_cleared: No se pudo desasignar la etiqueta para los agentes recientemente admitidos
-    add_tag_invalid: The tag id is not valid
+    add_tag_invalid: El id de la etiqueta no es válido
+    winget_configure_frequency_title: Frecuencia de aplicación de perfiles
+    winget_configure_frequency_description: Los agentes aplicarán los perfiles de equipo de acuerdo a la frecuencia fijada en minutos (valor mínimo 30)
+    winget_configure_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
+    winget_configure_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
+    winget_configure_frequency_invalid: La frecuencia seleccionada no es válida
+    winget_configure_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

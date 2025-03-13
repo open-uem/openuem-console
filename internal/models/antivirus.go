@@ -131,34 +131,34 @@ func (m *Model) GetDetectedAntiviri() ([]string, error) {
 
 func applyAntiviriFilters(query *ent.AgentQuery, f filters.AntivirusFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+		query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.AgentOSVersions) > 0 {
-		query = query.Where(agent.OsIn(f.AgentOSVersions...))
+		query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.AntivirusNameOptions) > 0 {
-		query = query.Where(agent.HasAntivirusWith(antivirus.NameIn(f.AntivirusNameOptions...)))
+		query.Where(agent.HasAntivirusWith(antivirus.NameIn(f.AntivirusNameOptions...)))
 	}
 
 	if len(f.AntivirusEnabledOptions) > 0 {
 		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "Enabled" {
-			query = query.Where(agent.HasAntivirusWith(antivirus.IsActive(true)))
+			query.Where(agent.HasAntivirusWith(antivirus.IsActive(true)))
 		}
 
 		if len(f.AntivirusEnabledOptions) == 1 && f.AntivirusEnabledOptions[0] == "Disabled" {
-			query = query.Where(agent.HasAntivirusWith(antivirus.IsActive(false)))
+			query.Where(agent.HasAntivirusWith(antivirus.IsActive(false)))
 		}
 	}
 
 	if len(f.AntivirusUpdatedOptions) > 0 {
 		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "UpdatedYes" {
-			query = query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(true)))
+			query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(true)))
 		}
 
 		if len(f.AntivirusUpdatedOptions) == 1 && f.AntivirusUpdatedOptions[0] == "UpdatedNo" {
-			query = query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)))
+			query.Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)))
 		}
 	}
 }

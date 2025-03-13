@@ -14,7 +14,7 @@ templ SortByColumnIcon(c echo.Context, p PaginationAndSort, title, sortBy, sortI
 		if method == "post" {
 			hx-post={ c.Request().URL.Path }
 		} else {
-			hx-gett={ c.Request().URL.Path }
+			hx-get={ c.Request().URL.Path }
 		}
 		hx-push-url="true"
 		hx-target={ target }

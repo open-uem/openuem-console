@@ -81,12 +81,19 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
+			// Get winget frequency
+			wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
 			}
 
 			config := openuem_nats.Config{}
 			config.AgentFrequency = settings.AgentFrequency
+			config.WinGetFrequency = wingetFrequency
 			data, err := json.Marshal(config)
 			if err != nil {
 				return err
@@ -100,6 +107,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				// Rollback communication
 				config := openuem_nats.Config{}
 				config.AgentFrequency = currentFrequency
+				config.WinGetFrequency = wingetFrequency
 				data, err := json.Marshal(config)
 				if err != nil {
 					return err
@@ -108,7 +116,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
 					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_error"), true))
 				}
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agent_frequency_could_not_be_saved"), true))
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_could_not_be_saved"), true))
 			}
 
 			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.agent_frequency_success")))
@@ -130,6 +138,53 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.add_tag_admitted_could_not_be_saved"), true))
 				}
 			}
+		}
+
+		if settings.WinGetFrequency != 0 {
+			// Get current frequency
+			currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
+			// Get winget frequency
+			wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
+			}
+
+			config := openuem_nats.Config{}
+			config.AgentFrequency = currentFrequency
+			config.WinGetFrequency = settings.WinGetFrequency
+			data, err := json.Marshal(config)
+			if err != nil {
+				return err
+			}
+
+			if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_error"), true))
+			}
+
+			if err := h.Model.UpdateWingetFrequency(settings.ID, settings.WinGetFrequency); err != nil {
+				// Rollback communication
+				config := openuem_nats.Config{}
+				config.AgentFrequency = currentFrequency
+				config.WinGetFrequency = wingetFrequency
+				data, err := json.Marshal(config)
+				if err != nil {
+					return err
+				}
+
+				if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_error"), true))
+				}
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_could_not_be_saved"), true))
+			}
+
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_success")))
 		}
 
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
@@ -180,6 +235,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	agentFrequency := c.FormValue("agent-frequency")
 	requestPIN := c.FormValue("request-pin")
 	admittedTag := c.FormValue("admitted-agent-tag")
+	wingetFrequency := c.FormValue("winget-configure-frequency")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -277,6 +333,17 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.Tag, err = strconv.Atoi(admittedTag)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.add_tag_invalid"))
+		}
+	}
+
+	if wingetFrequency != "" {
+		settings.WinGetFrequency, err = strconv.Atoi(wingetFrequency)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.winget_configure_frequency_invalid"))
+		}
+
+		if settings.WinGetFrequency < 30 {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.winget_configure_frequency_invalid"))
 		}
 	}
 

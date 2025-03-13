@@ -23,9 +23,8 @@ func (m *Model) CountAllUpdateServers(f filters.UpdateServersFilter) (int, error
 func (m *Model) GetUpdateServersByPage(p partials.PaginationAndSort, f filters.UpdateServersFilter) ([]*ent.Server, error) {
 	var err error
 	var components []*ent.Server
-	var query *ent.ServerQuery
 
-	query = m.Client.Server.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Server.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	// Apply filters
 	applyServerFilters(query, f)
@@ -118,11 +117,11 @@ func (m *Model) ServersExists() (bool, error) {
 
 func applyServerFilters(query *ent.ServerQuery, f filters.UpdateServersFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(server.HostnameContainsFold(f.Hostname))
+		query.Where(server.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.Releases) > 0 {
-		query = query.Where(server.VersionIn(f.Releases...))
+		query.Where(server.VersionIn(f.Releases...))
 	}
 
 	if len(f.UpdateStatus) > 0 {
@@ -140,20 +139,20 @@ func applyServerFilters(query *ent.ServerQuery, f filters.UpdateServersFilter) {
 			}
 		}
 
-		query = query.Where(server.UpdateStatusIn(enumStatus...))
+		query.Where(server.UpdateStatusIn(enumStatus...))
 	}
 
 	if len(f.UpdateWhenFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.UpdateWhenFrom)
 		if err == nil {
-			query = query.Where(server.UpdateWhenGTE(from))
+			query.Where(server.UpdateWhenGTE(from))
 		}
 	}
 
 	if len(f.UpdateWhenTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.UpdateWhenTo)
 		if err == nil {
-			query = query.Where(server.UpdateWhenLTE(to))
+			query.Where(server.UpdateWhenLTE(to))
 		}
 	}
 }

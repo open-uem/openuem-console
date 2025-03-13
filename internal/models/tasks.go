@@ -2,7 +2,7 @@ package models
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -78,7 +78,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
 	}
-	return fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
+	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
 func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) error {
@@ -120,7 +120,7 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
 	}
-	return fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
+	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
 func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID int) ([]*ent.Task, error) {

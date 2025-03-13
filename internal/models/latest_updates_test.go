@@ -25,7 +25,7 @@ func (suite *LatestUpdatesTestSuite) SetupTest() {
 	suite.model = Model{Client: client}
 
 	_, err := client.Agent.Create().
-		SetID(fmt.Sprintf("agent1")).
+		SetID("agent1").
 		SetOs("windows").
 		SetHostname("agent1").
 		SetAgentStatus(agent.AgentStatusEnabled).

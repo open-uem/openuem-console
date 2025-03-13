@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -102,7 +103,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 
 	taskConfig.Description = c.FormValue("task-description")
 	if taskConfig.Description == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.new.empty"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
 
 	if c.FormValue("package-task-type") != "" {
@@ -119,51 +120,51 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	if !slices.Contains(validTasks, taskConfig.TaskType) {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
 	}
 
 	taskConfig.ExecuteCommand = c.FormValue("execute-command")
 	if taskConfig.TaskType == "execute_command" && taskConfig.ExecuteCommand == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.execute_command_not_empty"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.execute_command_not_empty"))
 	}
 
 	// Package management
 
 	taskConfig.PackageID = c.FormValue("package-id")
 	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageID == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
 	}
 
 	taskConfig.PackageName = c.FormValue("package-name")
 	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
 
 	// Registry management
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
 	if (taskConfig.TaskType == "add_registry_key" || taskConfig.TaskType == "remove_registry_key") && taskConfig.RegistryKey == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.registry_key_not_empty"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_not_empty"))
 	}
 
 	taskConfig.RegistryKeyValue = c.FormValue("registry-value-name")
 	if (taskConfig.TaskType == "add_registry_key_value" || taskConfig.TaskType == "remove_registry_key_value") && taskConfig.RegistryKeyValue == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_name"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_name"))
 	}
 
 	taskConfig.RegistryKeyValueType = c.FormValue("registry-value-type")
 	if !slices.Contains([]string{"", wingetcfg.RegistryValueTypeString, wingetcfg.RegistryValueTypeDWord, wingetcfg.RegistryValueTypeQWord, wingetcfg.RegistryValueTypeMultistring}, taskConfig.RegistryKeyValueType) {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_type"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_type"))
 	}
 
 	taskConfig.RegistryKeyValueData = c.FormValue("registry-value-data")
 	if (taskConfig.TaskType == "update_registry_key_default_value") && taskConfig.RegistryKeyValueData == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_data"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_data"))
 	}
 
 	dataStrings := strings.Split(taskConfig.RegistryKeyValueData, "\n")
 	if len(dataStrings) > 1 && taskConfig.RegistryKeyValueType != wingetcfg.RegistryValueTypeMultistring {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_multiple_strings"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_multiple_strings"))
 	}
 
 	registryKeyHex := c.FormValue("registry-hex")
@@ -171,7 +172,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.RegistryHex = true
 	}
 	if taskConfig.RegistryKeyValueType != wingetcfg.RegistryValueTypeDWord && taskConfig.RegistryKeyValueType != wingetcfg.RegistryValueTypeQWord && taskConfig.RegistryHex {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.unexpected_hex"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_hex"))
 	}
 
 	registryKeyForce := c.FormValue("registry-key-force")
@@ -184,12 +185,11 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	// Local User
 	taskConfig.LocalUserUsername = c.FormValue("local-user-username")
 	if (taskConfig.TaskType == "add_local_user" || taskConfig.TaskType == "remove_local_user") && taskConfig.LocalUserUsername == "" {
-		return nil, fmt.Errorf(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
 	}
 
 	taskConfig.LocalUserDescription = c.FormValue("local-user-description")
 	taskConfig.LocalUserFullName = c.FormValue("local-user-fullname")
-	taskConfig.LocalUserPassword = c.FormValue("local-user-password")
 
 	localUserDisabled := c.FormValue("local-user-disabled")
 	if localUserDisabled == "on" {

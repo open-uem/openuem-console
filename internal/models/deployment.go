@@ -33,6 +33,8 @@ func (m *Model) GetDeploymentsForAgent(agentId string, p partials.PaginationAndS
 		} else {
 			query = query.Order(ent.Desc(deployment.FieldUpdated))
 		}
+	default:
+		query = query.Order(ent.Desc(deployment.FieldInstalled))
 	}
 
 	deployments, err := query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())

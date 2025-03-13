@@ -58,23 +58,6 @@ templ LocalUserComponent(task *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="local-user-password-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-form-label" for="registry-key">
-				{ i18n.T(ctx, "tasks.local_user_password") }
-			</label>
-			<input
-				type="password"
-				class="uk-input"
-				id="local-user-password"
-				name="local-user-password"
-				spellcheck="false"
-				aria-label={ i18n.T(ctx, "tasks.local_user_password") }
-				if task != nil {
-					value={ task.LocalUserPassword }
-				}
-				autocomplete="off"
-			/>
-		</div>
 		<div id="local-user-disabled-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
 			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" name="local-user-disabled" type="checkbox" checked?={ task != nil && task.LocalUserDisable }/> { i18n.T(ctx, "tasks.local_user_disabled") }</label>
 		</div>

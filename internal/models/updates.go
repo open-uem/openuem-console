@@ -139,52 +139,52 @@ func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.S
 
 func applySystemUpdatesFilters(query *ent.AgentQuery, f filters.SystemUpdatesFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+		query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.AgentOSVersions) > 0 {
-		query = query.Where(agent.OsIn(f.AgentOSVersions...))
+		query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.UpdateStatus) > 0 {
-		query = query.Where(agent.HasSystemupdateWith(systemupdate.SystemUpdateStatusIn(f.UpdateStatus...)))
+		query.Where(agent.HasSystemupdateWith(systemupdate.SystemUpdateStatusIn(f.UpdateStatus...)))
 	}
 
 	if len(f.LastSearchFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.LastSearchFrom)
 		if err == nil {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.LastSearchGTE(from)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.LastSearchGTE(from)))
 		}
 	}
 
 	if len(f.LastSearchTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.LastSearchTo)
 		if err == nil {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.LastSearchLTE(to)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.LastSearchLTE(to)))
 		}
 	}
 
 	if len(f.LastInstallFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.LastInstallFrom)
 		if err == nil {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.LastInstallGTE(from)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.LastInstallGTE(from)))
 		}
 	}
 
 	if len(f.LastInstallTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.LastInstallTo)
 		if err == nil {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.LastInstallLTE(to)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.LastInstallLTE(to)))
 		}
 	}
 
 	if len(f.PendingUpdateOptions) > 0 {
 		if len(f.PendingUpdateOptions) == 1 && f.PendingUpdateOptions[0] == "Yes" {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.PendingUpdates(true)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.PendingUpdates(true)))
 		}
 
 		if len(f.PendingUpdateOptions) == 1 && f.PendingUpdateOptions[0] == "No" {
-			query = query.Where(agent.HasSystemupdateWith(systemupdate.PendingUpdates(false)))
+			query.Where(agent.HasSystemupdateWith(systemupdate.PendingUpdates(false)))
 		}
 	}
 }

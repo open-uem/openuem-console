@@ -3,14 +3,12 @@ package models
 import (
 	"testing"
 
-	"github.com/open-uem/ent/enttest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type ModelTestSuite struct {
 	suite.Suite
-	t enttest.TestingT
 }
 
 func (suite *ModelTestSuite) TestNewModel() {

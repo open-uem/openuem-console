@@ -291,76 +291,90 @@ func (suite *ComputersTestSuite) TestCountAllComputers() {
 }
 
 func (suite *ComputersTestSuite) TestGetAgentComputerInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentComputerInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "manufacturer1", item.Edges.Computer.Manufacturer, "manufacturer should be manufacturer1")
 
-	item, err = suite.model.GetAgentComputerInfo("agent7")
+	_, err = suite.model.GetAgentComputerInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentOSInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentOSInfo("agent3")
 	assert.NoError(suite.T(), err, "should found agent3")
 	assert.Equal(suite.T(), "windows3", item.Edges.Operatingsystem.Version, "version should be windows3")
 	assert.Equal(suite.T(), "user3", item.Edges.Operatingsystem.Username, "user should be user3")
 
-	item, err = suite.model.GetAgentOSInfo("agent7")
+	_, err = suite.model.GetAgentOSInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentNetworkAdaptersInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentNetworkAdaptersInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "network0", item.Edges.Networkadapters[0].Name, "network should be network0")
 	assert.Equal(suite.T(), "FF:FF:FF:FF:FF:F0", item.Edges.Networkadapters[0].MACAddress, "version should be FF:FF:FF:FF:FF:F1")
 
-	item, err = suite.model.GetAgentNetworkAdaptersInfo("agent7")
+	_, err = suite.model.GetAgentNetworkAdaptersInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentPrintersInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentPrintersInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "printer0", item.Edges.Printers[0].Name, "printer should be printer0")
 
-	item, err = suite.model.GetAgentPrintersInfo("agent7")
+	_, err = suite.model.GetAgentPrintersInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentLogicalDisksInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentLogicalDisksInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "logicalDisk0", item.Edges.Logicaldisks[0].Label, "logicalDisk should be logicalDisk0")
 	assert.Equal(suite.T(), "logicalDisk1", item.Edges.Logicaldisks[1].Label, "logicalDisk should be logicalDisk1")
 
-	item, err = suite.model.GetAgentLogicalDisksInfo("agent7")
+	_, err = suite.model.GetAgentLogicalDisksInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentSharesInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentSharesInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "share2", item.Edges.Shares[2].Name, "share name should be share2")
 	assert.Equal(suite.T(), "share3", item.Edges.Shares[3].Name, "share name should be share3")
 
-	item, err = suite.model.GetAgentSharesInfo("agent7")
+	_, err = suite.model.GetAgentSharesInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *ComputersTestSuite) TestGetAgentMonitorsInfo() {
+	var err error
+
 	item, err := suite.model.GetAgentMonitorsInfo("agent1")
 	assert.NoError(suite.T(), err, "should found agent1")
 	assert.Equal(suite.T(), "manufacturer2", item.Edges.Monitors[2].Manufacturer, "manufacturer should be manufacturer2")
 	assert.Equal(suite.T(), "model3", item.Edges.Monitors[3].Model, "model should be model3")
 
-	item, err = suite.model.GetAgentMonitorsInfo("agent7")
+	_, err = suite.model.GetAgentMonitorsInfo("agent7")
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }

@@ -1,6 +1,6 @@
 module github.com/open-uem/openuem-console
 
-go 1.23.6
+go 1.24.1
 
 require (
 	entgo.io/ent v0.14.3
@@ -27,8 +27,8 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.38.0
-	github.com/open-uem/ent v0.0.0-20250311153013-c9f45b00c255
-	github.com/open-uem/nats v0.0.0-20250303091100-e80ac3ecc09e
+	github.com/open-uem/ent v0.0.0-20250313095743-dae8606f86d7
+	github.com/open-uem/nats v0.0.0-20250313100608-4bce5cb69e97
 	github.com/open-uem/utils v0.0.0-20250214102216-df5a38667d0a
 	github.com/pkg/sftp v1.13.7
 	github.com/stretchr/testify v1.10.0

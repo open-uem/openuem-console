@@ -17,9 +17,8 @@ func (m *Model) CountAllProfiles() (int, error) {
 func (m *Model) GetProfilesByPage(p partials.PaginationAndSort) ([]*ent.Profile, error) {
 	var err error
 	var profiles []*ent.Profile
-	var query *ent.ProfileQuery
 
-	query = m.Client.Profile.Query().WithTasks().WithTags().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Profile.Query().WithTasks().WithTags().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	switch p.SortBy {
 	case "name":
@@ -47,9 +46,13 @@ func (m *Model) AddProfile(description string) (*ent.Profile, error) {
 }
 
 func (m *Model) UpdateProfile(profileId int, description string, apply string) error {
-	applyToAll := apply == "applyToAll"
-
-	return m.Client.Profile.UpdateOneID(profileId).SetName(description).SetApplyToAll(applyToAll).Exec(context.Background())
+	switch apply {
+	case "applyToAll":
+		return m.Client.Profile.UpdateOneID(profileId).SetName(description).ClearTags().SetApplyToAll(true).Exec(context.Background())
+	case "useTags":
+		return m.Client.Profile.UpdateOneID(profileId).SetName(description).SetApplyToAll(false).Exec(context.Background())
+	}
+	return m.Client.Profile.UpdateOneID(profileId).SetName(description).ClearTags().SetApplyToAll(false).Exec(context.Background())
 }
 
 func (m *Model) GetProfileById(profileId int) (*ent.Profile, error) {
@@ -61,7 +64,7 @@ func (m *Model) DeleteProfile(profileId int) error {
 }
 
 func (m *Model) AddTagToProfile(profileId int, tagId int) error {
-	_, err := m.Client.Profile.UpdateOneID(profileId).AddTagIDs(tagId).Save(context.Background())
+	_, err := m.Client.Profile.UpdateOneID(profileId).SetApplyToAll(false).AddTagIDs(tagId).Save(context.Background())
 	if err != nil {
 		return err
 	}

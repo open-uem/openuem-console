@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	ent "github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/certificate"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -51,7 +50,7 @@ func (m *Model) CountCertificatesAboutToexpire() (int, error) {
 	return m.Client.Certificate.Query().Where(certificate.ExpiryLT(time.Now().AddDate(0, 2, 0))).Count(context.Background())
 }
 
-func (m *Model) GetCertificatesByPage(p partials.PaginationAndSort, f filters.CertificateFilter) ([]*ent.Certificate, error) {
+func (m *Model) GetCertificatesByPage(p partials.PaginationAndSort, f filters.CertificateFilter) ([]*openuem_ent.Certificate, error) {
 	query := m.Client.Certificate.Query().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	// Apply filters
@@ -60,36 +59,36 @@ func (m *Model) GetCertificatesByPage(p partials.PaginationAndSort, f filters.Ce
 	switch p.SortBy {
 	case "serial":
 		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(certificate.FieldID))
+			query = query.Order(openuem_ent.Asc(certificate.FieldID))
 		} else {
-			query = query.Order(ent.Desc(certificate.FieldID))
+			query = query.Order(openuem_ent.Desc(certificate.FieldID))
 		}
 	case "type":
 		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(certificate.FieldType))
+			query = query.Order(openuem_ent.Asc(certificate.FieldType))
 		} else {
-			query = query.Order(ent.Desc(certificate.FieldType))
+			query = query.Order(openuem_ent.Desc(certificate.FieldType))
 		}
 	case "description":
 		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(certificate.FieldDescription))
+			query = query.Order(openuem_ent.Asc(certificate.FieldDescription))
 		} else {
-			query = query.Order(ent.Desc(certificate.FieldDescription))
+			query = query.Order(openuem_ent.Desc(certificate.FieldDescription))
 		}
 	case "expiry":
 		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(certificate.FieldExpiry))
+			query = query.Order(openuem_ent.Asc(certificate.FieldExpiry))
 		} else {
-			query = query.Order(ent.Desc(certificate.FieldExpiry))
+			query = query.Order(openuem_ent.Desc(certificate.FieldExpiry))
 		}
 	case "username":
 		if p.SortOrder == "asc" {
-			query = query.Order(ent.Asc(certificate.FieldUID))
+			query = query.Order(openuem_ent.Asc(certificate.FieldUID))
 		} else {
-			query = query.Order(ent.Desc(certificate.FieldUID))
+			query = query.Order(openuem_ent.Desc(certificate.FieldUID))
 		}
 	default:
-		query = query.Order(ent.Desc(certificate.FieldID))
+		query = query.Order(openuem_ent.Desc(certificate.FieldID))
 	}
 
 	return query.All(context.Background())
@@ -99,7 +98,7 @@ func (m *Model) GetCertificatesTypes() ([]string, error) {
 	return m.Client.Certificate.Query().Unique(true).Select(certificate.FieldType).Strings(context.Background())
 }
 
-func applyCertificateFilters(query *ent.CertificateQuery, f filters.CertificateFilter) {
+func applyCertificateFilters(query *openuem_ent.CertificateQuery, f filters.CertificateFilter) {
 
 	if len(f.TypeOptions) > 0 {
 		selectedTypes := []certificate.Type{}
@@ -107,28 +106,28 @@ func applyCertificateFilters(query *ent.CertificateQuery, f filters.CertificateF
 			selectedTypes = append(selectedTypes, certificate.Type(option))
 		}
 
-		query = query.Where(certificate.TypeIn(selectedTypes...))
+		query.Where(certificate.TypeIn(selectedTypes...))
 	}
 
 	if len(f.Description) > 0 {
-		query = query.Where(certificate.DescriptionContainsFold(f.Description))
+		query.Where(certificate.DescriptionContainsFold(f.Description))
 	}
 
 	if len(f.ExpiryFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.ExpiryFrom)
 		if err == nil {
-			query = query.Where(certificate.ExpiryGTE(from))
+			query.Where(certificate.ExpiryGTE(from))
 		}
 	}
 
 	if len(f.ExpiryTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.ExpiryTo)
 		if err == nil {
-			query = query.Where(certificate.ExpiryLTE(to))
+			query.Where(certificate.ExpiryLTE(to))
 		}
 	}
 
 	if len(f.Username) > 0 {
-		query = query.Where(certificate.UIDContainsFold(f.Username))
+		query.Where(certificate.UIDContainsFold(f.Username))
 	}
 }

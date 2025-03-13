@@ -572,6 +572,13 @@ en:
     add_tag_admitted_could_not_be_saved: The tag associated to a recently admitted agent could not be saved
     add_tag_admitted_could_not_be_cleared: Could not unassign the tag for recently admitted agents
     add_tag_invalid: The tag id is not valid
+    winget_configure_frequency_title: Profile application frequency
+    winget_configure_frequency_description: "Agents will apply endpoints profiles according to the frequence set in minutes (minimum value 30)"
+    winget_configure_frequency_success: A new frequency has been communicated to the agents
+    winget_configure_frequency_could_not_be_saved: The new frequency could not be saved to the database
+    winget_configure_frequency_invalid: Selected frequency is not valid
+    winget_configure_frequency_error: The new frequency cannot be communicated to the agents now, retry later
+
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong
