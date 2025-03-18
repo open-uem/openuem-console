@@ -16,35 +16,54 @@ templ SelectTaskType(task *ent.Task) {
 			_="
             on change 
                 if my.value is '' then
-                    add .hidden to #package-subtask
-                    add .hidden to #registry-subtask
-                    add .hidden to #local-user-subtask
-                    add .hidden to #select-package
-                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='package'] />
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-task-type.value to ''
+                    set #registry-task-type.value to ''
+                    set #local-user-task-type.value to ''
+                    set #local-group-task-type.value to ''
                 end
                 if my.value is 'package_type' then 
+                    remove .hidden from #package-partial
                     remove .hidden from #package-subtask
-                    add .hidden to #registry-subtask
-                    add .hidden to #local-user-subtask
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-task-type.value to ''
+                    set #local-user-task-type.value to ''
+                    set #local-group-task-type.value to ''
                 end
                 if my.value is 'registry_type' then 
-                    add .hidden to #package-subtask
+                    add .hidden to <div[id^='package'] />
+                    remove .hidden from #registry-partial
                     remove .hidden from #registry-subtask
-                    add .hidden to #select-package
-                    add .hidden to #package-search-section
-                    add .hidden to #local-user-subtask
+                    add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-task-type.value to ''
+                    set #local-user-task-type.value to ''
+                    set #local-group-task-type.value to ''
                 end
                 if my.value is 'local_user_subtype' then 
-                    add .hidden to #package-subtask
-                    add .hidden to #registry-subtask
-                    add .hidden to #select-package
-                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='package'] />
                     add .hidden to <div[id^='registry'] />
+                    remove .hidden from #local-user-partial
                     remove .hidden from #local-user-subtask
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-task-type.value to ''
+                    set #registry-task-type.value to ''
+                    set #local-group-task-type.value to ''
+                end
+                if my.value is 'local_group_subtype' then 
+                    add .hidden to <div[id^='package'] />
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    remove .hidden from #local-group-partial
+                    remove .hidden from #local-group-subtask
+                    set #package-task-type.value to ''
+                    set #registry-task-type.value to ''
+                    set #local-user-task-type.value to ''
                 end
             end							
         "
@@ -59,6 +78,9 @@ templ SelectTaskType(task *ent.Task) {
 			</option>
 			<option value="local_user_subtype" selected?={ IsLocalUserTask(task) }>
 				{ i18n.T(ctx, "tasks.local_user_subtype") }
+			</option>
+			<option value="local_group_subtype" selected?={ IsLocalGroupTask(task) }>
+				{ i18n.T(ctx, "tasks.local_group_subtype") }
 			</option>
 		</select>
 	</div>
@@ -76,22 +98,34 @@ templ SelectPackageTaskSubtype(task *ent.Task) {
 			_="
             on change 
                 if my.value is '' then
-                    add .hidden to #select-package
                     add .hidden to #package-search-section
+                    add .hidden to #package-selected-section
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-search.value to ''
+                    set #package-id.value to ''
+                    set #package-name.value to ''
                 end
                 if my.value is 'winget_install' then 
-                    remove .hidden from #select-package
                     remove .hidden from #package-search-section
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-search.value to ''
+                    set #package-id.value to ''
+                    set #package-name.value to ''
+                    add .hidden to #package-selected-section
                 end
                 if my.value is 'winget_delete' then 
-                    remove .hidden from #select-package
                     remove .hidden from #package-search-section
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #package-search.value to ''
+                    set #package-id.value to ''
+                    set #package-name.value to ''
+                    add .hidden to #package-selected-section
                 end
             end							
         "
@@ -116,13 +150,19 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
 			_="
             on change 
                 if my.value is '' then
-                    add .hidden to #select-package
                     add .hidden to #package-search-section
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
                 if my.value is 'add_registry_key' then 
-                    add .hidden to #select-package
                     remove .hidden from #registry-key-section
                     add .hidden to #registry-key-value-name-section
                     add .hidden to #registry-value-types-section
@@ -130,9 +170,16 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-key-force-section
                     add .hidden to #registry-value-force-section
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
                 if my.value is 'remove_registry_key' then 
-                    add .hidden to #select-package
                     remove .hidden from #registry-key-section
                     add .hidden to #registry-key-value-name-section
                     add .hidden to #registry-value-types-section
@@ -140,9 +187,16 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     remove .hidden from #registry-key-force-section
                     add .hidden to #registry-value-force-section
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
                 if my.value is 'update_registry_key_default_value' then
-                    add .hidden to #select-package
                     remove .hidden from #registry-key-section
                     add .hidden to #registry-key-value-name-section
                     remove .hidden from #registry-value-types-section
@@ -150,9 +204,16 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-key-force-section
                     remove .hidden from #registry-value-force-section
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
                 if my.value is 'add_registry_key_value' then
-                    add .hidden to #select-package
                     remove .hidden from #registry-key-section
                     remove .hidden from #registry-key-value-name-section
                     remove .hidden from #registry-value-types-section
@@ -160,9 +221,16 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-key-force-section
                     remove .hidden from #registry-value-force-section
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
                 if my.value is 'remove_registry_key_value' then 
-                    add .hidden to #select-package
                     remove .hidden from #registry-key-section
                     remove .hidden from #registry-key-value-name-section
                     add .hidden to #registry-value-types-section
@@ -170,6 +238,14 @@ templ SelectRegistryTaskSubtype(task *ent.Task) {
                     add .hidden to #registry-key-force-section
                     add .hidden to #registry-value-force-section
                     add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #registry-key.value to ''
+                    set #registry-value-name.value to ''
+                    set #registry-value-data.value to ''
+                    set #registry-value-type.value to ''
+                    set #registry-hex.checked to false
+                    set #registry-key-force.checked to false
+                    set #registry-value-force.checked to false
                 end
             end							
         "
@@ -197,34 +273,60 @@ templ SelectLocalUserTaskSubtype(task *ent.Task) {
 			_="
             on change 
                 if my.value is '' then
-                    add .hidden to #select-package
                     add .hidden to #package-search-section
                     add .hidden to <div[id^='registry']/>
                     add .hidden to <div[id^='local-user']/>
+                    add .hidden to <div[id^='local-group']/>
+                    set #local-user-username.value to ''
+                    set #local-user-description.value to ''
+                    set #local-user-fullname.value to ''
+                    set #local-user-password.value to ''
+                    set #local-user-disabled.checked to false
+                    set #local-user-password-change-disallow.checked to false
+                    set #local-user-password-change-required.checked to false
+                    set #local-user-password-never-expires.checked to false
                 end
                 if my.value is 'add_local_user' then 
-                    add .hidden to #select-package
                     add .hidden to #package-search-section
                     add .hidden to <div[id^='registry'] />
                     remove .hidden from #local-user-username-section
                     remove .hidden from #local-user-description-section
                     remove .hidden from #local-user-fullname-section
+                    remove .hidden from #local-user-password-section
                     remove .hidden from #local-user-disabled-section
                     remove .hidden from #local-user-password-change-disallow-section
                     remove .hidden from #local-user-password-change-required-section
                     remove .hidden from #local-user-never-expires-section
+                    add .hidden to <div[id^='local-group'] />
+                    set #local-user-username.value to ''
+                    set #local-user-description.value to ''
+                    set #local-user-fullname.value to ''
+                    set #local-user-password.value to ''
+                    set #local-user-disabled.checked to false
+                    set #local-user-password-change-disallow.checked to false
+                    set #local-user-password-change-required.checked to false
+                    set #local-user-password-never-expires.checked to false
                 end
                 if my.value is 'remove_local_user' then 
-                    add .hidden to #select-package
                     add .hidden to #package-search-section
                     add .hidden to <div[id^='registry'] />
                     remove .hidden from #local-user-username-section
                     add .hidden to #local-user-description-section
                     add .hidden to #local-user-fullname-section
+                    add .hidden to #local-user-password-section
                     add .hidden to #local-user-disabled-section
                     add .hidden to #local-user-password-change-disallow-section
                     add .hidden to #local-user-password-change-required-section
                     add .hidden to #local-user-never-expires-section
+                    add .hidden to <div[id^='local-group'] />
+                    set #local-user-username.value to ''
+                    set #local-user-description.value to ''
+                    set #local-user-fullname.value to ''
+                    set #local-user-password.value to ''
+                    set #local-user-disabled.checked to false
+                    set #local-user-password-change-disallow.checked to false
+                    set #local-user-password-change-required.checked to false
+                    set #local-user-password-never-expires.checked to false
                 end
             end							
         "
@@ -233,6 +335,101 @@ templ SelectLocalUserTaskSubtype(task *ent.Task) {
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
 			<option value={ "add_local_user" } selected?={ task != nil && task.Type.String() == "add_local_user" }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
 			<option value={ "remove_local_user" } selected?={  task != nil && task.Type.String() == "remove_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+		</select>
+	</div>
+}
+
+templ SelectLocalGroupTaskSubtype(task *ent.Task) {
+	<div id="local-group-subtask" class={ templ.KV("hidden", !IsLocalGroupTask(task)) }>
+		<label class="uk-form-label" for="local-group-task-type">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="local-group-task-type"
+			name="local-group-task-type"
+			_="
+            on change 
+                if my.value is '' then
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry']/>
+                    add .hidden to <div[id^='local-user']/>
+                    add .hidden to <div[id^='local-group']/>
+                    set #local-group-name.value to ''
+                    set #local-group-description.value to ''
+                    set #local-group-members.value to ''
+                    set #local-group-members-to-include.value to ''
+                    set #local-group-members-to-exclude.value to ''
+                end
+                if my.value is 'add_local_group' then 
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    remove .hidden from #local-group-name-section
+                    remove .hidden from #local-group-description-section
+                    remove .hidden from #local-group-members-section
+                    add .hidden to #local-group-members-to-include-section
+                    add .hidden to #local-group-members-to-exclude-section
+                    set #local-group-name.value to ''
+                    set #local-group-description.value to ''
+                    set #local-group-members.value to ''
+                    set #local-group-members-to-include.value to ''
+                    set #local-group-members-to-exclude.value to ''
+                end
+                if my.value is 'remove_local_group' then 
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    remove .hidden from #local-group-name-section
+                    add .hidden to #local-group-description-section
+                    add .hidden to #local-group-members-section
+                    add .hidden to #local-group-members-to-include-section
+                    add .hidden to #local-group-members-to-exclude-section
+                    set #local-group-name.value to ''
+                    set #local-group-description.value to ''
+                    set #local-group-members.value to ''
+                    set #local-group-members-to-include.value to ''
+                    set #local-group-members-to-exclude.value to ''
+                end
+                if my.value is 'add_users_to_local_group' then 
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    remove .hidden from #local-group-name-section
+                    add .hidden to #local-group-description-section
+                    add .hidden to #local-group-members-section
+                    remove .hidden from #local-group-members-to-include-section
+                    add .hidden to #local-group-members-to-exclude-section
+                    set #local-group-name.value to ''
+                    set #local-group-description.value to ''
+                    set #local-group-members.value to ''
+                    set #local-group-members-to-include.value to ''
+                    set #local-group-members-to-exclude.value to ''
+                end
+                if my.value is 'remove_users_from_local_group' then 
+                    add .hidden to #package-search-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    remove .hidden from #local-group-name-section
+                    add .hidden to #local-group-description-section
+                    add .hidden to #local-group-members-section
+                    add .hidden to #local-group-members-to-include-section
+                    remove .hidden from #local-group-members-to-exclude-section
+                    set #local-group-name.value to ''
+                    set #local-group-description.value to ''
+                    set #local-group-members.value to ''
+                    set #local-group-members-to-include.value to ''
+                    set #local-group-members-to-exclude.value to ''
+                end
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "add_local_group" } selected?={ task != nil && task.Type.String() == "add_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
+			<option value={ "remove_local_group" } selected?={  task != nil && task.Type.String() == "remove_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
+			<option value={ "add_users_to_local_group" } selected?={ task != nil && task.Type.String() == "add_users_to_local_group" }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
+			<option value={ "remove_users_from_local_group" } selected?={  task != nil && task.Type.String() == "remove_users_from_local_group" }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
 		</select>
 	</div>
 }
@@ -250,4 +447,9 @@ func IsRegistryTask(task *ent.Task) bool {
 func IsLocalUserTask(task *ent.Task) bool {
 	userTasks := []string{"add_local_user", "remove_local_user"}
 	return task != nil && slices.Contains(userTasks, task.Type.String())
+}
+
+func IsLocalGroupTask(task *ent.Task) bool {
+	groupTasks := []string{"add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group"}
+	return task != nil && slices.Contains(groupTasks, task.Type.String())
 }

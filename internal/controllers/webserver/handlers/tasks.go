@@ -99,7 +99,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig := models.TaskConfig{}
 
-	validTasks := []string{"winget_install", "winget_delete", "add_registry_key", "remove_registry_key", "update_registry_key_default_value", "add_registry_key_value", "remove_registry_key_value", "add_local_user", "remove_local_user"}
+	validTasks := []string{"winget_install", "winget_delete", "add_registry_key", "remove_registry_key", "update_registry_key_default_value", "add_registry_key_value", "remove_registry_key_value", "add_local_user", "remove_local_user", "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group"}
 
 	taskConfig.Description = c.FormValue("task-description")
 	if taskConfig.Description == "" {
@@ -114,6 +114,9 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 	if c.FormValue("local-user-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("local-user-task-type")
+	}
+	if c.FormValue("local-group-task-type") != "" {
+		taskConfig.TaskType = c.FormValue("local-group-task-type")
 	}
 	if c.FormValue("selected-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("selected-task-type")
@@ -190,6 +193,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 
 	taskConfig.LocalUserDescription = c.FormValue("local-user-description")
 	taskConfig.LocalUserFullName = c.FormValue("local-user-fullname")
+	taskConfig.LocalUserPassword = c.FormValue("local-user-password")
 
 	localUserDisabled := c.FormValue("local-user-disabled")
 	if localUserDisabled == "on" {
@@ -208,7 +212,30 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 
 	localUserNeverExpires := c.FormValue("local-user-password-never-expires")
 	if localUserNeverExpires == "on" {
-		taskConfig.LocalUserDisabled = true
+		taskConfig.LocalUserNeverExpires = true
+	}
+
+	// Local group
+	taskConfig.LocalGroupName = c.FormValue("local-group-name")
+	if (taskConfig.TaskType == "add_local_group" || taskConfig.TaskType == "remove_local_group" || taskConfig.TaskType == "add_users_to_local_group" || taskConfig.TaskType == "remove_users_from_local_group") && taskConfig.LocalGroupName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
+	}
+
+	taskConfig.LocalGroupDescription = c.FormValue("local-group-description")
+	if taskConfig.TaskType == "add_local_group" && taskConfig.LocalGroupName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_description_is_required"))
+	}
+
+	taskConfig.LocalGroupMembers = c.FormValue("local-group-members")
+
+	taskConfig.LocalGroupMembersToInclude = c.FormValue("local-group-members-to-include")
+	if taskConfig.LocalGroupMembersToInclude != "" && taskConfig.LocalGroupMembers != "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_members_included_and_members_exclusive"))
+	}
+
+	taskConfig.LocalGroupMembersToExclude = c.FormValue("local-group-members-to-exclude")
+	if taskConfig.LocalGroupMembersToExclude != "" && taskConfig.LocalGroupMembers != "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_members_excluded_and_members_exclusive"))
 	}
 
 	return &taskConfig, nil

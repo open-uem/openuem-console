@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/wingetcfg/wingetcfg"
 )
 
-templ RegistryComponent(task *ent.Task) {
+templ RegistryComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div id="registry-key-section" class={ templ.KV("hidden", !IsRegistryTask(task)) }>
+		<div id="registry-key-section" class={ templ.KV("hidden", !IsRegistryTask(t)) }>
 			<label class="uk-form-label" for="registry-key">
 				{ i18n.T(ctx, "tasks.registry_key") }
 			</label>
@@ -21,12 +22,12 @@ templ RegistryComponent(task *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_registry_key", `HKEY_USERS\.DEFAULT\Control Panel\Keyboard`) }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_registry_key") }
-				if task != nil {
-					value={ task.RegistryKey }
+				if t != nil {
+					value={ t.RegistryKey }
 				}
 			/>
 		</div>
-		<div id="registry-key-value-name-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "add_registry_key_value" && task.Type.String() != "remove_registry_key_value")) }>
+		<div id="registry-key-value-name-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeAddRegistryKeyValue && t.Type != task.TypeRemoveRegistryKeyValue)) }>
 			<label class="uk-form-label" for="registry-value-name">
 				{ i18n.T(ctx, "tasks.registry_value_name") }
 			</label>
@@ -38,15 +39,15 @@ templ RegistryComponent(task *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
-				if task != nil {
-					value={ task.RegistryKeyValueName }
+				if t != nil {
+					value={ t.RegistryKeyValueName }
 				}
 			/>
 		</div>
-		<div id="registry-value-types-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value")) }>
-			@RegistryTypes(task)
+		<div id="registry-value-types-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
+			@RegistryTypes(t)
 		</div>
-		<div id="registry-value-data-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value" && task.Type.String() != "remove_registry_key_value")) }>
+		<div id="registry-value-data-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
 			<label class="uk-form-label" for="registry-value-data">
 				{ i18n.T(ctx, "tasks.registry_value_data") }
 			</label>
@@ -63,32 +64,32 @@ templ RegistryComponent(task *ent.Task) {
 					autocapitalize="off"
 					spellcheck="false"
 				>
-					if task != nil {
-						{ task.RegistryKeyValueData }
+					if t != nil {
+						{ t.RegistryKeyValueData }
 					}
 				</textarea>
 			</div>
 		</div>
-		<div id="registry-key-force-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "remove_registry_key")) }>
+		<div id="registry-key-force-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeRemoveRegistryKey)) }>
 			<div class="flex items-center space-x-2">
 				<input
 					class="uk-toggle-switch uk-toggle-switch-primary"
 					id="registry-key-force"
 					name="registry-key-force"
 					type="checkbox"
-					checked?={ task != nil && task.RegistryForce }
+					checked?={ t != nil && t.RegistryForce }
 				/>
 				<label class="uk-form-label" for="registry-key-force">{ i18n.T(ctx, "tasks.force_registry_key") }</label>
 			</div>
 		</div>
-		<div id="registry-value-force-section" class={ templ.KV("hidden", !IsRegistryTask(task) || (IsRegistryTask(task) && task.Type.String() != "update_registry_key_default_value" && task.Type.String() != "add_registry_key_value")) }>
+		<div id="registry-value-force-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
 			<div class="flex items-center space-x-2">
 				<input
 					class="uk-toggle-switch uk-toggle-switch-primary"
 					id="registry-value-force"
 					name="registry-value-force"
 					type="checkbox"
-					checked?={ task != nil && task.RegistryForce }
+					checked?={ t != nil && t.RegistryForce }
 				/>
 				<label class="uk-form-label" for="registry-value-force">{ i18n.T(ctx, "tasks.force_registry_value") }</label>
 			</div>
@@ -96,7 +97,7 @@ templ RegistryComponent(task *ent.Task) {
 	</div>
 }
 
-templ RegistryTypes(task *ent.Task) {
+templ RegistryTypes(t *ent.Task) {
 	<div class="flex flex-col gap-4">
 		<div>
 			<label class="uk-form-label" for="registry-value-type">{ i18n.T(ctx, "tasks.registry_value_type") }</label>
@@ -114,20 +115,20 @@ templ RegistryTypes(task *ent.Task) {
                     end`,  wingetcfg.RegistryValueTypeDWord, wingetcfg.RegistryValueTypeQWord) }
 			>
 				<option value="">{ i18n.T(ctx, "tasks.choose_registry_type") }</option>
-				<option value={ wingetcfg.RegistryValueTypeString } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeString }>{ wingetcfg.RegistryValueTypeString }</option>
-				<option value={ wingetcfg.RegistryValueTypeDWord } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeDWord }>{ wingetcfg.RegistryValueTypeDWord }</option>
-				<option value={ wingetcfg.RegistryValueTypeQWord } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeQWord }>{ wingetcfg.RegistryValueTypeQWord }</option>
-				<option value={ wingetcfg.RegistryValueTypeMultistring } selected?={ task != nil && task.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeMultistring }>{ wingetcfg.RegistryValueTypeMultistring }</option>
+				<option value={ wingetcfg.RegistryValueTypeString } selected?={ t != nil && t.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeString }>{ wingetcfg.RegistryValueTypeString }</option>
+				<option value={ wingetcfg.RegistryValueTypeDWord } selected?={ t != nil && t.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeDWord }>{ wingetcfg.RegistryValueTypeDWord }</option>
+				<option value={ wingetcfg.RegistryValueTypeQWord } selected?={ t != nil && t.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeQWord }>{ wingetcfg.RegistryValueTypeQWord }</option>
+				<option value={ wingetcfg.RegistryValueTypeMultistring } selected?={ t != nil && t.RegistryKeyValueType.String() == wingetcfg.RegistryValueTypeMultistring }>{ wingetcfg.RegistryValueTypeMultistring }</option>
 			</select>
 		</div>
-		<div id="registry-hex-section" class={ templ.KV("hidden", task != nil && task.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeDWord && task.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeQWord) }>
+		<div id="registry-hex-section" class={ templ.KV("hidden", t == nil || (t != nil && t.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeDWord && t.RegistryKeyValueType.String() != wingetcfg.RegistryValueTypeQWord)) }>
 			<div class="flex items-center space-x-2">
 				<input
 					class="uk-toggle-switch uk-toggle-switch-primary"
 					id="registry-hex"
 					name="registry-hex"
 					type="checkbox"
-					checkbox?={ task != nil && task.RegistryHex }
+					checked?={ t != nil && t.RegistryHex }
 				/>
 				<label class="uk-form-label" for="registry-hex">{ i18n.T(ctx, "tasks.registry_hex") }</label>
 			</div>

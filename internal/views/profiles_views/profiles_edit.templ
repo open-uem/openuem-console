@@ -160,6 +160,18 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 												<span>{ task.RegistryKey + " <- " + task.RegistryKeyValueName }</span>
 											case "add_local_user", "remove_local_user":
 												<span>{ task.LocalUserUsername }</span>
+											case "add_local_group":
+												if task.LocalGroupMembers != "" {
+													<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembers }</span>
+												} else {
+													<span>{ task.LocalGroupName }</span>
+												}
+											case "remove_local_group":
+												<span>{ task.LocalGroupName }</span>
+											case "add_users_to_local_group":
+												<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembersToInclude }</span>
+											case "remove_users_from_local_group":
+												<span>{ task.LocalGroupName + " - x - " + task.LocalGroupMembersToExclude }</span>
 											default:
 												<span>-</span>
 										}
@@ -199,13 +211,23 @@ templ TaskTypeIcon(taskType string) {
 			<uk-icon hx-history="false" icon="play" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.execute_command") } uk-cloack></uk-icon>
 		case "add_registry_key", "add_registry_key_value":
 			<uk-icon hx-history="false" icon="book-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_registry_key") } uk-cloack></uk-icon>
-		case "remove_registry_key", "remove_registry_key_value":
+		case "remove_registry_key":
 			<uk-icon hx-history="false" icon="book-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_registry_key") } uk-cloack></uk-icon>
+		case "remove_registry_key_value":
+			<uk-icon hx-history="false" icon="book-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_registry_key_value") } uk-cloack></uk-icon>
 		case "update_registry_key_default_value":
 			<uk-icon hx-history="false" icon="book-up2" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.update_registry_key_default_value") } uk-cloack></uk-icon>
 		case "add_local_user":
 			<uk-icon hx-history="false" icon="user-round-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_add") } uk-cloack></uk-icon>
 		case "remove_local_user":
 			<uk-icon hx-history="false" icon="user-round-x" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_remove") } uk-cloack></uk-icon>
+		case "add_local_group":
+			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_local_group") } uk-cloack></uk-icon>
+		case "remove_local_group":
+			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_local_group") } uk-cloack></uk-icon>
+		case "add_users_to_local_group":
+			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_users_to_local_group") } uk-cloack></uk-icon>
+		case "remove_users_from_local_group":
+			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_users_from_local_group") } uk-cloack></uk-icon>
 	}
 }

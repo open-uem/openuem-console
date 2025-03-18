@@ -5,6 +5,7 @@ import (
 
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/profile"
+	"github.com/open-uem/ent/profileissue"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -18,7 +19,7 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort) ([]*ent.Profile,
 	var err error
 	var profiles []*ent.Profile
 
-	query := m.Client.Profile.Query().WithTasks().WithTags().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Profile.Query().WithTasks().WithTags().WithIssues().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	switch p.SortBy {
 	case "name":
@@ -56,7 +57,7 @@ func (m *Model) UpdateProfile(profileId int, description string, apply string) e
 }
 
 func (m *Model) GetProfileById(profileId int) (*ent.Profile, error) {
-	return m.Client.Profile.Query().WithTags().WithTasks().Where(profile.ID(profileId)).First(context.Background())
+	return m.Client.Profile.Query().WithTags().WithTasks().WithIssues().Where(profile.ID(profileId)).First(context.Background())
 }
 
 func (m *Model) DeleteProfile(profileId int) error {
@@ -77,4 +78,12 @@ func (m *Model) RemoveTagFromProfile(profileId int, tagId int) error {
 		return err
 	}
 	return nil
+}
+
+func (m *Model) CountAllProfileIssues(profileID int) (int, error) {
+	return m.Client.ProfileIssue.Query().Where(profileissue.HasProfileWith(profile.ID(profileID))).Count(context.Background())
+}
+
+func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID int) ([]*ent.ProfileIssue, error) {
+	return m.Client.ProfileIssue.Query().WithAgents().Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }

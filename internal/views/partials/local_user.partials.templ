@@ -3,12 +3,13 @@ package partials
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 )
 
-templ LocalUserComponent(task *ent.Task) {
+templ LocalUserComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div id="local-user-username-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-form-label" for="registry-key">
+		<div id="local-user-username-section" class={ templ.KV("hidden", !IsLocalUserTask(t)) }>
+			<label class="uk-form-label" for="local-user-username">
 				{ i18n.T(ctx, "tasks.local_user_username") }
 			</label>
 			<input
@@ -19,13 +20,13 @@ templ LocalUserComponent(task *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_username") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_username") }
-				if task != nil {
-					value={ task.LocalUserUsername }
+				if t != nil {
+					value={ t.LocalUserUsername }
 				}
 			/>
 		</div>
-		<div id="local-user-description-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-form-label" for="registry-key">
+		<div id="local-user-description-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-form-label" for="local-user-description">
 				{ i18n.T(ctx, "tasks.local_user_description") }
 			</label>
 			<input
@@ -36,13 +37,13 @@ templ LocalUserComponent(task *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_description") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_description") }
-				if task != nil {
-					value={ task.LocalUserDescription }
+				if t != nil {
+					value={ t.LocalUserDescription }
 				}
 			/>
 		</div>
-		<div id="local-user-fullname-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-form-label" for="registry-key">
+		<div id="local-user-fullname-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-form-label" for="local-user-fullname">
 				{ i18n.T(ctx, "tasks.local_user_fullname") }
 			</label>
 			<input
@@ -53,22 +54,39 @@ templ LocalUserComponent(task *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_fullname") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_fullname") }
-				if task != nil {
-					value={ task.LocalUserFullname }
+				if t != nil {
+					value={ t.LocalUserFullname }
 				}
 			/>
 		</div>
-		<div id="local-user-disabled-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" name="local-user-disabled" type="checkbox" checked?={ task != nil && task.LocalUserDisable }/> { i18n.T(ctx, "tasks.local_user_disabled") }</label>
+		<div id="local-user-password-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-form-label" for="local-user-password">
+				{ i18n.T(ctx, "tasks.local_user_password") }
+			</label>
+			<input
+				type="password"
+				class="uk-input"
+				id="local-user-password"
+				name="local-user-password"
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.local_user_password") }
+				if t != nil {
+					value={ t.LocalUserPassword }
+				}
+				autocomplete="off"
+			/>
 		</div>
-		<div id="local-user-password-change-disallow-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" name="local-user-password-change-disallow" type="checkbox" checked?={ task != nil && task.LocalUserPasswordChangeNotAllowed }/> { i18n.T(ctx, "tasks.local_user_password_change_not_allowed") }</label>
+		<div id="local-user-disabled-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-disabled" name="local-user-disabled" type="checkbox" checked?={ t != nil && t.LocalUserDisable }/> { i18n.T(ctx, "tasks.local_user_disabled") }</label>
 		</div>
-		<div id="local-user-password-change-required-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" name="local-user-password-change-required" type="checkbox" checked?={ task != nil && task.LocalUserPasswordChangeRequired }/> { i18n.T(ctx, "tasks.local_user_password_change_required") }</label>
+		<div id="local-user-password-change-disallow-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-change-disallow" name="local-user-password-change-disallow" type="checkbox" checked?={ t != nil && t.LocalUserPasswordChangeNotAllowed }/> { i18n.T(ctx, "tasks.local_user_password_change_not_allowed") }</label>
 		</div>
-		<div id="local-user-never-expires-section" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" name="local-user-password-never-expires" type="checkbox" checked?={ task != nil && task.LocalUserPasswordNeverExpires }/> { i18n.T(ctx, "tasks.local_user_never_expires") }</label>
+		<div id="local-user-password-change-required-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-change-required" name="local-user-password-change-required" type="checkbox" checked?={ t != nil && t.LocalUserPasswordChangeRequired }/> { i18n.T(ctx, "tasks.local_user_password_change_required") }</label>
+		</div>
+		<div id="local-user-never-expires-section" class={ templ.KV("hidden", !IsLocalUserTask(t) || IsLocalUserTask(t) && t.Type != task.TypeAddLocalUser) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-never-expires" name="local-user-password-never-expires" type="checkbox" checked?={ t != nil && t.LocalUserPasswordNeverExpires }/> { i18n.T(ctx, "tasks.local_user_never_expires") }</label>
 		</div>
 	</div>
 }

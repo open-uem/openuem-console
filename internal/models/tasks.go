@@ -32,6 +32,11 @@ type TaskConfig struct {
 	LocalUserPasswordChangeNotAllowed bool
 	LocalUserPasswordChangeRequired   bool
 	LocalUserNeverExpires             bool
+	LocalGroupName                    string
+	LocalGroupDescription             string
+	LocalGroupMembers                 string
+	LocalGroupMembersToInclude        string
+	LocalGroupMembersToExclude        string
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int) (int, error) {
@@ -77,6 +82,28 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
+	case "add_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembers(cfg.LocalGroupMembers).
+			Exec(context.Background())
+	case "remove_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			Exec(context.Background())
+	case "add_users_to_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembersToInclude(cfg.LocalGroupMembersToInclude).
+			Exec(context.Background())
+	case "remove_users_from_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
+			Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -118,6 +145,28 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 	case "remove_local_user":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
 			SetLocalUserUsername(cfg.LocalUserUsername).
+			Exec(context.Background())
+	case "add_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembers(cfg.LocalGroupMembers).
+			Exec(context.Background())
+	case "remove_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			Exec(context.Background())
+	case "add_users_to_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembersToInclude(cfg.LocalGroupMembersToInclude).
+			Exec(context.Background())
+	case "remove_users_from_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupDescription(cfg.LocalGroupDescription).
+			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))

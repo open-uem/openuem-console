@@ -153,6 +153,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
 	e.DELETE("/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
 	e.GET("/profiles/:uuid/confirm-delete", h.ConfirmDeleteProfile, h.IsAuthenticated)
+	e.GET("/profiles/:uuid/issues", h.ProfileIssues, h.IsAuthenticated)
 
 	e.GET("/register", h.SignIn)
 	e.POST("/register", h.SendRegister)

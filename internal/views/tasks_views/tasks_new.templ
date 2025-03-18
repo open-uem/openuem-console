@@ -56,17 +56,21 @@ templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, curren
 						@partials.SelectPackageTaskSubtype(nil)
 						@partials.SelectRegistryTaskSubtype(nil)
 						@partials.SelectLocalUserTaskSubtype(nil)
+						@partials.SelectLocalGroupTaskSubtype(nil)
 					</div>
-					<div class="w-1/2 hidden" id="select-package">
+					<div class="w-1/2 hidden" id="package-partial">
 						@partials.WingetPackageSearch(nil)
 					</div>
-					<div class="w-1/2">
+					<div class="w-1/2 hidden" id="registry-partial">
 						@partials.RegistryComponent(nil)
 					</div>
-					<div class="w-1/2">
+					<div class="w-1/2 hidden" id="local-user-partial">
 						@partials.LocalUserComponent(nil)
 					</div>
-					<div class="w-1/2">
+					<div class="w-1/2 hidden" id="local-group-partial">
+						@partials.LocalGroupComponent(nil)
+					</div>
+					<div class="w-1/2 hidden">
 						@partials.CommandText()
 					</div>
 					<div class="flex gap-4 my-4">

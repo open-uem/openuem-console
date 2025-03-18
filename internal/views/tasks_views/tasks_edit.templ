@@ -10,7 +10,7 @@ import (
 )
 
 templ EditTask(c echo.Context, sm *sessions.SessionManager, profileID int, task *ent.Task, currentVersion, latestVersion string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks"), Url: "/tasks"}}, sm, currentVersion, latestVersion)
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks")}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -58,18 +58,22 @@ templ EditTask(c echo.Context, sm *sessions.SessionManager, profileID int, task 
 						@partials.SelectPackageTaskSubtype(task)
 						@partials.SelectRegistryTaskSubtype(task)
 						@partials.SelectLocalUserTaskSubtype(task)
+						@partials.SelectLocalGroupTaskSubtype(task)
 						if task != nil {
 							<input type="hidden" name="selected-task-type" value={ task.Type.String() }/>
 						}
 					</div>
-					<div class="w-1/2" id="select-package">
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPackageTask(task)) } id="package-partial">
 						@partials.WingetPackageSearch(task)
 					</div>
-					<div class="w-1/2">
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(task)) } id="registry-partial">
 						@partials.RegistryComponent(task)
 					</div>
-					<div class="w-1/2">
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalUserTask(task)) } id="local-user-partial">
 						@partials.LocalUserComponent(task)
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalGroupTask(task)) } id="local-group-partial">
+						@partials.LocalGroupComponent(task)
 					</div>
 					<div class="w-1/2">
 						@partials.CommandText()

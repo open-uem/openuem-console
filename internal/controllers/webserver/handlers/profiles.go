@@ -145,6 +145,7 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		}
 		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, "", h.Version, latestServerRelease.Version, successMessage, confirmDelete)), u)
 	}
+
 	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, "", h.Version, latestServerRelease.Version, successMessage, confirmDelete)))
 }
 
@@ -280,4 +281,43 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 	successMessage := ""
 	confirmDelete := true
 	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, taskId, h.Version, latestServerRelease.Version, successMessage, confirmDelete)))
+}
+
+func (h *Handler) ProfileIssues(c echo.Context) error {
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	profileID := c.Param("uuid")
+	if profileID == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
+	}
+
+	p := partials.NewPaginationAndSort()
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+
+	pID, err := strconv.Atoi(profileID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	p.NItems, err = h.Model.CountAllProfileIssues(pID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	profile, err := h.Model.GetProfileById(pID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
+	}
+
+	issues, err := h.Model.GetProfileIssuesByPage(p, pID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, l, h.SessionManager, issues, profile, h.Version, latestServerRelease.Version)))
 }

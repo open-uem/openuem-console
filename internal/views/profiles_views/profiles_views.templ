@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
-	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
@@ -35,12 +34,6 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
-				<div class="flex justify-between mt-8">
-					@filters.ClearFilters("/profiles", "#main", "outerHTML", func() bool {
-						return true
-					})
-					@partials.RefreshPage(l, "/profiles", "#main", "outerHTML", "get", refresh, true)
-				</div>
 				<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 					<button
 						title={ i18n.T(ctx, "profiles.add") }
@@ -64,6 +57,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Serial"), "serial", "alpha", "#main", "outerHTML", "get")
 									</div>
 								</th>
+								<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.issues_found") }</span></th>
 								<th><span>{ i18n.T(ctx, "profiles.new.applied_to") }</span></th>
 								<th><span>{ i18n.T(ctx, "profiles.new.num_tasks") }</span></th>
 								<th></th>
@@ -72,7 +66,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 						for index, profile := range profiles {
 							<tr>
 								<td
-									class="!align-middle underline hover:cursor-pointer"
+									class="!align-middle underline"
 								>
 									<a
 										href={ templ.URL(fmt.Sprintf("/profiles/%d", profile.ID)) }
@@ -82,14 +76,27 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 										hx-swap="outerHTML"
 									>{ profile.Name }</a>
 								</td>
+								<td class="!align-middle underline">
+									if len(profile.Edges.Issues) > 0 {
+										<a
+											href={ templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID)) }
+											hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID))) }
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+										>
+											<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2 fill-yellow-500 text-black" uk-cloack></uk-icon>
+										</a>
+									}
+								</td>
 								<td>
 									if profile.ApplyToAll {
-										{ i18n.T(ctx, "profiles.all_endpoints") }
+										@ShowAppliedToAll()
 									} else {
 										if profile.Edges.Tags != nil && len(profile.Edges.Tags) > 0 {
 											@partials.ShowAppliedTagsWithoutRemoveOption(profile.Edges.Tags)
 										} else {
-											{ i18n.T(ctx, "profiles.no_endpoints") }
+											@ShowAppliedToNone()
 										}
 									}
 								</td>
@@ -132,4 +139,20 @@ templ ProfilesIndex(title string, cmp templ.Component) {
 	@layout.Base("profiles") {
 		@cmp
 	}
+}
+
+templ ShowAppliedToAll() {
+	<div class="flex items-center gap-2">
+		<span class="flex items-center gap-2 rounded-full px-4 py-1 text-white bg-teal-600">
+			{ i18n.T(ctx, "profiles.all_endpoints") }
+		</span>
+	</div>
+}
+
+templ ShowAppliedToNone() {
+	<div class="flex items-center gap-2">
+		<span class="flex items-center gap-2 rounded-full px-4 py-1 text-white bg-gray-600">
+			{ i18n.T(ctx, "profiles.no_endpoints") }
+		</span>
+	</div>
 }

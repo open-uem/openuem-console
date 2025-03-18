@@ -145,12 +145,12 @@ templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Con
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
 					<th>
-						<div class="flex gap-1 items-center">
+						<div class="flex gap-1 items-center w-5/6">
 							<span>{ i18n.T(ctx, "Name") }</span>
-							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "get")
+							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "post")
 						</div>
 					</th>
-					<th>{ i18n.T(ctx, "Actions") }</th>
+					<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
 				</tr>
 			</thead>
 			<tbody>
