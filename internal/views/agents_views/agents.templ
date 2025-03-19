@@ -253,7 +253,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.remote") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML", "get")
 					@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
 						return len(f.IsRemote) == 0
 					})
@@ -262,7 +262,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 					@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 				</div>
 			</th>
@@ -270,7 +270,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "Status") }</span>
 					<div>
-						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "status", "alpha", "#main", "outerHTML")
+						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "status", "alpha", "#main", "outerHTML", "get")
 					</div>
 					<div>
 						@filters.FilterByOptions(c, p, "StatusAgent", "agents.filter_by_status", AgentStatus, f.AgentStatusOptions, "#main", "outerHTML", true, func() bool {
@@ -282,7 +282,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.os") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "get")
 					@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
 						return len(f.AgentOSVersions) == 0
 					})
@@ -291,13 +291,13 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.version") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML", "get")
 				</div>
 			</th>
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "IP Address") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "IP Address"), "ip_address", "alpha", "#main", "outerHTML", "get")
 				</div>
 			</th>
 			<th>
@@ -309,7 +309,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			<th>
 				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.last_contact") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML")
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.last_contact"), "last_contact", "time", "#main", "outerHTML", "get")
 					@filters.FilterByDate(c, p, "Contact", "agents.filter_by_last_contact", f.ContactFrom, f.ContactTo, "#main", "outerHTML", func() bool { return f.ContactFrom == "" && f.ContactTo == "" })
 				</div>
 			</th>

@@ -6,8 +6,8 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
@@ -46,7 +46,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 					<div class="uk-flex gap-8">
 						<div class="uk-card uk-card-body uk-card-default w-5/12 p-6">
 							<div class="flex flex-col gap-4">
-								<div class="mb-4">
+								<div>
 									<form
 										class="uk-search uk-search-default w-full flex items-center gap-4"
 										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
@@ -121,16 +121,16 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []models.DeployPackage, p partials.PaginationAndSort) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []nats.WingetPackage, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
-		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 			<thead>
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
 					<th>
 						<div class="flex gap-1 items-center">
 							<span>{ i18n.T(ctx, "Name") }</span>
-							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML")
+							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "post")
 						</div>
 					</th>
 					<th>{ i18n.T(ctx, "Actions") }</th>
@@ -182,19 +182,19 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 				<th>
 					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "Name") }</span>
-						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deployments-results", "innerHTML")
+						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deployments-results", "innerHTML", "post")
 					</div>
 				</th>
 				<th>
 					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "agents.deploy_install_date") }</span>
-						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.deploy_install_date"), "installation", "time", "#deployments-results", "innerHTML")
+						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.deploy_install_date"), "installation", "time", "#deployments-results", "innerHTML", "post")
 					</div>
 				</th>
 				<th>
 					<div class="flex gap-1 items-center">
 						<span>{ i18n.T(ctx, "agents.deploy_updated_date") }</span>
-						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.deploy_updated_date"), "updated", "time", "#deployments-results", "innerHTML")
+						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.deploy_updated_date"), "updated", "time", "#deployments-results", "innerHTML", "post")
 					</div>
 				</th>
 				<th>{ i18n.T(ctx, "Update") }</th>

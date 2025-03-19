@@ -53,14 +53,14 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "updates.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 													@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 												</div>
 											</th>
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.os") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML", "get")
 													@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
 														return len(f.AgentOSVersions) == 0
 													})
@@ -69,7 +69,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "antivirus.title") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML", "get")
 													@filters.FilterByOptions(c, p, "AntivirusName", "antivirus.filter_by_name", detectedAntiviri, f.AntivirusNameOptions, "#main", "outerHTML", false, func() bool {
 														return len(f.AntivirusNameOptions) == 0
 													})
@@ -78,7 +78,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-2 items-center justify-center">
 													<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML", "get")
 													@filters.FilterByOptions(c, p, "AntivirusEnabled", "antivirus.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AntivirusEnabledOptions, "#main", "outerHTML", true, func() bool {
 														return len(f.AntivirusEnabledOptions) == 0
 													})
@@ -87,7 +87,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											<th>
 												<div class="flex gap-2 items-center justify-center">
 													<span>{ i18n.T(ctx,"antivirus.updated") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML", "get")
 													@filters.FilterByOptions(c, p, "AntivirusUpdated", "antivirus.filter_by_updated", []string{"UpdatedYes", "UpdatedNo"}, f.AntivirusUpdatedOptions, "#main", "outerHTML", true, func() bool {
 														return len(f.AntivirusUpdatedOptions) == 0
 													})

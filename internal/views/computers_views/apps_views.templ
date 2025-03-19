@@ -46,28 +46,28 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 									<th class="w-1/3">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Name") }</span>
-											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#main", "outerHTML")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#main", "outerHTML", "get")
 											@filters.FilterByText(c, p, "AppName", f.AppName, "apps.filter_by_name", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-1/12">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Version") }</span>
-											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Version"), "version", "alpha", "#main", "outerHTML")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Version"), "version", "alpha", "#main", "outerHTML", "get")
 											@filters.FilterByText(c, p, "AppVersion", f.Version, "apps.filter_by_version", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-1/3">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Publisher") }</span>
-											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Publisher"), "publisher", "alpha", "#main", "outerHTML")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Publisher"), "publisher", "alpha", "#main", "outerHTML", "get")
 											@filters.FilterByText(c, p, "AppPublisher", f.Vendor, "apps.filter_by_publisher", "#main", "outerHTML")
 										</div>
 									</th>
 									<th class="w-2/12">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "inventory.apps.installation_date") }</span>
-											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "inventory.apps.installation_date"), "installation", "alpha", "#main", "outerHTML")
+											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "inventory.apps.installation_date"), "installation", "alpha", "#main", "outerHTML", "get")
 										</div>
 									</th>
 								</tr>

@@ -5,8 +5,8 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -138,19 +138,19 @@ templ DeployIndex(title string, cmp templ.Component) {
 	}
 }
 
-templ SearchPacketResult(install bool, packages []models.DeployPackage, c echo.Context, p partials.PaginationAndSort) {
+templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Context, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
 				<tr>
 					<th class="sr-only w-1/12">Logo</th>
 					<th>
-						<div class="flex gap-1 items-center">
+						<div class="flex gap-1 items-center w-5/6">
 							<span>{ i18n.T(ctx, "Name") }</span>
-							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML")
+							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "post")
 						</div>
 					</th>
-					<th>{ i18n.T(ctx, "Actions") }</th>
+					<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -369,13 +369,13 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "agents.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 												</div>
 											</th>
 											<th>
 												<div class="flex gap-1 items-center">
 													<span>{ i18n.T(ctx, "agents.os") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "get")
 												</div>
 											</th>
 										</tr>

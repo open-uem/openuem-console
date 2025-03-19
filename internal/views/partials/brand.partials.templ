@@ -5,6 +5,8 @@ import "strings"
 templ Brand(name, publisher string) {
 	if strings.Contains(name, "7-zip") {
 		<i class="si si-7zip si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(name, "acrobat") {
+		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "adobe acrobat") {
 		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "adobe") {

@@ -48,13 +48,13 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Serial") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Serial"), "serial", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Serial"), "serial", "alpha", "#main", "outerHTML", "get")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Type") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Type"), "type", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Type"), "type", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByOptions(c, p, "Type", "certificates.filter_by_types", certTypes, f.TypeOptions, "#main", "outerHTML", false, func() bool {
 													return len(f.TypeOptions) == 0
 												})
@@ -63,21 +63,21 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Description") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Description"), "description", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Description"), "description", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Description", f.Description, "certificates.filter_by_description", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "Expiry") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Expiry"), "expiry", "time", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Expiry"), "expiry", "time", "#main", "outerHTML", "get")
 												@filters.FilterByDate(c, p, "Expiry", "certificates.filter_by_expiry", f.ExpiryFrom, f.ExpiryTo, "#main", "outerHTML", func() bool { return f.ExpiryFrom == "" && f.ExpiryTo == "" })
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "agents.username") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML")
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML", "get")
 												@filters.FilterByText(c, p, "Username", f.Username, "certificates.filter_by_username", "#main", "outerHTML")
 											</div>
 										</th>

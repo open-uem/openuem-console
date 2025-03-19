@@ -153,9 +153,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 	}
 
 	availableReleases := []string{}
-	for _, r := range allReleases {
-		availableReleases = append(availableReleases, r)
-	}
+	availableReleases = append(availableReleases, allReleases...)
 
 	filteredReleases := []string{}
 	for index := range allReleases {

@@ -75,14 +75,14 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.hostname") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 			</div>
 		</th>
 		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.remote") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
 					return len(f.IsRemote) == 0
 				})
@@ -91,7 +91,7 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.os") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.os"), "os", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
 					return len(f.AgentOSVersions) == 0
 				})
@@ -100,7 +100,7 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.version") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByOptions(c, p, "OSVersion", "computers.filter_by_os_version", versions, f.OSVersions, "#main", "outerHTML", false, func() bool {
 					return len(f.OSVersions) == 0
 				})
@@ -109,14 +109,14 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 		<th>
 			<div class="flex gap-1 items-center">
 				<span>{ i18n.T(ctx, "agents.username") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.username"), "username", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByText(c, p, "Username", f.Username, "computers.filter_by_username", "#main", "outerHTML")
 			</div>
 		</th>
 		<th>
 			<div class="flex gap-2 items-center justify-center">
 				<span>{ i18n.T(ctx, "agents.manufacturer") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.manufacturer"), "manufacturer", "alpha", "#main", "outerHTML")
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.manufacturer"), "manufacturer", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByOptions(c, p, "ComputerManufacturer", "computers.filter_by_manufacturer", vendors, f.ComputerManufacturers, "#main", "outerHTML", false, func() bool {
 					return len(f.ComputerManufacturers) == 0
 				})
@@ -124,7 +124,7 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 		</th>
 		<th class="flex gap-2 items-center">
 			<span>{ i18n.T(ctx, "agents.model") }</span>
-			@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.model"), "model", "alpha", "#main", "outerHTML")
+			@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.model"), "model", "alpha", "#main", "outerHTML", "get")
 			@filters.FilterByOptions(c, p, "ComputerModel", "computers.filter_by_model", models, f.ComputerModels, "#main", "outerHTML", false, func() bool {
 				return len(f.ComputerModels) == 0
 			})

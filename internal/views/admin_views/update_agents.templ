@@ -224,14 +224,14 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.hostname") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
 													</div>
 												</th>
 												<th class="w-1/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "agents.version") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.version"), "version", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByOptions(c, p, "Release", "admin.update.agents.filter_by_release", availableReleases, f.Releases, "#main", "outerHTML", false, func() bool {
 															return len(f.Releases) == 0
 														})
@@ -246,7 +246,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												<th class="w-1/12">
 													<div class="flex gap-1 items-center">
 														{ i18n.T(ctx, "admin.update.agents.task_status") }
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "taskStatus", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "taskStatus", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByOptions(c, p, "TaskStatus", "admin.update.agents.filter_by_status", availableTaskStatus, f.TaskStatus, "#main", "outerHTML", true, func() bool {
 															return len(f.TaskStatus) == 0
 														})
@@ -255,20 +255,20 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx,  "admin.update.agents.task_description") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_description"), "taskDescription", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_description"), "taskDescription", "alpha", "#main", "outerHTML", "get")
 													</div>
 												</th>
 												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.agents.task_last_execution") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_last_execution"), "taskLastExecution", "time", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_last_execution"), "taskLastExecution", "time", "#main", "outerHTML", "get")
 														@filters.FilterByDate(c, p, "LastExecution", "admin.update.agents.filter_by_task_execution", f.TaskLastExecutionFrom, f.TaskLastExecutionTo, "#main", "outerHTML", func() bool { return f.TaskLastExecutionFrom == "" && f.TaskLastExecutionTo == "" })
 													</div>
 												</th>
 												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.agents.task_result") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_result"), "taskResult", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.agents.task_result"), "taskResult", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByText(c, p, "TaskResult", f.TaskResult, "admin.update.agents.filter_by_task_result", "#main", "outerHTML")
 													</div>
 												</th>

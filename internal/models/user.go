@@ -148,50 +148,50 @@ func (m *Model) DeleteUser(uid string) error {
 func applyUsersFilter(query *ent.UserQuery, f filters.UserFilter) {
 
 	if len(f.Username) > 0 {
-		query = query.Where(user.IDContainsFold(f.Username))
+		query.Where(user.IDContainsFold(f.Username))
 	}
 
 	if len(f.Name) > 0 {
-		query = query.Where(user.NameContainsFold(f.Name))
+		query.Where(user.NameContainsFold(f.Name))
 	}
 
 	if len(f.Email) > 0 {
-		query = query.Where(user.EmailContainsFold(f.Email))
+		query.Where(user.EmailContainsFold(f.Email))
 	}
 
 	if len(f.Phone) > 0 {
-		query = query.Where(user.PhoneContainsFold(f.Phone))
+		query.Where(user.PhoneContainsFold(f.Phone))
 	}
 
 	if len(f.CreatedFrom) > 0 {
 		dateFrom, err := time.Parse("2006-01-02", f.CreatedFrom)
 		if err == nil {
-			query = query.Where(user.CreatedGTE(dateFrom))
+			query.Where(user.CreatedGTE(dateFrom))
 		}
 	}
 
 	if len(f.CreatedTo) > 0 {
 		dateTo, err := time.Parse("2006-01-02", f.CreatedTo)
 		if err == nil {
-			query = query.Where(user.CreatedLTE(dateTo))
+			query.Where(user.CreatedLTE(dateTo))
 		}
 	}
 
 	if len(f.ModifiedFrom) > 0 {
 		dateFrom, err := time.Parse("2006-01-02", f.ModifiedFrom)
 		if err == nil {
-			query = query.Where(user.ModifiedGTE(dateFrom))
+			query.Where(user.ModifiedGTE(dateFrom))
 		}
 	}
 
 	if len(f.ModifiedTo) > 0 {
 		dateTo, err := time.Parse("2006-01-02", f.ModifiedTo)
 		if err == nil {
-			query = query.Where(user.ModifiedLTE(dateTo))
+			query.Where(user.ModifiedLTE(dateTo))
 		}
 	}
 
 	if len(f.RegisterOptions) > 0 {
-		query = query.Where(user.RegisterIn(f.RegisterOptions...))
+		query.Where(user.RegisterIn(f.RegisterOptions...))
 	}
 }

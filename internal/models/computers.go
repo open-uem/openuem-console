@@ -236,40 +236,40 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 
 func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+		query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.Username) > 0 {
-		query = query.Where(agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Username)))
+		query.Where(agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Username)))
 	}
 
 	if len(f.AgentOSVersions) > 0 {
-		query = query.Where(agent.OsIn(f.AgentOSVersions...))
+		query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.OSVersions) > 0 {
-		query = query.Where(agent.HasOperatingsystemWith(operatingsystem.VersionIn(f.OSVersions...)))
+		query.Where(agent.HasOperatingsystemWith(operatingsystem.VersionIn(f.OSVersions...)))
 	}
 
 	if len(f.ComputerManufacturers) > 0 {
-		query = query.Where(agent.HasComputerWith(computer.ManufacturerIn(f.ComputerManufacturers...)))
+		query.Where(agent.HasComputerWith(computer.ManufacturerIn(f.ComputerManufacturers...)))
 	}
 
 	if len(f.ComputerModels) > 0 {
-		query = query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
+		query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
 	}
 
 	if len(f.WithApplication) > 0 {
-		query = query.Where(agent.HasAppsWith(app.Name(f.WithApplication)))
+		query.Where(agent.HasAppsWith(app.Name(f.WithApplication)))
 	}
 
 	if len(f.IsRemote) > 0 {
 		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Remote" {
-			query = query.Where(agent.IsRemote(true))
+			query.Where(agent.IsRemote(true))
 		}
 
 		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Local" {
-			query = query.Where(agent.IsRemote(false))
+			query.Where(agent.IsRemote(false))
 		}
 	}
 
@@ -279,7 +279,7 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
 		}
 		if len(predicates) > 0 {
-			query = query.Where(agent.And(predicates...))
+			query.Where(agent.And(predicates...))
 		}
 	}
 }

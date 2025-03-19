@@ -208,14 +208,14 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.servers.hostname") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.hostname"), "hostname", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByText(c, p, "Hostname", f.Hostname, "admin.update.servers.filter_by_hostname", "#main", "outerHTML")
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.servers.version") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.version"), "version", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.version"), "version", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByOptions(c, p, "Release", "admin.update.servers.filter_by_release", appliedReleases, f.Releases, "#main", "outerHTML", false, func() bool {
 															return len(f.Releases) == 0
 														})
@@ -224,7 +224,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.servers.update_status") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_status"), "status", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_status"), "status", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByOptions(c, p, "UpdateStatus", "admin.update.servers.filter_by_status", allStatus, f.UpdateStatus, "#main", "outerHTML", true, func() bool {
 															return len(f.Releases) == 0
 														})
@@ -233,14 +233,14 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.servers.update_info") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_info"), "info", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.update_info"), "info", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByText(c, p, "UpdateMessage", f.UpdateMessage, "admin.update.servers.filter_by_message", "#main", "outerHTML")
 													</div>
 												</th>
 												<th>
 													<div class="flex gap-1 items-center">
 														<span>{ i18n.T(ctx, "admin.update.servers.update_when") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.filter_by_when"), "when", "alpha", "#main", "outerHTML")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "admin.update.servers.filter_by_when"), "when", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByDate(c, p, "UpdateWhen", "admin.update.servers.filter_by_when", f.UpdateWhenFrom, f.UpdateWhenTo, "#main", "outerHTML", func() bool { return f.UpdateWhenFrom == "" && f.UpdateWhenTo == "" })
 													</div>
 												</th>

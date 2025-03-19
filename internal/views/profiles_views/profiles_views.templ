@@ -1,0 +1,158 @@
+package profiles_views
+
+import (
+	"fmt"
+	"github.com/gohugoio/locales"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+)
+
+templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translator, sm *sessions.SessionManager, profiles []*ent.Profile, refresh int, currentVersion, latestVersion, profileId string, confirmDelete bool, successMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: "/profiles"}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		if successMessage != "" {
+			@partials.SuccessMessage(successMessage)
+		}
+		<div id="error" class="hidden"></div>
+		if confirmDelete {
+			@partials.ConfirmDelete(c, i18n.T(ctx, "profiles.confirm_delete"), "/profiles", "/profiles/"+profileId)
+		}
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "profiles.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "profiles.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body flex flex-col gap-4">
+				<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
+					<button
+						title={ i18n.T(ctx, "profiles.add") }
+						type="button"
+						class="uk-button uk-button-primary text-white"
+						hx-get="/profiles/new"
+						hx-target="#main"
+						hx-push-url="true"
+						hx-swap="outerHTML"
+					>
+						<uk-icon icon="square-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "profiles.add") }
+					</button>
+				</div>
+				if len(profiles) > 0 {
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
+						<thead>
+							<tr>
+								<th>
+									<div class="flex gap-1 items-center">
+										<span>{ i18n.T(ctx, "profiles.new.profile") }</span>
+										@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Serial"), "serial", "alpha", "#main", "outerHTML", "get")
+									</div>
+								</th>
+								<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.issues_found") }</span></th>
+								<th><span>{ i18n.T(ctx, "profiles.new.applied_to") }</span></th>
+								<th><span>{ i18n.T(ctx, "profiles.new.num_tasks") }</span></th>
+								<th></th>
+							</tr>
+						</thead>
+						for index, profile := range profiles {
+							<tr>
+								<td
+									class="!align-middle underline"
+								>
+									<a
+										href={ templ.URL(fmt.Sprintf("/profiles/%d", profile.ID)) }
+										hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d", profile.ID))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>{ profile.Name }</a>
+								</td>
+								<td class="!align-middle underline">
+									if len(profile.Edges.Issues) > 0 {
+										<a
+											href={ templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID)) }
+											hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID))) }
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+										>
+											<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2 fill-yellow-500 text-black" uk-cloack></uk-icon>
+										</a>
+									}
+								</td>
+								<td>
+									if profile.ApplyToAll {
+										@ShowAppliedToAll()
+									} else {
+										if profile.Edges.Tags != nil && len(profile.Edges.Tags) > 0 {
+											@partials.ShowAppliedTagsWithoutRemoveOption(profile.Edges.Tags)
+										} else {
+											@ShowAppliedToNone()
+										}
+									}
+								</td>
+								<td>
+									if profile.Edges.Tasks != nil {
+										{ strconv.Itoa(len(profile.Edges.Tasks)) }
+									} else {
+										{ "0" }
+									}
+								</td>
+								<td>
+									@partials.MoreButton(index)
+									<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+										<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+											<li>
+												<a
+													hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d/confirm-delete", profile.ID))) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+											</li>
+										</ul>
+									</div>
+								</td>
+							</tr>
+						}
+					</table>
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/profiles")
+				} else {
+					<p class="uk-text-small uk-text-muted mt-6">
+						{ i18n.T(ctx, "profiles.no_profiles") }
+					</p>
+				}
+			</div>
+		</div>
+	</main>
+}
+
+templ ProfilesIndex(title string, cmp templ.Component) {
+	@layout.Base("profiles") {
+		@cmp
+	}
+}
+
+templ ShowAppliedToAll() {
+	<div class="flex items-center gap-2">
+		<span class="flex items-center gap-2 rounded-full px-4 py-1 text-white bg-teal-600">
+			{ i18n.T(ctx, "profiles.all_endpoints") }
+		</span>
+	</div>
+}
+
+templ ShowAppliedToNone() {
+	<div class="flex items-center gap-2">
+		<span class="flex items-center gap-2 rounded-full px-4 py-1 text-white bg-gray-600">
+			{ i18n.T(ctx, "profiles.no_endpoints") }
+		</span>
+	</div>
+}

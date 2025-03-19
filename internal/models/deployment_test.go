@@ -19,7 +19,6 @@ type DeploymentTestSuite struct {
 	t     enttest.TestingT
 	model Model
 	p     partials.PaginationAndSort
-	orgs  []int
 }
 
 func (suite *DeploymentTestSuite) SetupTest() {

@@ -227,11 +227,12 @@ func (suite *ServersTestSuite) TestGetAllUpdateServers() {
 }
 
 func (suite *ServersTestSuite) TestGetServerById() {
+	var err error
 	server, err := suite.model.GetServerById(suite.serverId)
 	assert.NoError(suite.T(), err, "should get server by id")
 	assert.Equal(suite.T(), "server6", server.Hostname, "server should have server6 hostname")
 
-	server, err = suite.model.GetServerById(0)
+	_, err = suite.model.GetServerById(0)
 	assert.Error(suite.T(), err, "should get an error using a non existent id")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "query should return a not found error")
 }

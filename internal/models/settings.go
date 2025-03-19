@@ -142,6 +142,21 @@ func (m *Model) UpdateOpenUEMChannel(settingsId int, updateChannel string) error
 	return m.Client.Settings.UpdateOneID(settingsId).SetUpdateChannel(updateChannel).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultWingetFrequency() (int, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldProfilesApplicationFrequenceInMinutes).Only(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	return settings.ProfilesApplicationFrequenceInMinutes, nil
+}
+
+func (m *Model) UpdateWingetFrequency(settingsId, frequency int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetProfilesApplicationFrequenceInMinutes(frequency).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().WithTag().Select(
@@ -155,6 +170,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldUpdateChannel,
 		settings.FieldAgentReportFrequenceInMinutes,
 		settings.FieldRequestVncPin,
+		settings.FieldProfilesApplicationFrequenceInMinutes,
 		settings.TagColumn,
 	)
 
@@ -206,4 +222,5 @@ type GeneralSettings struct {
 	AgentFrequency  int
 	RequestVNCPIN   bool
 	Tag             int
+	WinGetFrequency int
 }

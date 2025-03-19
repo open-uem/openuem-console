@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 
-	ent "github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/release"
@@ -11,19 +10,19 @@ import (
 )
 
 func (m *Model) GetLatestServerRelease(channel string) (*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
+	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
 }
 
 func (m *Model) GetServerReleases() ([]string, error) {
-	return m.Client.Release.Query().Unique(true).Order(ent.Desc(release.FieldVersion)).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
+	return m.Client.Release.Query().Unique(true).Order(openuem_ent.Desc(release.FieldVersion)).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
 }
 
 func (m *Model) GetLatestAgentRelease(channel string) (*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).First(context.Background())
+	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
 }
 
 func (m *Model) GetAgentsReleases() ([]string, error) {
-	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(ent.Desc(release.FieldVersion)).Select(release.FieldVersion).Strings(context.Background())
+	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(openuem_ent.Desc(release.FieldVersion)).Select(release.FieldVersion).Strings(context.Background())
 }
 
 func (m *Model) GetAgentsReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
@@ -34,8 +33,8 @@ func (m *Model) GetServersReleaseByType(release_type release.ReleaseType, channe
 	return m.Client.Release.Query().Where(release.ReleaseTypeEQ(release_type), release.Channel(channel), release.Os(os), release.Arch(arch), release.Version(version)).Only(context.Background())
 }
 
-func (m *Model) GetHigherAgentReleaseInstalled() (*ent.Release, error) {
-	data, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent), release.HasAgentsWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Order(ent.Desc(release.FieldVersion)).First(context.Background())
+func (m *Model) GetHigherAgentReleaseInstalled() (*openuem_ent.Release, error) {
+	data, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent), release.HasAgentsWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
 	if err != nil {
 		if openuem_ent.IsNotFound(err) {
 			return nil, nil

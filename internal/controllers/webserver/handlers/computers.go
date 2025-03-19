@@ -513,11 +513,6 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	if p.SortBy == "" {
-		p.SortBy = "name"
-		p.SortOrder = "asc"
-	}
-
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))

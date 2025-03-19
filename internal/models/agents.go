@@ -171,52 +171,48 @@ func (m *Model) GetAgentsUsedOSes() ([]string, error) {
 
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+		query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.AgentStatusOptions) > 0 {
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "WaitingForAdmission" {
-			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission))
+			query.Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission))
 		}
 
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "Enabled" {
-			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusEnabled))
+			query.Where(agent.AgentStatusEQ(agent.AgentStatusEnabled))
 		}
 
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "Disabled" {
-			query = query.Where(agent.AgentStatusEQ(agent.AgentStatusDisabled))
+			query.Where(agent.AgentStatusEQ(agent.AgentStatusDisabled))
 		}
 	}
 
-	/* if len(f.Versions) > 0 {
-		query = query.Where(agent.VersionIn(f.Versions...))
-	} */
-
 	if len(f.IsRemote) > 0 {
 		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Remote" {
-			query = query.Where(agent.IsRemote(true))
+			query.Where(agent.IsRemote(true))
 		}
 
 		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Local" {
-			query = query.Where(agent.IsRemote(false))
+			query.Where(agent.IsRemote(false))
 		}
 	}
 
 	if len(f.AgentOSVersions) > 0 {
-		query = query.Where(agent.OsIn(f.AgentOSVersions...))
+		query.Where(agent.OsIn(f.AgentOSVersions...))
 	}
 
 	if len(f.ContactFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.ContactFrom)
 		if err == nil {
-			query = query.Where(agent.LastContactGTE(from))
+			query.Where(agent.LastContactGTE(from))
 		}
 	}
 
 	if len(f.ContactTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.ContactTo)
 		if err == nil {
-			query = query.Where(agent.LastContactLTE(to))
+			query.Where(agent.LastContactLTE(to))
 		}
 	}
 
@@ -226,7 +222,7 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
 		}
 		if len(predicates) > 0 {
-			query = query.Where(agent.And(predicates...))
+			query.Where(agent.And(predicates...))
 		}
 	}
 }
@@ -411,11 +407,11 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
 	if len(f.Hostname) > 0 {
-		query = query.Where(agent.HostnameContainsFold(f.Hostname))
+		query.Where(agent.HostnameContainsFold(f.Hostname))
 	}
 
 	if len(f.Releases) > 0 {
-		query = query.Where(agent.HasReleaseWith(release.VersionIn(f.Releases...)))
+		query.Where(agent.HasReleaseWith(release.VersionIn(f.Releases...)))
 	}
 
 	if len(f.Tags) > 0 {
@@ -424,29 +420,29 @@ func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilte
 			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
 		}
 		if len(predicates) > 0 {
-			query = query.Where(agent.And(predicates...))
+			query.Where(agent.And(predicates...))
 		}
 	}
 
 	if len(f.TaskStatus) > 0 {
-		query = query.Where(agent.UpdateTaskStatusIn(f.TaskStatus...))
+		query.Where(agent.UpdateTaskStatusIn(f.TaskStatus...))
 	}
 
 	if len(f.TaskResult) > 0 {
-		query = query.Where(agent.UpdateTaskResultContainsFold(f.TaskResult))
+		query.Where(agent.UpdateTaskResultContainsFold(f.TaskResult))
 	}
 
 	if len(f.TaskLastExecutionFrom) > 0 {
 		from, err := time.Parse("2006-01-02", f.TaskLastExecutionFrom)
 		if err == nil {
-			query = query.Where(agent.UpdateTaskExecutionGTE(from))
+			query.Where(agent.UpdateTaskExecutionGTE(from))
 		}
 	}
 
 	if len(f.TaskLastExecutionTo) > 0 {
 		to, err := time.Parse("2006-01-02", f.TaskLastExecutionTo)
 		if err == nil {
-			query = query.Where(agent.UpdateTaskExecutionLTE(to))
+			query.Where(agent.UpdateTaskExecutionLTE(to))
 		}
 	}
 }

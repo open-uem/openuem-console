@@ -1,0 +1,97 @@
+package partials
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
+)
+
+templ LocalGroupComponent(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div id="local-group-name-section" class={ templ.KV("hidden", !IsLocalGroupTask(t)) }>
+			<label class="uk-form-label" for="local-group-name">
+				{ i18n.T(ctx, "tasks.local_group_name") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-group-name"
+				name="local-group-name"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_name") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_name") }
+				if t != nil {
+					value={ t.LocalGroupName }
+				}
+			/>
+		</div>
+		<div id="local-group-description-section" class={ templ.KV("hidden", !IsLocalGroupTask(t) || (IsLocalGroupTask(t) && t.Type != task.TypeAddLocalGroup)) }>
+			<label class="uk-form-label" for="local-group-description">
+				{ i18n.T(ctx, "tasks.local_group_description") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-group-description"
+				name="local-group-description"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_description") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_description") }
+				if t != nil {
+					value={ t.LocalGroupDescription }
+				}
+			/>
+		</div>
+		<div id="local-group-members-section" class={ templ.KV("hidden", !IsLocalGroupTask(t) || (IsLocalGroupTask(t) && t.Type != task.TypeAddLocalGroup)) }>
+			<label class="uk-form-label" for="local-group-members">
+				{ i18n.T(ctx, "tasks.local_group_members") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-group-members"
+				name="local-group-members"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members") }
+				if t != nil {
+					value={ t.LocalGroupMembers }
+				}
+			/>
+		</div>
+		<div id="local-group-members-to-include-section" class={ templ.KV("hidden", !IsLocalGroupTask(t) || (IsLocalGroupTask(t) && t.Type != task.TypeAddUsersToLocalGroup)) }>
+			<label class="uk-form-label" for="local-group-members-to-include">
+				{ i18n.T(ctx, "tasks.local_group_members_to_include") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-group-members-to-include"
+				name="local-group-members-to-include"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members_to_include") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members_to_include") }
+				if t != nil {
+					value={ t.LocalGroupMembersToInclude }
+				}
+			/>
+		</div>
+		<div id="local-group-members-to-exclude-section" class={ templ.KV("hidden", !IsLocalGroupTask(t) || (IsLocalGroupTask(t) && t.Type != task.TypeRemoveUsersFromLocalGroup)) }>
+			<label class="uk-form-label" for="local-group-members-to-exclude">
+				{ i18n.T(ctx, "tasks.local_group_members_to_exclude") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-group-members-to-exclude"
+				name="local-group-members-to-exclude"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members_to_exclude") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members_to_exclude") }
+				if t != nil {
+					value={ t.LocalGroupMembersToExclude }
+				}
+			/>
+		</div>
+	</div>
+}

@@ -39,21 +39,23 @@ func (suite *CertificatesTestSuite) SetupTest() {
 }
 
 func (suite *CertificatesTestSuite) TestGetCertificateByUID() {
+	var err error
 	certificate, err := suite.model.GetCertificateByUID("user1")
 	assert.NoError(suite.T(), err, "should get certificate by uid")
 	assert.Equal(suite.T(), "description1", certificate.Description, "should get certificate for user1")
 
-	certificate, err = suite.model.GetCertificateByUID("user7")
+	_, err = suite.model.GetCertificateByUID("user7")
 	assert.Error(suite.T(), err, "should not get certificate by uid")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
 func (suite *CertificatesTestSuite) TestGetCertificateBySerial() {
+	var err error
 	certificate, err := suite.model.GetCertificateBySerial("5")
 	assert.NoError(suite.T(), err, "should get certificate by serial")
 	assert.Equal(suite.T(), "description5", certificate.Description, "should get certificate for serial 5")
 
-	certificate, err = suite.model.GetCertificateBySerial("7")
+	_, err = suite.model.GetCertificateBySerial("7")
 	assert.Error(suite.T(), err, "should not get certificate by serial")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }

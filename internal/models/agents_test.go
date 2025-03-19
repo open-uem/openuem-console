@@ -263,11 +263,12 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 }
 
 func (suite *AgentsTestSuite) TestGetAgentById() {
+	var err error
 	item, err := suite.model.GetAgentById("agent1")
 	assert.NoError(suite.T(), err, "should get agent by id")
 	assert.Equal(suite.T(), "agent1", item.Hostname)
 
-	item, err = suite.model.GetAgentById("agent7")
+	_, err = suite.model.GetAgentById("agent7")
 	assert.Error(suite.T(), err, "should not get agent by id")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise is not found error")
 }

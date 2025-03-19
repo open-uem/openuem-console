@@ -1,0 +1,100 @@
+package tasks_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ EditTask(c echo.Context, sm *sessions.SessionManager, profileID int, task *ent.Task, currentVersion, latestVersion string) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks")}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "tasks.edit.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "tasks.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body">
+				<form
+					class="flex flex-col gap-4 my-6"
+					hx-post={ string(templ.URL(fmt.Sprintf("/tasks/%d", task.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-push-url="false"
+				>
+					<div class="w-1/2">
+						<label class="uk-form-label" for="task-description">
+							{ i18n.T(ctx, "tasks.new.name") }
+						</label>
+						<div class="uk-form-controls">
+							<textarea
+								id="task-description"
+								name="task-description"
+								class="uk-textarea"
+								rows="2"
+								placeholder={ i18n.T(ctx, "tasks.new.text") }
+								aria-label="Task description"
+								autocomplete="off"
+								autocorrect="off"
+								autocapitalize="off"
+								spellcheck="false"
+							>
+								{ task.Name }
+							</textarea>
+						</div>
+					</div>
+					<div class="flex flex-col gap-4 w-1/2">
+						@partials.SelectTaskType(task)
+						@partials.SelectPackageTaskSubtype(task)
+						@partials.SelectRegistryTaskSubtype(task)
+						@partials.SelectLocalUserTaskSubtype(task)
+						@partials.SelectLocalGroupTaskSubtype(task)
+						if task != nil {
+							<input type="hidden" name="selected-task-type" value={ task.Type.String() }/>
+						}
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPackageTask(task)) } id="package-partial">
+						@partials.WingetPackageSearch(task)
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(task)) } id="registry-partial">
+						@partials.RegistryComponent(task)
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalUserTask(task)) } id="local-user-partial">
+						@partials.LocalUserComponent(task)
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalGroupTask(task)) } id="local-group-partial">
+						@partials.LocalGroupComponent(task)
+					</div>
+					<div class="w-1/2">
+						@partials.CommandText()
+					</div>
+					<div class="flex gap-4 my-4">
+						<button type="submit" class="uk-button uk-button-primary">
+							{ i18n.T(ctx, "tasks.edit.save") }
+						</button>
+						<button
+							type="button"
+							class="uk-button uk-button-default"
+							hx-get={ partials.GetCurrentUrl(c, fmt.Sprintf("/profiles/%d", profileID)) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+}

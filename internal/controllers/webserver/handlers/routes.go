@@ -136,11 +136,24 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/computers/:uuid/metadata", h.ComputerMetadata, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid/metadata", h.ComputerMetadata, h.IsAuthenticated)
 
+	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
+
 	e.POST("/logout", h.Logout, h.IsAuthenticated)
 
 	e.GET("/network-printers", h.NetworkPrinters, h.IsAuthenticated)
 
-	e.GET("/remote-workers", h.RemoteWorkers, h.IsAuthenticated)
+	e.POST("/packages", h.SearchWingetPackages, h.IsAuthenticated)
+
+	e.GET("/profiles", func(c echo.Context) error { return h.Profiles(c, "") }, h.IsAuthenticated)
+	e.GET("/profiles/new", h.NewProfile, h.IsAuthenticated)
+	e.POST("/profiles/new", h.NewProfile, h.IsAuthenticated)
+	e.GET("/profiles/:uuid", func(c echo.Context) error { return h.EditProfile(c, "GET", "", "") }, h.IsAuthenticated)
+	e.POST("/profiles/:uuid", func(c echo.Context) error { return h.EditProfile(c, "POST", "", "") }, h.IsAuthenticated)
+	e.DELETE("/profiles/:uuid", func(c echo.Context) error { return h.EditProfile(c, "DELETE", "", "") }, h.IsAuthenticated)
+	e.POST("/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
+	e.DELETE("/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
+	e.GET("/profiles/:uuid/confirm-delete", h.ConfirmDeleteProfile, h.IsAuthenticated)
+	e.GET("/profiles/:uuid/issues", h.ProfileIssues, h.IsAuthenticated)
 
 	e.GET("/register", h.SignIn)
 	e.POST("/register", h.SendRegister)
@@ -165,7 +178,12 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/software", h.Software, h.IsAuthenticated)
 	e.POST("/software", h.Software, h.IsAuthenticated)
 
-	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
+	e.GET("/tasks/:profile/new", h.NewTask, h.IsAuthenticated)
+	e.POST("/tasks/:profile/new", h.NewTask, h.IsAuthenticated)
+	e.GET("/tasks/:id", h.EditTask, h.IsAuthenticated)
+	e.POST("/tasks/:id", h.EditTask, h.IsAuthenticated)
+	e.DELETE("/tasks/:id", h.EditTask, h.IsAuthenticated)
+	e.GET("/tasks/:profile/confirm-delete/:task", h.ConfirmDeleteTask, h.IsAuthenticated)
 
 	e.POST("/render-markdown", h.RenderMarkdown, h.IsAuthenticated)
 }

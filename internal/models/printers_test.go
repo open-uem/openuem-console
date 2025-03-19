@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/open-uem/ent/enttest"
-	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -15,7 +14,6 @@ type PrintersTestSuite struct {
 	suite.Suite
 	t     enttest.TestingT
 	model Model
-	p     partials.PaginationAndSort
 }
 
 func (suite *PrintersTestSuite) SetupTest() {
