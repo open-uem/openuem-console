@@ -343,7 +343,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		}
 
 		// Min WinGetFrequency is 30
-		if settings.WinGetFrequency < 0 {
+		if settings.WinGetFrequency < 30 {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.winget_configure_frequency_invalid"))
 		}
 	}
