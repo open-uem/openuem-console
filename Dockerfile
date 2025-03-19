@@ -1,6 +1,6 @@
-FROM golang:1.23.6 AS build
+FROM golang:1.24.1 AS build
 COPY . ./
-RUN go install github.com/a-h/templ/cmd/templ@v0.3.819
+RUN go install github.com/a-h/templ/cmd/templ@v0.3.833
 RUN templ generate
 RUN CGO_ENABLED=1 go build -o "/bin/openuem-console" .
 
