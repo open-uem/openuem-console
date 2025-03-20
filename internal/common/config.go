@@ -179,7 +179,6 @@ func (w *Worker) StartGenerateConsoleConfigJob() error {
 				if err := w.TaskScheduler.RemoveJob(w.ConfigJob.ID()); err != nil {
 					return
 				}
-				return
 			},
 		),
 	)
