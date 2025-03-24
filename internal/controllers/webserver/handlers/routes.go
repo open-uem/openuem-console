@@ -31,6 +31,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/agents/:uuid/stopvnc", h.AgentStopVNC, h.IsAuthenticated)
 	e.POST("/agents/:uuid/forcerestart", h.AgentForceRestart, h.IsAuthenticated)
 	e.POST("/agents/:uuid/regeneratecerts", func(c echo.Context) error { return h.AgentConfirmAdmission(c, true) }, h.IsAuthenticated)
+	e.POST("/agents/:uuid/enabledebug", h.AgentEnableDebug, h.IsAuthenticated)
+	e.POST("/agents/:uuid/disabledebug", h.AgentDisableDebug, h.IsAuthenticated)
 	e.DELETE("/agents/:uuid", h.AgentConfirmDelete, h.IsAuthenticated)
 
 	e.GET("/admin", func(c echo.Context) error { return h.ListUsers(c, "", "") }, h.IsAuthenticated)

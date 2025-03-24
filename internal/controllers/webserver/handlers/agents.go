@@ -684,3 +684,49 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
 }
+
+func (h *Handler) AgentEnableDebug(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		msg, err := h.NATSConnection.Request("agent.enabledebug."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+		}
+
+		if string(msg.Data) == "enabled" {
+			if err := h.Model.EnableDebugAgent(agentId); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_save_debug_mode"), false))
+			}
+		}
+	}
+
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.debug_has_been_enabled"), "", false)
+}
+
+func (h *Handler) AgentDisableDebug(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		msg, err := h.NATSConnection.Request("agent.disabledebug."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+		}
+
+		if string(msg.Data) == "disabled" {
+			if err := h.Model.DisableDebugAgent(agentId); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_save_debug_mode"), false))
+			}
+		}
+	}
+
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.debug_has_been_disabled"), "", false)
+}

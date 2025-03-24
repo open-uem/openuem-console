@@ -423,6 +423,11 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 					if agent.RestartRequired {
 						@partials.AlertIcon(i18n.T(ctx, "agents.restart_required"))
 					}
+					if agent.DebugMode {
+						<div uk-tooltip={ i18n.T(ctx, "agents.debug_has_been_enabled") }>
+							<uk-icon hx-history="false" icon="search-check" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+						</div>
+					}
 				</div>
 			</td>
 			<td class="!align-middle">
@@ -542,25 +547,30 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
-			if agent.IP != "" && agent.AgentStatus == "Enabled" && agent.Vnc != "" {
+			if agent.DebugMode {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/remote-assistance", agent.ID))) }
-						hx-push-url="true"
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/disabledebug", agent.ID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
-					><uk-icon hx-history="false" icon="monitor-play" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Remote Assistance") }</a>
-				</li>
-			}
-			if agent.AgentStatus != "WaitingForAdmission" && len(agent.MAC) > 0 {
-				<li>
-					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s/power", agent.ID))) }
-						hx-target="#main"
-						hx-swap="outerHTML"
+						hx-indicator="#disable-debug-spinner"
 					>
-						<uk-icon hx-history="false" icon="alarm-clock" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
-						{ i18n.T(ctx, "agents.wol_title") }
+						<uk-icon hx-history="false" icon="search-x" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "Disable Debug") }
+						<div id="disable-debug-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+					</a>
+				</li>
+			} else {
+				<li>
+					<a
+						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabledebug", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-indicator="#enable-debug-spinner"
+					>
+						<uk-icon hx-history="false" icon="search-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "Enable Debug") }
+						<div id="enable-debug-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
 					</a>
 				</li>
 			}

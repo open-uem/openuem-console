@@ -383,6 +383,24 @@ func (suite *AgentsTestSuite) TestCountDisabledAgents() {
 	assert.Equal(suite.T(), 2, count, "should count 3 disabled agents")
 }
 
+func (suite *AgentsTestSuite) TestEnableDebugAgent() {
+	err := suite.model.EnableDebugAgent("agent0")
+	assert.NoError(suite.T(), err, "should disable agent")
+
+	a, err := suite.model.GetAgentById("agent0")
+	assert.NoError(suite.T(), err, "should get agent by id")
+	assert.Equal(suite.T(), true, a.DebugMode, "should get true for DebugMode")
+}
+
+func (suite *AgentsTestSuite) TestDisableDebugAgent() {
+	err := suite.model.DisableDebugAgent("agent0")
+	assert.NoError(suite.T(), err, "should disable agent")
+
+	a, err := suite.model.GetAgentById("agent0")
+	assert.NoError(suite.T(), err, "should get agent by id")
+	assert.Equal(suite.T(), false, a.DebugMode, "should get false for DebugMode")
+}
+
 func (suite *AgentsTestSuite) TestAddTagToAgent() {
 	err := suite.model.AddTagToAgent("agent0", strconv.Itoa(suite.tags[1]))
 	assert.NoError(suite.T(), err, "should add tag to agent")
