@@ -138,6 +138,15 @@ templ NavBar(active string) {
 				<span class="sr-only">Logs</span>
 			</a> */
 			<a
+				href="https://github.com/open-uem/openuem-console/issues/new/choose"
+				target="_blank"
+				rel="noopener"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Bugs")) }
+				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
+			>
+				<uk-icon hx-history="false" icon="bug" custom-class="h-5 w-5" uk-cloack></uk-icon>
+			</a>
+			<a
 				href="https://openuem.eu/docs/intro"
 				target="_blank"
 				rel="noopener"
