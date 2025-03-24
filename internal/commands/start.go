@@ -58,7 +58,7 @@ func startConsole(cCtx *cli.Context) error {
 	// Create winget directory
 	worker.WinGetDBFolder = filepath.Join(cwd, "tmp", "winget")
 	if strings.HasSuffix(cwd, "tmp") {
-		worker.ServerReleasesFolder = filepath.Join(cwd, "winget")
+		worker.WinGetDBFolder = filepath.Join(cwd, "winget")
 	}
 	if err := worker.CreateWingetDBDir(); err != nil {
 		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
