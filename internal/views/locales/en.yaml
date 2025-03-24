@@ -217,6 +217,7 @@ en:
     remote: "Is remote?"
     is_remote: "Agent is in a remote location"
     sftp_not_available: "The SFTP service is not available"
+    free_space: "Free space %d%%"
   inventory:
     hardware:
       title: "Hardware"
