@@ -267,6 +267,22 @@ func (m *Model) DisableAgent(agentId string) error {
 	return nil
 }
 
+func (m *Model) EnableDebugAgent(agentId string) error {
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetDebugMode(true).Save(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Model) DisableDebugAgent(agentId string) error {
+	_, err := m.Client.Agent.UpdateOneID(agentId).SetDebugMode(false).Save(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *Model) AddTagToAgent(agentId, tagId string) error {
 	id, err := strconv.Atoi(tagId)
 	if err != nil {

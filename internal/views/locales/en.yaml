@@ -31,6 +31,7 @@ en:
   Download: "Download"
   Edit: "Edit"
   Enabled: "Enabled"
+  Enable Debug: "Enable debug mode"
   Error: "Error"
   Example: "Example"
   Expiry: "Expiry"
@@ -40,6 +41,7 @@ en:
   Install: "Install"
   Uninstall: "Uninstall"
   Disable: "Disable"
+  Disable Debug: "Disable debug mode"
   Enable: "Enable"
   Import: "Import"
   In Progress: "In Progress"
@@ -219,6 +221,9 @@ en:
     is_remote: "Agent is in a remote location"
     sftp_not_available: "The SFTP service is not available"
     free_space: "Free space %d%%"
+    debug_has_been_enabled: "Debug mode has been enabled for the agent. Note that the log file will increased its size quickly"
+    debug_has_been_disabled: "Debug mode has been disabled for the agent"
+    could_not_save_debug_mode: "Debug mode could not be saved to database"
   inventory:
     hardware:
       title: "Hardware"
