@@ -46,8 +46,8 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, sm *sessions.Se
 									<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
-									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
+									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
 									if  agent.SftpPort != "" {
 										<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
@@ -66,12 +66,13 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, sm *sessions.Se
 									<td class="!align-middle">
 										<progress
 											class="uk-progress !mb-0"
+											uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.free_space", 100-int(disk.Usage))) }
 											value={ strconv.Itoa(int(disk.Usage)) }
 											max="100"
 										></progress>
 									</td>
-									<td class="!align-middle">{ disk.SizeInUnits }</td>
 									<td class="!align-middle">{ disk.RemainingSpaceInUnits }</td>
+									<td class="!align-middle">{ disk.SizeInUnits }</td>
 									<td class="!align-middle">
 										@partials.BitlockerStatus(disk.BitlockerStatus)
 									</td>
