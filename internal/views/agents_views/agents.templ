@@ -445,9 +445,11 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 			<td class="!align-middle">
 				switch agent.Os {
 					case "windows":
-						<i class="ri-windows-fill ri-2x text-blue-600"></i>
-					case "linux":
-						<span></span>
+						<i class="ri-windows-fill ri-2x text-blue-600 uk-cloak"></i>
+					case "ubuntu":
+						<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
+					case "debian":
+						<i class="si si-debian si--color uk-cloak text-2xl"></i>
 				}
 			</td>
 			<td class="!align-middle">{ agent.Edges.Release.Version }</td>

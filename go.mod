@@ -3,7 +3,7 @@ module github.com/open-uem/openuem-console
 go 1.24.1
 
 require (
-	entgo.io/ent v0.14.3
+	entgo.io/ent v0.14.4
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.833
 	github.com/alexedwards/scs/pgxstore v0.0.0-20250212122300-421ef1d8611c

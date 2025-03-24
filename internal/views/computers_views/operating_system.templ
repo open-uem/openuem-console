@@ -56,7 +56,7 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, sm *sessions
 						</tr>
 						<tr>
 							<th>{ i18n.T(ctx, "inventory.os.installation") }</th>
-							<td>{ l.FmtDateMedium(agent.Edges.Operatingsystem.InstallDate.Local()) + " " + l.FmtTimeShort(agent.Edges.Operatingsystem.InstallDate.Local()) }</td>
+							<td>{ l.FmtDateMedium(agent.Edges.Operatingsystem.InstallDate.Local())}</td>
 						</tr>
 						<tr>
 							<th>{ i18n.T(ctx, "inventory.os.last_bootup") }</th>
