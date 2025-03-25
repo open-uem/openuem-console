@@ -1,0 +1,14 @@
+package partials
+
+templ OSBadge(agentOS string) {
+	switch agentOS {
+		case "windows":
+			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "ubuntu":
+			<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
+		case "debian":
+			<i class="si si-debian si--color uk-cloak text-2xl"></i>
+		case "opensuse-leap":
+			<i class="si si-opensuse si--color uk-cloak text-2xl"></i>
+	}
+}

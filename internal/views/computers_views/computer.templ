@@ -51,7 +51,7 @@ templ Computer(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.model") }</th>
 									<td>
-										if  agent.Edges.Computer.Model == "Unknown" {
+										if agent.Edges.Computer.Model == "Unknown" {
 											{ i18n.T(ctx, "Unknown") }
 										} else {
 											{ agent.Edges.Computer.Model }
@@ -61,7 +61,7 @@ templ Computer(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.serial") }</th>
 									<td>
-										if  agent.Edges.Computer.Serial == "Unknown" {
+										if agent.Edges.Computer.Serial == "Unknown" || agent.Edges.Computer.Serial == "" {
 											{ i18n.T(ctx, "Unknown") }
 										} else {
 											{ agent.Edges.Computer.Serial }
