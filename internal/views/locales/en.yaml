@@ -264,6 +264,9 @@ en:
       bitlocker_encrypted: "Encrypted"
       bitlocker_unencrypted: "Unencrypted"
       bitlocker_unknown: "Unknown"
+      bitlocker_unsupported: "Unsupported"
+      mount_point: "Mount point"
+      filesystem_type: "FS type"
       no_logical_disks: "No logical disks information is available yet"
     file_browser:
       title: "File Browser"

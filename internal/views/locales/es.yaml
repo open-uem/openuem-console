@@ -264,6 +264,9 @@ es:
       bitlocker_encrypted: "Encriptado"
       bitlocker_unencrypted: "No encriptado"
       bitlocker_unknown: "Desconocido"
+      bitlocker_unsupported: "No soportado"
+      mount_point: "Punto de montaje"
+      filesystem_type: "Tipo Sist.Fich"
       no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
     file_browser:
       title: "Expl. Archivos"

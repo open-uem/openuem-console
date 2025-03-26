@@ -42,9 +42,21 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, sm *sessions.Se
 						<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 							<thead>
 								<tr>
-									<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
-									<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
-									<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
+									if agent.Os == "windows" {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.label") }</th>
+									} else {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.mount_point") }</th>
+									}
+									if agent.Os == "windows" {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.volume_name") }</th>
+									} else {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
+									}
+									if agent.Os == "windows" {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem") }</th>
+									} else {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.filesystem_type") }</th>
+									}
 									<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>

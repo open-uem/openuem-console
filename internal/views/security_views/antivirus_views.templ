@@ -109,12 +109,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 												{ antivirus.Hostname }
 											</td>
 											<td>
-												switch antivirus.OS {
-													case "windows":
-														<i class="ri-windows-fill ri-2x text-blue-600"></i>
-													case "linux":
-														<span></span>
-												}
+												@partials.OSBadge(antivirus.OS)
 											</td>
 											<td>
 												if len(antivirus.Name) == 0 {

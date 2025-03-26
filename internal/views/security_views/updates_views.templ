@@ -109,12 +109,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 												{ systemUpdate.Hostname }
 											</td>
 											<td>
-												switch systemUpdate.OS {
-													case "windows":
-														<i class="ri-windows-fill ri-2x text-blue-600"></i>
-													case "linux":
-														<span></span>
-												}
+												@partials.OSBadge(systemUpdate.OS)
 											</td>
 											<td>{ i18n.T(ctx,systemUpdate.SystemUpdateStatus) }</td>
 											<td>{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>

@@ -50,7 +50,7 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 											@filters.FilterByText(c, p, "AppName", f.AppName, "apps.filter_by_name", "#main", "outerHTML")
 										</div>
 									</th>
-									<th class="w-1/12">
+									<th class="w-2/12">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "Version") }</span>
 											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Version"), "version", "alpha", "#main", "outerHTML", "get")
@@ -64,7 +64,7 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 											@filters.FilterByText(c, p, "AppPublisher", f.Vendor, "apps.filter_by_publisher", "#main", "outerHTML")
 										</div>
 									</th>
-									<th class="w-2/12">
+									<th class="w-1/12">
 										<div class="flex gap-2 items-center ">
 											<span>{ i18n.T(ctx, "inventory.apps.installation_date") }</span>
 											@partials.SortByColumnIcon(c, p, i18n.T(ctx, "inventory.apps.installation_date"), "installation", "alpha", "#main", "outerHTML", "get")
@@ -98,6 +98,7 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 							if len(apps) < p.PageSize {
 								for i:=0; i < p.PageSize - len(apps); i++ {
 									<tr class="h-16">
+										<td class="!align-middle"></td>
 										<td class="!align-middle">-</td>
 										<td class="!align-middle">-</td>
 										<td class="!align-middle">-</td>
