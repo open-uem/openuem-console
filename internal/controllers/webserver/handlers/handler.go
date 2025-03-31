@@ -48,10 +48,12 @@ type Handler struct {
 	Replicas             int
 	ServerReleasesFolder string
 	WingetFolder         string
+	FlatpakFolder        string
+	CommonFolder         string
 	Version              string
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, version string) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, commonFolder, version string) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -88,6 +90,8 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		Replicas:             len(replicas),
 		ServerReleasesFolder: serverReleasesFolder,
 		WingetFolder:         wingetFolder,
+		FlatpakFolder:        flatpakFolder,
+		CommonFolder:         commonFolder,
 		Version:              version,
 	}
 

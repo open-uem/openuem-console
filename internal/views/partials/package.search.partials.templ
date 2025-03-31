@@ -88,7 +88,7 @@ templ WingetPackageSearch(task *ent.Task) {
 	</div>
 }
 
-templ SearchPacketResult(wingetPackages []nats.WingetPackage) {
+templ SearchPacketResult(wingetPackages []nats.SoftwarePackage) {
 	<div id="select-package-dropdown" class="uk-drop uk-dropdown uk-open mt-2">
 		<div class="uk-dropdown-nav uk-nav">
 			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">

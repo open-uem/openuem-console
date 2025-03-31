@@ -96,6 +96,7 @@ es:
   Testing: "Pruebas"
   Type: "Tipo"
   Unknown: "Desconocido"
+  Unsupported: "No soportado"
   Up: "Operativo"
   Update: "Actualizar"
   UpdatedYes: "Actualizado"
@@ -898,6 +899,9 @@ es:
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"
+  packages:
+    required_params_missing: "Faltan parámetros requeridos"
+    source_not_found: "No se ha podido encontrar el gestor de paquetes asociado"
   countries:
     Australia: "Australia"
     Austria: "Austria"

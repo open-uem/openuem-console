@@ -42,6 +42,8 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
 	}
 
+	source := c.FormValue("filterBySource")
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
@@ -51,12 +53,12 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p, h.WingetFolder)
+	packages, err := models.SearchPackages(search, source, p, h.CommonFolder)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = models.CountPackages(search, h.WingetFolder)
+	p.NItems, err = models.CountPackages(search, h.CommonFolder, "")
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -70,9 +72,10 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
 	installParam := c.FormValue("filterByInstallationType")
+	source := c.FormValue("filterBySource")
 
 	if packageId == "" || packageName == "" || installParam == "" {
-		return RenderError(c, partials.ErrorMessage("required params not found", true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), false))
 	}
 
 	f := filters.AgentFilter{}
@@ -83,8 +86,15 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		f.SelectedItems = 0
 	}
 
+	switch source {
+	case "winget":
+		f.AgentOSVersions = []string{"windows"}
+	case "flatpak":
+		f.AgentOSVersions = []string{"ubuntu", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux"}
+	}
+
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAdmittedAgents(f)
+	allAgents, err := h.Model.GetAllAgents(f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -102,7 +112,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p, filters.AgentFilter{}, true)
+	agents, err := h.Model.GetAgentsByPage(p, f, true)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}

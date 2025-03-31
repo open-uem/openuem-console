@@ -24,3 +24,12 @@ templ OSBadge(agentOS string) {
 			<i class="si si-kalilinux si--color uk-cloak text-2xl"></i>
 	}
 }
+
+templ PackageManagementTool(source string) {
+	switch source {
+		case "winget":
+			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "flatpak":
+			<i class="si si-linux text-black uk-cloak text-3xl"></i>
+	}
+}

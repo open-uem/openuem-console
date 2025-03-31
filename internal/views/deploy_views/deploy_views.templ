@@ -138,7 +138,7 @@ templ DeployIndex(title string, cmp templ.Component) {
 	}
 }
 
-templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Context, p partials.PaginationAndSort) {
+templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.Context, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important mt-6">
 			<thead>
@@ -150,6 +150,12 @@ templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Con
 							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "post")
 						</div>
 					</th>
+					<th>
+						<div class="flex gap-1 items-center w-5/6">
+							<span>{ i18n.T(ctx, "OS") }</span>
+							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "OS"), "source", "alpha", "#deploy-search-results", "innerHTML", "post")
+						</div>
+					</th>
 					<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
 				</tr>
 			</thead>
@@ -159,8 +165,11 @@ templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Con
 						<td class="text-center !align-middle">
 							@partials.Brand(strings.ToLower(p.Name), "")
 						</td>
-						<td>{ p.Name }</td>
-						<td>
+						<td class="!align-middle">{ p.Name }</td>
+						<td class="!align-middle">
+							@partials.PackageManagementTool(p.Source)
+						</td>
+						<td class="!align-middle">
 							<form
 								hx-get="/deploy/selectpackagedeployment"
 								hx-push-url="true"
@@ -169,6 +178,7 @@ templ SearchPacketResult(install bool, packages []nats.WingetPackage, c echo.Con
 							>
 								<input type="hidden" name="filterByPackageId" value={ p.ID }/>
 								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
+								<input type="hidden" name="filterBySource" value={ p.Source }/>
 								if install {
 									<input type="hidden" name="filterByInstallationType" value="true"/>
 								} else {
@@ -382,7 +392,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									</thead>
 									for _, agent := range agents {
 										<tr>
-											<td>
+											<td class="!align-middle">
 												<input
 													title="check-agent"
 													name={ agent.ID }
@@ -456,13 +466,10 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 													`,p.PageSize) }
 												/>
 											</td>
-											<td>{ agent.Hostname }</td>
-											switch agent.Os {
-												case "windows":
-													<td><i class="ri-windows-fill ri-2x text-blue-600"></i></td>
-												case "linux":
-													<td></td>
-											}
+											<td class="!align-middle">{ agent.Hostname }</td>
+											<td class="!align-middle">
+												@partials.OSBadge(agent.Os)
+											</td>
 										</tr>
 									}
 								</table>

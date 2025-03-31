@@ -9,6 +9,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"time"
 )
 
 templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
@@ -108,18 +109,30 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 											>
 												{ systemUpdate.Hostname }
 											</td>
-											<td>
+											<td class="!align-middle">
 												@partials.OSBadge(systemUpdate.OS)
 											</td>
-											<td>{ i18n.T(ctx,systemUpdate.SystemUpdateStatus) }</td>
-											<td>{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
-											<td>{ l.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + l.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
-											if systemUpdate.PendingUpdates {
-												<td><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+											if len(systemUpdate.SystemUpdateStatus) == 0 {
+												<td class="!align-middle">{ i18n.T(ctx,"Unknown") }</td>
 											} else {
-												<td>{ i18n.T(ctx, "No") }</td>
+												<td class="!align-middle">{ i18n.T(ctx,systemUpdate.SystemUpdateStatus) }</td>
 											}
-											<td>
+											if time.Time.IsZero(systemUpdate.LastSearch) {
+												<td class="!align-middle">{ " - " }</td>
+											} else {
+												<td class="!align-middle">{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
+											}
+											if time.Time.IsZero(systemUpdate.LastInstall) {
+												<td class="!align-middle">{ " - " }</td>
+											} else {
+												<td class="!align-middle">{ l.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + l.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
+											}
+											if systemUpdate.PendingUpdates {
+												<td class="!align-middle"><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+											} else {
+												<td class="!align-middle">{ i18n.T(ctx, "No") }</td>
+											}
+											<td class="!align-middle">
 												<button
 													title={ i18n.T(ctx, "systemupdate.show_updates_history") }
 													type="button"

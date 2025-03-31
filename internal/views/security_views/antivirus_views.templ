@@ -108,32 +108,32 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											>
 												{ antivirus.Hostname }
 											</td>
-											<td>
+											<td class="!align-middle">
 												@partials.OSBadge(antivirus.OS)
 											</td>
-											<td>
+											<td class="!align-middle">
 												if len(antivirus.Name) == 0 {
-													{ i18n.T(ctx, "Unknown") }
+													{ i18n.T(ctx, "Unsupported") }
 												} else {
 													{ antivirus.Name }
 												}
 											</td>
 											if antivirus.IsActive {
-												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+												<td class="!align-middle"><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
 											} else {
 												if len(antivirus.Name) == 0 {
-													<td><uk-icon hx-history="false" icon="shield-question" custom-class="mx-auto h-5 w-5 text-orange-600" uk-cloack></uk-icon></td>
+													<td class="!align-middle"><uk-icon hx-history="false" icon="shield-off" custom-class="mx-auto h-5 w-5 text-gray-600" uk-cloack></uk-icon></td>
 												} else {
-													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+													<td class="!align-middle"><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
 												}
 											}
 											if antivirus.IsUpdated {
-												<td><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+												<td class="!align-middle"><uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
 											} else {
 												if len(antivirus.Name) == 0 {
-													<td><uk-icon hx-history="false" icon="shield-question" custom-class="mx-auto h-5 w-5 text-orange-600" uk-cloack></uk-icon></td>
+													<td class="!align-middle"><uk-icon hx-history="false" icon="shield-off" custom-class="mx-auto h-5 w-5 text-gray-600" uk-cloack></uk-icon></td>
 												} else {
-													<td><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+													<td class="!align-middle"><uk-icon hx-history="false" icon="shield-x" custom-class="mx-auto h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
 												}
 											}
 										</tr>

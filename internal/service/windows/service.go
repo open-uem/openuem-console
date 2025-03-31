@@ -56,10 +56,16 @@ func main() {
 		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
 	}
 
-	// Create winget directory for index.db
+	// Create winget directory for flatpak.db
 	w.FlatpakDBFolder = filepath.Join(cwd, "tmp", "flatpak")
 	if err := w.CreateFlatpakDBDir(); err != nil {
 		log.Fatalf("[FATAL]: could not create flatpak temp dir: %v", err)
+	}
+
+	// Create winget directory for flatpak.db
+	w.CommonSoftwareDBFolder = filepath.Join(cwd, "tmp", "commondb")
+	if err := w.CreateCommonSoftwareDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create commondb temp dir: %v", err)
 	}
 
 	// Create server releases directory

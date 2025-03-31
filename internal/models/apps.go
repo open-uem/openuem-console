@@ -13,6 +13,7 @@ import (
 
 type App struct {
 	ID        int
+	Source    string
 	Name      string
 	Publisher string
 	Count     int

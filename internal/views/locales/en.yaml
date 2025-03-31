@@ -95,6 +95,7 @@ en:
   Testing: "Testing"
   Type: "Type"
   Unknown: "Unknown"
+  Unsupported: "Unsupported"
   Up: "Up"
   Update: "Update"
   UpdatedYes: "Updated"
@@ -904,6 +905,9 @@ en:
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"
+  packages:
+    required_params_missing: "Required params are missing"
+    source_not_found: "Could not find the associated package manager"
   countries:
     Australia: "Australia"
     Austria: "Austria"

@@ -121,7 +121,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []nats.WingetPackage, p partials.PaginationAndSort) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
 			<thead>

@@ -15,6 +15,7 @@ import (
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	openuem_nats "github.com/open-uem/nats"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
@@ -552,12 +553,19 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
+	var packages []nats.SoftwarePackage
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
 	}
 
 	search := c.FormValue("filterByAppName")
@@ -572,17 +580,30 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p, h.WingetFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
+	if agent.Os == "windows" {
+		packages, err = models.SearchPackages(search, "winget", p, h.CommonFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
 
-	p.NItems, err = models.CountPackages(search, h.WingetFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		p.NItems, err = models.CountPackages(search, h.CommonFolder, "winget")
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+	} else {
+		packages, err = models.SearchPackages(search, "flatpak", p, h.CommonFolder)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		p.NItems, err = models.CountPackages(search, h.CommonFolder, "flatpak")
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
 	}
 
 	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
+
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
