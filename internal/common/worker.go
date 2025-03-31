@@ -34,6 +34,7 @@ type Worker struct {
 	Domain                            string
 	NATSServers                       string
 	WinGetDBFolder                    string
+	FlatpakDBFolder                   string
 	OrgName                           string
 	OrgProvince                       string
 	OrgLocality                       string
@@ -48,6 +49,8 @@ type Worker struct {
 	DownloadServerReleasesJobDuration time.Duration
 	DownloadLatestReleaseJob          gocron.Job
 	DownloadLatestReleaseJobDuration  time.Duration
+	DownloadFlatpakDBJob              gocron.Job
+	DownloadFlatpakJobDuration        time.Duration
 	Version                           string
 }
 
@@ -76,6 +79,12 @@ func (w *Worker) StartWorker() {
 	// Start a job to download Microsoft Winget database
 	if err := w.StartWinGetDBDownloadJob(); err != nil {
 		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
+		return
+	}
+
+	// Start a job to download Flatpak database
+	if err := w.StartFlatpakDBDownloadJob(); err != nil {
+		log.Printf("[ERROR]: could not start flatpak.db download job, reason: %s", err.Error())
 		return
 	}
 }

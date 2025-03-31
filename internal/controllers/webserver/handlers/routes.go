@@ -26,9 +26,6 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/agents/:uuid/forcereport", h.AgentForceRun, h.IsAuthenticated)
 	e.POST("/agents/:uuid/disable", h.AgentConfirmDisable, h.IsAuthenticated)
 	e.POST("/agents/:uuid/admit", func(c echo.Context) error { return h.AgentConfirmAdmission(c, false) }, h.IsAuthenticated)
-	e.GET("/agents/:uuid/startvnc", h.AgentStartVNC, h.IsAuthenticated)
-	e.POST("/agents/:uuid/startvnc", h.AgentStartVNC, h.IsAuthenticated)
-	e.POST("/agents/:uuid/stopvnc", h.AgentStopVNC, h.IsAuthenticated)
 	e.POST("/agents/:uuid/forcerestart", h.AgentForceRestart, h.IsAuthenticated)
 	e.POST("/agents/:uuid/regeneratecerts", func(c echo.Context) error { return h.AgentConfirmAdmission(c, true) }, h.IsAuthenticated)
 	e.POST("/agents/:uuid/enabledebug", h.AgentEnableDebug, h.IsAuthenticated)
@@ -137,6 +134,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/computers/:uuid/metadata", h.ComputerMetadata, h.IsAuthenticated)
 	e.POST("/computers/:uuid/metadata", h.ComputerMetadata, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid/metadata", h.ComputerMetadata, h.IsAuthenticated)
+	e.GET("/computers/:uuid/startvnc", h.ComputerStartVNC, h.IsAuthenticated)
+	e.POST("/computers/:uuid/startvnc", h.ComputerStartVNC, h.IsAuthenticated)
+	e.POST("/computers/:uuid/stopvnc", h.ComputerStopVNC, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

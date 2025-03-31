@@ -44,7 +44,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 								class="flex gap-2 items-center uk-text-small"
 								target="_blank"
 								rel="noopener"
-								href={ templ.URL(fmt.Sprintf("/agents/%s/startvnc", agent.ID)) }
+								href={ templ.URL(fmt.Sprintf("/computers/%s/startvnc", agent.ID)) }
 							>
 								<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
 							</a>

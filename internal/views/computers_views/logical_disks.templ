@@ -91,7 +91,11 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, sm *sessions.Se
 									if  agent.SftpPort != "" && !agent.IsRemote {
 										<td class="!align-middle">
 											<form>
-												<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
+												if agent.Os == "windows" {
+													<input type="hidden" name="cwd" value={ disk.Label + "\\" }/>
+												} else {
+													<input type="hidden" name="cwd" value={ disk.Label }/>
+												}
 												<button
 													class="flex gap-2 items-center"
 													type="button"

@@ -27,7 +27,7 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 		log.Printf("[ERROR]: could not start the winget download job: %v", err)
 		return err
 	}
-	log.Println("[INFO]: download index.db job has been scheduled every ", w.DownloadWingetJobDuration.String())
+	log.Println("[INFO]: download winget index.db job has been scheduled every ", w.DownloadWingetJobDuration.String())
 	return nil
 }
 

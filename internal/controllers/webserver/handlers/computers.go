@@ -22,6 +22,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) Computer(c echo.Context) error {
@@ -965,4 +966,79 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 	}
 
 	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"), true)
+}
+
+func (h *Handler) ComputerStartVNC(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		// Check if PIN is optional or not
+		requestPIN, err := h.Model.GetDefaultRequestVNCPIN()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.request_pin_could_not_be_read"), false))
+		}
+
+		// Create new random PIN
+		pin, err := utils.GenerateRandomPIN()
+		if err != nil {
+			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))
+		}
+
+		vncConn := openuem_nats.VNCConnection{}
+		vncConn.NotifyUser = requestPIN
+		vncConn.PIN = pin
+
+		data, err := json.Marshal(vncConn)
+		if err != nil {
+			log.Printf("[ERROR]: could not marshall VNC connection data, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_could_not_marshal"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+}
+
+func (h *Handler) ComputerStopVNC(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
+	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
 }

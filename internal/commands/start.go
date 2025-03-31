@@ -64,6 +64,15 @@ func startConsole(cCtx *cli.Context) error {
 		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
 	}
 
+	// Create flatpak directory
+	worker.FlatpakDBFolder = filepath.Join(cwd, "tmp", "flatpak")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.FlatpakDBFolder = filepath.Join(cwd, "flatpak")
+	}
+	if err := worker.CreateFlatpakDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
+	}
+
 	// Save pid to PIDFILE
 	if err := os.WriteFile("PIDFILE", []byte(strconv.Itoa(os.Getpid())), 0666); err != nil {
 		return err
