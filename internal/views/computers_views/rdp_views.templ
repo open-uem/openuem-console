@@ -1,0 +1,74 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ RemoteDesktop(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager, currentVersion, latestVersion string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, sm, currentVersion, latestVersion)
+	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-1">
+				<div id="error" class="hidden"></div>
+				<div id="vnc" class="flex flex-col gap-4">
+					<p class="uk-margin-small-top uk-margin-small-bottom uk-text-small">
+						{ i18n.T(ctx, "agents.rdp_file") }
+					</p>
+					<p class="uk-margin-small-top uk-margin-small-bottom uk-text-bolder">
+						{ i18n.T(ctx, "agents.rdp_file_warning") }
+					</p>
+					<div class="flex items-center gap-2">
+						<button
+							title={ i18n.T(ctx, "Connect") }
+							class={ "uk-button uk-button-primary flex items-center gap-2 pr-6", templ.KV("hidden", connected) }
+							hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							htmx-indicator="#vnc-connect-spinner"
+						>
+							<uk-icon id="vnc-connect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon> { i18n.T(ctx, "Connect") }
+						</button>
+						<button
+							title={ i18n.T(ctx, "Close") }
+							class={ "uk-button uk-button-default", templ.KV("hidden", connected) }
+							_="on click call window.close()"
+						>
+							{ i18n.T(ctx, "Close") }
+						</button>
+						<form
+							class={ "flex gap-2",templ.KV("hidden", !connected) }
+							hx-post={ fmt.Sprintf("/computers/%s/generaterdp", agent.ID) }
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							<button type="submit" class="flex items-center gap-2 uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">
+								<uk-icon hx-history="false" icon="key" custom-class="h-4 w-4" uk-cloack></uk-icon>
+								{ i18n.T(ctx, "agents.generate_rdp_file") }
+							</button>
+						</form>
+						<button
+							id="disconnectRDP"
+							class={ "uk-button uk-button-danger flex items-center gap-2 my-4", templ.KV("hidden", !connected) }
+							hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/stopvnc", agent.ID))) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							htmx-indicator="#rdp-disconnect-spinner"
+						>
+							<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-4 w-4" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "Disconnect") }
+							<uk-icon id="rdp-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+						</button>
+					</div>
+					if !requestPIN {
+						<p class={ "text-2xl", templ.KV("hidden", !connected) }>{ fmt.Sprintf("PIN: %s", pin) }</p>
+					}
+				</div>
+			</div>
+		</div>
+	</main>
+}

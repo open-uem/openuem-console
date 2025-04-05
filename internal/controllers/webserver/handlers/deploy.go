@@ -171,6 +171,11 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
+		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
 		if install {
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -180,7 +185,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
@@ -192,7 +197,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}

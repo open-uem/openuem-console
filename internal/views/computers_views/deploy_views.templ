@@ -18,7 +18,10 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				<div class="flex gap-2 items-center">
-					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 					if agent.IsRemote {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
@@ -38,7 +41,10 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 				}
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "Deploy") }</h3>
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="package-plus" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "Deploy") }</h3>
+						</div>
 						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.deploy_description") }</p>
 					</div>
 				</div>
@@ -197,8 +203,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.deploy_updated_date"), "updated", "time", "#deployments-results", "innerHTML", "post")
 					</div>
 				</th>
-				<th>{ i18n.T(ctx, "Update") }</th>
-				<th>{ i18n.T(ctx, "Uninstall") }</th>
+				<th>{ i18n.T(ctx, "Actions") }</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -209,10 +214,14 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 					</td>
 					<td class="!align-middle">{ item.Name }</td>
 					<td class="!align-middle">
-						if item.Installed.IsZero() {
-							{ i18n.T(ctx, "In Progress") }
+						if item.Failed {
+							<span class="uk-text-danger">{ i18n.T(ctx, "agents.could_not_deploy") }</span>
 						} else {
-							{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) }
+							if item.Installed.IsZero() {
+								{ i18n.T(ctx, "In Progress") }
+							} else {
+								{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) }
+							}
 						}
 					</td>
 					<td class="!align-middle">
@@ -225,34 +234,51 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 						}
 					</td>
 					<td class="!align-middle">
-						<form>
-							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
-							<input type="hidden" name="filterByPackageName" value={ item.Name }/>
-							<button
-								type="submit"
-								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/update", agentId))) }
-								hx-push-url="false"
-								hx-target="#main"
-								hx-swap="outerHTML"
-							>
-								<uk-icon hx-history="false" icon="package-check" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-							</button>
-						</form>
-					</td>
-					<td class="!align-middle">
-						<form>
-							<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
-							<input type="hidden" name="filterByPackageName" value={ item.Name }/>
-							<button
-								type="submit"
-								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/uninstall", agentId))) }
-								hx-push-url="false"
-								hx-target="#main"
-								hx-swap="outerHTML"
-							>
-								<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
-							</button>
-						</form>
+						<div class="flex items-center gap-4">
+							if item.Installed.IsZero() && item.Failed {
+								<form>
+									<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
+									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+									<button
+										type="submit"
+										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
+									</button>
+								</form>
+							}
+							if !item.Installed.IsZero() {
+								<form>
+									<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
+									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+									<button
+										type="submit"
+										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/update", agentId))) }
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										<uk-icon hx-history="false" icon="package-check" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+									</button>
+								</form>
+							}
+							<form>
+								<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
+								<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+								<button
+									type="submit"
+									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/uninstall", agentId))) }
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+								>
+									<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
+								</button>
+							</form>
+						</div>
 					</td>
 				</tr>
 			}

@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gomarkdown/markdown"
+	"github.com/google/uuid"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/linde12/gowol"
@@ -628,6 +633,11 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.already_deployed"), true))
 	}
 
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	action := openuem_nats.DeployAction{}
 	action.AgentId = agentId
 	action.PackageId = packageId
@@ -649,7 +659,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -691,7 +701,12 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -710,6 +725,16 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
+	}
+
+	// If the package hasn't been installed and the previous action was a failure
+	d, err := h.Model.GetDeployment(agentId, packageId)
+	if err == nil && d.Failed && d.Installed.IsZero() {
+		if err := h.Model.RemoveDeployment(d.ID); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_remove_deployment"), true))
+		}
+		c.Request().Method = "GET"
+		return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.deployment_removed"))
 	}
 
 	action := openuem_nats.DeployAction{}
@@ -733,7 +758,12 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -1034,9 +1064,16 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+		if strings.Contains(agent.Vnc, "RDP") {
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+		} else {
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+		}
 	}
 
+	if strings.Contains(agent.Vnc, "RDP") {
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+	}
 	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
 }
 
@@ -1062,4 +1099,48 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 	}
 
 	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+}
+
+func (h *Handler) GenerateRDPFile(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+	}
+
+	fileName := uuid.NewString() + ".rdp"
+	dstPath := filepath.Join(h.DownloadDir, fileName)
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+	}
+
+	f, err := os.Create(dstPath)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_generate_rdp_file"), false))
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Println("[ERROR]: could not close RDP file")
+		}
+	}()
+
+	if _, err := f.WriteString(fmt.Sprintf("full address:s:%s\n", agent.IP)); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("username:s:openuem\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("audiocapturemode:i:0\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("audiomode:i:2\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
 }

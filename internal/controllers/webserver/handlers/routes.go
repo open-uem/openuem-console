@@ -137,6 +137,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/computers/:uuid/startvnc", h.ComputerStartVNC, h.IsAuthenticated)
 	e.POST("/computers/:uuid/startvnc", h.ComputerStartVNC, h.IsAuthenticated)
 	e.POST("/computers/:uuid/stopvnc", h.ComputerStopVNC, h.IsAuthenticated)
+	e.POST("/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

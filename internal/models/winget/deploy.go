@@ -196,7 +196,7 @@ func CreateCommonSoftwareTable(db *sql.DB) {
 	sqlStmt := `create table apps (id text not null primary key, name text, source text)`
 	_, err := db.Exec(sqlStmt)
 	if err != nil {
-		log.Println("[ERROR]: could not create table apps")
+		log.Println("[INFO]: could not create table apps for commondb")
 	}
 }
 

@@ -50,7 +50,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.agents.release_cant_be_empty"), false))
 		}
 
-		for _, a := range strings.Split(agents, ",") {
+		for a := range strings.SplitSeq(agents, ",") {
 
 			agentInfo, err := h.Model.GetAgentById(a)
 			if err != nil {
@@ -59,12 +59,18 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 			arch := ""
 			switch agentInfo.Edges.Computer.ProcessorArch {
-			case "x64":
+			case "x64", "x86_64":
 				arch = "amd64"
+			}
+
+			switch agentInfo.Os {
+			case "debian", "ubuntu", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux":
+				agentInfo.Os = "linux"
 			}
 
 			releaseToBeApplied, err := h.Model.GetAgentsReleaseByType(release.ReleaseTypeAgent, channel, agentInfo.Os, arch, sr)
 			if err != nil {
+				log.Printf("[ERROR]: could not get release to be applied, reason: %v\n", err)
 				errorMessage = err.Error()
 				break
 			}
@@ -72,6 +78,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			updateRequest := openuem_nats.OpenUEMUpdateRequest{}
 			updateRequest.DownloadFrom = releaseToBeApplied.FileURL
 			updateRequest.DownloadHash = releaseToBeApplied.Checksum
+			updateRequest.Version = releaseToBeApplied.Version
 
 			if c.FormValue("update-agent-date") == "" {
 				updateRequest.UpdateNow = true

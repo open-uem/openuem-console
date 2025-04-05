@@ -17,7 +17,10 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				<div class="flex gap-2 items-center">
-					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 					if agent.IsRemote {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
@@ -31,7 +34,10 @@ templ Apps(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsF
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.apps.title") }</h3>
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="app-window" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.apps.title") }</h3>
+						</div>
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "inventory.apps.description") }
 						</p>

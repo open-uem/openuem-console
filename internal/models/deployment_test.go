@@ -129,7 +129,7 @@ func (suite *DeploymentTestSuite) TestSaveDeployInfo() {
 		PackageName:    "Package 7",
 		PackageVersion: "version7",
 		Info:           "info",
-	})
+	}, false)
 	assert.NoError(suite.T(), err, "should save deployment info")
 
 	suite.p.PageSize = 10
@@ -141,7 +141,7 @@ func (suite *DeploymentTestSuite) TestSaveDeployInfo() {
 		AgentId:   "agent1",
 		Action:    "update",
 		PackageId: "package7",
-	})
+	}, false)
 	assert.NoError(suite.T(), err, "should save deployment info")
 	suite.p.PageSize = 10
 	items, err = suite.model.GetDeploymentsForAgent("agent1", suite.p)
@@ -152,7 +152,7 @@ func (suite *DeploymentTestSuite) TestSaveDeployInfo() {
 		AgentId:   "agent1",
 		Action:    "uninstall",
 		PackageId: "package3",
-	})
+	}, false)
 	assert.NoError(suite.T(), err, "should save deployment info")
 	suite.p.PageSize = 10
 	items, err = suite.model.GetDeploymentsForAgent("agent1", suite.p)
