@@ -27,7 +27,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.39.1
-	github.com/open-uem/ent v0.0.0-20250403114345-22aabf970736
+	github.com/open-uem/ent v0.0.0-20250407054329-49c90f0f6824
 	github.com/open-uem/nats v0.0.0-20250403114902-a630b1578537
 	github.com/open-uem/utils v0.0.0-20250214102216-df5a38667d0a
 	github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1
@@ -67,7 +67,6 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/jmoiron/sqlx v1.4.0 // indirect
 	github.com/johnfercher/go-tree v1.1.0 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect

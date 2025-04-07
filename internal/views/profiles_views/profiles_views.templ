@@ -25,11 +25,12 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
 				<div class="flex justify-between items-center">
-					<div class="flex flex-col my-4 mx-1">
+					<div class="flex flex-col my-4 mx-1 gap-2">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "profiles.title") }</h3>
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "profiles.description") }
 						</p>
+						<p class="uk-text-bold">{ i18n.T(ctx, "profiles.only_windows") }</p>
 					</div>
 				</div>
 			</div>

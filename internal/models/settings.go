@@ -171,6 +171,8 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldAgentReportFrequenceInMinutes,
 		settings.FieldRequestVncPin,
 		settings.FieldProfilesApplicationFrequenceInMinutes,
+		settings.FieldUseWinget,
+		settings.FieldUseFlatpak,
 		settings.TagColumn,
 	)
 
@@ -210,6 +212,36 @@ func (m *Model) RemoveAdmittedTag(settingsId int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).ClearTag().Exec(context.Background())
 }
 
+func (m *Model) UpdateUseWinget(settingsId int, useWinGet bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetUseWinget(useWinGet).Exec(context.Background())
+}
+
+func (m *Model) GetDefaultUseWinget() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldUseWinget).Only(context.Background())
+	if err != nil {
+		return true, err
+	}
+
+	return settings.UseWinget, nil
+}
+
+func (m *Model) UpdateUseFlatpak(settingsId int, useFlatpak bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetUseFlatpak(useFlatpak).Exec(context.Background())
+}
+
+func (m *Model) GetDefaultUseFlatpak() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldUseFlatpak).Only(context.Background())
+	if err != nil {
+		return true, err
+	}
+
+	return settings.UseFlatpak, nil
+}
+
 type GeneralSettings struct {
 	ID              int
 	Country         string
@@ -223,4 +255,6 @@ type GeneralSettings struct {
 	RequestVNCPIN   bool
 	Tag             int
 	WinGetFrequency int
+	UseWinget       bool
+	UseFlatpak      bool
 }

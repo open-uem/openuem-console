@@ -43,12 +43,40 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
 	}
 
-	allSources := []string{"winget", "flatpak"}
+	allSources := []string{}
+
+	useWinget, err := h.Model.GetDefaultUseWinget()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if useWinget {
+		allSources = append(allSources, "winget")
+	}
+
+	useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if useFlatpak {
+		allSources = append(allSources, "flatpak")
+	}
+
 	filteredSources := []string{}
 	for index := range allSources {
 		value := c.FormValue(fmt.Sprintf("filterBySource%d", index))
 		if value != "" {
 			filteredSources = append(filteredSources, value)
+		}
+	}
+
+	if len(filteredSources) == 0 {
+		if useWinget {
+			filteredSources = append(allSources, "winget")
+		}
+		if useFlatpak {
+			filteredSources = append(allSources, "flatpak")
 		}
 	}
 
@@ -168,7 +196,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			AgentId:     agent,
 			PackageId:   packageId,
 			PackageName: packageName,
-			Repository:  "winget",
+			// Repository:  "winget",
 		}
 
 		if install {

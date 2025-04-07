@@ -558,6 +558,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
+	var f filters.DeployPackageFilter
 	var packages []nats.SoftwarePackage
 
 	p := partials.NewPaginationAndSort()
@@ -586,28 +587,36 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	}
 
 	if agent.Os == "windows" {
-		f := filters.DeployPackageFilter{Sources: []string{"winget"}}
-
-		packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
+		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
+		useWinget, err := h.Model.GetDefaultUseWinget()
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_winget_use"), true))
 		}
 
-		p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		if !useWinget {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
 		}
+
 	} else {
-		f := filters.DeployPackageFilter{Sources: []string{"flatpak"}}
-		packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
+		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
+		useFlatpak, err := h.Model.GetDefaultUseFlatpak()
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_flatpak_use"), true))
 		}
 
-		p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		if !useFlatpak {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_flatpak_is_false"), true))
 		}
+	}
+
+	packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_search_packages", err.Error()), true))
+	}
+
+	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
 
 	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
@@ -645,7 +654,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "install"
 
 	data, err := json.Marshal(action)
@@ -687,7 +696,7 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "update"
 
 	data, err := json.Marshal(action)
@@ -744,7 +753,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "uninstall"
 
 	data, err := json.Marshal(action)

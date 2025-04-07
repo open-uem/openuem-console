@@ -232,7 +232,7 @@ en:
     generate_rdp_file: "Generate RDP file"
     could_not_generate_rdp_file: "Could not generate RDP file"
     rdp_file_warning: "Be warned, you must click on the Disconnect button to stop the remote desktop service of the endpoint. Closing the remote desktop client app is not enough to stop the remote service"
-    filter_by_source: "Filter by package source"    
+    filter_by_source: "Filter by package source"
   inventory:
     hardware:
       title: "Hardware"
@@ -347,6 +347,12 @@ en:
     search_empty_error: "Please type a package name to search"
     no_packages: "No packages have been found for that name"
     requested: "We've requested the selected agents to install this package, check later if the software has been installed successfully in that computer"
+    could_not_get_winget_use: "Could not get Use Winget setting from database"
+    use_winget_is_false: "WinGet has been disabled in General Settings"
+    could_not_get_flatpak_use: "Could not get Use Flatpak setting from database"
+    use_flatpak_is_false: "Flatpak has been disabled in General Settings"
+    could_not_search_packages: "Could not set packages, reason: %s"
+    could_not_count_packages: "Could not count packages, reason: %s"
   uninstall:
     title: "Uninstall"
     phase_1: "Search for software packets that can be uninstalled by OpenUEM agents on demand. Then use the button associated to each package to select the agents where te package will be uninstalled"
@@ -597,6 +603,16 @@ en:
     winget_configure_frequency_could_not_be_saved: The new frequency could not be saved to the database
     winget_configure_frequency_invalid: Selected frequency is not valid
     winget_configure_frequency_error: The new frequency cannot be communicated to the agents now, retry later
+    use_winget_title: Use WinGet
+    use_winget_description: Use WinGet to search and install new Windows packages
+    use_winget_success: WinGet setting has been saved
+    use_winget_invalid: Selected value for use winget is not valid
+    use_winget_could_not_be_saved: Use winget value could not be saved
+    use_flatpak_title: Use Flatpak
+    use_flatpak_description: Use Flatpak to search and install new Linux packages
+    use_flatpak_success: Flatpak setting has been saved
+    use_flatpak_invalid: Selected value for use flatpak is not valid
+    use_flatpak_could_not_be_saved: Use flatpak value could not be saved
 
   restore:
     title: Restore
@@ -750,6 +766,7 @@ en:
     title: "Profile management"
     description: "The endpoint profiles allow you to define a series of tasks that will be applied to several endpoints. The tasks include software installation, local users and groups management, registry management... Click on the profile's description to edit its definition and click on the warning sign to see which endpoints had problems to apply the profile"
     no_profiles: "No profiles have been found for this query"
+    only_windows: "For now, profiles are only supported for Windows endpoints"
     add: "Add profile"
     confirm_delete: "Confirm that you want to remove this endpoint profile"
     issues_found: "Issues"
