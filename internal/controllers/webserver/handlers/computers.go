@@ -586,22 +586,25 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	}
 
 	if agent.Os == "windows" {
-		packages, err = models.SearchPackages(search, "winget", p, h.CommonFolder)
+		f := filters.DeployPackageFilter{Sources: []string{"winget"}}
+
+		packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		p.NItems, err = models.CountPackages(search, h.CommonFolder, "winget")
+		p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 	} else {
-		packages, err = models.SearchPackages(search, "flatpak", p, h.CommonFolder)
+		f := filters.DeployPackageFilter{Sources: []string{"flatpak"}}
+		packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		p.NItems, err = models.CountPackages(search, h.CommonFolder, "flatpak")
+		p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}

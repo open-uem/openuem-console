@@ -232,6 +232,7 @@ en:
     generate_rdp_file: "Generate RDP file"
     could_not_generate_rdp_file: "Could not generate RDP file"
     rdp_file_warning: "Be warned, you must click on the Disconnect button to stop the remote desktop service of the endpoint. Closing the remote desktop client app is not enough to stop the remote service"
+    filter_by_source: "Filter by package source"    
   inventory:
     hardware:
       title: "Hardware"

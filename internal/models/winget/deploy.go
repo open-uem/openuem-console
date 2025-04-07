@@ -6,15 +6,22 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-func SearchPackages(packageName string, source string, p partials.PaginationAndSort, dbFolder string) ([]nats.SoftwarePackage, error) {
+func SearchPackages(packageName string, p partials.PaginationAndSort, dbFolder string, f filters.DeployPackageFilter) ([]nats.SoftwarePackage, error) {
 	var rows *sql.Rows
 	var err error
+
+	sources := []string{}
+	for _, s := range f.Sources {
+		sources = append(sources, "'"+s+"'")
+	}
 
 	// Open DB
 	db, err := OpenCommonDB(dbFolder)
@@ -27,30 +34,34 @@ func SearchPackages(packageName string, source string, p partials.PaginationAndS
 	switch p.SortBy {
 	case "name":
 		if p.SortOrder == "asc" {
-			if source == "" {
+			if len(f.Sources) == 0 {
 				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? ORDER BY name ASC LIMIT ? OFFSET ? `, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			} else {
-				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source = ? ORDER BY name ASC LIMIT ? OFFSET ? `, "%"+packageName+"%", source, p.PageSize, (p.CurrentPage-1)*p.PageSize)
+				q := fmt.Sprintf("SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source IN (%s) ORDER BY name ASC LIMIT ? OFFSET ?", strings.Join(sources, ","))
+				rows, err = db.Query(q, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			}
 		} else {
-			if source == "" {
+			if len(f.Sources) == 0 {
 				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? ORDER BY name DESC LIMIT ? OFFSET ? `, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			} else {
-				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source = ? ORDER BY name DESC LIMIT ? OFFSET ? `, "%"+packageName+"%", source, p.PageSize, (p.CurrentPage-1)*p.PageSize)
+				q := fmt.Sprintf("SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source IN (%s) ORDER BY name DESC LIMIT ? OFFSET ?", strings.Join(sources, ","))
+				rows, err = db.Query(q, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			}
 		}
 	case "source":
 		if p.SortOrder == "asc" {
-			if source == "" {
+			if len(f.Sources) == 0 {
 				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? ORDER BY source ASC LIMIT ? OFFSET ? `, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			} else {
-				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source = ? ORDER BY source ASC LIMIT ? OFFSET ? `, "%"+packageName+"%", source, p.PageSize, (p.CurrentPage-1)*p.PageSize)
+				q := fmt.Sprintf("SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source IN (%s) ORDER BY sources ASC LIMIT ? OFFSET ?", strings.Join(sources, ","))
+				rows, err = db.Query(q, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			}
 		} else {
-			if source == "" {
+			if len(f.Sources) == 0 {
 				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? ORDER BY source DESC LIMIT ? OFFSET ? `, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			} else {
-				rows, err = db.Query(`SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source = ? ORDER BY source DESC LIMIT ? OFFSET ? `, "%"+packageName+"%", source, p.PageSize, (p.CurrentPage-1)*p.PageSize)
+				q := fmt.Sprintf("SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source IN (%s) ORDER BY sources DESC LIMIT ? OFFSET ?", strings.Join(sources, ","))
+				rows, err = db.Query(q, "%"+packageName+"%", p.PageSize, (p.CurrentPage-1)*p.PageSize)
 			}
 		}
 	}
@@ -74,7 +85,7 @@ func SearchPackages(packageName string, source string, p partials.PaginationAndS
 	return packages, nil
 }
 
-func CountPackages(packageName string, indexPath string, source string) (int, error) {
+func CountPackages(packageName string, indexPath string, f filters.DeployPackageFilter) (int, error) {
 	var err error
 	var rows *sql.Rows
 
@@ -84,8 +95,13 @@ func CountPackages(packageName string, indexPath string, source string) (int, er
 	}
 	defer db.Close()
 
+	sources := []string{}
+	for _, s := range f.Sources {
+		sources = append(sources, "'"+s+"'")
+	}
+
 	// Query the SQLite database
-	if source == "" {
+	if len(f.Sources) == 0 {
 		rows, err = db.Query(`
         SELECT DISTINCT id, name, source FROM apps
 		WHERE name LIKE ?
@@ -94,10 +110,8 @@ func CountPackages(packageName string, indexPath string, source string) (int, er
 			return 0, err
 		}
 	} else {
-		rows, err = db.Query(`
-        SELECT DISTINCT id, name, source FROM apps
-		WHERE name LIKE ? AND source = ?
-	`, "%"+packageName+"%", source)
+		q := fmt.Sprintf("SELECT DISTINCT id, name, source FROM apps WHERE name LIKE ? AND source IN (%s)", strings.Join(sources, ","))
+		rows, err = db.Query(q, "%"+packageName+"%")
 		if err != nil {
 			return 0, err
 		}

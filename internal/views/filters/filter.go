@@ -98,6 +98,10 @@ type UpdateServersFilter struct {
 	SelectedRelease    string
 }
 
+type DeployPackageFilter struct {
+	Sources []string
+}
+
 func GetPaginationUrl(c echo.Context) string {
 	// If Hx-Replace-Url is set in the header that means that we come from a dialog
 	// and that we force to go to page 1, to avoid going to a non-existent page

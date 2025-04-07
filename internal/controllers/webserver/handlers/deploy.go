@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -42,7 +43,17 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
 	}
 
-	source := c.FormValue("filterBySource")
+	allSources := []string{"winget", "flatpak"}
+	filteredSources := []string{}
+	for index := range allSources {
+		value := c.FormValue(fmt.Sprintf("filterBySource%d", index))
+		if value != "" {
+			filteredSources = append(filteredSources, value)
+		}
+	}
+
+	f := filters.DeployPackageFilter{}
+	f.Sources = filteredSources
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
@@ -53,17 +64,17 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, source, p, h.CommonFolder)
+	packages, err := models.SearchPackages(search, p, h.CommonFolder, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = models.CountPackages(search, h.CommonFolder, "")
+	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
