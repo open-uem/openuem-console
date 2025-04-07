@@ -58,10 +58,28 @@ func startConsole(cCtx *cli.Context) error {
 	// Create winget directory
 	worker.WinGetDBFolder = filepath.Join(cwd, "tmp", "winget")
 	if strings.HasSuffix(cwd, "tmp") {
-		worker.ServerReleasesFolder = filepath.Join(cwd, "winget")
+		worker.WinGetDBFolder = filepath.Join(cwd, "winget")
 	}
 	if err := worker.CreateWingetDBDir(); err != nil {
 		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
+	}
+
+	// Create flatpak directory
+	worker.FlatpakDBFolder = filepath.Join(cwd, "tmp", "flatpak")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.FlatpakDBFolder = filepath.Join(cwd, "flatpak")
+	}
+	if err := worker.CreateFlatpakDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create flatpak temp dir: %v", err)
+	}
+
+	// Create common software directory
+	worker.CommonSoftwareDBFolder = filepath.Join(cwd, "tmp", "commondb")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.CommonSoftwareDBFolder = filepath.Join(cwd, "commondb")
+	}
+	if err := worker.CreateCommonSoftwareDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create commondb temp dir: %v", err)
 	}
 
 	// Save pid to PIDFILE

@@ -16,7 +16,10 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, curren
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				<div class="flex gap-2 items-center">
-					<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
 					if agent.IsRemote {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>

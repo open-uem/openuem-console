@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -42,6 +43,46 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.search_empty_error"), true))
 	}
 
+	allSources := []string{}
+
+	useWinget, err := h.Model.GetDefaultUseWinget()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if useWinget {
+		allSources = append(allSources, "winget")
+	}
+
+	useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if useFlatpak {
+		allSources = append(allSources, "flatpak")
+	}
+
+	filteredSources := []string{}
+	for index := range allSources {
+		value := c.FormValue(fmt.Sprintf("filterBySource%d", index))
+		if value != "" {
+			filteredSources = append(filteredSources, value)
+		}
+	}
+
+	if len(filteredSources) == 0 {
+		if useWinget {
+			filteredSources = append(allSources, "winget")
+		}
+		if useFlatpak {
+			filteredSources = append(allSources, "flatpak")
+		}
+	}
+
+	f := filters.DeployPackageFilter{}
+	f.Sources = filteredSources
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
@@ -51,17 +92,17 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p, h.WingetFolder)
+	packages, err := models.SearchPackages(search, p, h.CommonFolder, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = models.CountPackages(search, h.WingetFolder)
+	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
@@ -70,9 +111,10 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
 	installParam := c.FormValue("filterByInstallationType")
+	source := c.FormValue("filterBySource")
 
 	if packageId == "" || packageName == "" || installParam == "" {
-		return RenderError(c, partials.ErrorMessage("required params not found", true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), false))
 	}
 
 	f := filters.AgentFilter{}
@@ -83,8 +125,15 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		f.SelectedItems = 0
 	}
 
+	switch source {
+	case "winget":
+		f.AgentOSVersions = []string{"windows"}
+	case "flatpak":
+		f.AgentOSVersions = []string{"ubuntu", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux"}
+	}
+
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAdmittedAgents(f)
+	allAgents, err := h.Model.GetAllAgents(f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -102,7 +151,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p, filters.AgentFilter{}, true)
+	agents, err := h.Model.GetAgentsByPage(p, f, true)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -147,7 +196,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			AgentId:     agent,
 			PackageId:   packageId,
 			PackageName: packageName,
-			Repository:  "winget",
+			// Repository:  "winget",
 		}
 
 		if install {
@@ -161,6 +210,11 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
+		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
 		if install {
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -170,7 +224,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
@@ -182,7 +236,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}

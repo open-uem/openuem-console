@@ -5,16 +5,22 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gomarkdown/markdown"
+	"github.com/google/uuid"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	openuem_nats "github.com/open-uem/nats"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
@@ -22,6 +28,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) Computer(c echo.Context) error {
@@ -551,12 +558,20 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
+	var f filters.DeployPackageFilter
+	var packages []nats.SoftwarePackage
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
 	}
 
 	search := c.FormValue("filterByAppName")
@@ -571,17 +586,41 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p, h.WingetFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	if agent.Os == "windows" {
+		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
+		useWinget, err := h.Model.GetDefaultUseWinget()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_winget_use"), true))
+		}
+
+		if !useWinget {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
+		}
+
+	} else {
+		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
+		useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_flatpak_use"), true))
+		}
+
+		if !useFlatpak {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_flatpak_is_false"), true))
+		}
 	}
 
-	p.NItems, err = models.CountPackages(search, h.WingetFolder)
+	packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_search_packages", err.Error()), true))
+	}
+
+	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
 
 	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
+
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
@@ -606,11 +645,16 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.already_deployed"), true))
 	}
 
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	action := openuem_nats.DeployAction{}
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "install"
 
 	data, err := json.Marshal(action)
@@ -627,7 +671,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -652,7 +696,7 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "update"
 
 	data, err := json.Marshal(action)
@@ -669,7 +713,12 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -690,11 +739,21 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
+	// If the package hasn't been installed and the previous action was a failure
+	d, err := h.Model.GetDeployment(agentId, packageId)
+	if err == nil && d.Failed && d.Installed.IsZero() {
+		if err := h.Model.RemoveDeployment(d.ID); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_remove_deployment"), true))
+		}
+		c.Request().Method = "GET"
+		return h.ComputerDeploy(c, i18n.T(c.Request().Context(), "agents.deployment_removed"))
+	}
+
 	action := openuem_nats.DeployAction{}
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
-	action.Repository = "winget"
+	// action.Repository = "winget"
 	action.Action = "uninstall"
 
 	data, err := json.Marshal(action)
@@ -711,7 +770,12 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action); err != nil {
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -965,4 +1029,130 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 	}
 
 	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"), true)
+}
+
+func (h *Handler) ComputerStartVNC(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if c.Request().Method == "POST" {
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		// Check if PIN is optional or not
+		requestPIN, err := h.Model.GetDefaultRequestVNCPIN()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.request_pin_could_not_be_read"), false))
+		}
+
+		// Create new random PIN
+		pin, err := utils.GenerateRandomPIN()
+		if err != nil {
+			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))
+		}
+
+		vncConn := openuem_nats.VNCConnection{}
+		vncConn.NotifyUser = requestPIN
+		vncConn.PIN = pin
+
+		data, err := json.Marshal(vncConn)
+		if err != nil {
+			log.Printf("[ERROR]: could not marshall VNC connection data, reason: %v\n", err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_could_not_marshal"), false))
+		}
+
+		if _, err := h.NATSConnection.Request("agent.startvnc."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		if strings.Contains(agent.Vnc, "RDP") {
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+		} else {
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+		}
+	}
+
+	if strings.Contains(agent.Vnc, "RDP") {
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+	}
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+}
+
+func (h *Handler) ComputerStopVNC(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+	}
+
+	if _, err := h.NATSConnection.Request("agent.stopvnc."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+}
+
+func (h *Handler) GenerateRDPFile(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+	}
+
+	fileName := uuid.NewString() + ".rdp"
+	dstPath := filepath.Join(h.DownloadDir, fileName)
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+	}
+
+	f, err := os.Create(dstPath)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_generate_rdp_file"), false))
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Println("[ERROR]: could not close RDP file")
+		}
+	}()
+
+	if _, err := f.WriteString(fmt.Sprintf("full address:s:%s\n", agent.IP)); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("username:s:openuem\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("audiocapturemode:i:0\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+	if _, err := f.WriteString("audiomode:i:2\n"); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
 }

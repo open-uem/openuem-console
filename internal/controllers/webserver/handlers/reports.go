@@ -69,7 +69,7 @@ func (h *Handler) GenerateAgentsReport(c echo.Context) error {
 
 	err = document.Save(dstPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	// Redirect to file
@@ -239,7 +239,7 @@ func (h *Handler) GenerateComputersReport(c echo.Context) error {
 
 	err = document.Save(dstPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	// Redirect to file
@@ -422,7 +422,7 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 
 	err = document.Save(dstPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	// Redirect to file
@@ -535,7 +535,7 @@ func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
 
 	err = document.Save(dstPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	// Redirect to file
@@ -647,7 +647,7 @@ func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
 
 	err = document.Save(dstPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	// Redirect to file
@@ -713,7 +713,8 @@ func getSoftwareTransactions(apps []models.App) []core.Row {
 func getPageHeader(title string) core.Row {
 	cwd, err := utils.GetWd()
 	if err != nil {
-		log.Fatal("[FATAL]: could not get working directory")
+		log.Println("[ERROR]: could not get working directory")
+		return nil
 	}
 
 	return row.New(10).Add(
@@ -755,7 +756,8 @@ func getWhiteColor() *props.Color {
 func getCheckEmoji(value bool) string {
 	cwd, err := utils.GetWd()
 	if err != nil {
-		log.Fatal("[FATAL]: could not get working directory")
+		log.Println("[ERROR]: could not get working directory")
+		return ""
 	}
 
 	if value {
@@ -768,7 +770,8 @@ func getCheckEmoji(value bool) string {
 func getWarningEmoji(value bool) string {
 	cwd, err := utils.GetWd()
 	if err != nil {
-		log.Fatal("[FATAL]: could not get working directory")
+		log.Println("[ERROR]: could not get working directory")
+		return ""
 	}
 	if value {
 		return filepath.Join(cwd, "assets", "img", "reports", "warning.png")
@@ -780,7 +783,8 @@ func getWarningEmoji(value bool) string {
 func getWindowsPNG() string {
 	cwd, err := utils.GetWd()
 	if err != nil {
-		log.Fatal("[FATAL]: could not get working directory")
+		log.Println("[ERROR]: could not get working directory")
+		return ""
 	}
 	return filepath.Join(cwd, "assets", "img", "os", "windows.png")
 }

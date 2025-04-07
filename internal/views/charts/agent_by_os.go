@@ -4,11 +4,11 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/go-echarts/go-echarts/v2/render"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/openuem-console/internal/models"
 )
 
 func AgentsByOs(ctx context.Context, agents []models.Agent, countAllAgents int) render.ChartSnippet {
@@ -39,7 +39,7 @@ func AgentsByOs(ctx context.Context, agents []models.Agent, countAllAgents int) 
 	pie.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: leftTitle, Top: "43%", TitleStyle: &textStyle}),
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
-		charts.WithColorsOpts(opts.Colors{"#0f3375", "#13459c", "#1557c0", "#196bde"}),
+		charts.WithColorsOpts(opts.Colors{"#9e0142", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2"}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Width:  "480px",
 			Height: "300px",

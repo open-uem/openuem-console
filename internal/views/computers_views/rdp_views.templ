@@ -8,13 +8,19 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager, currentVersion, latestVersion string) {
+templ RemoteDesktop(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, sm *sessions.SessionManager, currentVersion, latestVersion string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, sm, currentVersion, latestVersion)
 	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-1">
 				<div id="error" class="hidden"></div>
-				<div id="vnc" class="flex flex-col">
+				<div id="vnc" class="flex flex-col gap-4">
+					<p class="uk-margin-small-top uk-margin-small-bottom uk-text-small">
+						{ i18n.T(ctx, "agents.rdp_file") }
+					</p>
+					<p class="uk-margin-small-top uk-margin-small-bottom uk-text-bolder">
+						{ i18n.T(ctx, "agents.rdp_file_warning") }
+					</p>
 					<div class="flex items-center gap-2">
 						<button
 							title={ i18n.T(ctx, "Connect") }
@@ -33,46 +39,36 @@ templ VNC(agent *openuem_ent.Agent, domainSuffix string, connected, requestPIN b
 						>
 							{ i18n.T(ctx, "Close") }
 						</button>
-						<div id="vncConnectPanel" class={ "flex gap-4 items-center my-4", templ.KV("hidden", !connected) }>
-							if requestPIN {
-								<span>PIN: </span>
-								<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
-							} else {
-								<div class="hidden" id="vncPIN">
-									<input type="hidden"/>
-									<input type="hidden"/>
-									<input type="hidden"/>
-									<input type="hidden"/>
-									<input type="hidden"/>
-									<input type="hidden"/>
-									<input type="hidden" name="vncPIN" value={ pin }/>
-								</div>
-							}
-							<button type="button" class="flex items-center gap-2 uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">
+						<form
+							class={ "flex gap-2",templ.KV("hidden", !connected) }
+							hx-post={ fmt.Sprintf("/computers/%s/generaterdp", agent.ID) }
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							<button type="submit" class="flex items-center gap-2 uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">
 								<uk-icon hx-history="false" icon="key" custom-class="h-4 w-4" uk-cloack></uk-icon>
-								{ i18n.T(ctx, "Authenticate") }
+								{ i18n.T(ctx, "agents.generate_rdp_file") }
 							</button>
-						</div>
-						<input id="vncHostname" type="hidden" value={ agent.Hostname + "." + domainSuffix }/>
-						<input id="vncPort" type="hidden" value={ agent.VncProxyPort }/>
+						</form>
 						<button
-							id="disconnectVNC"
+							id="disconnectRDP"
 							class={ "uk-button uk-button-danger flex items-center gap-2 my-4", templ.KV("hidden", !connected) }
 							hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/stopvnc", agent.ID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
-							htmx-indicator="#vnc-disconnect-spinner"
+							htmx-indicator="#rdp-disconnect-spinner"
 						>
 							<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-4 w-4" uk-cloack></uk-icon>
 							{ i18n.T(ctx, "Disconnect") }
-							<uk-icon id="vnc-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+							<uk-icon id="rdp-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 						</button>
-						<div id="status" class="uk-text-muted uk-text-small"></div>
 					</div>
-					<div id="screen"></div>
+					if !requestPIN {
+						<p class={ "text-2xl", templ.KV("hidden", !connected) }>{ fmt.Sprintf("PIN: %s", pin) }</p>
+					}
 				</div>
 			</div>
 		</div>
 	</main>
-	<script type="module" src="/assets/js/novnc.js"></script>
 }

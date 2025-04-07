@@ -3,7 +3,7 @@ module github.com/open-uem/openuem-console
 go 1.24.1
 
 require (
-	entgo.io/ent v0.14.3
+	entgo.io/ent v0.14.4
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.833
 	github.com/alexedwards/scs/pgxstore v0.0.0-20250212122300-421ef1d8611c
@@ -27,8 +27,8 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.39.1
-	github.com/open-uem/ent v0.0.0-20250324101047-772cf0fc6667
-	github.com/open-uem/nats v0.0.0-20250324100902-e34b427bb2cf
+	github.com/open-uem/ent v0.0.0-20250407054329-49c90f0f6824
+	github.com/open-uem/nats v0.0.0-20250403114902-a630b1578537
 	github.com/open-uem/utils v0.0.0-20250214102216-df5a38667d0a
 	github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1
 	github.com/pkg/sftp v1.13.8

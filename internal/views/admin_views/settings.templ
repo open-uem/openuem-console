@@ -286,6 +286,56 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 									</form>
 								</td>
 							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_winget_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_winget_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select class="uk-select" name="use-winget">
+											<option value="true" selected?={ settings.UseWinget }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UseWinget }>{ i18n.T(ctx, "No") }</option>
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-12"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-12" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_flatpak_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_flatpak_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select class="uk-select" name="use-flatpak">
+											<option value="true" selected?={ settings.UseFlatpak }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UseFlatpak }>{ i18n.T(ctx, "No") }</option>
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-13"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-13" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
 						</table>
 					</div>
 				</div>

@@ -443,14 +443,13 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				</div>
 			</td>
 			<td class="!align-middle">
-				switch agent.Os {
-					case "windows":
-						<i class="ri-windows-fill ri-2x text-blue-600"></i>
-					case "linux":
-						<span></span>
-				}
+				@partials.OSBadge(agent.Os)
 			</td>
-			<td class="!align-middle">{ agent.Edges.Release.Version }</td>
+			if agent.Edges.Release != nil {
+				<td class="!align-middle">{ agent.Edges.Release.Version }</td>
+			} else {
+				<td class="!align-middle">{ "???" }</td>
+			}
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
 				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")

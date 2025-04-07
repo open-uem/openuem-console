@@ -140,6 +140,18 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if c.FormValue("use-winget") != "" {
+			if err := h.Model.UpdateUseWinget(settings.ID, settings.UseWinget); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.use_winget_could_not_be_saved"), true))
+			}
+		}
+
+		if c.FormValue("use-flatpak") != "" {
+			if err := h.Model.UpdateUseFlatpak(settings.ID, settings.UseFlatpak); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.use_flatpak_could_not_be_saved"), true))
+			}
+		}
+
 		if settings.WinGetFrequency != 0 {
 			// Get current frequency
 			currentFrequency, err := h.Model.GetDefaultAgentFrequency()
@@ -236,6 +248,8 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	requestPIN := c.FormValue("request-pin")
 	admittedTag := c.FormValue("admitted-agent-tag")
 	wingetFrequency := c.FormValue("winget-configure-frequency")
+	useWinget := c.FormValue("use-winget")
+	useFlatpak := c.FormValue("use-flatpak")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -345,6 +359,20 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		// Min WinGetFrequency is 30
 		if settings.WinGetFrequency < 30 {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.winget_configure_frequency_invalid"))
+		}
+	}
+
+	if useWinget != "" {
+		settings.UseWinget, err = strconv.ParseBool(useWinget)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.use_winget_invalid"))
+		}
+	}
+
+	if useFlatpak != "" {
+		settings.UseFlatpak, err = strconv.ParseBool(useFlatpak)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.use_flatpak_invalid"))
 		}
 	}
 

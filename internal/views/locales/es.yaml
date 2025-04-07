@@ -96,6 +96,7 @@ es:
   Testing: "Pruebas"
   Type: "Tipo"
   Unknown: "Desconocido"
+  Unsupported: "No soportado"
   Up: "Operativo"
   Update: "Actualizar"
   UpdatedYes: "Actualizado"
@@ -147,7 +148,7 @@ es:
     vnc: "Serv. VNC"
     no_vnc: "Ninguno"
     vnc_title: "Asistencia remota"
-    vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario. Utilice el PIN para autenticar su sesión."
+    vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario a menos que haya desactivado esta opción desde la configuración general. Utilice el PIN para autenticar su sesión."
     vnc_new_tab: "Abrir la sesión en una nueva pestaña"
     vnc_pin_not_generated: "No se pudo generar un PIN para la conexión VNC"
     vnc_could_not_marshal: "No se pudo preparar la petición de sesión VNC"
@@ -224,6 +225,14 @@ es:
     debug_has_been_enabled: "Se ha activado el modo debug para el agente. Tenga en cuenta que el fichero de log del agente crecerá rápidamente"
     debug_has_been_disabled: "Se ha desactivado el modo debug para el agente"
     could_not_save_debug_mode: "El modo debug no se pudo guardar en la base de datos"
+    could_not_deploy: "Error de despliegue"
+    could_not_remove_deployment: "No se pudo eliminar este paquete"
+    deployment_removed: "Se ha eliminado este paquete para el despliegue"
+    rdp_file: "La asistencia remota empleará el protocolo de escritorio remoto RDP y se descargará un fichero para iniciar la conexión con el equipo. Ese fichero puede abrirse con un cliente compatible como Escritorio Remoto de Windows o Remmina"
+    generate_rdp_file: "Generar fichero RDP"
+    could_not_generate_rdp_file: "No se pudo generar el fichero RDP"
+    rdp_file_warning: "Tenga esto en cuenta, debe hacer click en el botón de Desconectar para parar el servicio de escritorio remoto en el servicio. No basta con cerrar la aplicación cliente de escritorio remoto"
+    filter_by_source: "Filtrar por origen del paquete"
   inventory:
     hardware:
       title: "Hardware"
@@ -243,7 +252,7 @@ es:
       architecture: "Arquitectura"
       username: "Usuario"
       installation: "Fecha de instalación"
-      last_bootup: "Fecha de último arranque"
+      last_bootup: "Último arranque"
     monitor:
       title: "Monitores"
       description: "Estos son los monitores conectados a este equipo de acuerdo con lo informado por el agente de OpenUEM"
@@ -264,6 +273,9 @@ es:
       bitlocker_encrypted: "Encriptado"
       bitlocker_unencrypted: "No encriptado"
       bitlocker_unknown: "Desconocido"
+      bitlocker_unsupported: "No soportado"
+      mount_point: "Punto de montaje"
+      filesystem_type: "Tipo Sist.Fich"
       no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
     file_browser:
       title: "Expl. Archivos"
@@ -334,6 +346,12 @@ es:
     search_empty_error: "Por favor escribe el nombre de un paquete a buscar"
     no_packages: "No se han encontrado paquetes con ese nombre"
     requested: "Hemos solicitado a los agentes seleccionados que instalen este paquete, compruebe más tarde si el software se ha instalado correctamente en ese dispositivo"
+    could_not_get_winget_use: "No se pudo consultar la configuración de uso de WinGet en la base de datos"
+    use_winget_is_false: "WinGet ha sido desactivado en la Configuración General"
+    could_not_get_flatpak_use: "No se pudo consultar la configuración de uso de Flatpak en la base de datos"
+    use_flatpak_is_false: "Flatpak ha sido desactivado en la Configuración General"
+    could_not_search_packages: "No pude buscar los paquetes, razón: %s"
+    could_not_count_packages: "No pude contar los paquetes, razón: %s"
   uninstall:
     title: "Desinstalación de software"
     phase_1: "Busca paquetes de software que pueden ser desinstalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe desinstalarse"
@@ -582,6 +600,17 @@ es:
     winget_configure_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
     winget_configure_frequency_invalid: La frecuencia seleccionada no es válida
     winget_configure_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
+    use_winget_title: Usar WinGet
+    use_winget_description: Usar WinGet para buscar e instalar nuevos paquetes Windows
+    use_winget_success: La configuración de WinGet se ha guardado
+    use_winget_invalid: El valor seleccionado para usar winget no es válido
+    use_winget_could_not_be_saved: No se pudo guardar el valor de uso de winget
+    use_flatpak_title: Usar Flatpak
+    use_flatpak_description: Usar Flatpak para buscar e instalar nuevos paquetes en Linux
+    use_flatpak_success: La configuración de Flatpak se ha guardado
+    use_flatpak_invalid: El valor seleccionado para usar flatpak no es válido
+    use_flatpak_could_not_be_saved: No se pudo guardar el valor de uso de flatpak
+
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal
@@ -735,6 +764,7 @@ es:
     title: "Gestión de perfiles"
     description: "Los perfiles de equipo permiten definir un conjunto de tareas que se aplicarán a un conjunto de equipos. Las tareas incluyen la instalación de software, gestión de usuarios y grupos locales, modificación de entradas de registros... Haga click en la descripción del perfil para cambiar su definición y en el signo de advertencia para ver qué equipos tuvieron problemas a la hora de aplicar el perfil"
     no_profiles: "No se han encontrado perfiles para esta consulta"
+    only_windows: "Por ahora, los perfiles sólo están soportados en agentes Windows"
     add: "Añadir perfil"
     confirm_delete: "Confirme que desea eliminar este perfil de configuración"
     issues_found: "Incidencias"
@@ -895,6 +925,9 @@ es:
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"
+  packages:
+    required_params_missing: "Faltan parámetros requeridos"
+    source_not_found: "No se ha podido encontrar el gestor de paquetes asociado"
   countries:
     Australia: "Australia"
     Austria: "Austria"

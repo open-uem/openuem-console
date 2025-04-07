@@ -157,12 +157,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 				}
 			</td>
 			<td class="!align-middle">
-				switch agent.OS {
-					case "windows":
-						<i class="ri-windows-fill ri-2x text-blue-600"></i>
-					case "linux":
-						<span></span>
-				}
+				@partials.OSBadge(agent.OS)
 			</td>
 			<td class="!align-middle">{ agent.Version } </td>
 			<td class="!align-middle">{ agent.Username } </td>

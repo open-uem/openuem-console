@@ -1,0 +1,35 @@
+package partials
+
+templ OSBadge(agentOS string) {
+	switch agentOS {
+		case "windows":
+			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "ubuntu":
+			<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
+		case "debian":
+			<i class="si si-debian si--color uk-cloak text-2xl"></i>
+		case "opensuse-leap":
+			<i class="si si-opensuse si--color uk-cloak text-2xl"></i>
+		case "linuxmint":
+			<i class="si si-linuxmint si--color uk-cloak text-2xl"></i>
+		case "fedora":
+			<i class="si si-fedora si--color uk-cloak text-2xl"></i>
+		case "manjaro":
+			<i class="si si-manjaro si--color uk-cloak text-2xl"></i>
+		case "arch":
+			<i class="si si-archlinux si--color uk-cloak text-2xl"></i>
+		case "almalinux":
+			<i class="si si-almalinux si--color uk-cloak text-2xl"></i>
+		case "kali":
+			<i class="si si-kalilinux si--color uk-cloak text-2xl"></i>
+	}
+}
+
+templ PackageManagementTool(source string) {
+	switch source {
+		case "winget":
+			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "flatpak":
+			<i class="si si-linux text-black uk-cloak text-3xl"></i>
+	}
+}

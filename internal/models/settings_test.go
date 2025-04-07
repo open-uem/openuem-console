@@ -150,6 +150,18 @@ func (suite *SettingsTestSuite) TestDefaultRequestVNCPIN() {
 	assert.Equal(suite.T(), true, requestVNCPin, "by default request vnc pin should be true")
 }
 
+func (suite *SettingsTestSuite) TestDefaultUseWinget() {
+	useWinget, err := suite.model.GetDefaultUseWinget()
+	assert.NoError(suite.T(), err, "should get default use winget setting")
+	assert.Equal(suite.T(), true, useWinget, "by default use winget should be true")
+}
+
+func (suite *SettingsTestSuite) TestDefaultUseFlatpak() {
+	useFlatpak, err := suite.model.GetDefaultUseFlatpak()
+	assert.NoError(suite.T(), err, "should get default use flatpak setting")
+	assert.Equal(suite.T(), true, useFlatpak, "by default use flatpak should be true")
+}
+
 func (suite *SettingsTestSuite) TestGetGeneralSettings() {
 
 	err := suite.model.Client.Settings.Update().
@@ -162,6 +174,8 @@ func (suite *SettingsTestSuite) TestGetGeneralSettings() {
 		SetUserCertYearsValid(2).
 		SetNatsRequestTimeoutSeconds(60).
 		SetRequestVncPin(false).
+		SetUseWinget(true).
+		SetUseFlatpak(true).
 		Exec(context.Background())
 	assert.NoError(suite.T(), err, "settings should be updated")
 
@@ -177,6 +191,8 @@ func (suite *SettingsTestSuite) TestGetGeneralSettings() {
 	assert.Equal(suite.T(), 2, settings.UserCertYearsValid, "user cert years should be 2")
 	assert.Equal(suite.T(), 60, settings.NatsRequestTimeoutSeconds, "nats timeout should be 60")
 	assert.Equal(suite.T(), false, settings.RequestVncPin, "request vnc pin should be false")
+	assert.Equal(suite.T(), true, settings.UseWinget, "use winget should be true")
+	assert.Equal(suite.T(), true, settings.UseFlatpak, "use flatpak should be true")
 }
 
 func (suite *SettingsTestSuite) TestCreateInitialSettings() {

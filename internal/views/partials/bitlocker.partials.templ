@@ -19,6 +19,12 @@ templ BitlockerStatus(status string) {
 					<uk-icon hx-history="false" icon="lock" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				</span>
 			</div>
+		case "Unsupported":
+			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unsupported")) }>
+				<span class="text-gray-600">
+					<uk-icon hx-history="false" icon="shield-off" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</span>
+			</div>
 		default:
 			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unknown")) }>
 				<span class="text-red-600">
