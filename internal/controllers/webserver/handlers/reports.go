@@ -122,6 +122,10 @@ func getAgentsTransactions(agents []*ent.Agent) []core.Row {
 		switch agent.Os {
 		case "windows":
 			osImage = getWindowsPNG()
+		case "debian":
+			osImage = getDebianPNG()
+		case "ubuntu":
+			osImage = getUbuntuPNG()
 		}
 
 		r := row.New(4).Add(
@@ -293,6 +297,10 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 		switch computer.OS {
 		case "windows":
 			osImage = getWindowsPNG()
+		case "debian":
+			osImage = getDebianPNG()
+		case "ubuntu":
+			osImage = getUbuntuPNG()
 		}
 
 		r := row.New(4).Add(
@@ -474,6 +482,10 @@ func getAntiviriTransactions(antiviri []models.Antivirus) []core.Row {
 		switch antivirus.OS {
 		case "windows":
 			osImage = getWindowsPNG()
+		case "debian":
+			osImage = getDebianPNG()
+		case "ubuntu":
+			osImage = getUbuntuPNG()
 		}
 
 		r := row.New(4).Add(
@@ -588,6 +600,10 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 		switch update.OS {
 		case "windows":
 			osImage = getWindowsPNG()
+		case "debian":
+			osImage = getDebianPNG()
+		case "ubuntu":
+			osImage = getUbuntuPNG()
 		}
 
 		r := row.New(4).Add(
@@ -787,4 +803,22 @@ func getWindowsPNG() string {
 		return ""
 	}
 	return filepath.Join(cwd, "assets", "img", "os", "windows.png")
+}
+
+func getDebianPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "debian.png")
+}
+
+func getUbuntuPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "ubuntu.png")
 }
