@@ -12,6 +12,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
+	"time"
 )
 
 templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int, successMessage string) {
@@ -143,14 +144,23 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 	for index, agent := range agents {
 		<tr class="h-16">
 			<td
-				class="!align-middle underline cursor-pointer"
+				class="!align-middle cursor-pointer"
 				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
-			>{ agent.Hostname }</td>
+			>
+				<div class="flex items-center gap-2">
+					<span class="underline">{ agent.Hostname }</span>
+					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
+						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
+							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+						</div>
+					}
+				</div>
+			</td>
 			<td class="!align-middle">
-				if agent.Is_Remote {
+				if agent.IsRemote {
 					<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 						<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 					</span>
