@@ -11,6 +11,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
+	"time"
 )
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
@@ -412,14 +413,14 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 				}
 			</td>
 			<td
-				class="!align-middle underline hover:cursor-pointer"
+				class="!align-middle hover:cursor-pointer"
 				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
 			>
 				<div class="flex items-center gap-2">
-					{ agent.Hostname }
+					<span class="underline">{ agent.Hostname }</span>
 					if agent.RestartRequired {
 						@partials.AlertIcon(i18n.T(ctx, "agents.restart_required"))
 					}
@@ -428,6 +429,12 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 							<uk-icon hx-history="false" icon="search-check" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>
 					}
+					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
+						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
+							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+						</div>
+					}
+					// time.Now().AddDate(0, 0, -1)
 				</div>
 			</td>
 			<td class="!align-middle">

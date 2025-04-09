@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	ent "github.com/open-uem/ent"
@@ -26,7 +27,8 @@ type Computer struct {
 	Manufacturer string
 	Model        string
 	Serial       string
-	Is_Remote    bool
+	IsRemote     bool      `sql:"is_remote"`
+	LastContact  time.Time `sql:"last_contact"`
 	Tags         []*ent.Tag
 }
 
@@ -46,7 +48,7 @@ func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial, agent.FieldIsRemote).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial, agent.FieldIsRemote, agent.FieldLastContact).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).

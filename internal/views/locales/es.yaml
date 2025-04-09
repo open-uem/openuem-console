@@ -233,6 +233,7 @@ es:
     could_not_generate_rdp_file: "No se pudo generar el fichero RDP"
     rdp_file_warning: "Tenga esto en cuenta, debe hacer click en el botón de Desconectar para parar el servicio de escritorio remoto en el servicio. No basta con cerrar la aplicación cliente de escritorio remoto"
     filter_by_source: "Filtrar por origen del paquete"
+    no_contact_in_last_day: "El agente no ha contactado en las últimas 24 horas"
   inventory:
     hardware:
       title: "Hardware"
