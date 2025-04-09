@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +21,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
@@ -224,7 +227,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
 	if comesFromDialog {
@@ -246,7 +249,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 func (h *Handler) AgentDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -256,7 +259,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
@@ -265,7 +268,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
 	err := h.Model.DeleteAgent(agentId)
@@ -280,7 +283,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return fmt.Errorf("uuid cannot be empty")
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
@@ -309,7 +312,7 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
@@ -505,7 +508,7 @@ func (h *Handler) AgentAdmit(c echo.Context) error {
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
@@ -652,4 +655,143 @@ func (h *Handler) AgentDisableDebug(c echo.Context) error {
 	}
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.debug_has_been_disabled"), "", false)
+}
+
+func (h *Handler) AgentLogs(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	category := c.FormValue("log-category")
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+	}
+
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
+	}
+
+	a, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
+	}
+
+	logFile := ""
+	if a.Os == "windows" {
+		logFile = "C:\\Program Files\\OpenUEM Agent\\logs\\openuem-log.txt"
+	} else {
+		logFile = "/var/log/openuem-agent/openuem-agent.log"
+	}
+
+	// Get agents log using SFTP
+	data, err := h.GetAgentLogFile(a, logFile)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_log", err.Error()), true))
+	}
+
+	agentLog := parseLogFile(data, category)
+
+	if a.Os == "windows" {
+		logFile = "C:\\Program Files\\OpenUEM Agent\\logs\\openuem-agent-updater.txt"
+	} else {
+		logFile = "/var/log/openuem-agent/openuem-updater.log"
+	}
+
+	// Get updaters log using SFTP
+	data, err = h.GetAgentLogFile(a, logFile)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_log", err.Error()), true))
+	}
+
+	updaterLog := parseLogFile(data, category)
+
+	l := views.GetTranslatorForDates(c)
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, agentLog, updaterLog, category, "", "", refreshTime)))
+}
+
+func (h *Handler) GetAgentLogFile(agent *ent.Agent, path string) (string, error) {
+	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
+	if err != nil {
+		return "", err
+	}
+
+	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	defer sshConn.Close()
+
+	dstFile, err := os.CreateTemp(h.DownloadDir, "*.log")
+	if err != nil {
+		return "", err
+	}
+	defer dstFile.Close()
+
+	srcFile, err := client.OpenFile(path, (os.O_RDONLY))
+	if err != nil {
+		return "", err
+	}
+	defer srcFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return "", err
+	}
+
+	// Read file
+	l, err := os.ReadFile(dstFile.Name())
+	if err != nil {
+		return "", err
+	}
+
+	return string(l), nil
+}
+
+func parseLogFile(data, category string) []agents_views.LogEntry {
+	logEntries := []agents_views.LogEntry{}
+	for line := range strings.SplitSeq(string(data), "\n") {
+		if strings.Contains(line, ">>>>>>>") || strings.Contains(line, "<<<<<<<") {
+			continue
+		}
+		line = strings.TrimPrefix(line, "openuem-agent:")
+		line = strings.TrimPrefix(line, "openuem-updater:")
+		logEntry := agents_views.LogEntry{}
+		if strings.Index(line, "[") == -1 {
+			continue
+		}
+
+		logEntry.Date = strings.TrimSpace(line[:strings.Index(line, " [")])
+
+		switch {
+		case strings.Contains(line, "[ERROR]"):
+			logEntry.Category = "ERROR"
+		case strings.Contains(line, "[INFO]"):
+			logEntry.Category = "INFO"
+		case strings.Contains(line, "[WARNING]"):
+			logEntry.Category = "WARNING"
+		case strings.Contains(line, "[DEBUG]"):
+			logEntry.Category = "DEBUG"
+		}
+
+		if category != "" && logEntry.Category != category {
+			continue
+		}
+
+		if strings.Index(line, "]: ") == -1 {
+			continue
+		}
+
+		line = line[(strings.Index(line, "]: ") + 3):]
+		logEntry.Text = line
+		logEntries = append(logEntries, logEntry)
+	}
+	return logEntries
 }

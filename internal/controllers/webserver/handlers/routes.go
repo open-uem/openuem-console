@@ -22,6 +22,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/agents/:uuid/delete", h.AgentDelete, h.IsAuthenticated)
 	e.GET("/agents/:uuid/disable", h.AgentDisable, h.IsAuthenticated)
 	e.GET("/agents/:uuid/admit", h.AgentAdmit, h.IsAuthenticated)
+	e.GET("/agents/:uuid/logs", h.AgentLogs, h.IsAuthenticated)
 	e.POST("/agents/:uuid/enabled", h.AgentEnable, h.IsAuthenticated)
 	e.POST("/agents/:uuid/forcereport", h.AgentForceRun, h.IsAuthenticated)
 	e.POST("/agents/:uuid/disable", h.AgentConfirmDisable, h.IsAuthenticated)
