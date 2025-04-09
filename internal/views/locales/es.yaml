@@ -234,6 +234,16 @@ es:
     rdp_file_warning: "Tenga esto en cuenta, debe hacer click en el botón de Desconectar para parar el servicio de escritorio remoto en el servicio. No basta con cerrar la aplicación cliente de escritorio remoto"
     filter_by_source: "Filtrar por origen del paquete"
     no_contact_in_last_day: "El agente no ha contactado en las últimas 24 horas"
+    show_agent_log: "Mostrar logs del agente"
+    could_not_get_latest_release: "No pude obtener información de la última versión"
+    could_not_get_agent: "No se pudo obtener el agente de la base de datos. Razon: %s"
+    could_not_get_log: "No se puedo obtener el fichero de log del agente. Razon: %s"
+    log_title: "Logs del agent"
+    log_description: "Estos son los ficheros de log generados por el agente. Encontrará el log de operaciones del agente y el log del actualizador del agente que es el responsable de actualizar el agente bajo demanda y de reiniciar el agente si este se encuentra parado o ha sido detenido bajo petición desde la consola"
+    log_agent: "Log del agente"
+    log_update: "Log del actualizador del agente"
+    select_log_category: "Seleccione la categoría que quiere mostrar"
+    no_log_entries: "No existen entradas de log para esa categoría"
   inventory:
     hardware:
       title: "Hardware"

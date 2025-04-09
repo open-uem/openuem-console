@@ -582,6 +582,19 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 			}
 			<li>
 				<a
+					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/logs", agent.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#enable-agent-log"
+					hx-push-url="true"
+				>
+					<uk-icon hx-history="false" icon="scroll-text" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.show_agent_log") }
+					<div id="enable-agent-log" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+				</a>
+			</li>
+			<li>
+				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
@@ -606,4 +619,110 @@ templ EmptyAgentRows(pageSize, nItems int) {
 			<td class="!align-middle">-</td>
 		</tr>
 	}
+}
+
+type LogEntry struct {
+	Date     string
+	Category string
+	Text     string
+}
+
+templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, agentLog, updaterLog []LogEntry, category, successMessage, errMessage string, refresh int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: "logs"}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				<div class="flex gap-2 items-center">
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
+					if agent.IsRemote {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</span>
+					}
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="scroll-text" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.log_title") }</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "agents.log_description") }
+						</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					<div class="flex flex-col gap-4">
+						<div class="flex justify-between">
+							<form
+								class="flex gap-4 items-end"
+								hx-get={ fmt.Sprintf("/agents/%s/logs", agent.ID) }
+								hx-swap="outerHTML"
+								hx-target="#main"
+								hx-push-url="false"
+							>
+								<div>
+									<label class="uk-form-label" for="log-category">{ i18n.T(ctx, "agents.select_log_category") }</label>
+									<select class="uk-select" id="log-category" name="log-category">
+										<option selected?={ category == "" } value="">{ "ALL" }</option>
+										<option selected?={ category == "ERROR" } value="ERROR">{ "ERROR" }</option>
+										<option selected?={ category == "WARNING" } value="WARNING">{ "WARNING" }</option>
+										<option selected?={ category == "DEBUG" } value="DEBUG">{ "DEBUG" }</option>
+										<option selected?={ category == "INFO" } value="INFO">{ "INFO" }</option>
+									</select>
+								</div>
+								<button
+									class="uk-button uk-button-primary"
+									title={ i18n.T(ctx, "Filter") }
+									type="submit"
+								>
+									{ i18n.T(ctx, "Filter") }
+								</button>
+							</form>
+							@partials.RefreshPage(l, fmt.Sprintf("/agents/%s/logs", agent.ID), "#main", "outerHTML", "get", refresh, true)
+						</div>
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-4">
+								<p class="text-sm font-bold">{ i18n.T(ctx, "agents.log_agent") }</p>
+								@LogDetail(agentLog)
+							</div>
+							<div class="flex flex-col gap-4">
+								<p class="text-sm font-bold">{ i18n.T(ctx, "agents.log_update") }</p>
+								@LogDetail(updaterLog)
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ LogDetail(agentLog []LogEntry) {
+	<div class="uk-textarea bg-black text-white font-mono max-h-44 scroll-auto">
+		if len(agentLog) > 0 {
+			for _, logEntry := range agentLog {
+				<p>
+					<span class="text-orange-300">{ logEntry.Date }</span>
+					switch logEntry.Category {
+						case "ERROR":
+							<span class="text-red-600">{ " [ERROR]: " }</span>
+						case "WARNING":
+							<span class="text-orange-500">{ " [WARNING]: " }</span>
+						case "DEBUG":
+							<span class="text-yellow-300">{ " [DEBUG]: " }</span>
+						case "INFO":
+							<span class="text-blue-300">{ " [INFO]: " }</span>
+					}
+					<span>{ logEntry.Text }</span>
+				</p>
+			}
+		} else {
+			<p>{ i18n.T(ctx, "agents.no_log_entries") }</p>
+		}
+	</div>
 }
