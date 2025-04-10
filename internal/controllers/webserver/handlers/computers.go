@@ -40,7 +40,7 @@ func (h *Handler) Computer(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentComputerInfo(agentId)
@@ -63,7 +63,7 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentOSInfo(agentId)
@@ -89,7 +89,7 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId)
@@ -111,7 +111,7 @@ func (h *Handler) Printers(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentPrintersInfo(agentId)
@@ -134,7 +134,7 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId)
@@ -156,7 +156,7 @@ func (h *Handler) Shares(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentSharesInfo(agentId)
@@ -179,7 +179,7 @@ func (h *Handler) Monitors(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
@@ -212,12 +212,12 @@ func (h *Handler) Apps(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	a, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error ocurred querying agent: %v", err)
+		log.Fatalf("[FATAL]: an error occurred querying agent: %v", err)
 	}
 
 	// Get filters
@@ -228,12 +228,12 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
+		log.Fatalf("[FATAL]: an error occurred querying apps for agent: %v", err)
 	}
 
 	p.NItems, err = h.Model.CountAgentApps(agentId, *f)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error ocurred querying apps for agent: %v", err)
+		log.Fatalf("[FATAL]: an error occurred querying apps for agent: %v", err)
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -249,7 +249,7 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -514,7 +514,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -902,7 +902,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -993,7 +993,7 @@ func (h *Handler) Notes(c echo.Context) error {
 	}
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error ocurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
 	agent, err := h.Model.GetAgentById(agentId)
@@ -1020,7 +1020,7 @@ func (h *Handler) Notes(c echo.Context) error {
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error ocurred getting uuid param", false)
+		return h.ListAgents(c, "", "an error occurred getting uuid param", false)
 	}
 
 	err := h.Model.DeleteAgent(agentId)
@@ -1116,7 +1116,7 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 func (h *Handler) GenerateRDPFile(c echo.Context) error {
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return RenderError(c, partials.ErrorMessage("an error ocurred getting uuid param", false))
+		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
 	fileName := uuid.NewString() + ".rdp"
