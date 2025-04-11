@@ -129,7 +129,7 @@ en:
   WOL: "Wake On Lan"
   agents:
     title: "Agents"
-    description: "These are the agents that have contacted with the OpenUEM server"
+    description: "These are the agents that have contacted the server"
     hostname: "Hostname"
     version: "Version"
     os: "OS"
@@ -342,7 +342,7 @@ en:
     filter_by_version: "Filter by version..."
   antivirus:
     title: "Antivirus"
-    description: "This is the information about antivirus reported by the agents that have contacted with OpenUEM server."
+    description: "This is the information about antivirus reported by the agents that have contacted the server."
     hostname: "Hostname"
     os: "OS"
     enabled: "Antivirus Enabled?"
@@ -372,7 +372,7 @@ en:
     no_packages: "No packages have been found for that name"
     requested: "We've requested the selected agents to uninstall this package, check later if the software has been uninstalled successfully from that computer"
   computers:
-    description: "This is the inventory of computers for your organization reported by the agents that have contacted with OpenUEM server"
+    description: "This is the inventory of computers for your organization reported by the agents that have contacted the server"
     filter_by_username: "Filter by username..."
     filter_by_os_version: "Filter by os version"
     filter_by_manufacturer: "Filter by manufacturer"
@@ -472,7 +472,7 @@ en:
     email_confirmed: "Email has been confirmed"
   updates:
     title: "Security Updates"
-    description: "This is the information about security updates retrieved by the agents that have contacted with OpenUEM server"
+    description: "This is the information about security updates retrieved by the agents that have contacted the server"
     no_updates_info: "No security information was found for this query"
     hostname: "Hostname"
     os: "OS"

@@ -21,7 +21,7 @@ func New(dbUrl string, sessionLifetimeInMinutes int) *SessionManager {
 
 	sm.Pool, err = pgxpool.New(context.Background(), dbUrl)
 	if err != nil {
-		log.Println("[FATAL]: session manager could not contact with the database")
+		log.Println("[FATAL]: session manager could not contact the database")
 		log.Fatal(err)
 	}
 

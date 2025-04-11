@@ -66,7 +66,7 @@ func StartConsoleFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:     "domain",
-			Usage:    "the DNS domain used to contact with agents",
+			Usage:    "the DNS domain used to contact agents",
 			EnvVars:  []string{"DOMAIN"},
 			Required: true,
 		},
