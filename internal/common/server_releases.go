@@ -50,7 +50,7 @@ func (w *Worker) StartServerReleasesDownloadJob() error {
 	// Try to download server releases at start
 	if err := w.GetServerReleases(); err != nil {
 		log.Printf("[ERROR]: could not get server releases, reason: %v", err)
-		w.DownloadServerReleasesJobDuration = 2 * time.Minute
+		w.DownloadServerReleasesJobDuration = 10 * time.Minute
 	} else {
 		log.Println("[INFO]: server releases files have been downloaded")
 		w.DownloadServerReleasesJobDuration = 6 * time.Hour
@@ -58,7 +58,7 @@ func (w *Worker) StartServerReleasesDownloadJob() error {
 
 	// Create task
 	if err := w.StartDownloadServerReleasesJob(); err == nil {
-		log.Println("[INFO]: download server releases job has been scheduled every " + w.DownloadServerReleasesJobDuration.String())
+		log.Printf("[INFO]: download server releases job has been scheduled every %d minutes", 10)
 	}
 	return nil
 }

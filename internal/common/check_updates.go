@@ -25,7 +25,7 @@ func (w *Worker) StartCheckLatestReleasesJob(channel string) error {
 	if err := w.StartDownloadLatestAgentReleaseJob(channel); err != nil {
 		return err
 	}
-	log.Println("[INFO]: check latest releases job has been scheduled every ", w.DownloadLatestReleaseJobDuration.String())
+	log.Printf("[INFO]: check latest releases job has been scheduled every %d hours", 6)
 	return nil
 }
 

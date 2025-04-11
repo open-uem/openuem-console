@@ -15,7 +15,7 @@ func (w *Worker) StartFlatpakDBDownloadJob() error {
 	// Try to download at start
 	if err := w.DownloaFlatpakDB(); err != nil {
 		log.Printf("[ERROR]: could not get flatpak.db, reason: %v", err)
-		w.DownloadFlatpakJobDuration = 5 * time.Second
+		w.DownloadFlatpakJobDuration = 30 * time.Minute
 	} else {
 		log.Println("[INFO]: flatpak.db has been downloaded")
 		w.DownloadFlatpakJobDuration = 24 * time.Hour
@@ -26,7 +26,7 @@ func (w *Worker) StartFlatpakDBDownloadJob() error {
 		log.Printf("[ERROR]: could not start the flatpak download job: %v", err)
 		return err
 	}
-	log.Println("[INFO]: download flatpak.db job has been scheduled every ", w.DownloadFlatpakJobDuration.String())
+	log.Printf("[INFO]: download flatpak.db job has been scheduled every %d minutes", 30)
 	return nil
 }
 

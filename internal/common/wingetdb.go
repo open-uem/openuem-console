@@ -16,7 +16,7 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 	// Try to download at start
 	if err := w.DownloadWgetDB(); err != nil {
 		log.Printf("[ERROR]: could not get index.db, reason: %v", err)
-		w.DownloadWingetJobDuration = 5 * time.Second
+		w.DownloadWingetJobDuration = 30 * time.Minute
 	} else {
 		log.Println("[INFO]: winget index.db has been downloaded")
 		w.DownloadWingetJobDuration = 24 * time.Hour
@@ -27,12 +27,12 @@ func (w *Worker) StartWinGetDBDownloadJob() error {
 		log.Printf("[ERROR]: could not start the winget download job: %v", err)
 		return err
 	}
-	log.Println("[INFO]: download winget index.db job has been scheduled every ", w.DownloadWingetJobDuration.String())
+	log.Printf("[INFO]: download winget index.db job has been scheduled every %d minutes", 30)
 	return nil
 }
 
 func (w *Worker) DownloadWgetDB() error {
-	url := "https://cdn.winget.microsoft.com/cache/source.msix"
+	url := "https://cdn.winget.microsoft.com/cache/source2.msix"
 
 	// If we're in development don't download
 	if os.Getenv("DEVEL") == "true" {
@@ -106,7 +106,7 @@ func (w *Worker) StartDownloadWingetDBJob() error {
 			func() {
 				if err := w.DownloadWgetDB(); err != nil {
 					log.Printf("[ERROR]: could not get index.db, reason: %v", err)
-					jobDuration = 2 * time.Minute
+					jobDuration = 30 * time.Minute
 				} else {
 					jobDuration = 24 * time.Hour
 				}
