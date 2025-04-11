@@ -56,7 +56,10 @@ func (w *Worker) StartCommonPackagesDBJob() error {
 	if err != nil {
 		log.Println("[INFO]: could not get winget database")
 	} else {
-		rows, err := wingetDB.Query(`SELECT DISTINCT ids.id as id, names.name AS name FROM manifest LEFT JOIN ids ON manifest.id = ids.rowid LEFT JOIN names ON manifest.name = names.rowid`)
+		// Old source.msix database information fix-68
+		// rows, err := wingetDB.Query(`SELECT DISTINCT ids.id as id, names.name AS name FROM manifest LEFT JOIN ids ON manifest.id = ids.rowid LEFT JOIN names ON manifest.name = names.rowid`)
+		rows, err := wingetDB.Query(`SELECT DISTINCT id, name FROM packages`)
+
 		if err != nil {
 			log.Println("[INFO]: could not query winget apps")
 		} else {
