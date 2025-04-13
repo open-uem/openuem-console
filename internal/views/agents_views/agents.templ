@@ -595,6 +595,17 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 			</li>
 			<li>
 				<a
+					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/sftp", agent.ID))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-push-url="true"
+				>
+					<uk-icon hx-history="false" icon="folder-output" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.sftp_agent_setting") }
+				</a>
+			</li>
+			<li>
+				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
@@ -638,11 +649,6 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					if agent.IsRemote {
-						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
-							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-						</span>
-					}
 				</div>
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -694,6 +700,65 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 								<p class="text-sm font-bold">{ i18n.T(ctx, "agents.log_update") }</p>
 								@LogDetail(updaterLog)
 							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ AgentSFTPSettings(c echo.Context, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, port, successMessage, errMessage string, refresh int) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: "SFTP"}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				<div class="flex gap-2 items-center">
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="folder-output" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.sftp_agent_setting_title") }</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "agents.sftp_agent_setting_description") }
+						</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					<div class="flex items-center space-x-2">
+						<div class="flex items-end gap-4 w-1/2">
+							<form
+								hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/sftp", agent.ID))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								<div>
+									<label class="uk-form-label" for="sftp-port">{ i18n.T(ctx, "agents.sftp_port") }</label>
+									<input
+										id="sftp-port"
+										name="sftp-port"
+										type="text"
+										value={ agent.SftpPort }
+										class="uk-input"
+									/>
+								</div>
+								<div>
+									<button
+										type="submit"
+										class="uk-button uk-button-primary"
+									>
+										{ i18n.T(ctx, "Save") }
+									</button>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>

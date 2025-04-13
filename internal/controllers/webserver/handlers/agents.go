@@ -795,3 +795,43 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 	}
 	return logEntries
 }
+
+func (h *Handler) AgentSFTPSettings(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	port := c.FormValue("sftp-port")
+	if port != "" {
+		portNumber, err := strconv.Atoi(port)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_be_a_number"), true))
+		}
+
+		if portNumber < 0 || portNumber > 65535 {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_is_not_valid"), true))
+		}
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+	}
+
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
+	}
+
+	a, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, "", "", refreshTime)))
+}

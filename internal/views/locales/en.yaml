@@ -244,6 +244,13 @@ en:
     log_update: "Agent's updater log"
     select_log_category: "Select the log category that you want to show"
     no_log_entries: "No log entries have been found for this category"
+    sftp_agent_setting: "SFTP service"
+    sftp_agent_setting_title: "SFTP service's settings"
+    sftp_agent_setting_description: "OpenUEM agent can start an SFTP service that can be used to browse files, upload or download files from the console. If the SFTP port is set to a non-empty value, the service is started by default. You can disable the SFTP service for this agent by setting an empty value for the port or enable it by setting the port used by the SFTP service (note that you must open the firewall port) "
+    sftp_must_be_a_number: "The port must be a number"
+    sftp_must_is_not_valid: "The port is not valid"
+    sftp_service_status: "SFTP service"
+    sftp_port: "SFTP port"
   inventory:
     hardware:
       title: "Hardware"
