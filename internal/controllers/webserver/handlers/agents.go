@@ -825,12 +825,53 @@ func (h *Handler) AgentSFTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	if c.Request().Method == "POST" {
+		r := openuem_nats.AgentReport{}
+		r.SFTPPort = port
+
+		data, err := json.Marshal(r)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+		}
+
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+		}
+
+		if err := h.Model.SaveSFTPPort(agentId, port); err != nil {
+			errMessage := err.Error()
+			// Rollback
+			r := openuem_nats.AgentReport{}
+			r.SFTPPort = a.SftpPort
+
+			data, err := json.Marshal(r)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+			}
+
+			err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+			}
+
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", errMessage), true))
+		}
+
+		a.SftpPort = port
+		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, i18n.T(c.Request().Context(), "agents.sftp_port_success"), "", refreshTime)))
 	}
 
 	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, "", "", refreshTime)))

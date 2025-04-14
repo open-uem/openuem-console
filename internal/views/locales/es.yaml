@@ -250,6 +250,9 @@ es:
     sftp_must_be_a_number: "El puerto debe ser un número"
     sftp_must_is_not_valid: "El puerto no es válido"
     sftp_port: "Puerto SFTP"
+    sftp_port_data_error: "No se pudo preparar los datos para la petición del agente"
+    sftp_port_success: "Se ha configurado el puerto SFTP"
+    sftp_port_nats_error: "No se pudo enviar el mensaje NATS, razón: %s"
   inventory:
     hardware:
       title: "Hardware"

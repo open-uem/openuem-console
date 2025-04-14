@@ -421,6 +421,10 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 	return agents, nil
 }
 
+func (m *Model) SaveSFTPPort(agentID string, port string) error {
+	return m.Client.Agent.UpdateOneID(agentID).SetSftpPort(port).Exec(context.Background())
+}
+
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
 	if len(f.Hostname) > 0 {
 		query.Where(agent.HostnameContainsFold(f.Hostname))

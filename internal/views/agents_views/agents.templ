@@ -711,6 +711,11 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 templ AgentSFTPSettings(c echo.Context, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, port, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: "SFTP"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		if successMessage != "" {
+			@partials.SuccessMessage(successMessage)
+		} else {
+			<div id="success" class="hidden"></div>
+		}
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -735,6 +740,7 @@ templ AgentSFTPSettings(c echo.Context, sm *sessions.SessionManager, l locales.T
 					<div class="flex items-center space-x-2">
 						<div class="flex items-end gap-4 w-1/2">
 							<form
+								class="flex flex items-end gap-2"
 								hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/sftp", agent.ID))) }
 								hx-push-url="false"
 								hx-target="#main"

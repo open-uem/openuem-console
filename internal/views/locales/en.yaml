@@ -251,6 +251,9 @@ en:
     sftp_must_is_not_valid: "The port is not valid"
     sftp_service_status: "SFTP service"
     sftp_port: "SFTP port"
+    sftp_port_data_error: "Could not prepare data for agent's request"
+    sftp_port_success: "SFTP port has been set"
+    sftp_port_nats_error: "Could not send NATS message, reason: %s"
   inventory:
     hardware:
       title: "Hardware"
