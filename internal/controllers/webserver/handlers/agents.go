@@ -230,6 +230,11 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_sftp_general_setting"), true))
+	}
+
 	if comesFromDialog {
 		currentUrl := c.Request().Header.Get("Hx-Current-Url")
 		if currentUrl != "" {
@@ -238,12 +243,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime)), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
@@ -794,4 +799,85 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 		logEntries = append(logEntries, logEntry)
 	}
 	return logEntries
+}
+
+func (h *Handler) AgentSFTPSettings(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	port := c.FormValue("sftp-port")
+	if port != "" {
+		portNumber, err := strconv.Atoi(port)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_be_a_number"), true))
+		}
+
+		if portNumber < 0 || portNumber > 65535 {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_is_not_valid"), true))
+		}
+	}
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+	}
+
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
+	}
+
+	a, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
+	}
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	l := views.GetTranslatorForDates(c)
+
+	if c.Request().Method == "POST" {
+		r := openuem_nats.AgentReport{}
+		r.SFTPPort = port
+
+		data, err := json.Marshal(r)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+		}
+
+		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
+		}
+
+		err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+		}
+
+		if err := h.Model.SaveSFTPPort(agentId, port); err != nil {
+			errMessage := err.Error()
+			// Rollback
+			r := openuem_nats.AgentReport{}
+			r.SFTPPort = a.SftpPort
+
+			data, err := json.Marshal(r)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+			}
+
+			err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+			}
+
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", errMessage), true))
+		}
+
+		a.SftpPort = port
+		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, i18n.T(c.Request().Context(), "agents.sftp_port_success"), "", refreshTime)))
+	}
+
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, "", "", refreshTime)))
 }

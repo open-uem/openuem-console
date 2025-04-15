@@ -244,6 +244,16 @@ en:
     log_update: "Agent's updater log"
     select_log_category: "Select the log category that you want to show"
     no_log_entries: "No log entries have been found for this category"
+    sftp_agent_setting: "SFTP service"
+    sftp_agent_setting_title: "SFTP service's settings"
+    sftp_agent_setting_description: "OpenUEM agent can start an SFTP service that can be used to browse files, upload or download files from the console. If the SFTP port is set to a non-empty value, the service is started by default. You can disable the SFTP service for this agent by setting an empty value for the port or enable it by setting the port used by the SFTP service (note that you must open the firewall port) "
+    sftp_must_be_a_number: "The port must be a number"
+    sftp_must_is_not_valid: "The port is not valid"
+    sftp_service_status: "SFTP service"
+    sftp_port: "SFTP port"
+    sftp_port_data_error: "Could not prepare data for agent's request"
+    sftp_port_success: "SFTP port has been set"
+    sftp_port_nats_error: "Could not send NATS message, reason: %s"
   inventory:
     hardware:
       title: "Hardware"
@@ -624,7 +634,13 @@ en:
     use_flatpak_success: Flatpak setting has been saved
     use_flatpak_invalid: Selected value for use flatpak is not valid
     use_flatpak_could_not_be_saved: Use flatpak value could not be saved
-
+    disable_sftp_title: Disable SFTP
+    disable_sftp_description: SFTP is disabled globally for every agent
+    disable_sftp_success: SFTP setting has been saved
+    disable_sftp_invalid: Selected value for SFTP service is not valid
+    disable_sftp_could_not_be_saved: SFTP service settings could not be saved
+    disable_sftp_error: The new SFTP service settings cannot be communicated to the agents now, retry later
+    could_not_get_sftp_general_setting: Could not get SFTP general setting
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong

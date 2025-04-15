@@ -244,6 +244,15 @@ es:
     log_update: "Log del actualizador del agente"
     select_log_category: "Seleccione la categoría que quiere mostrar"
     no_log_entries: "No existen entradas de log para esa categoría"
+    sftp_agent_setting: "Servicio SFTP"
+    sftp_agent_setting_title: "Configuración del servicio SFTP"
+    sftp_agent_setting_description: "El agente de OpenUEM puede iniciar un servicio SFTP que puede usarse para navegar por el sistema de ficheros o subir y bajar ficheros desde la consola. Si el puerto SFTP tiene asignado un valor, el servicio se inicia por defecto. Puedes desactivar el servicio SFTP para este agente dejando vacío el puerto o activarlo configurando el puerto usado por el servicio SFTP (será necesario que habra el puerto en el firewall)"
+    sftp_must_be_a_number: "El puerto debe ser un número"
+    sftp_must_is_not_valid: "El puerto no es válido"
+    sftp_port: "Puerto SFTP"
+    sftp_port_data_error: "No se pudo preparar los datos para la petición del agente"
+    sftp_port_success: "Se ha configurado el puerto SFTP"
+    sftp_port_nats_error: "No se pudo enviar el mensaje NATS, razón: %s"
   inventory:
     hardware:
       title: "Hardware"
@@ -621,7 +630,13 @@ es:
     use_flatpak_success: La configuración de Flatpak se ha guardado
     use_flatpak_invalid: El valor seleccionado para usar flatpak no es válido
     use_flatpak_could_not_be_saved: No se pudo guardar el valor de uso de flatpak
-
+    disable_sftp_title: Inhabilitar SFTP
+    disable_sftp_description: SFTP está inhabilitado globalmente para cada agente
+    disable_sftp_success: La configuración de SFTP se ha guardado
+    disable_sftp_invalid: El valor seleccionado para el servicio SFTP no es válido
+    disable_sftp_could_not_be_saved: No se pudo guardar el valor del servicio SFTP
+    disable_sftp_error: La configuración del servicio SFTP no pudo comunicarse a los agentes, inténtelo más tarde
+    could_not_get_sftp_general_setting: No se pudo consultar la configuración general de SFTP
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

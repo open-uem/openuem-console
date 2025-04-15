@@ -157,6 +157,21 @@ func (m *Model) UpdateWingetFrequency(settingsId, frequency int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetProfilesApplicationFrequenceInMinutes(frequency).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultSFTPDisabled() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldDisableSftp).Only(context.Background())
+	if err != nil {
+		return false, err
+	}
+
+	return settings.DisableSftp, nil
+}
+
+func (m *Model) UpdateSFTPDisabled(settingsId int, disableSFTP bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetDisableSftp(disableSFTP).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().WithTag().Select(
@@ -173,6 +188,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldProfilesApplicationFrequenceInMinutes,
 		settings.FieldUseWinget,
 		settings.FieldUseFlatpak,
+		settings.FieldDisableSftp,
 		settings.TagColumn,
 	)
 
@@ -257,4 +273,5 @@ type GeneralSettings struct {
 	WinGetFrequency int
 	UseWinget       bool
 	UseFlatpak      bool
+	SFTPDisabled    bool
 }
