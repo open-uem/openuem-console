@@ -16,7 +16,7 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled bool, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -163,7 +163,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						end"
 					>
 						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
-						@AgentsTableBody(p, l, agents, availableTags)
+						@AgentsTableBody(p, l, agents, availableTags, sftpDisabled)
 					</table>
 					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/agents")
 				} else {
@@ -323,7 +323,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</thead>
 }
 
-templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag) {
+templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag, sftpDisabled bool) {
 	for index, agent := range agents {
 		<tr>
 			<td class="!align-middle">
@@ -464,7 +464,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 			</td>
 			<td class="!align-middle">{ l.FmtDateMedium(agent.LastContact.Local()) + " " + l.FmtTimeShort(agent.LastContact.Local()) } </td>
 			<td class="!align-middle">
-				@AddActionsButton(agent, index)
+				@AddActionsButton(agent, index, sftpDisabled)
 			</td>
 		</tr>
 	}
@@ -473,7 +473,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 	}
 }
 
-templ AddActionsButton(agent *ent.Agent, index int) {
+templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
@@ -580,6 +580,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					</a>
 				</li>
 			}
+			if !sftpDisabled {
 			<li>
 				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/logs", agent.ID))) }
@@ -593,6 +594,9 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					<div id="enable-agent-log" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
 				</a>
 			</li>
+			}
+
+			if !sftpDisabled {
 			<li>
 				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/sftp", agent.ID))) }
@@ -604,6 +608,7 @@ templ AddActionsButton(agent *ent.Agent, index int) {
 					{ i18n.T(ctx, "agents.sftp_agent_setting") }
 				</a>
 			</li>
+			}
 			<li>
 				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }

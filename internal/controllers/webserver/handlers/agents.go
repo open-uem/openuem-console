@@ -230,6 +230,11 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
 	}
 
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_sftp_general_setting"), true))
+	}
+
 	if comesFromDialog {
 		currentUrl := c.Request().Header.Get("Hx-Current-Url")
 		if currentUrl != "" {
@@ -238,12 +243,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime)), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime)))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

@@ -630,7 +630,13 @@ es:
     use_flatpak_success: La configuración de Flatpak se ha guardado
     use_flatpak_invalid: El valor seleccionado para usar flatpak no es válido
     use_flatpak_could_not_be_saved: No se pudo guardar el valor de uso de flatpak
-
+    disable_sftp_title: Inhabilitar SFTP
+    disable_sftp_description: SFTP está inhabilitado globalmente para cada agente
+    disable_sftp_success: La configuración de SFTP se ha guardado
+    disable_sftp_invalid: El valor seleccionado para el servicio SFTP no es válido
+    disable_sftp_could_not_be_saved: No se pudo guardar el valor del servicio SFTP
+    disable_sftp_error: La configuración del servicio SFTP no pudo comunicarse a los agentes, inténtelo más tarde
+    could_not_get_sftp_general_setting: No se pudo consultar la configuración general de SFTP
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

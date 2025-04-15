@@ -87,6 +87,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
+			// Get SFTPDisabledy
+			sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
 			}
@@ -94,6 +100,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			config := openuem_nats.Config{}
 			config.AgentFrequency = settings.AgentFrequency
 			config.WinGetFrequency = wingetFrequency
+			config.SFTPDisabled = sftpDisabled
 			data, err := json.Marshal(config)
 			if err != nil {
 				return err
@@ -108,6 +115,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				config := openuem_nats.Config{}
 				config.AgentFrequency = currentFrequency
 				config.WinGetFrequency = wingetFrequency
+				config.SFTPDisabled = sftpDisabled
 				data, err := json.Marshal(config)
 				if err != nil {
 					return err
@@ -164,6 +172,13 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			if err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
+
+			// Get SFTP disabled
+			sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
 			}
@@ -171,6 +186,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			config := openuem_nats.Config{}
 			config.AgentFrequency = currentFrequency
 			config.WinGetFrequency = settings.WinGetFrequency
+			config.SFTPDisabled = sftpDisabled
 			data, err := json.Marshal(config)
 			if err != nil {
 				return err
@@ -185,6 +201,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				config := openuem_nats.Config{}
 				config.AgentFrequency = currentFrequency
 				config.WinGetFrequency = wingetFrequency
+				config.SFTPDisabled = sftpDisabled
 				data, err := json.Marshal(config)
 				if err != nil {
 					return err
@@ -196,7 +213,63 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_could_not_be_saved"), true))
 			}
 
-			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.winget_configure_frequency_success")))
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_success")))
+		}
+
+		if c.FormValue("disable-sftp") != "" {
+			// Get current frequency
+			currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
+			// Get winget frequency
+			wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
+			// Get SFTP disabled settings
+			sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+
+			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), true))
+			}
+
+			config := openuem_nats.Config{}
+			config.AgentFrequency = currentFrequency
+			config.WinGetFrequency = wingetFrequency
+			config.SFTPDisabled = settings.SFTPDisabled
+			data, err := json.Marshal(config)
+			if err != nil {
+				return err
+			}
+
+			if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_error"), true))
+			}
+
+			if err := h.Model.UpdateSFTPDisabled(settings.ID, settings.SFTPDisabled); err != nil {
+				// Rollback communication
+				config := openuem_nats.Config{}
+				config.AgentFrequency = currentFrequency
+				config.WinGetFrequency = wingetFrequency
+				config.SFTPDisabled = sftpDisabled
+				data, err := json.Marshal(config)
+				if err != nil {
+					return err
+				}
+
+				if err := h.NATSConnection.Publish("agent.newconfig", data); err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_error"), true))
+				}
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_could_not_be_saved"), true))
+			}
+
+			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_success")))
 		}
 
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
@@ -250,6 +323,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	wingetFrequency := c.FormValue("winget-configure-frequency")
 	useWinget := c.FormValue("use-winget")
 	useFlatpak := c.FormValue("use-flatpak")
+	disableSFTP := c.FormValue("disable-sftp")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -373,6 +447,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.UseFlatpak, err = strconv.ParseBool(useFlatpak)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.use_flatpak_invalid"))
+		}
+	}
+
+	if disableSFTP != "" {
+		settings.SFTPDisabled, err = strconv.ParseBool(disableSFTP)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.disable_sftp_invalid"))
 		}
 	}
 
