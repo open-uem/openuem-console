@@ -142,14 +142,9 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_sftp_general_setting"), true))
-	}
-
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, sftpDisabled, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
 }
 
 func (h *Handler) Shares(c echo.Context) error {

@@ -41,7 +41,7 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, l locales.Tra
 									{ issue.Edges.Agents.Hostname }
 								</td>
 								<td class="!align-middle">
-									for _, line := range strings.Split(issue.Error, "\r\n") {
+									for line := range strings.SplitSeq(issue.Error, "\r\n") {
 										<p>{ line }</p>
 									}
 								</td>

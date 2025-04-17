@@ -50,7 +50,7 @@ func (h *Handler) UpdateServers(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "admin.update.servers.release_cant_be_empty"), false))
 		}
 
-		for _, s := range strings.Split(servers, ",") {
+		for s := range strings.SplitSeq(servers, ",") {
 
 			serverId, err := strconv.Atoi(s)
 			if err != nil {

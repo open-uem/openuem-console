@@ -83,6 +83,7 @@ es:
   Session:
     one: "Sesión"
     other: "Sesiones"
+  Settings: "Configuración"
   Size: "Tamaño"
   SortBy: "Ordenar por %s"
   Stable: "Estable"
@@ -152,7 +153,7 @@ es:
     vnc_new_tab: "Abrir la sesión en una nueva pestaña"
     vnc_pin_not_generated: "No se pudo generar un PIN para la conexión VNC"
     vnc_could_not_marshal: "No se pudo preparar la petición de sesión VNC"
-    no_supported_vnc: "No está disponible la asistencia remota, el equipo no está en la red local, no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
+    no_supported_vnc: "No está disponible la asistencia remota debido a una de las siguientes razones. La asistencia remota ha sido inhabilitada de forma global, el equipo no está en la red local, no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
     no_vnc_certificate: "El agente no cuenta con un certificado para proteger la conexión VNC. Si aún no ha admitido este agente, hágalo ahora para crear el certificado. Si ya lo ha hecho intente forzar un nuevo informe y si este mensaje sigue apareciendo, regenere el certificado para este agente"
     deploy_description: "OpenUEM puede desplegar software en sus equipos de forma automática. Busque un paquete disponible en el repositorio e instálelo o seleccione un paquete desplegado para actualizarlo o desinstalarlo"
     deploy_search: "Busque un paquete por su nombre para instalarlo"
@@ -245,14 +246,18 @@ es:
     select_log_category: "Seleccione la categoría que quiere mostrar"
     no_log_entries: "No existen entradas de log para esa categoría"
     sftp_agent_setting: "Servicio SFTP"
-    sftp_agent_setting_title: "Configuración del servicio SFTP"
-    sftp_agent_setting_description: "El agente de OpenUEM puede iniciar un servicio SFTP que puede usarse para navegar por el sistema de ficheros o subir y bajar ficheros desde la consola. Si el puerto SFTP tiene asignado un valor, el servicio se inicia por defecto. Puedes desactivar el servicio SFTP para este agente dejando vacío el puerto o activarlo configurando el puerto usado por el servicio SFTP (será necesario que habra el puerto en el firewall)"
-    sftp_must_be_a_number: "El puerto debe ser un número"
-    sftp_must_is_not_valid: "El puerto no es válido"
+    settings_title: "Configuración del Agente"
+    settings_description: "Aquí puede configurar los servicios del agente y los puertos utilizados. Si activa el modo debug para el agente, tenga en cuenta que el fichero de log del agente crecerá rápidamente"
+    port_must_be_a_number: "El puerto debe ser un número"
+    port_is_not_valid: "El puerto no es válido"
     sftp_port: "Puerto SFTP"
-    sftp_port_data_error: "No se pudo preparar los datos para la petición del agente"
-    sftp_port_success: "Se ha configurado el puerto SFTP"
-    sftp_port_nats_error: "No se pudo enviar el mensaje NATS, razón: %s"
+    settings_data_error: "No se pudo preparar los datos para la petición del agente"
+    settings_success: "Se ha configurado el agente"
+    settings_nats_error: "No se pudo enviar el mensaje NATS al agente, razón: %s"
+    vnc_proxy_port: "Puerto del proxy VNC"
+    debug_mode: "Modo depuración"
+    remote_assistance: "Opción de asistencia remota"
+    sftp_service: "Opción de servicio SFTP"
   inventory:
     hardware:
       title: "Hardware"
@@ -636,7 +641,15 @@ es:
     disable_sftp_invalid: El valor seleccionado para el servicio SFTP no es válido
     disable_sftp_could_not_be_saved: No se pudo guardar el valor del servicio SFTP
     disable_sftp_error: La configuración del servicio SFTP no pudo comunicarse a los agentes, inténtelo más tarde
+    disable_sftp_to_all: No se pudo actualizar la configuración de SFTP para todos los agentes
     could_not_get_sftp_general_setting: No se pudo consultar la configuración general de SFTP
+    disable_remote_assistance_title: Inhabilitar la Asistencia Remota
+    disable_remote_assistance_description: La Asistencia Remota está inhabilitado globalmente para cada agente
+    disable_remote_assistance_success: La configuración de Asistencia Remota se ha guardado
+    disable_remote_assistance_invalid: El valor seleccionado para la Asistencia Remota no es válido
+    disable_remote_assistance_could_not_be_saved: No se pudo guardar el valor de la Asistencia Remota
+    disable_remote_assistance_error: La configuración de la Asistencia Remota no pudo comunicarse a los agentes, inténtelo más tarde
+    disable_remote_assistance_to_all: No se pudo actualizar la configuración de asistencia remota para todos los agentes
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal
