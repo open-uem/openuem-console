@@ -172,6 +172,21 @@ func (m *Model) UpdateSFTPDisabled(settingsId int, disableSFTP bool) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetDisableSftp(disableSFTP).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultRemoteAssistanceDisabled() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldDisableRemoteAssistance).Only(context.Background())
+	if err != nil {
+		return false, err
+	}
+
+	return settings.DisableRemoteAssistance, nil
+}
+
+func (m *Model) UpdateRemoteAssistanceDisabled(settingsId int, disableRemoteAssistance bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetDisableRemoteAssistance(disableRemoteAssistance).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().WithTag().Select(
@@ -189,6 +204,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldUseWinget,
 		settings.FieldUseFlatpak,
 		settings.FieldDisableSftp,
+		settings.FieldDisableRemoteAssistance,
 		settings.TagColumn,
 	)
 
@@ -259,19 +275,20 @@ func (m *Model) GetDefaultUseFlatpak() (bool, error) {
 }
 
 type GeneralSettings struct {
-	ID              int
-	Country         string
-	MaxUploadSize   string
-	UserCertYears   int
-	NATSTimeout     int
-	Refresh         int
-	SessionLifetime int
-	UpdateChannel   string
-	AgentFrequency  int
-	RequestVNCPIN   bool
-	Tag             int
-	WinGetFrequency int
-	UseWinget       bool
-	UseFlatpak      bool
-	SFTPDisabled    bool
+	ID                       int
+	Country                  string
+	MaxUploadSize            string
+	UserCertYears            int
+	NATSTimeout              int
+	Refresh                  int
+	SessionLifetime          int
+	UpdateChannel            string
+	AgentFrequency           int
+	RequestVNCPIN            bool
+	Tag                      int
+	WinGetFrequency          int
+	UseWinget                bool
+	UseFlatpak               bool
+	SFTPDisabled             bool
+	RemoteAssistanceDisabled bool
 }

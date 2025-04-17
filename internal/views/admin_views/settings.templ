@@ -361,6 +361,31 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 									</form>
 								</td>
 							</tr>
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.disable_remote_assistance_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.disable_remote_assistance_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select class="uk-select" name="disable-remote-assistance">
+											<option value="true" selected?={ settings.DisableRemoteAssistance }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.DisableRemoteAssistance }>{ i18n.T(ctx, "No") }</option>
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/settings"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-15"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-15" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
 						</table>
 					</div>
 				</div>

@@ -44,7 +44,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && !agent.IsRemote {
+					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && !agent.IsRemote && agent.RemoteAssistance {
 						<div id="vnc">
 							<a
 								class="flex gap-2 items-center uk-text-small"

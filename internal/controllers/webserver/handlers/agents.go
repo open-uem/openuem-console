@@ -329,7 +329,7 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 
-		for _, agentId := range strings.Split(agents, ",") {
+		for agentId := range strings.SplitSeq(agents, ",") {
 
 			agent, err := h.Model.GetAgentById(agentId)
 			if err != nil {
@@ -416,7 +416,7 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 
-		for _, agentId := range strings.Split(agents, ",") {
+		for agentId := range strings.SplitSeq(agents, ",") {
 			agent, err := h.Model.GetAgentById(agentId)
 			if err != nil {
 				log.Println("[ERROR]: ", err.Error())
@@ -466,7 +466,7 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 
 		agents := c.FormValue("agents")
 
-		for _, agentId := range strings.Split(agents, ",") {
+		for agentId := range strings.SplitSeq(agents, ",") {
 			agent, err := h.Model.GetAgentById(agentId)
 			if err != nil {
 				log.Println("[ERROR]: ", err.Error())
@@ -594,6 +594,20 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	sftpServiceDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if err := h.Model.Client.Agent.UpdateOneID(agentId).SetSftpService(!sftpServiceDisabled).SetRemoteAssistance(!remoteAssistanceDisabled).Exec(context.Background()); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
 	if regenerate {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", false)
 	}
@@ -614,52 +628,6 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 	}
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
-}
-
-func (h *Handler) AgentEnableDebug(c echo.Context) error {
-	agentId := c.Param("uuid")
-
-	if c.Request().Method == "POST" {
-		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
-		}
-
-		msg, err := h.NATSConnection.Request("agent.enabledebug."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
-		}
-
-		if string(msg.Data) == "enabled" {
-			if err := h.Model.EnableDebugAgent(agentId); err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_save_debug_mode"), false))
-			}
-		}
-	}
-
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.debug_has_been_enabled"), "", false)
-}
-
-func (h *Handler) AgentDisableDebug(c echo.Context) error {
-	agentId := c.Param("uuid")
-
-	if c.Request().Method == "POST" {
-		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
-		}
-
-		msg, err := h.NATSConnection.Request("agent.disabledebug."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
-		}
-
-		if string(msg.Data) == "disabled" {
-			if err := h.Model.DisableDebugAgent(agentId); err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_save_debug_mode"), false))
-			}
-		}
-	}
-
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.debug_has_been_disabled"), "", false)
 }
 
 func (h *Handler) AgentLogs(c echo.Context) error {
@@ -801,20 +769,8 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 	return logEntries
 }
 
-func (h *Handler) AgentSFTPSettings(c echo.Context) error {
+func (h *Handler) AgentSettings(c echo.Context) error {
 	agentId := c.Param("uuid")
-
-	port := c.FormValue("sftp-port")
-	if port != "" {
-		portNumber, err := strconv.Atoi(port)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_be_a_number"), true))
-		}
-
-		if portNumber < 0 || portNumber > 65535 {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_must_is_not_valid"), true))
-		}
-	}
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
@@ -825,7 +781,7 @@ func (h *Handler) AgentSFTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
-	a, err := h.Model.GetAgentById(agentId)
+	currentAgent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
 	}
@@ -839,45 +795,87 @@ func (h *Handler) AgentSFTPSettings(c echo.Context) error {
 	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		r := openuem_nats.AgentReport{}
-		r.SFTPPort = port
+		s := openuem_nats.AgentSetting{}
 
-		data, err := json.Marshal(r)
+		s.DebugMode = false
+		if c.FormValue("debug-mode") != "" {
+			s.DebugMode = true
+		}
+
+		s.SFTPService = false
+		if c.FormValue("sftp-service") != "" {
+			s.SFTPService = true
+		}
+
+		s.RemoteAssistance = false
+		if c.FormValue("remote-assistance-service") != "" {
+			s.RemoteAssistance = true
+		}
+
+		s.SFTPPort = c.FormValue("sftp-port")
+		if s.SFTPPort != "" {
+			portNumber, err := strconv.Atoi(s.SFTPPort)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.port_must_be_a_number"), true))
+			}
+
+			if portNumber < 0 || portNumber > 65535 {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.port_is_not_valid"), true))
+			}
+		}
+
+		s.VNCProxyPort = c.FormValue("vnc-proxy-port")
+		if s.VNCProxyPort != "" {
+			portNumber, err := strconv.Atoi(s.VNCProxyPort)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.port_must_be_a_number"), true))
+			}
+
+			if portNumber < 0 || portNumber > 65535 {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.port_is_not_valid"), true))
+			}
+		}
+
+		data, err := json.Marshal(s)
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_data_error"), true))
 		}
 
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 		}
 
-		err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+		err = h.NATSConnection.Publish("agent.settings."+agentId, data)
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", err.Error()), true))
 		}
 
-		if err := h.Model.SaveSFTPPort(agentId, port); err != nil {
+		a, err := h.Model.SaveAgentSettings(agentId, s)
+		if err != nil {
 			errMessage := err.Error()
 			// Rollback
-			r := openuem_nats.AgentReport{}
-			r.SFTPPort = a.SftpPort
+			s := openuem_nats.AgentSetting{}
+			s.DebugMode = currentAgent.DebugMode
+			s.RemoteAssistance = currentAgent.RemoteAssistance
+			s.SFTPService = currentAgent.SftpService
+			s.SFTPPort = currentAgent.SftpPort
+			s.VNCProxyPort = currentAgent.VncProxyPort
 
-			data, err := json.Marshal(r)
+			data, err := json.Marshal(s)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_data_error"), true))
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_data_error"), true))
 			}
 
-			err = h.NATSConnection.Publish("agent.sftpport."+agentId, data)
+			err = h.NATSConnection.Publish("agent.settings."+agentId, data)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", err.Error()), true))
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", err.Error()), true))
 			}
 
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.sftp_port_nats_error", errMessage), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", errMessage), true))
 		}
 
-		a.SftpPort = port
-		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, i18n.T(c.Request().Context(), "agents.sftp_port_success"), "", refreshTime)))
+		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, i18n.T(c.Request().Context(), "agents.settings_success"), "", refreshTime)))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSFTPSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, port, "", "", refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, currentAgent, "", "", refreshTime)))
 }

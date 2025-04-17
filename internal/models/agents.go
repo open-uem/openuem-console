@@ -252,8 +252,7 @@ func (m *Model) DeleteAgent(agentId string) error {
 }
 
 func (m *Model) EnableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background())
-	if err != nil {
+	if _, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background()); err != nil {
 		return err
 	}
 	return nil
@@ -261,22 +260,6 @@ func (m *Model) EnableAgent(agentId string) error {
 
 func (m *Model) DisableAgent(agentId string) error {
 	_, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusDisabled).Save(context.Background())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Model) EnableDebugAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetDebugMode(true).Save(context.Background())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Model) DisableDebugAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetDebugMode(false).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -421,8 +404,8 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 	return agents, nil
 }
 
-func (m *Model) SaveSFTPPort(agentID string, port string) error {
-	return m.Client.Agent.UpdateOneID(agentID).SetSftpPort(port).Exec(context.Background())
+func (m *Model) SaveAgentSettings(agentID string, settings openuem_nats.AgentSetting) (*ent.Agent, error) {
+	return m.Client.Agent.UpdateOneID(agentID).SetDebugMode(settings.DebugMode).SetSftpPort(settings.SFTPPort).SetSftpService(settings.SFTPService).SetRemoteAssistance(settings.RemoteAssistance).SetVncProxyPort(settings.VNCProxyPort).SetSettingsModified(time.Now()).Save(context.Background())
 }
 
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
@@ -465,4 +448,18 @@ func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilte
 			query.Where(agent.UpdateTaskExecutionLTE(to))
 		}
 	}
+}
+
+func (m *Model) UpdateRemoteAssistanceToAllAgents(status bool) error {
+	if _, err := m.Client.Agent.Update().SetRemoteAssistance(status).Save(context.Background()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Model) UpdateSFTPServiceToAllAgents(status bool) error {
+	if _, err := m.Client.Agent.Update().SetSftpService(status).Save(context.Background()); err != nil {
+		return err
+	}
+	return nil
 }
