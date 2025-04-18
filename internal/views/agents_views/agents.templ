@@ -179,8 +179,11 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 templ AgentsConfirmDelete(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
-		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
-		@AgentInfo(agent)
+		<div id="error" class="hidden"></div>
+		<div class="flex flex-col gap-4 my-4">
+			@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
+			@AgentInfo(agent)
+		</div>
 	</main>
 }
 
@@ -195,7 +198,9 @@ templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, currentV
 templ AgentConfirmAdmission(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
-		@partials.ConfirmAdmission(c, i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
+		<div class="mt-4 mb-2">
+			@partials.ConfirmAdmission(c, i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
+		</div>
 		@AgentInfo(agent)
 	</main>
 }

@@ -258,6 +258,11 @@ es:
     debug_mode: "Modo depuración"
     remote_assistance: "Opción de asistencia remota"
     sftp_service: "Opción de servicio SFTP"
+    delete_action: "Seleccione la opción de borrado"
+    delete_uninstall: "Borrar de la consola y desinstalar el agente"
+    delete_keep: "Borrar de la consola pero mantener el agente instalado"
+    keep_uninstall: "Desinstalar el agente pero mantener la info en la consola"
+    could_not_send_request_to_uninstall: "No se pudo enviar la petición para desinstalar el agente"
   inventory:
     hardware:
       title: "Hardware"

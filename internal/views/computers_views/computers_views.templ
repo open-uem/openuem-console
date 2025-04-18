@@ -215,7 +215,7 @@ templ ComputerActions(index int, agent models.Computer) {
 					hx-push-url="false"
 					hx-target="#main"
 					hx-swap="outerHTML"
-				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon> { i18n.T(ctx, "Delete") }</a>
+				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon> { i18n.T(ctx, "Delete") }</a>
 			</li>
 			if agent.IP != "" {
 				<li>

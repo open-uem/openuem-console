@@ -115,7 +115,7 @@ func (h *Handler) StartNATSConnectJob() error {
 
 			agentStreamConfig := jetstream.StreamConfig{
 				Name:     "AGENTS_STREAM",
-				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>"},
+				Subjects: []string{"agent.certificate.>", "agent.enable.>", "agent.disable.>", "agent.report.>", "agent.update.>", "agent.uninstall.>"},
 			}
 
 			if h.Replicas > 1 {

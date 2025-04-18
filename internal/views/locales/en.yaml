@@ -259,6 +259,11 @@ en:
     debug_mode: "Debug mode"
     remote_assistance: "Remote assistance feature"
     sftp_service: "SFTP service feature"
+    delete_action: "Select delete action"
+    delete_uninstall: "Delete from console and uninstall the agent"
+    delete_keep: "Delete from console but keep the agent installed"
+    keep_uninstall: "Uninstall the agent but keep the info in the console"
+    could_not_send_request_to_uninstall: "Could not send request to uninstall the agent"
   inventory:
     hardware:
       title: "Hardware"
