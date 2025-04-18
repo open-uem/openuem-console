@@ -1,0 +1,56 @@
+package partials
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+)
+
+templ ConfirmDeleteAgent(c echo.Context, confirm, cancelURL, deleteURL string) {
+	<div id="confirm">
+		<div id="confirm-message" class="uk-alert uk-alert-danger uk-background-default" uk-alert>
+			<div class="uk-alert-description p-2">
+				{ confirm }
+				<div class="flex items-end gap-6 pt-6">
+					<div>
+						<label class="uk-form-label" for="agent-delete-action">{ i18n.T(ctx, "agents.delete_action") }</label>
+						<select
+							id="agent-delete-action"
+							name="agent-delete-action"
+							title={ i18n.T(ctx, "agents.delete_action") }
+							class="uk-select"
+							aria-label={ i18n.T(ctx, "agents.delete_action") }
+						>
+							<option value="delete-and-uninstall">{ i18n.T(ctx, "agents.delete_uninstall") }</option>
+							<option value="delete-and-keep">{ i18n.T(ctx, "agents.delete_keep") }</option>
+							<option value="keep-and-uninstall">{ i18n.T(ctx, "agents.keep_uninstall") }</option>
+						</select>
+					</div>
+					if cancelURL != "" {
+						<button
+							hx-get={ GetCurrentUrl(c, cancelURL) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							class="uk-button uk-button-default"
+						>
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					} else {
+						<button class="uk-button uk-button-default" _="on click UIkit.alert('#confirm-message').close() then toggle .hidden on #confirm" id="error-message" class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white " uk-alert="animation:true">
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					}
+					<button
+						hx-delete={ string(templ.URL(deleteURL)) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-include="#agent-delete-action"
+						class="uk-button uk-button-danger"
+					>
+						{ i18n.T(ctx, "Delete") }
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

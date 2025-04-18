@@ -29,7 +29,7 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, sm *sessions
 				</div>
 				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete)
 				if confirmDelete {
-					@partials.ConfirmDelete(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
