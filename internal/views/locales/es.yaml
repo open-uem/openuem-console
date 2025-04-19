@@ -290,6 +290,8 @@ es:
       model: "Modelo"
       serial: "Núm. Serie"
       no_monitors: "No existe aún información sobre los monitores conectados"
+      week_of_manufacture: "Semana de fabric."
+      year_of_manufacture: "Año de fabric."
     logical_disk:
       title: "Discos Lógicos"
       description: "Estos son los discos lógicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
