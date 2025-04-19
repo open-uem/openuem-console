@@ -291,6 +291,8 @@ en:
       model: "Model"
       serial: "Serial"
       no_monitors: "No monitors information is available yet"
+      week_of_manufacture: "Week of manufacture"
+      year_of_manufacture: "Year of manufacture"
     logical_disk:
       title: "Logical Disks"
       description: "These are the logical disks connected to this computer as reported by the OpenUEM agent"

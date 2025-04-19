@@ -49,6 +49,8 @@ templ Monitors(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									<th>{ i18n.T(ctx, "inventory.monitor.manufacturer") }</th>
 									<th>{ i18n.T(ctx, "inventory.monitor.model") }</th>
 									<th>{ i18n.T(ctx, "inventory.monitor.serial") }</th>
+									<th>{ i18n.T(ctx, "inventory.monitor.week_of_manufacture") }</th>
+									<th>{ i18n.T(ctx, "inventory.monitor.year_of_manufacture") }</th>
 								</tr>
 							</thead>
 							for _, monitor := range agent.Edges.Monitors {
@@ -63,6 +65,16 @@ templ Monitors(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 										<td>-</td>
 									} else {
 										<td>{ monitor.Serial }</td>
+									}
+									if monitor.WeekOfManufacture == "" {
+										<td>-</td>
+									} else {
+										<td>{ monitor.WeekOfManufacture }</td>
+									}
+									if monitor.YearOfManufacture == "" {
+										<td>-</td>
+									} else {
+										<td>{ monitor.YearOfManufacture }</td>
 									}
 								</tr>
 							}
