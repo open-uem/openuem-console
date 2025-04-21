@@ -287,7 +287,7 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 }
 
 func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithComputer().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+	agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().Where(agent.ID(agentId)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}

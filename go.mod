@@ -27,8 +27,8 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.41.0
-	github.com/open-uem/ent v0.0.0-20250418203617-439211a78217
-	github.com/open-uem/nats v0.0.0-20250419082047-bcaf840b68ff
+	github.com/open-uem/ent v0.0.0-20250421093541-96a08d8163e7
+	github.com/open-uem/nats v0.0.0-20250421093642-a4655dc84c80
 	github.com/open-uem/utils v0.0.0-20250407085447-f3730b9ef3ac
 	github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1
 	github.com/pkg/sftp v1.13.9
