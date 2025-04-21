@@ -81,16 +81,6 @@ templ Computer(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 						<div class="uk-card uk-card-body uk-card-default">
 							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
 								<tr>
-									<th>{ i18n.T(ctx, "inventory.hardware.memory") }</th>
-									<td>{ fmt.Sprintf("%d MB", agent.Edges.Computer.Memory) }</td>
-								</tr>
-							</table>
-						</div>
-					</div>
-					<div>
-						<div class="uk-card uk-card-body uk-card-default">
-							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
-								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.processor") }</th>
 									<td>{ agent.Edges.Computer.Processor }</td>
 								</tr>
@@ -102,6 +92,63 @@ templ Computer(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									<th># Cores</th>
 									<td>{ strconv.Itoa(int(agent.Edges.Computer.ProcessorCores)) }</td>
 								</tr>
+							</table>
+						</div>
+					</div>
+					<div>
+						<div class="uk-card uk-card-body uk-card-default">
+							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.hardware.memory") }</th>
+									<td class="font-bold">{ fmt.Sprintf("%d MB", agent.Edges.Computer.Memory) }</td>
+								</tr>
+								for _, slot := range agent.Edges.Memoryslots {
+									<tr>
+										<th>{ slot.Slot }</th>
+										<td>
+											if slot.Manufacturer != "" {
+												{ slot.Manufacturer }
+											} else {
+												{ " - " }
+											}
+										</td>
+										<td>
+											if slot.Size != "" {
+												{ slot.Size }
+											} else {
+												{ " - " }
+											}
+										</td>
+										<td>
+											if slot.Type != "" {
+												{ slot.Type }
+											} else {
+												{ " - " }
+											}
+										</td>
+										<td>
+											if slot.Speed != "" {
+												{ slot.Speed }
+											} else {
+												{ " - " }
+											}
+										</td>
+										<td>
+											if slot.SerialNumber != "" {
+												{ fmt.Sprintf("S/N: %s",slot.SerialNumber) }
+											} else {
+												{ " - " }
+											}
+										</td>
+										<td>
+											if slot.PartNumber != "" {
+												{ fmt.Sprintf("P/N: %s",slot.PartNumber) }
+											} else {
+												{ " - " }
+											}
+										</td>
+									</tr>
+								}
 							</table>
 						</div>
 					</div>
