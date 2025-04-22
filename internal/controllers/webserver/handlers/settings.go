@@ -120,6 +120,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			return h.ChangeRemoteAssistanceSetting(c, settings)
 		}
 
+		if c.FormValue("detect-remote-agents") != "" {
+			if err := h.Model.UpdateDetectRemoteAgents(settings.ID, settings.DetectRemoteAgents); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.detect_remote_agents_could_not_be_saved"), true))
+			}
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -173,6 +179,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	useFlatpak := c.FormValue("use-flatpak")
 	disableSFTP := c.FormValue("disable-sftp")
 	disableRemoteAssistance := c.FormValue("disable-remote-assistance")
+	detectRemoteAgents := c.FormValue("detect-remote-agents")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -310,6 +317,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.RemoteAssistanceDisabled, err = strconv.ParseBool(disableRemoteAssistance)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.disable_remote_assistance_invalid"))
+		}
+	}
+
+	if detectRemoteAgents != "" {
+		settings.DetectRemoteAgents, err = strconv.ParseBool(detectRemoteAgents)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.detect_remote_agents_invalid"))
 		}
 	}
 

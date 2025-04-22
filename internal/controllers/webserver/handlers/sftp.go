@@ -94,7 +94,12 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files)))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -194,7 +199,12 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files)))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
@@ -260,7 +270,12 @@ func (h *Handler) RenameItem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files)))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
@@ -317,7 +332,13 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, removeForm.Parent, files)))
+
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, removeForm.Parent, files, detectRemoteAgents)))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -395,7 +416,12 @@ func (h *Handler) UploadFile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {

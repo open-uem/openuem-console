@@ -657,6 +657,12 @@ es:
     disable_remote_assistance_could_not_be_saved: No se pudo guardar el valor de la Asistencia Remota
     disable_remote_assistance_error: La configuración de la Asistencia Remota no pudo comunicarse a los agentes, inténtelo más tarde
     disable_remote_assistance_to_all: No se pudo actualizar la configuración de asistencia remota para todos los agentes
+    detect_remote_agents_title: Detectar agentes remotos
+    detect_remote_agents_description: OpenUEM marcará como remotos a aquellos agentes para los que la dirección IP incluida en el informe no coincide con la IP resuelta por DNS
+    detect_remote_agents_success: La configuración de detección de agentes remotos se ha guardado
+    detect_remote_agents_invalid: El valor seleccionado para la detección de agentes remotos no es válido
+    detect_remote_agents_could_not_be_saved: La configuración de detección de agentes remotos no pudo guardarse
+    could_not_get_detect_remote_agents_setting: No se pudo consultar la configuración de detección de agentes remotos
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

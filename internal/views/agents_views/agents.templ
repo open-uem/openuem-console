@@ -16,7 +16,7 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled bool, successMessage, errMessage string, refresh int) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled, detectRemoteAgents bool, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -163,7 +163,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						end"
 					>
 						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
-						@AgentsTableBody(p, l, agents, availableTags, sftpDisabled)
+						@AgentsTableBody(p, l, agents, availableTags, sftpDisabled, detectRemoteAgents)
 					</table>
 					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/agents")
 				} else {
@@ -258,15 +258,6 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			</th>
 			<th>
 				<div class="flex gap-1 items-center">
-					<span>{ i18n.T(ctx, "agents.remote") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML", "get")
-					@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
-						return len(f.IsRemote) == 0
-					})
-				</div>
-			</th>
-			<th>
-				<div class="flex gap-1 items-center">
 					<span>{ i18n.T(ctx, "agents.hostname") }</span>
 					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 					@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
@@ -328,7 +319,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</thead>
 }
 
-templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag, sftpDisabled bool) {
+templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag, sftpDisabled bool, detectRemoteAgents bool) {
 	for index, agent := range agents {
 		<tr>
 			<td class="!align-middle">
@@ -410,13 +401,6 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 					`,p.PageSize) }
 				/>
 			</td>
-			<td class="!align-middle">
-				if agent.IsRemote {
-					<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
-						<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-					</span>
-				}
-			</td>
 			<td
 				class="!align-middle hover:cursor-pointer"
 				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
@@ -437,6 +421,11 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
 						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
 							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+						</div>
+					}
+					if agent.IsRemote && detectRemoteAgents {
+						<div uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</div>
 					}
 					// time.Now().AddDate(0, 0, -1)

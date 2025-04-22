@@ -11,7 +11,7 @@ import (
 
 var connectVNCHandle = templ.NewOnceHandle()
 
-templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, confirmDelete bool) {
+templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, confirmDelete, detectRemoteAgents bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -22,7 +22,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote {
+					if agent.IsRemote && detectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>
@@ -44,7 +44,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, sm *session
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && !agent.IsRemote && agent.RemoteAssistance {
+					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && (!detectRemoteAgents || (detectRemoteAgents && !agent.IsRemote)) && agent.RemoteAssistance {
 						<div id="vnc">
 							<a
 								class="flex gap-2 items-center uk-text-small"
