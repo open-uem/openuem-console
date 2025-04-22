@@ -667,6 +667,12 @@ en:
     detect_remote_agents_invalid: Selected value for Detect remote agents is not valid
     detect_remote_agents_could_not_be_saved: Detect remote agents setting could not be saved
     could_not_get_detect_remote_agents_setting: Could not get Detect remote agents general setting
+    auto_admit_agents_title: Admit agents automatically
+    auto_admit_agents_description: OpenUEM will admit automatically agents without waiting for the admin to admit them. Note that you'll have to request to generate certificates for the agent from the agent's actions menu if you want to connect using SFTP or VNC/RDP
+    auto_admit_agents_success: The admit agents automatically setting has been saved
+    auto_admit_agents_invalid: Selected value for admit agents automatically is not valid
+    auto_admit_agents_could_not_be_saved: Admit agents automatically setting could not be saved
+    could_not_get_auto_admit_agents_setting: Could not update admit agents automatically setting
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong

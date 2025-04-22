@@ -7,6 +7,27 @@ import (
 	"github.com/open-uem/ent/settings"
 )
 
+type GeneralSettings struct {
+	ID                       int
+	Country                  string
+	MaxUploadSize            string
+	UserCertYears            int
+	NATSTimeout              int
+	Refresh                  int
+	SessionLifetime          int
+	UpdateChannel            string
+	AgentFrequency           int
+	RequestVNCPIN            bool
+	Tag                      int
+	WinGetFrequency          int
+	UseWinget                bool
+	UseFlatpak               bool
+	SFTPDisabled             bool
+	RemoteAssistanceDisabled bool
+	DetectRemoteAgents       bool
+	AutoAdmitAgents          bool
+}
+
 func (m *Model) GetMaxUploadSize() (string, error) {
 	var err error
 
@@ -202,6 +223,21 @@ func (m *Model) UpdateDetectRemoteAgents(settingsId int, detectRemoteAgents bool
 	return m.Client.Settings.UpdateOneID(settingsId).SetDetectRemoteAgents(detectRemoteAgents).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultAutoAdmitAgents() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldAutoAdmitAgents).Only(context.Background())
+	if err != nil {
+		return false, err
+	}
+
+	return settings.AutoAdmitAgents, nil
+}
+
+func (m *Model) UpdateAutoAdmitAgents(settingsId int, autoAdmitAgents bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetAutoAdmitAgents(autoAdmitAgents).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().WithTag().Select(
@@ -221,6 +257,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldDisableSftp,
 		settings.FieldDisableRemoteAssistance,
 		settings.FieldDetectRemoteAgents,
+		settings.FieldAutoAdmitAgents,
 		settings.TagColumn,
 	)
 
@@ -288,24 +325,4 @@ func (m *Model) GetDefaultUseFlatpak() (bool, error) {
 	}
 
 	return settings.UseFlatpak, nil
-}
-
-type GeneralSettings struct {
-	ID                       int
-	Country                  string
-	MaxUploadSize            string
-	UserCertYears            int
-	NATSTimeout              int
-	Refresh                  int
-	SessionLifetime          int
-	UpdateChannel            string
-	AgentFrequency           int
-	RequestVNCPIN            bool
-	Tag                      int
-	WinGetFrequency          int
-	UseWinget                bool
-	UseFlatpak               bool
-	SFTPDisabled             bool
-	RemoteAssistanceDisabled bool
-	DetectRemoteAgents       bool
 }
