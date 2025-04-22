@@ -187,6 +187,21 @@ func (m *Model) UpdateRemoteAssistanceDisabled(settingsId int, disableRemoteAssi
 	return m.Client.Settings.UpdateOneID(settingsId).SetDisableRemoteAssistance(disableRemoteAssistance).Exec(context.Background())
 }
 
+func (m *Model) GetDefaultDetectRemoteAgents() (bool, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldDetectRemoteAgents).Only(context.Background())
+	if err != nil {
+		return false, err
+	}
+
+	return settings.DetectRemoteAgents, nil
+}
+
+func (m *Model) UpdateDetectRemoteAgents(settingsId int, detectRemoteAgents bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetDetectRemoteAgents(detectRemoteAgents).Exec(context.Background())
+}
+
 func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 
 	query := m.Client.Settings.Query().WithTag().Select(
@@ -205,6 +220,7 @@ func (m *Model) GetGeneralSettings() (*openuem_ent.Settings, error) {
 		settings.FieldUseFlatpak,
 		settings.FieldDisableSftp,
 		settings.FieldDisableRemoteAssistance,
+		settings.FieldDetectRemoteAgents,
 		settings.TagColumn,
 	)
 
@@ -291,4 +307,5 @@ type GeneralSettings struct {
 	UseFlatpak               bool
 	SFTPDisabled             bool
 	RemoteAssistanceDisabled bool
+	DetectRemoteAgents       bool
 }

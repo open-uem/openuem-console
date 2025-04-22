@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *openuem_ent.Agent, cwd, parent string, files []fs.FileInfo) {
+templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *openuem_ent.Agent, cwd, parent string, files []fs.FileInfo, detectRemoteAgents bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -21,7 +21,7 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, curren
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
 					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote {
+					if agent.IsRemote && detectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>

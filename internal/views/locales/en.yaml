@@ -661,6 +661,12 @@ en:
     disable_remote_assistance_could_not_be_saved: Remote Assistance setting could not be saved
     disable_remote_assistance_error: The new Remote Assistance setting cannot be communicated to the agents now, retry later
     disable_remote_assistance_to_all: Could not update remote assistance setting to all agents
+    detect_remote_agents_title: Detect remote agents
+    detect_remote_agents_description: OpenUEM will mark as remote agents to those agents with a reported IP address that doesn't match the IP address resolved by DNS
+    detect_remote_agents_success: Detect remote agents setting has been saved
+    detect_remote_agents_invalid: Selected value for Detect remote agents is not valid
+    detect_remote_agents_could_not_be_saved: Detect remote agents setting could not be saved
+    could_not_get_detect_remote_agents_setting: Could not get Detect remote agents general setting
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong

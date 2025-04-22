@@ -48,10 +48,15 @@ func (h *Handler) Computer(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
@@ -71,13 +76,18 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
 
 	l := views.GetTranslatorForDates(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, h.SessionManager, h.Version, latestServerRelease.Version, l, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, h.SessionManager, h.Version, latestServerRelease.Version, l, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
@@ -97,9 +107,15 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
+
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -119,10 +135,15 @@ func (h *Handler) Printers(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
@@ -142,9 +163,14 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
@@ -164,10 +190,15 @@ func (h *Handler) Shares(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
@@ -187,9 +218,14 @@ func (h *Handler) Monitors(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
@@ -236,8 +272,13 @@ func (h *Handler) Apps(c echo.Context) error {
 		log.Fatalf("[FATAL]: an error occurred querying apps for agent: %v", err)
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, h.SessionManager, h.Version, latestServerRelease.Version, a, apps, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, h.SessionManager, h.Version, latestServerRelease.Version, a, apps, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -257,10 +298,15 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {
@@ -494,6 +540,11 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 
 	l := views.GetTranslatorForDates(c)
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	if comesFromDialog {
 		currentUrl := c.Request().Header.Get("Hx-Current-Url")
 		if currentUrl != "" {
@@ -502,12 +553,12 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage)), u)
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, detectRemoteAgents)), u)
 			}
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, detectRemoteAgents)))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
@@ -554,7 +605,12 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, agent, deployments, successMessage, confirmDelete, refreshTime)))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, agent, deployments, successMessage, confirmDelete, detectRemoteAgents, refreshTime)))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -799,10 +855,15 @@ func (h *Handler) PowerManagement(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
 		p := partials.PaginationAndSort{}
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete)))
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
 	}
 
 	action := c.Param("action")
@@ -981,7 +1042,12 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, data, orgMetadata, confirmDelete, successMessage)))
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, data, orgMetadata, confirmDelete, detectRemoteAgents, successMessage)))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
@@ -1012,9 +1078,14 @@ func (h *Handler) Notes(c echo.Context) error {
 	maybeUnsafeHTML := markdown.ToHTML([]byte(agent.Notes), nil, nil)
 	renderedMarkdown := string(bluemonday.UGCPolicy().SanitizeBytes(maybeUnsafeHTML))
 
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, agent.Notes, renderedMarkdown, confirmDelete)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, agent.Notes, renderedMarkdown, confirmDelete, detectRemoteAgents)))
 }
 
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {

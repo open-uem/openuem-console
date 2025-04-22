@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int, successMessage string) {
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []models.Computer, versions, vendors, models []string, availableTags []*openuem_ent.Tag, availableOSes []string, refreshTime int, successMessage string, detectRemoteAgents bool) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -57,7 +57,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							@ComputersHeader(c, p, f, versions, vendors, models, availableTags, availableOSes)
 						</thead>
 						<tbody>
-							@ComputersBody(p, agents, availableTags)
+							@ComputersBody(p, agents, availableTags, detectRemoteAgents)
 						</tbody>
 					</table>
 					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/computers")
@@ -78,15 +78,6 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 				<span>{ i18n.T(ctx, "agents.hostname") }</span>
 				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
 				@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
-			</div>
-		</th>
-		<th>
-			<div class="flex gap-1 items-center">
-				<span>{ i18n.T(ctx, "agents.remote") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.remote"), "remote", "alpha", "#main", "outerHTML", "get")
-				@filters.FilterByOptions(c, p, "IsRemote", "agents.filter_by_status", []string{"Remote", "Local"}, f.IsRemote, "#main", "outerHTML", true, func() bool {
-					return len(f.IsRemote) == 0
-				})
 			</div>
 		</th>
 		<th>
@@ -140,7 +131,7 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</tr>
 }
 
-templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, availableTags []*openuem_ent.Tag) {
+templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, availableTags []*openuem_ent.Tag, detectRemoteAgents bool) {
 	for index, agent := range agents {
 		<tr class="h-16">
 			<td
@@ -157,14 +148,12 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>
 					}
+					if agent.IsRemote && detectRemoteAgents {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</span>
+					}
 				</div>
-			</td>
-			<td class="!align-middle">
-				if agent.IsRemote {
-					<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
-						<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-					</span>
-				}
 			</td>
 			<td class="!align-middle">
 				@partials.OSBadge(agent.OS)
