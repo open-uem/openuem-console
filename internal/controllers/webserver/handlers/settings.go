@@ -126,6 +126,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if c.FormValue("auto-admit-agents") != "" {
+			if err := h.Model.UpdateAutoAdmitAgents(settings.ID, settings.AutoAdmitAgents); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.auto_admit_agents_could_not_be_saved"), true))
+			}
+		}
+
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
@@ -180,6 +186,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	disableSFTP := c.FormValue("disable-sftp")
 	disableRemoteAssistance := c.FormValue("disable-remote-assistance")
 	detectRemoteAgents := c.FormValue("detect-remote-agents")
+	autoAdmitAgents := c.FormValue("auto-admit-agents")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -324,6 +331,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.DetectRemoteAgents, err = strconv.ParseBool(detectRemoteAgents)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.detect_remote_agents_invalid"))
+		}
+	}
+
+	if autoAdmitAgents != "" {
+		settings.AutoAdmitAgents, err = strconv.ParseBool(autoAdmitAgents)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.auto_admit_agents_invalid"))
 		}
 	}
 
