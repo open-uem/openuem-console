@@ -161,6 +161,9 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	for index := range agents_views.AgentStatus {
 		value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
 		if value != "" {
+			if value == "No Contact" {
+				f.NoContact = true
+			}
 			filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
 		}
 	}

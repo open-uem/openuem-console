@@ -158,7 +158,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 			<td class="!align-middle">
 				@partials.OSBadge(agent.OS)
 			</td>
-			<td class="!align-middle">{ agent.Version } </td>
+			<td class="!align-middle">{ strings.Title(agent.Version) } </td>
 			<td class="!align-middle">{ agent.Username } </td>
 			<td class="!align-middle text-center">
 				@partials.Manufacturer(strings.ToLower(agent.Manufacturer))
