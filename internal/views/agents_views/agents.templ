@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled"}
+var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled", "No Contact"}
 
 templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled, detectRemoteAgents bool, successMessage, errMessage string, refresh int) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm, currentVersion, latestVersion)
@@ -144,7 +144,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								disabled?={ f.SelectedItems == 0 }
 							>
 								<div class="flex items-center gap-2">
-									<uk-icon hx-history="false" icon="megaphone-off" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									<uk-icon hx-history="false" icon="monitor-off" custom-class="h-5 w-5" uk-cloack></uk-icon>
 									{ i18n.T(ctx, "Disable") }
 								</div>
 							</button>
@@ -270,7 +270,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 						@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Status"), "status", "alpha", "#main", "outerHTML", "get")
 					</div>
 					<div>
-						@filters.FilterByOptions(c, p, "StatusAgent", "agents.filter_by_status", AgentStatus, f.AgentStatusOptions, "#main", "outerHTML", true, func() bool {
+						@filters.FilterBySingleChoice(c, p, "StatusAgent", "agents.filter_by_status", AgentStatus, f.AgentStatusOptions, "#main", "outerHTML", true, func() bool {
 							return len(f.AgentStatusOptions) == 0
 						})
 					</div>
@@ -418,30 +418,34 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 							<uk-icon hx-history="false" icon="search-check" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>
 					}
-					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
-						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
-							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
-						</div>
-					}
 					if agent.IsRemote && detectRemoteAgents {
 						<div uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</div>
 					}
-					// time.Now().AddDate(0, 0, -1)
 				</div>
 			</td>
 			<td class="!align-middle">
-				<div uk-tooltip={ i18n.T(ctx, agent.AgentStatus.String()) }>
-					switch agent.AgentStatus {
-						case "WaitingForAdmission":
-							<uk-icon hx-history="false" icon="monitor-pause" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>
-						case "Enabled":
-							<uk-icon hx-history="false" icon="monitor-check" custom-class="h-6 w-6 text-green-600" uk-cloack></uk-icon>
-						case "Disabled":
-							<uk-icon hx-history="false" icon="monitor-x" custom-class="h-6 w-6 text-gray-600" uk-cloack></uk-icon>
-					}
-				</div>
+				switch agent.AgentStatus {
+					case "WaitingForAdmission":
+						<div class="h-7 w-7" uk-tooltip={ i18n.T(ctx, agent.AgentStatus.String()) }>
+							<uk-icon hx-history="false" icon="monitor-pause" custom-class="h-7 w-7 text-orange-600" uk-cloack></uk-icon>
+						</div>
+					case "Enabled":
+						if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
+							<div class="h-7 w-7" uk-tooltip={ i18n.T(ctx, "No Contact") }>
+								<uk-icon hx-history="false" icon="monitor-x" custom-class="h-7 w-7 text-red-600" uk-cloack></uk-icon>
+							</div>
+						} else {
+							<div class="h-7 w-7" uk-tooltip={ i18n.T(ctx, agent.AgentStatus.String()) }>
+								<uk-icon hx-history="false" icon="monitor-check" custom-class="h-7 w-7 text-green-600" uk-cloack></uk-icon>
+							</div>
+						}
+					case "Disabled":
+						<div class="h-7 w-7" uk-tooltip={ i18n.T(ctx, agent.AgentStatus.String()) }>
+							<uk-icon hx-history="false" icon="monitor-off" custom-class="h-7 w-7 text-gray-600" uk-cloack></uk-icon>
+						</div>
+				}
 			</td>
 			<td class="!align-middle">
 				@partials.OSBadge(agent.Os)
@@ -502,7 +506,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
-						<uk-icon hx-history="false" icon="megaphone-off" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						<uk-icon hx-history="false" icon="monitor-off" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
 						{ i18n.T(ctx, "Disable") }
 					</a>
 				</li>

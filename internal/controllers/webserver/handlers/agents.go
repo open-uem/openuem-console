@@ -68,12 +68,18 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 			if err == nil {
 				value := u.Query().Get(fmt.Sprintf("filterByStatusAgent%d", index))
 				if value != "" {
+					if value == "No Contact" {
+						f.NoContact = true
+					}
 					filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
 				}
 			}
 		} else {
 			value := c.FormValue(fmt.Sprintf("filterByStatusAgent%d", index))
 			if value != "" {
+				if value == "No Contact" {
+					f.NoContact = true
+				}
 				filteredAgentStatusOptions = append(filteredAgentStatusOptions, value)
 			}
 		}

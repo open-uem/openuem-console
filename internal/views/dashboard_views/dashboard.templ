@@ -71,8 +71,8 @@ templ Dashboard(sm *sessions.SessionManager, l locales.Translator, currentVersio
 							</th>
 							<td class="!align-middle text-center">
 								<a
-									href="/agents?sortBy=last_contact&sortOrder=asc"
-									hx-get="/agents?sortBy=last_contact&sortOrder=asc"
+									href="/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc"
+									hx-get="/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc"
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"

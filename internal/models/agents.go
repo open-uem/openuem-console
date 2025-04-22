@@ -183,6 +183,10 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 			query.Where(agent.AgentStatusEQ(agent.AgentStatusEnabled))
 		}
 
+		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "No Contact" {
+			query.Where(agent.AgentStatusEQ(agent.AgentStatusEnabled))
+		}
+
 		if len(f.AgentStatusOptions) == 1 && f.AgentStatusOptions[0] == "Disabled" {
 			query.Where(agent.AgentStatusEQ(agent.AgentStatusDisabled))
 		}
@@ -224,6 +228,10 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		if len(predicates) > 0 {
 			query.Where(agent.And(predicates...))
 		}
+	}
+
+	if f.NoContact {
+		query.Where(agent.LastContactLTE((time.Now().AddDate(0, 0, -1))))
 	}
 }
 

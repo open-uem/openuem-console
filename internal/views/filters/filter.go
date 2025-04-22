@@ -23,6 +23,7 @@ type AgentFilter struct {
 	SelectedAllAgents     string
 	SelectedRelease       string
 	IsRemote              []string
+	NoContact             bool
 }
 
 type ApplicationsFilter struct {
