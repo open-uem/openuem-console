@@ -52,7 +52,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 					<form class="mt-5 mb-2">
 						<input id="filterByApplication" type="hidden" name="filterByApplication" value={ f.WithApplication }/>
 					</form>
-					<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 						<thead>
 							@ComputersHeader(c, p, f, versions, vendors, models, availableTags, availableOSes)
 						</thead>

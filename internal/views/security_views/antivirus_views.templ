@@ -42,7 +42,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 							@partials.RefreshPage(l, "/security", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(antiviri) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 								<form class="mt-5 mb-2">
 									<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
 									<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>

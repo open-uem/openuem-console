@@ -5,7 +5,7 @@ export default {
   presets: [
     franken({
       customPalette: {
-        ".uk-theme-emerald": {
+        ".uk-theme-openuem": {
           "--background": "0 0% 100%",
           "--foreground": "240 10% 3.9%",
           "--card": "0 0% 100%",
@@ -26,7 +26,7 @@ export default {
           "--input": "240 5.9% 90%",
           "--ring": "142.1 76.2% 36.3%",
         },
-        ".dark.uk-theme-emerald": {
+        ".dark.uk-theme-openuem": {
           "--background": "20 14.3% 4.1%",
           "--foreground": "0 0% 95%",
           "--card": "24 9.8% 10%",

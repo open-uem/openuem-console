@@ -36,7 +36,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 					@partials.RefreshPage(l, "/software", "#main", "outerHTML", "get", refresh, true)
 				</div>
 				if len(apps) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 						<thead>
 							<tr>
 								<th><span class="sr-only">{ i18n.T(ctx, "apps.logo") }</span></th>

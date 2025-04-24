@@ -21,7 +21,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 				<div id="confirm" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
-				<div id="confirm-tag-delete" class="uk-alert uk-alert-danger bg-red-100 hidden" uk-alert>
+				<div id="confirm-tag-delete" class="uk-alert uk-alert-danger bg-red-100  dark:bg-red-600 dark:text-white hidden" uk-alert>
 					@ConfirmTagDeletion()
 				</div>
 				<div id="edit-tag-dialog" class="uk-alert border border-green-700 bg-green-50 hidden" uk-alert>
@@ -37,7 +37,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 					<div class="uk-card-body">
 						@NewTag()
 						if len(tags) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 								<thead>
 									<tr>
 										<th class="w-1/6">

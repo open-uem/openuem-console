@@ -63,7 +63,7 @@ templ Dashboard(sm *sessions.SessionManager, l locales.Translator, currentVersio
 				@partials.RefreshPage(l, "/dashboard", "#main", "outerHTML", "get", data.RefreshTime, true)
 			</div>
 			<div class="flex gap-2 justify-start">
-				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">
 					<tbody>
 						<tr>
 							<th class="!align-middle">
@@ -213,7 +213,7 @@ templ Dashboard(sm *sessions.SessionManager, l locales.Translator, currentVersio
 						</tr>
 					</tbody>
 				</table>
-				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">
 					<tbody>
 						<tr>
 							<th class="!align-middle">
@@ -316,7 +316,7 @@ templ Dashboard(sm *sessions.SessionManager, l locales.Translator, currentVersio
 						</tr>
 					</tbody>
 				</table>
-				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6 w-1/3">
+				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">
 					<tbody>
 						<tr>
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.nats_server_status") }</th>

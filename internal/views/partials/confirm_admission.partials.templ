@@ -6,7 +6,7 @@ import (
 )
 
 templ ConfirmAdmission(c echo.Context, confirm, cancelURL, admitURL string) {
-	<div class="uk-alert border-blue-600 text-blue-500" uk-alert>
+	<div class="uk-alert border-blue-700 text-blue-500 dark:bg-blue-500 dark:text-white" uk-alert>
 		<div class="uk-alert-description p-2">
 			{ confirm }
 			<div class="flex gap-6 pt-6">

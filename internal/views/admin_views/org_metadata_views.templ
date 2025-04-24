@@ -19,10 +19,10 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 				<div id="confirm" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
-				<div id="confirm-orgmetadata-delete" class="uk-alert uk-alert-danger hidden" uk-alert>
+				<div id="confirm-orgmetadata-delete" class="uk-alert uk-alert-danger dark:bg-red-600 dark:text-white hidden" uk-alert>
 					@ConfirmOrgMetadataDeletion()
 				</div>
-				<div id="edit-orgmetadata-dialog" class="uk-alert border border-blue-700 hidden" uk-alert>
+				<div id="edit-orgmetadata-dialog" class="uk-alert border border-blue-700  dark:bg-blue-500 dark:text-white hidden" uk-alert>
 					@EditOrgMetadata()
 				</div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -35,7 +35,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 					<div class="uk-card-body">
 						@NewOrgMetadata()
 						if len(data) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 								<thead>
 									<tr>
 										<th class="w-1/4">

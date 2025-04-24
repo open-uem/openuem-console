@@ -154,7 +154,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 				</div>
 				if len(agents) > 0 {
 					<table
-						class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important"
+						class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped "
 						_="on load
 							if #filterBySelectedItems.value is '0' then
 								set storedItems to [] as Array
@@ -178,7 +178,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 
 templ AgentsConfirmDelete(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
-	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
 		<div id="error" class="hidden"></div>
 		<div class="flex flex-col gap-4 my-4">
 			@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
@@ -189,7 +189,7 @@ templ AgentsConfirmDelete(c echo.Context, sm *sessions.SessionManager, currentVe
 
 templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
-	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
 		@partials.ConfirmDisable(c, i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable")
 		@AgentInfo(agent)
 	</main>
@@ -197,7 +197,7 @@ templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, currentV
 
 templ AgentConfirmAdmission(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
-	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-white">
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
 		<div class="mt-4 mb-2">
 			@partials.ConfirmAdmission(c, i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
 		</div>
@@ -208,7 +208,7 @@ templ AgentConfirmAdmission(c echo.Context, sm *sessions.SessionManager, current
 templ AgentInfo(agent *ent.Agent) {
 	<div class="uk-width-1-2@m uk-card uk-card-default">
 		<div class="uk-card-body">
-			<table class="uk-table uk-table-striped border border-gray-400!important mt-2">
+			<table class="uk-table uk-table-striped  mt-2">
 				<tr><th>{ i18n.T(ctx, "agents.hostname") }</th><td>{ agent.Hostname }</td></tr>
 				<tr><th>{ i18n.T(ctx, "agents.manufacturer") }</th><td>{ agent.Edges.Computer.Manufacturer }</td></tr>
 				<tr><th>{ i18n.T(ctx, "Serial") }</th><td>{ agent.Edges.Computer.Serial }</td></tr>
