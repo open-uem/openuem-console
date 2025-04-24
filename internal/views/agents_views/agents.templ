@@ -554,7 +554,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 					</a>
 				</li>
 			}
-			if !sftpDisabled {
+			if !sftpDisabled && agent.AgentStatus == "Enabled" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/logs", agent.ID))) }
@@ -569,17 +569,19 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 					</a>
 				</li>
 			}
-			<li>
-				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/settings", agent.ID))) }
-					hx-target="#main"
-					hx-swap="outerHTML"
-					hx-push-url="true"
-				>
-					<uk-icon hx-history="false" icon="settings" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
-					{ i18n.T(ctx, "Settings") }
-				</a>
-			</li>
+			if agent.AgentStatus != "WaitingForAdmission" {
+				<li>
+					<a
+						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/settings", agent.ID))) }
+						hx-target="#main"
+						hx-swap="outerHTML"
+						hx-push-url="true"
+					>
+						<uk-icon hx-history="false" icon="settings" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "Settings") }
+					</a>
+				</li>
+			}
 			<li>
 				<a
 					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }
