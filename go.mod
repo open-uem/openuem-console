@@ -6,12 +6,12 @@ require (
 	entgo.io/ent v0.14.4
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.857
-	github.com/alexedwards/scs/pgxstore v0.0.0-20250212122300-421ef1d8611c
+	github.com/alexedwards/scs/pgxstore v0.0.0-20250417082927-ab20b3feb5e9
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
 	github.com/go-co-op/gocron/v2 v2.16.1
-	github.com/go-echarts/go-echarts/v2 v2.5.2
+	github.com/go-echarts/go-echarts/v2 v2.5.3
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/gohugoio/locales v0.14.0
@@ -23,13 +23,13 @@ require (
 	github.com/johnfercher/maroto/v2 v2.3.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
-	github.com/mattn/go-sqlite3 v1.14.27
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
-	github.com/nats-io/nats.go v1.41.0
-	github.com/open-uem/ent v0.0.0-20250422104317-37876cf69cea
-	github.com/open-uem/nats v0.0.0-20250421093642-a4655dc84c80
-	github.com/open-uem/utils v0.0.0-20250407085447-f3730b9ef3ac
+	github.com/nats-io/nats.go v1.41.2
+	github.com/open-uem/ent v0.0.0-20250424154135-51cb9044486a
+	github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381
+	github.com/open-uem/utils v0.0.0-20250424154005-aa7e1df31e6c
 	github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1
 	github.com/pkg/sftp v1.13.9
 	github.com/stretchr/testify v1.10.0
@@ -43,7 +43,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.32.0 // indirect
+	ariga.io/atlas v0.32.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/f-amaral/go-async v0.3.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/go-openapi/inflect v0.21.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -62,6 +62,7 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
+	github.com/hhrutter/pkcs7 v0.2.0 // indirect
 	github.com/hhrutter/tiff v1.0.2 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -78,9 +79,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/nats-io/nkeys v0.4.10 // indirect
+	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pdfcpu/pdfcpu v0.9.1 // indirect
+	github.com/pdfcpu/pdfcpu v0.10.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
