@@ -170,6 +170,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
 
+	e.POST("/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
+
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.POST("/security", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.GET("/security/:uuid/updates", h.ListLatestUpdates, h.IsAuthenticated)

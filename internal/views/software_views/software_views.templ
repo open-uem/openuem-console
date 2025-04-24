@@ -25,7 +25,10 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 							{ i18n.T(ctx, "apps.description") }
 						</p>
 					</div>
-					@partials.PDFReportButton(p, "/reports/software", "reports.software")
+					<div class="flex gap-4">
+						@partials.CSVReportButton(p, "/reports/software/csv", "reports.agents")
+						@partials.PDFReportButton(p, "/reports/software", "reports.agents")
+					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
