@@ -155,14 +155,16 @@ func SearchAllPackages(packageName string, wingetFolder string) ([]nats.Software
 	defer db.Close()
 
 	// Query the SQLite database
-	rows, err = db.Query(`
-			SELECT DISTINCT ids.id as id, names.name AS name FROM manifest 
-			LEFT JOIN ids ON manifest.id = ids.rowid 
-			LEFT JOIN names ON manifest.name = names.rowid 
-			LEFT JOIN versions ON manifest.version = versions.rowid
-			WHERE names.name LIKE ?	ORDER BY name ASC
-		`, "%"+packageName+"%")
+	// Old source.msix database information fix-68
+	// rows, err = db.Query(`
+	// 		SELECT DISTINCT ids.id as id, names.name AS name FROM manifest
+	// 		LEFT JOIN ids ON manifest.id = ids.rowid
+	// 		LEFT JOIN names ON manifest.name = names.rowid
+	// 		LEFT JOIN versions ON manifest.version = versions.rowid
+	// 		WHERE names.name LIKE ?	ORDER BY name ASC
+	// 	`, "%"+packageName+"%")
 
+	rows, err = db.Query(`SELECT DISTINCT id, name FROM packages WHERE name LIKE ? ORDER BY name ASC`, "%"+packageName+"%")
 	if err != nil {
 		return nil, err
 	}
