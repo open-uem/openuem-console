@@ -36,7 +36,10 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							<p class="uk-text-small uk-text-bold underline">{ i18n.T(ctx, "computers.filter_by_application", f.WithApplication) }</p>
 						}
 					</div>
-					@partials.PDFReportButton(p, "/reports/computers", "reports.computers")
+					<div class="flex gap-4">
+						@partials.CSVReportButton(p, "/reports/computers/csv", "reports.agents")
+						@partials.PDFReportButton(p, "/reports/computers", "reports.agents")
+					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">

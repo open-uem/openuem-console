@@ -297,7 +297,6 @@ func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if _, err := h.JetStream.Publish(ctx, "agent.uninstall."+agentId, nil); err != nil {
-			log.Println(err, "agent.uninstall."+agentId)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_send_request_to_uninstall"), true))
 		}
 	}

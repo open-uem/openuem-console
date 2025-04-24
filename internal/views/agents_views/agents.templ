@@ -39,7 +39,10 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							{ i18n.T(ctx, "agents.description") }
 						</p>
 					</div>
-					@partials.PDFReportButton(p, "/reports/agents", "reports.agents")
+					<div class="flex gap-4">
+						@partials.CSVReportButton(p, "/reports/agents/csv", "reports.agents")
+						@partials.PDFReportButton(p, "/reports/agents", "reports.agents")
+					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">

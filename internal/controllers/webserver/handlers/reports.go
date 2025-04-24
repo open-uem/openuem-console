@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -39,14 +41,44 @@ func (h *Handler) Reports(c echo.Context) error {
 	return RenderView(c, reports_views.ReportsIndex("| Reports", reports_views.Reports(c, h.SessionManager, h.Version, latestServerRelease.Version, "")))
 }
 
-func (h *Handler) GenerateAgentsReport(c echo.Context) error {
+func (h *Handler) GenerateCSVReports(c echo.Context) error {
 
-	fileName := uuid.NewString() + ".pdf"
+	fileName := uuid.NewString() + ".csv"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
+	csvFile, err := os.Create(dstPath)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_create_file"), false))
+	}
+	defer func() {
+		if err := csvFile.Close(); err != nil {
+			log.Printf("[ERROR]: could not close CSV file, reason: %v", err)
+		}
+	}()
 
+	w := csv.NewWriter(csvFile)
+
+	report := c.Param("report")
+	switch report {
+	case "agents":
+		return h.GenerateAgentsCSVReport(c, w, fileName)
+	case "computers":
+		return h.GenerateComputersCSVReport(c, w, fileName)
+	case "software":
+		return h.GenerateSoftwareCSVReport(c, w, fileName)
+	case "antivirus":
+		return h.GenerateAntivirusCSVReport(c, w, fileName)
+	case "updates":
+		return h.GenerateUpdatesCSVReport(c, w, fileName)
+	default:
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.invalid_report_selected"), false))
+	}
+
+}
+
+func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
 	f, err := h.GetAgentFilters(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
 	p := partials.PaginationAndSort{}
@@ -54,17 +86,212 @@ func (h *Handler) GenerateAgentsReport(c echo.Context) error {
 
 	allAgents, err := h.Model.GetAgentsByPage(p, *f, true)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not get all agents", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_agents"), false))
+	}
+
+	w.Write([]string{"hostname", "status", "os", "version", "ip", "last_contact"})
+
+	for _, agent := range allAgents {
+		record := []string{agent.Hostname, string(agent.AgentStatus), agent.Os, agent.Edges.Release.Version, agent.IP, agent.LastContact.Format("2006-01-02T15:03:04")}
+		if err := w.Write(record); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	f, err := h.GetComputerFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allComputers, err := h.Model.GetComputersByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_computers"), false))
+	}
+
+	w.Write([]string{"hostname", "os", "version", "username", "manufacturer", "model", "serial_number"})
+
+	for _, computer := range allComputers {
+		record := []string{computer.Hostname, computer.OS, computer.Version, computer.Username, computer.Manufacturer, computer.Model, computer.Serial}
+		if err := w.Write(record); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) GenerateSoftwareCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	f, err := h.GetSoftwareFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allSoftware, err := h.Model.GetAppsByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_software"), false))
+	}
+
+	w.Write([]string{"name", "publisher", "#installations"})
+
+	for _, software := range allSoftware {
+		record := []string{software.Name, software.Publisher, strconv.Itoa(software.Count)}
+		if err := w.Write(record); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	f, _, _, err := h.GetAntiviriFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_antiviri"), false))
+	}
+
+	w.Write([]string{"hostname", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
+
+	for _, antivirus := range allAntiviri {
+		record := []string{antivirus.Hostname, antivirus.OS, antivirus.Name, strconv.FormatBool(antivirus.IsActive), strconv.FormatBool(antivirus.IsUpdated)}
+		if err := w.Write(record); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+
+	f, _, _, err := h.GetSystemUpdatesFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_system_updates"), false))
+	}
+
+	w.Write([]string{"hostname", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
+
+	for _, update := range allSystemUpdates {
+		lastSearch := update.LastSearch.Format("2006-01-02T15:03:04")
+		if update.LastSearch.IsZero() {
+			lastSearch = "-"
+		}
+
+		lastInstall := update.LastInstall.Format("2006-01-02T15:03:04")
+		if update.LastInstall.IsZero() {
+			lastInstall = "-"
+		}
+
+		record := []string{update.Hostname, update.OS, i18n.T(c.Request().Context(), update.SystemUpdateStatus), lastSearch, lastInstall, strconv.FormatBool(update.PendingUpdates)}
+		if err := w.Write(record); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) GenerateAgentsReport(c echo.Context) error {
+
+	fileName := uuid.NewString() + ".pdf"
+	dstPath := filepath.Join(h.DownloadDir, fileName)
+
+	f, err := h.GetAgentFilters(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
+	}
+
+	p := partials.PaginationAndSort{}
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+
+	allAgents, err := h.Model.GetAgentsByPage(p, *f, true)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_agents"), false))
 	}
 
 	m, err := GetAgentsReport(c, allAgents)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_initiate_report"), false))
 	}
 
 	document, err := m.Generate()
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not generate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_generate_report"), false))
 	}
 
 	err = document.Save(dstPath)
@@ -223,7 +450,7 @@ func (h *Handler) GenerateComputersReport(c echo.Context) error {
 
 	f, err := h.GetComputerFilters(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
 	p := partials.PaginationAndSort{}
@@ -231,12 +458,12 @@ func (h *Handler) GenerateComputersReport(c echo.Context) error {
 
 	allComputers, err := h.Model.GetComputersByPage(p, *f)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not get all computers", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_computers"), false))
 	}
 
 	m, err := GetComputersReport(c, allComputers)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_initiate_report"), false))
 	}
 
 	document, err := m.Generate()
@@ -312,9 +539,9 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 				Center:  true,
 				Percent: 75,
 			}),
-			text.NewCol(2, computer.Version, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(1, computer.Version, props.Text{Size: 8, Align: align.Left}),
 			text.NewCol(2, computer.Username, props.Text{Size: 8, Align: align.Left}),
-			text.NewCol(1, computer.Manufacturer, props.Text{Size: 7, Align: align.Left}),
+			text.NewCol(2, computer.Manufacturer, props.Text{Size: 7, Align: align.Left}),
 			text.NewCol(2, computer.Model, props.Text{Size: 8, Align: align.Left}),
 			text.NewCol(2, computer.Serial, props.Text{Size: 7, Align: align.Left}),
 		)
@@ -410,7 +637,7 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 
 	f, _, _, err := h.GetAntiviriFilters(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
 	p := partials.PaginationAndSort{}
@@ -418,17 +645,17 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 
 	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not get all antivirus systems", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_antiviri"), false))
 	}
 
 	m, err := GetAntiviriReport(c, allAntiviri)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_initiate_report"), false))
 	}
 
 	document, err := m.Generate()
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not generate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_generate_report"), false))
 	}
 
 	err = document.Save(dstPath)
@@ -527,7 +754,7 @@ func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
 
 	f, _, _, err := h.GetSystemUpdatesFilters(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
 	p := partials.PaginationAndSort{}
@@ -535,17 +762,17 @@ func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
 
 	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not get all systems", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_system_updates"), false))
 	}
 
 	m, err := GetSystemUpdatesReport(c, allSystemUpdates)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_initiate_report"), false))
 	}
 
 	document, err := m.Generate()
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not generate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_generate_report"), false))
 	}
 
 	err = document.Save(dstPath)
@@ -609,6 +836,16 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 			osImage = getUbuntuPNG()
 		}
 
+		lastSearch := update.LastSearch.Format("2006-01-02T15:03:04")
+		if update.LastSearch.IsZero() {
+			lastSearch = "-"
+		}
+
+		lastInstall := update.LastInstall.Format("2006-01-02T15:03:04")
+		if update.LastInstall.IsZero() {
+			lastInstall = "-"
+		}
+
 		r := row.New(4).Add(
 			text.NewCol(2, update.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			image.NewFromFileCol(1, osImage, props.Rect{
@@ -616,8 +853,8 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 				Percent: 75,
 			}),
 			text.NewCol(3, i18n.T(c.Request().Context(), update.SystemUpdateStatus), props.Text{Size: 8, Align: align.Left}),
-			text.NewCol(2, update.LastSearch.Format("2006-01-02 15:03"), props.Text{Size: 8, Align: align.Center}),
-			text.NewCol(2, update.LastInstall.Format("2006-01-02 15:03"), props.Text{Size: 8, Align: align.Center}),
+			text.NewCol(2, lastSearch, props.Text{Size: 8, Align: align.Center}),
+			text.NewCol(2, lastInstall, props.Text{Size: 8, Align: align.Center}),
 			image.NewFromFileCol(2, getWarningEmoji(update.PendingUpdates), props.Rect{
 				Center:  true,
 				Percent: 75,
@@ -643,7 +880,7 @@ func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
 
 	f, err := h.GetSoftwareFilters(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not apply filters", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
 	p := partials.PaginationAndSort{}
@@ -651,17 +888,17 @@ func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
 
 	allSoftware, err := h.Model.GetAppsByPage(p, *f)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not get all software", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_software"), false))
 	}
 
 	m, err := GetSoftwareReport(c, allSoftware)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not initiate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_initiate_report"), false))
 	}
 
 	document, err := m.Generate()
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not generate report", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_generate_report"), false))
 	}
 
 	err = document.Save(dstPath)

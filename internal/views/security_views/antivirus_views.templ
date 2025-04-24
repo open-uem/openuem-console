@@ -29,7 +29,10 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									{ i18n.T(ctx, "antivirus.description") }
 								</p>
 							</div>
-							@partials.PDFReportButton(p, "/reports/antivirus", "reports.antivirus")
+							<div class="flex gap-4">
+								@partials.CSVReportButton(p, "/reports/antivirus/csv", "reports.agents")
+								@partials.PDFReportButton(p, "/reports/antivirus", "reports.agents")
+							</div>
 						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">

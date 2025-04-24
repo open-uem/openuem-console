@@ -29,7 +29,10 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									{ i18n.T(ctx, "updates.description") }
 								</p>
 							</div>
-							@partials.PDFReportButton(p, "/reports/updates", "reports.updates")
+							<div class="flex gap-4">
+								@partials.CSVReportButton(p, "/reports/updates/csv", "reports.agents")
+								@partials.PDFReportButton(p, "/reports/updates", "reports.agents")
+							</div>
 						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
