@@ -264,7 +264,7 @@ templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
 templ FileBrowser(files []fs.FileInfo, agent *openuem_ent.Agent, cwd, parent string) {
 	<div class=" max-h-96 overflow-y-auto">
 		<table class="uk-table uk-table-striped mt-6">
-			<thead class="top-0 sticky bg-white w-full">
+			<thead class="top-0 sticky bg-muted w-full">
 				<tr><th class="w-1/12"></th><th class="w-1/12"></th><th class="w-1/12">{ i18n.T(ctx, "Actions") }</th><th class="w-1/2">{ i18n.T(ctx, "Name") }</th><th class="w-1/4">{ i18n.T(ctx, "Size") }</th></tr>
 			</thead>
 			<tbody>

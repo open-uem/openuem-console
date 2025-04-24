@@ -32,7 +32,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 					</div>
 					<div class="uk-card-body">
 						if len(sessions) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped border border-gray-400!important mt-6">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 								<thead>
 									<tr>
 										<th>
@@ -121,7 +121,7 @@ templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, sm 
 templ SessionInfo(session *ent.Sessions, codec scs.Codec) {
 	<div class="uk-width-1-2@m uk-card uk-card-default">
 		<div class="uk-card-body">
-			<table class="uk-table uk-table-striped border border-gray-400!important">
+			<table class="uk-table uk-table-striped ">
 				<tr><th>{ i18n.T(ctx, "session.uid") }</th><td>{ session.Edges.Owner.ID }</td></tr>
 				<tr><th>{ i18n.T(ctx, "session.user_agent") }</th><td>{ decodeData(session.Data, codec, "user-agent") }</td></tr>
 				<tr><th>{ i18n.T(ctx, "IP Address") }</th><td>{ decodeData(session.Data, codec, "ip-address") }</td></tr>

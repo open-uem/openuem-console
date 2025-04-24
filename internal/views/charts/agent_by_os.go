@@ -35,10 +35,13 @@ func AgentsByOs(ctx context.Context, agents []models.Agent, countAllAgents int) 
 		leftTitle = "22%"
 	}
 
-	textStyle := opts.TextStyle{FontSize: 36}
+	textStyle := opts.TextStyle{FontSize: 36, Color: "#777"}
+
+	labelStyle := opts.TextStyle{Color: "#777"}
+
 	pie.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{Title: strconv.Itoa(countAllAgents), Left: leftTitle, Top: "43%", TitleStyle: &textStyle}),
-		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
+		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(true), TextStyle: &labelStyle, Type: "scroll", Orient: "vertical", X: "left", Y: "center", Left: "55%"}),
 		charts.WithColorsOpts(opts.Colors{"#9e0142", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2"}),
 		charts.WithInitializationOpts(opts.Initialization{
 			Width:  "480px",

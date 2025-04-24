@@ -17,7 +17,7 @@ templ Header(breadcrumbs []Breadcrumb, sm *sessions.SessionManager, currentVersi
 	<header class="sticky top-0 z-30 uk-flex uk-flex-between@s w-full h-14 items-center border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 		<nav id="header">
 			<ul class="uk-breadcrumb" aria-label="Breadcrumb">
-				<li>OpenUEM</li>
+				<li class="uk-text-muted uk-text-bold">OpenUEM</li>
 				for _,bc := range breadcrumbs {
 					<li>
 						<a
@@ -34,8 +34,37 @@ templ Header(breadcrumbs []Breadcrumb, sm *sessions.SessionManager, currentVersi
 			</ul>
 		</nav>
 		<div class="flex items-center gap-4">
+			<a
+				href="#"
+				_="
+					on load
+						if localStorage.mode is 'dark' then
+							add [@icon=sun] to #theme-switch
+							add [@custom-class=h-6 w-6 uk-text-muted] to #theme-switch
+						else
+							add [@icon=moon] to #theme-switch
+							add [@custom-class=h-6 w-6] to #theme-switch
+						end
+					end
+
+					on click
+						if localStorage.mode is 'dark' then
+							set localStorage.mode to ''
+							remove .dark from <html/>
+							add [@icon=moon] to #theme-switch
+							add [@custom-class=h-6 w-6] to #theme-switch
+						else
+							set localStorage.mode to 'dark'
+							add .dark to <html/>
+							add [@icon=sun] to #theme-switch
+							add [@custom-class=h-6 w-6 uk-text-muted] to #theme-switch
+						end
+					end"
+			>
+				<uk-icon id="theme-switch" hx-history="false" icon="moon" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			</a>
 			<div class="flex items-center gap-4">
-				<p class="text-sm uk-text-light">OpenUEM { currentVersion }</p>
+				<p class="text-sm uk-text-muted">OpenUEM { currentVersion }</p>
 				if newVersionAvailable(currentVersion, latestVersion) {
 					<a
 						href="/admin/update-servers"
@@ -49,7 +78,7 @@ templ Header(breadcrumbs []Breadcrumb, sm *sessions.SessionManager, currentVersi
 					</a>
 				}
 			</div>
-			<button title={ i18n.T(ctx, "Profile") } type="button" class="rounded-full"><uk-icon hx-history="false" icon="user-circle" hx-history="false" custom-class="h-6 w-6" uk-cloack></uk-icon></button>
+			<button title={ i18n.T(ctx, "Profile") } type="button" class="rounded-full uk-text-muted"><uk-icon hx-history="false" icon="user-circle" hx-history="false" custom-class="h-6 w-6" uk-cloack></uk-icon></button>
 			<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 				<div class="flex flex-col gap-1">
 					<div class="flex justify-center mt-4 mb-1">

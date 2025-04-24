@@ -7,7 +7,7 @@ import (
 
 templ ConfirmDelete(c echo.Context, confirm, cancelURL, deleteURL string) {
 	<div id="confirm">
-		<div id="confirm-message" class="uk-alert uk-alert-danger mt-8 uk-background-default" uk-alert>
+		<div id="confirm-message" class="uk-alert uk-alert-danger mt-8 uk-background-default dark:bg-red-600 dark:text-white" uk-alert>
 			<div class="uk-alert-description p-2">
 				{ confirm }
 				<div class="flex gap-6 pt-6">

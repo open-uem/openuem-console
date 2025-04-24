@@ -43,7 +43,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 							@partials.RefreshPage(l, "/security/updates", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(systemUpdates) > 0 {
-							<table class="uk-table uk-table-divider uk-table-small uk-table-striped border border-gray-400!important">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 								<thead>
 									<tr>
 										<th>

@@ -4,7 +4,7 @@ import "strings"
 
 templ Manufacturer(brand string) {
 	if strings.Contains(brand, "asus") {
-		<i class="si si-asus si--color uk-cloak text-4xl"></i>
+		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "hp") {
 		<i class="si si-hp si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(brand, "dell") {
@@ -12,7 +12,7 @@ templ Manufacturer(brand string) {
 	} else if strings.Contains(brand, "intel") {
 		<i class="si si-intel si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "kingston") {
-		<i class="si si-kingstontechnology si--color uk-cloak text-2xl"></i>
+		<i class="si si-kingstontechnology uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(brand, "samsung") {
 		<i class="si si-samsung si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "vmware") {
