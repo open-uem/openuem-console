@@ -395,7 +395,7 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					continue
 				}
 
-				if _, err := h.NATSConnection.Request("certificates.agent."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+				if err := h.NATSConnection.Publish("certificates.agent."+agentId, data); err != nil {
 					log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "nats.no_responder"))
 					errorsFound = true
 					continue
@@ -613,7 +613,7 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.NATSConnection.Request("certificates.agent."+agentId, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+	if err := h.NATSConnection.Publish("certificates.agent."+agentId, data); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 

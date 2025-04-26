@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -162,7 +161,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
-	if _, err := h.JetStream.Publish(context.Background(), "notification.confirm_email", data); err != nil {
+	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
