@@ -127,6 +127,14 @@ func (h *Handler) StartNATSConnectJob() error {
 			if err == nil {
 				log.Println("[INFO]: agent stream could be instantiated")
 
+				h.ServerStream, err = h.JetStream.Stream(ctx, "SERVERS_STREAM")
+				if err == nil {
+					log.Println("[INFO]: server stream could be instantiated")
+					return nil
+				} else {
+					log.Printf("[ERROR]: Server Stream could not be instantiated, reason: %v", err)
+				}
+
 			} else {
 				log.Printf("[ERROR]: Agent Stream could not be instantiated, reason: %v", err)
 			}
@@ -182,16 +190,7 @@ func (h *Handler) StartNATSConnectJob() error {
 					return
 				}
 
-				serverStreamConfig := jetstream.StreamConfig{
-					Name:     "SERVERS_STREAM",
-					Subjects: []string{"server.update.>"},
-				}
-
-				if h.Replicas > 1 {
-					serverStreamConfig.Replicas = h.Replicas
-				}
-
-				h.ServerStream, err = h.JetStream.CreateOrUpdateStream(ctx, serverStreamConfig)
+				h.ServerStream, err = h.JetStream.Stream(ctx, "SERVERS_STREAM")
 				if err != nil {
 					log.Printf("[ERROR]: Server Stream could not be created or updated, reason: %v", err)
 					return
