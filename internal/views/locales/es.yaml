@@ -334,6 +334,7 @@ es:
       is_default: "¿Por defecto?"
       is_network_printer: "¿Impresora de Red?"
       no_printers: "No existe aún información sobre las impresoras conectadas"
+      set_default: "Impresora por defecto"
     network_adapters:
       title: "Adaptadores de red"
       description: "Estos son los adaptadores de red conectados a este equipo de acuerdo a lo informado por el agente de OpenUEM"

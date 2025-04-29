@@ -335,6 +335,7 @@ en:
       is_default: "Is Default?"
       is_network_printer: "Is Network Printer?"
       no_printers: "No printers information is available yet"
+      set_default: "Set as default printer"
     network_adapters:
       title: "Network Adapters"
       description: "These are the network adapters connected to this computer as reported by the OpenUEM agent"

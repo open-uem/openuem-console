@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/user"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -50,9 +51,14 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									<th>{ i18n.T(ctx, "inventory.printers.port") }</th>
 									<th>{ i18n.T(ctx, "inventory.printers.is_default") }</th>
 									<th>{ i18n.T(ctx, "inventory.printers.is_network_printer") }</th>
+									<th>
+										<div class="flex gap-1 items-center">
+											<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+										</div>
+									</th>
 								</tr>
 							</thead>
-							for _, printer := range agent.Edges.Printers {
+							for index, printer := range agent.Edges.Printers {
 								<tr>
 									<td>{ printer.Name }</td>
 									<td>{ printer.Port }</td>
@@ -66,6 +72,31 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									} else {
 										<td>-</td>
 									}
+									<td>
+										@partials.MoreButton(index)
+										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+												<li>
+													<a
+														hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
+														hx-target="#main"
+														hx-push-url="false"
+														hx-swap="outerHTML"
+													>
+														<uk-icon hx-history="false" icon="printer-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "inventory.printers.set_default") }
+													</a>
+												</li>
+												<li>
+													<a
+														hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s?delete=true", agent.ID))) }
+														hx-push-url="false"
+														hx-target="#main"
+														hx-swap="outerHTML"
+													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon> { i18n.T(ctx, "Delete") }</a>
+												</li>
+											</ul>
+										</div>
+									</td>
 								</tr>
 							}
 						</table>
