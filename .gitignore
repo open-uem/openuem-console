@@ -9,3 +9,4 @@ node_modules
 .vscode
 PIDFILE
 openuem-console
+.air.toml
