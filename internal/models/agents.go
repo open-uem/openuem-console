@@ -137,6 +137,14 @@ func (m *Model) GetAgentById(agentId string) (*ent.Agent, error) {
 	return agent, err
 }
 
+func (m *Model) GetAgentOverviewById(agentId string) (*ent.Agent, error) {
+	agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Only(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return agent, err
+}
+
 func (m *Model) CountAgentsByOS() ([]Agent, error) {
 	// Info from agents waiting for admission won't be shown
 	agents := []Agent{}

@@ -1,0 +1,200 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/gohugoio/locales"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"golang.org/x/mod/semver"
+	"strings"
+)
+
+templ Overview(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, l locales.Translator, agent *openuem_ent.Agent, higherReleaseApplied *openuem_ent.Release, confirmDelete, detectRemoteAgents bool, successMessage string) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				<div class="flex gap-2 items-center">
+					<div class="flex items-center gap-4">
+						@partials.OSBadge(agent.Os)
+						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+					</div>
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
+					if agent.IsRemote && detectRemoteAgents {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</span>
+					}
+				</div>
+				@ComputersNavbar(agent.ID, "overview", agent.VncProxyPort, confirmDelete)
+				if confirmDelete {
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+				}
+				<div id="error" class="hidden"></div>
+				@partials.SuccessMessage(successMessage)
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="table-of-contents" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "Overview") }</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.overview_description") }</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default p-6">
+					<div class="flex gap-4">
+						<table class="uk-table uk-table-small uk-table-divider uk-table-justify w-1/2">
+							<tr>
+								<th>{ i18n.T(ctx, "Description") }</th>
+								<td>
+									<form class="flex gap-2 items-center">
+										<input class="uk-input" type="text" name="endpoint-description" placeholder={ i18n.T(ctx, "agents.overview_description_placeholder") } value={ agent.Description }/>
+										<button
+											class="flex items-center gap-8"
+											type="submit"
+											hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/overview", agent.ID))) }
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-description"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-description" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "inventory.hardware.model") }</th>
+								<td>
+									if agent.Edges.Computer.Model == "Unknown" {
+										{ i18n.T(ctx, "Unknown") }
+									} else {
+										{ agent.Edges.Computer.Model }
+									}
+								</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "OperatingSystem") }</th>
+								<td>{ strings.Title(agent.Edges.Operatingsystem.Version) }</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "inventory.os.username") }</th>
+								<td>{ agent.Edges.Operatingsystem.Username }</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "antivirus.enabled") }</th>
+								if agent.Edges.Antivirus.IsActive {
+									<td class="!align-middle"><uk-icon hx-history="false" icon="shield-check" custom-class="h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+								} else {
+									if len(agent.Edges.Antivirus.Name) == 0 {
+										<td class="!align-middle"><uk-icon hx-history="false" icon="shield-off" custom-class="h-5 w-5 text-gray-600" uk-cloack></uk-icon></td>
+									} else {
+										<td class="!align-middle"><uk-icon hx-history="false" icon="shield-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+									}
+								}
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "updates.title") }</th>
+								if len(agent.Edges.Systemupdate.SystemUpdateStatus) == 0 {
+									<td class="!align-middle">{ i18n.T(ctx,"Unknown") }</td>
+								} else {
+									<td class="!align-middle">{ i18n.T(ctx,agent.Edges.Systemupdate.SystemUpdateStatus) }</td>
+								}
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "agents.last_inventory") }</th>
+								<td class="!align-middle">{ l.FmtDateMedium(agent.LastContact.Local()) + " " + l.FmtTimeShort(agent.LastContact.Local()) } </td>
+							</tr>
+						</table>
+						<table class="uk-table uk-table-small uk-table-divider uk-table-justify w-1/2">
+							<tr>
+								<th>{ i18n.T(ctx, "Type") }</th>
+								<td>
+									<form class="flex gap-2 items-center">
+										<select class="uk-select" name="endpoint-type">
+											<option value="DesktopPC" selected?={ agent.EndpointType == "DesktopPC" }>{ i18n.T(ctx, "DesktopPC") }</option>
+											<option value="Laptop" selected?={ agent.EndpointType == "Laptop" }>{ i18n.T(ctx, "Laptop") }</option>
+											<option value="Server" selected?={ agent.EndpointType == "Server" }>{ i18n.T(ctx, "Server") }</option>
+											<option value="Tablet" selected?={ agent.EndpointType == "Tablet" }>{ i18n.T(ctx, "Tablet") }</option>
+											<option value="VM" selected?={ agent.EndpointType == "VM" }>{ i18n.T(ctx, "VM") }</option>
+											<option value="Other" selected?={ agent.EndpointType == "Other" }>{ i18n.T(ctx, "Other") }</option>
+										</select>
+										<button
+											class="flex items-center gap-8"
+											type="submit"
+											hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/overview", agent.ID))) }
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-description"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-description" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "inventory.hardware.serial") }</th>
+								<td>
+									if agent.Edges.Computer.Serial == "Unknown" || agent.Edges.Computer.Serial == "" {
+										{ i18n.T(ctx, "Unknown") }
+									} else {
+										{ agent.Edges.Computer.Serial }
+									}
+								</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "inventory.os.last_bootup") }</th>
+								<td>{ l.FmtDateMedium(agent.Edges.Operatingsystem.LastBootupTime.Local()) + " " + l.FmtTimeShort(agent.Edges.Operatingsystem.LastBootupTime.Local()) }</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "IP Address") }</th>
+								<td class="!align-middle">{ agent.IP }</td>
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "antivirus.updated") }</th>
+								if agent.Edges.Antivirus.IsUpdated {
+									<td class="!align-middle"><uk-icon hx-history="false" icon="shield-check" custom-class="h-5 w-5 text-green-600" uk-cloack></uk-icon></td>
+								} else {
+									if len(agent.Edges.Antivirus.Name) == 0 {
+										<td class="!align-middle"><uk-icon hx-history="false" icon="shield-off" custom-class="h-5 w-5 text-gray-600" uk-cloack></uk-icon></td>
+									} else {
+										<td class="!align-middle"><uk-icon hx-history="false" icon="shield-x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon></td>
+									}
+								}
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "updates.pending_updates") }</th>
+								if agent.Edges.Systemupdate.PendingUpdates {
+									<td class="!align-middle"><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+								} else {
+									<td class="!align-middle">{ i18n.T(ctx, "No") }</td>
+								}
+							</tr>
+							<tr>
+								<th>{ i18n.T(ctx, "agents.agent_version") }</th>
+								if agent.Edges.Release != nil {
+									<td class="!align-middle">
+										<div class="flex items-center gap-2">
+											{ agent.Edges.Release.Version }
+											if semver.Compare("v" + agent.Edges.Release.Version, "v"+ higherReleaseApplied.Version) < 0 {
+												@partials.AlertIcon(i18n.T(ctx, "admin.update.agents.outdated"))
+											}
+										</div>
+									</td>
+								} else {
+									<td class="!align-middle">{ "???" }</td>
+								}
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}

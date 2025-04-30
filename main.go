@@ -14,7 +14,7 @@ func main() {
 		Commands:  getCommands(),
 		Usage:     "The OpenUEM console allows and organization to manage its endpoints from a Web User Interface",
 		Authors:   []*cli.Author{{Name: "Miguel Angel Alvarez Cabrerizo", Email: "mcabrerizo@openuem.eu"}},
-		Copyright: "2024 - Miguel Angel Alvarez Cabrerizo <https://github.com/open-uem>",
+		Copyright: "2024-2025 - Miguel Angel Alvarez Cabrerizo <https://github.com/open-uem>",
 	}
 
 	if err := app.Run(os.Args); err != nil {
