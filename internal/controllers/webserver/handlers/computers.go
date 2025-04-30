@@ -32,6 +32,64 @@ import (
 	"github.com/open-uem/utils"
 )
 
+func (h *Handler) Overview(c echo.Context) error {
+	agentId := c.Param("uuid")
+	successMessage := ""
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+	}
+
+	if agentId == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+	}
+
+	if c.Request().Method == "POST" {
+		description := c.FormValue("endpoint-description")
+		endpointType := c.FormValue("endpoint-type")
+
+		if description != "" {
+			if err := h.Model.SaveEndpointDescription(agentId, description); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_description_could_not_save", err.Error()), true))
+			}
+			successMessage = i18n.T(c.Request().Context(), "agents.overview_description_success")
+		}
+
+		if endpointType != "" {
+			if !slices.Contains([]string{"DesktopPC", "Laptop", "Server", "Tablet", "VM", "Other"}, endpointType) {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_invalid"), true))
+			}
+			if err := h.Model.SaveEndpointType(agentId, endpointType); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_could_not_save"), true))
+			}
+			successMessage = i18n.T(c.Request().Context(), "agents.overview_endpoint_type_success")
+		}
+	}
+
+	agent, err := h.Model.GetAgentOverviewById(agentId)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+	}
+
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	p := partials.PaginationAndSort{}
+	l := views.GetTranslatorForDates(c)
+
+	higherVersion, err := h.Model.GetHigherAgentReleaseInstalled()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, h.SessionManager, h.Version, latestServerRelease.Version, l, agent, higherVersion, confirmDelete, detectRemoteAgents, successMessage)))
+}
+
 func (h *Handler) Computer(c echo.Context) error {
 	agentId := c.Param("uuid")
 

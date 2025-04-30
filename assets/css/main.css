@@ -9743,6 +9743,10 @@ th.uk-text-break, td.uk-text-break {
   width: 83.333333%;
 }
 
+.w-52 {
+  width: 13rem;
+}
+
 .w-6 {
   width: 1.5rem;
 }
@@ -9773,22 +9777,6 @@ th.uk-text-break, td.uk-text-break {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-36 {
-  width: 9rem;
-}
-
-.w-44 {
-  width: 11rem;
-}
-
-.w-60 {
-  width: 15rem;
-}
-
-.w-52 {
-  width: 13rem;
 }
 
 .flex-1 {
