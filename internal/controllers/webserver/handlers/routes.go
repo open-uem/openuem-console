@@ -31,6 +31,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/agents/:uuid/admit", func(c echo.Context) error { return h.AgentConfirmAdmission(c, false) }, h.IsAuthenticated)
 	e.POST("/agents/:uuid/forcerestart", h.AgentForceRestart, h.IsAuthenticated)
 	e.POST("/agents/:uuid/regeneratecerts", func(c echo.Context) error { return h.AgentConfirmAdmission(c, true) }, h.IsAuthenticated)
+
 	e.DELETE("/agents/:uuid", h.AgentConfirmDelete, h.IsAuthenticated)
 
 	e.GET("/admin", func(c echo.Context) error { return h.ListUsers(c, "", "") }, h.IsAuthenticated)
@@ -139,6 +140,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/computers/:uuid/startvnc", h.ComputerStartVNC, h.IsAuthenticated)
 	e.POST("/computers/:uuid/stopvnc", h.ComputerStopVNC, h.IsAuthenticated)
 	e.POST("/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
+	e.POST("/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
+	e.DELETE("/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

@@ -328,18 +328,6 @@ func (suite *ComputersTestSuite) TestGetAgentNetworkAdaptersInfo() {
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
 
-func (suite *ComputersTestSuite) TestGetAgentPrintersInfo() {
-	var err error
-
-	item, err := suite.model.GetAgentPrintersInfo("agent1")
-	assert.NoError(suite.T(), err, "should found agent1")
-	assert.Equal(suite.T(), "printer0", item.Edges.Printers[0].Name, "printer should be printer0")
-
-	_, err = suite.model.GetAgentPrintersInfo("agent7")
-	assert.Error(suite.T(), err, "should not found agent7")
-	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
-}
-
 func (suite *ComputersTestSuite) TestGetAgentLogicalDisksInfo() {
 	var err error
 

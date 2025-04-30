@@ -11,6 +11,7 @@ import (
 	"github.com/open-uem/ent/computer"
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
+	"github.com/open-uem/ent/printer"
 	"github.com/open-uem/ent/tag"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -310,12 +311,8 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string) (*ent.Agent, error) 
 	return agent, nil
 }
 
-func (m *Model) GetAgentPrintersInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithPrinters().WithTags().Where(agent.ID(agentId)).Only(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return agent, nil
+func (m *Model) GetAgentPrintersInfo(agentId string) ([]*ent.Printer, error) {
+	return m.Client.Printer.Query().Where(printer.HasOwnerWith(agent.ID(agentId))).Order(ent.Asc(printer.FieldID)).All(context.Background())
 }
 
 func (m *Model) GetAgentLogicalDisksInfo(agentId string) (*ent.Agent, error) {
@@ -362,4 +359,16 @@ func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
 
 func (m *Model) CountDifferentVendor() (int, error) {
 	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
+}
+
+func (m *Model) SetDefaultPrinter(agentId string, printerName string) error {
+	if err := m.Client.Printer.Update().SetIsDefault(false).Where(printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background()); err != nil {
+		return err
+	}
+	return m.Client.Printer.Update().SetIsDefault(true).Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background())
+}
+
+func (m *Model) RemovePrinter(agentId string, printerName string) error {
+	_, err := m.Client.Printer.Delete().Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background())
+	return err
 }

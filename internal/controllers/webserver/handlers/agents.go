@@ -588,7 +588,7 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {

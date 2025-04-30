@@ -264,6 +264,12 @@ es:
     delete_keep: "Borrar de la consola pero mantener el agente instalado"
     keep_uninstall: "Desinstalar el agente pero mantener la info en la consola"
     could_not_send_request_to_uninstall: "No se pudo enviar la petición para desinstalar el agente"
+    printer_name: "El nombre de la impresora no puede estar vacío"
+    printer_has_been_removed: "Se ha eliminado la impresora. Tenga en cuenta que la impresora puede reaparecer si existe una política aplicada que cree la impresora (GPO/Intune/Ansible)"
+    printer_has_been_set_as_default: "La impresora se ha configurado como impresora por defecto. Tenga en cuenta que esta configuración puede sobreescribirse si existe una política aplicada (GPO/Intune/Ansible)"
+    printer_could_not_be_removed: "La impresora no se pudo eliminar, razón: %s"
+    printer_could_not_set_as_default: "La impresora no se pudo configurar por defecto, razón: %s"
+    could_not_decode_printer: "No pude descodificar el nombre de la impresora"
   inventory:
     hardware:
       title: "Hardware"
@@ -332,8 +338,10 @@ es:
       description: "Estas son las impresoras conectadas a este equipo de acuerdo a lo informado por el agente de OpenUEM"
       port: "Puerto"
       is_default: "¿Por defecto?"
-      is_network_printer: "¿Impresora de Red?"
+      is_network_printer: "¿Impr. de Red?"
+      is_shared_printer: "¿Impr. Compartida?"
       no_printers: "No existe aún información sobre las impresoras conectadas"
+      set_default: "Impresora por defecto"
     network_adapters:
       title: "Adaptadores de red"
       description: "Estos son los adaptadores de red conectados a este equipo de acuerdo a lo informado por el agente de OpenUEM"

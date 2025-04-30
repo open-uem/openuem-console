@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -130,7 +131,12 @@ func (h *Handler) Printers(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
 
-	agent, err := h.Model.GetAgentPrintersInfo(agentId)
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	printers, err := h.Model.GetAgentPrintersInfo(agentId)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
 	}
@@ -143,7 +149,7 @@ func (h *Handler) Printers(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, "")))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
@@ -253,7 +259,7 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	a, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error occurred querying agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	// Get filters
@@ -264,12 +270,14 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error occurred querying apps for agent: %v", err)
+		log.Printf("[ERROR]: an error occurred querying apps for agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	p.NItems, err = h.Model.CountAgentApps(agentId, *f)
 	if err != nil {
-		log.Fatalf("[FATAL]: an error occurred querying apps for agent: %v", err)
+		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
@@ -627,7 +635,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	search := c.FormValue("filterByAppName")
@@ -847,7 +855,7 @@ func (h *Handler) PowerManagement(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
@@ -976,7 +984,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -1012,15 +1020,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 				acceptedMetadata = append(acceptedMetadata, data.ID)
 			}
 
-			found := false
-			for _, item := range acceptedMetadata {
-				if item == id {
-					found = true
-					break
-				}
-			}
-
-			if !found {
+			if !slices.Contains(acceptedMetadata, id) {
 				return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s is not an accepted metadata", name), false))
 			}
 
@@ -1064,7 +1064,7 @@ func (h *Handler) Notes(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	if c.Request().Method == "POST" {
@@ -1107,7 +1107,7 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
@@ -1165,7 +1165,7 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
@@ -1195,7 +1195,7 @@ func (h *Handler) GenerateRDPFile(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.not_found"), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	f, err := os.Create(dstPath)
@@ -1226,4 +1226,125 @@ func (h *Handler) GenerateRDPFile(c echo.Context) error {
 	c.Response().Header().Set("HX-Redirect", url)
 
 	return c.String(http.StatusOK, "")
+}
+
+func (h *Handler) SetDefaultPrinter(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	printer := c.Param("printer")
+	if printer == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_name"), false))
+	}
+
+	printerName, err := url.QueryUnescape(printer)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_decode_printer"), false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.defaultprinter."+agentId, []byte(printerName), time.Duration(h.NATSTimeout)*time.Second)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
+	}
+
+	if string(msg.Data) != "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", string(msg.Data)), false))
+	}
+
+	if err := h.Model.SetDefaultPrinter(agentId, printerName); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", err.Error()), false))
+	}
+
+	printers, err = h.Model.GetAgentPrintersInfo(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, i18n.T(c.Request().Context(), "agents.printer_has_been_set_as_default"))))
+
+}
+
+func (h *Handler) RemovePrinter(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	printer := c.Param("printer")
+	if printer == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_name"), false))
+	}
+
+	printerName, err := url.QueryUnescape(printer)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	agent, err := h.Model.GetAgentById(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.removeprinter."+agentId, []byte(printerName), time.Duration(h.NATSTimeout)*time.Second)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
+	}
+
+	if string(msg.Data) != "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", string(msg.Data)), false))
+	}
+
+	if err := h.Model.RemovePrinter(agentId, printerName); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", err.Error()), false))
+	}
+
+	printers, err = h.Model.GetAgentPrintersInfo(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+	}
+
+	p := partials.PaginationAndSort{}
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"))))
 }

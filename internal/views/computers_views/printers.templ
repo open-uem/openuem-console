@@ -9,7 +9,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, confirmDelete, detectRemoteAgents bool) {
+templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, printers []*ent.Printer, confirmDelete, detectRemoteAgents bool, successMessage string) {
 	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -30,6 +30,10 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
 				}
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<div class="flex items-center gap-2">
@@ -42,7 +46,7 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.Edges.Printers) > 0 {
+					if len(printers) > 0 {
 						<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 							<thead>
 								<tr>
@@ -50,9 +54,15 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									<th>{ i18n.T(ctx, "inventory.printers.port") }</th>
 									<th>{ i18n.T(ctx, "inventory.printers.is_default") }</th>
 									<th>{ i18n.T(ctx, "inventory.printers.is_network_printer") }</th>
+									<th>{ i18n.T(ctx, "inventory.printers.is_shared_printer") }</th>
+									<th>
+										<div class="flex gap-1 items-center">
+											<span class="sr-only">{ i18n.T(ctx, "Actions") }</span>
+										</div>
+									</th>
 								</tr>
 							</thead>
-							for _, printer := range agent.Edges.Printers {
+							for index, printer := range printers {
 								<tr>
 									<td>{ printer.Name }</td>
 									<td>{ printer.Port }</td>
@@ -66,6 +76,48 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 									} else {
 										<td>-</td>
 									}
+									if printer.IsShared {
+										@partials.Checkmark()
+									} else {
+										<td>-</td>
+									}
+									<td>
+										@partials.MoreButton(index)
+										<div class="uk-drop uk-dropdown w-52" uk-dropdown="mode: click">
+											<ul class="uk-dropdown-nav uk-nav">
+												<li>
+													<a
+														hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/printers/%s/default", agent.ID, printer.Name))) }
+														hx-target="#main"
+														hx-push-url="false"
+														hx-swap="outerHTML"
+														hx-indicator="#default-printer-spinner"
+													>
+														<div class="flex gap-2 items-center">
+															<uk-icon hx-history="false" icon="printer-check" custom-class="h-5 w-5" uk-cloack></uk-icon>
+															{ i18n.T(ctx, "inventory.printers.set_default") }
+															<div id="default-printer-spinner" class="htmx-indicator uk-text-default" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+														</div>
+													</a>
+												</li>
+												<li>
+													<a
+														hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/printers/%s", agent.ID, printer.Name))) }
+														hx-target="#main"
+														hx-push-url="false"
+														hx-swap="outerHTML"
+														hx-indicator="#remove-printer-spinner"
+													>
+														<div class="flex gap-2 items-center">
+															<uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+															{ i18n.T(ctx, "Delete") }
+															<div id="remove-printer-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
+														</div>
+													</a>
+												</li>
+											</ul>
+										</div>
+									</td>
 								</tr>
 							}
 						</table>

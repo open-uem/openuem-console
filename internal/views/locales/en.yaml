@@ -265,6 +265,12 @@ en:
     delete_keep: "Delete from console but keep the agent installed"
     keep_uninstall: "Uninstall the agent but keep the info in the console"
     could_not_send_request_to_uninstall: "Could not send request to uninstall the agent"
+    printer_name: "Printer name cannot be empty"
+    printer_has_been_removed: "The printer has been removed. Note that the printer may show again if a (GPO/Intune/Ansible) policy is being applied"
+    printer_has_been_set_as_default: "The printer has been set as default printer. Note that this setting can be overriden if a (GPO/Intune/Ansible) policy is being applied"
+    printer_could_not_be_removed: "The printer could not be removed, reason: %s"
+    printer_could_not_set_as_default: "The printer could not be set as default, reason: %s"
+    could_not_decode_printer: "Could not decode the printer's name"
   inventory:
     hardware:
       title: "Hardware"
@@ -333,8 +339,10 @@ en:
       description: "These are the printers connected to this computer as reported by the OpenUEM agent"
       port: "Port"
       is_default: "Is Default?"
-      is_network_printer: "Is Network Printer?"
+      is_network_printer: "Is network printer?"
+      is_shared_printer: "Is shared printer?"
       no_printers: "No printers information is available yet"
+      set_default: "Set as default printer"
     network_adapters:
       title: "Network Adapters"
       description: "These are the network adapters connected to this computer as reported by the OpenUEM agent"
