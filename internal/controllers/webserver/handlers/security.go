@@ -98,7 +98,7 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage("could not find agent info", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	p := partials.NewPaginationAndSort()

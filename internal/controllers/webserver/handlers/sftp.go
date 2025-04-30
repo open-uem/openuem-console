@@ -40,7 +40,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	// Get form values
@@ -110,7 +110,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -154,7 +154,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -216,7 +216,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -293,7 +293,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -369,7 +369,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -445,7 +445,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -506,7 +506,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
@@ -574,7 +574,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
