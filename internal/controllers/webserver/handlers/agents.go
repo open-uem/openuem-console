@@ -764,7 +764,7 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 		line = strings.TrimPrefix(line, "openuem-agent:")
 		line = strings.TrimPrefix(line, "openuem-updater:")
 		logEntry := agents_views.LogEntry{}
-		if strings.Index(line, "[") == -1 {
+		if !strings.Contains(line, "[") {
 			continue
 		}
 
@@ -785,7 +785,7 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 			continue
 		}
 
-		if strings.Index(line, "]: ") == -1 {
+		if !strings.Contains(line, "]: ") {
 			continue
 		}
 

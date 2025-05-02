@@ -21,7 +21,6 @@ import (
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/nats"
 	openuem_nats "github.com/open-uem/nats"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
@@ -681,7 +680,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	var f filters.DeployPackageFilter
-	var packages []nats.SoftwarePackage
+	var packages []openuem_nats.SoftwarePackage
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
@@ -1307,11 +1306,6 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
-	}
-
 	msg, err := h.NATSConnection.Request("agent.defaultprinter."+agentId, []byte(printerName), time.Duration(h.NATSTimeout)*time.Second)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
@@ -1325,7 +1319,7 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", err.Error()), false))
 	}
 
-	printers, err = h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1368,11 +1362,6 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
-	}
-
 	msg, err := h.NATSConnection.Request("agent.removeprinter."+agentId, []byte(printerName), time.Duration(h.NATSTimeout)*time.Second)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.request_error", err.Error()), true))
@@ -1386,7 +1375,7 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", err.Error()), false))
 	}
 
-	printers, err = h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
