@@ -303,11 +303,11 @@ func (m *Model) CountPendingUpdateAgents() (int, error) {
 }
 
 func (m *Model) CountDisabledAntivirusAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Count(context.Background())
 }
 
 func (m *Model) CountOutdatedAntivirusDatabaseAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Count(context.Background())
 }
 
 func (m *Model) CountNoAutoupdateAgents() (int, error) {
