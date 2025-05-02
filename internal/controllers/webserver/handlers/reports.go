@@ -345,15 +345,7 @@ func getAgentsTransactions(agents []*ent.Agent) []core.Row {
 	var contentsRow []core.Row
 
 	for i, agent := range agents {
-		osImage := ""
-		switch agent.Os {
-		case "windows":
-			osImage = getWindowsPNG()
-		case "debian":
-			osImage = getDebianPNG()
-		case "ubuntu":
-			osImage = getUbuntuPNG()
-		}
+		osImage := getOperatingSystemPNG(agent.Os)
 
 		r := row.New(4).Add(
 			text.NewCol(2, agent.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
@@ -523,15 +515,7 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 	var contentsRow []core.Row
 
 	for i, computer := range computers {
-		osImage := ""
-		switch computer.OS {
-		case "windows":
-			osImage = getWindowsPNG()
-		case "debian":
-			osImage = getDebianPNG()
-		case "ubuntu":
-			osImage = getUbuntuPNG()
-		}
+		osImage := getOperatingSystemPNG(computer.OS)
 
 		r := row.New(4).Add(
 			text.NewCol(2, computer.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
@@ -708,15 +692,7 @@ func getAntiviriTransactions(antiviri []models.Antivirus) []core.Row {
 	var contentsRow []core.Row
 
 	for i, antivirus := range antiviri {
-		osImage := ""
-		switch antivirus.OS {
-		case "windows":
-			osImage = getWindowsPNG()
-		case "debian":
-			osImage = getDebianPNG()
-		case "ubuntu":
-			osImage = getUbuntuPNG()
-		}
+		osImage := getOperatingSystemPNG(antivirus.OS)
 
 		r := row.New(4).Add(
 			text.NewCol(3, antivirus.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
@@ -826,15 +802,7 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 	var contentsRow []core.Row
 
 	for i, update := range updates {
-		osImage := ""
-		switch update.OS {
-		case "windows":
-			osImage = getWindowsPNG()
-		case "debian":
-			osImage = getDebianPNG()
-		case "ubuntu":
-			osImage = getUbuntuPNG()
-		}
+		osImage := getOperatingSystemPNG(update.OS)
 
 		lastSearch := update.LastSearch.Format("2006-01-02T15:03:04")
 		if update.LastSearch.IsZero() {
@@ -1061,4 +1029,70 @@ func getUbuntuPNG() string {
 		return ""
 	}
 	return filepath.Join(cwd, "assets", "img", "os", "ubuntu.png")
+}
+
+func getSuSEPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "suse.png")
+}
+
+func getRedHatPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "redhat.png")
+}
+
+func getFedoraPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "fedora.png")
+}
+
+func getAlmaLinuxPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "almalinux.png")
+}
+
+func getUnknownPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "question.png")
+}
+
+func getOperatingSystemPNG(os string) string {
+	switch os {
+	case "windows":
+		return getWindowsPNG()
+	case "debian":
+		return getDebianPNG()
+	case "ubuntu":
+		return getUbuntuPNG()
+	case "opensuse-leap":
+		return getSuSEPNG()
+	case "fedora":
+		return getFedoraPNG()
+	case "redhat":
+		return getRedHatPNG()
+	case "almalinux":
+		return getAlmaLinuxPNG()
+	default:
+		return getUnknownPNG()
+	}
 }
