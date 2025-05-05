@@ -479,3 +479,7 @@ func (m *Model) UpdateSFTPServiceToAllAgents(status bool) error {
 	}
 	return nil
 }
+
+func (m *Model) AssociateDefaultSiteToAgents(site *ent.Site) error {
+	return m.Client.Agent.Update().Where(agent.Not(agent.HasSite())).AddSite(site).Exec(context.Background())
+}

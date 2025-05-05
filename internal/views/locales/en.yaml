@@ -20,6 +20,8 @@ en:
   Dashboard: "Dashboard"
   DateFrom: From
   DateTo: To
+  DefaultTenant: "Default Org"
+  DefaultSite: "Default Site"
   Delete: "Delete"
   Deploy: "Deploy"
   Description: "Description"

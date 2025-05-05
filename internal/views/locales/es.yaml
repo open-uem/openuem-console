@@ -20,6 +20,8 @@ es:
   Create: "Crear"
   Dashboard: "Panel de control"
   DateFrom: Desde
+  DefaultTenant: "Org. por defecto"
+  DefaultSite: "Sitio por defecto"
   DateTo: Hasta
   Delete: "Borrar"
   Deploy: "Despliegue de software"
