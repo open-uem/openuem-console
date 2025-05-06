@@ -2,23 +2,21 @@ package admin_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"time"
 )
 
-templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.CertificateFilter, sm *sessions.SessionManager, currentVersion, latestVersion string, l locales.Translator, certTypes []string, certificates []*openuem_ent.Certificate, successMessage string, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "Certificates"), Url: "/admin/certificates"}}, sm, currentVersion, latestVersion)
+templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.CertificateFilter, certTypes []string, certificates []*ent.Certificate, successMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "Certificates"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("certificates", agentsExists, serversExists)
+				@ConfigNavbar("certificates", agentsExists, serversExists, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -35,7 +33,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters("/admin/certificates", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
 								return f.Serial == "" && len(f.TypeOptions) == 0 &&
 									f.Description == "" && f.Username == "" &&
 									f.ExpiryFrom == "" && f.ExpiryTo == ""
@@ -93,7 +91,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 												-
 											} else {
 												<div class="flex gap-2 items-center">
-													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ l.FmtDateLong(certificate.Expiry.Local()) }</span>
+													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ commonInfo.Translator.FmtDateLong(certificate.Expiry.Local()) }</span>
 													if IsCertificateAboutToExpire(certificate.Expiry) {
 														@partials.AlertIcon(i18n.T(ctx, "certificates.about_to_expiry"))
 													}
@@ -102,8 +100,8 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 										</td>
 										<td class="underline">
 											<a
-												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", certificate.UID)) }
-												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", certificate.UID))) }
+												href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/profile", commonInfo.TenantID, commonInfo.SiteID, certificate.UID)) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/profile", commonInfo.TenantID, commonInfo.SiteID, certificate.UID))) }
 												hx-target="#main"
 												hx-push-url="true"
 												hx-swap="outerHTML"
@@ -115,7 +113,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 													<li>
 														<form
-															hx-post="/admin/certificates"
+															hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))) }
 															hx-target="#main"
 															hx-swap="outerHTML"
 															hx-push-url="false"
@@ -130,7 +128,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/certificates")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))))
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "certificates.no_certificates") }
@@ -143,8 +141,8 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 	</main>
 }
 
-templ CertificatesIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ CertificatesIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

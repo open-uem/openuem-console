@@ -2,25 +2,23 @@ package profiles_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translator, sm *sessions.SessionManager, profiles []*ent.Profile, refresh int, currentVersion, latestVersion, profileId string, confirmDelete bool, successMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: "/profiles"}}, sm, currentVersion, latestVersion)
+templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Profile, refresh int, profileId string, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
 		}
 		<div id="error" class="hidden"></div>
 		if confirmDelete {
-			@partials.ConfirmDelete(c, i18n.T(ctx, "profiles.confirm_delete"), "/profiles", "/profiles/"+profileId)
+			@partials.ConfirmDelete(c, i18n.T(ctx, "profiles.confirm_delete"), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID))), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%s", commonInfo.TenantID, commonInfo.SiteID, profileId))))
 		}
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
@@ -40,7 +38,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 						title={ i18n.T(ctx, "profiles.add") }
 						type="button"
 						class="uk-button uk-button-primary text-white"
-						hx-get="/profiles/new"
+						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/new", commonInfo.TenantID, commonInfo.SiteID))) }
 						hx-target="#main"
 						hx-push-url="true"
 						hx-swap="outerHTML"
@@ -70,8 +68,8 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 									class="!align-middle underline"
 								>
 									<a
-										href={ templ.URL(fmt.Sprintf("/profiles/%d", profile.ID)) }
-										hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d", profile.ID))) }
+										href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID)) }
+										hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID))) }
 										hx-push-url="true"
 										hx-target="#main"
 										hx-swap="outerHTML"
@@ -80,8 +78,8 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 								<td class="!align-middle underline">
 									if len(profile.Edges.Issues) > 0 {
 										<a
-											href={ templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID)) }
-											hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d/issues", profile.ID))) }
+											href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d/issues", commonInfo.TenantID, commonInfo.SiteID, profile.ID)) }
+											hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d/issues", commonInfo.TenantID, commonInfo.SiteID, profile.ID))) }
 											hx-push-url="true"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -114,7 +112,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 										<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 											<li>
 												<a
-													hx-get={ string(templ.URL(fmt.Sprintf("/profiles/%d/confirm-delete", profile.ID))) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d/confirm-delete", commonInfo.TenantID, commonInfo.SiteID, profile.ID))) }
 													hx-target="#main"
 													hx-swap="outerHTML"
 												><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -125,7 +123,8 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 							</tr>
 						}
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/profiles")
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID))))
+					)
 				} else {
 					<p class="uk-text-small uk-text-muted mt-6">
 						{ i18n.T(ctx, "profiles.no_profiles") }
@@ -136,8 +135,8 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, l locales.Translato
 	</main>
 }
 
-templ ProfilesIndex(title string, cmp templ.Component) {
-	@layout.Base("profiles") {
+templ ProfilesIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("profiles", commonInfo) {
 		@cmp
 	}
 }

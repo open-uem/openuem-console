@@ -1,22 +1,22 @@
 package admin_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "General Settings"), Url: "/admin/settings"}}, sm, currentVersion, latestVersion)
+templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "General Settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("settings", agentsExists, serversExists)
+				@ConfigNavbar("settings", agentsExists, serversExists, commonInfo)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -38,7 +38,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -60,7 +60,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -82,7 +82,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -104,7 +104,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -126,7 +126,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -148,7 +148,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -174,7 +174,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -196,7 +196,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -221,7 +221,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -252,7 +252,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -274,7 +274,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -299,7 +299,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -324,7 +324,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -349,7 +349,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -374,7 +374,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -399,7 +399,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -424,7 +424,7 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -444,8 +444,8 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 	</main>
 }
 
-templ GeneralSettingsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ GeneralSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

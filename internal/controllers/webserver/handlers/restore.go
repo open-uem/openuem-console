@@ -1,16 +1,21 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Restore(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentsExists, err := h.Model.AgentsExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -21,15 +26,17 @@ func (h *Handler) Restore(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, "", agentsExists, serversExists)))
+	return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, "", agentsExists, serversExists, commonInfo), commonInfo))
 }
 
 func (h *Handler) RestoreMessenger(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	if c.Request().Method == "POST" {
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -59,17 +66,19 @@ func (h *Handler) RestoreMessenger(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
-		}
-
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists, commonInfo), commonInfo))
 	}
-	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-messenger", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), fmt.Sprintf("/tenant/%s/site/%s/admin/restore-messenger", commonInfo.TenantID, commonInfo.SiteID), fmt.Sprintf("/tenant/%s/site/%s/admin/restore", commonInfo.TenantID, commonInfo.SiteID), true))
 }
 
 func (h *Handler) RestoreUpdater(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	if c.Request().Method == "POST" {
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -99,17 +108,19 @@ func (h *Handler) RestoreUpdater(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
-		}
-
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists, commonInfo), commonInfo))
 	}
-	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-updater", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), fmt.Sprintf("/tenant/%s/site/%s/admin/restore-updater", commonInfo.TenantID, commonInfo.SiteID), fmt.Sprintf("/tenant/%s/site/%s/admin/restore", commonInfo.TenantID, commonInfo.SiteID), true))
 }
 
 func (h *Handler) RestoreAgents(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	if c.Request().Method == "POST" {
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -139,17 +150,19 @@ func (h *Handler) RestoreAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
-		}
-
-		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Restore", admin_views.Restore(c, i18n.T(c.Request().Context(), "restore.restore_requested"), agentsExists, serversExists, commonInfo), commonInfo))
 	}
-	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), "/admin/restore-agents", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_restore"), fmt.Sprintf("/tenant/%s/site/%s/admin/restore-agents", commonInfo.TenantID, commonInfo.SiteID), fmt.Sprintf("/tenant/%s/site/%s/admin/restore", commonInfo.TenantID, commonInfo.SiteID), true))
 }
 
 func (h *Handler) RestoreDatabase(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	if c.Request().Method == "POST" {
 		_, err := h.Model.DeleteAllAgents()
 		if err != nil {
@@ -166,12 +179,7 @@ func (h *Handler) RestoreDatabase(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), true))
-		}
-
-		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, h.SessionManager, h.Version, latestServerRelease.Version, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists)))
+		return RenderView(c, admin_views.RestoreIndex("| Delete", admin_views.Restore(c, i18n.T(c.Request().Context(), "restore.delete_database_requested"), agentsExists, serversExists, commonInfo), commonInfo))
 	}
-	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_delete_database"), "/admin/restore-database", "/admin/restore", true))
+	return RenderConfirm(c, partials.Confirm(c, i18n.T(c.Request().Context(), "restore.confirm_delete_database"), fmt.Sprintf("/tenant/%s/site/%s/admin/restore-database", commonInfo.TenantID, commonInfo.SiteID), fmt.Sprintf("/tenant/%s/site/%s/admin/restore", commonInfo.TenantID, commonInfo.SiteID), true))
 }

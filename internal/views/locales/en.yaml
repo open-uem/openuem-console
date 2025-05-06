@@ -20,7 +20,7 @@ en:
   Dashboard: "Dashboard"
   DateFrom: From
   DateTo: To
-  DefaultTenant: "Default Org"
+  DefaultTenant: "Default Organization"
   DefaultSite: "Default Site"
   Delete: "Delete"
   Deploy: "Deploy"
@@ -64,6 +64,7 @@ en:
   Notes: "Notes"
   Now: "Now"
   OperatingSystem: "Operating System"
+  Organization: "Organization"
   Overview: "Overview"
   Pending: "Pending"
   Profile: "Profile"
@@ -90,6 +91,7 @@ en:
     one: "Session"
     other: "Sessions"
   Settings: "Settings"
+  Site: "Site"
   Size: "Size"
   SortBy: "Sort by %s"
   Stable: "Stable"

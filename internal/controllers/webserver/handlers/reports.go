@@ -24,7 +24,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/models"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -33,12 +32,12 @@ import (
 )
 
 func (h *Handler) Reports(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
-	return RenderView(c, reports_views.ReportsIndex("| Reports", reports_views.Reports(c, h.SessionManager, h.Version, latestServerRelease.Version, "")))
+	return RenderView(c, reports_views.ReportsIndex("| Reports", reports_views.Reports(c, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) GenerateCSVReports(c echo.Context) error {

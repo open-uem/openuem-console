@@ -10,16 +10,17 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/models"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/tasks_views"
 	"github.com/open-uem/wingetcfg/wingetcfg"
 )
 
 func (h *Handler) NewTask(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	profile := c.Param("profile")
@@ -45,13 +46,15 @@ func (h *Handler) NewTask(c echo.Context) error {
 		return h.EditProfile(c, "GET", profile, i18n.T(c.Request().Context(), "tasks.new.saved"))
 	}
 
-	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.NewTask(c, h.SessionManager, profileID, h.Version, latestServerRelease.Version)))
+	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.NewTask(c, profileID, commonInfo), commonInfo))
 }
 
 func (h *Handler) EditTask(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	id := c.Param("id")
@@ -93,7 +96,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 		return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.deleted"))
 	}
 
-	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.EditTask(c, h.SessionManager, task.Edges.Profile.ID, task, h.Version, latestServerRelease.Version)))
+	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.EditTask(c, task.Edges.Profile.ID, task, commonInfo), commonInfo))
 }
 
 func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {

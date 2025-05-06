@@ -16,7 +16,6 @@ import (
 	"github.com/open-uem/ent/server"
 	openuem_nats "github.com/open-uem/nats"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -151,17 +150,33 @@ func (h *Handler) DeleteServer(c echo.Context) error {
 }
 
 func (h *Handler) UpdateServersConfirm(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	version := c.FormValue("filterBySelectedRelease")
-	return RenderConfirm(c, partials.ConfirmUpdateServers(c, version))
+	return RenderConfirm(c, partials.ConfirmUpdateServers(c, version, commonInfo))
 }
 
 func (h *Handler) DeleteServerConfirm(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	server := c.Param("serverId")
-	return RenderConfirm(c, partials.ConfirmDelete(c, i18n.T(c.Request().Context(), "admin.update.servers.confirm_delete"), "/admin/update-servers", "/admin/update-servers/"+server))
+	return RenderConfirm(c, partials.ConfirmDelete(c, i18n.T(c.Request().Context(), "admin.update.servers.confirm_delete"), fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID), fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers/%s", commonInfo.TenantID, commonInfo.SiteID, server)))
 }
 
 func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
@@ -256,8 +271,6 @@ func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, 
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	agentsExists, err := h.Model.AgentsExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -268,5 +281,5 @@ func (h *Handler) ShowUpdateServersList(c echo.Context, r *openuem_ent.Release, 
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage, agentsExists, serversExists)))
+	return RenderView(c, admin_views.UpdateServersIndex(" | Update Servers", admin_views.UpdateServers(c, p, f, Servers, []string{}, higherRelease, latestServerRelease, appliedReleases, allReleases, allUpdateStatus, refreshTime, successMessage, errorMessage, agentsExists, serversExists, commonInfo), commonInfo))
 }

@@ -7,16 +7,19 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/charts"
 	"github.com/open-uem/openuem-console/internal/views/dashboard_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
-	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Dashboard(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	data := dashboard_views.DashboardData{}
 
 	// Get latest version
@@ -144,14 +147,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 
 	h.CheckNATSComponentStatus(&data)
 
-	l := views.GetTranslatorForDates(c)
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(h.SessionManager, l, h.Version, latestServerRelease.Version, data)))
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(data, commonInfo), commonInfo))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {

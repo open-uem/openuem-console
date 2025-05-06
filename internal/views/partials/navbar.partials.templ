@@ -5,12 +5,12 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 )
 
-templ NavBar(active string) {
+templ NavBar(active string, commonInfo *CommonInfo) {
 	<nav id="navbar" hx-history="false" class="uk-flex uk-flex-between@s h-full flex-col items-center px-2 sm:py-5">
 		<div class="flex flex-col gap-4">
 			<a
-				href="/dashboard"
-				hx-get="/dashboard"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/dashboard", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/dashboard", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Dashboard")) }
@@ -26,8 +26,8 @@ templ NavBar(active string) {
 				<span class="sr-only">{ i18n.T(ctx, "Dashboard") }</span>
 			</a>
 			<a
-				href="/computers"
-				hx-get="/computers"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Computers")) }
@@ -37,8 +37,8 @@ templ NavBar(active string) {
 				<span class="sr-only">Computers</span>
 			</a>
 			<a
-				href="/software"
-				hx-get="/software"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Software")) }
@@ -48,8 +48,8 @@ templ NavBar(active string) {
 				<span class="sr-only">Software</span>
 			</a>
 			<a
-				href="/security"
-				hx-get="/security"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Security")) }
@@ -59,8 +59,8 @@ templ NavBar(active string) {
 				<span class="sr-only">{ i18n.T(ctx, "Security") }</span>
 			</a>
 			<a
-				href="/deploy"
-				hx-get="/deploy"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Deploy")) }
@@ -70,8 +70,8 @@ templ NavBar(active string) {
 				<span class="sr-only">{ i18n.T(ctx, "Deploy") }</span>
 			</a>
 			<a
-				href="/profiles"
-				hx-get="/profiles"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Profile Management")) }
@@ -80,31 +80,9 @@ templ NavBar(active string) {
 				<uk-icon hx-history="false" icon="replace-all" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				<span class="sr-only">{ i18n.T(ctx, "Profile Management") }</span>
 			</a>
-			/*<a
-			href="/network-printers"
-			hx-get="/network-printers"
-			hx-push-url="true"
-			hx-target="body"
-			uk-tooltip="title: Network Printers; pos: right"
-			class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "network printers"), templ.KV("text-muted-foreground hover:text-foreground", active != "network printers") }
-		>
-			<uk-icon hx-history="false" icon="printer" custom-class="h-5 w-5" uk-cloack></uk-icon>
-			<span class="sr-only">Network Printers</span>
-		</a> */
-			/* <a
-				href="/reports"
-				hx-get="/reports"
-				hx-push-url="true"
-				hx-target="body"
-				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Reports")) }
-				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "reports"), templ.KV("text-muted-foreground hover:text-foreground", active != "reports") }
-			>
-				<uk-icon hx-history="false" icon="clipboard-list" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				<span class="sr-only">Reports</span>
-			</a> */
 			<a
-				href="/agents"
-				hx-get="/agents"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Agents")) }
@@ -116,8 +94,8 @@ templ NavBar(active string) {
 		</div>
 		<div class="flex flex-col gap-4">
 			<a
-				href="/admin"
-				hx-get="/admin"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip="title: Admin; pos: right"

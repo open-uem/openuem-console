@@ -1,13 +1,13 @@
 package profiles_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ NewProfile(sm *sessions.SessionManager, currentVersion, latestVersion string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: "/profiles"}}, sm, currentVersion, latestVersion)
+templ NewProfile(commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -24,7 +24,7 @@ templ NewProfile(sm *sessions.SessionManager, currentVersion, latestVersion stri
 			<div class="uk-card-body">
 				<form
 					class="uk-form-stacked my-6"
-					hx-post="/profiles/new"
+					hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/new", commonInfo.TenantID, commonInfo.SiteID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					hx-push-url="false"

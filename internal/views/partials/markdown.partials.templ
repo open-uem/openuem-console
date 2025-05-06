@@ -5,7 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 )
 
-templ MarkdownNavbar(agentId, renderedMarkdown string) {
+templ MarkdownNavbar(agentId, renderedMarkdown string, commonInfo *CommonInfo) {
 	<ul class="flex mb-6 gap-2 items-center">
 		<li>
 			<div id="edit" class={ "", templ.KV("hidden", len(renderedMarkdown) == 0) }>
@@ -54,7 +54,7 @@ templ MarkdownNavbar(agentId, renderedMarkdown string) {
 				type="button"
 				title="save"
 				class="p-2 uk-button uk-button-primary flex gap-2"
-				hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/notes", agentId))) }
+				hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/notes", commonInfo.TenantID, commonInfo.SiteID, agentId))) }
 				hx-push-url="false"
 				hx-target="#success"
 				hx-swap="innerHTML"

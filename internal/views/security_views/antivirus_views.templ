@@ -2,22 +2,20 @@ package security_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: "/security"}, {Title: "Antivirus", Url: "/security/antivirus"}}, sm, currentVersion, latestVersion)
+templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Antivirus", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/antivirus", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@SecurityNavbar("antivirus")
+				@SecurityNavbar("antivirus", commonInfo)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -30,19 +28,19 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 								</p>
 							</div>
 							<div class="flex gap-4">
-								@partials.CSVReportButton(p, "/reports/antivirus/csv", "reports.agents")
-								@partials.PDFReportButton(p, "/reports/antivirus", "reports.agents")
+								@partials.CSVReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/antivirus/csv", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
+								@partials.PDFReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/antivirus", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
 							</div>
 						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters("/security", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
 								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
 									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
 							
 							})
-							@partials.RefreshPage(l, "/security", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(antiviri) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
@@ -104,7 +102,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 										<tr>
 											<td
 												class="!align-middle underline cursor-pointer"
-												hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", antivirus.ID))) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s", commonInfo.TenantID, commonInfo.SiteID, antivirus.ID))) }
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"
@@ -143,7 +141,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/security/antivirus")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/antivirus", commonInfo.TenantID, commonInfo.SiteID))))
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "antivirus.no_antivirus_yet") }

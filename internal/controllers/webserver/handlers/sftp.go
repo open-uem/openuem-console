@@ -15,7 +15,6 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
@@ -32,6 +31,12 @@ type CheckedItemsForm struct {
 }
 
 func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -89,17 +94,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, agent, cwd, parent, files, commonInfo), commonInfo))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -146,6 +141,12 @@ func (h *Handler) NewFolder(c echo.Context) error {
 }
 
 func (h *Handler) DeleteItem(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -194,20 +195,16 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, agent, cwd, parent, files, commonInfo), commonInfo))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -265,20 +262,17 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	p := partials.PaginationAndSort{}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, agent, cwd, parent, files, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	removeForm := new(CheckedItemsForm)
 	if err := c.Bind(removeForm); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -325,23 +319,20 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, removeForm.Parent, files, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(p, agent, cwd, removeForm.Parent, files, commonInfo), commonInfo))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	// Get form values
 	parent := c.FormValue("parent")
 
@@ -411,17 +402,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	p := partials.PaginationAndSort{}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.SFTPHome(p, h.SessionManager, h.Version, latestServerRelease.Version, agent, cwd, parent, files, detectRemoteAgents))
+	return RenderView(c, computers_views.SFTPHome(p, agent, cwd, parent, files, commonInfo))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {

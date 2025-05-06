@@ -1,10 +1,9 @@
 package software_views
 
 import (
-	"github.com/gohugoio/locales"
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
@@ -13,8 +12,8 @@ import (
 	"strings"
 )
 
-templ Software(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, apps []models.App, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Software", i18n.Default("Software")), Url: "/software"}}, sm, currentVersion, latestVersion)
+templ Software(c echo.Context, p partials.PaginationAndSort, f filters.ApplicationsFilter, apps []models.App, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Software", i18n.Default("Software")), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
@@ -26,17 +25,17 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 						</p>
 					</div>
 					<div class="flex gap-4">
-						@partials.CSVReportButton(p, "/reports/software/csv", "reports.agents")
-						@partials.PDFReportButton(p, "/reports/software", "reports.agents")
+						@partials.CSVReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/software/csv", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
+						@partials.PDFReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/software", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
 					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters("/software", "#main", "outerHTML", func() bool {
+					@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
 						return f.AppName == "" && f.Vendor == ""
 					})
-					@partials.RefreshPage(l, "/software", "#main", "outerHTML", "get", refresh, true)
+					@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "get", refresh, true)
 				</div>
 				if len(apps) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
@@ -77,7 +76,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 										<input type="hidden" id="selectedApp" name="selectedApp" value={ app.Name }/>
 										<span
 											class="underline cursor-pointer"
-											hx-post="/computers"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))) }
 											hx-push-url="true"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -102,7 +101,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 							}
 						}
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/software")
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID))))
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "apps.no_apps") }
@@ -113,8 +112,8 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 	</main>
 }
 
-templ SoftwareIndex(title string, cmp templ.Component) {
-	@layout.Base("software") {
+templ SoftwareIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("software", commonInfo) {
 		@cmp
 	}
 }

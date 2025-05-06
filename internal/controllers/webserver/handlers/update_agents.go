@@ -14,8 +14,6 @@ import (
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/release"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -138,12 +136,23 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 }
 
 func (h *Handler) UpdateAgentsConfirm(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	version := c.FormValue("filterBySelectedRelease")
-	return RenderConfirm(c, partials.ConfirmUpdateAgents(c, version))
+	return RenderConfirm(c, partials.ConfirmUpdateAgents(c, version, commonInfo))
 }
 
 func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, successMessage, errorMessage string) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
@@ -253,8 +262,6 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	agentsExists, err := h.Model.AgentsExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -265,10 +272,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage, agentsExists, serversExists)))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage, agentsExists, serversExists, commonInfo), commonInfo))
 }

@@ -1,15 +1,15 @@
 package reports_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Reports(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, successMessage string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: "/reports"}}, sm, currentVersion, latestVersion)
+templ Reports(c echo.Context, successMessage string, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -34,7 +34,7 @@ templ Reports(c echo.Context, sm *sessions.SessionManager, currentVersion, lates
 									id="report1-button"
 									class="flex items-center gap-2"
 									type="submit"
-									hx-post="/reports"
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -55,7 +55,7 @@ templ Reports(c echo.Context, sm *sessions.SessionManager, currentVersion, lates
 									id="report2-button"
 									class="flex items-center gap-2"
 									type="submit"
-									hx-post="/reports"
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -74,8 +74,8 @@ templ Reports(c echo.Context, sm *sessions.SessionManager, currentVersion, lates
 	</main>
 }
 
-templ ReportsIndex(title string, cmp templ.Component) {
-	@layout.Base("reports") {
+templ ReportsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("reports", commonInfo) {
 		@cmp
 	}
 }

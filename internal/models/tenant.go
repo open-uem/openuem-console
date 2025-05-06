@@ -18,3 +18,11 @@ func (m *Model) CountTenants() (int, error) {
 func (m *Model) GetDefaultTenant() (*ent.Tenant, error) {
 	return m.Client.Tenant.Query().Where(tenant.IsDefault(true)).Only(context.Background())
 }
+
+func (m *Model) GetTenantByID(tenantID int) (*ent.Tenant, error) {
+	return m.Client.Tenant.Query().Where(tenant.ID(tenantID)).Only(context.Background())
+}
+
+func (m *Model) GetTenants() ([]*ent.Tenant, error) {
+	return m.Client.Tenant.Query().All(context.Background())
+}

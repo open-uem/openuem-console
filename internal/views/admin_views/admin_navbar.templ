@@ -1,13 +1,17 @@
 package admin_views
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
 
-templ ConfigNavbar(active string, agentsExists, serversExists bool) {
+templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "users") }>
 			<a
-				href="/admin/users"
-				hx-get="/admin/users"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -20,8 +24,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "sessions") }>
 			<a
-				href="/admin/sessions"
-				hx-get="/admin/sessions"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -34,8 +38,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "tags") }>
 			<a
-				href="/admin/tags"
-				hx-get="/admin/tags"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -48,8 +52,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "smtp") }>
 			<a
-				href="/admin/smtp"
-				hx-get="/admin/smtp"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -62,8 +66,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "metadata") }>
 			<a
-				href="/admin/metadata"
-				hx-get="/admin/metadata"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -76,8 +80,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "settings") }>
 			<a
-				href="/admin/settings"
-				hx-get="/admin/settings"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -91,8 +95,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		<li class={ templ.KV("uk-active", active == "update-agents") }>
 			<a
 				if agentsExists {
-					href="/admin/update-agents"
-					hx-get="/admin/update-agents"
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID))) }
 				}
 				hx-push-url="true"
 				hx-target="#main"
@@ -107,8 +111,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		<li class={ templ.KV("uk-active", active == "update-servers") }>
 			<a
 				if serversExists {
-					href="/admin/update-servers"
-					hx-get="/admin/update-servers"
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))) }
 				}
 				hx-push-url="true"
 				hx-target="#main"
@@ -122,8 +126,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "certificates") }>
 			<a
-				href="/admin/certificates"
-				hx-get="/admin/certificates"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -134,19 +138,5 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool) {
 				{ i18n.T(ctx, "certificates.title") }
 			</a>
 		</li>
-		/* <li class={ templ.KV("uk-active", active == "restore") }>
-			<a
-				href="/admin/restore"
-				hx-get="/admin/restore"
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-restore-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-restore-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "restore.title") }
-			</a>
-		</li> */
 	</ul>
 }

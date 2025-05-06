@@ -5,8 +5,6 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -18,6 +16,13 @@ func (h *Handler) ListCertificates(c echo.Context) error {
 }
 
 func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f := filters.CertificateFilter{}
 
 	f.Description = c.FormValue("filterByDescription")
@@ -59,8 +64,6 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	serversExists, err := h.Model.ServersExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -71,21 +74,21 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, h.SessionManager, h.Version, latestServerRelease.Version, l, certTypes, certificates, successMessage, agentsExists, serversExists)))
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, certTypes, certificates, successMessage, agentsExists, serversExists, commonInfo), commonInfo))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	serial := c.FormValue("serial")
 	if serial == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "certificates.no_serial"), true))
 	}
 
-	return RenderConfirm(c, partials.ConfirmCertRevocation(c, serial))
+	return RenderConfirm(c, partials.ConfirmCertRevocation(c, serial, commonInfo))
 }
 
 func (h *Handler) RevocateCertificate(c echo.Context) error {

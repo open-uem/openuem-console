@@ -1,21 +1,21 @@
 package admin_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, settings *openuem_ent.Settings, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "SMTP Settings", Url: "/admin/smtp"}}, sm, currentVersion, latestVersion)
+templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "SMTP Settings", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("smtp", agentsExists, serversExists)
+				@ConfigNavbar("smtp", agentsExists, serversExists, commonInfo)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -71,7 +71,7 @@ templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, 
 								<button
 									class="uk-button uk-button-primary flex items-center gap-2"
 									type="submit"
-									hx-post="/admin/smtp"
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -83,7 +83,7 @@ templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, 
 								<button
 									class="uk-button uk-button-secondary flex items-center gap-2"
 									type="button"
-									hx-post="/admin/smtp/test"
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp/test", commonInfo.TenantID, commonInfo.SiteID))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -101,8 +101,8 @@ templ SMTPSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, 
 	</main>
 }
 
-templ SMTPSettingsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ SMTPSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

@@ -15,8 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 	openuem_ent "github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -34,6 +32,12 @@ type NewUser struct {
 
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f := filters.UserFilter{}
 
 	usernameFilter := c.FormValue("filterByUsername")
@@ -104,8 +108,6 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	agentsExists, err := h.Model.AgentsExists()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -116,15 +118,17 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, users, successMessage, errMessage, refreshTime, agentsExists, serversExists)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, users, successMessage, errMessage, refreshTime, agentsExists, serversExists, commonInfo), commonInfo))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	defaultCountry, err := h.Model.GetDefaultCountry()
 	if err != nil {
 		return err
@@ -140,12 +144,7 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, h.SessionManager, h.Version, latestServerRelease.Version, defaultCountry, agentsExists, serversExists)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry, agentsExists, serversExists, commonInfo), commonInfo))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -366,6 +365,13 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 }
 
 func (h *Handler) EditUser(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
@@ -395,12 +401,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, h.SessionManager, h.Version, latestServerRelease.Version, user, defaultCountry, agentsExists, serversExists)))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry, agentsExists, serversExists, commonInfo), commonInfo))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {

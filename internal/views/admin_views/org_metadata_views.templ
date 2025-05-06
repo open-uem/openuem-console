@@ -5,25 +5,24 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, data []*ent.OrgMetadata, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Metadata", Url: "/admin/metadata"}}, sm, currentVersion, latestVersion)
+templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgMetadata, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Metadata", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("metadata", agentsExists, serversExists)
+				@ConfigNavbar("metadata", agentsExists, serversExists, commonInfo)
 				<div id="confirm" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
 				<div id="confirm-orgmetadata-delete" class="uk-alert uk-alert-danger dark:bg-red-600 dark:text-white hidden" uk-alert>
-					@ConfirmOrgMetadataDeletion()
+					@ConfirmOrgMetadataDeletion(commonInfo)
 				</div>
 				<div id="edit-orgmetadata-dialog" class="uk-alert border border-blue-700  dark:bg-blue-500 dark:text-white hidden" uk-alert>
-					@EditOrgMetadata()
+					@EditOrgMetadata(commonInfo)
 				</div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -33,7 +32,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 						</p>
 					</div>
 					<div class="uk-card-body">
-						@NewOrgMetadata()
+						@NewOrgMetadata(commonInfo)
 						if len(data) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 								<thead>
@@ -88,7 +87,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/metadata")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "metadata.no_metadata") }
@@ -101,13 +100,13 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, sm *sessions.Ses
 	</main>
 }
 
-templ OrgMetadataIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ OrgMetadataIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }
 
-templ ConfirmOrgMetadataDeletion() {
+templ ConfirmOrgMetadataDeletion(commonInfo *partials.CommonInfo) {
 	<div class="uk-alert-description p-2">
 		<div class="flex flex-col gap-6 pt-2">
 			<p>{ i18n.T(ctx, "metadata.confirm_delete") }</p>
@@ -124,7 +123,7 @@ templ ConfirmOrgMetadataDeletion() {
 				</button>
 				<button
 					title="confirm orgmetadata deletion"
-					hx-delete="/admin/metadata"
+					hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					class="uk-button uk-button-danger"
@@ -136,7 +135,7 @@ templ ConfirmOrgMetadataDeletion() {
 	</div>
 }
 
-templ NewOrgMetadata() {
+templ NewOrgMetadata(commonInfo *partials.CommonInfo) {
 	<form class="flex gap-2 items-center w-1/2 mt-6 mb-2">
 		<input name="name" class="uk-input w-1/3" type="text" placeholder={ i18n.T(ctx, "metadata.new") }/>
 		<input name="description" class="uk-input w-2/3" type="text" placeholder={ i18n.T(ctx, "metadata.optional_description") }/>
@@ -144,7 +143,7 @@ templ NewOrgMetadata() {
 			title="add org metadata"
 			type="button"
 			class="uk-button uk-button-primary"
-			hx-post="/admin/metadata"
+			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))) }
 			hx-target="#main"
 			hx-swap="outerHTML"
 		>
@@ -153,7 +152,7 @@ templ NewOrgMetadata() {
 	</form>
 }
 
-templ EditOrgMetadata() {
+templ EditOrgMetadata(commonInfo *partials.CommonInfo) {
 	<div class="uk-alert-description p-2">
 		<div class="flex flex-col gap-6 pt-2">
 			<p>{ i18n.T(ctx, "metadata.edit") }</p>
@@ -176,7 +175,7 @@ templ EditOrgMetadata() {
 					</button>
 					<button
 						title="Confirm org metatada update"
-						hx-post="/admin/metadata"
+						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="uk-button text-white bg-blue-600 hover:bg-blue-400"

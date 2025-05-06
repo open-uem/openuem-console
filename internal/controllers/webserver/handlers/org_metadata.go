@@ -4,13 +4,17 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) OrgMetadataManager(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
@@ -73,10 +77,5 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, h.SessionManager, h.Version, latestServerRelease.Version, data, agentsExists, serversExists)))
+	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, data, agentsExists, serversExists, commonInfo), commonInfo))
 }

@@ -1,11 +1,12 @@
 package partials
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
 
-templ ConfirmCertRevocation(c echo.Context, serial string) {
+templ ConfirmCertRevocation(c echo.Context, serial string, commonInfo *CommonInfo) {
 	<div class="uk-alert border-red-600 text-red-600" uk-alert>
 		<div class="uk-alert-description p-2">
 			<form class="flex flex-col gap-2">
@@ -15,7 +16,7 @@ templ ConfirmCertRevocation(c echo.Context, serial string) {
 				</p>
 				<div class="flex justify-start gap-6">
 					<button
-						hx-delete="/admin/certificates"
+						hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -30,7 +31,7 @@ templ ConfirmCertRevocation(c echo.Context, serial string) {
 						title={ i18n.T(ctx, "Cancel") }
 						type="button"
 						class="uk-button uk-button-default"
-						hx-get={ GetCurrentUrl(c, "/admin/certificates") }
+						hx-get={ GetCurrentUrl(c, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID)))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"

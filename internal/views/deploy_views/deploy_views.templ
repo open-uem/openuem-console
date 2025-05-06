@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -14,21 +13,21 @@ import (
 	"strings"
 )
 
-templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, install bool, successMessage string) {
+templ Deploy(install bool, successMessage string, commonInfo *partials.CommonInfo) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}}, sm, currentVersion, latestVersion)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Install", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/install", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}}, sm, currentVersion, latestVersion)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Uninstall", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/uninstall", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				if install {
-					@DeployNavbar("install")
+					@DeployNavbar("install", commonInfo)
 				} else {
-					@DeployNavbar("uninstall")
+					@DeployNavbar("uninstall", commonInfo)
 				}
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
@@ -83,9 +82,9 @@ templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, 
 									type="submit"
 									class="uk-button uk-button-primary"
 									if install {
-										hx-post="/deploy/searchinstall"
+										hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/searchinstall", commonInfo.TenantID, commonInfo.SiteID))) }
 									} else {
-										hx-post="/deploy/searchuninstall"
+										hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/searchuninstall", commonInfo.TenantID, commonInfo.SiteID))) }
 									}
 									hx-push-url="true"
 									hx-target="#deploy-search-results"
@@ -105,12 +104,12 @@ templ Deploy(sm *sessions.SessionManager, currentVersion, latestVersion string, 
 	</main>
 }
 
-templ DeployNavbar(active string) {
+templ DeployNavbar(active string, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "install") }>
 			<a
-				href="/deploy/install"
-				hx-get="/deploy/install"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/install", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/install", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -120,8 +119,8 @@ templ DeployNavbar(active string) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "uninstall") }>
 			<a
-				href="/deploy/uninstall"
-				hx-get="/deploy/uninstall"
+				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/uninstall", commonInfo.TenantID, commonInfo.SiteID)) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/uninstall", commonInfo.TenantID, commonInfo.SiteID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -132,13 +131,13 @@ templ DeployNavbar(active string) {
 	</ul>
 }
 
-templ DeployIndex(title string, cmp templ.Component) {
-	@layout.Base("deploy") {
+templ DeployIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("deploy", commonInfo) {
 		@cmp
 	}
 }
 
-templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string) {
+templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped  mt-6">
 			<thead>
@@ -174,7 +173,7 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 						</td>
 						<td class="!align-middle">
 							<form
-								hx-get="/deploy/selectpackagedeployment"
+								hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/selectpackagedeployment", commonInfo.TenantID, commonInfo.SiteID))) }
 								hx-push-url="true"
 								hx-target="#main"
 								hx-swap="outerHTML"
@@ -208,9 +207,9 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 			</tbody>
 		</table>
 		if install {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", "/deploy/searchinstall")
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/searchinstall", commonInfo.TenantID, commonInfo.SiteID))))
 		} else {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", "/deploy/searchuninstall")
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/searchuninstall", commonInfo.TenantID, commonInfo.SiteID))))
 		}
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
@@ -219,21 +218,21 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, currentVersion, latestVersion string, packageId, packageName string, agents []*openuem_ent.Agent, install bool, refresh int) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*ent.Agent, install bool, refresh int, commonInfo *partials.CommonInfo) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Install", Url: "/deploy/install"}, {Title: packageName, Url: ""}}, sm, currentVersion, latestVersion)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Install", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/install", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: packageName, Url: ""}}, *commonInfo)
 	} else {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: "/deploy"}, {Title: "Uninstall", Url: "/deploy/uninstall"}, {Title: packageName, Url: ""}}, sm, currentVersion, latestVersion)
+		@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Uninstall", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/uninstall", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: packageName, Url: ""}}, *commonInfo)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				if install {
-					@DeployNavbar("install")
+					@DeployNavbar("install", commonInfo)
 				} else {
-					@DeployNavbar("uninstall")
+					@DeployNavbar("uninstall", commonInfo)
 				}
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
@@ -255,7 +254,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							<span class="uk-text-bolder">{ packageName }</span>
 						</p>
 						<form
-							hx-post="/deploy/selectpackagedeployment"
+							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/selectpackagedeployment", commonInfo.TenantID, commonInfo.SiteID))) }
 							hx-target="#main"
 							hx-push-url="true"
 							hx-target="#main"
@@ -297,7 +296,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 					</div>
 					<div class="uk-card-body mt-8 mb-2">
 						<div class="flex items-center gap-4">
-							@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
 								return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
 							})
 							if len(agents) > 0 {
@@ -476,7 +475,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									}
 								</table>
 							</div>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/deploy/selectpackagedeployment")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/deploy/selectpackagedeployment", commonInfo.TenantID, commonInfo.SiteID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "agents.no_agents") }

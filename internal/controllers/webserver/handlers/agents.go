@@ -16,8 +16,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -27,6 +25,11 @@ import (
 func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
 	var err error
 	var agents []*ent.Agent
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	currentPage := c.FormValue("page")
 	pageSize := c.FormValue("pageSize")
@@ -229,21 +232,9 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
 	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_sftp_general_setting"), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
 	}
 
 	if comesFromDialog {
@@ -254,15 +245,22 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, detectRemoteAgents, successMessage, errMessage, refreshTime)), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, detectRemoteAgents, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
@@ -273,12 +271,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
@@ -336,22 +329,29 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 }
 
 func (h *Handler) AgentDisable(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentsAdmit(c echo.Context) error {
 	errorsFound := false
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
@@ -434,11 +434,16 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmAdmitAgents(c))
+	return RenderConfirm(c, partials.ConfirmAdmitAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentsEnable(c echo.Context) error {
 	errorsFound := false
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
@@ -483,11 +488,16 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmEnableAgents(c))
+	return RenderConfirm(c, partials.ConfirmEnableAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentsDisable(c echo.Context) error {
 	errorsFound := false
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 
@@ -528,22 +538,24 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 
 	}
 
-	return RenderConfirm(c, partials.ConfirmDisableAgents(c))
+	return RenderConfirm(c, partials.ConfirmDisableAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentAdmit(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -658,14 +670,16 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 }
 
 func (h *Handler) AgentLogs(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
 	category := c.FormValue("log-category")
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
 
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
@@ -705,15 +719,13 @@ func (h *Handler) AgentLogs(c echo.Context) error {
 
 	updaterLog := parseLogFile(data, category)
 
-	l := views.GetTranslatorForDates(c)
-
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, agentLog, updaterLog, category, "", "", refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, a, agentLog, updaterLog, category, "", "", refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) GetAgentLogFile(agent *ent.Agent, path string) (string, error) {
@@ -797,12 +809,14 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 }
 
 func (h *Handler) AgentSettings(c echo.Context) error {
-	agentId := c.Param("uuid")
+	var err error
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+		return err
 	}
+
+	agentId := c.Param("uuid")
 
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
@@ -818,8 +832,6 @@ func (h *Handler) AgentSettings(c echo.Context) error {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
-
-	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
 		s := openuem_nats.AgentSetting{}
@@ -901,8 +913,8 @@ func (h *Handler) AgentSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", errMessage), true))
 		}
 
-		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, i18n.T(c.Request().Context(), "agents.settings_success"), "", refreshTime)))
+		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, a, i18n.T(c.Request().Context(), "agents.settings_success"), "", refreshTime, commonInfo), commonInfo))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, currentAgent, "", "", refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, currentAgent, "", "", refreshTime, commonInfo), commonInfo))
 }

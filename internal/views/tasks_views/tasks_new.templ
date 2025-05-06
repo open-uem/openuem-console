@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, currentVersion, latestVersion string) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks"), Url: "/tasks"}}, sm, currentVersion, latestVersion)
+templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
+	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -27,7 +26,7 @@ templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, curren
 			<div class="uk-card-body">
 				<form
 					class="flex flex-col gap-4 my-6"
-					hx-post={ string(templ.URL(fmt.Sprintf("/tasks/%d/new", profileId))) }
+					hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d/new", commonInfo.TenantID, commonInfo.SiteID, profileId))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					hx-push-url="false"
@@ -80,7 +79,7 @@ templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, curren
 						<button
 							type="button"
 							class="uk-button uk-button-default"
-							hx-get={ partials.GetCurrentUrl(c, "/profiles") }
+							hx-get={ partials.GetCurrentUrl(c, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)))) }
 							hx-push-url="true"
 							hx-target="#main"
 							hx-swap="outerHTML"
@@ -94,8 +93,8 @@ templ NewTask(c echo.Context, sm *sessions.SessionManager, profileId int, curren
 	</main>
 }
 
-templ TasksIndex(title string, cmp templ.Component) {
-	@layout.Base("tasks") {
+templ TasksIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("tasks", commonInfo) {
 		@cmp
 	}
 }

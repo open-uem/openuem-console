@@ -2,21 +2,19 @@ package security_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, updates []*ent.Update) {
+templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update, commonInfo *partials.CommonInfo) {
 	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "updates_history.title") } </title>
-	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}, {Title: agent.Hostname, Url: fmt.Sprintf("/security/%s/updates", agent.ID)}}, sm, currentVersion, latestVersion)
+	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: agent.Hostname, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/%s/updates", commonInfo.TenantID, commonInfo.SiteID, agent.ID)))}}, *commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@SecurityNavbar("updates")
+				@SecurityNavbar("updates", commonInfo)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "updates_history.title") }</h3>
@@ -47,7 +45,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.S
 								for _, update := range updates {
 									<tr>
 										<td>{ update.Title }</td>
-										<td>{ l.FmtDateMedium(update.Date) }</td>
+										<td>{ commonInfo.Translator.FmtDateMedium(update.Date) }</td>
 										<td><a class="underline text-blue-500" target="_blank" rel="noopener" href={ templ.URL(update.SupportURL) }>{ update.SupportURL }</a></td>
 									</tr>
 								}
@@ -61,7 +59,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, sm *sessions.S
 									}
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", fmt.Sprintf("/security/%s/updates", agent.ID))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/%s/updates", commonInfo.TenantID, commonInfo.SiteID, agent.ID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "updates_history.no_info") }
