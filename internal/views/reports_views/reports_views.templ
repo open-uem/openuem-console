@@ -1,7 +1,6 @@
 package reports_views
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/layout"
@@ -9,7 +8,7 @@ import (
 )
 
 templ Reports(c echo.Context, successMessage string, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Reports"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -34,7 +33,7 @@ templ Reports(c echo.Context, successMessage string, commonInfo *partials.Common
 									id="report1-button"
 									class="flex items-center gap-2"
 									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID))) }
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports"))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -55,7 +54,7 @@ templ Reports(c echo.Context, successMessage string, commonInfo *partials.Common
 									id="report2-button"
 									class="flex items-center gap-2"
 									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports", commonInfo.TenantID, commonInfo.SiteID))) }
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports"))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"

@@ -1,7 +1,6 @@
 package partials
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"time"
@@ -20,7 +19,7 @@ templ ConfirmUpdateServers(c echo.Context, version string, commonInfo *CommonInf
 				<div class="flex justify-start gap-6">
 					<input class="uk-input w-1/6" name="update-server-date" type="datetime-local" min={ time.Now().Format("2006-01-02T15:03") }/>
 					<button
-						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))) }
+						hx-post="/admin/update-servers"
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -42,7 +41,7 @@ templ ConfirmUpdateServers(c echo.Context, version string, commonInfo *CommonInf
 						title={ i18n.T(ctx, "Cancel") }
 						type="button"
 						class="uk-button uk-button-default"
-						hx-get={ GetCurrentUrl(c, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID)))) }
+						hx-get="/admin/update-servers"
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"

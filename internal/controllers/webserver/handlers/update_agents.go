@@ -22,6 +22,11 @@ import (
 func (h *Handler) UpdateAgents(c echo.Context) error {
 	var err error
 
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	successMessage := ""
 	errorMessage := ""
 
@@ -50,7 +55,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 		for a := range strings.SplitSeq(agents, ",") {
 
-			agentInfo, err := h.Model.GetAgentById(a)
+			agentInfo, err := h.Model.GetAgentById(a, commonInfo)
 			if err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			}
@@ -97,7 +102,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			data, err := json.Marshal(updateRequest)
 			if err != nil {
 				errorMessage = err.Error()
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.task_status_error", releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.task_status_error", releaseToBeApplied.Version, commonInfo); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
@@ -105,7 +110,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 				errorMessage = i18n.T(c.Request().Context(), "nats.not_connected")
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "nats.not_connected", releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "nats.not_connected", releaseToBeApplied.Version, commonInfo); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
@@ -113,13 +118,13 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 
 			if _, err := h.JetStream.Publish(context.Background(), "agent.update."+a, data); err != nil {
 				errorMessage = i18n.T(c.Request().Context(), "admin.update.agents.cannot_send_request")
-				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.cannot_send_request", releaseToBeApplied.Version); err != nil {
+				if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_error", "admin.update.agents.cannot_send_request", releaseToBeApplied.Version, commonInfo); err != nil {
 					log.Println("[ERROR]: could not save update task info")
 				}
 				continue
 			}
 
-			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", i18n.T(c.Request().Context(), "admin.update.agents.task_update", releaseToBeApplied.Version), releaseToBeApplied.Version); err != nil {
+			if err := h.Model.SaveAgentUpdateInfo(a, "admin.update.agents.task_status_pending", i18n.T(c.Request().Context(), "admin.update.agents.task_update", releaseToBeApplied.Version), releaseToBeApplied.Version, commonInfo); err != nil {
 				log.Println("[ERROR]: could not save update task info")
 				continue
 			}
@@ -197,7 +202,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllUpdateAgents(f)
+	allAgents, err := h.Model.GetAllUpdateAgents(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -230,23 +235,23 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 	tagId := c.FormValue("tagId")
 	agentId := c.FormValue("agentId")
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
-		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		err := h.Model.RemoveTagFromAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
-	p.NItems, err = h.Model.CountAllUpdateAgents(f)
+	p.NItems, err = h.Model.CountAllUpdateAgents(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	agents, err := h.Model.GetUpdateAgentsByPage(p, f)
+	agents, err := h.Model.GetUpdateAgentsByPage(p, f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	settings, err := h.Model.GetGeneralSettings()
+	settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -262,7 +267,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 		refreshTime = 5
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -272,5 +277,5 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.UpdateAgentsIndex(" | Update Agents", admin_views.UpdateAgents(c, p, f, agents, settings, r, higherVersion, allReleases, availableReleases, availableTaskStatus, appliedTags, refreshTime, successMessage, errorMessage, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }

@@ -10,14 +10,14 @@ import (
 )
 
 templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, successMessage string, confirmDelete bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: profile.Name}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))}, {Title: profile.Name}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
 		}
 		<div id="error" class="hidden"></div>
 		if confirmDelete {
-			@partials.ConfirmDelete(c, i18n.T(ctx, "tasks.confirm_delete"), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID))), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%s", commonInfo.TenantID, commonInfo.SiteID, taskId))))
+			@partials.ConfirmDelete(c, i18n.T(ctx, "tasks.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%s", taskId)))))
 		}
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
@@ -83,8 +83,8 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 									</label>
 									<div class="uk-form-controls">
 										<div id="profile-tags-section" class="flex flex-wrap gap-2">
-											@partials.ShowAppliedTags(profile.Edges.Tags, strconv.Itoa(profile.ID), p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d/tags", commonInfo.TenantID, commonInfo.SiteID, profile.ID))), "#main", "outerHTML")
-											@partials.AddTagButton(p, availableTags, profile.Edges.Tags, strconv.Itoa(profile.ID), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d/tags", commonInfo.TenantID, commonInfo.SiteID, profile.ID))), "post", "#main", "outerHTML", commonInfo)
+											@partials.ShowAppliedTags(profile.Edges.Tags, strconv.Itoa(profile.ID), p, string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/tags", profile.ID)))), "#main", "outerHTML")
+											@partials.AddTagButton(p, availableTags, profile.Edges.Tags, strconv.Itoa(profile.ID), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/tags", profile.ID)))), "post", "#main", "outerHTML", commonInfo)
 										</div>
 									</div>
 								</div>
@@ -94,7 +94,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							<button
 								type="submit"
 								class="uk-button uk-button-primary"
-								hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID))) }
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))) }
 								hx-target="#main"
 								hx-swap="outerHTML"
 								hx-push-url="false"
@@ -106,7 +106,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 								title={ i18n.T(ctx, "profiles.add") }
 								type="button"
 								class="uk-button uk-button-default"
-								hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d/new", commonInfo.TenantID, commonInfo.SiteID, profile.ID))) }
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/new", profile.ID)))) }
 								hx-target="#main"
 								hx-push-url="false"
 								hx-swap="outerHTML"
@@ -142,8 +142,8 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 										class="!align-middle underline hover:cursor-pointer"
 									>
 										<a
-											href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d", commonInfo.TenantID, commonInfo.SiteID, task.ID)) }
-											hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d", commonInfo.TenantID, commonInfo.SiteID, task.ID))) }
+											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID))) }
+											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID)))) }
 											hx-push-url="true"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -181,7 +181,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 												<li>
 													<a
-														hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d/confirm-delete/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID, task.ID))) }
+														hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, task.ID)))) }
 														hx-target="#main"
 														hx-swap="outerHTML"
 													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -192,7 +192,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 								</tr>
 							}
 						</table>
-						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles/%d", commonInfo.TenantID, commonInfo.SiteID, profile.ID))))
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))))
 					}
 				</div>
 			</div>

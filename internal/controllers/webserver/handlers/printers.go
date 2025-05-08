@@ -11,5 +11,5 @@ func (h *Handler) NetworkPrinters(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, printers_views.PrintersIndex("| Network Printers", printers_views.Printers(commonInfo), commonInfo))
+	return RenderView(c, printers_views.PrintersIndex("| Network Printers", printers_views.Printers(c, commonInfo), commonInfo))
 }

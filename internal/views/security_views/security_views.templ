@@ -1,7 +1,6 @@
 package security_views
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -11,8 +10,8 @@ templ SecurityNavbar(active string, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "antivirus") }>
 			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/antivirus", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/antivirus", commonInfo.TenantID, commonInfo.SiteID))) }
+				href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus")) }
+				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus"))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -22,8 +21,8 @@ templ SecurityNavbar(active string, commonInfo *partials.CommonInfo) {
 		</li>
 		<li class={ templ.KV("uk-active", active == "updates") }>
 			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID))) }
+				href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")) }
+				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"

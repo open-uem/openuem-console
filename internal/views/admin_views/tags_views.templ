@@ -11,8 +11,8 @@ import (
 	"strconv"
 )
 
-templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "Tag.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Tag.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -114,7 +114,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agents
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "tags.no_tags") }
@@ -150,7 +150,7 @@ templ ConfirmTagDeletion(commonInfo *partials.CommonInfo) {
 				</button>
 				<button
 					title="confirm tag deletion"
-					hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
+					hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					class="uk-button uk-button-danger"
@@ -171,7 +171,7 @@ templ NewTag(commonInfo *partials.CommonInfo) {
 			title="add tag"
 			type="button"
 			class="uk-button uk-button-primary"
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
+			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 			hx-target="#main"
 			hx-swap="outerHTML"
 		>
@@ -240,7 +240,7 @@ templ EditTag(commonInfo *partials.CommonInfo) {
 					</button>
 					<button
 						title="confirm tag deletion"
-						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
+						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="uk-button uk-button-primary"

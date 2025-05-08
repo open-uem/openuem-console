@@ -41,7 +41,7 @@ func (h *Handler) Overview(c echo.Context) error {
 	successMessage := ""
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	if c.Request().Method == "POST" {
@@ -49,7 +49,7 @@ func (h *Handler) Overview(c echo.Context) error {
 		endpointType := c.FormValue("endpoint-type")
 
 		if description != "" {
-			if err := h.Model.SaveEndpointDescription(agentId, description); err != nil {
+			if err := h.Model.SaveEndpointDescription(agentId, description, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_description_could_not_save", err.Error()), true))
 			}
 			successMessage = i18n.T(c.Request().Context(), "agents.overview_description_success")
@@ -59,16 +59,16 @@ func (h *Handler) Overview(c echo.Context) error {
 			if !slices.Contains([]string{"DesktopPC", "Laptop", "Server", "Tablet", "VM", "Other"}, endpointType) {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_invalid"), true))
 			}
-			if err := h.Model.SaveEndpointType(agentId, endpointType); err != nil {
+			if err := h.Model.SaveEndpointType(agentId, endpointType, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_could_not_save"), true))
 			}
 			successMessage = i18n.T(c.Request().Context(), "agents.overview_endpoint_type_success")
 		}
 	}
 
-	agent, err := h.Model.GetAgentOverviewById(agentId)
+	agent, err := h.Model.GetAgentOverviewById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -94,12 +94,12 @@ func (h *Handler) Computer(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentComputerInfo(agentId)
+	agent, err := h.Model.GetAgentComputerInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -120,12 +120,12 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentOSInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -146,12 +146,12 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId)
+	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -172,17 +172,17 @@ func (h *Handler) Printers(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -203,12 +203,12 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId)
+	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -228,12 +228,12 @@ func (h *Handler) Shares(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentSharesInfo(agentId)
+	agent, err := h.Model.GetAgentSharesInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -254,12 +254,12 @@ func (h *Handler) Monitors(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
+	agent, err := h.Model.GetAgentMonitorsInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -288,10 +288,10 @@ func (h *Handler) Apps(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	a, err := h.Model.GetAgentById(agentId)
+	a, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -302,13 +302,13 @@ func (h *Handler) Apps(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f)
+	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f, commonInfo)
 	if err != nil {
 		log.Printf("[ERROR]: an error occurred querying apps for agent: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = h.Model.CountAgentApps(agentId, *f)
+	p.NItems, err = h.Model.CountAgentApps(agentId, *f, commonInfo)
 	if err != nil {
 		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -330,12 +330,12 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -394,7 +394,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.Username = c.FormValue("filterByUsername")
 	}
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return err
 	}
@@ -418,7 +418,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	versions, err := h.Model.GetOSVersions(f)
+	versions, err := h.Model.GetOSVersions(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -442,7 +442,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers()
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -465,7 +465,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.ComputerManufacturers = filteredComputerManufacturers
 
 	filteredComputerModels := []string{}
-	models, err := h.Model.GetComputerModels(f)
+	models, err := h.Model.GetComputerModels(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -544,27 +544,27 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	tagId := c.FormValue("tagId")
 	agentId := c.FormValue("agentId")
 	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
-		err := h.Model.AddTagToAgent(agentId, tagId)
+		err := h.Model.AddTagToAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
-		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		err := h.Model.RemoveTagFromAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
-	computers, err := h.Model.GetComputersByPage(p, f)
+	computers, err := h.Model.GetComputersByPage(p, f, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	p.NItems, err = h.Model.CountAllComputers(f)
+	p.NItems, err = h.Model.CountAllComputers(f, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -606,25 +606,25 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	deployments, err := h.Model.GetDeploymentsForAgent(agentId, p)
+	deployments, err := h.Model.GetDeploymentsForAgent(agentId, p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountDeploymentsForAgent(agentId)
+	p.NItems, err = h.Model.CountDeploymentsForAgent(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, commonInfo.Translator, agentId, deployments, commonInfo))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -653,7 +653,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -672,7 +672,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	if agent.Os == "windows" {
 		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
-		useWinget, err := h.Model.GetDefaultUseWinget()
+		useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_winget_use"), true))
 		}
@@ -683,7 +683,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	} else {
 		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
-		useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+		useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_flatpak_use"), true))
 		}
@@ -708,6 +708,11 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -720,7 +725,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
-	alreadyInstalled, err := h.Model.DeploymentAlreadyInstalled(agentId, packageId)
+	alreadyInstalled, err := h.Model.DeploymentAlreadyInstalled(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -729,7 +734,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.already_deployed"), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -755,7 +760,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -764,6 +769,11 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 }
 
 func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -797,12 +807,12 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -811,6 +821,11 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 }
 
 func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -824,7 +839,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	}
 
 	// If the package hasn't been installed and the previous action was a failure
-	d, err := h.Model.GetDeployment(agentId, packageId)
+	d, err := h.Model.GetDeployment(agentId, packageId, commonInfo)
 	if err == nil && d.Failed && d.Installed.IsZero() {
 		if err := h.Model.RemoveDeployment(d.ID); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_remove_deployment"), true))
@@ -854,12 +869,12 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -880,7 +895,7 @@ func (h *Handler) PowerManagement(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1006,14 +1021,14 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	data, err = h.Model.GetMetadataForAgent(agentId, p)
+	data, err = h.Model.GetMetadataForAgent(agentId, p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -1052,7 +1067,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			}
 
-			data, err = h.Model.GetMetadataForAgent(agentId, p)
+			data, err = h.Model.GetMetadataForAgent(agentId, p, commonInfo)
 			if err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			}
@@ -1075,17 +1090,17 @@ func (h *Handler) Notes(c echo.Context) error {
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	if c.Request().Method == "POST" {
 		notes := c.FormValue("markdown")
-		if err := h.Model.SaveNotes(agentId, notes); err != nil {
+		if err := h.Model.SaveNotes(agentId, notes, commonInfo); err != nil {
 			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.error", err.Error())))
 		}
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.updated")))
@@ -1101,13 +1116,17 @@ func (h *Handler) Notes(c echo.Context) error {
 }
 
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return h.ListAgents(c, "", "an error occurred getting uuid param", false)
 	}
 
-	err := h.Model.DeleteAgent(agentId)
-	if err != nil {
+	if err := h.Model.DeleteAgent(agentId, commonInfo); err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
@@ -1124,7 +1143,7 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1135,7 +1154,7 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		// Check if PIN is optional or not
-		requestPIN, err := h.Model.GetDefaultRequestVNCPIN()
+		requestPIN, err := h.Model.GetDefaultRequestVNCPIN(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.request_pin_could_not_be_read"), false))
 		}
@@ -1162,16 +1181,16 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		if strings.Contains(agent.Vnc, "RDP") {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
 		} else {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
 		}
 	}
 
 	if strings.Contains(agent.Vnc, "RDP") {
-		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, false, false, "", commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
 	}
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerStopVNC(c echo.Context) error {
@@ -1184,7 +1203,7 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1197,10 +1216,15 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) GenerateRDPFile(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
@@ -1209,7 +1233,7 @@ func (h *Handler) GenerateRDPFile(c echo.Context) error {
 	fileName := uuid.NewString() + ".rdp"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1267,7 +1291,7 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_decode_printer"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1281,11 +1305,11 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", string(msg.Data)), false))
 	}
 
-	if err := h.Model.SetDefaultPrinter(agentId, printerName); err != nil {
+	if err := h.Model.SetDefaultPrinter(agentId, printerName, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", err.Error()), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1321,7 +1345,7 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1335,11 +1359,11 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", string(msg.Data)), false))
 	}
 
-	if err := h.Model.RemovePrinter(agentId, printerName); err != nil {
+	if err := h.Model.RemovePrinter(agentId, printerName, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", err.Error()), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}

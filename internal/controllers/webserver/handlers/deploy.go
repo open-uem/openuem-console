@@ -22,7 +22,7 @@ func (h *Handler) DeployInstall(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(true, "", commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployUninstall(c echo.Context) error {
@@ -31,7 +31,7 @@ func (h *Handler) DeployUninstall(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(false, "", commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
@@ -49,7 +49,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 
 	allSources := []string{}
 
-	useWinget, err := h.Model.GetDefaultUseWinget()
+	useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -58,7 +58,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		allSources = append(allSources, "winget")
 	}
 
-	useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+	useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -140,7 +140,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllAgents(f)
+	allAgents, err := h.Model.GetAllAgents(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -153,12 +153,12 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	p.SortBy = "hostname"
-	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true)
+	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p, f, true)
+	agents, err := h.Model.GetAgentsByPage(p, f, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -219,7 +219,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId)
+		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
@@ -233,7 +233,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
@@ -245,15 +245,15 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 	}
 
 	if install {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(true, i18n.T(c.Request().Context(), "install.requested"), commonInfo), commonInfo))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, i18n.T(c.Request().Context(), "install.requested"), commonInfo), commonInfo))
 	} else {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(false, i18n.T(c.Request().Context(), "uninstall.requested"), commonInfo), commonInfo))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, i18n.T(c.Request().Context(), "uninstall.requested"), commonInfo), commonInfo))
 	}
 }

@@ -157,6 +157,10 @@ github.com/open-uem/ent v0.0.0-20250505055446-c8ac8a18c51e h1:Ha/BNmtE3RjHOfHI9b
 github.com/open-uem/ent v0.0.0-20250505055446-c8ac8a18c51e/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
 github.com/open-uem/ent v0.0.0-20250505064141-e42eb1250e30 h1:rYA8+4mIJMn8XM5loin5QoMMHjj69lpi75qhehVkpYo=
 github.com/open-uem/ent v0.0.0-20250505064141-e42eb1250e30/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
+github.com/open-uem/ent v0.0.0-20250508082043-5edaff77e7a5 h1:/pLO2WCJHT8NlYKsyqB1h8/N5DRbD7HRmA6Ldq9ytfQ=
+github.com/open-uem/ent v0.0.0-20250508082043-5edaff77e7a5/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
+github.com/open-uem/ent v0.0.0-20250508124121-93703f9748b7 h1:mGSqD4ihsCThQUCb0Z4XUUjtB/2ZKXxyjWIxfW/G4HI=
+github.com/open-uem/ent v0.0.0-20250508124121-93703f9748b7/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
 github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381 h1:d7NDH0ctxPzl/eTo81E+tK5OWwWU6hRIRvrxYeHX0t8=
 github.com/open-uem/nats v0.0.0-20250424154048-a772eef61381/go.mod h1:JB6zAM56L+iD+BLn3o/vNdg9X5IFn52dSvltnIdiQAQ=
 github.com/open-uem/utils v0.0.0-20250424154005-aa7e1df31e6c h1:oEybWeWWzelM7WU7LF+wqWF4fj8pXGjQ1RQ/bCVi6vg=

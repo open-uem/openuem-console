@@ -1,7 +1,6 @@
 package partials
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +14,7 @@ templ ConfirmAdmitAgents(c echo.Context, commonInfo *CommonInfo) {
 				</p>
 				<div class="flex justify-start gap-6">
 					<button
-						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents/admit", commonInfo.TenantID, commonInfo.SiteID))) }
+						hx-post={ string(templ.URL(GetNavigationUrl(commonInfo, "/agents/admit"))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -36,7 +35,7 @@ templ ConfirmAdmitAgents(c echo.Context, commonInfo *CommonInfo) {
 						title={ i18n.T(ctx, "Cancel") }
 						type="button"
 						class="uk-button uk-button-default"
-						hx-get={ GetCurrentUrl(c, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents", commonInfo.TenantID, commonInfo.SiteID)))) }
+						hx-get={ GetCurrentUrl(c, string(templ.URL(GetNavigationUrl(commonInfo, "/agents")))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"

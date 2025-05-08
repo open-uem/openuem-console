@@ -10,8 +10,12 @@ import (
 	"strconv"
 )
 
-templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "SMTP Settings", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	if commonInfo.TenantID == "-1" {
+		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "SMTP Settings", Url: "/admin/smtp"}}, commonInfo)
+	} else {
+		@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: "SMTP Settings", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/smtp", commonInfo.TenantID)))}}, commonInfo)
+	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -23,6 +27,9 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 						<h3 class="uk-card-title">{ i18n.T(ctx, "smtp.title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "smtp.description") }
+							if commonInfo.TenantID != "-1" {
+								{ i18n.T(ctx, "settings.tenant") }
+							}
 						</p>
 					</div>
 					<div class="uk-card-body">
@@ -71,7 +78,11 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 								<button
 									class="uk-button uk-button-primary flex items-center gap-2"
 									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID))) }
+									if commonInfo.TenantID == "-1" {
+										hx-post="/admin/smtp"
+									} else {
+										hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/smtp", commonInfo.TenantID))) }
+									}
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -83,7 +94,11 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 								<button
 									class="uk-button uk-button-secondary flex items-center gap-2"
 									type="button"
-									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp/test", commonInfo.TenantID, commonInfo.SiteID))) }
+									if commonInfo.TenantID == "-1" {
+										hx-post="/admin/smtp/test"
+									} else {
+										hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/smtp/test", commonInfo.TenantID))) }
+									}
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"

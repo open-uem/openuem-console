@@ -69,7 +69,7 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

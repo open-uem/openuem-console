@@ -14,7 +14,7 @@ import (
 )
 
 templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, users []*ent.User, successMessage, errMessage string, refresh int, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "User.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -34,12 +34,12 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
+							@filters.ClearFilters("/admin/users", "#main", "outerHTML", func() bool {
 								return f.Username == "" && f.Name == "" && f.Email == "" && f.Phone == "" &&
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.RegisterOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, "/admin/users", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button
@@ -54,7 +54,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 								<form
 									class="flex flex-col gap-4 p-4 w-96"
 									hx-encoding="multipart/form-data"
-									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/import", commonInfo.TenantID, commonInfo.SiteID))) }
+									hx-post="/admin/users/import"
 									hx-target="#main"
 									hx-indicator="#upload-csv-spinner"
 									_="on htmx:afterRequest	set #csvFile.value to ''"
@@ -77,7 +77,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 								title={ i18n.T(ctx, "users.add") }
 								type="button"
 								class="uk-button uk-button-primary text-white"
-								hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/new", commonInfo.TenantID, commonInfo.SiteID))) }
+								hx-get="/admin/users/new"
 								hx-target="#main"
 								hx-push-url="false"
 								hx-swap="outerHTML"
@@ -164,8 +164,8 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 										<td>{ user.ID }</td>
 										<td class="underline">
 											<a
-												href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/profile", commonInfo.TenantID, commonInfo.SiteID, user.ID)) }
-												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/profile", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
 												hx-target="#main"
 												hx-swap="outerHTML"
 											>
@@ -216,7 +216,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/confirmemail", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -228,7 +228,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/askconfirm", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -240,7 +240,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													if user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
 														<li>
 															<a
-																hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/certificate", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
 																hx-target="#main"
 																hx-push-url="false"
 																hx-swap="outerHTML"
@@ -254,7 +254,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															<a
 																hx-target="#main"
 																hx-swap="outerHTML"
-																hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/renewcertificate", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/renewcertificate", user.ID))) }
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
@@ -263,7 +263,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													}
 													<li>
 														<a
-															hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+															hx-delete={ string(templ.URL(fmt.Sprintf("/admin/users/%s", user.ID))) }
 															hx-target="#main"
 															hx-push-url="false"
 															hx-swap="outerHTML"
@@ -278,7 +278,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 								}
 							</table>
 							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID))))
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/users")
 							}
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
@@ -293,7 +293,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 }
 
 templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Users", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -309,7 +309,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 					<div class="uk-card-body">
 						<form
 							class="mt-6"
-							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/new", commonInfo.TenantID, commonInfo.SiteID))) }
+							hx-post="/admin/users/new"
 							hx-target="#main"
 							hx-swap="outerHTML"
 						>
@@ -396,7 +396,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 }
 
 templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Users", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -413,7 +413,7 @@ templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, ag
 					<div class="uk-card-body">
 						<form
 							class="mt-6"
-							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users/%s/profile", commonInfo.TenantID, commonInfo.SiteID, user.ID))) }
+							hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
 							hx-indicator="#update-profile-spinner"

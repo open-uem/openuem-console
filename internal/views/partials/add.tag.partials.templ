@@ -50,8 +50,8 @@ templ AddTagButton(p PaginationAndSort, allTags, appliedTags []*ent.Tag, agentId
 					<button
 						type="button"
 						title="add more tags"
-						href={ fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID) }
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
+						href={ fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"

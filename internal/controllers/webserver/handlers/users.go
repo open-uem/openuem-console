@@ -108,7 +108,7 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		refreshTime = 5
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -134,7 +134,7 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return err
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -391,7 +391,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return err
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

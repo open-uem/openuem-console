@@ -11,7 +11,7 @@ import (
 )
 
 templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -28,20 +28,20 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 								</p>
 							</div>
 							<div class="flex gap-4">
-								@partials.CSVReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/updates/csv", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
-								@partials.PDFReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/updates", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
+								@partials.CSVReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/updates/csv"))), "reports.agents")
+								@partials.PDFReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/updates"))), "reports.agents")
 							</div>
 						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", func() bool {
 								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.UpdateStatus) == 0 &&
 									f.LastSearchFrom == "" && f.LastSearchTo == "" &&
 									f.LastInstallFrom == "" && f.LastInstallTo == "" &&
 									len(f.PendingUpdateOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(systemUpdates) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
@@ -103,7 +103,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 										<tr>
 											<td
 												class="!align-middle underline cursor-pointer"
-												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s", commonInfo.TenantID, commonInfo.SiteID, systemUpdate.ID))) }
+												hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", systemUpdate.ID)))) }
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"
@@ -138,7 +138,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 													title={ i18n.T(ctx, "systemupdate.show_updates_history") }
 													type="button"
 													hx-push-url="true"
-													hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/%s/updates", commonInfo.TenantID, commonInfo.SiteID, systemUpdate.ID))) }
+													hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", systemUpdate.ID)))) }
 													hx-target="#main"
 													hx-swap="outerHTML"
 												>
@@ -149,7 +149,8 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates", commonInfo.TenantID, commonInfo.SiteID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))))
+							)
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }

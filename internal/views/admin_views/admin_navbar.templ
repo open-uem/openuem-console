@@ -8,52 +8,79 @@ import (
 
 templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
-		<li class={ templ.KV("uk-active", active == "users") }>
-			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/admin/users", commonInfo.TenantID, commonInfo.SiteID))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-users-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-users-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "User.other") }
-			</a>
-		</li>
-		<li class={ templ.KV("uk-active", active == "sessions") }>
-			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-sessions-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-sessions-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "Session.other") }
-			</a>
-		</li>
-		<li class={ templ.KV("uk-active", active == "tags") }>
-			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-tags-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-tags-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "Tag.other") }
-			</a>
-		</li>
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "users") }>
+				<a
+					href="/admin/users"
+					hx-get="/admin/users"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-users-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-users-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "User.other") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "tenants") }>
+				<a
+					href="/admin/tenants"
+					hx-get="/admin/tenants"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-tenants-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-tenants-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Tenant.other") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "sessions") }>
+				<a
+					href="/admin/sessions"
+					hx-get="/admin/sessions"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-sessions-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-sessions-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Session.other") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID != "-1" {
+			<li class={ templ.KV("uk-active", active == "tags") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-tags-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-tags-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Tag.other") }
+				</a>
+			</li>
+		}
 		<li class={ templ.KV("uk-active", active == "smtp") }>
 			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/smtp", commonInfo.TenantID, commonInfo.SiteID))) }
+				if commonInfo.TenantID != "-1" {
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/smtp", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/smtp", commonInfo.TenantID))) }
+				} else {
+					href="/admin/smtp"
+					hx-get="/admin/smtp"
+				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -64,24 +91,31 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				{ i18n.T(ctx, "smtp.title") }
 			</a>
 		</li>
-		<li class={ templ.KV("uk-active", active == "metadata") }>
-			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/metadata", commonInfo.TenantID, commonInfo.SiteID))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-metadata-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-metadata-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "Metadata") }
-			</a>
-		</li>
+		if commonInfo.TenantID != "-1" {
+			<li class={ templ.KV("uk-active", active == "metadata") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/metadata", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/metadata", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-metadata-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-metadata-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Metadata") }
+				</a>
+			</li>
+		}
 		<li class={ templ.KV("uk-active", active == "settings") }>
 			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/settings", commonInfo.TenantID, commonInfo.SiteID))) }
+				if commonInfo.TenantID != "-1" {
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+				} else {
+					href="/admin/settings"
+					hx-get="/admin/settings"
+				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -92,51 +126,57 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				{ i18n.T(ctx, "General Settings") }
 			</a>
 		</li>
-		<li class={ templ.KV("uk-active", active == "update-agents") }>
-			<a
-				if agentsExists {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID))) }
-				}
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-update-agents-spinner"
-				class={ "flex items-center gap-1", templ.KV("opacity-35", !agentsExists) }
-			>
-				<uk-icon id="admin-update-agents-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "admin.update.agents.title") }
-			</a>
-		</li>
-		<li class={ templ.KV("uk-active", active == "update-servers") }>
-			<a
-				if serversExists {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))) }
-				}
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-update-servers-spinner"
-				class={ "flex items-center gap-1", templ.KV("opacity-35",!serversExists) }
-			>
-				<uk-icon id="admin-update-servers-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "admin.update.servers.title") }
-			</a>
-		</li>
-		<li class={ templ.KV("uk-active", active == "certificates") }>
-			<a
-				href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID)) }
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-certificates-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-certificates-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "certificates.title") }
-			</a>
-		</li>
+		if commonInfo.TenantID != "-1" {
+			<li class={ templ.KV("uk-active", active == "update-agents") }>
+				<a
+					if agentsExists {
+						href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID)) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))) }
+					}
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-update-agents-spinner"
+					class={ "flex items-center gap-1", templ.KV("opacity-35", !agentsExists) }
+				>
+					<uk-icon id="admin-update-agents-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "admin.update.agents.title") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "update-servers") }>
+				<a
+					if serversExists {
+						href="/admin/update-servers"
+						hx-get="/admin/update-servers"
+					}
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-update-servers-spinner"
+					class={ "flex items-center gap-1", templ.KV("opacity-35",!serversExists) }
+				>
+					<uk-icon id="admin-update-servers-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "admin.update.servers.title") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "certificates") }>
+				<a
+					href="/admin/certificates"
+					hx-get="/admin/certificates"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-certificates-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-certificates-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "certificates.title") }
+				</a>
+			</li>
+		}
 	</ul>
 }

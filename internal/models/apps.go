@@ -2,11 +2,14 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/app"
+	"github.com/open-uem/ent/site"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -19,10 +22,24 @@ type App struct {
 	Count     int
 }
 
-func (m *Model) CountAgentApps(agentId string, f filters.ApplicationsFilter) (int, error) {
-	// Info from agents waiting for admission won't be shown
+func (m *Model) CountAgentApps(agentId string, f filters.ApplicationsFilter, c *partials.CommonInfo) (int, error) {
+	var query *ent.AppQuery
 
-	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)))
+	// Info from agents waiting for admission won't be shown
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))
+	} else {
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
+	}
 
 	applyAppsFilters(query, f)
 
@@ -33,25 +50,54 @@ func (m *Model) CountAgentApps(agentId string, f filters.ApplicationsFilter) (in
 	return count, err
 }
 
-func (m *Model) CountAllApps(f filters.ApplicationsFilter) (int, error) {
+func (m *Model) CountAllApps(f filters.ApplicationsFilter, c *partials.CommonInfo) (int, error) {
 	var apps []App
+	var query *ent.AppQuery
 
 	// Info from agents waiting for admission won't be shown
-	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)))
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))
+	} else {
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
+	}
 
 	applyAppsFilters(query, f)
 
-	err := query.GroupBy(app.FieldName).Scan(context.Background(), &apps)
-	if err != nil {
+	if err := query.GroupBy(app.FieldName).Scan(context.Background(), &apps); err != nil {
 		return 0, err
 	}
 	return len(apps), err
 }
 
-func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort, f filters.ApplicationsFilter) ([]*ent.App, error) {
-	// Info from agents waiting for admission won't be shown
-	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+func (m *Model) GetAgentAppsByPage(agentId string, p partials.PaginationAndSort, f filters.ApplicationsFilter, c *partials.CommonInfo) ([]*ent.App, error) {
+	var query *ent.AppQuery
 
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		// Info from agents waiting for admission won't be shown
+		query = m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	} else {
+		query = m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	}
 	applyAppsFilters(query, f)
 
 	switch p.SortBy {
@@ -95,12 +141,26 @@ func mainAppsByPageSQL(s *sql.Selector, p partials.PaginationAndSort) {
 	}
 }
 
-func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.ApplicationsFilter) ([]App, error) {
+func (m *Model) GetAppsByPage(p partials.PaginationAndSort, f filters.ApplicationsFilter, c *partials.CommonInfo) ([]App, error) {
 	var apps []App
 	var err error
+	var query *ent.AppQuery
 
-	// Info from agents waiting for admission won't be shown
-	query := m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)))
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		// Info from agents waiting for admission won't be shown
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))
+	} else {
+		query = m.Client.App.Query().Where(app.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
+	}
 
 	applyAppsFilters(query, f)
 

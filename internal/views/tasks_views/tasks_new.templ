@@ -9,7 +9,7 @@ import (
 )
 
 templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/tasks")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -26,7 +26,7 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 			<div class="uk-card-body">
 				<form
 					class="flex flex-col gap-4 my-6"
-					hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/tasks/%d/new", commonInfo.TenantID, commonInfo.SiteID, profileId))) }
+					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/new", profileId)))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					hx-push-url="false"
@@ -79,7 +79,7 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 						<button
 							type="button"
 							class="uk-button uk-button-default"
-							hx-get={ partials.GetCurrentUrl(c, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.SiteID)))) }
+							hx-get={ partials.GetCurrentUrl(c, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))) }
 							hx-push-url="true"
 							hx-target="#main"
 							hx-swap="outerHTML"

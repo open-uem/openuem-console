@@ -75,6 +75,11 @@ func (h *Handler) GenerateCSVReports(c echo.Context) error {
 }
 
 func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f, err := h.GetAgentFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
@@ -83,7 +88,7 @@ func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileNam
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allAgents, err := h.Model.GetAgentsByPage(p, *f, true)
+	allAgents, err := h.Model.GetAgentsByPage(p, *f, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_agents"), false))
 	}
@@ -111,6 +116,11 @@ func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileNam
 }
 
 func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f, err := h.GetComputerFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
@@ -119,7 +129,7 @@ func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, file
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allComputers, err := h.Model.GetComputersByPage(p, *f)
+	allComputers, err := h.Model.GetComputersByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_computers"), false))
 	}
@@ -147,6 +157,11 @@ func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, file
 }
 
 func (h *Handler) GenerateSoftwareCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f, err := h.GetSoftwareFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
@@ -155,7 +170,7 @@ func (h *Handler) GenerateSoftwareCSVReport(c echo.Context, w *csv.Writer, fileN
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allSoftware, err := h.Model.GetAppsByPage(p, *f)
+	allSoftware, err := h.Model.GetAppsByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_software"), false))
 	}
@@ -183,6 +198,11 @@ func (h *Handler) GenerateSoftwareCSVReport(c echo.Context, w *csv.Writer, fileN
 }
 
 func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	f, _, _, err := h.GetAntiviriFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
@@ -191,7 +211,7 @@ func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, file
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f)
+	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_antiviri"), false))
 	}
@@ -219,6 +239,10 @@ func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, file
 }
 
 func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileName string) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	f, _, _, err := h.GetSystemUpdatesFilters(c)
 	if err != nil {
@@ -228,7 +252,7 @@ func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileNa
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
+	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_system_updates"), false))
 	}
@@ -266,6 +290,10 @@ func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileNa
 }
 
 func (h *Handler) GenerateAgentsReport(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
@@ -278,7 +306,7 @@ func (h *Handler) GenerateAgentsReport(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allAgents, err := h.Model.GetAgentsByPage(p, *f, true)
+	allAgents, err := h.Model.GetAgentsByPage(p, *f, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_agents"), false))
 	}
@@ -373,6 +401,11 @@ func getAgentsTransactions(agents []*ent.Agent) []core.Row {
 func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) {
 	f := filters.AgentFilter{}
 
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return nil, err
+	}
+
 	f.Hostname = c.FormValue("filterByHostname")
 
 	filteredAgentStatusOptions := []string{}
@@ -387,7 +420,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -435,6 +468,10 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 }
 
 func (h *Handler) GenerateComputersReport(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
@@ -447,7 +484,7 @@ func (h *Handler) GenerateComputersReport(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allComputers, err := h.Model.GetComputersByPage(p, *f)
+	allComputers, err := h.Model.GetComputersByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_computers"), false))
 	}
@@ -544,10 +581,15 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, error) {
 	f := filters.AgentFilter{}
 
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return nil, err
+	}
+
 	f.Hostname = c.FormValue("filterByHostname")
 	f.Username = c.FormValue("filterByUsername")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -560,7 +602,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	versions, err := h.Model.GetOSVersions(f)
+	versions, err := h.Model.GetOSVersions(f, commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -574,7 +616,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers()
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -587,7 +629,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	f.ComputerManufacturers = filteredComputerManufacturers
 
 	filteredComputerModels := []string{}
-	models, err := h.Model.GetComputerModels(f)
+	models, err := h.Model.GetComputerModels(f, commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -614,6 +656,10 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 }
 
 func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
@@ -626,7 +672,7 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f)
+	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_antiviri"), false))
 	}
@@ -723,6 +769,10 @@ func getAntiviriTransactions(antiviri []models.Antivirus) []core.Row {
 }
 
 func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
@@ -735,7 +785,7 @@ func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
+	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_system_updates"), false))
 	}
@@ -841,6 +891,10 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 }
 
 func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
@@ -853,7 +907,7 @@ func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
 
-	allSoftware, err := h.Model.GetAppsByPage(p, *f)
+	allSoftware, err := h.Model.GetAppsByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_software"), false))
 	}

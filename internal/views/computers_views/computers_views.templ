@@ -14,7 +14,7 @@ import (
 )
 
 templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*ent.Tag, availableOSes []string, refreshTime int, successMessage string, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -35,19 +35,19 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 						}
 					</div>
 					<div class="flex gap-4">
-						@partials.CSVReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/computers/csv", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
-						@partials.PDFReportButton(p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/reports/computers", commonInfo.TenantID, commonInfo.SiteID))), "reports.agents")
+						@partials.CSVReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/computers/csv"))), "reports.agents")
+						@partials.PDFReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/computers"))), "reports.agents")
 					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
+					@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML", func() bool {
 						return f.Hostname == "" && len(f.AgentOSVersions) == 0 &&
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
 							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0
 					})
-					@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "post", refreshTime, true)
+					@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML", "post", refreshTime, true)
 				</div>
 				if len(agents) > 0 {
 					<form class="mt-5 mb-2">
@@ -61,7 +61,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							@ComputersBody(p, agents, availableTags, commonInfo)
 						</tbody>
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))))
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_endpoints") }
@@ -137,7 +137,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 		<tr class="h-16">
 			<td
 				class="!align-middle cursor-pointer"
-				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -173,8 +173,8 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 			</td>
 			<td class="!align-middle">
 				<div class="flex flex-wrap gap-2">
-					@partials.ShowAppliedTags(agent.Tags, agent.ID, p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML")
-					@partials.AddTagButton(p, availableTags, agent.Tags, agent.ID, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))), "post", "#main", "outerHTML", commonInfo)
+					@partials.ShowAppliedTags(agent.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+					@partials.AddTagButton(p, availableTags, agent.Tags, agent.ID, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "post", "#main", "outerHTML", commonInfo)
 				</div>
 			</td>
 			<td class="!align-middle">
@@ -193,7 +193,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 			<li>
 				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
 					hx-push-url="true"
 					hx-target="#main"
 					hx-swap="outerHTML"
@@ -201,7 +201,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 			</li>
 			<li>
 				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s?delete=true", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s?delete=true", agent.ID)))) }
 					hx-push-url="false"
 					hx-target="#main"
 					hx-swap="outerHTML"
@@ -210,7 +210,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 			if agent.IP != "" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/remote-assistance", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", agent.ID)))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -220,7 +220,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 			if len(agent.MAC) > 0 {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -231,7 +231,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 			}
 			<li>
 				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power", agent.ID)))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 				>
@@ -241,7 +241,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 			</li>
 			<li>
 				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power", agent.ID)))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 				>

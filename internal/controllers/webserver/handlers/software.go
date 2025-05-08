@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -31,17 +30,17 @@ func (h *Handler) Software(c echo.Context) error {
 	// Get filters
 	f, err := h.GetSoftwareFilters(c)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(c, err.Error(), "Software", partials.GetNavigationUrl(commonInfo, "/software"), commonInfo), commonInfo))
 	}
 
-	apps, err = h.Model.GetAppsByPage(p, *f)
+	apps, err = h.Model.GetAppsByPage(p, *f, commonInfo)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(c, err.Error(), "Software", partials.GetNavigationUrl(commonInfo, "/software"), commonInfo), commonInfo))
 	}
 
-	p.NItems, err = h.Model.CountAllApps(*f)
+	p.NItems, err = h.Model.CountAllApps(*f, commonInfo)
 	if err != nil {
-		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(err.Error(), "Software", fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, software_views.SoftwareIndex(" | Software", partials.Error(c, err.Error(), "Software", partials.GetNavigationUrl(commonInfo, "/software"), commonInfo), commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()

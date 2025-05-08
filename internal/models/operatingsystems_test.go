@@ -49,20 +49,20 @@ func (suite *OperatingSystemsTestSuite) SetupTest() {
 }
 
 func (suite *ComputersTestSuite) TestCountAgentsByOSVersion() {
-	agents, err := suite.model.CountAgentsByOSVersion()
+	agents, err := suite.model.CountAgentsByOSVersion(&partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all agents by os version")
 	assert.Equal(suite.T(), 7, len(agents), "should count 7 agents by os versions")
 }
 
 func (suite *ComputersTestSuite) TestCountAllOSUsernames() {
-	count, err := suite.model.CountAllOSUsernames()
+	count, err := suite.model.CountAllOSUsernames(&partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all usernames")
 	assert.Equal(suite.T(), 7, count, "should count 7 usernames")
 }
 
 func (suite *ComputersTestSuite) TestGetOSVersions() {
 	allVersions := []string{"windows0", "windows1", "windows2", "windows3", "windows4", "windows5", "windows6"}
-	items, err := suite.model.GetOSVersions(filters.AgentFilter{AgentOSVersions: []string{"windows"}})
+	items, err := suite.model.GetOSVersions(filters.AgentFilter{AgentOSVersions: []string{"windows"}}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get os versions")
 	assert.Equal(suite.T(), allVersions, items, "should get 7 os versions")
 }

@@ -11,6 +11,8 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/migrate"
+	"github.com/open-uem/ent/orgmetadata"
+	"github.com/open-uem/ent/tag"
 )
 
 type Model struct {
@@ -54,6 +56,21 @@ func New(dbUrl string, driverName string) (*Model, error) {
 		return nil, err
 	}
 
+	// Associate tags without tenant to default tenant #feat-119
+	if err := model.AssociateTagsToDefaultTenant(); err != nil {
+		return nil, err
+	}
+
+	// Associate metadata without tenant to default tenant #feat-119
+	if err := model.AssociateMetadataToDefaultTenant(); err != nil {
+		return nil, err
+	}
+
+	// Associate profiles without tenant to default tenant #feat-119
+	if err := model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
+		return nil, err
+	}
+
 	return &model, nil
 }
 
@@ -82,6 +99,11 @@ func (m *Model) CreateDefaultTenantAndSite() error {
 			if err != nil {
 				return fmt.Errorf("could not create default site")
 			}
+
+			// Create copy of global settings
+			if err := m.CloneGlobalSettings(tenant.ID); err != nil {
+				return fmt.Errorf("could not clone global settings, reason: %v", err)
+			}
 		}
 	}
 
@@ -105,4 +127,36 @@ func (m *Model) AssociateAgentsToDefaultTenantAndSite() error {
 	}
 
 	return nil
+}
+
+func (m *Model) AssociateTagsToDefaultTenant() error {
+	tenant, err := m.GetDefaultTenant()
+	if err != nil {
+		return fmt.Errorf("could not find default tenant")
+	}
+
+	return m.Client.Tag.Update().SetTenantID(tenant.ID).Where(tag.Not(tag.HasTenant())).Exec(context.Background())
+}
+
+func (m *Model) AssociateProfilesToDefaultTenantAndSite() error {
+	tenant, err := m.GetDefaultTenant()
+	if err != nil {
+		return fmt.Errorf("could not find default tenant")
+	}
+
+	site, err := m.GetDefaultSite(tenant)
+	if err != nil {
+		return fmt.Errorf("coulf not find default site")
+	}
+
+	return m.Client.Profile.Update().SetSiteID(site.ID).Exec(context.Background())
+}
+
+func (m *Model) AssociateMetadataToDefaultTenant() error {
+	tenant, err := m.GetDefaultTenant()
+	if err != nil {
+		return fmt.Errorf("could not find default tenant")
+	}
+
+	return m.Client.OrgMetadata.Update().SetTenantID(tenant.ID).Where(orgmetadata.Not(orgmetadata.HasTenant())).Exec(context.Background())
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-echarts/go-echarts/v2/render"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
@@ -46,8 +47,8 @@ type DashboardData struct {
 	NCertificatesAboutToExpire int
 }
 
-templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Dashboard", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/dashboard", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Dashboard", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/dashboard")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
 			<h3 class="uk-card-title">{ i18n.T(ctx, "Dashboard") }</h3>
@@ -59,7 +60,7 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 				@Chart("Agents By OS Version", "Agent distribution by operating system version", data.Charts.AgentByOsVersion)
 			</div>
 			<div class="flex justify-end">
-				@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/dashboard", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "get", data.RefreshTime, true)
+				@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/dashboard"))), "#main", "outerHTML", "get", data.RefreshTime, true)
 			</div>
 			<div class="flex gap-2 justify-start">
 				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">
@@ -70,8 +71,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents?filterByStatusAgent1=No%20Contact&sortBy=last_contact&sortOrder=asc"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -85,8 +86,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID)) }
+									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -100,8 +101,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-agents", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID)) }
+									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -113,8 +114,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_waiting_for_admission") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=WaitingForAdmission", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=WaitingForAdmission", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/agents?filterByStatusAgent1=WaitingForAdmission")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents?filterByStatusAgent1=WaitingForAdmission"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -128,8 +129,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_disabled_agents") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=Disabled", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/agents?filterByStatusAgent1=Disabled", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/agents?filterByStatusAgent1=Disabled")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, ("/agents?filterByStatusAgent1=Disabled")))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -143,8 +144,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.pending_update_agents") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByPendingUpdate0=Yes", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByPendingUpdate0=Yes", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByPendingUpdate0=Yes")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByPendingUpdate0=Yes"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -156,8 +157,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.no_auto_update") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -169,8 +170,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.disabled_antivirus") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByAntivirusEnabled1=Disabled", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByAntivirusEnabled1=Disabled", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled")) }
+									hx-get={ string(templ.URL(fmt.Sprintf(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled")))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -184,8 +185,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.outdated_antivirus") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByAntivirusUpdated1=UpdatedNo", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/security/updates?filterByAntivirusUpdated1=UpdatedNo", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusUpdated1=UpdatedNo")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusUpdated1=UpdatedNo"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -199,8 +200,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.certificates_to_expire") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/certificates", commonInfo.TenantID, commonInfo.SiteID))) }
+									href="/admin/certificates"
+									hx-get="/admin/certificates"
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -220,8 +221,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID))) }
+									href="/admin/sessions"
+									hx-get="/admin/sessions"
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -251,8 +252,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_os_users") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -266,8 +267,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_apps_found") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/software", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/software")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/software"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -287,8 +288,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_openuem_users") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID))) }
+									href="/admin/users"
+									hx-get="/admin/users"
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -302,8 +303,8 @@ templ Dashboard(data DashboardData, commonInfo *partials.CommonInfo) {
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_applied_tags") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID)) }
-									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/tags", commonInfo.TenantID, commonInfo.SiteID))) }
+									href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)) }
+									hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"

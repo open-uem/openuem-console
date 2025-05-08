@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -20,7 +21,15 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		SM:             h.SessionManager,
 		CurrentVersion: h.Version,
 		Translator:     views.GetTranslatorForDates(c),
+		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
 	}
+
+	latestRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	if err != nil {
+		return nil, err
+	}
+
+	info.LatestVersion = latestRelease.Version
 
 	tenantID := c.Param("tenant")
 	siteID := c.Param("site")
@@ -31,6 +40,11 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 	}
 
 	if tenantID == "" {
+		if info.IsAdmin {
+			info.TenantID = "-1"
+			info.SiteID = "-1"
+			return &info, nil
+		}
 		tenant, err = h.Model.GetDefaultTenant()
 		if err != nil {
 			return nil, err
@@ -59,13 +73,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		return nil, err
 	}
 
-	if siteID == "" {
-		s, err := h.Model.GetDefaultSite(tenant)
-		if err != nil {
-			return nil, err
-		}
-		info.SiteID = strconv.Itoa(s.ID)
-	} else {
+	if siteID != "" {
 		id, err := strconv.Atoi(siteID)
 		if err != nil {
 			return nil, err
@@ -81,19 +89,31 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		} else {
 			info.SiteID = siteID
 		}
+	} else {
+		info.SiteID = "-1"
 	}
 
-	latestRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return nil, err
-	}
-
-	info.LatestVersion = latestRelease.Version
-
-	info.DetectRemoteAgents, err = h.Model.GetDefaultDetectRemoteAgents()
+	info.DetectRemoteAgents, err = h.Model.GetDefaultDetectRemoteAgents(info.TenantID)
 	if err != nil {
 		return nil, errors.New(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"))
 	}
 
 	return &info, nil
+}
+
+func (h *Handler) GetAdminTenantName(commonInfo *partials.CommonInfo) string {
+	tenantName := ""
+	if commonInfo.TenantID != "-1" {
+		tenantID, err := strconv.Atoi(commonInfo.TenantID)
+		if err != nil {
+			return ""
+		}
+
+		t, err := h.Model.GetTenantByID(tenantID)
+		if err != nil {
+			return ""
+		}
+		tenantName = t.Description
+	}
+	return tenantName
 }

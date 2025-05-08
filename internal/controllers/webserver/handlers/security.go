@@ -29,12 +29,12 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	antiviri, err := h.Model.GetAntiviriByPage(p, *f)
+	antiviri, err := h.Model.GetAntiviriByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllAntiviri(*f)
+	p.NItems, err = h.Model.CountAllAntiviri(*f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -65,12 +65,12 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	systemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f)
+	systemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllSystemUpdates(*f)
+	p.NItems, err = h.Model.CountAllSystemUpdates(*f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -97,7 +97,7 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -110,14 +110,14 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	p.NItems, err = h.Model.CountLatestUpdates(agentId)
+	p.NItems, err = h.Model.CountLatestUpdates(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	updates, err := h.Model.GetLatestUpdates(agentId, p)
+	updates, err := h.Model.GetLatestUpdates(agentId, p, commonInfo)
 	if err != nil {
-		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(err.Error(), "Security", fmt.Sprintf("/tenant/%s/site/%s/security", commonInfo.TenantID, commonInfo.SiteID), commonInfo), commonInfo))
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(c, err.Error(), "Security", partials.GetNavigationUrl(commonInfo, "/security"), commonInfo), commonInfo))
 	}
 
 	if c.Request().Method == "POST" {
@@ -130,9 +130,15 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {
 	// Get filters values
 	f := filters.AntivirusFilter{}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
 	f.Hostname = c.FormValue("filterByHostname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -145,7 +151,7 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	detectedAntiviri, err := h.Model.GetDetectedAntiviri()
+	detectedAntiviri, err := h.Model.GetDetectedAntiviri(commonInfo)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -182,9 +188,15 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdatesFilter, []string, []string, error) {
 	// Get filters values
 	f := filters.SystemUpdatesFilter{}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
 	f.Hostname = c.FormValue("filterByHostname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return nil, nil, nil, err
 	}

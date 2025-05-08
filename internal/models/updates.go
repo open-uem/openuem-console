@@ -2,12 +2,15 @@ package models
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/systemupdate"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -33,19 +36,52 @@ func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	}
 }
 
-func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter) (int, error) {
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter, c *partials.CommonInfo) (int, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	applySystemUpdatesFilters(query, f)
 
 	return query.Count(context.Background())
 }
 
-func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.SystemUpdatesFilter) ([]SystemUpdate, error) {
+func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.SystemUpdatesFilter, c *partials.CommonInfo) ([]SystemUpdate, error) {
+	var query *ent.AgentQuery
 	var systemUpdates []SystemUpdate
 	var err error
 
-	query := m.Client.Agent.Query()
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	applySystemUpdatesFilters(query, f)
 

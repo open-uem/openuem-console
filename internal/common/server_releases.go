@@ -12,7 +12,7 @@ import (
 )
 
 func (w *Worker) GetServerReleases() error {
-	settings, err := w.Model.GetGeneralSettings()
+	settings, err := w.Model.GetGeneralSettings("-1")
 	if err != nil {
 		return err
 	}

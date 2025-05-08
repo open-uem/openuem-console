@@ -3,14 +3,15 @@ package computers_views
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"io/fs"
 	"strings"
 )
 
-templ SFTPHome(p partials.PaginationAndSort, agent *ent.Agent, cwd, parent string, files []fs.FileInfo, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: agent.Hostname, Url: fmt.Sprintf("/tenant/%s/site/%s/computers/%s", commonInfo.TenantID, commonInfo.SiteID, agent.ID)}}, *commonInfo)
+templ SFTPHome(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, cwd, parent string, files []fs.FileInfo, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -19,7 +20,7 @@ templ SFTPHome(p partials.PaginationAndSort, agent *ent.Agent, cwd, parent strin
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML")
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
 					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
@@ -94,7 +95,7 @@ templ FolderUpIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.Co
 		<button
 			type="button"
 			disabled?={ parent == cwd || len(cwd) == 0 || parent == "." }
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-indicator="#spinner"
@@ -129,7 +130,7 @@ templ NewFolderDialog(agent *ent.Agent, cwd string, commonInfo *partials.CommonI
 		<button
 			type="button"
 			class="uk-button uk-button-primary flex gap-2"
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/folder", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -153,7 +154,7 @@ templ SyncFolderIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.
 		<input type="hidden" name="dst" value={ parent }/>
 		<button
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -180,7 +181,7 @@ templ UploadFileDialog(agent *ent.Agent, cwd, parent string, commonInfo *partial
 	<form
 		class="flex gap-4 items-center justify-between"
 		hx-encoding="multipart/form-data"
-		hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/file", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 		hx-target="#main"
 		hx-indicator="#spinner"
 	>
@@ -204,7 +205,7 @@ templ DownloadIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.Co
 			class="text-gray-300"
 			type="button"
 			disabled
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/downloadmany", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadmany", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -241,7 +242,7 @@ templ BulkRemoveDialog(agent *ent.Agent, cwd, parent string, commonInfo *partial
 			type="button"
 			class="uk-button uk-button-danger"
 			disabled?={ parent == cwd || len(cwd) == 0 }
-			hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/many", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/many", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -385,7 +386,7 @@ templ OpenFolderEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, i 
 		<button
 			class="flex gap-4 m-4"
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -406,9 +407,9 @@ templ DownloadEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, i in
 		<button
 			class="flex gap-4 m-4 items-center"
 			if isDir {
-				hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/downloadfolder", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadfolder", agent.ID)))) }
 			} else {
-				hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/downloadfile", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadfile", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-indicator={ fmt.Sprintf("#download-spinner-%d", i) }
@@ -467,9 +468,9 @@ templ RenameEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, isDir 
 			name="renameConfirm"
 			class="uk-button uk-button-primary hidden"
 			if isDir {
-				hx-put={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/folder", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-put={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			} else {
-				hx-put={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/file", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-put={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"
@@ -523,9 +524,9 @@ templ RemoveEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, isDir 
 			name="confirmRemove"
 			class="uk-button uk-button-danger hidden"
 			if isDir {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/folder", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			} else {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks/file", commonInfo.TenantID, commonInfo.SiteID, agent.ID))) }
+				hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"

@@ -49,25 +49,25 @@ func (suite *AppsTestSuite) TestCountAgentApps() {
 
 	f := filters.ApplicationsFilter{}
 
-	count, err := suite.model.CountAgentApps("agent1", f)
+	count, err := suite.model.CountAgentApps("agent1", f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count agent apps")
 	assert.Equal(suite.T(), 7, count, "should count 7 apps")
 
-	count, err = suite.model.CountAgentApps("agent9", f)
+	count, err = suite.model.CountAgentApps("agent9", f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count agent apps")
 	assert.Equal(suite.T(), 0, count, "should count 0 apps")
 }
 
 func (suite *AppsTestSuite) TestCountAllApps() {
-	count, err := suite.model.CountAllApps(filters.ApplicationsFilter{})
+	count, err := suite.model.CountAllApps(filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all apps")
 	assert.Equal(suite.T(), 7, count, "should count 7 apps")
 
-	count, err = suite.model.CountAllApps(filters.ApplicationsFilter{AppName: "app5"})
+	count, err = suite.model.CountAllApps(filters.ApplicationsFilter{AppName: "app5"}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all apps")
 	assert.Equal(suite.T(), 1, count, "should count 1 apps")
 
-	count, err = suite.model.CountAllApps(filters.ApplicationsFilter{Vendor: "publisher"})
+	count, err = suite.model.CountAllApps(filters.ApplicationsFilter{Vendor: "publisher"}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all apps")
 	assert.Equal(suite.T(), 7, count, "should count 7 apps")
 }
@@ -77,7 +77,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "asc"
-	items, err := suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err := suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", i), item.Name)
@@ -85,7 +85,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", 6-i), item.Name)
@@ -93,7 +93,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("version%d", i), item.Version)
@@ -101,7 +101,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("version%d", 6-i), item.Version)
@@ -109,7 +109,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -117,7 +117,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", 6-i), item.Publisher)
@@ -125,7 +125,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "installation"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -133,7 +133,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 
 	suite.p.SortBy = "installation"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f)
+	items, err = suite.model.GetAgentAppsByPage("agent1", suite.p, f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all agent apps")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -143,7 +143,7 @@ func (suite *AppsTestSuite) TestGetAgentAppsByPage() {
 func (suite *AppsTestSuite) TestGetAppsByPage() {
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "asc"
-	items, err := suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err := suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", i), item.Name)
@@ -151,7 +151,7 @@ func (suite *AppsTestSuite) TestGetAppsByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("app%d", 6-i), item.Name)
@@ -159,7 +159,7 @@ func (suite *AppsTestSuite) TestGetAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -167,7 +167,7 @@ func (suite *AppsTestSuite) TestGetAppsByPage() {
 
 	suite.p.SortBy = "publisher"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", 6-i), item.Publisher)
@@ -175,7 +175,7 @@ func (suite *AppsTestSuite) TestGetAppsByPage() {
 
 	suite.p.SortBy = "installations"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)
@@ -183,7 +183,7 @@ func (suite *AppsTestSuite) TestGetAppsByPage() {
 
 	suite.p.SortBy = "installations"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{})
+	items, err = suite.model.GetAppsByPage(suite.p, filters.ApplicationsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get apps by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("publisher%d", i), item.Publisher)

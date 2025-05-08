@@ -3,6 +3,7 @@ en:
   Actions: "Actions"
   Add: "Add"
   Admit: "Admit"
+  AllSites: "All Sites"
   Antivirus: "Antivirus"
   Authenticate: "Authenticate"
   Bugs: "Send a bug report"
@@ -40,6 +41,7 @@ en:
   Expiry: "Expiry"
   Filter: "Filter"
   General Settings: "General Settings"
+  Global Config: "Global config"
   Help: "Help"
   Install: "Install"
   Uninstall: "Uninstall"
@@ -103,6 +105,9 @@ en:
     one: "Tag"
     other: "Tags"
   Tasks: "Tasks"
+  Tenant:
+    one: "Organization"
+    other: "Organizations"
   Testing: "Testing"
   Type: "Type"
   Unknown: "Unknown"
@@ -601,7 +606,7 @@ en:
     no_certificates: "No certificates have been found for this request"
   smtp:
     title: SMTP
-    description: "Configure your SMTP provider in order to send email notifications"
+    description: "Configure your SMTP provider in order to send email notifications."
     server_fieldset: SMTP Server
     server: Server
     server_placeholder: Your SMTP server name...
@@ -629,7 +634,9 @@ en:
     test_success: Email test was sent successfully to %s!
   settings:
     title: General Settings
-    description: OpenUEM has some settings that configure its behavior
+    description: OpenUEM has some settings that configure its behavior.
+    global: "These are OpenUEM global settings which are inherited by organizations. Use the organization drop-down menu to change its settings"
+    tenant: "This are the specific settings for this organization. This settings are inherited from the global config, but you can override them"
     country_title: Country
     country_description: Default country for user registration
     nats_timeout_title: NATS Timeout

@@ -44,12 +44,12 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.saved")))
 	}
 
-	settings, err := h.Model.GetSMTPSettings()
+	settings, err := h.Model.GetSMTPSettings(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -59,7 +59,7 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, settings, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, settings, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }
 
 func (h *Handler) TestSMTPSettings(c echo.Context) error {

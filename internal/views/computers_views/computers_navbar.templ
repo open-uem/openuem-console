@@ -11,14 +11,14 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "overview") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview?delete=true", id)))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -30,12 +30,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "hardware") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/hardware?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/hardware?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/hardware?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/hardware?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/hardware", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/hardware", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/hardware", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/hardware", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -47,12 +47,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "os") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/os?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/os?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/os?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/os?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/os", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/os", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/os", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/os", id)))) }
 					hx-push-url="true"
 				}
 				hx-push-url="true"
@@ -65,12 +65,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "monitors") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/monitors?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/monitors?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/monitors?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/monitors?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/monitors?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/monitors", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/monitors?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/monitors", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -82,12 +82,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "logical-disks") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/logical-disks", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -99,12 +99,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "shares") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/shares?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/shares?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/shares?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/shares?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/shares", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/shares", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/shares", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/shares", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -116,12 +116,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "network-adapters") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/network-adapters?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/network-adapters?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/network-adapters", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/network-adapters", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -133,12 +133,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "printers") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/printers?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/printers?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/printers", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/printers", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -150,12 +150,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "software") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/software?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/software?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/software?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/software?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/software", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/software", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/software", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/software", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -167,12 +167,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "deploy") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/deploy?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/deploy?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/deploy", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/deploy", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -185,12 +185,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 			<li class={ templ.KV("uk-active", active == "remote-assistance") }>
 				<a
 					if confirmDelete {
-						href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/remote-assistance?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/remote-assistance?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id)))) }
 						hx-push-url="false"
 					} else {
-						href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/remote-assistance", commonInfo.TenantID, commonInfo.SiteID, id)) }
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/remote-assistance", commonInfo.TenantID, commonInfo.SiteID, id))) }
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id)))) }
 						hx-push-url="true"
 					}
 					hx-target="#main"
@@ -203,12 +203,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "power") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/power", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -220,12 +220,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "notes") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/notes?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/notes?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/notes?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/notes?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/notes", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/notes", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/notes", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("s/computers/%s/notes", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
@@ -237,12 +237,12 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 		<li class={ templ.KV("uk-active", active == "metadata") }>
 			<a
 				if confirmDelete {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/metadata?delete=true", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/metadata?delete=true", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/metadata?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/metadata?delete=true", id)))) }
 					hx-push-url="false"
 				} else {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/metadata", commonInfo.TenantID, commonInfo.SiteID, id)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/computers/%s/metadata", commonInfo.TenantID, commonInfo.SiteID, id))) }
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/metadata", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/metadata", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"

@@ -9507,6 +9507,11 @@ th.uk-text-break, td.uk-text-break {
   margin-bottom: 1.75rem;
 }
 
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
 .\!mb-0 {
   margin-bottom: 0px !important;
 }
@@ -10156,10 +10161,6 @@ th.uk-text-break, td.uk-text-break {
 
 .pl-4 {
   padding-left: 1rem;
-}
-
-.pl-6 {
-  padding-left: 1.5rem;
 }
 
 .pr-2 {

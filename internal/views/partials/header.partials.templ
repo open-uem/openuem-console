@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"golang.org/x/mod/semver"
+	"slices"
 	"strconv"
+	"strings"
 )
 
 type Breadcrumb struct {
@@ -26,9 +29,10 @@ type CommonInfo struct {
 	SiteID             string
 	DetectRemoteAgents bool
 	Translator         locales.Translator
+	IsAdmin            bool
 }
 
-templ Header(breadcrumbs []Breadcrumb, c CommonInfo) {
+templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 	<header class="sticky top-0 z-30 flex justify-between w-full h-14 items-center border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 		<nav id="header" class="flex">
 			<ul class="uk-breadcrumb" aria-label="Breadcrumb">
@@ -51,32 +55,73 @@ templ Header(breadcrumbs []Breadcrumb, c CommonInfo) {
 		<div class="flex items-center gap-4">
 			<form class="flex items-center gap-1">
 				<span class="uk-text-muted">
-					<uk-icon hx-history="false" icon="globe" custom-class="h-6 w-6" uk-cloack></uk-icon>
-				</span>
-				<select title={ i18n.T(ctx, "Organization") } class="uk-select" name="tenant">
-					for _, t := range c.Tenants {
-						if t.Description == "DefaultTenant" {
-							<option class="!align-middle" value={ strconv.Itoa(t.ID) } selected?={ c.TenantID ==  strconv.Itoa(t.ID) }>{ i18n.T(ctx,t.Description) }</option>
+					<uk-icon
+						hx-history="false"
+						if commonInfo.IsAdmin {
+							icon="settings"
 						} else {
-							<option class="!align-middle" value={ strconv.Itoa(t.ID) } selected?={ c.TenantID ==  strconv.Itoa(t.ID) }>{ t.Description }</option>
+							icon="globe"
 						}
+						custom-class="h-6 w-6"
+						uk-cloack
+					></uk-icon>
+				</span>
+				<select title={ i18n.T(ctx, "Organization") } class="uk-select" name="tenant" _="on change set window.location to my.value">
+					if commonInfo.IsAdmin {
+						<option
+							class="!align-middle"
+							value="/admin"
+							selected?={ commonInfo.TenantID ==  "-1" }
+						>
+							{ i18n.T(ctx,"Global Config") }
+						</option>
+					}
+					for _, t := range commonInfo.Tenants {
+						<option
+							class="!align-middle"
+							if commonInfo.IsAdmin {
+								value={ string(templ.URL(fmt.Sprintf("/tenant/%d/admin", t.ID))) }
+							} else {
+								value={ string(templ.URL(fmt.Sprintf("/tenant/%d", t.ID))) }
+							}
+							selected?={ commonInfo.TenantID ==  strconv.Itoa(t.ID) }
+						>
+							if t.Description == "DefaultTenant" {
+								{ i18n.T(ctx,t.Description) }
+							} else {
+								{ t.Description }
+							}
+						</option>
 					}
 				</select>
 			</form>
-			<form class="flex items-center gap-2">
-				<span class="uk-text-muted">
-					<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
-				</span>
-				<select title={ i18n.T(ctx, "Site") } class="uk-select" name="site">
-					for _, s := range c.Sites {
-						if s.Description == "DefaultSite" {
-							<option value={ strconv.Itoa(s.ID) } selected?={ c.SiteID ==  strconv.Itoa(s.ID) }>{ i18n.T(ctx,s.Description) }</option>
-						} else {
-							<option value={ strconv.Itoa(s.ID) } selected?={ c.SiteID ==  strconv.Itoa(s.ID) }>{ s.Description }</option>
+			if !commonInfo.IsAdmin {
+				<form class="flex items-center gap-2">
+					<span class="uk-text-muted">
+						<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
+					</span>
+					<select title={ i18n.T(ctx, "Site") } class="uk-select" name="site" _="on change set window.location to my.value">
+						<option
+							value={ GetSiteSelectorUrl(c, commonInfo, -1) }
+							selected?={ commonInfo.SiteID ==  "-1" }
+						>
+							{ i18n.T(ctx,"AllSites") }
+						</option>
+						for _, s := range commonInfo.Sites {
+							<option
+								value={ GetSiteSelectorUrl(c, commonInfo, s.ID) }
+								selected?={ commonInfo.SiteID ==  strconv.Itoa(s.ID) }
+							>
+								if s.Description == "DefaultSite" {
+									{ i18n.T(ctx,s.Description) }
+								} else {
+									{ s.Description }
+								}
+							</option>
 						}
-					}
-				</select>
-			</form>
+					</select>
+				</form>
+			}
 			<a
 				href="#"
 				_="
@@ -107,15 +152,15 @@ templ Header(breadcrumbs []Breadcrumb, c CommonInfo) {
 				<uk-icon id="theme-switch" hx-history="false" icon="moon" custom-class="h-6 w-6" uk-cloack></uk-icon>
 			</a>
 			<div class="flex items-center gap-4">
-				<p class="text-sm uk-text-muted">OpenUEM { c.CurrentVersion }</p>
-				if newVersionAvailable(c.CurrentVersion, c.LatestVersion) {
+				<p class="text-sm uk-text-muted">OpenUEM { commonInfo.CurrentVersion }</p>
+				if newVersionAvailable(commonInfo.CurrentVersion, commonInfo.LatestVersion) {
 					<a
-						href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", c.TenantID, c.SiteID)) }
-						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", c.TenantID, c.SiteID))) }
+						href="/admin/update-servers"
+						hx-get="/admin/update-servers"
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"
-						uk-tooltip={ fmt.Sprintf("title: %s %s; pos: right", i18n.T(ctx, "admin.update.servers.new_version_available"), c.LatestVersion) }
+						uk-tooltip={ fmt.Sprintf("title: %s %s; pos: right", i18n.T(ctx, "admin.update.servers.new_version_available"), commonInfo.LatestVersion) }
 					>
 						<uk-icon hx-history="false" icon="cloud-download" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 					</a>
@@ -127,8 +172,8 @@ templ Header(breadcrumbs []Breadcrumb, c CommonInfo) {
 					<div class="flex justify-center mt-4 mb-1">
 						<uk-icon hx-history="false" icon="circle-user" custom-class="h-14 w-14 text-green-800" uk-cloack></uk-icon>
 					</div>
-					<p class="text-center uk-text-muted uk-text-small">{ GetUID(ctx, c.SM) }</p>
-					<p class="text-center">{ GetUsername(ctx, c.SM) }</p>
+					<p class="text-center uk-text-muted uk-text-small">{ GetUID(ctx, commonInfo.SM) }</p>
+					<p class="text-center">{ GetUsername(ctx, commonInfo.SM) }</p>
 					<button
 						title={ i18n.T(ctx, "LogOut") }
 						href="/logout"
@@ -166,4 +211,70 @@ func GetUsername(ctx context.Context, sm *sessions.SessionManager) string {
 
 func newVersionAvailable(currentVersion, latestVersion string) bool {
 	return semver.Compare("v"+latestVersion, "v"+currentVersion) == 1
+}
+
+func GetNavigationUrl(commonInfo *CommonInfo, location string) string {
+	if commonInfo.SiteID == "-1" {
+		return fmt.Sprintf("/tenant/%s%s", commonInfo.TenantID, location)
+	}
+
+	if commonInfo.TenantID == "-1" {
+		return fmt.Sprintf("%s", location)
+	}
+
+	return fmt.Sprintf("/tenant/%s/site/%s%s", commonInfo.TenantID, commonInfo.SiteID, location)
+}
+
+func GetTenantSelectorUrl(c echo.Context, commonInfo *CommonInfo, location string) string {
+	if commonInfo.SiteID == "-1" {
+		return fmt.Sprintf("/tenant/%s%s", commonInfo.TenantID, location)
+	}
+
+	if commonInfo.TenantID == "-1" {
+		return fmt.Sprintf("%s", location)
+	}
+
+	return fmt.Sprintf("/tenant/%s/site/%s%s", commonInfo.TenantID, commonInfo.SiteID, location)
+}
+
+func GetSiteSelectorUrl(c echo.Context, commonInfo *CommonInfo, siteID int) string {
+	myURL := c.Request().URL.Path
+	pathElements := strings.Split(myURL, "/")
+
+	if siteID == -1 {
+		if slices.Contains(pathElements, "site") {
+			if len(pathElements) > 5 {
+				elements := pathElements[5:]
+				urlEnd := strings.Join(elements, "/")
+				return fmt.Sprintf("/tenant/%s/%s", commonInfo.TenantID, urlEnd)
+			} else {
+				return fmt.Sprintf("/tenant/%s", commonInfo.TenantID)
+			}
+		} else {
+			if len(pathElements) > 3 {
+				elements := pathElements[3:]
+				urlEnd := strings.Join(elements, "/")
+				return fmt.Sprintf("/tenant/%s/%s", commonInfo.TenantID, urlEnd)
+			} else {
+				return fmt.Sprintf("/tenant/%s", commonInfo.TenantID)
+			}
+		}
+	} else {
+		if slices.Contains(pathElements, "site") {
+			if len(pathElements) > 5 {
+				pathElements[4] = strconv.Itoa(siteID)
+				return strings.Join(pathElements, "/")
+			} else {
+				return fmt.Sprintf("/tenant/%s/site/%d", commonInfo.TenantID, siteID)
+			}
+		} else {
+			if len(pathElements) > 3 {
+				elements := pathElements[3:]
+				urlEnd := strings.Join(elements, "/")
+				return fmt.Sprintf("/tenant/%s/site/%d/%s", commonInfo.TenantID, siteID, urlEnd)
+			} else {
+				return fmt.Sprintf("/tenant/%s/site/%d", commonInfo.TenantID, siteID)
+			}
+		}
+	}
 }

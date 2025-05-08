@@ -56,7 +56,7 @@ func (suite *MetadataTestSuite) SetupTest() {
 }
 
 func (suite *MetadataTestSuite) TestGetMetadataForAgent() {
-	items, err := suite.model.GetMetadataForAgent("agent1", suite.p)
+	items, err := suite.model.GetMetadataForAgent("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get metadata for agent")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("value%d", i), item.Value)
@@ -64,7 +64,7 @@ func (suite *MetadataTestSuite) TestGetMetadataForAgent() {
 }
 
 func (suite *MetadataTestSuite) TestCountMetadataForAgent() {
-	count, err := suite.model.CountMetadataForAgent("agent1")
+	count, err := suite.model.CountMetadataForAgent("agent1", &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all metadata")
 	assert.Equal(suite.T(), 7, count, "should count 7 metadata")
 }
@@ -73,7 +73,7 @@ func (suite *MetadataTestSuite) TestSaveMetadata() {
 	err := suite.model.SaveMetadata("agent1", suite.orgs[7], "value7")
 	assert.NoError(suite.T(), err, "should save metadata value")
 
-	count, err := suite.model.CountMetadataForAgent("agent1")
+	count, err := suite.model.CountMetadataForAgent("agent1", &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all metadata")
 	assert.Equal(suite.T(), 8, count, "should count 8 metadata")
 }

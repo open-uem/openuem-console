@@ -69,7 +69,7 @@ func (h *Handler) TagManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -79,5 +79,5 @@ func (h *Handler) TagManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, tags, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.TagsIndex(" | Tags", admin_views.Tags(c, p, tags, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }

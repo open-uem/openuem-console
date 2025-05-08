@@ -15,7 +15,7 @@ import (
 )
 
 templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, servers []*ent.Server, allServers []string, higherRelease *ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "admin/update-servers"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -77,8 +77,8 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 								<hr class="uk-divider-icon"/>
 								<div class="flex justify-between">
 									<div class="flex items-center gap-4">
-										@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", "get", refresh, false)
-										@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))), "#main", "outerHTML", func() bool {
+										@partials.RefreshPage(commonInfo.Translator, "/admin/update-servers", "#main", "outerHTML", "get", refresh, false)
+										@filters.ClearFilters("/admin/update-servers", "#main", "outerHTML", func() bool {
 											return f.Hostname == "" && len(f.Releases) == 0 &&
 												len(f.UpdateStatus) == 0 && f.UpdateMessage == "" &&
 												len(f.UpdateWhenFrom) == 0 && len(f.UpdateWhenTo) == 0
@@ -157,7 +157,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 											title={ i18n.T(ctx, "UpdateAll") }
 											type="button"
 											class="uk-button uk-button-primary"
-											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers/confirm", commonInfo.TenantID, commonInfo.SiteID))) }
+											hx-post="/admin/update-servers/confirm"
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -408,7 +408,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/update-servers", commonInfo.TenantID, commonInfo.SiteID))))
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/update-servers")
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
@@ -456,7 +456,7 @@ templ addServerActionsButtons(serverId, index int, commonInfo *partials.CommonIn
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 			<li>
 				<a
-					hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/confirm-delete-server/%d", commonInfo.TenantID, commonInfo.SiteID, serverId))) }
+					hx-post={ string(templ.URL(fmt.Sprintf("/admin/confirm-delete-server/%d", serverId))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>

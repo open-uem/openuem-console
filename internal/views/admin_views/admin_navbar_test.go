@@ -32,7 +32,7 @@ func TestConfigNavbarTabs(t *testing.T) {
 			assert.Equal(t, 1, selection.Length(), "should get only one active tab")
 			val, exists := selection.Find("a").Attr("href")
 			assert.Equal(t, true, exists, "should get href")
-			assert.Equal(t, fmt.Sprintf("/tenant/%s/site/%s/admin/%s", test, config.TenantID, config.SiteID), val, "should get active tab")
+			assert.Equal(t, fmt.Sprintf("/tenant/%s/admin/%s", test, config.TenantID), val, "should get active tab")
 		})
 	}
 }

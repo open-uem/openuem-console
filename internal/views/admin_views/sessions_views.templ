@@ -13,7 +13,7 @@ import (
 )
 
 templ Sessions(c echo.Context, p partials.PaginationAndSort, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: i18n.T(ctx, "Session.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "Session.other"), Url: "/admin/sessions"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -85,7 +85,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sessions []*ent.Ses
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 													<li>
 														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions/%s/delete", commonInfo.TenantID, commonInfo.SiteID, session.ID))) }
+															hx-get={ string(templ.URL(fmt.Sprintf("/admin/sessions/%s/delete", session.ID))) }
 															hx-target="#main"
 															hx-swap="outerHTML"
 														><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -96,7 +96,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sessions []*ent.Ses
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/sessions")
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "sessions.nosessions") }
@@ -110,9 +110,9 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sessions []*ent.Ses
 }
 
 templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, commonInfo *partials.CommonInfo) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/users", commonInfo.TenantID, commonInfo.SiteID)))}, {Title: "Sessions", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID)))}}, *commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.session_delete"), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions", commonInfo.TenantID, commonInfo.SiteID))), string(templ.URL(fmt.Sprintf("/tenant/%s/site/%s/admin/sessions/%s", commonInfo.TenantID, commonInfo.SiteID, session.ID))))
+		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", string(templ.URL(fmt.Sprintf("/admin/sessions/%s", session.ID))))
 	</main>
 }
 

@@ -67,7 +67,7 @@ func (h *Handler) NewProfile(c echo.Context) error {
 		return h.EditProfile(c, "GET", strconv.Itoa(profile.ID), i18n.T(c.Request().Context(), "profiles.new.saved"))
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.NewProfile(commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.NewProfile(c, commonInfo), commonInfo))
 }
 
 func (h *Handler) EditProfile(c echo.Context, method string, id string, successMessage string) error {
@@ -142,7 +142,7 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 	confirmDelete := false
 
 	if successMessage != "" {
-		u, err := url.Parse(fmt.Sprintf("/tenant/%s/site/%s/profiles/%s", commonInfo.TenantID, commonInfo.SiteID, id))
+		u, err := url.Parse(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%s", id)))
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
