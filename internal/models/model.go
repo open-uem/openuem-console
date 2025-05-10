@@ -89,7 +89,7 @@ func (m *Model) CreateDefaultTenantAndSite() error {
 		if err != nil {
 			return fmt.Errorf("could not create default tenant")
 		}
-		nSites, err := m.CountSites()
+		nSites, err := m.CountSites(tenant.ID)
 		if err != nil {
 			return fmt.Errorf("could not count existing sites")
 		}

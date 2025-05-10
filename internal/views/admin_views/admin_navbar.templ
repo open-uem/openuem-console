@@ -75,8 +75,8 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 		if commonInfo.TenantID != "-1" {
 			<li class={ templ.KV("uk-active", active == "sites") }>
 				<a
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/sites", commonInfo.TenantID)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/sites", commonInfo.TenantID))) }
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))) }
 					hx-push-url="true"
 					hx-target="#main"
 					hx-swap="outerHTML"

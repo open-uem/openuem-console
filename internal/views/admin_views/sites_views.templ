@@ -5,19 +5,18 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilter, tenants []*ent.Tenant, successMessage, errMessage string, refresh int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/tenants"}, {Title: i18n.T(ctx, "Tenant.other"), Url: "/admin/tenants"}}, commonInfo)
+templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, sites []*ent.Site, successMessage, errMessage string, refresh int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Site.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("tenants", agentsExists, serversExists, commonInfo)
+				@ConfigNavbar("sites", agentsExists, serversExists, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -29,23 +28,23 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 					<div id="error" class="hidden"></div>
 				}
 				if confirmDelete {
-					@partials.ConfirmDelete(c, i18n.T(ctx, "tenants.confirm_delete"), "/admin/tenants", string(templ.URL(fmt.Sprintf("/admin/tenants/%s", commonInfo.ActionTenantID))))
+					@partials.ConfirmDelete(c, i18n.T(ctx, "sites.confirm_delete"), string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%s", commonInfo.TenantID, commonInfo.SiteID))))
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "tenants.title") } </h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "sites.title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
-							{ i18n.T(ctx, "tenants.description") }
+							{ i18n.T(ctx, "sites.description") }
 						</p>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters("/admin/tenants", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), "#main", "outerHTML", func() bool {
 								return f.Name == "" &&
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.DefaultOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, "/admin/tenants", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), "#main", "outerHTML", "post", refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button
@@ -54,21 +53,21 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 								type="button"
 								class="uk-button bg-slate-500 hover:bg-slate-400 text-white"
 							>
-								<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "tenants.import") }
+								<uk-icon icon="file-up" class="mr-2"></uk-icon>{ i18n.T(ctx, "sites.import") }
 							</button>
 							<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 								<form
 									class="flex flex-col gap-4 p-4 w-96"
 									hx-encoding="multipart/form-data"
-									hx-post="/admin/tenants/import"
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/import", commonInfo.TenantID))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-indicator="#upload-csv-spinner"
 									_="on htmx:afterRequest	set #csvFile.value to ''"
 								>
-									<label class="uk-text-bold" for="csvFile">{ i18n.T(ctx, "tenants.csv_file") }</label>
+									<label class="uk-text-bold" for="csvFile">{ i18n.T(ctx, "sites.csv_file") }</label>
 									<input id="csvFile" name="csvFile" type="file" accept=".csv,.txt"/>
-									<p>{ i18n.T(ctx, "tenants.csv_description") }</p>
+									<p>{ i18n.T(ctx, "sites.csv_description") }</p>
 									<button
 										title={ i18n.T(ctx, "Upload") }
 										type="submit"
@@ -81,18 +80,18 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 								</form>
 							</div>
 							<button
-								title={ i18n.T(ctx, "tenants.add") }
+								title={ i18n.T(ctx, "sites.add") }
 								type="button"
 								class="uk-button uk-button-primary text-white"
-								hx-get="/admin/tenants/new"
+								hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/new", commonInfo.TenantID))) }
 								hx-target="#main"
 								hx-push-url="false"
 								hx-swap="outerHTML"
 							>
-								<uk-icon icon="circle-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "tenants.add") }
+								<uk-icon icon="circle-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "sites.add") }
 							</button>
 						</div>
-						if len(tenants) > 0 {
+						if len(sites) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped ">
 								<thead>
 									<tr>
@@ -104,32 +103,32 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "tenants.name") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "tenants.name"), "name", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByText(c, p, "Name", f.Name, "tenants.filter_by_name", "#main", "outerHTML")
+												<span>{ i18n.T(ctx, "sites.name") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.name"), "name", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByText(c, p, "Name", f.Name, "sites.filter_by_name", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "tenants.is_default") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "tenants.is_default"), "default", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterBySingleChoice(c, p, "DefaultStatus", "tenants.filter_by_default_status", []string{"Yes", "No"}, f.DefaultOptions, "#main", "outerHTML", true, func() bool {
+												<span>{ i18n.T(ctx, "sites.is_default") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.is_default"), "default", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterBySingleChoice(c, p, "DefaultStatus", "sites.filter_by_default_status", []string{"Yes", "No"}, f.DefaultOptions, "#main", "outerHTML", true, func() bool {
 													return len(f.DefaultOptions) == 0
 												})
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "tenants.created") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "tenants.created"), "created", "time", "#main", "outerHTML", "get")
-												@filters.FilterByDate(c, p, "Created", "tenants.filter_by_creation", f.CreatedFrom, f.CreatedTo, "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
+												<span>{ i18n.T(ctx, "sites.created") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.created"), "created", "time", "#main", "outerHTML", "get")
+												@filters.FilterByDate(c, p, "Created", "sites.filter_by_creation", f.CreatedFrom, f.CreatedTo, "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
 											</div>
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "tenants.modified") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "tenants.modified"), "modified", "time", "#main", "outerHTML", "get")
-												@filters.FilterByDate(c, p, "Modified", "tenants.filter_by_modification", f.ModifiedFrom, f.ModifiedTo, "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
+												<span>{ i18n.T(ctx, "sites.modified") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.modified"), "modified", "time", "#main", "outerHTML", "get")
+												@filters.FilterByDate(c, p, "Modified", "sites.filter_by_modification", f.ModifiedFrom, f.ModifiedTo, "#main", "outerHTML", func() bool { return f.ModifiedFrom == "" && f.ModifiedTo == "" })
 											</div>
 										</th>
 										<th>
@@ -139,40 +138,40 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 										</th>
 									</tr>
 								</thead>
-								for index, tenant := range tenants {
+								for index, s := range sites {
 									<tr>
 										<td>
-											{ strconv.Itoa(tenant.ID) }
+											{ strconv.Itoa(s.ID) }
 										</td>
 										<td class="underline">
 											<a
-												href={ templ.URL(fmt.Sprintf("/admin/tenants/%d", tenant.ID)) }
-												hx-get={ string(templ.URL(fmt.Sprintf("/admin/tenants/%d", tenant.ID))) }
+												href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%d", commonInfo.TenantID, s.ID)) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%d", commonInfo.TenantID, s.ID))) }
 												hx-target="#main"
 												hx-push-url="true"
 												hx-swap="outerHTML"
 											>
-												if tenant.Description == "DefaultTenant" {
-													{ i18n.T(ctx, "DefaultTenant") }
+												if s.Description == "DefaultSite" {
+													{ i18n.T(ctx, "DefaultSite") }
 												} else {
-													{ tenant.Description }
+													{ s.Description }
 												}
 											</a>
 										</td>
-										if tenant.IsDefault {
+										if s.IsDefault {
 											@partials.Checkmark()
 										} else {
 											<td>-</td>
 										}
-										if tenant.Created.IsZero() {
+										if s.Created.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ commonInfo.Translator.FmtDateMedium(tenant.Created.Local()) + " " + commonInfo.Translator.FmtTimeShort(tenant.Created.Local()) } </td>
+											<td>{ commonInfo.Translator.FmtDateMedium(s.Created.Local()) + " " + commonInfo.Translator.FmtTimeShort(s.Created.Local()) } </td>
 										}
-										if tenant.Modified.IsZero() {
+										if s.Modified.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ commonInfo.Translator.FmtDateMedium(tenant.Modified.Local()) + " " + commonInfo.Translator.FmtTimeShort(tenant.Modified.Local()) } </td>
+											<td>{ commonInfo.Translator.FmtDateMedium(s.Modified.Local()) + " " + commonInfo.Translator.FmtTimeShort(s.Modified.Local()) } </td>
 										}
 										<td>
 											@partials.MoreButton(index)
@@ -180,7 +179,7 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 													<li>
 														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/admin/tenants/%d", tenant.ID))) }
+															hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%d", commonInfo.TenantID, s.ID))) }
 															hx-target="#main"
 															hx-push-url="true"
 															hx-swap="outerHTML"
@@ -190,22 +189,12 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 													</li>
 													<li>
 														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/admin/tenants/%d/confirm-delete", tenant.ID))) }
+															hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%d/confirm-delete", commonInfo.TenantID, s.ID))) }
 															hx-target="#main"
 															hx-push-url="false"
 															hx-swap="outerHTML"
 														>
 															<uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }
-														</a>
-													</li>
-													<li>
-														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%d/admin/sites", tenant.ID))) }
-															hx-target="#main"
-															hx-push-url="true"
-															hx-swap="outerHTML"
-														>
-															<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "Site.other") }
 														</a>
 													</li>
 												</ul>
@@ -215,11 +204,11 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 								}
 							</table>
 							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/tenants")
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/admin/tenants/%s/sites", commonInfo.TenantID))))
 							}
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
-								{ i18n.T(ctx, "tenants.no_tenants") }
+								{ i18n.T(ctx, "sites.no_tenants") }
 							</p>
 						}
 					</div>
@@ -229,63 +218,49 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 	</main>
 }
 
-templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/tenants"}, {Title: i18n.T(ctx, "Tenant.other"), Url: "/admin/tenants"}}, commonInfo)
+templ NewSite(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Site.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("tenants", agentsExists, serversExists, commonInfo)
+				@ConfigNavbar("sites", agentsExists, serversExists, commonInfo)
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "tenants.new_title") } </h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "sites.new_title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
-							{ i18n.T(ctx, "tenants.new_description") }
+							{ i18n.T(ctx, "sites.new_description") }
 						</p>
 					</div>
 					<div class="uk-card-body">
 						<form
 							class="mt-6"
-							hx-post="/admin/tenants/new"
+							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/new", commonInfo.TenantID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
 						>
 							<div class="flex gap-8">
 								<fieldset class="uk-fieldset w-1/6">
 									<div class="uk-margin">
-										<label class="uk-form-label" for="name">{ i18n.T(ctx, "tenants.name") }</label>
+										<label class="uk-form-label" for="name">{ i18n.T(ctx, "sites.name") }</label>
 										<div class="uk-form-controls">
 											<input
 												id="name"
 												name="name"
 												class="uk-input"
 												type="text"
-												placeholder={ i18n.T(ctx, "tenants.name") + "..." }
+												placeholder={ i18n.T(ctx, "sites.name") + "..." }
 												required
 											/>
 										</div>
 									</div>
 									<div class="uk-margin">
-										<label class="uk-form-label" for="is-default">{ i18n.T(ctx, "tenants.is_default") }</label>
+										<label class="uk-form-label" for="is-default">{ i18n.T(ctx, "sites.is_default") }</label>
 										<div class="uk-form-controls">
 											<select name="is-default" class="uk-select">
 												<option value="true">{ i18n.T(ctx, "Yes") }</option>
 												<option value="false">{ i18n.T(ctx, "No") }</option>
 											</select>
-										</div>
-									</div>
-									<div class="uk-margin">
-										<label class="uk-form-label" for="site-name">{ i18n.T(ctx, "Site.one") }</label>
-										<div class="uk-form-controls">
-											<input
-												id="site-name"
-												name="site-name"
-												class="uk-input"
-												type="text"
-												value={ i18n.T(ctx, "DefaultSite") }
-												placeholder={ i18n.T(ctx, "Site.one") + "..." }
-												required
-											/>
 										</div>
 									</div>
 								</fieldset>
@@ -302,8 +277,8 @@ templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExis
 	</main>
 }
 
-templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/tenants"}, {Title: i18n.T(ctx, "Tenant.other"), Url: "/admin/tenants"}}, commonInfo)
+templ EditSite(c echo.Context, s *ent.Site, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Site.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -312,45 +287,45 @@ templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, a
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">{ i18n.T(ctx, "tenants.edit_title") } </h3>
+						<h3 class="uk-card-title">{ i18n.T(ctx, "sites.edit_title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
-							{ i18n.T(ctx, "tenants.edit_description") }
+							{ i18n.T(ctx, "sites.edit_description") }
 						</p>
 					</div>
 					<div class="uk-card-body">
 						<form
 							class="mt-6"
-							hx-post={ string(templ.URL(fmt.Sprintf("/admin/tenants/%d", t.ID))) }
+							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites/%d", commonInfo.TenantID, s.ID))) }
 							hx-target="#main"
 							hx-swap="outerHTML"
-							hx-indicator="#update-tenant-spinner"
+							hx-indicator="#update-site-spinner"
 						>
 							<div class="flex gap-8">
 								<fieldset class="uk-fieldset w-1/6">
 									<div class="uk-margin">
-										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "tenants.name") }</label>
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "sites.name") }</label>
 										<div class="uk-form-controls">
 											<input
 												id="name"
 												name="name"
 												class="uk-input"
 												type="text"
-												if t.Description == "DefaultTenant" {
-													value={ i18n.T(ctx, t.Description) }
+												if s.Description == "DefaultTenant" {
+													value={ i18n.T(ctx, s.Description) }
 												} else {
-													value={ t.Description }
+													value={ s.Description }
 												}
-												placeholder={ i18n.T(ctx, "tenants.name") + "..." }
+												placeholder={ i18n.T(ctx, "sites.name") + "..." }
 												required
 											/>
 										</div>
 									</div>
 									<div class="uk-margin">
-										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "tenants.is_default") }</label>
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "sites.is_default") }</label>
 										<div class="uk-form-controls">
 											<select name="is-default" class="uk-select">
-												<option value="true" selected?={ t.IsDefault }>{ i18n.T(ctx, "Yes") }</option>
-												<option value="false" selected?={ !t.IsDefault }>{ i18n.T(ctx, "No") }</option>
+												<option value="true" selected?={ s.IsDefault }>{ i18n.T(ctx, "Yes") }</option>
+												<option value="false" selected?={ !s.IsDefault }>{ i18n.T(ctx, "No") }</option>
 											</select>
 										</div>
 									</div>
@@ -359,13 +334,13 @@ templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, a
 							<div class="flex gap-4">
 								<button type="reset" class="uk-button uk-button-secondary">{ i18n.T(ctx, "Reset") }</button>
 								<button
-									id="edit-tenant"
+									id="edit-site"
 									type="submit"
 									class="uk-button uk-button-primary flex items-center gap-2"
 								>
 									{ i18n.T(ctx, "Update") }
 								</button>
-								<uk-icon id="update-tenant-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+								<uk-icon id="update-site-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 							</div>
 						</form>
 					</div>
@@ -375,7 +350,7 @@ templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, a
 	</main>
 }
 
-templ TenantsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+templ SitesIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
 	@layout.Base("admin", commonInfo) {
 		@cmp
 	}

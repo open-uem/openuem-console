@@ -270,7 +270,7 @@ func (h *Handler) DeleteTenant(c echo.Context) error {
 
 	nTenants, err := h.Model.CountTenants()
 	if err != nil {
-		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.could_not_count_tenants", id), false)
+		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.could_not_count_tenants"), false)
 	}
 
 	if nTenants == 1 {
@@ -285,7 +285,7 @@ func (h *Handler) DeleteTenant(c echo.Context) error {
 	// Send a request to uninstall agents associated with this organization
 	agents, err := h.Model.GetAgentsByTenant(tenantID)
 	if err != nil {
-		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.could_not_get_agents", id), false)
+		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.could_not_get_agents"), false)
 	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
