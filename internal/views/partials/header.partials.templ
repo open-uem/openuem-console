@@ -54,7 +54,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 			</ul>
 		</nav>
 		<div class="flex items-center gap-4">
-			<form class="flex items-center gap-1">
+			<form class="flex items-center gap-2">
 				<span class="uk-text-muted">
 					<uk-icon
 						hx-history="false"
@@ -67,7 +67,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 						uk-cloack
 					></uk-icon>
 				</span>
-				<select title={ i18n.T(ctx, "Organization") } class="uk-select" name="tenant" _="on change set window.location to my.value">
+				<select class="w-48 uk-select border-green-700 leading-none" title={ i18n.T(ctx, "Organization") } name="tenant" _="on change set window.location to my.value">
 					if commonInfo.IsAdmin {
 						<option
 							class="!align-middle"
@@ -101,7 +101,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 					<span class="uk-text-muted">
 						<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
 					</span>
-					<select title={ i18n.T(ctx, "Site.one") } class="uk-select" name="site" _="on change set window.location to my.value">
+					<select class="w-48 uk-select border-green-700 leading-none" title={ i18n.T(ctx, "Site.one") } name="site" _="on change set window.location to my.value">
 						<option
 							value={ GetSiteSelectorUrl(c, commonInfo, -1) }
 							selected?={ commonInfo.SiteID ==  "-1" }
@@ -216,6 +216,10 @@ func newVersionAvailable(currentVersion, latestVersion string) bool {
 
 func GetNavigationUrl(commonInfo *CommonInfo, location string) string {
 	if commonInfo.SiteID == "-1" {
+		if commonInfo.TenantID == "-1" {
+			return fmt.Sprintf("%s", location)
+		}
+
 		return fmt.Sprintf("/tenant/%s%s", commonInfo.TenantID, location)
 	}
 
