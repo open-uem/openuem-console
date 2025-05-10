@@ -95,7 +95,9 @@ es:
     one: "Sesión"
     other: "Sesiones"
   Settings: "Configuración"
-  Site: "Sitio"
+  Site:
+    one: "Sitio"
+    other: "Sitios"
   Size: "Tamaño"
   SortBy: "Ordenar por %s"
   Stable: "Estable"
@@ -1034,6 +1036,60 @@ es:
   packages:
     required_params_missing: "Faltan parámetros requeridos"
     source_not_found: "No se ha podido encontrar el gestor de paquetes asociado"
+
+  tenants:
+    title: "Organizaciones"
+    description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos. Una organización por defecto con un sitio por defecto es creada donde se agregan los equipos si no se configura ninguna organización y/o sitio en el agente"
+    add: "Añadir organization"
+    import: "Importar organizaciones"
+    set_as_default: "Establecer como predet."
+    is_default: "Es predeterm."
+    name: "Nombre"
+    created: "Fecha Creación"
+    modified: "Fecha Modificación"
+    edit_title: "Edite la organización"
+    edit_description: "Cambie el nombre de la organización, o elija si esta organización será la organización predeterminada donde los agentes se agruparán por defecto si no tienen información de donde deben ser agregados. Tenga en cuenta que OpenUEM requiere que al menos una organización, y como mucho una, debe ser seleccionada como predeterminada"
+    edit_success: "La organización ha sido modificada"
+    tenant_cannot_be_empty: "El ID de la organización no puede estar vacío"
+    could_not_convert_to_int: "El ID de la organización: %s no pudo convertirse en un valor entero"
+    tenant_not_found: "La organización no pudo encontrarse, razón: %s"
+    name_cannot_be_empty: "El nombre de la organización no puede estar vacío"
+    could_not_convert_to_bool: "El estado predeterminado de la organización no pudo convertise en un booleano, razón: %s"
+    at_least_one_tenant: "OpenUEM necesita tener al menos una organización, no puede borrar esta organización"
+    could_not_check_name: "No se pudo comprobar si el nombre de esta organización ya está cogido, razón: %s"
+    tenant_name_taken: "%s ya está cogido, use un nombre diferente"
+    could_not_get_common_info: "La información común requerida para esta acción no se pudo obtener, razón: %s"
+    deleted: "La organización fue eliminada"
+    default_cannot_be_deleted: "La organización seleccionada es la organización predeterminada, por favor elija otra organización como predeterminada antes de eliminar esta"
+    could_not_count_tenants: "Could not count existing organizations"
+    new_title: "Nueva organización"
+    new_description: "Cree una nueva organización dándola un nombre y elija si esta organización será la organización por defecto asociada con un equipo. Cada organización debe tener un sitio asociado que se creará automáticamente, así que añada un nombre también para ese sitio inicial"
+    new_success: "La organización fue creada"
+    new_error: "No se pudo crear la organización, razón: %s"
+    site_name_cannot_be_empty: "El nombre del sitio no puede estar vacío"
+    csv_file: "Fichero CSV"
+    csv_description: "Suba un fichero de valores separados por coma sin fila de cabecera y con las filas usando el formato 'nombreorg,nombresitio'. Todos los campos son obligatorios"
+    import_read_error: "No se pudo leer el fichero de organizaciones, razón: %s"
+    import_success: "El fichero de organizaciones ha sido procesado"
+    import_error_wrong_format: "La fila CSV %d tiene un formato incorrecto"
+    import_required: "El campo %s en la fila %d es obligatorio y no puede estar vacío"
+    import_wrong_tenants: "Hemos encontrado errores para las siguientes organizaciones: %s"
+    confirm_delete: "¿Está seguro de quiere eliminar esta organización? Todos los agentes asociados, perfiles, etiquetas, metadatos y otras configuraciones serán eliminados de la base de datos"
+    delete_error: "No se pudo eliminar la organización, razón: %s"
+    filter_by_name: Filtrar por nombre...
+    filter_by_creation: Filtar por fecha de creación
+    filter_by_modification: Filtrar por fecha de modificación
+    filter_by_default_status: Filtrar por estado predeterminado
+    no_tenants: No se han encontrado organizaciones para esta consulta
+    could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
+
+  sites:
+    title: "Sitio"
+    description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos"
+    add: "Añadir sitio"
+    import: "Importar sitios"
+    set_as_default: "Establecer como predet."
+
   countries:
     Australia: "Australia"
     Austria: "Austria"

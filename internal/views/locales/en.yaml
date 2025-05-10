@@ -93,7 +93,9 @@ en:
     one: "Session"
     other: "Sessions"
   Settings: "Settings"
-  Site: "Site"
+  Site:
+    one: "Site"
+    other: "Sites"
   Size: "Size"
   SortBy: "Sort by %s"
   Stable: "Stable"
@@ -1041,6 +1043,59 @@ en:
   packages:
     required_params_missing: "Required params are missing"
     source_not_found: "Could not find the associated package manager"
+
+  tenants:
+    title: "Organizations"
+    description: "OpenUEM supports multi-tenancy so you can manage different organizations. An organization can have one or more sites where endpoints are grouped. A default organization is created with a default site where endpoints are added if no organization and/or site is configured for the agent"
+    add: "Add organization"
+    import: "Import organizations"
+    set_as_default: "Set as default"
+    is_default: "Is default"
+    name: "Name"
+    created: "Created at"
+    modified: "Modified at"
+    edit_title: "Edit organization"
+    edit_description: "Change the organization's name, or choose if this organization will be the default organization where agents are grouped by default if agent has no information about where it should be added. Note that OpenUEM requires that at least one and at most one organization is selected as default"
+    edit_success: "The organization has been modified"
+    tenant_cannot_be_empty: "The organization ID cannot be empty"
+    could_not_convert_to_int: "The organization ID: %s could not be converted to an int"
+    tenant_not_found: "The organization could not be found, reason: %s"
+    name_cannot_be_empty: "The organization name cannot be empty"
+    could_not_convert_to_bool: "The organization default status could not be converted to a boolean, reason: %s"
+    at_least_one_tenant: "OpenUEM needs to have at least one organization, you cannot delete this organization"
+    could_not_check_name: "Could not check if the name is already taken, reason: %s"
+    tenant_name_taken: "%s is already taken, use a different name"
+    could_not_get_common_info: "The common info required for this action could not be retrieved, reason: %s"
+    deleted: "The organization was deleted"
+    default_cannot_be_deleted: "The selected organization is the default organization, please choose another organization as default before removing this one"
+    could_not_count_tenants: "Could not count existing organizations"
+    new_title: "New organization"
+    new_description: "Create a new organization giving it a name and choose if this organization will be the default organization associated with and endpoint. Every organization must have one associated site that will be created automatically, so add a name for that initial site too"
+    new_success: "The organization was created"
+    new_error: "Could not create the new organization, reason: %s"
+    site_name_cannot_be_empty: "The site name cannot be empty"
+    csv_file: "CSV File"
+    csv_description: "Upload a comma-separated values file with no header row and rows using the following format 'orgname,sitename'. All fields are required"
+    import_read_error: "Tenants file could not be read, reason: %s"
+    import_success: "Tenants file has been processed"
+    import_error_wrong_format: "The CSV row %d has a wrong format"
+    import_required: "Field %s in row %d is required and cannot be empty"
+    import_wrong_tenants: "We encountered errors for the following tenants: %s"
+    confirm_delete: "Are you sure that you want to delete this organization? All the associated agents, profiles, tags, metadata and other settings will be removed from the database"
+    delete_error: "Could not delete the organization, reason: %s"
+    filter_by_name: Filter by name...
+    filter_by_creation: Filter by creation date
+    filter_by_modification: Filter by modification date
+    filter_by_default_status: Filter by default status
+    no_tenants: No tenants have been found for this query
+    could_not_get_agents: "Could not get agents associated with this organization"
+  sites:
+    title: "Sites"
+    description: "OpenUEM supports multi-tenancy so you can manage different organizations. An organization can have one or more sites where endpoints are grouped"
+    add: "Add site"
+    import: "Import sites"
+    set_as_default: "Set as default"
+
   countries:
     Australia: "Australia"
     Austria: "Austria"
