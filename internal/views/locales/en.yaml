@@ -266,7 +266,7 @@ en:
     no_log_entries: "No log entries have been found for this category"
     sftp_agent_setting: "SFTP service"
     settings_title: "Agent's settings"
-    settings_description: "Here you can configure the agent's services and used ports. If you enable the debug mode for the agent, note that the log file will increase its size quickly"
+    settings_description: "Here you can configure the organization and site where this agent belongs to, the agent's services and used ports. If you enable the debug mode for the agent, note that the log file will increase its size quickly"
     port_must_be_a_number: "The port must be a number"
     port_is_not_valid: "The port is not valid"
     sftp_service_status: "SFTP service"
@@ -298,6 +298,14 @@ en:
     overview_endpoint_type_success: "The endpoint's type has been saved"
     agent_version: "Agent's version"
     last_inventory: "Last inventory"
+    could_not_get_tenants: "Could not get the list of organizations"
+    could_not_get_sites: "Could not get the list of sites"
+    could_not_get_associated_site: "Could not get agent's associated site"
+    agent_cannot_associated_to_more_than_one_site: "Agent cannot be associated with more than one site"
+    could_not_get_site_info: "Could not retrieve site's information"
+    could_not_get_tenant: "The site is not associated with an organization"
+    could_not_associate: "Could not associate the endpoint with the selected site and organization, reason: %s"
+    association_success: "The endpoint has been associated with the selected site and organization"
 
   inventory:
     hardware:

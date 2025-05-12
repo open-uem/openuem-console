@@ -154,13 +154,13 @@ func (m *Model) GetAgentById(agentId string, c *partials.CommonInfo) (*ent.Agent
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		return agent, err
 	} else {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func (m *Model) GetAgentOverviewById(agentId string, c *partials.CommonInfo) (*e
 		}
 		return agent, err
 	} else {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}

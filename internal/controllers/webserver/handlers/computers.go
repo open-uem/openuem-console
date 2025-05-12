@@ -47,6 +47,8 @@ func (h *Handler) Overview(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		description := c.FormValue("endpoint-description")
 		endpointType := c.FormValue("endpoint-type")
+		tenant := c.FormValue("tenant")
+		site := c.FormValue("site")
 
 		if description != "" {
 			if err := h.Model.SaveEndpointDescription(agentId, description, commonInfo); err != nil {
@@ -64,11 +66,61 @@ func (h *Handler) Overview(c echo.Context) error {
 			}
 			successMessage = i18n.T(c.Request().Context(), "agents.overview_endpoint_type_success")
 		}
+
+		if tenant != "" && site != "" {
+			if err := h.Model.AssociateToTenantAndSite(agentId, tenant, site); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_could_not_save", err.Error()), true))
+			}
+
+			// Change URL with the new site and organization
+			if commonInfo.SiteID == "-1" {
+				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/computers/%s/overview", tenant, agentId))
+				commonInfo.TenantID = tenant
+			} else {
+				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", tenant, site, agentId))
+				commonInfo.TenantID = tenant
+				commonInfo.SiteID = site
+			}
+
+			successMessage = i18n.T(c.Request().Context(), "agents.association_success")
+		}
 	}
 
 	agent, err := h.Model.GetAgentOverviewById(agentId, commonInfo)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	sites := agent.Edges.Site
+	if len(sites) == 0 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_associated_site"), true))
+	}
+
+	if len(sites) > 1 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.agent_cannot_associated_to_more_than_one_site"), true))
+	}
+
+	currentSite := sites[0]
+
+	s, err := h.Model.GetSite(currentSite.ID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_site_info"), true))
+	}
+
+	if s.Edges.Tenant == nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenant"), true))
+	}
+
+	currentTenant := s.Edges.Tenant
+
+	allTenants, err := h.Model.GetTenants()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
+	}
+
+	allSites, err := h.Model.GetSites(currentTenant.ID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
@@ -80,7 +132,7 @@ func (h *Handler) Overview(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites), commonInfo))
 }
 
 func (h *Handler) Computer(c echo.Context) error {

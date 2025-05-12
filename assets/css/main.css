@@ -9487,6 +9487,11 @@ th.uk-text-break, td.uk-text-break {
   margin-right: auto;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -9779,8 +9784,8 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
-.w-64 {
-  width: 16rem;
+.w-3\/4 {
+  width: 75%;
 }
 
 .flex-1 {

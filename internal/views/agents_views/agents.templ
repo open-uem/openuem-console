@@ -722,7 +722,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="debug-mode">{ i18n.T(ctx, "agents.debug_mode") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="debug-mode"
 								name="debug-mode"
 								type="checkbox"
@@ -732,7 +732,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="sftp-service">{ i18n.T(ctx, "agents.sftp_service") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="sftp-service"
 								name="sftp-service"
 								type="checkbox"
@@ -760,7 +760,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="remote-assistance-service">{ i18n.T(ctx, "agents.remote_assistance") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="remote-assistance-service"
 								name="remote-assistance-service"
 								type="checkbox"

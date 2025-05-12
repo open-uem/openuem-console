@@ -266,7 +266,7 @@ es:
     no_log_entries: "No existen entradas de log para esa categoría"
     sftp_agent_setting: "Servicio SFTP"
     settings_title: "Configuración del Agente"
-    settings_description: "Aquí puede configurar los servicios del agente y los puertos utilizados. Si activa el modo debug para el agente, tenga en cuenta que el fichero de log del agente crecerá rápidamente"
+    settings_description: "Aquí puede configurar la organización y el sitio al que pertenece este agente, los servicios del agente y los puertos utilizados. Si activa el modo debug para el agente, tenga en cuenta que el fichero de log del agente crecerá rápidamente"
     port_must_be_a_number: "El puerto debe ser un número"
     port_is_not_valid: "El puerto no es válido"
     sftp_port: "Puerto SFTP"
@@ -297,6 +297,15 @@ es:
     overview_endpoint_type_success: "El tipo de equipo se ha guardado"
     agent_version: "Versión del agente"
     last_inventory: "Último inventario"
+    could_not_get_tenants: "No se pudo obtener la lista de organizaciones"
+    could_not_get_sites: "No se pudo obtener la lista de sitios"
+    could_not_get_associated_site: "No se pudo obtener el sitio asociado al agente"
+    agent_cannot_associated_to_more_than_one_site: "El agente no puede estar asociado a más de un sitio"
+    could_not_get_site_info: "No pude obtener la información del sitio"
+    could_not_get_tenant: "El sitio no está asociado a una organización"
+    could_not_associate: "No se pudo asociar el equipo con el sitio y organización seleccionado, razón: %s"
+    association_success: "El equipo ha sido asociado con el sitio y la organización seleccionados"
+
   inventory:
     hardware:
       title: "Hardware"

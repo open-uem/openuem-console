@@ -30,8 +30,16 @@ func (m *Model) GetAssociatedSites(t *ent.Tenant) ([]*ent.Site, error) {
 	return m.Client.Site.Query().Where(site.HasTenantWith(tenant.ID(t.ID))).All(context.Background())
 }
 
+func (m *Model) GetSite(siteID int) (*ent.Site, error) {
+	return m.Client.Site.Query().WithTenant().Where(site.ID(siteID)).Only(context.Background())
+}
+
 func (m *Model) GetSiteById(tenantID int, siteID int) (*ent.Site, error) {
 	return m.Client.Site.Query().Where(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))).Only(context.Background())
+}
+
+func (m *Model) GetSites(tenantID int) ([]*ent.Site, error) {
+	return m.Client.Site.Query().Where(site.HasTenantWith(tenant.ID(tenantID))).All(context.Background())
 }
 
 func (m *Model) GetSitesByPage(p partials.PaginationAndSort, f filters.SiteFilter, tenantID string) ([]*ent.Site, error) {
