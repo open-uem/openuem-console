@@ -53,13 +53,22 @@ func (h *Handler) NewProfile(c echo.Context) error {
 		return err
 	}
 
+	siteID, err := strconv.Atoi(commonInfo.SiteID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_site_to_int", commonInfo.SiteID), true))
+	}
+
+	if siteID == -1 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.profile_empty_site", commonInfo.SiteID), true))
+	}
+
 	if c.Request().Method == "POST" {
 		description := c.FormValue("profile-description")
 		if description == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.empty"), true))
 		}
 
-		profile, err := h.Model.AddProfile(description)
+		profile, err := h.Model.AddProfile(siteID, description)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.could_not_save"), true))
 		}

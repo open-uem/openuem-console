@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, higherReleaseApplied *ent.Release, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo) {
+templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, higherReleaseApplied *ent.Release, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -45,6 +45,16 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 				<div class="uk-card uk-card-body uk-card-default p-6">
 					<div class="flex gap-4">
 						<table class="uk-table uk-table-small uk-table-divider uk-table-justify w-1/2">
+							<tr>
+								<th>{ i18n.T(ctx, "Tenant.one") }</th>
+								<td>
+									if tenantName == "DefaultTenant" {
+										{ i18n.T(ctx, "DefaultTenant") }
+									} else {
+										{ tenantName }
+									}
+								</td>
+							</tr>
 							<tr>
 								<th>{ i18n.T(ctx, "Description") }</th>
 								<td>
@@ -110,6 +120,16 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 						</table>
 						<table class="uk-table uk-table-small uk-table-divider uk-table-justify w-1/2">
 							<tr>
+								<th>{ i18n.T(ctx, "Site.one") }</th>
+								<td>
+									if GetSiteName(agent, commonInfo)== "DefaultSite" {
+										{ i18n.T(ctx, "DefaultSite") }
+									} else {
+										GetSiteName(agent, commonInfo)
+									}
+								</td>
+							</tr>
+							<tr>
 								<th>{ i18n.T(ctx, "Type") }</th>
 								<td>
 									<form class="flex gap-2 items-center">
@@ -169,7 +189,12 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 							<tr>
 								<th>{ i18n.T(ctx, "updates.pending_updates") }</th>
 								if agent.Edges.Systemupdate.PendingUpdates {
-									<td class="!align-middle"><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+									<td class="!align-middle">
+										<div class="flex gap-1 items-center uk-alert-description">
+											<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+											<span>{ i18n.T(ctx, "Yes") }</span>
+										</div>
+									</td>
 								} else {
 									<td class="!align-middle">{ i18n.T(ctx, "No") }</td>
 								}
@@ -195,4 +220,12 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 			</div>
 		</div>
 	</main>
+}
+
+func GetSiteName(agent *ent.Agent, commonInfo *partials.CommonInfo) string {
+	if commonInfo.TenantID == "-1" || agent.Edges.Site == nil || len(agent.Edges.Site) != 1 {
+		return "-"
+	}
+
+	return agent.Edges.Site[0].Description
 }

@@ -38,8 +38,8 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort) ([]*ent.Profile,
 	return profiles, nil
 }
 
-func (m *Model) AddProfile(description string) (*ent.Profile, error) {
-	profile, err := m.Client.Profile.Create().SetName(description).Save(context.Background())
+func (m *Model) AddProfile(siteID int, description string) (*ent.Profile, error) {
+	profile, err := m.Client.Profile.Create().SetName(description).SetSiteID(siteID).Save(context.Background())
 	if err != nil {
 		return nil, err
 	}

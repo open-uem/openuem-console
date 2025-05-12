@@ -179,7 +179,7 @@ func (m *Model) GetAgentOverviewById(agentId string, c *partials.CommonInfo) (*e
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}

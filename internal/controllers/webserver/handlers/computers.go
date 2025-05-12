@@ -80,7 +80,7 @@ func (h *Handler) Overview(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }
 
 func (h *Handler) Computer(c echo.Context) error {
