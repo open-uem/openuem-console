@@ -90,7 +90,11 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 			info.SiteID = siteID
 		}
 	} else {
-		info.SiteID = "-1"
+		if len(info.Sites) == 0 {
+			info.SiteID = strconv.Itoa(info.Sites[0].ID)
+		} else {
+			info.SiteID = "-1"
+		}
 	}
 
 	info.DetectRemoteAgents, err = h.Model.GetDefaultDetectRemoteAgents(info.TenantID)
