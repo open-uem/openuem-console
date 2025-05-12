@@ -49,7 +49,18 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 							<tr>
 								<th>{ i18n.T(ctx, "Tenant.one") }</th>
 								<td>
-									<select id="tenant" class="uk-select w-3/4" title={ i18n.T(ctx, "Organization") } name="tenant">
+									<select
+										id="tenant"
+										class="uk-select w-3/4"
+										title={ i18n.T(ctx, "Organization") }
+										hx-post={ fmt.Sprintf("/computers/%s/sites", agent.ID) }
+										hx-include="#tenant"
+										hx-target="#site-selector"
+										hx-swap="outerHTML"
+										hx-trigger="change"
+										hx-push-url="false"
+										name="tenant"
+									>
 										for _, t := range allTenants {
 											<option
 												class="!align-middle"
@@ -69,36 +80,38 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 							<tr>
 								<th>{ i18n.T(ctx, "Site.one") }</th>
 								<td>
-									<form class="flex gap-2 items-center">
-										<select id="site" class="uk-select w-3/4" title={ i18n.T(ctx, "Organization") } name="site">
-											for _, s := range allSites {
-												<option
-													class="!align-middle"
-													value={ strconv.Itoa(s.ID) }
-													selected?={ currentSite.ID == s.ID }
-												>
-													if s.Description == "DefaultSite" {
-														{ i18n.T(ctx,s.Description) }
-													} else {
-														{ s.Description }
-													}
-												</option>
-											}
-										</select>
-										<button
-											class="flex items-center gap-8"
-											type="submit"
-											hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", agent.ID)))) }
-											hx-include="#tenant"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-description"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-description" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
+									<div id="site-selector">
+										<form class="flex gap-2 items-center" id="sites-dropdown">
+											<select id="site" class="uk-select w-3/4" title={ i18n.T(ctx, "Organization") } name="site">
+												for _, s := range allSites {
+													<option
+														class="!align-middle"
+														value={ strconv.Itoa(s.ID) }
+														selected?={ currentSite.ID == s.ID }
+													>
+														if s.Description == "DefaultSite" {
+															{ i18n.T(ctx,s.Description) }
+														} else {
+															{ s.Description }
+														}
+													</option>
+												}
+											</select>
+											<button
+												class="flex items-center gap-8"
+												type="submit"
+												hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", agent.ID)))) }
+												hx-include="#tenant"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-description"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-description" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</div>
 								</td>
 							</tr>
 							<tr>
@@ -256,6 +269,59 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 			</div>
 		</div>
 	</main>
+}
+
+templ SitesDropdown(c echo.Context, agentId string, allSites []*ent.Site, commonInfo *partials.CommonInfo) {
+	<div id="site-selector">
+		<form class="flex gap-2 items-center" id="sites-dropdown">
+			<select
+				id="site"
+				class="uk-select w-3/4"
+				title={ i18n.T(ctx, "Organization") }
+				name="site"
+				_="on change
+					if my.value is not empty then
+						remove @disabled from #submit-site
+						remove .uk-text-muted from #submit-site
+						add .text-blue-600 to #submit-site
+					else
+						add @disabled to #submit-site
+						add .uk-text-muted to #submit-site
+						remove .text-blue-600 from #submit-site
+					end
+				end"
+			>
+				<option value="" selected>{ i18n.T(ctx,"sites.choose_site") }</option>
+				for _, s := range allSites {
+					<option
+						class="!align-middle"
+						value={ strconv.Itoa(s.ID) }
+					>
+						if s.Description == "DefaultSite" {
+							{ i18n.T(ctx,s.Description) }
+						} else {
+							{ s.Description }
+						}
+					</option>
+				}
+			</select>
+			<button
+				id="submit-site"
+				class="flex items-center gap-8 uk-text-muted"
+				type="submit"
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", agentId)))) }
+				hx-include="#tenant"
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				htmx-indicator="#save-description"
+				disabled
+			>
+				<uk-icon hx-history="false" icon="save" custom-class="h-6 w-6" uk-cloack></uk-icon>
+				<uk-icon id="save-description" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+			</button>
+		</form>
+	</div>
 }
 
 func GetSiteName(agent *ent.Agent, commonInfo *partials.CommonInfo) string {

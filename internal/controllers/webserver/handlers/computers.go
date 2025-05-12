@@ -1325,7 +1325,7 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return err
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_common_info"), false))
 	}
 
 	agentId := c.Param("uuid")
@@ -1425,4 +1425,29 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 	p := partials.PaginationAndSort{}
 
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"), commonInfo), commonInfo))
+}
+
+func (h *Handler) GetDropdownSites(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	tenantID, err := strconv.Atoi(c.FormValue("tenant"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_int"), false))
+	}
+
+	sites, err := h.Model.GetSites(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_get_sites"), false))
+	}
+
+	return RenderView(c, computers_views.SitesDropdown(c, agentId, sites, commonInfo))
+
 }

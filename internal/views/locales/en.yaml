@@ -1146,6 +1146,7 @@ en:
     no_tenants: No tenants have been found for this query
     could_not_get_agents: "Could not get agents associated with this organization"
     could_not_convert_site_to_int: "The site ID: %s could not be converted to an int"
+    choose_site: "Choose a site..."
   countries:
     Australia: "Australia"
     Austria: "Austria"

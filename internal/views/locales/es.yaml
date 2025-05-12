@@ -1140,6 +1140,7 @@ es:
     no_tenants: No se han encontrado organizaciones para esta consulta
     could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
     could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
+    choose_site: "Elija un sitio..."
 
   countries:
     Australia: "Australia"
