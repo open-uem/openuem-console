@@ -59,7 +59,7 @@ func (suite *SettingsTestSuite) TestUpdateCountrySetting() {
 }
 
 func (suite *SettingsTestSuite) TestGetDefaultAgentFrequency() {
-	defaultAgentFrequency, err := suite.model.GetDefaultAgentFrequency()
+	defaultAgentFrequency, err := suite.model.GetDefaultAgentFrequency("-1")
 	assert.NoError(suite.T(), err, "should get default agent frequencue")
 	assert.Equal(suite.T(), 60, defaultAgentFrequency, "default agency frequency should be 60")
 }
@@ -68,7 +68,7 @@ func (suite *SettingsTestSuite) TestUpdateAgentFrequency() {
 	err := suite.model.UpdateAgentFrequency(suite.settingsId, 30)
 	assert.NoError(suite.T(), err, "should update agent frequency setting")
 
-	setting, err := suite.model.GetDefaultAgentFrequency()
+	setting, err := suite.model.GetDefaultAgentFrequency("-1")
 	assert.NoError(suite.T(), err, "should get agent frequency setting")
 
 	assert.Equal(suite.T(), 30, setting, "agent frequency should be 30")
@@ -145,19 +145,19 @@ func (suite *SettingsTestSuite) TestGetNATSTimeout() {
 }
 
 func (suite *SettingsTestSuite) TestDefaultRequestVNCPIN() {
-	requestVNCPin, err := suite.model.GetDefaultRequestVNCPIN()
+	requestVNCPin, err := suite.model.GetDefaultRequestVNCPIN("-1")
 	assert.NoError(suite.T(), err, "should get default request vnc pin setting")
 	assert.Equal(suite.T(), true, requestVNCPin, "by default request vnc pin should be true")
 }
 
 func (suite *SettingsTestSuite) TestDefaultUseWinget() {
-	useWinget, err := suite.model.GetDefaultUseWinget()
+	useWinget, err := suite.model.GetDefaultUseWinget("-1")
 	assert.NoError(suite.T(), err, "should get default use winget setting")
 	assert.Equal(suite.T(), true, useWinget, "by default use winget should be true")
 }
 
 func (suite *SettingsTestSuite) TestDefaultUseFlatpak() {
-	useFlatpak, err := suite.model.GetDefaultUseFlatpak()
+	useFlatpak, err := suite.model.GetDefaultUseFlatpak("-1")
 	assert.NoError(suite.T(), err, "should get default use flatpak setting")
 	assert.Equal(suite.T(), true, useFlatpak, "by default use flatpak should be true")
 }
@@ -179,7 +179,7 @@ func (suite *SettingsTestSuite) TestGetGeneralSettings() {
 		Exec(context.Background())
 	assert.NoError(suite.T(), err, "settings should be updated")
 
-	settings, err := suite.model.GetGeneralSettings()
+	settings, err := suite.model.GetGeneralSettings("-1")
 	assert.NoError(suite.T(), err, "settings should be retrieved")
 
 	assert.Equal(suite.T(), "128M", settings.MaxUploadSize, "default max upload size should be 128M")
@@ -202,7 +202,7 @@ func (suite *SettingsTestSuite) TestCreateInitialSettings() {
 	err = suite.model.CreateInitialSettings()
 	assert.NoError(suite.T(), err, "initial settings should be deleted")
 
-	settings, err := suite.model.GetGeneralSettings()
+	settings, err := suite.model.GetGeneralSettings("-1")
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), "512M", settings.MaxUploadSize, "default max upload size should be 512M")

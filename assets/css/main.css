@@ -9487,6 +9487,11 @@ th.uk-text-break, td.uk-text-break {
   margin-right: auto;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -9779,6 +9784,10 @@ th.uk-text-break, td.uk-text-break {
   width: 100vw;
 }
 
+.w-3\/4 {
+  width: 75%;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -9979,11 +9988,6 @@ th.uk-text-break, td.uk-text-break {
   background-color: rgb(75 85 99 / var(--tw-bg-opacity));
 }
 
-.bg-green-50 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(240 253 244 / var(--tw-bg-opacity));
-}
-
 .bg-green-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(34 197 94 / var(--tw-bg-opacity));
@@ -10158,10 +10162,6 @@ th.uk-text-break, td.uk-text-break {
   padding-left: 1rem;
 }
 
-.pl-6 {
-  padding-left: 1.5rem;
-}
-
 .pr-2 {
   padding-right: 0.5rem;
 }
@@ -10246,6 +10246,10 @@ th.uk-text-break, td.uk-text-break {
 
 .italic {
   font-style: italic;
+}
+
+.leading-none {
+  line-height: 1;
 }
 
 .text-black {

@@ -2,16 +2,14 @@ package computers_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, l locales.Translator, agent *ent.Agent, confirmDelete, detectRemoteAgents bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -20,16 +18,16 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, sm *sessions
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote && detectRemoteAgents {
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete)
+				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete, commonInfo)
 				if confirmDelete {
-					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -62,11 +60,11 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, sm *sessions
 						</tr>
 						<tr>
 							<th>{ i18n.T(ctx, "inventory.os.installation") }</th>
-							<td>{ l.FmtDateMedium(agent.Edges.Operatingsystem.InstallDate.Local()) }</td>
+							<td>{ commonInfo.Translator.FmtDateMedium(agent.Edges.Operatingsystem.InstallDate.Local()) }</td>
 						</tr>
 						<tr>
 							<th>{ i18n.T(ctx, "inventory.os.last_bootup") }</th>
-							<td>{ l.FmtDateMedium(agent.Edges.Operatingsystem.LastBootupTime.Local()) + " " + l.FmtTimeShort(agent.Edges.Operatingsystem.LastBootupTime.Local()) }</td>
+							<td>{ commonInfo.Translator.FmtDateMedium(agent.Edges.Operatingsystem.LastBootupTime.Local()) + " " + commonInfo.Translator.FmtTimeShort(agent.Edges.Operatingsystem.LastBootupTime.Local()) }</td>
 						</tr>
 					</table>
 				</div>

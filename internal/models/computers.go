@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -12,7 +13,9 @@ import (
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/printer"
+	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/tag"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -31,12 +34,31 @@ type Computer struct {
 	IsRemote     bool      `sql:"is_remote"`
 	LastContact  time.Time `sql:"last_contact"`
 	Tags         []*ent.Tag
+	SiteID       int
 }
 
-func (m *Model) CountAllComputers(f filters.AgentFilter) (int, error) {
+func (m *Model) CountAllComputers(f filters.AgentFilter, c *partials.CommonInfo) (int, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
 
 	// Agents that haven't been admitted yet should not appear
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+	if siteID == -1 {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -108,12 +130,30 @@ func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	return agents, nil
 }*/
 
-func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter) ([]Computer, error) {
+func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.AgentFilter, c *partials.CommonInfo) ([]Computer, error) {
 	var err error
 	var computers []Computer
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
 
 	// Agents that haven't been admitted yet should not appear
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+	if siteID == -1 {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -219,16 +259,21 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 	for _, computer := range computers {
 		sortedAgentIDs = append(sortedAgentIDs, computer.ID)
 	}
-	agents, err := m.Client.Agent.Query().WithTags().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
+	agents, err := m.Client.Agent.Query().WithSite().WithTags().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	// Add tags to each computer in order
+	// Add tags and site id to each computer in order
 	for i, computer := range computers {
 		for _, agent := range agents {
 			if computer.ID == agent.ID {
 				computers[i].Tags = agent.Edges.Tags
+				if len(agent.Edges.Site) == 1 {
+					computers[i].SiteID = agent.Edges.Site[0].ID
+				} else {
+					computers[i].SiteID = -1
+				}
 				break
 			}
 		}
@@ -287,68 +332,272 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	}
 }
 
-func (m *Model) GetAgentComputerInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+func (m *Model) GetAgentComputerInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
-}
-
-func (m *Model) GetAgentOSInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
 }
 
-func (m *Model) GetAgentNetworkAdaptersInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+func (m *Model) GetAgentOSInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
-}
-
-func (m *Model) GetAgentPrintersInfo(agentId string) ([]*ent.Printer, error) {
-	return m.Client.Printer.Query().Where(printer.HasOwnerWith(agent.ID(agentId))).Order(ent.Asc(printer.FieldID)).All(context.Background())
-}
-
-func (m *Model) GetAgentLogicalDisksInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
 }
 
-func (m *Model) GetAgentSharesInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithShares().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
-}
-
-func (m *Model) GetAgentMonitorsInfo(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithMonitors().WithTags().Where(agent.ID(agentId)).Only(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, nil
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
 }
 
-func (m *Model) SaveNotes(agentId string, notes string) error {
-	return m.Client.Agent.UpdateOneID(agentId).SetNotes(notes).Exec(context.Background())
+func (m *Model) GetAgentPrintersInfo(agentId string, c *partials.CommonInfo) ([]*ent.Printer, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Printer.Query().
+			Where(printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			Order(ent.Asc(printer.FieldID)).All(context.Background())
+	} else {
+		return m.Client.Printer.Query().
+			Where(printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			Order(ent.Asc(printer.FieldID)).All(context.Background())
+	}
 }
 
-func (m *Model) GetComputerManufacturers() ([]string, error) {
-	return m.Client.Computer.Query().Unique(true).Select(computer.FieldManufacturer).Strings(context.Background())
+func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
 }
 
-func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
-	query := m.Client.Computer.Query().Unique(true).Select(computer.FieldModel)
+func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
+}
+
+func (m *Model) GetAgentMonitorsInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
+}
+
+func (m *Model) SaveNotes(agentId string, notes string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.UpdateOneID(agentId).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			SetNotes(notes).Exec(context.Background())
+	} else {
+		return m.Client.Agent.UpdateOneID(agentId).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			SetNotes(notes).Exec(context.Background())
+	}
+}
+
+func (m *Model) GetComputerManufacturers(c *partials.CommonInfo) ([]string, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Computer.Query().Where(computer.HasOwnerWith(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).Unique(true).Select(computer.FieldManufacturer).Strings(context.Background())
+	} else {
+		return m.Client.Computer.Query().Where(computer.HasOwnerWith(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Unique(true).Select(computer.FieldManufacturer).Strings(context.Background())
+	}
+}
+
+func (m *Model) GetComputerModels(f filters.AgentFilter, c *partials.CommonInfo) ([]string, error) {
+	var query *ent.ComputerSelect
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Computer.Query().
+			Where(computer.HasOwnerWith(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			Unique(true).Select(computer.FieldModel)
+	} else {
+		query = m.Client.Computer.Query().
+			Where(computer.HasOwnerWith(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			Unique(true).Select(computer.FieldModel)
+	}
 
 	if len(f.ComputerManufacturers) > 0 {
 		query.Where(computer.ManufacturerIn(f.ComputerManufacturers...))
@@ -357,18 +606,65 @@ func (m *Model) GetComputerModels(f filters.AgentFilter) ([]string, error) {
 	return query.Strings(context.Background())
 }
 
-func (m *Model) CountDifferentVendor() (int, error) {
-	return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Count(context.Background())
+func (m *Model) CountDifferentVendor(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	} else {
+		return m.Client.Computer.Query().Select(computer.FieldManufacturer).Unique(true).Where(computer.HasOwnerWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	}
 }
 
-func (m *Model) SetDefaultPrinter(agentId string, printerName string) error {
-	if err := m.Client.Printer.Update().SetIsDefault(false).Where(printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background()); err != nil {
+func (m *Model) SetDefaultPrinter(agentId string, printerName string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
 		return err
 	}
-	return m.Client.Printer.Update().SetIsDefault(true).Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		if err := m.Client.Printer.Update().SetIsDefault(false).Where(printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).Exec(context.Background()); err != nil {
+			return err
+		}
+		return m.Client.Printer.Update().SetIsDefault(true).Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Exec(context.Background())
+	} else {
+		if err := m.Client.Printer.Update().SetIsDefault(false).Where(printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Exec(context.Background()); err != nil {
+			return err
+		}
+		return m.Client.Printer.Update().SetIsDefault(true).Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Exec(context.Background())
+	}
 }
 
-func (m *Model) RemovePrinter(agentId string, printerName string) error {
-	_, err := m.Client.Printer.Delete().Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId))).Exec(context.Background())
-	return err
+func (m *Model) RemovePrinter(agentId string, printerName string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		_, err = m.Client.Printer.Delete().
+			Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			Exec(context.Background())
+		return err
+	} else {
+		_, err = m.Client.Printer.Delete().
+			Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			Exec(context.Background())
+		return err
+	}
 }

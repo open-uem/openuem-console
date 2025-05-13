@@ -12,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/models"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -21,6 +20,11 @@ var UpdateChannels = []string{"stable", "devel", "testing"}
 
 func (h *Handler) GeneralSettings(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 
@@ -135,12 +139,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
 	}
 
-	settings, err := h.Model.GetGeneralSettings()
+	settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -155,12 +159,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, h.SessionManager, h.Version, latestServerRelease.Version, settings, agentsExists, serversExists, allTags)))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), ""), commonInfo))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
@@ -345,26 +344,31 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 }
 
 func (h *Handler) ChangeAgentFrequency(c echo.Context, settings *models.GeneralSettings) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	// Get current frequency
-	currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+	currentFrequency, err := h.Model.GetDefaultAgentFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get winget frequency
-	wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+	wingetFrequency, err := h.Model.GetDefaultWingetFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get SFTPDisabled
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get RemoteAssistanceDisabled
-	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -409,26 +413,31 @@ func (h *Handler) ChangeAgentFrequency(c echo.Context, settings *models.GeneralS
 }
 
 func (h *Handler) ChangeWingetFrequency(c echo.Context, settings *models.GeneralSettings) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	// Get current frequency
-	currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+	currentFrequency, err := h.Model.GetDefaultAgentFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get winget frequency
-	wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+	wingetFrequency, err := h.Model.GetDefaultWingetFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get SFTP disabled
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get RemoteAssistanceDisabled
-	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -473,26 +482,31 @@ func (h *Handler) ChangeWingetFrequency(c echo.Context, settings *models.General
 }
 
 func (h *Handler) ChangeSFTPSetting(c echo.Context, settings *models.GeneralSettings) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	// Get current frequency
-	currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+	currentFrequency, err := h.Model.GetDefaultAgentFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get winget frequency
-	wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+	wingetFrequency, err := h.Model.GetDefaultWingetFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get SFTP disabled settings
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get RemoteAssistanceDisabled
-	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -534,7 +548,7 @@ func (h *Handler) ChangeSFTPSetting(c echo.Context, settings *models.GeneralSett
 	}
 
 	// Apply change to all agents
-	if err := h.Model.UpdateSFTPServiceToAllAgents(!settings.SFTPDisabled); err != nil {
+	if err := h.Model.UpdateSFTPServiceToAllAgents(!settings.SFTPDisabled, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.disable_sftp_to_all"), true))
 	}
 
@@ -542,26 +556,31 @@ func (h *Handler) ChangeSFTPSetting(c echo.Context, settings *models.GeneralSett
 }
 
 func (h *Handler) ChangeRemoteAssistanceSetting(c echo.Context, settings *models.GeneralSettings) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	// Get current frequency
-	currentFrequency, err := h.Model.GetDefaultAgentFrequency()
+	currentFrequency, err := h.Model.GetDefaultAgentFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get winget frequency
-	wingetFrequency, err := h.Model.GetDefaultWingetFrequency()
+	wingetFrequency, err := h.Model.GetDefaultWingetFrequency(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get SFTP disabled settings
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	// Get RemoteAssistanceDisabled
-	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -603,9 +622,53 @@ func (h *Handler) ChangeRemoteAssistanceSetting(c echo.Context, settings *models
 	}
 
 	// Apply change to all agents
-	if err := h.Model.UpdateRemoteAssistanceToAllAgents(!settings.RemoteAssistanceDisabled); err != nil {
+	if err := h.Model.UpdateRemoteAssistanceToAllAgents(!settings.RemoteAssistanceDisabled, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.disable_remote_assistance_to_all"), true))
 	}
 
 	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.disable_remote_assistance_success")))
+}
+
+func (h *Handler) ApplyGlobalSettings(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	if commonInfo.TenantID == "-1" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.tenant_cannot_be_empty"), true))
+	}
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_int", commonInfo.TenantID), true))
+	}
+
+	if err := h.Model.ApplyGlobalSettings(tenantID); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_apply_global_settings", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	allTags, err := h.Model.GetAllTags()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), i18n.T(c.Request().Context(), "settings.saved")), commonInfo))
 }

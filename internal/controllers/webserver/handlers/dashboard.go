@@ -7,16 +7,19 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/charts"
 	"github.com/open-uem/openuem-console/internal/views/dashboard_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
-	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 func (h *Handler) Dashboard(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	data := dashboard_views.DashboardData{}
 
 	// Get latest version
@@ -49,37 +52,37 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NPendingUpdates, err = h.Model.CountPendingUpdateAgents()
+	data.NPendingUpdates, err = h.Model.CountPendingUpdateAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NInactiveAntiviri, err = h.Model.CountDisabledAntivirusAgents()
+	data.NInactiveAntiviri, err = h.Model.CountDisabledAntivirusAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NOutdatedDatabaseAntiviri, err = h.Model.CountOutdatedAntivirusDatabaseAgents()
+	data.NOutdatedDatabaseAntiviri, err = h.Model.CountOutdatedAntivirusDatabaseAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NNoAutoUpdate, err = h.Model.CountNoAutoupdateAgents()
+	data.NNoAutoUpdate, err = h.Model.CountNoAutoupdateAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NSupportedVNC, err = h.Model.CountVNCSupportedAgents()
+	data.NSupportedVNC, err = h.Model.CountVNCSupportedAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NVendors, err = h.Model.CountDifferentVendor()
+	data.NVendors, err = h.Model.CountDifferentVendor(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NPrinters, err = h.Model.CountDifferentPrinters()
+	data.NPrinters, err = h.Model.CountDifferentPrinters(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -90,22 +93,22 @@ func (h *Handler) Dashboard(c echo.Context) error {
 	}
 	data.NAppliedTags = len(appliedTags)
 
-	data.NDisabledAgents, err = h.Model.CountDisabledAgents()
+	data.NDisabledAgents, err = h.Model.CountDisabledAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NWaitingForAdmission, err = h.Model.CountWaitingForAdmissionAgents()
+	data.NWaitingForAdmission, err = h.Model.CountWaitingForAdmissionAgents(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NApps, err = h.Model.CountAllApps(filters.ApplicationsFilter{})
+	data.NApps, err = h.Model.CountAllApps(filters.ApplicationsFilter{}, commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NDeployments, err = h.Model.CountAllDeployments()
+	data.NDeployments, err = h.Model.CountAllDeployments(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -120,7 +123,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NUsernames, err = h.Model.CountAllOSUsernames()
+	data.NUsernames, err = h.Model.CountAllOSUsernames(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -131,7 +134,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		data.RefreshTime = 5
 	}
 
-	data.NAgentsNotReportedIn24h, err = h.Model.CountAgentsNotReportedLast24h()
+	data.NAgentsNotReportedIn24h, err = h.Model.CountAgentsNotReportedLast24h(commonInfo)
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		data.RefreshTime = 5
@@ -144,38 +147,36 @@ func (h *Handler) Dashboard(c echo.Context) error {
 
 	h.CheckNATSComponentStatus(&data)
 
-	l := views.GetTranslatorForDates(c)
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(h.SessionManager, l, h.Version, latestServerRelease.Version, data)))
+	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(c, data, commonInfo), commonInfo))
 }
 
 func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardCharts, error) {
 	ch := dashboard_views.DashboardCharts{}
 
-	countAllAgents, err := h.Model.CountAllAgents(filters.AgentFilter{}, true)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return nil, err
 	}
 
-	agents, err := h.Model.CountAgentsByOS()
+	countAllAgents, err := h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	agents, err := h.Model.CountAgentsByOS(commonInfo)
 	if err != nil {
 		return nil, err
 	}
 	ch.AgentByOs = charts.AgentsByOs(c.Request().Context(), agents, countAllAgents)
 
-	agents, err = h.Model.CountAgentsByOSVersion()
+	agents, err = h.Model.CountAgentsByOSVersion(commonInfo)
 	if err != nil {
 		return nil, err
 	}
 
 	ch.AgentByOsVersion = charts.AgentsByOsVersion(c.Request().Context(), agents, countAllAgents)
 
-	countAgents, err := h.Model.CountAgentsReportedLast24h()
+	countAgents, err := h.Model.CountAgentsReportedLast24h(commonInfo)
 	if err != nil {
 		return nil, err
 	}

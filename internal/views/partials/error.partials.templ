@@ -1,9 +1,9 @@
 package partials
 
-import "github.com/open-uem/openuem-console/internal/controllers/sessions"
+import "github.com/labstack/echo/v4"
 
-templ Error(err, title, url string, sm *sessions.SessionManager, currentVersion, latestVersion string) {
-	@Header([]Breadcrumb{{Title: title, Url: url}}, sm, currentVersion, latestVersion)
+templ Error(c echo.Context, err, title, url string, commonInfo *CommonInfo) {
+	@Header(c, []Breadcrumb{{Title: title, Url: url}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-alert uk-alert-danger" uk-alert>
 			<div class="uk-alert-description uk-text-large p-4">

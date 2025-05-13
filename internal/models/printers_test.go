@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/open-uem/ent/enttest"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -33,7 +34,7 @@ func (suite *PrintersTestSuite) SetupTest() {
 }
 
 func (suite *PrintersTestSuite) TestCountDifferentPrinters() {
-	count, err := suite.model.CountDifferentPrinters()
+	count, err := suite.model.CountDifferentPrinters(&partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count different printers")
 	assert.Equal(suite.T(), 7, count, "should count 7 different printers")
 }

@@ -2,18 +2,16 @@ package computers_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *openuem_ent.Agent, deployments []*openuem_ent.Deployment, successMessage string, confirmDelete, detectRemoteAgents bool, refreshTime int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, deployments []*ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -22,16 +20,16 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote && detectRemoteAgents {
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "deploy", agent.VncProxyPort, confirmDelete)
+				@ComputersNavbar(agent.ID, "deploy", agent.VncProxyPort, confirmDelete, commonInfo)
 				if confirmDelete {
-					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
 				<div id="error" class="hidden"></div>
 				if successMessage != "" {
@@ -55,7 +53,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 								<div>
 									<form
 										class="uk-search uk-search-default w-full flex items-center gap-4"
-										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID))) }
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/searchinstall", agent.ID)))) }
 										hx-target="#deploy-search-results"
 										hx-push-url="false"
 										hx-swap="innerHTML"
@@ -103,12 +101,12 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 											{ i18n.T(ctx, "agents.no_deployments") }
 										}
 									</p>
-									@partials.RefreshPage(l, string(templ.URL(fmt.Sprintf("/computers/%s/deploy", agent.ID))), "#main", "outerHTML", "get", refreshTime, true)
+									@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agent.ID)))), "#main", "outerHTML", "get", refreshTime, true)
 								</div>
 								<div>
 									if p.NItems > 0 {
 										<div id="deployments-results">
-											@DeploymentsTable(c, p, l, agent.ID, deployments)
+											@DeploymentsTable(c, p, agent.ID, deployments, commonInfo)
 										</div>
 									}
 								</div>
@@ -127,7 +125,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, sm *sessions.
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 			<thead>
@@ -155,7 +153,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
 								<button
 									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/install", agentId)))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -168,7 +166,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId))
+		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId)))))
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -176,7 +174,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 	}
 }
 
-templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.Translator, agentId string, packages []*openuem_ent.Deployment) {
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*ent.Deployment, commonInfo *partials.CommonInfo) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 		<thead>
 			<tr>
@@ -220,7 +218,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 							if item.Installed.IsZero() {
 								{ i18n.T(ctx, "In Progress") }
 							} else {
-								{ l.FmtDateMedium(item.Installed) + " " + l.FmtTimeShort(item.Installed) }
+								{ commonInfo.Translator.FmtDateMedium(item.Installed) + " " + commonInfo.Translator.FmtTimeShort(item.Installed) }
 							}
 						}
 					</td>
@@ -229,7 +227,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 							if item.Updated.IsZero() {
 								{ i18n.T(ctx, "In Progress") }
 							} else {
-								{ l.FmtDateMedium(item.Updated) + " " + l.FmtTimeShort(item.Updated) }
+								{ commonInfo.Translator.FmtDateMedium(item.Updated) + " " + commonInfo.Translator.FmtTimeShort(item.Updated) }
 							}
 						}
 					</td>
@@ -241,7 +239,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
 									<button
 										type="submit"
-										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/install", agentId))) }
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/install", agentId)))) }
 										hx-push-url="false"
 										hx-target="#main"
 										hx-swap="outerHTML"
@@ -256,7 +254,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
 									<button
 										type="submit"
-										hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/update", agentId))) }
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/update", agentId)))) }
 										hx-push-url="false"
 										hx-target="#main"
 										hx-swap="outerHTML"
@@ -270,7 +268,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 								<input type="hidden" name="filterByPackageName" value={ item.Name }/>
 								<button
 									type="submit"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/deploy/uninstall", agentId))) }
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/uninstall", agentId)))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -284,5 +282,5 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, l locales.T
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "post", "#deployments-results", "innerHTML", fmt.Sprintf("/computers/%s/deploy", agentId))
+	@partials.Pagination(c, p, "post", "#deployments-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agentId)))))
 }

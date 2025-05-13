@@ -4,6 +4,7 @@ es:
   Add: "Añadir"
   Admit: "Admitir"
   Advanced Settings: "Conf. Avanzada"
+  AllSites: "Todos los sitios"
   Antivirus: "Antivirus"
   Authenticate: "Autenticarse"
   Bugs: "Envíe un informe de error"
@@ -20,6 +21,8 @@ es:
   Create: "Crear"
   Dashboard: "Panel de control"
   DateFrom: Desde
+  DefaultTenant: "Org. por defecto"
+  DefaultSite: "Sitio por defecto"
   DateTo: Hasta
   Delete: "Borrar"
   Deploy: "Despliegue de software"
@@ -41,6 +44,7 @@ es:
   Expiry: "Caducidad"
   Filter: "Filtrar"
   General Settings: "Conf. General"
+  Global Config: "Config. Global"
   Help: "Ayuda"
   Install: "Instalar"
   Uninstall: "Desinstalar"
@@ -63,6 +67,7 @@ es:
   Notes: "Notas"
   Now: "Ahora"
   OperatingSystem: "Sistema Operativo"
+  Organization: "Organización"
   Overview: "Resumen"
   Other: "Otro"
   Pending: "Pendiente"
@@ -90,6 +95,9 @@ es:
     one: "Sesión"
     other: "Sesiones"
   Settings: "Configuración"
+  Site:
+    one: "Sitio"
+    other: "Sitios"
   Size: "Tamaño"
   SortBy: "Ordenar por %s"
   Stable: "Estable"
@@ -101,6 +109,9 @@ es:
     one: "Etiqueta"
     other: "Etiquetas"
   Tasks: "Tareas"
+  Tenant:
+    one: "Organización"
+    other: "Organizaciones"
   Testing: "Pruebas"
   Type: "Tipo"
   Unknown: "Desconocido"
@@ -255,7 +266,7 @@ es:
     no_log_entries: "No existen entradas de log para esa categoría"
     sftp_agent_setting: "Servicio SFTP"
     settings_title: "Configuración del Agente"
-    settings_description: "Aquí puede configurar los servicios del agente y los puertos utilizados. Si activa el modo debug para el agente, tenga en cuenta que el fichero de log del agente crecerá rápidamente"
+    settings_description: "Aquí puede configurar la organización y el sitio al que pertenece este agente, los servicios del agente y los puertos utilizados. Si activa el modo debug para el agente, tenga en cuenta que el fichero de log del agente crecerá rápidamente"
     port_must_be_a_number: "El puerto debe ser un número"
     port_is_not_valid: "El puerto no es válido"
     sftp_port: "Puerto SFTP"
@@ -277,7 +288,7 @@ es:
     printer_could_not_be_removed: "La impresora no se pudo eliminar, razón: %s"
     printer_could_not_set_as_default: "La impresora no se pudo configurar por defecto, razón: %s"
     could_not_decode_printer: "No pude descodificar el nombre de la impresora"
-    overview_description: "Esta es la descripción general de tu equipo. También puede añadir una description y seleccionar el tipo de equipo"
+    overview_description: "Esta es la vista general de su equipo. Puede seleccionar a qué organización y sitio pertenece este equipo y también puede añadir una description y seleccionar el tipo de equipo"
     overview_description_placeholder: "Escriba una descripción de su equipo..."
     overview_description_could_not_save: "No se pudo guardar la descripción, razón: %s"
     overview_description_success: "La descripción del equipo se ha guardado"
@@ -286,6 +297,15 @@ es:
     overview_endpoint_type_success: "El tipo de equipo se ha guardado"
     agent_version: "Versión del agente"
     last_inventory: "Último inventario"
+    could_not_get_tenants: "No se pudo obtener la lista de organizaciones"
+    could_not_get_sites: "No se pudo obtener la lista de sitios"
+    could_not_get_associated_site: "No se pudo obtener el sitio asociado al agente"
+    agent_cannot_associated_to_more_than_one_site: "El agente no puede estar asociado a más de un sitio"
+    could_not_get_site_info: "No pude obtener la información del sitio"
+    could_not_get_tenant: "El sitio no está asociado a una organización"
+    could_not_associate: "No se pudo asociar el equipo con el sitio y organización seleccionado, razón: %s"
+    association_success: "El equipo ha sido asociado con el sitio y la organización seleccionados"
+
   inventory:
     hardware:
       title: "Hardware"
@@ -592,7 +612,7 @@ es:
     no_certificates: "No se han encontrado certificados para esta consulta"
   smtp:
     title: SMTP
-    description: "Configura tu proveedor SMTP para poder enviar notificaciones por email"
+    description: "Configura tu proveedor SMTP para poder enviar notificaciones por email."
     server_fieldset: Servidor SMTP
     server: Servidor
     server_placeholder: El nombre del servidor SMTP...
@@ -620,7 +640,9 @@ es:
     test_success: Se envió con éxito el email de prueba a %s
   settings:
     title: Configuración general
-    description: OpenUEM tiene algunos ajustes que configuran su comportamiento
+    description: OpenUEM tiene algunos ajustes que configuran su comportamiento.
+    global: "Estos son los ajustes globales de OpenUEM y que son heredados por las organizaciones. Use el menú de desplegable de organización para cambiar sus ajustes"
+    tenant: "Estos son los ajustes específicos para esta organización. Estos ajuste se heredan de la configuración global, pero se pueden sobrescribir o puede usar el botón para aplicar nuevamente la configuración global"
     country_title: País
     country_description: País por defecto para el registro de usuarios
     nats_timeout_title: NATS Timeout
@@ -706,6 +728,8 @@ es:
     auto_admit_agents_invalid: El valor seleccionado para la admisión de agentes automáticamente no es válido
     auto_admit_agents_could_not_be_saved: La configuración de admisión de agentes automáticamente no pudo guardarse
     could_not_get_auto_admit_agents_setting: No se pudo consultar la configuración de admisión de agentes automáticamente
+    apply_global: "Aplicar conf. global"
+    could_not_apply_global_settings: "No se pudo aplicar la configuración global, razón: %s"
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal
@@ -909,6 +933,7 @@ es:
     dont_assign: "No aplicar el perfil"
     assign_all: "Aplicar a todos los equipos"
     assign_tags: "Aplicar a aquellos que tengan una de las siguientes etiquetas"
+    profile_empty_site: "El perfil no puede asociarse a un sitio vacío"
   tasks:
     description: "Las tareas permiten realizar acciones sobre los equipos de forma automática (instalación de paquetes, desinstalación de paquetes, modificación del registro...) que serán ejecutadas por los agentes de OpenUEM"
     choose_task_type: "Elija un tipo de tarea"
@@ -1023,6 +1048,103 @@ es:
   packages:
     required_params_missing: "Faltan parámetros requeridos"
     source_not_found: "No se ha podido encontrar el gestor de paquetes asociado"
+
+  tenants:
+    title: "Organizaciones"
+    description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos. Una organización por defecto con un sitio por defecto es creada donde se agregan los equipos si no se configura ninguna organización y/o sitio en el agente"
+    add: "Añadir organization"
+    import: "Importar organizaciones"
+    set_as_default: "Establecer como predet."
+    is_default: "Es predeterm."
+    name: "Nombre"
+    created: "Fecha Creación"
+    modified: "Fecha Modificación"
+    edit_title: "Edite la organización"
+    edit_description: "Cambie el nombre de la organización, o elija si esta organización será la organización predeterminada donde los agentes se agruparán por defecto si no tienen información de donde deben ser agregados. Tenga en cuenta que OpenUEM requiere que al menos una organización, y como mucho una, debe ser seleccionada como predeterminada"
+    edit_success: "La organización ha sido modificada"
+    tenant_cannot_be_empty: "El ID de la organización no puede estar vacío"
+    could_not_convert_to_int: "El ID de la organización: %s no pudo convertirse en un valor entero"
+    tenant_not_found: "La organización no pudo encontrarse, razón: %s"
+    name_cannot_be_empty: "El nombre de la organización no puede estar vacío"
+    could_not_convert_to_bool: "El estado predeterminado de la organización no pudo convertise en un booleano, razón: %s"
+    at_least_one_tenant: "OpenUEM necesita tener al menos una organización, no puede borrar esta organización"
+    could_not_check_name: "No se pudo comprobar si el nombre de esta organización ya está cogido, razón: %s"
+    tenant_name_taken: "%s ya está cogido, use un nombre diferente"
+    could_not_get_common_info: "La información común requerida para esta acción no se pudo obtener, razón: %s"
+    deleted: "La organización fue eliminada"
+    default_cannot_be_deleted: "La organización seleccionada es la organización predeterminada, por favor elija otra organización como predeterminada antes de eliminar esta"
+    could_not_count_tenants: "No se pudo contar las organizaciones existentes"
+    new_title: "Nueva organización"
+    new_description: "Cree una nueva organización dándola un nombre y elija si esta organización será la organización por defecto asociada con un equipo. Cada organización debe tener un sitio asociado que se creará automáticamente, así que añada un nombre también para ese sitio inicial"
+    new_success: "La organización fue creada"
+    new_error: "No se pudo crear la organización, razón: %s"
+    site_name_cannot_be_empty: "El nombre del sitio no puede estar vacío"
+    csv_file: "Fichero CSV"
+    csv_description: "Suba un fichero de valores separados por coma sin fila de cabecera y con las filas usando el formato 'nombreorg,nombresitio'. Todos los campos son obligatorios"
+    import_read_error: "No se pudo leer el fichero de organizaciones, razón: %s"
+    import_success: "El fichero de organizaciones ha sido procesado"
+    import_error_wrong_format: "La fila CSV %d tiene un formato incorrecto"
+    import_required: "El campo %s en la fila %d es obligatorio y no puede estar vacío"
+    import_wrong_tenants: "Hemos encontrado errores para las siguientes organizaciones: %s"
+    confirm_delete: "¿Está seguro de quiere eliminar esta organización? Todos los agentes asociados, perfiles, etiquetas, metadatos y otras configuraciones serán eliminados de la base de datos"
+    delete_error: "No se pudo eliminar la organización, razón: %s"
+    filter_by_name: Filtrar por nombre...
+    filter_by_creation: Filtar por fecha de creación
+    filter_by_modification: Filtrar por fecha de modificación
+    filter_by_default_status: Filtrar por estado predeterminado
+    no_tenants: No se han encontrado organizaciones para esta consulta
+    could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
+
+  sites:
+    title: "Sitio"
+    description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos"
+    add: "Añadir sitio"
+    import: "Importar sitios"
+    set_as_default: "Establecer como predet."
+    is_default: "Es predeterm."
+    name: "Nombre"
+    created: "Fecha Creación"
+    modified: "Fecha Modificación"
+    edit_title: "Edite el sitio"
+    edit_description: "Cambie el nombre del sitio, o elija si este sitio será el sitio predeterminado donde los agentes se agruparán por defecto si no tienen información de donde deben ser agregados. El dominio se corresponde con el sufijo DNS que se usará para resolver los nombres de DNS (p.e example.com). Tenga en cuenta que una organización requiere que al menos un sitio y como mucho un sitio sea seleccionado como predeterminado"
+    edit_success: "El sitio ha sido modificado"
+    tenant_cannot_be_empty: "El ID de la organización no puede estar vacío"
+    site_cannot_be_empty: "El ID del sitio no puede estar vacío"
+    could_not_convert_to_int: "El ID de la organización: %s no pudo convertirse en un valor entero"
+    site_not_found: "El sitio no pudo encontrarse, razón: %s"
+    name_cannot_be_empty: "El nombre del sitio no puede estar vacío"
+    domain_cannot_be_empty: "El dominio no puede estar vacío"
+    could_not_convert_to_bool: "El estado de predeterminado del sitio no pudo convertirse en un valor booleano, razón: %s"
+    at_least_one_site: "Una organización necesita al menos un sitio, no puede eliminar este sitio"
+    could_not_check_name: "No se pudo comprobar si el nombre de este sitio ya está cogido, razón: %s"
+    site_name_taken: "%s ya está cogido, use un nombre diferente"
+    could_not_get_common_info: "La información común requerida para esta acción no se pudo obtener, razón: %s"
+    deleted: "El nombre del sitio no puede estar vacío"
+    default_cannot_be_deleted: "El sitio seleccionado es el sitio predeterminado, por favor elija otro sitio como predeterminado antes de eliminar este sitio"
+    could_not_count_sites: "No se pudo contar los sitios existentes"
+    new_title: "Nuevo sitio"
+    new_description: "Cree un nuevo sitio dándole un nombre y elija si este sitio será el sitio predeterminado asociado con el equipo que no tenga configurado ni su organización ni su sitio. El dominio se corresponde con el sufijo DNS que se usará para resolver los nombres de DNS (p.e example.com)"
+    new_success: "El sitio fue creado"
+    new_error: "No se pudo crear el nuevo sitio, razón: %s"
+    site_name_cannot_be_empty: "El nombre del sitio no puede estar vacío"
+    csv_file: "CSV File"
+    csv_description: "Sube un fichero separado con comas fila de cabecera y con las filas usando el formato 'nombresitio,dominio'"
+    import_read_error: "El fichero de sitios no se pudo leer, razón: %s"
+    import_success: "El fichero de sitios ha sido procesado"
+    import_error_wrong_format: "La fila CSV %d tiene un formato incorrecto"
+    import_required: "El campo %s en la fila %d es obligatorio y no puede estar vacío"
+    import_wrong_sites: "Hemos encontrado errores para los siguientes sitios: %s"
+    confirm_delete: "¿Está seguro de quiere eliminar este sitio? Todos los agentes asociados, perfiles, etiquetas, metadatos y otras configuraciones serán eliminados de la base de datos"
+    delete_error: "No se pudo eliminar el sitio, razón: %s"
+    filter_by_name: Filtrar por nombre...
+    filter_by_creation: Filter by creation date
+    filter_by_modification: Filter by modification date
+    filter_by_default_status: Filtar por fecha de creación
+    no_tenants: No se han encontrado organizaciones para esta consulta
+    could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
+    could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
+    choose_site: "Elija un sitio..."
+    domain: "Dominio"
   countries:
     Australia: "Australia"
     Austria: "Austria"

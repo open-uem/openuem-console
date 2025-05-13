@@ -44,17 +44,17 @@ func (suite *LatestUpdatesTestSuite) SetupTest() {
 }
 
 func (suite *LatestUpdatesTestSuite) TestCountLatestUpdates() {
-	count, err := suite.model.CountLatestUpdates("agent1")
+	count, err := suite.model.CountLatestUpdates("agent1", &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count lates updates")
 	assert.Equal(suite.T(), 7, count, "should have 7 updates")
 
-	count, err = suite.model.CountLatestUpdates("agent2")
+	count, err = suite.model.CountLatestUpdates("agent2", &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count lates updates")
 	assert.Equal(suite.T(), 0, count, "should have 0 updates")
 }
 
 func (suite *LatestUpdatesTestSuite) TestGetLatestUpdates() {
-	items, err := suite.model.GetLatestUpdates("agent1", suite.p)
+	items, err := suite.model.GetLatestUpdates("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get latest updates")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("update%d", 6-i), item.Title)
@@ -62,7 +62,7 @@ func (suite *LatestUpdatesTestSuite) TestGetLatestUpdates() {
 
 	suite.p.SortBy = "title"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetLatestUpdates("agent1", suite.p)
+	items, err = suite.model.GetLatestUpdates("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get latest updates")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("update%d", i), item.Title)
@@ -70,7 +70,7 @@ func (suite *LatestUpdatesTestSuite) TestGetLatestUpdates() {
 
 	suite.p.SortBy = "title"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetLatestUpdates("agent1", suite.p)
+	items, err = suite.model.GetLatestUpdates("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get latest updates")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("update%d", 6-i), item.Title)
@@ -78,7 +78,7 @@ func (suite *LatestUpdatesTestSuite) TestGetLatestUpdates() {
 
 	suite.p.SortBy = "date"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetLatestUpdates("agent1", suite.p)
+	items, err = suite.model.GetLatestUpdates("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get latest updates")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("update%d", i), item.Title)
@@ -86,7 +86,7 @@ func (suite *LatestUpdatesTestSuite) TestGetLatestUpdates() {
 
 	suite.p.SortBy = "date"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetLatestUpdates("agent1", suite.p)
+	items, err = suite.model.GetLatestUpdates("agent1", suite.p, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get latest updates")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("update%d", 6-i), item.Title)

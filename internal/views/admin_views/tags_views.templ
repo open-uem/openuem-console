@@ -5,27 +5,26 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"math/rand"
 	"strconv"
 )
 
-templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, tags []*ent.Tag, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "Tag.other"), Url: "/admin/tags"}}, sm, currentVersion, latestVersion)
+templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Tag.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("tags", agentsExists, serversExists)
+				@ConfigNavbar("tags", agentsExists, serversExists, commonInfo)
 				<div id="confirm" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
 				<div id="confirm-tag-delete" class="uk-alert uk-alert-danger bg-red-100  dark:bg-red-600 dark:text-white hidden" uk-alert>
-					@ConfirmTagDeletion()
+					@ConfirmTagDeletion(commonInfo)
 				</div>
-				<div id="edit-tag-dialog" class="uk-alert border border-green-700 bg-green-50 hidden" uk-alert>
-					@EditTag()
+				<div id="edit-tag-dialog" class="uk-alert border border-blue-700  dark:bg-blue-500 dark:text-white hidden" uk-alert>
+					@EditTag(commonInfo)
 				</div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -35,7 +34,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 						</p>
 					</div>
 					<div class="uk-card-body">
-						@NewTag()
+						@NewTag(commonInfo)
 						if len(tags) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 								<thead>
@@ -115,7 +114,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/tags")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "tags.no_tags") }
@@ -128,13 +127,13 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionMan
 	</main>
 }
 
-templ TagsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ TagsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }
 
-templ ConfirmTagDeletion() {
+templ ConfirmTagDeletion(commonInfo *partials.CommonInfo) {
 	<div class="uk-alert-description p-2">
 		<div class="flex flex-col gap-6 pt-2">
 			<p>{ i18n.T(ctx, "tags.confirm_delete") }</p>
@@ -151,7 +150,7 @@ templ ConfirmTagDeletion() {
 				</button>
 				<button
 					title="confirm tag deletion"
-					hx-delete="/admin/tags"
+					hx-delete={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					class="uk-button uk-button-danger"
@@ -163,7 +162,7 @@ templ ConfirmTagDeletion() {
 	</div>
 }
 
-templ NewTag() {
+templ NewTag(commonInfo *partials.CommonInfo) {
 	<form class="flex gap-2 items-center w-1/2 mt-6 mb-2">
 		<input name="tag" class="uk-input w-1/3" type="text" placeholder={ i18n.T(ctx, "tags.new") }/>
 		<input name="description" class="uk-input w-2/3" type="text" placeholder={ i18n.T(ctx, "tags.optional_description") }/>
@@ -172,7 +171,7 @@ templ NewTag() {
 			title="add tag"
 			type="button"
 			class="uk-button uk-button-primary"
-			hx-post="/admin/tags"
+			hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 			hx-target="#main"
 			hx-swap="outerHTML"
 		>
@@ -218,7 +217,7 @@ templ ColorSelector(id string) {
 	</div>
 }
 
-templ EditTag() {
+templ EditTag(commonInfo *partials.CommonInfo) {
 	<div class="uk-alert-description p-2">
 		<div class="flex flex-col gap-6 pt-2">
 			<p>{ i18n.T(ctx, "tags.edit_tag") }</p>
@@ -241,7 +240,7 @@ templ EditTag() {
 					</button>
 					<button
 						title="confirm tag deletion"
-						hx-post="/admin/tags"
+						hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="uk-button uk-button-primary"

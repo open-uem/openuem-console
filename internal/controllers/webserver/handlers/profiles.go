@@ -1,22 +1,23 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"strconv"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/profiles_views"
 )
 
 func (h *Handler) Profiles(c echo.Context, successMessage string) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -38,18 +39,27 @@ func (h *Handler) Profiles(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
-
 	confirmDelete := false
 	profileId := ""
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, l, h.SessionManager, profiles, refreshTime, h.Version, latestServerRelease.Version, profileId, confirmDelete, successMessage)))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) NewProfile(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
+	}
+
+	siteID, err := strconv.Atoi(commonInfo.SiteID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_site_to_int", commonInfo.SiteID), true))
+	}
+
+	if siteID == -1 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.profile_empty_site", commonInfo.SiteID), true))
 	}
 
 	if c.Request().Method == "POST" {
@@ -58,7 +68,7 @@ func (h *Handler) NewProfile(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.empty"), true))
 		}
 
-		profile, err := h.Model.AddProfile(description)
+		profile, err := h.Model.AddProfile(siteID, description)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.could_not_save"), true))
 		}
@@ -66,13 +76,15 @@ func (h *Handler) NewProfile(c echo.Context) error {
 		return h.EditProfile(c, "GET", strconv.Itoa(profile.ID), i18n.T(c.Request().Context(), "profiles.new.saved"))
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.NewProfile(h.SessionManager, h.Version, latestServerRelease.Version)))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.NewProfile(c, commonInfo), commonInfo))
 }
 
 func (h *Handler) EditProfile(c echo.Context, method string, id string, successMessage string) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -139,14 +151,14 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 	confirmDelete := false
 
 	if successMessage != "" {
-		u, err := url.Parse("/profiles/" + id)
+		u, err := url.Parse(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%s", id)))
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
-		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, "", h.Version, latestServerRelease.Version, successMessage, confirmDelete)), u)
+		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, commonInfo), commonInfo), u)
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, "", h.Version, latestServerRelease.Version, successMessage, confirmDelete)))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileTags(c echo.Context) error {
@@ -188,9 +200,11 @@ func (h *Handler) ProfileTags(c echo.Context) error {
 }
 
 func (h *Handler) ConfirmDeleteProfile(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	profileId := c.Param("uuid")
@@ -217,17 +231,18 @@ func (h *Handler) ConfirmDeleteProfile(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
 	confirmDelete := true
 	successMessage := ""
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, l, h.SessionManager, profiles, refreshTime, h.Version, latestServerRelease.Version, profileId, confirmDelete, successMessage)))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	p := partials.NewPaginationAndSort()
@@ -280,13 +295,16 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 
 	successMessage := ""
 	confirmDelete := true
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, h.SessionManager, profile, tasks, tags, taskId, h.Version, latestServerRelease.Version, successMessage, confirmDelete)))
+
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, taskId, successMessage, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileIssues(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
 	profileID := c.Param("uuid")
@@ -317,7 +335,5 @@ func (h *Handler) ProfileIssues(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	l := views.GetTranslatorForDates(c)
-
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, l, h.SessionManager, issues, profile, h.Version, latestServerRelease.Version)))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, issues, profile, commonInfo), commonInfo))
 }

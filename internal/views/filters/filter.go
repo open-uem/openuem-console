@@ -46,6 +46,25 @@ type UserFilter struct {
 	RegisterOptions []string
 }
 
+type TenantFilter struct {
+	Name           string
+	DefaultOptions []string
+	CreatedFrom    string
+	CreatedTo      string
+	ModifiedFrom   string
+	ModifiedTo     string
+}
+
+type SiteFilter struct {
+	Name           string
+	Domain         string
+	DefaultOptions []string
+	CreatedFrom    string
+	CreatedTo      string
+	ModifiedFrom   string
+	ModifiedTo     string
+}
+
 type AntivirusFilter struct {
 	Hostname                string
 	AntivirusNameOptions    []string

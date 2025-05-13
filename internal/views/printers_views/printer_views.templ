@@ -1,13 +1,13 @@
 package printers_views
 
 import (
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Printers(sm *sessions.SessionManager, currentVersion, latestVersion string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Network Printers", Url: "/network-printers"}}, sm, currentVersion, latestVersion)
+templ Printers(c echo.Context, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Network Printers", Url: "/network-printers"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
 			<h3 class="uk-card-title">Network Printers</h3>
@@ -19,8 +19,8 @@ templ Printers(sm *sessions.SessionManager, currentVersion, latestVersion string
 	</main>
 }
 
-templ PrintersIndex(title string, cmp templ.Component) {
-	@layout.Base("network printers") {
+templ PrintersIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("network printers", commonInfo) {
 		@cmp
 	}
 }

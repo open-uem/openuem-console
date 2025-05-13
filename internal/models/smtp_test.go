@@ -26,7 +26,7 @@ func (suite *SMTPTestSuite) SetupTest() {
 }
 
 func (suite *SMTPTestSuite) TestGetSMTPSettings() {
-	settings, err := suite.model.GetSMTPSettings()
+	settings, err := suite.model.GetSMTPSettings("-1")
 	assert.NoError(suite.T(), err, "should get default SMTP settings")
 
 	assert.Equal(suite.T(), "", settings.SMTPServer, "server should be empty")
@@ -51,7 +51,7 @@ func (suite *SMTPTestSuite) TestUpdateSMTPSettings() {
 	err := suite.model.UpdateSMTPSettings(&newSettings)
 	assert.NoError(suite.T(), err, "should update SMTP settings")
 
-	settings, err := suite.model.GetSMTPSettings()
+	settings, err := suite.model.GetSMTPSettings("-1")
 	assert.NoError(suite.T(), err, "should get updated SMTP settings")
 
 	assert.Equal(suite.T(), "smtp.example.com", settings.SMTPServer, "server should be smtp.example.com")

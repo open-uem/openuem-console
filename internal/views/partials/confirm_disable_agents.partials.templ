@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ ConfirmDisableAgents(c echo.Context) {
+templ ConfirmDisableAgents(c echo.Context, commonInfo *CommonInfo) {
 	<div class="uk-alert border-blue-700 text-blue-700 dark:bg-blue-500 dark:text-white" uk-alert>
 		<div class="uk-alert-description p-2">
 			<form class="flex flex-col gap-2">
@@ -14,7 +14,7 @@ templ ConfirmDisableAgents(c echo.Context) {
 				</p>
 				<div class="flex justify-start gap-6">
 					<button
-						hx-post="/agents/disable"
+						hx-post={ string(templ.URL(GetNavigationUrl(commonInfo, "/agents/disable"))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -35,7 +35,7 @@ templ ConfirmDisableAgents(c echo.Context) {
 						title={ i18n.T(ctx, "Cancel") }
 						type="button"
 						class="uk-button uk-button-default"
-						hx-get={ GetCurrentUrl(c, "/agents") }
+						hx-get={ GetCurrentUrl(c, string(templ.URL(GetNavigationUrl(commonInfo, "/agents")))) }
 						hx-push-url="true"
 						hx-target="#main"
 						hx-swap="outerHTML"

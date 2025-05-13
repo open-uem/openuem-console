@@ -1,191 +1,228 @@
 package admin_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
 
-templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "General Settings"), Url: "/admin/settings"}}, sm, currentVersion, latestVersion)
+templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
+	if commonInfo.TenantID == "-1" {
+		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "General Settings"), Url: "/admin/settings"}}, commonInfo)
+	} else {
+		@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "General Settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID)))}}, commonInfo)
+	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("settings", agentsExists, serversExists)
-				<div id="success" class="hidden"></div>
+				@ConfigNavbar("settings", agentsExists, serversExists, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "settings.title") } </h3>
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "settings.description") }
+							if commonInfo.TenantID != "-1" {
+								{ i18n.T(ctx, "settings.tenant") }
+							} else {
+								{ i18n.T(ctx, "settings.global") }
+							}
 						</p>
+						<button
+							class="flex items-center my-4 uk-button uk-button-primary"
+							type="submit"
+							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/inherit", commonInfo.TenantID))) }
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx,"settings.apply_global") }
+						</button>
 					</div>
 					<div class="uk-card-body">
 						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.country_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.country_description") }</td>
-								<td class="w-1/5 !align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										@partials.Countries(c, settings.Country)
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-1"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-1" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_description") } </td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<input class="uk-input" type="number" name="nats-timeout" value={ strconv.Itoa(settings.NatsRequestTimeoutSeconds) }/>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-2"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-2" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_description") }</td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<input class="uk-input" type="text" name="max-upload-size" value={ settings.MaxUploadSize }/>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-3"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-3" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_description") }</td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<input class="uk-input" type="number" name="cert-years" value={ strconv.Itoa(settings.UserCertYearsValid) }/>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-4"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.refresh_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.refresh_description") }</td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<input class="uk-input" type="number" name="refresh" value={ strconv.Itoa(settings.RefreshTimeInMinutes) }/>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-5"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-5" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.session_lifetime_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.session_lifetime_description") }</td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<input class="uk-input" type="number" name="session-lifetime" value={ strconv.Itoa(settings.SessionLifetimeInMinutes) }/>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-6"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-6" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
-							<tr>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_title") }</td>
-								<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_description") }</td>
-								<td class="!align-middle">
-									<form class="flex gap-2">
-										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-										<select name="update-channel" class="uk-select">
-											<option value="stable" selected?={ settings.UpdateChannel == "stable" }>{ i18n.T(ctx,"Stable") }</option>
-											<option value="devel" selected?={ settings.UpdateChannel == "devel" }>{ i18n.T(ctx,"Devel") }</option>
-											<option value="testing" selected?={ settings.UpdateChannel == "testing" }>{ i18n.T(ctx,"Testing") }</option>
-										</select>
-										<button
-											class="flex items-center gap-2"
-											type="submit"
-											hx-post="/admin/settings"
-											hx-push-url="false"
-											hx-target="#main"
-											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-7"
-										>
-											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-7" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-										</button>
-									</form>
-								</td>
-							</tr>
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.country_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.country_description") }</td>
+									<td class="w-1/5 !align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											@partials.Countries(c, settings.Country)
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-1"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-1" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.nats_timeout_description") } </td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="number" name="nats-timeout" value={ strconv.Itoa(settings.NatsRequestTimeoutSeconds) }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-2"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-2" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.max_upload_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="text" name="max-upload-size" value={ settings.MaxUploadSize }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-3"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-3" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.user_cert_years_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="number" name="cert-years" value={ strconv.Itoa(settings.UserCertYearsValid) }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-4"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.refresh_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.refresh_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="number" name="refresh" value={ strconv.Itoa(settings.RefreshTimeInMinutes) }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-5"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-5" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.session_lifetime_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.session_lifetime_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="number" name="session-lifetime" value={ strconv.Itoa(settings.SessionLifetimeInMinutes) }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-6"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-6" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.update_channel_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<select name="update-channel" class="uk-select">
+												<option value="stable" selected?={ settings.UpdateChannel == "stable" }>{ i18n.T(ctx,"Stable") }</option>
+												<option value="devel" selected?={ settings.UpdateChannel == "devel" }>{ i18n.T(ctx,"Devel") }</option>
+												<option value="testing" selected?={ settings.UpdateChannel == "testing" }>{ i18n.T(ctx,"Testing") }</option>
+											</select>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-7"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-7" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
 							<tr>
 								<td class="!align-middle">{ i18n.T(ctx, "settings.agent_frequency_title") }</td>
 								<td class="!align-middle">{ i18n.T(ctx, "settings.agent_frequency_description") }</td>
@@ -196,7 +233,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -221,7 +262,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -252,7 +297,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -274,7 +323,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -299,7 +352,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -324,7 +381,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -349,7 +410,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -374,7 +439,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -399,7 +468,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -424,7 +497,11 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 										<button
 											class="flex items-center gap-2"
 											type="submit"
-											hx-post="/admin/settings"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -444,8 +521,8 @@ templ GeneralSettings(c echo.Context, sm *sessions.SessionManager, currentVersio
 	</main>
 }
 
-templ GeneralSettingsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ GeneralSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

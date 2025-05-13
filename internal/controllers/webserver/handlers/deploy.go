@@ -10,7 +10,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -18,25 +17,30 @@ import (
 )
 
 func (h *Handler) DeployInstall(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, true, "")))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployUninstall(c echo.Context) error {
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return err
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, false, "")))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	search := c.FormValue("filterByAppName")
 	if search == "" {
@@ -45,7 +49,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 
 	allSources := []string{}
 
-	useWinget, err := h.Model.GetDefaultUseWinget()
+	useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -54,7 +58,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		allSources = append(allSources, "winget")
 	}
 
-	useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+	useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -102,11 +106,14 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources, commonInfo))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
-	var err error
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
@@ -133,7 +140,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllAgents(f)
+	allAgents, err := h.Model.GetAllAgents(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -146,12 +153,12 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
 	p.SortBy = "hostname"
-	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true)
+	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	agents, err := h.Model.GetAgentsByPage(p, f, true)
+	agents, err := h.Model.GetAgentsByPage(p, f, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -167,15 +174,17 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, h.SessionManager, h.Version, latestServerRelease.Version, packageId, packageName, agents, install, refreshTime)))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, agents, install, refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	checkedItems := c.FormValue("selectedAgents")
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
@@ -210,7 +219,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId)
+		deploymentFailed, err := h.Model.DeploymentFailed(agent, packageId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
@@ -224,7 +233,7 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		} else {
@@ -236,20 +245,15 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if install {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, true, i18n.T(c.Request().Context(), "install.requested"))))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, i18n.T(c.Request().Context(), "install.requested"), commonInfo), commonInfo))
 	} else {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(h.SessionManager, h.Version, latestServerRelease.Version, false, i18n.T(c.Request().Context(), "uninstall.requested"))))
+		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, i18n.T(c.Request().Context(), "uninstall.requested"), commonInfo), commonInfo))
 	}
 }

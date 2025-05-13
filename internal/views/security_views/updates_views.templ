@@ -2,22 +2,20 @@ package security_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"time"
 )
 
-templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Security", Url: "/security"}, {Title: i18n.T(ctx, "Updates"), Url: "/security/updates"}}, sm, currentVersion, latestVersion)
+templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@SecurityNavbar("updates")
+				@SecurityNavbar("updates", commonInfo)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -30,20 +28,20 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 								</p>
 							</div>
 							<div class="flex gap-4">
-								@partials.CSVReportButton(p, "/reports/updates/csv", "reports.agents")
-								@partials.PDFReportButton(p, "/reports/updates", "reports.agents")
+								@partials.CSVReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/updates/csv"))), "reports.agents")
+								@partials.PDFReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/updates"))), "reports.agents")
 							</div>
 						</div>
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters("/security/updates", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", func() bool {
 								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.UpdateStatus) == 0 &&
 									f.LastSearchFrom == "" && f.LastSearchTo == "" &&
 									f.LastInstallFrom == "" && f.LastInstallTo == "" &&
 									len(f.PendingUpdateOptions) == 0
 							})
-							@partials.RefreshPage(l, "/security/updates", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", "post", refresh, true)
 						</div>
 						if len(systemUpdates) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
@@ -105,7 +103,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 										<tr>
 											<td
 												class="!align-middle underline cursor-pointer"
-												hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", systemUpdate.ID))) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, systemUpdate.SiteID, systemUpdate.ID))) }
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"
@@ -123,12 +121,12 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 											if time.Time.IsZero(systemUpdate.LastSearch) {
 												<td class="!align-middle">{ " - " }</td>
 											} else {
-												<td class="!align-middle">{ l.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + l.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
+												<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(systemUpdate.LastSearch.Local()) + " " + commonInfo.Translator.FmtTimeShort(systemUpdate.LastSearch.Local()) }</td>
 											}
 											if time.Time.IsZero(systemUpdate.LastInstall) {
 												<td class="!align-middle">{ " - " }</td>
 											} else {
-												<td class="!align-middle">{ l.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + l.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
+												<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + commonInfo.Translator.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
 											}
 											if systemUpdate.PendingUpdates {
 												<td class="!align-middle"><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
@@ -140,7 +138,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 													title={ i18n.T(ctx, "systemupdate.show_updates_history") }
 													type="button"
 													hx-push-url="true"
-													hx-get={ string(templ.URL(fmt.Sprintf("/security/%s/updates", systemUpdate.ID))) }
+													hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", systemUpdate.ID)))) }
 													hx-target="#main"
 													hx-swap="outerHTML"
 												>
@@ -151,7 +149,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/security/updates")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))))
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }

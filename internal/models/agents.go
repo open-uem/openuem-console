@@ -11,8 +11,10 @@ import (
 	"github.com/open-uem/ent/antivirus"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/release"
+	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/systemupdate"
 	"github.com/open-uem/ent/tag"
+	"github.com/open-uem/ent/tenant"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -25,14 +27,25 @@ type Agent struct {
 	Count   int
 }
 
-func (m *Model) GetAllAgentsToUpdate() ([]*ent.Agent, error) {
-	return m.Client.Agent.Query().All(context.Background())
-}
+func (m *Model) GetAllAgents(f filters.AgentFilter, c *partials.CommonInfo) ([]*ent.Agent, error) {
+	var query *ent.AgentQuery
 
-func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	// Info from agents waiting for admission won't be shown
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
 
-	query := m.Client.Agent.Query().WithRelease()
+	if siteID == -1 {
+		query = m.Client.Agent.Query().WithRelease().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().WithRelease().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
+
 	// Apply filters
 	applyAgentFilters(query, f)
 
@@ -43,30 +56,31 @@ func (m *Model) GetAllAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
 	return agents, nil
 }
 
-func (m *Model) GetAdmittedAgents(f filters.AgentFilter) ([]*ent.Agent, error) {
-	// Info from agents waiting for admission won't be shown
-
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
-	// Apply filters
-	applyAgentFilters(query, f)
-
-	agents, err := query.All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return agents, nil
-}
-
-func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFilter, excludeWaitingForAdmissionAgents bool) ([]*ent.Agent, error) {
+func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFilter, excludeWaitingForAdmissionAgents bool, c *partials.CommonInfo) ([]*ent.Agent, error) {
 	var err error
 	var agents []*ent.Agent
 	var query *ent.AgentQuery
 
 	// Info from agents waiting for admission won't be shown
 	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease()
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithSite().WithTags().WithRelease()
 	} else {
-		query = m.Client.Agent.Query().WithTags().WithRelease()
+		query = m.Client.Agent.Query().WithSite().WithTags().WithRelease()
+	}
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = query.Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
 
 	if p.PageSize != 0 {
@@ -129,35 +143,88 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	return agents, nil
 }
 
-func (m *Model) GetAgentById(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().Where(agent.ID(agentId)).Only(context.Background())
+func (m *Model) GetAgentById(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, err
-}
-
-func (m *Model) GetAgentOverviewById(agentId string) (*ent.Agent, error) {
-	agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Only(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return nil, err
 	}
-	return agent, err
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, err
+	} else {
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, err
+	}
 }
 
-func (m *Model) CountAgentsByOS() ([]Agent, error) {
+func (m *Model) GetAgentOverviewById(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, err
+	} else {
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithComputer().WithOperatingsystem().WithAntivirus().WithSystemupdate().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, err
+	}
+}
+
+func (m *Model) CountAgentsByOS(c *partials.CommonInfo) ([]Agent, error) {
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
 	// Info from agents waiting for admission won't be shown
 	agents := []Agent{}
-	err := m.Client.Agent.Query().Modify(func(s *sql.Selector) {
-		s.Select(agent.FieldOs, sql.As(sql.Count("os"), "count")).Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission))).GroupBy("os").OrderBy("count")
-	}).Scan(context.Background(), &agents)
-	if err != nil {
-		return nil, err
+
+	if siteID == -1 {
+		if err = m.Client.Agent.Query().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Modify(func(s *sql.Selector) {
+			s.Select(agent.FieldOs, sql.As(sql.Count("os"), "count")).Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission))).GroupBy("os").OrderBy("count")
+		}).Scan(context.Background(), &agents); err != nil {
+			return nil, err
+		}
+		return agents, err
+	} else {
+		if err = m.Client.Agent.Query().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Modify(func(s *sql.Selector) {
+			s.Select(agent.FieldOs, sql.As(sql.Count("os"), "count")).Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission))).GroupBy("os").OrderBy("count")
+		}).Scan(context.Background(), &agents); err != nil {
+			return nil, err
+		}
+		return agents, err
 	}
-	return agents, err
 }
 
-func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmissionAgents bool) (int, error) {
+func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmissionAgents bool, c *partials.CommonInfo) (int, error) {
 	var query *ent.AgentQuery
 
 	// Info from agents waiting for admission won't be shown
@@ -167,14 +234,42 @@ func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmission
 		query = m.Client.Agent.Query()
 	}
 
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return -1, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return -1, err
+	}
+
+	if siteID == -1 {
+		query = query.Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
+
 	applyAgentFilters(query, f)
 
 	count, err := query.Count(context.Background())
 	return count, err
 }
 
-func (m *Model) GetAgentsUsedOSes() ([]string, error) {
-	return m.Client.Agent.Query().Unique(true).Select(agent.FieldOs).Strings(context.Background())
+func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo) ([]string, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Unique(true).Select(agent.FieldOs).Strings(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Unique(true).Select(agent.FieldOs).Strings(context.Background())
+	}
 }
 
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
@@ -243,111 +338,371 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	}
 }
 
-func (m *Model) CountAgentsReportedLast24h() (int, error) {
-	count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+func (m *Model) CountAgentsReportedLast24h(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return 0, err
 	}
-	return count, err
-}
-
-func (m *Model) CountAgentsNotReportedLast24h() (int, error) {
-	count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return 0, err
 	}
-	return count, err
+
+	if siteID == -1 {
+		count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+		if err != nil {
+			return 0, err
+		}
+		return count, err
+	} else {
+		count, err := m.Client.Agent.Query().Where(agent.LastContactGTE(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+		if err != nil {
+			return 0, err
+		}
+		return count, err
+	}
 }
 
-func (m *Model) DeleteAgent(agentId string) error {
-	err := m.Client.Agent.DeleteOneID(agentId).Exec(context.Background())
+func (m *Model) CountAgentsNotReportedLast24h(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+		if err != nil {
+			return 0, err
+		}
+		return count, err
+	} else {
+		count, err := m.Client.Agent.Query().Where(agent.LastContactLT(time.Now().AddDate(0, 0, -1)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+		if err != nil {
+			return 0, err
+		}
+		return count, err
+	}
+}
+
+func (m *Model) DeleteAgent(agentId string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (m *Model) EnableAgent(agentId string) error {
-	if _, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background()); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Model) DisableAgent(agentId string) error {
-	_, err := m.Client.Agent.UpdateOneID(agentId).SetAgentStatus(agent.AgentStatusDisabled).Save(context.Background())
+	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return err
 	}
+
+	if siteID == -1 {
+		err = m.Client.Agent.DeleteOneID(agentId).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+		if err != nil {
+			return err
+		}
+	} else {
+		err = m.Client.Agent.DeleteOneID(agentId).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (m *Model) AddTagToAgent(agentId, tagId string) error {
+func (m *Model) EnableAgent(agentId string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		if _, err := m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetAgentStatus(agent.AgentStatusEnabled).Save(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Model) DisableAgent(agentId string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		if _, err := m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).SetAgentStatus(agent.AgentStatusDisabled).Save(context.Background()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetAgentStatus(agent.AgentStatusDisabled).Save(context.Background()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *Model) AddTagToAgent(agentId, tagId string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
 	id, err := strconv.Atoi(tagId)
 	if err != nil {
 		return err
 	}
-	return m.Client.Agent.UpdateOneID(agentId).AddTagIDs(id).Exec(context.Background())
+
+	if siteID == -1 {
+		return m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).AddTagIDs(id).Exec(context.Background())
+	} else {
+		return m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).AddTagIDs(id).Exec(context.Background())
+	}
 }
 
-func (m *Model) RemoveTagFromAgent(agentId, tagId string) error {
+func (m *Model) RemoveTagFromAgent(agentId, tagId string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
 	id, err := strconv.Atoi(tagId)
 	if err != nil {
 		return err
 	}
-	return m.Client.Agent.UpdateOneID(agentId).RemoveTagIDs(id).Exec(context.Background())
+
+	if siteID == -1 {
+		return m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).RemoveTagIDs(id).Exec(context.Background())
+	} else {
+		return m.Client.Agent.UpdateOneID(agentId).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).RemoveTagIDs(id).Exec(context.Background())
+	}
 }
 
-func (m *Model) CountPendingUpdateAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+func (m *Model) CountPendingUpdateAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.PendingUpdatesEQ(true)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountDisabledAntivirusAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Count(context.Background())
+func (m *Model) CountDisabledAntivirusAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsActive(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountOutdatedAntivirusDatabaseAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Count(context.Background())
+func (m *Model) CountOutdatedAntivirusDatabaseAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.HasAntivirusWith(antivirus.IsUpdated(false)), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.Os("windows")).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountNoAutoupdateAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.SystemUpdateStatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION))), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+func (m *Model) CountNoAutoupdateAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.SystemUpdateStatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION))), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.HasSystemupdateWith(systemupdate.Not(systemupdate.SystemUpdateStatusContains(openuem_nats.NOTIFY_SCHEDULED_INSTALLATION))), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountVNCSupportedAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+func (m *Model) CountVNCSupportedAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.Not(agent.Vnc("")), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountDisabledAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusDisabled)).Count(context.Background())
+func (m *Model) CountDisabledAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusDisabled)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusDisabled)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) CountWaitingForAdmissionAgents() (int, error) {
-	return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission)).Count(context.Background())
+func (m *Model) CountWaitingForAdmissionAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.AgentStatusEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Count(context.Background())
+	}
 }
 
-func (m *Model) AgentsExists() (bool, error) {
-	return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Exist(context.Background())
+func (m *Model) AgentsExists(c *partials.CommonInfo) (bool, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return false, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return false, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Exist(context.Background())
+	} else {
+		return m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exist(context.Background())
+	}
 }
 
-func (m *Model) DeleteAllAgents() (int, error) {
-	return m.Client.Agent.Delete().Exec(context.Background())
+func (m *Model) DeleteAllAgents(c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.Delete().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+	} else {
+		return m.Client.Agent.Delete().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+	}
 }
 
-func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string) error {
-	return m.Client.Agent.UpdateOneID(agentId).
-		SetUpdateTaskStatus(status).
-		SetUpdateTaskDescription(description).
-		SetUpdateTaskExecution(time.Time{}).
-		SetUpdateTaskVersion(version).
-		SetUpdateTaskResult("").Exec(context.Background())
+func (m *Model) SaveAgentUpdateInfo(agentId, status, description, version string, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.UpdateOneID(agentId).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			SetUpdateTaskStatus(status).
+			SetUpdateTaskDescription(description).
+			SetUpdateTaskExecution(time.Time{}).
+			SetUpdateTaskVersion(version).
+			SetUpdateTaskResult("").Exec(context.Background())
+	} else {
+		return m.Client.Agent.UpdateOneID(agentId).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			SetUpdateTaskStatus(status).
+			SetUpdateTaskDescription(description).
+			SetUpdateTaskExecution(time.Time{}).
+			SetUpdateTaskVersion(version).
+			SetUpdateTaskResult("").Exec(context.Background())
+	}
 }
 
-func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.UpdateAgentsFilter) ([]*ent.Agent, error) {
+func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.UpdateAgentsFilter, c *partials.CommonInfo) ([]*ent.Agent, error) {
 	var err error
 	var agents []*ent.Agent
 
 	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = query.Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	// Apply filters
 	applyUpdateAgentsFilters(query, f)
@@ -399,8 +754,23 @@ func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.Up
 	return agents, nil
 }
 
-func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter) (int, error) {
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter, c *partials.CommonInfo) (int, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	applyUpdateAgentsFilters(query, f)
 
@@ -408,8 +778,23 @@ func (m *Model) CountAllUpdateAgents(f filters.UpdateAgentsFilter) (int, error) 
 	return count, err
 }
 
-func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, error) {
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter, c *partials.CommonInfo) ([]*ent.Agent, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 	// Apply filters
 	applyUpdateAgentsFilters(query, f)
 
@@ -420,8 +805,21 @@ func (m *Model) GetAllUpdateAgents(f filters.UpdateAgentsFilter) ([]*ent.Agent, 
 	return agents, nil
 }
 
-func (m *Model) SaveAgentSettings(agentID string, settings openuem_nats.AgentSetting) (*ent.Agent, error) {
-	return m.Client.Agent.UpdateOneID(agentID).SetDebugMode(settings.DebugMode).SetSftpPort(settings.SFTPPort).SetSftpService(settings.SFTPService).SetRemoteAssistance(settings.RemoteAssistance).SetVncProxyPort(settings.VNCProxyPort).SetSettingsModified(time.Now()).Save(context.Background())
+func (m *Model) SaveAgentSettings(agentID string, settings openuem_nats.AgentSetting, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return m.Client.Agent.UpdateOneID(agentID).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).SetDebugMode(settings.DebugMode).SetSftpPort(settings.SFTPPort).SetSftpService(settings.SFTPService).SetRemoteAssistance(settings.RemoteAssistance).SetVncProxyPort(settings.VNCProxyPort).SetSettingsModified(time.Now()).Save(context.Background())
+	} else {
+		return m.Client.Agent.UpdateOneID(agentID).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetDebugMode(settings.DebugMode).SetSftpPort(settings.SFTPPort).SetSftpService(settings.SFTPService).SetRemoteAssistance(settings.RemoteAssistance).SetVncProxyPort(settings.VNCProxyPort).SetSettingsModified(time.Now()).Save(context.Background())
+	}
 }
 
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
@@ -466,16 +864,51 @@ func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilte
 	}
 }
 
-func (m *Model) UpdateRemoteAssistanceToAllAgents(status bool) error {
-	if _, err := m.Client.Agent.Update().SetRemoteAssistance(status).Save(context.Background()); err != nil {
+func (m *Model) UpdateRemoteAssistanceToAllAgents(status bool, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
 		return err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		if _, err := m.Client.Agent.Update().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).SetRemoteAssistance(status).Save(context.Background()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := m.Client.Agent.Update().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetRemoteAssistance(status).Save(context.Background()); err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
 
-func (m *Model) UpdateSFTPServiceToAllAgents(status bool) error {
-	if _, err := m.Client.Agent.Update().SetSftpService(status).Save(context.Background()); err != nil {
+func (m *Model) UpdateSFTPServiceToAllAgents(status bool, c *partials.CommonInfo) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
 		return err
 	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		if _, err := m.Client.Agent.Update().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).SetSftpService(status).Save(context.Background()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := m.Client.Agent.Update().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetSftpService(status).Save(context.Background()); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (m *Model) AssociateDefaultSiteToAgents(site *ent.Site) error {
+	return m.Client.Agent.Update().Where(agent.Not(agent.HasSite())).AddSite(site).Exec(context.Background())
 }

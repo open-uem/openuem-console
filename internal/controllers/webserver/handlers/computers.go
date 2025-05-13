@@ -22,9 +22,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -32,24 +30,28 @@ import (
 )
 
 func (h *Handler) Overview(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	successMessage := ""
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	if c.Request().Method == "POST" {
 		description := c.FormValue("endpoint-description")
 		endpointType := c.FormValue("endpoint-type")
+		tenant := c.FormValue("tenant")
+		site := c.FormValue("site")
 
 		if description != "" {
-			if err := h.Model.SaveEndpointDescription(agentId, description); err != nil {
+			if err := h.Model.SaveEndpointDescription(agentId, description, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_description_could_not_save", err.Error()), true))
 			}
 			successMessage = i18n.T(c.Request().Context(), "agents.overview_description_success")
@@ -59,240 +61,272 @@ func (h *Handler) Overview(c echo.Context) error {
 			if !slices.Contains([]string{"DesktopPC", "Laptop", "Server", "Tablet", "VM", "Other"}, endpointType) {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_invalid"), true))
 			}
-			if err := h.Model.SaveEndpointType(agentId, endpointType); err != nil {
+			if err := h.Model.SaveEndpointType(agentId, endpointType, commonInfo); err != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_could_not_save"), true))
 			}
 			successMessage = i18n.T(c.Request().Context(), "agents.overview_endpoint_type_success")
 		}
+
+		if tenant != "" && site != "" {
+			if err := h.Model.AssociateToTenantAndSite(agentId, tenant, site); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.overview_endpoint_type_could_not_save", err.Error()), true))
+			}
+
+			// Change URL with the new site and organization
+			if commonInfo.SiteID == "-1" {
+				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/computers/%s/overview", tenant, agentId))
+				commonInfo.TenantID = tenant
+			} else {
+				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", tenant, site, agentId))
+				commonInfo.TenantID = tenant
+				commonInfo.SiteID = site
+			}
+
+			successMessage = i18n.T(c.Request().Context(), "agents.association_success")
+		}
 	}
 
-	agent, err := h.Model.GetAgentOverviewById(agentId)
+	agent, err := h.Model.GetAgentOverviewById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
+	sites := agent.Edges.Site
+	if len(sites) == 0 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_associated_site"), true))
+	}
+
+	if len(sites) > 1 {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.agent_cannot_associated_to_more_than_one_site"), true))
+	}
+
+	currentSite := sites[0]
+
+	s, err := h.Model.GetSite(currentSite.ID)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_site_info"), true))
+	}
+
+	if s.Edges.Tenant == nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenant"), true))
+	}
+
+	currentTenant := s.Edges.Tenant
+
+	allTenants, err := h.Model.GetTenants()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
+	}
+
+	allSites, err := h.Model.GetSites(currentTenant.ID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	l := views.GetTranslatorForDates(c)
 
 	higherVersion, err := h.Model.GetHigherAgentReleaseInstalled()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, h.SessionManager, h.Version, latestServerRelease.Version, l, agent, higherVersion, confirmDelete, detectRemoteAgents, successMessage)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites), commonInfo))
 }
 
 func (h *Handler) Computer(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentComputerInfo(agentId)
+	agent, err := h.Model.GetAgentComputerInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentOSInfo(agentId)
+	agent, err := h.Model.GetAgentOSInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
 
-	l := views.GetTranslatorForDates(c)
-
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, h.SessionManager, h.Version, latestServerRelease.Version, l, agent, confirmDelete, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId)
+	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, "")))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId)
+	agent, err := h.Model.GetAgentLogicalDisksInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentSharesInfo(agentId)
+	agent, err := h.Model.GetAgentSharesInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentMonitorsInfo(agentId)
+	agent, err := h.Model.GetAgentMonitorsInfo(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
@@ -305,16 +339,11 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	a, err := h.Model.GetAgentById(agentId)
+	a, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -325,57 +354,55 @@ func (h *Handler) Apps(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f)
+	apps, err := h.Model.GetAgentAppsByPage(agentId, p, *f, commonInfo)
 	if err != nil {
 		log.Printf("[ERROR]: an error occurred querying apps for agent: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = h.Model.CountAgentApps(agentId, *f)
+	p.NItems, err = h.Model.CountAgentApps(agentId, *f, commonInfo)
 	if err != nil {
 		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
 	confirmDelete := c.QueryParam("delete") != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, h.SessionManager, h.Version, latestServerRelease.Version, a, apps, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	currentPage := c.FormValue("page")
 	pageSize := c.FormValue("pageSize")
@@ -419,7 +446,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.Username = c.FormValue("filterByUsername")
 	}
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return err
 	}
@@ -443,7 +470,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	versions, err := h.Model.GetOSVersions(f)
+	versions, err := h.Model.GetOSVersions(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -467,7 +494,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers()
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -490,7 +517,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.ComputerManufacturers = filteredComputerManufacturers
 
 	filteredComputerModels := []string{}
-	models, err := h.Model.GetComputerModels(f)
+	models, err := h.Model.GetComputerModels(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -569,45 +596,33 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	tagId := c.FormValue("tagId")
 	agentId := c.FormValue("agentId")
 	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
-		err := h.Model.AddTagToAgent(agentId, tagId)
+		err := h.Model.AddTagToAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
-		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		err := h.Model.RemoveTagFromAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	computers, err := h.Model.GetComputersByPage(p, f, commonInfo)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	computers, err := h.Model.GetComputersByPage(p, f)
+	p.NItems, err = h.Model.CountAllComputers(f, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
-	}
-
-	p.NItems, err = h.Model.CountAllComputers(f)
-	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
-	}
-
-	l := views.GetTranslatorForDates(c)
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
 	}
 
 	if comesFromDialog {
@@ -618,15 +633,22 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, detectRemoteAgents)), u)
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, detectRemoteAgents)))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -636,32 +658,25 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	agent, err := h.Model.GetAgentById(agentId)
-	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(err.Error(), "Computers", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	deployments, err := h.Model.GetDeploymentsForAgent(agentId, p)
+	deployments, err := h.Model.GetDeploymentsForAgent(agentId, p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountDeploymentsForAgent(agentId)
+	p.NItems, err = h.Model.CountDeploymentsForAgent(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
-
-	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, l, agentId, deployments))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -670,17 +685,17 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, h.SessionManager, l, h.Version, latestServerRelease.Version, agent, deployments, successMessage, confirmDelete, detectRemoteAgents, refreshTime)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	var f filters.DeployPackageFilter
 	var packages []openuem_nats.SoftwarePackage
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
@@ -690,7 +705,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -709,7 +724,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	if agent.Os == "windows" {
 		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
-		useWinget, err := h.Model.GetDefaultUseWinget()
+		useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_winget_use"), true))
 		}
@@ -720,7 +735,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	} else {
 		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
-		useFlatpak, err := h.Model.GetDefaultUseFlatpak()
+		useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_flatpak_use"), true))
 		}
@@ -740,11 +755,16 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
 
-	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p))
+	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, commonInfo))
 
 }
 
 func (h *Handler) ComputerDeployInstall(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -757,7 +777,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
-	alreadyInstalled, err := h.Model.DeploymentAlreadyInstalled(agentId, packageId)
+	alreadyInstalled, err := h.Model.DeploymentAlreadyInstalled(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -766,7 +786,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.already_deployed"), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -792,7 +812,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -801,6 +821,11 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 }
 
 func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -834,12 +859,12 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -848,6 +873,11 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 }
 
 func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -861,7 +891,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	}
 
 	// If the package hasn't been installed and the previous action was a failure
-	d, err := h.Model.GetDeployment(agentId, packageId)
+	d, err := h.Model.GetDeployment(agentId, packageId, commonInfo)
 	if err == nil && d.Failed && d.Installed.IsZero() {
 		if err := h.Model.RemoveDeployment(d.ID); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_remove_deployment"), true))
@@ -891,12 +921,12 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId)
+	deploymentFailed, err := h.Model.DeploymentFailed(agentId, packageId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	if err := h.Model.SaveDeployInfo(&action, deploymentFailed); err != nil {
+	if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
@@ -905,30 +935,28 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 }
 
 func (h *Handler) PowerManagement(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
-	}
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
 	}
 
 	if c.Request().Method == "GET" {
 		confirmDelete := c.QueryParam("delete") != ""
 		p := partials.PaginationAndSort{}
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, confirmDelete, detectRemoteAgents)))
+
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, agent, confirmDelete, commonInfo), commonInfo))
 	}
 
 	action := c.Param("action")
@@ -1023,6 +1051,12 @@ func (h *Handler) PowerManagement(c echo.Context) error {
 
 func (h *Handler) ComputerMetadata(c echo.Context) error {
 	var data []*openuem_ent.Metadata
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	successMessage := ""
 
 	agentId := c.Param("uuid")
@@ -1039,14 +1073,14 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	data, err = h.Model.GetMetadataForAgent(agentId, p)
+	data, err = h.Model.GetMetadataForAgent(agentId, p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -1085,7 +1119,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			}
 
-			data, err = h.Model.GetMetadataForAgent(agentId, p)
+			data, err = h.Model.GetMetadataForAgent(agentId, p, commonInfo)
 			if err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), false))
 			}
@@ -1094,39 +1128,31 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		}
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, data, orgMetadata, confirmDelete, detectRemoteAgents, successMessage)))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	if agentId == "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error("an error occurred getting uuid param", "Computer", "/computers", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	if c.Request().Method == "POST" {
 		notes := c.FormValue("markdown")
-		if err := h.Model.SaveNotes(agentId, notes); err != nil {
+		if err := h.Model.SaveNotes(agentId, notes, commonInfo); err != nil {
 			return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.error", err.Error())))
 		}
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "notes.updated")))
@@ -1135,24 +1161,24 @@ func (h *Handler) Notes(c echo.Context) error {
 	maybeUnsafeHTML := markdown.ToHTML([]byte(agent.Notes), nil, nil)
 	renderedMarkdown := string(bluemonday.UGCPolicy().SanitizeBytes(maybeUnsafeHTML))
 
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, agent.Notes, renderedMarkdown, confirmDelete, detectRemoteAgents)))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, agent, agent.Notes, renderedMarkdown, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return h.ListAgents(c, "", "an error occurred getting uuid param", false)
 	}
 
-	err := h.Model.DeleteAgent(agentId)
-	if err != nil {
+	if err := h.Model.DeleteAgent(agentId, commonInfo); err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
@@ -1160,16 +1186,23 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 }
 
 func (h *Handler) ComputerStartVNC(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
 	}
 
 	if c.Request().Method == "POST" {
@@ -1178,7 +1211,7 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		// Check if PIN is optional or not
-		requestPIN, err := h.Model.GetDefaultRequestVNCPIN()
+		requestPIN, err := h.Model.GetDefaultRequestVNCPIN(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.request_pin_could_not_be_read"), false))
 		}
@@ -1205,24 +1238,36 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		if strings.Contains(agent.Vnc, "RDP") {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, domain, true, requestPIN, pin, commonInfo), commonInfo))
 		} else {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, true, requestPIN, pin, h.SessionManager, h.Version, latestServerRelease.Version)))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, true, requestPIN, pin, commonInfo), commonInfo))
 		}
 	}
 
 	if strings.Contains(agent.Vnc, "RDP") {
-		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, domain, false, false, "", commonInfo), commonInfo))
 	}
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerStopVNC(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
 	}
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
@@ -1233,15 +1278,15 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(agent, h.Domain, false, false, "", h.SessionManager, h.Version, latestServerRelease.Version)))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) GenerateRDPFile(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
@@ -1250,7 +1295,7 @@ func (h *Handler) GenerateRDPFile(c echo.Context) error {
 	fileName := uuid.NewString() + ".rdp"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1286,6 +1331,13 @@ func (h *Handler) GenerateRDPFile(c echo.Context) error {
 }
 
 func (h *Handler) SetDefaultPrinter(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_common_info"), false))
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -1301,7 +1353,7 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_decode_printer"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1315,33 +1367,31 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", string(msg.Data)), false))
 	}
 
-	if err := h.Model.SetDefaultPrinter(agentId, printerName); err != nil {
+	if err := h.Model.SetDefaultPrinter(agentId, printerName, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_set_as_default", err.Error()), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, i18n.T(c.Request().Context(), "agents.printer_has_been_set_as_default"))))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_set_as_default"), commonInfo), commonInfo))
 
 }
 
 func (h *Handler) RemovePrinter(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
@@ -1357,7 +1407,7 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -1371,27 +1421,43 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", string(msg.Data)), false))
 	}
 
-	if err := h.Model.RemovePrinter(agentId, printerName); err != nil {
+	if err := h.Model.RemovePrinter(agentId, printerName, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.printer_could_not_be_removed", err.Error()), false))
 	}
 
-	printers, err := h.Model.GetAgentPrintersInfo(agentId)
+	printers, err := h.Model.GetAgentPrintersInfo(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
-	}
-
 	p := partials.PaginationAndSort{}
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, h.SessionManager, h.Version, latestServerRelease.Version, agent, printers, confirmDelete, detectRemoteAgents, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"))))
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"), commonInfo), commonInfo))
+}
+
+func (h *Handler) GetDropdownSites(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	tenantID, err := strconv.Atoi(c.FormValue("tenant"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_int"), false))
+	}
+
+	sites, err := h.Model.GetSites(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_get_sites"), false))
+	}
+
+	return RenderView(c, computers_views.SitesDropdown(c, agentId, sites, commonInfo))
+
 }

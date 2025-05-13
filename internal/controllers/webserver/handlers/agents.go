@@ -16,8 +16,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
-	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/agents_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -27,6 +25,11 @@ import (
 func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, comesFromDialog bool) error {
 	var err error
 	var agents []*ent.Agent
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	currentPage := c.FormValue("page")
 	pageSize := c.FormValue("pageSize")
@@ -86,7 +89,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes()
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
 		return err
 	}
@@ -173,14 +176,14 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	tagId := c.FormValue("tagId")
 	agentId := c.FormValue("agentId")
 	if c.Request().Method == "POST" && tagId != "" && agentId != "" {
-		err := h.Model.AddTagToAgent(agentId, tagId)
+		err := h.Model.AddTagToAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
 	if c.Request().Method == "DELETE" && tagId != "" && agentId != "" {
-		err := h.Model.RemoveTagFromAgent(agentId, tagId)
+		err := h.Model.RemoveTagFromAgent(agentId, tagId, commonInfo)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
@@ -204,7 +207,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 
 	tmpAllAgents := []string{}
-	allAgents, err := h.Model.GetAllAgents(f)
+	allAgents, err := h.Model.GetAllAgents(f, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -213,12 +216,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
-	agents, err = h.Model.GetAgentsByPage(p, f, false)
+	agents, err = h.Model.GetAgentsByPage(p, f, false, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllAgents(f, false)
+	p.NItems, err = h.Model.CountAllAgents(f, false, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -229,21 +232,9 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		refreshTime = 5
 	}
 
-	l := views.GetTranslatorForDates(c)
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_sftp_general_setting"), true))
-	}
-
-	detectRemoteAgents, err := h.Model.GetDefaultDetectRemoteAgents()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"), true))
 	}
 
 	if comesFromDialog {
@@ -254,34 +245,41 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, detectRemoteAgents, successMessage, errMessage, refreshTime)), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, h.SessionManager, l, h.Version, latestServerRelease.Version, agents, availableTags, appliedTags, availableOSes, sftpDisabled, detectRemoteAgents, successMessage, errMessage, refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentConfirmDelete(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
@@ -302,7 +300,7 @@ func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 	}
 
 	if deleteAction == "delete-and-uninstall" || deleteAction == "delete-and-keep" {
-		err := h.Model.DeleteAgent(agentId)
+		err := h.Model.DeleteAgent(agentId, commonInfo)
 		if err != nil {
 			return h.ListAgents(c, "", err.Error(), false)
 		}
@@ -312,6 +310,11 @@ func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 }
 
 func (h *Handler) AgentEnable(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
 	if agentId == "" {
@@ -328,7 +331,7 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.Model.EnableAgent(agentId); err != nil {
+	if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -336,29 +339,36 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 }
 
 func (h *Handler) AgentDisable(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentsAdmit(c echo.Context) error {
 	errorsFound := false
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 
 		for agentId := range strings.SplitSeq(agents, ",") {
 
-			agent, err := h.Model.GetAgentById(agentId)
+			agent, err := h.Model.GetAgentById(agentId, commonInfo)
 			if err != nil {
 				log.Println("[ERROR]: ", i18n.T(c.Request().Context(), "agents.not_found"))
 				errorsFound = true
@@ -373,9 +383,14 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					continue
 				}
 
+				domain := h.Domain
+				if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+					domain = agent.Edges.Site[0].Domain
+				}
+
 				data, err := json.Marshal(openuem_nats.CertificateRequest{
 					AgentId:      agentId,
-					DNSName:      agent.Hostname + "." + h.Domain,
+					DNSName:      agent.Hostname + "." + domain,
 					Organization: h.OrgName,
 					Province:     h.OrgProvince,
 					Locality:     h.OrgLocality,
@@ -401,19 +416,19 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					continue
 				}
 
-				if err := h.Model.EnableAgent(agentId); err != nil {
+				if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 					log.Println("[ERROR]: ", err.Error())
 					errorsFound = true
 					continue
 				}
 
-				if settings, err := h.Model.GetGeneralSettings(); err != nil {
+				if settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID); err != nil {
 					log.Println("[ERROR]: ", err.Error())
 					errorsFound = true
 					continue
 				} else {
 					if settings.Edges.Tag != nil {
-						if err := h.Model.AddTagToAgent(agentId, strconv.Itoa(settings.Edges.Tag.ID)); err != nil {
+						if err := h.Model.AddTagToAgent(agentId, strconv.Itoa(settings.Edges.Tag.ID), commonInfo); err != nil {
 							log.Println("[ERROR]: ", err.Error())
 							errorsFound = true
 							continue
@@ -434,17 +449,22 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_admitted"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmAdmitAgents(c))
+	return RenderConfirm(c, partials.ConfirmAdmitAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentsEnable(c echo.Context) error {
 	errorsFound := false
 
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	if c.Request().Method == "POST" {
 		agents := c.FormValue("agents")
 
 		for agentId := range strings.SplitSeq(agents, ",") {
-			agent, err := h.Model.GetAgentById(agentId)
+			agent, err := h.Model.GetAgentById(agentId, commonInfo)
 			if err != nil {
 				log.Println("[ERROR]: ", err.Error())
 				errorsFound = true
@@ -466,7 +486,7 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 					continue
 				}
 
-				if err := h.Model.EnableAgent(agentId); err != nil {
+				if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 					log.Println("[ERROR]: ", err.Error())
 					errorsFound = true
 					continue
@@ -483,18 +503,23 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.have_been_enabled"), "", true)
 	}
 
-	return RenderConfirm(c, partials.ConfirmEnableAgents(c))
+	return RenderConfirm(c, partials.ConfirmEnableAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentsDisable(c echo.Context) error {
 	errorsFound := false
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 
 		agents := c.FormValue("agents")
 
 		for agentId := range strings.SplitSeq(agents, ",") {
-			agent, err := h.Model.GetAgentById(agentId)
+			agent, err := h.Model.GetAgentById(agentId, commonInfo)
 			if err != nil {
 				log.Println("[ERROR]: ", err.Error())
 				errorsFound = true
@@ -512,7 +537,7 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 
-				if err := h.Model.DisableAgent(agentId); err != nil {
+				if err := h.Model.DisableAgent(agentId, commonInfo); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			} else {
@@ -528,22 +553,24 @@ func (h *Handler) AgentsDisable(c echo.Context) error {
 
 	}
 
-	return RenderConfirm(c, partials.ConfirmDisableAgents(c))
+	return RenderConfirm(c, partials.ConfirmDisableAgents(c, commonInfo))
 }
 
 func (h *Handler) AgentAdmit(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return h.ListAgents(c, "", err.Error(), false)
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
-
-	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, h.SessionManager, h.Version, latestServerRelease.Version, agent)))
+	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, agent, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentForceRun(c echo.Context) error {
@@ -565,6 +592,11 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
@@ -577,7 +609,7 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := h.Model.DisableAgent(agentId); err != nil {
+	if err := h.Model.DisableAgent(agentId, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
@@ -585,8 +617,13 @@ func (h *Handler) AgentConfirmDisable(c echo.Context) error {
 }
 
 func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
-	agent, err := h.Model.GetAgentById(agentId)
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
@@ -595,9 +632,14 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
+	}
+
 	data, err := json.Marshal(openuem_nats.CertificateRequest{
 		AgentId:      agentId,
-		DNSName:      agent.Hostname + "." + h.Domain,
+		DNSName:      agent.Hostname + "." + domain,
 		Organization: h.OrgName,
 		Province:     h.OrgProvince,
 		Locality:     h.OrgLocality,
@@ -617,16 +659,16 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	if err := h.Model.EnableAgent(agentId); err != nil {
+	if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	sftpServiceDisabled, err := h.Model.GetDefaultSFTPDisabled()
+	sftpServiceDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled()
+	remoteAssistanceDisabled, err := h.Model.GetDefaultRemoteAssistanceDisabled(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -658,20 +700,22 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 }
 
 func (h *Handler) AgentLogs(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
 	agentId := c.Param("uuid")
 
 	category := c.FormValue("log-category")
-
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
-	}
 
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
-	a, err := h.Model.GetAgentById(agentId)
+	a, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
 	}
@@ -705,15 +749,13 @@ func (h *Handler) AgentLogs(c echo.Context) error {
 
 	updaterLog := parseLogFile(data, category)
 
-	l := views.GetTranslatorForDates(c)
-
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, agentLog, updaterLog, category, "", "", refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, a, agentLog, updaterLog, category, "", "", refreshTime, commonInfo), commonInfo))
 }
 
 func (h *Handler) GetAgentLogFile(agent *ent.Agent, path string) (string, error) {
@@ -797,18 +839,20 @@ func parseLogFile(data, category string) []agents_views.LogEntry {
 }
 
 func (h *Handler) AgentSettings(c echo.Context) error {
-	agentId := c.Param("uuid")
+	var err error
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
+	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_latest_release"), true))
+		return err
 	}
+
+	agentId := c.Param("uuid")
 
 	if agentId == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), true))
 	}
 
-	currentAgent, err := h.Model.GetAgentById(agentId)
+	currentAgent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent", err.Error()), true))
 	}
@@ -818,8 +862,6 @@ func (h *Handler) AgentSettings(c echo.Context) error {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
-
-	l := views.GetTranslatorForDates(c)
 
 	if c.Request().Method == "POST" {
 		s := openuem_nats.AgentSetting{}
@@ -877,7 +919,7 @@ func (h *Handler) AgentSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", err.Error()), true))
 		}
 
-		a, err := h.Model.SaveAgentSettings(agentId, s)
+		a, err := h.Model.SaveAgentSettings(agentId, s, commonInfo)
 		if err != nil {
 			errMessage := err.Error()
 			// Rollback
@@ -901,8 +943,8 @@ func (h *Handler) AgentSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.settings_nats_error", errMessage), true))
 		}
 
-		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, a, i18n.T(c.Request().Context(), "agents.settings_success"), "", refreshTime)))
+		return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, a, i18n.T(c.Request().Context(), "agents.settings_success"), "", refreshTime, commonInfo), commonInfo))
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, h.SessionManager, l, h.Version, latestServerRelease.Version, currentAgent, "", "", refreshTime)))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentSettings(c, currentAgent, "", "", refreshTime, commonInfo), commonInfo))
 }

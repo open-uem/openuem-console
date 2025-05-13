@@ -2,11 +2,9 @@ package agents_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -16,8 +14,8 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled", "No Contact"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled, detectRemoteAgents bool, successMessage, errMessage string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}}, sm, currentVersion, latestVersion)
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled bool, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -40,15 +38,15 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						</p>
 					</div>
 					<div class="flex gap-4">
-						@partials.CSVReportButton(p, "/reports/agents/csv", "reports.agents")
-						@partials.PDFReportButton(p, "/reports/agents", "reports.agents")
+						@partials.CSVReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/agents/csv"))), "reports.agents")
+						@partials.PDFReportButton(p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/reports/agents"))), "reports.agents")
 					</div>
 				</div>
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
 					<div class="flex items-center gap-4">
-						@filters.ClearFilters("/agents", "#main", "outerHTML", func() bool {
+						@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), "#main", "outerHTML", func() bool {
 							return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
 								len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
 								f.ContactFrom == "" && f.ContactTo == "" && len(f.IsRemote) == 0
@@ -108,7 +106,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								title={ i18n.T(ctx, "Admit") }
 								type="button"
 								class="uk-button uk-button-default"
-								hx-get="/agents/admit"
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents/admit"))) }
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
@@ -124,7 +122,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								title={ i18n.T(ctx, "Enable") }
 								type="button"
 								class="uk-button uk-button-default"
-								hx-get="/agents/enable"
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents/enable"))) }
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
@@ -140,7 +138,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 								title={ i18n.T(ctx, "Disable") }
 								type="button"
 								class="uk-button uk-button-default"
-								hx-get="/agents/disable"
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents/disable"))) }
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
@@ -153,7 +151,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							</button>
 						</form>
 					</div>
-					@partials.RefreshPage(l, "/agents", "#main", "outerHTML", "post", refresh, true)
+					@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), "#main", "outerHTML", "post", refresh, true)
 				</div>
 				if len(agents) > 0 {
 					<table
@@ -165,10 +163,10 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							end
 						end"
 					>
-						@AgentsTableHead(c, p, f, l, appliedTags, availableOSes)
-						@AgentsTableBody(p, l, agents, availableTags, sftpDisabled, detectRemoteAgents)
+						@AgentsTableHead(c, p, f, appliedTags, availableOSes)
+						@AgentsTableBody(p, agents, availableTags, sftpDisabled, commonInfo)
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", "/agents")
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))))
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }
@@ -179,30 +177,30 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 	</main>
 }
 
-templ AgentsConfirmDelete(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ AgentsConfirmDelete(c echo.Context, agent *ent.Agent, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.ID, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
 		<div id="error" class="hidden"></div>
 		<div class="flex flex-col gap-4 my-4">
-			@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "confirm.agent_delete"), "/agents", "/agents/"+agent.ID)
+			@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "confirm.agent_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID)))))
 			@AgentInfo(agent)
 		</div>
 	</main>
 }
 
-templ AgentsConfirmDisable(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ AgentsConfirmDisable(c echo.Context, agent *ent.Agent, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.ID, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
-		@partials.ConfirmDisable(c, i18n.T(ctx, "confirm.agent_disable"), "/agents", "/agents/"+agent.ID+"/disable")
+		@partials.ConfirmDisable(c, i18n.T(ctx, "confirm.agent_disable"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/disable", agent.ID)))))
 		@AgentInfo(agent)
 	</main>
 }
 
-templ AgentConfirmAdmission(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.ID, Url: fmt.Sprintf("/agents/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ AgentConfirmAdmission(c echo.Context, agent *ent.Agent, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.ID, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted">
 		<div class="mt-4 mb-2">
-			@partials.ConfirmAdmission(c, i18n.T(ctx, "confirm.agent_admit"), "/agents", "/agents/"+agent.ID+"/admit")
+			@partials.ConfirmAdmission(c, i18n.T(ctx, "confirm.agent_disable"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/admit", agent.ID)))))
 		</div>
 		@AgentInfo(agent)
 	</main>
@@ -225,13 +223,13 @@ templ AgentInfo(agent *ent.Agent) {
 	</div>
 }
 
-templ AgentsIndex(title string, cmp templ.Component) {
-	@layout.Base("agents") {
+templ AgentsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("agents", commonInfo) {
 		@cmp
 	}
 }
 
-templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, l locales.Translator, tags []*ent.Tag, availableOSes []string) {
+templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, tags []*ent.Tag, availableOSes []string) {
 	<thead>
 		<tr>
 			<th>
@@ -322,7 +320,7 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</thead>
 }
 
-templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents []*ent.Agent, tags []*ent.Tag, sftpDisabled bool, detectRemoteAgents bool) {
+templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []*ent.Tag, sftpDisabled bool, commonInfo *partials.CommonInfo) {
 	for index, agent := range agents {
 		<tr>
 			<td class="!align-middle">
@@ -406,7 +404,11 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 			</td>
 			<td
 				class="!align-middle hover:cursor-pointer"
-				hx-get={ string(templ.URL(fmt.Sprintf("/computers/%s", agent.ID))) }
+				if len(agent.Edges.Site) == 1 {
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, agent.Edges.Site[0].ID, agent.ID))) }
+				} else {
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
+				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
@@ -421,7 +423,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 							<uk-icon hx-history="false" icon="search-check" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>
 					}
-					if agent.IsRemote && detectRemoteAgents {
+					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<div uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</div>
@@ -460,12 +462,12 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 			}
 			<td class="!align-middle">{ agent.IP }</td>
 			<td class="flex flex-wrap gap-2">
-				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/agents", "#main", "outerHTML")
-				@partials.AddTagButton(p, tags, agent.Edges.Tags, agent.ID, "/agents", "post", "#main", "outerHTML")
+				@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), "#main", "outerHTML")
+				@partials.AddTagButton(p, tags, agent.Edges.Tags, agent.ID, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), "post", "#main", "outerHTML", commonInfo)
 			</td>
-			<td class="!align-middle">{ l.FmtDateMedium(agent.LastContact.Local()) + " " + l.FmtTimeShort(agent.LastContact.Local()) } </td>
+			<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(agent.LastContact.Local()) + " " + commonInfo.Translator.FmtTimeShort(agent.LastContact.Local()) } </td>
 			<td class="!align-middle">
-				@AddActionsButton(agent, index, sftpDisabled)
+				@AddActionsButton(agent, index, sftpDisabled, commonInfo)
 			</td>
 		</tr>
 	}
@@ -474,14 +476,14 @@ templ AgentsTableBody(p partials.PaginationAndSort, l locales.Translator, agents
 	}
 }
 
-templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
+templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool, commonInfo *partials.CommonInfo) {
 	@partials.MoreButton(index)
 	<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 		<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 			if agent.AgentStatus == "WaitingForAdmission" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/admit", agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/admit", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -493,7 +495,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcereport", agent.ID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/forcereport", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -505,7 +507,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/disable", agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/disable", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -517,7 +519,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/regeneratecerts", agent.ID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/regeneratecerts", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 					>
@@ -529,7 +531,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus == "Enabled" {
 				<li>
 					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/forcerestart", agent.ID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/forcerestart", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						hx-indicator="#restart-spinner"
@@ -543,7 +545,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus == "Disabled" {
 				<li>
 					<a
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/enabled", agent.ID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/enabled", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						hx-indicator="#disable-spinner"
@@ -557,7 +559,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if !sftpDisabled && agent.AgentStatus == "Enabled" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/logs", agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/logs", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						hx-indicator="#enable-agent-log"
@@ -572,7 +574,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			if agent.AgentStatus != "WaitingForAdmission" {
 				<li>
 					<a
-						hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/settings", agent.ID))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/settings", agent.ID)))) }
 						hx-target="#main"
 						hx-swap="outerHTML"
 						hx-push-url="true"
@@ -584,7 +586,7 @@ templ AddActionsButton(agent *ent.Agent, index int, sftpDisabled bool) {
 			}
 			<li>
 				<a
-					hx-get={ string(templ.URL(fmt.Sprintf("/agents/%s/delete", agent.ID))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/delete", agent.ID)))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -615,8 +617,8 @@ type LogEntry struct {
 	Text     string
 }
 
-templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, agentLog, updaterLog []LogEntry, category, successMessage, errMessage string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: "logs"}}, sm, currentVersion, latestVersion)
+templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntry, category, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}, {Title: "logs"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -643,7 +645,7 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 						<div class="flex justify-between">
 							<form
 								class="flex gap-4 items-end"
-								hx-get={ fmt.Sprintf("/agents/%s/logs", agent.ID) }
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/logs", agent.ID)))) }
 								hx-swap="outerHTML"
 								hx-target="#main"
 								hx-push-url="false"
@@ -666,7 +668,7 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 									{ i18n.T(ctx, "Filter") }
 								</button>
 							</form>
-							@partials.RefreshPage(l, fmt.Sprintf("/agents/%s/logs", agent.ID), "#main", "outerHTML", "get", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, string(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/logs", agent.ID))), "#main", "outerHTML", "get", refresh, true)
 						</div>
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-4">
@@ -685,8 +687,8 @@ templ AgentsLog(c echo.Context, sm *sessions.SessionManager, l locales.Translato
 	</main>
 }
 
-templ AgentSettings(c echo.Context, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agent *ent.Agent, successMessage, errMessage string, refresh int) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Agents", Url: "/agents"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}, {Title: i18n.T(ctx, "Settings")}}, sm, currentVersion, latestVersion)
+templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID))))}, {Title: i18n.T(ctx, "Settings")}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -716,7 +718,7 @@ templ AgentSettings(c echo.Context, sm *sessions.SessionManager, l locales.Trans
 				<div class="uk-card uk-card-body uk-card-default">
 					<form
 						class="flex flex-col gap-4 w-1/4"
-						hx-post={ string(templ.URL(fmt.Sprintf("/agents/%s/settings", agent.ID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s/settings", agent.ID)))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
@@ -724,7 +726,7 @@ templ AgentSettings(c echo.Context, sm *sessions.SessionManager, l locales.Trans
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="debug-mode">{ i18n.T(ctx, "agents.debug_mode") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="debug-mode"
 								name="debug-mode"
 								type="checkbox"
@@ -734,7 +736,7 @@ templ AgentSettings(c echo.Context, sm *sessions.SessionManager, l locales.Trans
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="sftp-service">{ i18n.T(ctx, "agents.sftp_service") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="sftp-service"
 								name="sftp-service"
 								type="checkbox"
@@ -762,7 +764,7 @@ templ AgentSettings(c echo.Context, sm *sessions.SessionManager, l locales.Trans
 						<div class="flex items-center justify-between space-x-2 w-full">
 							<label class="uk-form-label font-bold" for="remote-assistance-service">{ i18n.T(ctx, "agents.remote_assistance") }</label>
 							<input
-								class="uk-toggle-switch uk-toggle-switch-primary"
+								class="uk-toggle-switch uk-toggle-switch-primary my-1"
 								id="remote-assistance-service"
 								name="remote-assistance-service"
 								type="checkbox"

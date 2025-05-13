@@ -3,15 +3,15 @@ package computers_views
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
-	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"io/fs"
 	"strings"
 )
 
-templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *openuem_ent.Agent, cwd, parent string, files []fs.FileInfo, detectRemoteAgents bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ SFTPHome(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, cwd, parent string, files []fs.FileInfo, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -20,14 +20,14 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, curren
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote && detectRemoteAgents {
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false)
+				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false, commonInfo)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.file_browser.title") }</h3>
@@ -38,13 +38,13 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, curren
 					<div id="file-browser" class="uk-card-body m-4">
 						<div id="success" class="hidden"></div>
 						<div id="error" class="hidden"></div>
-						@SFTPNavBar(agent, cwd, parent)
+						@SFTPNavBar(agent, cwd, parent, commonInfo)
 						<div class="flex justify-center my-4">
 							<uk-icon id="spinner" hx-history="false" icon="loader-circle" custom-class="my-indicator h-28 w-28 text-green-700 animate-spin" uk-cloack></uk-icon>
 						</div>
 						<div id="files">
 							if len(files) > 0 {
-								@FileBrowser(files, agent, cwd, parent)
+								@FileBrowser(files, agent, cwd, parent, commonInfo)
 							} else {
 								<p class="mx-1 uk-text-muted">{ i18n.T(ctx, "inventory.file_browser.empty_folder") }</p>
 							}
@@ -56,13 +56,13 @@ templ SFTPHome(p partials.PaginationAndSort, sm *sessions.SessionManager, curren
 	</main>
 }
 
-templ SFTPNavBar(agent *openuem_ent.Agent, cwd, parent string) {
+templ SFTPNavBar(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<nav class="flex gap-4 my-4 mx-1 items-center">
-		@FolderUpIcon(agent, cwd, parent)
+		@FolderUpIcon(agent, cwd, parent, commonInfo)
 		@NewFolderIcon()
-		@SyncFolderIcon(agent, cwd, parent)
+		@SyncFolderIcon(agent, cwd, parent, commonInfo)
 		@UploadFileIcon()
-		@DownloadIcon(agent, cwd, parent)
+		@DownloadIcon(agent, cwd, parent, commonInfo)
 		@RemoveIcon(cwd, parent)
 		<div class="mx-1">
 			<p class="uk-text-muted">
@@ -76,17 +76,17 @@ templ SFTPNavBar(agent *openuem_ent.Agent, cwd, parent string) {
 		</div>
 	</nav>
 	<div id="new-folder" class="mx-1 my-4 w-1/3 hidden">
-		@NewFolderDialog(agent, cwd)
+		@NewFolderDialog(agent, cwd, commonInfo)
 	</div>
 	<div id="upload-file" class="mx-1 my-4 w-1/3 hidden">
-		@UploadFileDialog(agent, cwd, parent)
+		@UploadFileDialog(agent, cwd, parent, commonInfo)
 	</div>
 	<div id="confirm-bulk-delete" class="mx-1 my-4 w-1/3 hidden">
-		@BulkRemoveDialog(agent, cwd, parent)
+		@BulkRemoveDialog(agent, cwd, parent, commonInfo)
 	</div>
 }
 
-templ FolderUpIcon(agent *openuem_ent.Agent, cwd, parent string) {
+templ FolderUpIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<form>
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
@@ -95,7 +95,7 @@ templ FolderUpIcon(agent *openuem_ent.Agent, cwd, parent string) {
 		<button
 			type="button"
 			disabled?={ parent == cwd || len(cwd) == 0 || parent == "." }
-			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-indicator="#spinner"
@@ -123,14 +123,14 @@ templ NewFolderIcon() {
 	</form>
 }
 
-templ NewFolderDialog(agent *openuem_ent.Agent, cwd string) {
+templ NewFolderDialog(agent *ent.Agent, cwd string, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-4">
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="text" id="itemName" name="itemName" placeholder={ i18n.T(ctx, "inventory.file_browser.folder_name") } class="uk-input" value=""/>
 		<button
 			type="button"
 			class="uk-button uk-button-primary flex gap-2"
-			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -147,14 +147,14 @@ templ NewFolderDialog(agent *openuem_ent.Agent, cwd string) {
 	</form>
 }
 
-templ SyncFolderIcon(agent *openuem_ent.Agent, cwd, parent string) {
+templ SyncFolderIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<form>
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
 		<input type="hidden" name="dst" value={ parent }/>
 		<button
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -177,11 +177,11 @@ templ UploadFileIcon() {
 	</form>
 }
 
-templ UploadFileDialog(agent *openuem_ent.Agent, cwd, parent string) {
+templ UploadFileDialog(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<form
 		class="flex gap-4 items-center justify-between"
 		hx-encoding="multipart/form-data"
-		hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 		hx-target="#main"
 		hx-indicator="#spinner"
 	>
@@ -195,7 +195,7 @@ templ UploadFileDialog(agent *openuem_ent.Agent, cwd, parent string) {
 	</form>
 }
 
-templ DownloadIcon(agent *openuem_ent.Agent, cwd, parent string) {
+templ DownloadIcon(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<form>
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
@@ -205,7 +205,7 @@ templ DownloadIcon(agent *openuem_ent.Agent, cwd, parent string) {
 			class="text-gray-300"
 			type="button"
 			disabled
-			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadmany", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadmany", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -232,7 +232,7 @@ templ RemoveIcon(cwd, parent string) {
 	</form>
 }
 
-templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
+templ BulkRemoveDialog(agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-4">
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="cwd" value={ cwd }/>
@@ -242,7 +242,7 @@ templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
 			type="button"
 			class="uk-button uk-button-danger"
 			disabled?={ parent == cwd || len(cwd) == 0 }
-			hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/many", agent.ID))) }
+			hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/many", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -261,7 +261,7 @@ templ BulkRemoveDialog(agent *openuem_ent.Agent, cwd, parent string) {
 	</form>
 }
 
-templ FileBrowser(files []fs.FileInfo, agent *openuem_ent.Agent, cwd, parent string) {
+templ FileBrowser(files []fs.FileInfo, agent *ent.Agent, cwd, parent string, commonInfo *partials.CommonInfo) {
 	<div class=" max-h-96 overflow-y-auto">
 		<table class="uk-table uk-table-striped mt-6">
 			<thead class="top-0 sticky bg-muted w-full">
@@ -281,7 +281,7 @@ templ FileBrowser(files []fs.FileInfo, agent *openuem_ent.Agent, cwd, parent str
 							}
 						</td>
 						<td class="w-1/12">
-							@ActionDropDown(agent, cwd, parent, file, i, file.IsDir())
+							@ActionDropDown(agent, cwd, parent, file, i, file.IsDir(), commonInfo)
 						</td>
 						<td class="w-1/2">{ file.Name() }</td>
 						if file.IsDir() {
@@ -348,7 +348,7 @@ templ FileIcon(i int) {
 	<uk-icon id={ fmt.Sprintf("file-dropdown-%d", i) } hx-history="false" icon="file" custom-class="h-5 w-5" uk-cloack></uk-icon>
 }
 
-templ ActionDropDown(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool) {
+templ ActionDropDown(agent *ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool, commonInfo *partials.CommonInfo) {
 	<uk-icon id={ fmt.Sprintf("action-dropdown-%d", i) } hx-history="false" icon="ellipsis" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
 	<div
 		class="uk-drop uk-dropdown"
@@ -361,23 +361,23 @@ templ ActionDropDown(agent *openuem_ent.Agent, cwd, parent string, file fs.FileI
 		<ul class="uk-dropdown-nav uk-nav">
 			if isDir {
 				<li>
-					@OpenFolderEntry(agent, cwd, parent, file, i)
+					@OpenFolderEntry(agent, cwd, parent, file, i, commonInfo)
 				</li>
 			}
 			<li>
-				@DownloadEntry(agent, cwd, parent, file, i, isDir)
+				@DownloadEntry(agent, cwd, parent, file, i, isDir, commonInfo)
 			</li>
 			<li>
-				@RenameEntry(agent, cwd, parent, file, isDir)
+				@RenameEntry(agent, cwd, parent, file, isDir, commonInfo)
 			</li>
 			<li>
-				@RemoveEntry(agent, cwd, parent, file, isDir)
+				@RemoveEntry(agent, cwd, parent, file, isDir, commonInfo)
 			</li>
 		</ul>
 	</div>
 }
 
-templ OpenFolderEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int) {
+templ OpenFolderEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, i int, commonInfo *partials.CommonInfo) {
 	<form>
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
@@ -386,7 +386,7 @@ templ OpenFolderEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.File
 		<button
 			class="flex gap-4 m-4"
 			type="button"
-			hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#main"
 			hx-swap="outerHTML"
@@ -399,7 +399,7 @@ templ OpenFolderEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.File
 	</form>
 }
 
-templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool) {
+templ DownloadEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, i int, isDir bool, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-4 items-center">
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
@@ -407,9 +407,9 @@ templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileIn
 		<button
 			class="flex gap-4 m-4 items-center"
 			if isDir {
-				hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadfolder", agent.ID))) }
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadfolder", agent.ID)))) }
 			} else {
-				hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/downloadfile", agent.ID))) }
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/downloadfile", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-indicator={ fmt.Sprintf("#download-spinner-%d", i) }
@@ -425,7 +425,7 @@ templ DownloadEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileIn
 	</form>
 }
 
-templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool) {
+templ RenameEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-2 items-center">
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="parent" value={ parent }/>
@@ -468,9 +468,9 @@ templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 			name="renameConfirm"
 			class="uk-button uk-button-primary hidden"
 			if isDir {
-				hx-put={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
+				hx-put={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			} else {
-				hx-put={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
+				hx-put={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"
@@ -494,7 +494,7 @@ templ RenameEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 	</form>
 }
 
-templ RemoveEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool) {
+templ RemoveEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, isDir bool, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-2 items-center">
 		<input type="hidden" name="cwd" value={ cwd }/>
 		<input type="hidden" name="itemName" value={ file.Name() }/>
@@ -524,9 +524,9 @@ templ RemoveEntry(agent *openuem_ent.Agent, cwd, parent string, file fs.FileInfo
 			name="confirmRemove"
 			class="uk-button uk-button-danger hidden"
 			if isDir {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID))) }
+				hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/folder", agent.ID)))) }
 			} else {
-				hx-delete={ string(templ.URL(fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID))) }
+				hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/file", agent.ID)))) }
 			}
 			hx-push-url="false"
 			hx-target="#main"

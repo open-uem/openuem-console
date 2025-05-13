@@ -2,11 +2,9 @@ package admin_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -32,12 +30,12 @@ type LatestRelease struct {
 	IsCritical      bool       `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, agents []*openuem_ent.Agent, settings *openuem_ent.Settings, latestRelease *openuem_ent.Release, higherReleaseApplied *openuem_ent.Release, allReleases []string, availableReleases, availableTaskStatus []string, tags []*openuem_ent.Tag, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: "/admin/update-agents"}}, sm, currentVersion, latestVersion)
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, agents []*ent.Agent, settings *ent.Settings, latestRelease *ent.Release, higherReleaseApplied *ent.Release, allReleases []string, availableReleases, availableTaskStatus []string, tags []*ent.Tag, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("update-agents", agentsExists, serversExists)
+				@ConfigNavbar("update-agents", agentsExists, serversExists, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -87,7 +85,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 									if newReleaseAvailable(latestRelease.Version, higherReleaseApplied.Version) {
 										<p class="uk-text-small">
 											{ i18n.T(ctx, "admin.update.agents.new_version_date") }
-											{ l.FmtDateMedium(latestRelease.ReleaseDate) }
+											{ commonInfo.Translator.FmtDateMedium(latestRelease.ReleaseDate) }
 										</p>
 									}
 									<p class="uk-text-small uk-text-italic">{ latestRelease.Summary } </p>
@@ -95,8 +93,8 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 								<hr class="uk-divider-icon"/>
 								<div class="flex justify-between">
 									<div class="flex items-center gap-4">
-										@partials.RefreshPage(l, "/admin/update-agents", "#main", "outerHTML", "get", refresh, false)
-										@filters.ClearFilters("/admin/update-agents", "#main", "outerHTML", func() bool {
+										@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML", "get", refresh, false)
+										@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML", func() bool {
 											return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
 												len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
 												len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionTo) == 0
@@ -175,7 +173,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 											title={ i18n.T(ctx, "UpdateAll") }
 											type="button"
 											class="uk-button uk-button-primary"
-											hx-post="/admin/update-agents/confirm"
+											hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents/confirm", commonInfo.TenantID))) }
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
@@ -362,7 +360,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												</td>
 												<td class="!align-middle">
 													<div class="flex flex-wrap gap-2">
-														@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/admin/update-agents", "#main", "outerHTML")
+														@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML")
 													</div>
 												</td>
 												if len(agent.UpdateTaskStatus) > 0 {
@@ -386,7 +384,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												}
 												if !agent.UpdateTaskExecution.IsZero() {
 													<td class="!align-middle">
-														{ l.FmtDateMedium(agent.UpdateTaskExecution.Local()) + " " + l.FmtTimeShort(agent.UpdateTaskExecution.Local()) }
+														{ commonInfo.Translator.FmtDateMedium(agent.UpdateTaskExecution.Local()) + " " + commonInfo.Translator.FmtTimeShort(agent.UpdateTaskExecution.Local()) }
 													</td>
 												} else {
 													<td class="!align-middle"></td>
@@ -412,7 +410,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/update-agents")
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))))
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
@@ -444,8 +442,8 @@ templ GetVersionError() {
 	</div>
 }
 
-templ UpdateAgentsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ UpdateAgentsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

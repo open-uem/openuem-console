@@ -5,13 +5,12 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"time"
 )
 
-templ PowerManagement(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, currentVersion, latestVersion string, agent *ent.Agent, confirmDelete, detectRemoteAgents bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Computers", Url: "/computers"}, {Title: agent.Hostname, Url: fmt.Sprintf("/computers/%s", agent.ID)}}, sm, currentVersion, latestVersion)
+templ PowerManagement(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -20,16 +19,16 @@ templ PowerManagement(c echo.Context, p partials.PaginationAndSort, sm *sessions
 						@partials.OSBadge(agent.Os)
 						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
 					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, "/computers", "#main", "outerHTML")
-					if agent.IsRemote && detectRemoteAgents {
+					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+					if agent.IsRemote && commonInfo.DetectRemoteAgents {
 						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
 							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "power", agent.VncProxyPort, confirmDelete)
+				@ComputersNavbar(agent.ID, "power", agent.VncProxyPort, confirmDelete, commonInfo)
 				if confirmDelete {
-					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), "/computers", "/computers/"+agent.ID)
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
@@ -46,14 +45,14 @@ templ PowerManagement(c echo.Context, p partials.PaginationAndSort, sm *sessions
 				</div>
 				<div class="uk-card uk-card-body uk-card-default flex justify-start">
 					<div class="flex flex-col gap-4 w-1/3">
-						if len(agent.MAC) > 0 && (!detectRemoteAgents || (detectRemoteAgents && !agent.IsRemote)) {
+						if len(agent.MAC) > 0 && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) {
 							<form class="flex gap-4 w-full uk-form-horizontal items-end">
 								<input type="hidden" name="MACAddress" value={ agent.MAC }/>
 								<input type="hidden" name="IPAddress" value={ agent.IP }/>
 								<button
 									type="button"
 									class="flex justify-start gap-4 uk-button uk-button-primary w-1/2"
-									hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/power/wol", agent.ID))) }
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power/wol", agent.ID)))) }
 									hx-push-url="false"
 									hx-target="#main"
 									hx-swap="outerHTML"
@@ -71,7 +70,7 @@ templ PowerManagement(c echo.Context, p partials.PaginationAndSort, sm *sessions
 							<button
 								type="button"
 								class="flex justify-start gap-4 uk-button uk-button-primary w-1/2"
-								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/power/off", agent.ID))) }
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power/off", agent.ID)))) }
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"
@@ -89,7 +88,7 @@ templ PowerManagement(c echo.Context, p partials.PaginationAndSort, sm *sessions
 							<button
 								type="button"
 								class="flex justify-start gap-4 uk-button uk-button-primary w-1/2"
-								hx-post={ string(templ.URL(fmt.Sprintf("/computers/%s/power/reboot", agent.ID))) }
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power/reboot", agent.ID)))) }
 								hx-push-url="false"
 								hx-target="#main"
 								hx-swap="outerHTML"

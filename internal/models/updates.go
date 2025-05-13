@@ -2,12 +2,15 @@ package models
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/systemupdate"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -20,6 +23,7 @@ type SystemUpdate struct {
 	LastInstall        time.Time `sql:"last_install"`
 	LastSearch         time.Time `sql:"last_search"`
 	PendingUpdates     bool      `sql:"pending_updates"`
+	SiteID             int
 }
 
 func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
@@ -33,19 +37,52 @@ func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	}
 }
 
-func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter) (int, error) {
-	query := m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))
+func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter, c *partials.CommonInfo) (int, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().
+			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	applySystemUpdatesFilters(query, f)
 
 	return query.Count(context.Background())
 }
 
-func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.SystemUpdatesFilter) ([]SystemUpdate, error) {
+func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.SystemUpdatesFilter, c *partials.CommonInfo) ([]SystemUpdate, error) {
+	var query *ent.AgentQuery
 	var systemUpdates []SystemUpdate
 	var err error
 
-	query := m.Client.Agent.Query()
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
 
 	applySystemUpdatesFilters(query, f)
 
@@ -132,6 +169,30 @@ func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.S
 
 	if err != nil {
 		return nil, err
+	}
+
+	// Add site ids
+	sortedAgentIDs := []string{}
+	for _, computer := range systemUpdates {
+		sortedAgentIDs = append(sortedAgentIDs, computer.ID)
+	}
+	agents, err := m.Client.Agent.Query().WithSite().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Add site id to each computer in order
+	for i, computer := range systemUpdates {
+		for _, agent := range agents {
+			if computer.ID == agent.ID {
+				if len(agent.Edges.Site) == 1 {
+					systemUpdates[i].SiteID = agent.Edges.Site[0].ID
+				} else {
+					systemUpdates[i].SiteID = -1
+				}
+				break
+			}
+		}
 	}
 
 	return systemUpdates, nil

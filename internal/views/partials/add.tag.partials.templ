@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-templ AddTagButton(p PaginationAndSort, allTags, appliedTags []*ent.Tag, agentId, url, method, target, swap string) {
+templ AddTagButton(p PaginationAndSort, allTags, appliedTags []*ent.Tag, agentId, url, method, target, swap string, commonInfo *CommonInfo) {
 	<button type="button" class="border rounded-full px-5 py-1 flex gap-2 items-center ">
 		<uk-icon icon="tag" hx-history="false" uk-cloak></uk-icon>
 		{ i18n.T(ctx, "Add") }
@@ -50,9 +50,9 @@ templ AddTagButton(p PaginationAndSort, allTags, appliedTags []*ent.Tag, agentId
 					<button
 						type="button"
 						title="add more tags"
-						hx-get="/admin/tags"
+						href={ fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
 						hx-push-url="true"
-						href="/admin/tags"
 						hx-target="#main"
 						hx-swap="outerHTML"
 						class="flex gap-2 items-center text-left p-2"

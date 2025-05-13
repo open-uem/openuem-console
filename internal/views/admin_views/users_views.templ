@@ -2,25 +2,23 @@ package admin_views
 
 import (
 	"fmt"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	openuem_nats "github.com/open-uem/nats"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
 
-templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, users []*ent.User, successMessage, errMessage string, refresh int, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, sm, currentVersion, latestVersion)
+templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, users []*ent.User, successMessage, errMessage string, refresh int, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", agentsExists, serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -36,12 +34,12 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters("/admin", "#main", "outerHTML", func() bool {
+							@filters.ClearFilters("/admin/users", "#main", "outerHTML", func() bool {
 								return f.Username == "" && f.Name == "" && f.Email == "" && f.Phone == "" &&
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.RegisterOptions) == 0
 							})
-							@partials.RefreshPage(l, "/admin", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, "/admin/users", "#main", "outerHTML", "post", refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button
@@ -204,12 +202,12 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 										if user.Created.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ l.FmtDateMedium(user.Created.Local()) + " " + l.FmtTimeShort(user.Created.Local()) } </td>
+											<td>{ commonInfo.Translator.FmtDateMedium(user.Created.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Created.Local()) } </td>
 										}
 										if user.Modified.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ l.FmtDateMedium(user.Modified.Local()) + " " + l.FmtTimeShort(user.Modified.Local()) } </td>
+											<td>{ commonInfo.Translator.FmtDateMedium(user.Modified.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Modified.Local()) } </td>
 										}
 										<td>
 											@partials.MoreButton(index)
@@ -256,7 +254,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															<a
 																hx-target="#main"
 																hx-swap="outerHTML"
-																hx-post={ string(templ.URL("/admin/users/" + user.ID + "/renewcertificate")) }
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/renewcertificate", user.ID))) }
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
@@ -265,7 +263,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													}
 													<li>
 														<a
-															hx-delete={ string(templ.URL("/admin/users/" + user.ID)) }
+															hx-delete={ string(templ.URL(fmt.Sprintf("/admin/users/%s", user.ID))) }
 															hx-target="#main"
 															hx-push-url="false"
 															hx-swap="outerHTML"
@@ -294,12 +292,12 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 	</main>
 }
 
-templ NewUser(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, defaultCountry string, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm, currentVersion, latestVersion)
+templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", agentsExists, serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists, commonInfo)
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -397,12 +395,12 @@ templ NewUser(c echo.Context, sm *sessions.SessionManager, currentVersion, lates
 	</main>
 }
 
-templ EditUser(c echo.Context, sm *sessions.SessionManager, currentVersion, latestVersion string, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, sm, currentVersion, latestVersion)
+templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("users", agentsExists, serversExists)
+				@ConfigNavbar("users", agentsExists, serversExists, commonInfo)
 				<div id="success" class="hidden"></div>
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -498,8 +496,8 @@ templ EditUser(c echo.Context, sm *sessions.SessionManager, currentVersion, late
 	</main>
 }
 
-templ UsersIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ UsersIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }

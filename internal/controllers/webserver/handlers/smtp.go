@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/models"
-	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/wneessen/go-mail"
@@ -17,6 +16,11 @@ import (
 
 func (h *Handler) SMTPSettings(c echo.Context) error {
 	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
 
 	if c.Request().Method == "POST" {
 
@@ -40,12 +44,12 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.saved")))
 	}
 
-	settings, err := h.Model.GetSMTPSettings()
+	settings, err := h.Model.GetSMTPSettings(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	agentsExists, err := h.Model.AgentsExists()
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -55,12 +59,7 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	latestServerRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
-	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, h.SessionManager, h.Version, latestServerRelease.Version, settings, agentsExists, serversExists)))
+	return RenderView(c, admin_views.SMTPSettingsIndex(" | SMTP Settings", admin_views.SMTPSettings(c, settings, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }
 
 func (h *Handler) TestSMTPSettings(c echo.Context) error {

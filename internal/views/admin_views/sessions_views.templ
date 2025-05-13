@@ -3,23 +3,21 @@ package admin_views
 import (
 	"fmt"
 	"github.com/alexedwards/scs/v2"
-	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/mssola/useragent"
 	ent "github.com/open-uem/ent"
-	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"log"
 )
 
-templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.SessionManager, l locales.Translator, currentVersion, latestVersion string, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec, agentsExists, serversExists bool) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: i18n.T(ctx, "Session.other"), Url: "/admin/sessions"}}, sm, currentVersion, latestVersion)
+templ Sessions(c echo.Context, p partials.PaginationAndSort, sessions []*ent.Sessions, successMessage, errMessage string, codec scs.Codec, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "Session.other"), Url: "/admin/sessions"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("sessions", agentsExists, serversExists)
+				@ConfigNavbar("sessions", agentsExists, serversExists, commonInfo)
 				<div id="confirm" class="hidden"></div>
 				@partials.SuccessMessage(successMessage)
 				@partials.ErrorMessage(errMessage, true)
@@ -79,7 +77,7 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 										if session.Expiry.IsZero() {
 											<td>-</td>
 										} else {
-											<td>{ l.FmtDateMedium(session.Expiry.Local()) + " " + l.FmtTimeShort(session.Expiry.Local()) }</td>
+											<td>{ commonInfo.Translator.FmtDateMedium(session.Expiry.Local()) + " " + commonInfo.Translator.FmtTimeShort(session.Expiry.Local()) }</td>
 										}
 										<td>
 											@partials.MoreButton(index)
@@ -111,10 +109,10 @@ templ Sessions(c echo.Context, p partials.PaginationAndSort, sm *sessions.Sessio
 	</main>
 }
 
-templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, sm *sessions.SessionManager, currentVersion, latestVersion string) {
-	@partials.Header([]partials.Breadcrumb{{Title: "Admin", Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}}, sm, currentVersion, latestVersion)
+templ SessionsDelete(c echo.Context, session *ent.Sessions, codec scs.Codec, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Sessions", Url: "/admin/sessions"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", "/admin/sessions/"+session.ID)
+		@partials.ConfirmDelete(c, i18n.T(ctx, "confirm.session_delete"), "/admin/sessions", string(templ.URL(fmt.Sprintf("/admin/sessions/%s", session.ID))))
 	</main>
 }
 
@@ -131,8 +129,8 @@ templ SessionInfo(session *ent.Sessions, codec scs.Codec) {
 	</div>
 }
 
-templ SessionsIndex(title string, cmp templ.Component) {
-	@layout.Base("admin") {
+templ SessionsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
 		@cmp
 	}
 }
