@@ -113,6 +113,10 @@ func applySitesFilter(query *ent.SiteQuery, f filters.SiteFilter) {
 		query.Where(site.DescriptionContainsFold(f.Name))
 	}
 
+	if len(f.Domain) > 0 {
+		query.Where(site.DomainContainsFold(f.Domain))
+	}
+
 	if len(f.CreatedFrom) > 0 {
 		dateFrom, err := time.Parse("2006-01-02", f.CreatedFrom)
 		if err == nil {
@@ -152,7 +156,7 @@ func applySitesFilter(query *ent.SiteQuery, f filters.SiteFilter) {
 	}
 }
 
-func (m *Model) AddSite(tenantID int, name string, isDefault bool) error {
+func (m *Model) AddSite(tenantID int, name string, isDefault bool, domain string) error {
 	if isDefault {
 		// Remove the is default property for existing sites
 		if err := m.Client.Site.Update().Where(site.HasTenantWith(tenant.ID(tenantID))).SetIsDefault(false).Exec(context.Background()); err != nil {
@@ -160,12 +164,12 @@ func (m *Model) AddSite(tenantID int, name string, isDefault bool) error {
 		}
 	}
 
-	return m.Client.Site.Create().SetDescription(name).SetIsDefault(isDefault).SetTenantID(tenantID).Exec(context.Background())
+	return m.Client.Site.Create().SetDescription(name).SetIsDefault(isDefault).SetDomain(domain).SetTenantID(tenantID).Exec(context.Background())
 }
 
-func (m *Model) UpdateSite(tenantID int, siteID int, desc string, isDefault bool) error {
+func (m *Model) UpdateSite(tenantID int, siteID int, desc string, domain string, isDefault bool) error {
 
-	query := m.Client.Site.Update().Where(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))).SetDescription(desc)
+	query := m.Client.Site.Update().Where(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))).SetDescription(desc).SetDomain(domain)
 
 	if isDefault {
 		if err := m.Client.Site.Update().Where(site.Not(site.ID(siteID)), site.HasTenantWith(tenant.ID(tenantID))).SetIsDefault(false).Exec(context.Background()); err != nil {

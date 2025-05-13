@@ -1200,6 +1200,11 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
+	}
+
 	if c.Request().Method == "POST" {
 		if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
@@ -1233,16 +1238,16 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		if strings.Contains(agent.Vnc, "RDP") {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, domain, true, requestPIN, pin, commonInfo), commonInfo))
 		} else {
-			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, true, requestPIN, pin, commonInfo), commonInfo))
+			return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, true, requestPIN, pin, commonInfo), commonInfo))
 		}
 	}
 
 	if strings.Contains(agent.Vnc, "RDP") {
-		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, domain, false, false, "", commonInfo), commonInfo))
 	}
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerStopVNC(c echo.Context) error {
@@ -1260,6 +1265,11 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
+	}
+
 	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
@@ -1268,7 +1278,7 @@ func (h *Handler) ComputerStopVNC(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.no_responder"), false))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, h.Domain, false, false, "", commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, false, false, "", commonInfo), commonInfo))
 }
 
 func (h *Handler) GenerateRDPFile(c echo.Context) error {

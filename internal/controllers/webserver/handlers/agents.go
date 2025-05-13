@@ -383,9 +383,14 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					continue
 				}
 
+				domain := h.Domain
+				if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+					domain = agent.Edges.Site[0].Domain
+				}
+
 				data, err := json.Marshal(openuem_nats.CertificateRequest{
 					AgentId:      agentId,
-					DNSName:      agent.Hostname + "." + h.Domain,
+					DNSName:      agent.Hostname + "." + domain,
 					Organization: h.OrgName,
 					Province:     h.OrgProvince,
 					Locality:     h.OrgLocality,
@@ -627,9 +632,14 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
+	}
+
 	data, err := json.Marshal(openuem_nats.CertificateRequest{
 		AgentId:      agentId,
-		DNSName:      agent.Hostname + "." + h.Domain,
+		DNSName:      agent.Hostname + "." + domain,
 		Organization: h.OrgName,
 		Province:     h.OrgProvince,
 		Locality:     h.OrgLocality,

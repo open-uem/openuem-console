@@ -3,8 +3,8 @@ package commands
 import (
 	"crypto/x509"
 
-	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/nats-io/nats.go"
+	"github.com/open-uem/openuem-console/internal/models"
 )
 
 type ConsoleCommand struct {
@@ -17,4 +17,5 @@ type ConsoleCommand struct {
 	CACertPath     string
 	NATSServers    string
 	JWTKey         string
+	Domain         string
 }

@@ -57,6 +57,7 @@ type TenantFilter struct {
 
 type SiteFilter struct {
 	Name           string
+	Domain         string
 	DefaultOptions []string
 	CreatedFrom    string
 	CreatedTo      string

@@ -34,7 +34,8 @@ func (command *ConsoleCommand) CheckRequisites(cCtx *cli.Context) error {
 
 	log.Println("... connecting to database")
 	command.DBUrl = cCtx.String("dburl")
-	command.Model, err = models.New(command.DBUrl, "pgx")
+	command.Domain = cCtx.String("domain")
+	command.Model, err = models.New(command.DBUrl, "pgx", command.Domain)
 	if err != nil {
 		log.Fatalf("[FATAL]: could not connect to database, reason: %s", err.Error())
 	}

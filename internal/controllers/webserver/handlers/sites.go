@@ -40,6 +40,11 @@ func (h *Handler) ListSites(c echo.Context, successMessage, errMessage string, c
 		f.Name = nameFilter
 	}
 
+	domainFilter := c.FormValue("filterByDomain")
+	if domainFilter != "" {
+		f.Domain = domainFilter
+	}
+
 	createdFrom := c.FormValue("filterByCreatedDateFrom")
 	if createdFrom != "" {
 		f.CreatedFrom = createdFrom
@@ -176,7 +181,12 @@ func (h *Handler) AddSite(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_bool", err.Error()), true))
 	}
 
-	err = h.Model.AddSite(tenantID, name, isDefault)
+	domain := c.FormValue("domain")
+	if domain == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.domain_cannot_be_empty"), true))
+	}
+
+	err = h.Model.AddSite(tenantID, name, isDefault, domain)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.new_error"), true))
 	}
@@ -222,6 +232,11 @@ func (h *Handler) EditSite(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.name_cannot_be_empty"), true))
 		}
 
+		domain := c.FormValue("domain")
+		if domain == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.domain_cannot_be_empty"), true))
+		}
+
 		if s.Description != name {
 			exists, err := h.Model.SiteNameTaken(tenantID, name)
 			if err != nil {
@@ -238,7 +253,7 @@ func (h *Handler) EditSite(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_bool", err.Error()), true))
 		}
 
-		if err := h.Model.UpdateSite(tenantID, s.ID, name, isDefault); err != nil {
+		if err := h.Model.UpdateSite(tenantID, s.ID, name, domain, isDefault); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
@@ -377,12 +392,16 @@ func (h *Handler) ImportSites(c echo.Context) error {
 
 		}
 
-		if len(record) != 1 {
+		if len(record) != 2 {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_error_wrong_format", index), false))
 		}
 
 		if record[0] == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_required", "orgname", index), false))
+		}
+
+		if record[1] == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_required", "domain", index), false))
 		}
 
 		index++
@@ -398,7 +417,7 @@ func (h *Handler) ImportSites(c echo.Context) error {
 			continue
 		}
 
-		err = h.Model.AddSite(tenantID, record[0], false)
+		err = h.Model.AddSite(tenantID, record[0], false, record[1])
 		if err != nil {
 			errors = append(errors, err.Error())
 			continue

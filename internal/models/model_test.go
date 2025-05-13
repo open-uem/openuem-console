@@ -12,15 +12,15 @@ type ModelTestSuite struct {
 }
 
 func (suite *ModelTestSuite) TestNewModel() {
-	_, err := New("file:ent?mode=memory&_fk=1", "sqlite3")
+	_, err := New("file:ent?mode=memory&_fk=1", "sqlite3", "openuem.eu")
 	assert.NoError(suite.T(), err, "should create model")
 
-	_, err = New("postgres://localhost:1111/test", "pgx")
+	_, err = New("postgres://localhost:1111/test", "pgx", "openuem.eu")
 	assert.Error(suite.T(), err, "pgx should raise error")
 }
 
 func (suite *ModelTestSuite) TestCloseModel() {
-	m, err := New("file:ent?mode=memory&_fk=1", "sqlite3")
+	m, err := New("file:ent?mode=memory&_fk=1", "sqlite3", "openuem.eu")
 	assert.NoError(suite.T(), err, "should create model")
 	err = m.Close()
 	assert.NoError(suite.T(), err, "should close model")

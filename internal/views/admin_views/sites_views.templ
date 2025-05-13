@@ -119,6 +119,13 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 										</th>
 										<th>
 											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "sites.domain") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.domain"), "domain", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByText(c, p, "Domain", f.Name, "sites.filter_by_domain", "#main", "outerHTML")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "sites.created") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "sites.created"), "created", "time", "#main", "outerHTML", "get")
 												@filters.FilterByDate(c, p, "Created", "sites.filter_by_creation", f.CreatedFrom, f.CreatedTo, "#main", "outerHTML", func() bool { return f.CreatedFrom == "" && f.CreatedTo == "" })
@@ -163,6 +170,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 										} else {
 											<td>-</td>
 										}
+										<td>{ s.Domain }</td>
 										if s.Created.IsZero() {
 											<td>-</td>
 										} else {
@@ -263,6 +271,19 @@ templ NewSite(c echo.Context, defaultCountry string, agentsExists, serversExists
 											</select>
 										</div>
 									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="domain">{ i18n.T(ctx, "sites.domain") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="domain"
+												name="domain"
+												class="uk-input"
+												type="text"
+												placeholder={ i18n.T(ctx, "sites.domain") + "..." }
+												required
+											/>
+										</div>
+									</div>
 								</fieldset>
 							</div>
 							<div class="flex gap-4">
@@ -327,6 +348,20 @@ templ EditSite(c echo.Context, s *ent.Site, defaultCountry string, agentsExists,
 												<option value="true" selected?={ s.IsDefault }>{ i18n.T(ctx, "Yes") }</option>
 												<option value="false" selected?={ !s.IsDefault }>{ i18n.T(ctx, "No") }</option>
 											</select>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "sites.domain") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="domain"
+												name="domain"
+												class="uk-input"
+												type="text"
+												value={ s.Domain }
+												placeholder={ i18n.T(ctx, "sites.domain") + "..." }
+												required
+											/>
 										</div>
 									</div>
 								</fieldset>
