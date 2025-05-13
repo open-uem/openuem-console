@@ -154,7 +154,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags()
+	allTags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -665,7 +665,7 @@ func (h *Handler) ApplyGlobalSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags()
+	allTags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

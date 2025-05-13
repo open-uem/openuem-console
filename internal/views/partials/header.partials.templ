@@ -32,6 +32,7 @@ type CommonInfo struct {
 	IsAdmin            bool
 	ActionTenantID     string
 	IsComputer         bool
+	IsProfile          bool
 }
 
 templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
@@ -68,7 +69,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 						uk-cloack
 					></uk-icon>
 				</span>
-				<select class="w-48 uk-select border-green-700 leading-none" title={ i18n.T(ctx, "Organization") } name="tenant" _="on change set window.location to my.value">
+				<select class="w-48 uk-select border-green-700" title={ i18n.T(ctx, "Organization") } name="tenant" _="on change set window.location to my.value">
 					if commonInfo.IsAdmin {
 						<option
 							class="!align-middle"
@@ -103,13 +104,15 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 						<span class="uk-text-muted">
 							<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
 						</span>
-						<select class="w-48 uk-select border-green-700 leading-none" title={ i18n.T(ctx, "Site.one") } name="site" _="on change set window.location to my.value">
-							<option
-								value={ GetSiteSelectorUrl(c, commonInfo, -1) }
-								selected?={ commonInfo.SiteID ==  "-1" }
-							>
-								{ i18n.T(ctx,"AllSites") }
-							</option>
+						<select class="w-48 uk-select border-green-700" title={ i18n.T(ctx, "Site.one") } name="site" _="on change set window.location to my.value">
+							if !commonInfo.IsProfile {
+								<option
+									value={ GetSiteSelectorUrl(c, commonInfo, -1) }
+									selected?={ commonInfo.SiteID ==  "-1" }
+								>
+									{ i18n.T(ctx,"AllSites") }
+								</option>
+							}
 							for _, s := range commonInfo.Sites {
 								<option
 									value={ GetSiteSelectorUrl(c, commonInfo, s.ID) }
@@ -285,11 +288,15 @@ func GetSiteSelectorUrl(c echo.Context, commonInfo *CommonInfo, siteID int) stri
 		}
 	} else {
 		if slices.Contains(pathElements, "site") {
-			if len(pathElements) > 5 {
-				pathElements[4] = strconv.Itoa(siteID)
-				return strings.Join(pathElements, "/")
+			if commonInfo.IsProfile {
+				return fmt.Sprintf("/tenant/%s/site/%d/profiles", commonInfo.TenantID, siteID)
 			} else {
-				return fmt.Sprintf("/tenant/%s/site/%d", commonInfo.TenantID, siteID)
+				if len(pathElements) > 5 {
+					pathElements[4] = strconv.Itoa(siteID)
+					return strings.Join(pathElements, "/")
+				} else {
+					return fmt.Sprintf("/tenant/%s/site/%d", commonInfo.TenantID, siteID)
+				}
 			}
 		} else {
 			if len(pathElements) > 3 {

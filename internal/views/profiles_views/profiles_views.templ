@@ -40,7 +40,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 						class="uk-button uk-button-primary text-white"
 						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles/new"))) }
 						hx-target="#main"
-						hx-push-url="true"
+						hx-push-url="false"
 						hx-swap="outerHTML"
 					>
 						<uk-icon icon="square-plus" class="mr-2"></uk-icon>{ i18n.T(ctx, "profiles.add") }

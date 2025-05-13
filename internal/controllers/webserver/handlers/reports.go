@@ -453,7 +453,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 		f.ContactTo = contactTo
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -641,7 +641,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	}
 	f.ComputerModels = filteredComputerModels
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return nil, err
 	}
