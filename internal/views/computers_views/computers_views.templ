@@ -137,7 +137,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 		<tr class="h-16">
 			<td
 				class="!align-middle cursor-pointer"
-				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, agent.SiteID, agent.ID))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"

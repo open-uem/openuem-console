@@ -63,9 +63,9 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 
 	// Info from agents waiting for admission won't be shown
 	if excludeWaitingForAdmissionAgents {
-		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithTags().WithRelease()
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).WithSite().WithTags().WithRelease()
 	} else {
-		query = m.Client.Agent.Query().WithTags().WithRelease()
+		query = m.Client.Agent.Query().WithSite().WithTags().WithRelease()
 	}
 
 	siteID, err := strconv.Atoi(c.SiteID)

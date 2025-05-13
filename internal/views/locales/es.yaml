@@ -288,7 +288,7 @@ es:
     printer_could_not_be_removed: "La impresora no se pudo eliminar, razón: %s"
     printer_could_not_set_as_default: "La impresora no se pudo configurar por defecto, razón: %s"
     could_not_decode_printer: "No pude descodificar el nombre de la impresora"
-    overview_description: "Esta es la descripción general de tu equipo. También puede añadir una description y seleccionar el tipo de equipo"
+    overview_description: "Esta es la vista general de su equipo. Puede seleccionar a qué organización y sitio pertenece este equipo y también puede añadir una description y seleccionar el tipo de equipo"
     overview_description_placeholder: "Escriba una descripción de su equipo..."
     overview_description_could_not_save: "No se pudo guardar la descripción, razón: %s"
     overview_description_success: "La descripción del equipo se ha guardado"

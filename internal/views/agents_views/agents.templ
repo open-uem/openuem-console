@@ -404,7 +404,11 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 			</td>
 			<td
 				class="!align-middle hover:cursor-pointer"
-				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
+				if len(agent.Edges.Site) == 1 {
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, agent.Edges.Site[0].ID, agent.ID))) }
+				} else {
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))) }
+				}
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"

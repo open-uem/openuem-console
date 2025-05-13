@@ -24,6 +24,10 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
 	}
 
+	if strings.Contains(c.Request().URL.String(), "computers") && !strings.HasSuffix(c.Request().URL.String(), "computers") {
+		info.IsComputer = true
+	}
+
 	latestRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {
 		return nil, err
@@ -120,4 +124,27 @@ func (h *Handler) GetAdminTenantName(commonInfo *partials.CommonInfo) string {
 		tenantName = t.Description
 	}
 	return tenantName
+}
+
+func (h *Handler) GetAdminSiteName(commonInfo *partials.CommonInfo) string {
+	siteName := ""
+	if commonInfo.TenantID != "-1" {
+		tenantID, err := strconv.Atoi(commonInfo.TenantID)
+		if err != nil {
+			return ""
+		}
+
+		siteID, err := strconv.Atoi(commonInfo.SiteID)
+		if err != nil {
+			return ""
+		}
+
+		s, err := h.Model.GetSiteById(tenantID, siteID)
+		if err != nil {
+			return ""
+		}
+
+		siteName = s.Description
+	}
+	return siteName
 }

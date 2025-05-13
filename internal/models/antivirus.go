@@ -21,6 +21,7 @@ type Antivirus struct {
 	Name      string
 	IsActive  bool `sql:"is_active"`
 	IsUpdated bool `sql:"is_updated"`
+	SiteID    int
 }
 
 func mainAntivirusQuery(s *sql.Selector, p partials.PaginationAndSort) {
@@ -159,6 +160,30 @@ func (m *Model) GetAntiviriByPage(p partials.PaginationAndSort, f filters.Antivi
 
 	if err != nil {
 		return nil, err
+	}
+
+	// Add site ids
+	sortedAgentIDs := []string{}
+	for _, computer := range antiviri {
+		sortedAgentIDs = append(sortedAgentIDs, computer.ID)
+	}
+	agents, err := m.Client.Agent.Query().WithSite().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Add site id to each computer in order
+	for i, computer := range antiviri {
+		for _, agent := range agents {
+			if computer.ID == agent.ID {
+				if len(agent.Edges.Site) == 1 {
+					antiviri[i].SiteID = agent.Edges.Site[0].ID
+				} else {
+					antiviri[i].SiteID = -1
+				}
+				break
+			}
+		}
 	}
 
 	return antiviri, nil

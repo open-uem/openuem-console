@@ -103,7 +103,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 										<tr>
 											<td
 												class="!align-middle underline cursor-pointer"
-												hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", systemUpdate.ID)))) }
+												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, systemUpdate.SiteID, systemUpdate.ID))) }
 												hx-push-url="true"
 												hx-target="#main"
 												hx-swap="outerHTML"

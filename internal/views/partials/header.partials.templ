@@ -31,6 +31,7 @@ type CommonInfo struct {
 	Translator         locales.Translator
 	IsAdmin            bool
 	ActionTenantID     string
+	IsComputer         bool
 }
 
 templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
@@ -88,7 +89,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 							selected?={ commonInfo.TenantID ==  strconv.Itoa(t.ID) }
 						>
 							if t.Description == "DefaultTenant" {
-								{ i18n.T(ctx,t.Description) }
+								{ i18n.T(ctx,"DefaultTenant") }
 							} else {
 								{ t.Description }
 							}
@@ -97,7 +98,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 				</select>
 			</form>
 			if !commonInfo.IsAdmin {
-				if len(commonInfo.Sites) > 1 {
+				if len(commonInfo.Sites) > 1 && !commonInfo.IsComputer {
 					<form class="flex items-center gap-2">
 						<span class="uk-text-muted">
 							<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
@@ -115,7 +116,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 									selected?={ commonInfo.SiteID ==  strconv.Itoa(s.ID) }
 								>
 									if s.Description == "DefaultSite" {
-										{ i18n.T(ctx,s.Description) }
+										{ i18n.T(ctx,"DefaultSite") }
 									} else {
 										{ s.Description }
 									}
@@ -124,12 +125,32 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 						</select>
 					</form>
 				}
-				if len(commonInfo.Sites) == 1 {
+				if len(commonInfo.Sites) == 1  && !commonInfo.IsComputer {
 					<div class="flex items-center gap-2 uk-text-muted">
 						<span>
 							<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
 						</span>
-						{ commonInfo.Sites[0].Description }
+						if commonInfo.Sites[0].Description == "DefaultSite" {
+							{ i18n.T(ctx,"DefaultSite") }
+						} else {
+							{ commonInfo.Sites[0].Description }
+						}
+					</div>
+				}
+				if commonInfo.IsComputer {
+					<div class="flex items-center gap-2 uk-text-muted">
+						<span>
+							<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
+						</span>
+						for _, s := range commonInfo.Sites {
+							if commonInfo.SiteID == strconv.Itoa(s.ID) {
+								if s.Description == "DefaultSite" {
+									{ i18n.T(ctx,"DefaultSite") }
+								} else {
+									{ s.Description }
+								}
+							}
+						}
 					</div>
 				}
 			}

@@ -34,6 +34,7 @@ type Computer struct {
 	IsRemote     bool      `sql:"is_remote"`
 	LastContact  time.Time `sql:"last_contact"`
 	Tags         []*ent.Tag
+	SiteID       int
 }
 
 func (m *Model) CountAllComputers(f filters.AgentFilter, c *partials.CommonInfo) (int, error) {
@@ -258,16 +259,21 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 	for _, computer := range computers {
 		sortedAgentIDs = append(sortedAgentIDs, computer.ID)
 	}
-	agents, err := m.Client.Agent.Query().WithTags().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
+	agents, err := m.Client.Agent.Query().WithSite().WithTags().Where(agent.IDIn(sortedAgentIDs...)).All(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	// Add tags to each computer in order
+	// Add tags and site id to each computer in order
 	for i, computer := range computers {
 		for _, agent := range agents {
 			if computer.ID == agent.ID {
 				computers[i].Tags = agent.Edges.Tags
+				if len(agent.Edges.Site) == 1 {
+					computers[i].SiteID = agent.Edges.Site[0].ID
+				} else {
+					computers[i].SiteID = -1
+				}
 				break
 			}
 		}

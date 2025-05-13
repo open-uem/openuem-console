@@ -289,7 +289,7 @@ en:
     printer_could_not_be_removed: "The printer could not be removed, reason: %s"
     printer_could_not_set_as_default: "The printer could not be set as default, reason: %s"
     could_not_decode_printer: "Could not decode the printer's name"
-    overview_description: "Here's your endpoint's overview. You can add a description and select the endpoint type too"
+    overview_description: "Here's your endpoint's overview. You can select the organization and site where this endpoint belongs to, add a description and select the endpoint type too"
     overview_description_placeholder: "Enter a description of the endpoint..."
     overview_description_could_not_save: "Could not save the description, reason: %s"
     overview_description_success: "The endpoint's description has been saved"
