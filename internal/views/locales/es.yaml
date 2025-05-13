@@ -642,7 +642,7 @@ es:
     title: Configuración general
     description: OpenUEM tiene algunos ajustes que configuran su comportamiento.
     global: "Estos son los ajustes globales de OpenUEM y que son heredados por las organizaciones. Use el menú de desplegable de organización para cambiar sus ajustes"
-    tenant: "Estos son los ajustes específicos para esta organización. Estos ajuste se heredan de la configuración global, pero se puden sobrescribir"
+    tenant: "Estos son los ajustes específicos para esta organización. Estos ajuste se heredan de la configuración global, pero se pueden sobrescribir o puede usar el botón para aplicar nuevamente la configuración global"
     country_title: País
     country_description: País por defecto para el registro de usuarios
     nats_timeout_title: NATS Timeout
@@ -728,6 +728,8 @@ es:
     auto_admit_agents_invalid: El valor seleccionado para la admisión de agentes automáticamente no es válido
     auto_admit_agents_could_not_be_saved: La configuración de admisión de agentes automáticamente no pudo guardarse
     could_not_get_auto_admit_agents_setting: No se pudo consultar la configuración de admisión de agentes automáticamente
+    apply_global: "Aplicar conf. global"
+    could_not_apply_global_settings: "No se pudo aplicar la configuración global, razón: %s"
   restore:
     title: Restaurar
     description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal

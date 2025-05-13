@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag, commonInfo *partials.CommonInfo, tenantName string) {
+templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExists, serversExists bool, tags []*ent.Tag, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
 	if commonInfo.TenantID == "-1" {
 		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "General Settings"), Url: "/admin/settings"}}, commonInfo)
 	} else {
@@ -21,7 +21,11 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@ConfigNavbar("settings", agentsExists, serversExists, commonInfo)
-				<div id="success" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
 				<div id="error" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
@@ -34,6 +38,16 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 								{ i18n.T(ctx, "settings.global") }
 							}
 						</p>
+						<button
+							class="flex items-center my-4 uk-button uk-button-primary"
+							type="submit"
+							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/inherit", commonInfo.TenantID))) }
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx,"settings.apply_global") }
+						</button>
 					</div>
 					<div class="uk-card-body">
 						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">

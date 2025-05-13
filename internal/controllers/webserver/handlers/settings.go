@@ -159,7 +159,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), ""), commonInfo))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
@@ -627,4 +627,48 @@ func (h *Handler) ChangeRemoteAssistanceSetting(c echo.Context, settings *models
 	}
 
 	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.disable_remote_assistance_success")))
+}
+
+func (h *Handler) ApplyGlobalSettings(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	if commonInfo.TenantID == "-1" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.tenant_cannot_be_empty"), true))
+	}
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_int", commonInfo.TenantID), true))
+	}
+
+	if err := h.Model.ApplyGlobalSettings(tenantID); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.could_not_apply_global_settings", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	allTags, err := h.Model.GetAllTags()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), i18n.T(c.Request().Context(), "settings.saved")), commonInfo))
 }

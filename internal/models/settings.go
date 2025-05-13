@@ -461,12 +461,12 @@ func (m *Model) GetDefaultUseFlatpak(tenantID string) (bool, error) {
 }
 
 func (m *Model) CloneGlobalSettings(tenantID int) error {
-	s, err := m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Only(context.Background())
+	s, err := m.Client.Settings.Query().WithTag().Where(settings.Not(settings.HasTenant())).Only(context.Background())
 	if err != nil {
 		return err
 	}
 
-	return m.Client.Settings.Create().
+	query := m.Client.Settings.Create().
 		SetAgentReportFrequenceInMinutes(s.AgentReportFrequenceInMinutes).
 		SetAutoAdmitAgents(s.AutoAdmitAgents).
 		SetCountry(s.Country).
@@ -478,6 +478,7 @@ func (m *Model) CloneGlobalSettings(tenantID int) error {
 		SetMessageFrom(s.MessageFrom).
 		SetProfilesApplicationFrequenceInMinutes(s.ProfilesApplicationFrequenceInMinutes).
 		SetRefreshTimeInMinutes(s.RefreshTimeInMinutes).
+		SetRequestVncPin(s.RequestVncPin).
 		SetSMTPAuth(s.SMTPAuth).
 		SetSMTPPassword(s.SMTPPassword).
 		SetSMTPPort(s.SMTPPort).
@@ -490,5 +491,53 @@ func (m *Model) CloneGlobalSettings(tenantID int) error {
 		SetUseFlatpak(s.UseFlatpak).
 		SetUseWinget(s.UseWinget).
 		SetUserCertYearsValid(s.UserCertYearsValid).
-		SetTenantID(tenantID).Exec(context.Background())
+		SetTenantID(tenantID)
+
+	if s.Edges.Tag != nil {
+		query = query.SetTagID(s.Edges.Tag.ID)
+	}
+
+	return query.Exec(context.Background())
+}
+
+func (m *Model) ApplyGlobalSettings(tenantID int) error {
+	s, err := m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	query := m.Client.Settings.Update().Where(settings.HasTenantWith(tenant.ID(tenantID))).
+		SetAgentReportFrequenceInMinutes(s.AgentReportFrequenceInMinutes).
+		SetAutoAdmitAgents(s.AutoAdmitAgents).
+		SetCountry(s.Country).
+		SetDetectRemoteAgents(s.DetectRemoteAgents).
+		SetDisableRemoteAssistance(s.DisableRemoteAssistance).
+		SetDisableSftp(s.DisableSftp).
+		SetMaxUploadSize(s.MaxUploadSize).
+		SetNatsRequestTimeoutSeconds(s.NatsRequestTimeoutSeconds).
+		SetMessageFrom(s.MessageFrom).
+		SetProfilesApplicationFrequenceInMinutes(s.ProfilesApplicationFrequenceInMinutes).
+		SetRefreshTimeInMinutes(s.RefreshTimeInMinutes).
+		SetRequestVncPin(s.RequestVncPin).
+		SetSMTPAuth(s.SMTPAuth).
+		SetSMTPPassword(s.SMTPPassword).
+		SetSMTPPort(s.SMTPPort).
+		SetSMTPServer(s.SMTPServer).
+		SetSMTPStarttls(s.SMTPStarttls).
+		SetSMTPTLS(s.SMTPTLS).
+		SetSMTPUser(s.SMTPUser).
+		SetSessionLifetimeInMinutes(s.SessionLifetimeInMinutes).
+		SetUpdateChannel(s.UpdateChannel).
+		SetUseFlatpak(s.UseFlatpak).
+		SetUseWinget(s.UseWinget).
+		SetUserCertYearsValid(s.UserCertYearsValid).
+		SetTenantID(tenantID)
+
+	query = query.ClearTag()
+
+	if s.Edges.Tag != nil {
+		query = query.SetTagID(s.Edges.Tag.ID)
+	}
+
+	return query.Exec(context.Background())
 }

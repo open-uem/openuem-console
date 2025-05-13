@@ -140,6 +140,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/admin/update-agents", h.UpdateAgents, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin/update-agents/confirm", h.UpdateAgentsConfirm, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/admin/inherit", h.ApplyGlobalSettings, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/admin/sites", func(c echo.Context) error { return h.ListSites(c, "", "", false) }, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/admin/sites/new", h.NewSite, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin/sites/new", h.AddSite, h.IsAuthenticated)

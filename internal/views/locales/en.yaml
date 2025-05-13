@@ -646,7 +646,7 @@ en:
     title: General Settings
     description: OpenUEM has some settings that configure its behavior.
     global: "These are OpenUEM global settings which are inherited by organizations. Use the organization drop-down menu to change its settings"
-    tenant: "This are the specific settings for this organization. This settings are inherited from the global config, but you can override them"
+    tenant: "This are the specific settings for this organization. This settings are inherited from the global config, but you can override them or you can use the button to apply the global settings again"
     country_title: Country
     country_description: Default country for user registration
     nats_timeout_title: NATS Timeout
@@ -732,6 +732,8 @@ en:
     auto_admit_agents_invalid: Selected value for admit agents automatically is not valid
     auto_admit_agents_could_not_be_saved: Admit agents automatically setting could not be saved
     could_not_get_auto_admit_agents_setting: Could not update admit agents automatically setting
+    apply_global: "Apply global settings"
+    could_not_apply_global_settings: "Could not apply global settings, reason: %s"
   restore:
     title: Restore
     description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong
