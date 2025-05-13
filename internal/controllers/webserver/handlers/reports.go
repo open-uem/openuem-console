@@ -530,8 +530,8 @@ func GetComputersReport(c echo.Context, computers []models.Computer) (core.Marot
 			text.NewCol(1, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: getWhiteColor()}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.version"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.username"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(1, i18n.T(c.Request().Context(), "agents.manufacturer"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
-			text.NewCol(2, i18n.T(c.Request().Context(), "agents.model"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.manufacturer"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
+			text.NewCol(1, i18n.T(c.Request().Context(), "agents.model"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
 			text.NewCol(2, "S/N", props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: getWhiteColor()}),
 		).WithStyle(&props.Cell{BackgroundColor: getDarkGreenColor()}),
 	}
@@ -559,10 +559,10 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 				Center:  true,
 				Percent: 75,
 			}),
-			text.NewCol(1, computer.Version, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(2, computer.Version, props.Text{Size: 8, Align: align.Left}),
 			text.NewCol(2, computer.Username, props.Text{Size: 8, Align: align.Left}),
 			text.NewCol(2, computer.Manufacturer, props.Text{Size: 7, Align: align.Left}),
-			text.NewCol(2, computer.Model, props.Text{Size: 8, Align: align.Left}),
+			text.NewCol(1, computer.Model, props.Text{Size: 7, Align: align.Left}),
 			text.NewCol(2, computer.Serial, props.Text{Size: 7, Align: align.Left}),
 		)
 		if i%2 == 0 {
