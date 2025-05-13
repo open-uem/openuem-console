@@ -136,7 +136,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	case "winget":
 		f.AgentOSVersions = []string{"windows"}
 	case "flatpak":
-		f.AgentOSVersions = []string{"ubuntu", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux"}
+		f.AgentOSVersions = []string{"ubuntu", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky"}
 	}
 
 	tmpAllAgents := []string{}
