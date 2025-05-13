@@ -3,12 +3,15 @@ package models
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/profile"
+	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/task"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -39,8 +42,23 @@ type TaskConfig struct {
 	LocalGroupMembersToExclude        string
 }
 
-func (m *Model) CountAllTasksForProfile(profileID int) (int, error) {
-	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Count(context.Background())
+func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return -1, err
+	}
+
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return -1, err
+	}
+
+	if siteID == -1 {
+		return -1, err
+	}
+
+	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
 }
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
@@ -172,8 +190,22 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
-func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID int) ([]*ent.Task, error) {
-	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID)))
+func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID int, c *partials.CommonInfo) ([]*ent.Task, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return nil, err
+	}
+
+	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
 
 	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByID()).All(context.Background())
 }

@@ -573,7 +573,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		}
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

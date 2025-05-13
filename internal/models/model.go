@@ -12,6 +12,7 @@ import (
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/migrate"
 	"github.com/open-uem/ent/orgmetadata"
+	"github.com/open-uem/ent/profile"
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/tag"
 	"github.com/open-uem/ent/tenant"
@@ -142,7 +143,7 @@ func (m *Model) AssociateTagsToDefaultTenant() error {
 		return fmt.Errorf("could not find default tenant")
 	}
 
-	return m.Client.Tag.Update().SetTenantID(t.ID).Where(tag.Not(tag.HasTenant())).Exec(context.Background())
+	return m.Client.Tag.Update().Where(tag.Not(tag.HasTenant())).SetTenantID(t.ID).Exec(context.Background())
 }
 
 func (m *Model) AssociateProfilesToDefaultTenantAndSite() error {
@@ -156,7 +157,7 @@ func (m *Model) AssociateProfilesToDefaultTenantAndSite() error {
 		return fmt.Errorf("coulf not find default site")
 	}
 
-	return m.Client.Profile.Update().SetSiteID(s.ID).Exec(context.Background())
+	return m.Client.Profile.Update().Where(profile.Not(profile.HasSite())).SetSiteID(s.ID).Exec(context.Background())
 }
 
 func (m *Model) AssociateMetadataToDefaultTenant() error {
@@ -165,7 +166,7 @@ func (m *Model) AssociateMetadataToDefaultTenant() error {
 		return fmt.Errorf("could not find default tenant")
 	}
 
-	return m.Client.OrgMetadata.Update().SetTenantID(t.ID).Where(orgmetadata.Not(orgmetadata.HasTenant())).Exec(context.Background())
+	return m.Client.OrgMetadata.Update().Where(orgmetadata.Not(orgmetadata.HasTenant())).SetTenantID(t.ID).Exec(context.Background())
 }
 
 func (m *Model) AssociateDomainToDefaultSite(domain string) error {

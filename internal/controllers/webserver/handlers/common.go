@@ -22,6 +22,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		CurrentVersion: h.Version,
 		Translator:     views.GetTranslatorForDates(c),
 		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
+		IsProfile:      strings.Contains(c.Request().URL.String(), "profiles"),
 	}
 
 	if strings.Contains(c.Request().URL.String(), "computers") && !strings.HasSuffix(c.Request().URL.String(), "computers") {

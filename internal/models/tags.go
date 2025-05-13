@@ -2,14 +2,21 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/tag"
+	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-func (m *Model) GetAllTags() ([]*ent.Tag, error) {
-	tags, err := m.Client.Tag.Query().All(context.Background())
+func (m *Model) GetAllTags(c *partials.CommonInfo) ([]*ent.Tag, error) {
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := m.Client.Tag.Query().Where(tag.HasTenantWith(tenant.ID(tenantID))).All(context.Background())
 	if err != nil {
 		return nil, err
 	}

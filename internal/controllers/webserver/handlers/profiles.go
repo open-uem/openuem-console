@@ -23,12 +23,12 @@ func (h *Handler) Profiles(c echo.Context, successMessage string) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	p.NItems, err = h.Model.CountAllProfiles()
+	p.NItems, err = h.Model.CountAllProfiles(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	profiles, err := h.Model.GetProfilesByPage(p)
+	profiles, err := h.Model.GetProfilesByPage(p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -102,22 +102,22 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.invalid_task"), true))
 	}
 
-	profile, err := h.Model.GetProfileById(profileId)
+	profile, err := h.Model.GetProfileById(profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
 	}
 
-	p.NItems, err = h.Model.CountAllTasksForProfile(profileId)
+	p.NItems, err = h.Model.CountAllTasksForProfile(profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId)
+	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.no_tags"), true))
 	}
@@ -134,7 +134,7 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 
 		applyToAll := c.FormValue("profile-assignment")
 
-		if err := h.Model.UpdateProfile(profileId, description, applyToAll); err != nil {
+		if err := h.Model.UpdateProfile(profileId, description, applyToAll, commonInfo); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.could_not_save"), true))
 		}
 
@@ -142,7 +142,7 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 	}
 
 	if method == "DELETE" {
-		if err := h.Model.DeleteProfile(profileId); err != nil {
+		if err := h.Model.DeleteProfile(profileId, commonInfo); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.could_not_delete"), true))
 		}
 		return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.edit.deleted"))
@@ -215,12 +215,12 @@ func (h *Handler) ConfirmDeleteProfile(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	p.NItems, err = h.Model.CountAllProfiles()
+	p.NItems, err = h.Model.CountAllProfiles(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	profiles, err := h.Model.GetProfilesByPage(p)
+	profiles, err := h.Model.GetProfilesByPage(p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -258,22 +258,22 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.invalid_task"), true))
 	}
 
-	profile, err := h.Model.GetProfileById(profileId)
+	profile, err := h.Model.GetProfileById(profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
 	}
 
-	p.NItems, err = h.Model.CountAllTasksForProfile(profileId)
+	p.NItems, err = h.Model.CountAllTasksForProfile(profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId)
+	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tags, err := h.Model.GetAllTags()
+	tags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.no_tags"), true))
 	}
@@ -325,7 +325,7 @@ func (h *Handler) ProfileIssues(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	profile, err := h.Model.GetProfileById(pID)
+	profile, err := h.Model.GetProfileById(pID, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
 	}

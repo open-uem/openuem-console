@@ -144,7 +144,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	availableTags, err := h.Model.GetAllTags()
+	availableTags, err := h.Model.GetAllTags(commonInfo)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()

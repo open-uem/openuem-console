@@ -40,7 +40,7 @@ func (suite *TagsTestSuite) SetupTest() {
 }
 
 func (suite *TagsTestSuite) TestGetAllTags() {
-	tags, err := suite.model.GetAllTags()
+	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
 
 	assert.NoError(suite.T(), err, "should get all tags")
 
@@ -151,7 +151,7 @@ func (suite *TagsTestSuite) TestNewTag() {
 	assert.NoError(suite.T(), err, "should count all tags")
 	assert.Equal(suite.T(), 8, count, "tags count should be 8")
 
-	tags, err := suite.model.GetAllTags()
+	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")
@@ -163,7 +163,7 @@ func (suite *TagsTestSuite) TestUpdateTag() {
 	err := suite.model.UpdateTag(suite.tagId, "Tag8", "My tag 8", "#f8f8f8")
 	assert.NoError(suite.T(), err, "should update a tag")
 
-	tags, err := suite.model.GetAllTags()
+	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")
