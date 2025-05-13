@@ -1120,6 +1120,15 @@ func getAlmaLinuxPNG() string {
 	return filepath.Join(cwd, "assets", "img", "os", "almalinux.png")
 }
 
+func getRockyLinuxPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "rockylinux.png")
+}
+
 func getUnknownPNG() string {
 	cwd, err := utils.GetWd()
 	if err != nil {
@@ -1145,6 +1154,8 @@ func getOperatingSystemPNG(os string) string {
 		return getRedHatPNG()
 	case "almalinux":
 		return getAlmaLinuxPNG()
+	case "rocky":
+		return getRockyLinuxPNG()
 	default:
 		return getUnknownPNG()
 	}
