@@ -769,6 +769,7 @@ es:
     filter_by_pendingupdate: "Filtrar por estado de actualizaciones pendientes"
     filter_by_updatestatus: "Filtrar por estado de actualización"
     show_updates_history: "Mostrar historial de actualizaciones recientes"
+    unknown: "La config. de actualizacion automát. es desconocido"
   admin:
     update:
       agents:

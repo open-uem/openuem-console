@@ -773,6 +773,7 @@ en:
     filter_by_pendingupdate: "Filter by pending updates status"
     filter_by_updatestatus: "Filter by update status"
     show_updates_history: "Show recent updates history"
+    unknown: "Automatic updates configuration is unknown"
   admin:
     update:
       agents:
