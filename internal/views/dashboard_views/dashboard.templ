@@ -157,8 +157,8 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.no_auto_update") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation")) }
-									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.not_configured&filterByUpdateStatus1=systemupdate.disabled&filterByUpdateStatus2=systemupdate.notify_before_download&filterByUpdateStatus3=systemupdate.notify_before_installation"))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.unknown&filterByUpdateStatus1=systemupdate.not_configured&filterByUpdateStatus2=systemupdate.disabled&filterByUpdateStatus3=systemupdate.notify_before_download&filterByUpdateStatus4=systemupdate.notify_before_installation")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByUpdateStatus0=systemupdate.unknown&filterByUpdateStatus1=systemupdate.not_configured&filterByUpdateStatus2=systemupdate.disabled&filterByUpdateStatus3=systemupdate.notify_before_download&filterByUpdateStatus4=systemupdate.notify_before_installation"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
