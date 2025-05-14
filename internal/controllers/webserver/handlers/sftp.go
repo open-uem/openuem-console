@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -86,6 +87,13 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 		parent = filepath.Dir(cwd)
 	}
 
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			cwd = filepath.ToSlash(cwd)
+			parent = filepath.ToSlash(parent)
+		}
+	}
+
 	files, err := client.ReadDir(cwd)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -138,6 +146,11 @@ func (h *Handler) NewFolder(c echo.Context) error {
 	}
 
 	path := filepath.Join(cwd, itemName)
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			path = filepath.ToSlash(path)
+		}
+	}
 	if err := client.Mkdir(path); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -188,6 +201,13 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	}
 
 	path := filepath.Join(cwd, itemName)
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			cwd = filepath.ToSlash(cwd)
+			parent = filepath.ToSlash(parent)
+			path = filepath.ToSlash(path)
+		}
+	}
 	if err := client.RemoveAll(path); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -253,7 +273,14 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	currentPath := filepath.Join(cwd, currentName)
 	newPath := filepath.Join(cwd, newName)
-
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			cwd = filepath.ToSlash(cwd)
+			parent = filepath.ToSlash(parent)
+			currentPath = filepath.ToSlash(currentPath)
+			newPath = filepath.ToSlash(newPath)
+		}
+	}
 	if err := client.Rename(currentPath, newPath); err != nil {
 		return RenderError(c, partials.ErrorMessage("current name cannot be empty", false))
 	}
@@ -314,6 +341,13 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 
 	for _, item := range items {
 		path := filepath.Join(removeForm.Cwd, item)
+		if agent.Os != "windows" {
+			if runtime.GOOS == "windows" {
+				cwd = filepath.ToSlash(cwd)
+				removeForm.Parent = filepath.ToSlash(removeForm.Parent)
+				path = filepath.ToSlash(path)
+			}
+		}
 		if err := client.RemoveAll(path); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
@@ -381,6 +415,14 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	defer sshConn.Close()
 
 	path := filepath.Join(cwd, file.Filename)
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			cwd = filepath.ToSlash(cwd)
+			parent = filepath.ToSlash(parent)
+			path = filepath.ToSlash(path)
+		}
+	}
+
 	dst, err := client.Create(path)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -393,6 +435,13 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	}
 
 	// Get stat info
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			cwd = filepath.ToSlash(cwd)
+			parent = filepath.ToSlash(parent)
+			path = filepath.ToSlash(path)
+		}
+	}
 	_, err = client.Stat(path)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -456,6 +505,12 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	defer dstFile.Close()
+
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			remoteFile = filepath.ToSlash(remoteFile)
+		}
+	}
 
 	srcFile, err := client.OpenFile(remoteFile, (os.O_RDONLY))
 	if err != nil {
@@ -522,7 +577,13 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 
 	w := zip.NewWriter(file)
 
-	if err := addFiles(client, w, remoteFolder, ""); err != nil {
+	if agent.Os != "windows" {
+		if runtime.GOOS == "windows" {
+			remoteFolder = filepath.ToSlash(remoteFolder)
+		}
+	}
+
+	if err := addFiles(client, w, remoteFolder, "", agent.Os); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	if err := w.Close(); err != nil {
@@ -596,7 +657,12 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 
 	for _, item := range items {
 		path := filepath.Join(deleteForm.Cwd, item)
-		if err := addFiles(client, w, path, ""); err != nil {
+		if agent.Os != "windows" {
+			if runtime.GOOS == "windows" {
+				path = filepath.ToSlash(path)
+			}
+		}
+		if err := addFiles(client, w, path, "", agent.Os); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
@@ -629,7 +695,7 @@ func (h *Handler) Download(c echo.Context) error {
 	return c.Attachment(path, fileName)
 }
 
-func addFiles(client *sftp.Client, w *zip.Writer, basePath, baseInZip string) error {
+func addFiles(client *sftp.Client, w *zip.Writer, basePath, baseInZip, os string) error {
 	// Check if is file or directory
 	entry, err := client.Open(basePath)
 	if err != nil {
@@ -653,12 +719,24 @@ func addFiles(client *sftp.Client, w *zip.Writer, basePath, baseInZip string) er
 		for _, file := range files {
 			if !file.IsDir() {
 				filePath := filepath.Join(basePath, file.Name())
-				if err := addFiles(client, w, filePath, baseInZip); err != nil {
+				if os != "windows" {
+					if runtime.GOOS == "windows" {
+						filePath = filepath.ToSlash(filePath)
+					}
+				}
+
+				if err := addFiles(client, w, filePath, baseInZip, os); err != nil {
 					return err
 				}
 			} else {
 				filePath := filepath.Join(basePath, file.Name(), "/")
-				if err := addFiles(client, w, filePath, baseInZip); err != nil {
+				if os != "windows" {
+					if runtime.GOOS == "windows" {
+						filePath = filepath.ToSlash(filePath)
+					}
+				}
+
+				if err := addFiles(client, w, filePath, baseInZip, os); err != nil {
 					return err
 				}
 			}
