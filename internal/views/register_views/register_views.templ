@@ -55,6 +55,7 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 								id="uid"
 								name="uid"
 								type="text"
+								spellcheck="false"
 								placeholder={ i18n.T(ctx, "register.uid_placeholder") }
 								value={ values.UID }
 								required

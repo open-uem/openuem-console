@@ -164,8 +164,8 @@ templ ConfirmTagDeletion(commonInfo *partials.CommonInfo) {
 
 templ NewTag(commonInfo *partials.CommonInfo) {
 	<form class="flex gap-2 items-center w-1/2 mt-6 mb-2">
-		<input name="tag" class="uk-input w-1/3" type="text" placeholder={ i18n.T(ctx, "tags.new") }/>
-		<input name="description" class="uk-input w-2/3" type="text" placeholder={ i18n.T(ctx, "tags.optional_description") }/>
+		<input name="tag" class="uk-input w-1/3" type="text" placeholder={ i18n.T(ctx, "tags.new") } spellcheck="false"/>
+		<input name="description" class="uk-input w-2/3" type="text" placeholder={ i18n.T(ctx, "tags.optional_description") } spellcheck="false"/>
 		@ColorSelector("new")
 		<button
 			title="add tag"
@@ -224,8 +224,8 @@ templ EditTag(commonInfo *partials.CommonInfo) {
 			<form class="flex flex-col gap-4">
 				<input id="edit-tag" name="tagId" type="hidden" value=""/>
 				<div class="flex gap-4 w-1/2">
-					<input id="edit-tag-name" name="tag" class="uk-input w-1/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.new") }/>
-					<input id="edit-tag-description" name="description" class="uk-input w-2/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.optional_description") }/>
+					<input id="edit-tag-name" name="tag" class="uk-input w-1/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.new") } spellcheck="false"/>
+					<input id="edit-tag-description" name="description" class="uk-input w-2/3" type="text" value="" placeholder={ i18n.T(ctx, "tags.optional_description") } spellcheck="false"/>
 					@ColorSelector("edit")
 				</div>
 				<div class="flex gap-4">

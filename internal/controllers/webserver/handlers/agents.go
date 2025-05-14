@@ -150,7 +150,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		errMessage = err.Error()
 	}
 
-	appliedTags, err := h.Model.GetAppliedTags()
+	appliedTags, err := h.Model.GetAppliedTags(commonInfo)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()

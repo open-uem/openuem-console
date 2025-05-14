@@ -87,7 +87,7 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	appliedTags, err := h.Model.GetAppliedTags()
+	appliedTags, err := h.Model.GetAppliedTags(commonInfo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

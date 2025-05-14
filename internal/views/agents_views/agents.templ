@@ -756,6 +756,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 								id="sftp-port"
 								name="sftp-port"
 								type="text"
+								spellcheck="false"
 								value={ agent.SftpPort }
 								class={ "uk-input w-1/3 text-right", templ.KV("uk-disabled", !agent.SftpService) }
 								readonly?={ !agent.SftpService }
@@ -784,6 +785,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 								id="vnc-proxy-port"
 								name="vnc-proxy-port"
 								type="text"
+								spellcheck="false"
 								value={ agent.VncProxyPort }
 								class="uk-input w-1/3 text-right"
 								readonly?={ !agent.SftpService }

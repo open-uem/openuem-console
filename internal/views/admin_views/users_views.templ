@@ -323,6 +323,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 												name="uid"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "users.uid") + "..." }
 												required
 											/>
@@ -341,6 +342,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "users.name") + "..." }
 												required
 											/>
@@ -371,6 +373,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 												name="phone"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "users.phone") + "..." }
 												_="
 												on blur on keyup wait 0.5s
@@ -428,6 +431,7 @@ templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, ag
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												value={ user.Name }
 												placeholder={ i18n.T(ctx, "users.name") + "..." }
 												required
@@ -464,6 +468,7 @@ templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, ag
 												name="phone"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												value={ user.Phone }
 												placeholder={ i18n.T(ctx, "users.phone") + "..." }
 												_="

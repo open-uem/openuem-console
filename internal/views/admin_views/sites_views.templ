@@ -257,6 +257,7 @@ templ NewSite(c echo.Context, defaultCountry string, agentsExists, serversExists
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "sites.name") + "..." }
 												required
 											/>
@@ -279,6 +280,7 @@ templ NewSite(c echo.Context, defaultCountry string, agentsExists, serversExists
 												name="domain"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "sites.domain") + "..." }
 												required
 											/>
@@ -331,6 +333,7 @@ templ EditSite(c echo.Context, s *ent.Site, defaultCountry string, agentsExists,
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												if s.Description == "DefaultTenant" {
 													value={ i18n.T(ctx, s.Description) }
 												} else {
@@ -358,6 +361,7 @@ templ EditSite(c echo.Context, s *ent.Site, defaultCountry string, agentsExists,
 												name="domain"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												value={ s.Domain }
 												placeholder={ i18n.T(ctx, "sites.domain") + "..." }
 												required

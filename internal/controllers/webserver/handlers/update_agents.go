@@ -211,7 +211,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 	}
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
-	appliedTags, err := h.Model.GetAppliedTags()
+	appliedTags, err := h.Model.GetAppliedTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

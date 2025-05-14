@@ -73,15 +73,17 @@ func (h *Handler) Overview(c echo.Context) error {
 			}
 
 			// Change URL with the new site and organization
-			if commonInfo.SiteID == "-1" {
-				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/computers/%s/overview", tenant, agentId))
-				commonInfo.TenantID = tenant
-			} else {
-				c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", tenant, site, agentId))
-				commonInfo.TenantID = tenant
-				commonInfo.SiteID = site
+			c.Response().Header().Set("HX-Replace-Url", fmt.Sprintf("/tenant/%s/site/%s/computers/%s/overview", tenant, site, agentId))
+			commonInfo.TenantID = tenant
+			commonInfo.SiteID = site
+			tenantID, err := strconv.Atoi(tenant)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
 			}
-
+			commonInfo.Sites, err = h.Model.GetSites(tenantID)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_sites", err.Error()), true))
+			}
 			successMessage = i18n.T(c.Request().Context(), "agents.association_success")
 		}
 	}
@@ -1085,12 +1087,12 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	orgMetadata, err := h.Model.GetAllOrgMetadata()
+	orgMetadata, err := h.Model.GetAllOrgMetadata(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	p.NItems, err = h.Model.CountAllOrgMetadata()
+	p.NItems, err = h.Model.CountAllOrgMetadata(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -1456,6 +1458,10 @@ func (h *Handler) GetDropdownSites(c echo.Context) error {
 	sites, err := h.Model.GetSites(tenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_get_sites"), false))
+	}
+
+	if commonInfo.SiteID == "-1" {
+		commonInfo.SiteID = c.FormValue("site")
 	}
 
 	return RenderView(c, computers_views.SitesDropdown(c, agentId, sites, commonInfo))

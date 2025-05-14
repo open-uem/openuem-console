@@ -54,7 +54,7 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 										class="uk-select w-3/4"
 										title={ i18n.T(ctx, "Organization") }
 										hx-post={ fmt.Sprintf("/computers/%s/sites", agent.ID) }
-										hx-include="#tenant"
+										hx-include="#tenant,#site"
 										hx-target="#site-selector"
 										hx-swap="outerHTML"
 										hx-trigger="change"
@@ -98,6 +98,7 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 												}
 											</select>
 											<button
+												id="save-site"
 												class="flex items-center gap-8"
 												type="submit"
 												hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/overview", agent.ID)))) }
@@ -162,7 +163,7 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 								<th>{ i18n.T(ctx, "Description") }</th>
 								<td>
 									<form class="flex gap-2 items-center">
-										<input class="uk-input w-3/4" type="text" name="endpoint-description" placeholder={ i18n.T(ctx, "agents.overview_description_placeholder") } value={ agent.Description }/>
+										<input class="uk-input w-3/4" type="text" spellcheck="false" name="endpoint-description" placeholder={ i18n.T(ctx, "agents.overview_description_placeholder") } value={ agent.Description }/>
 										<button
 											class="flex items-center gap-8"
 											type="submit"

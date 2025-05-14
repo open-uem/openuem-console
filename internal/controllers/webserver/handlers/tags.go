@@ -27,7 +27,7 @@ func (h *Handler) TagManager(c echo.Context) error {
 
 		if tag != "" && color != "" {
 			if tagId == "" {
-				if err := h.Model.NewTag(tag, description, color); err != nil {
+				if err := h.Model.NewTag(tag, description, color, commonInfo); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			} else {
@@ -35,7 +35,7 @@ func (h *Handler) TagManager(c echo.Context) error {
 				if err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
-				if err := h.Model.UpdateTag(id, tag, description, color); err != nil {
+				if err := h.Model.UpdateTag(id, tag, description, color, commonInfo); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			}
@@ -54,17 +54,17 @@ func (h *Handler) TagManager(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		if err := h.Model.DeleteTag(id); err != nil {
+		if err := h.Model.DeleteTag(id, commonInfo); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
-	p.NItems, err = h.Model.CountAllTags()
+	p.NItems, err = h.Model.CountAllTags(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	tags, err := h.Model.GetTagsByPage(p)
+	tags, err := h.Model.GetTagsByPage(p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

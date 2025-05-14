@@ -98,7 +98,7 @@ templ MetadataTable(c echo.Context, p partials.PaginationAndSort, agentId string
 							<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
 							<input type="hidden" name="sortBy" value={ p.SortBy }/>
 							<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
-							<input class="uk-input" type="text" name="value" placeholder={ i18n.T(ctx, "agents.metadata_insert_value") } value={ SearchValue(item.ID, data) }/>
+							<input class="uk-input" type="text" name="value" spellcheck="false" placeholder={ i18n.T(ctx, "agents.metadata_insert_value") } value={ SearchValue(item.ID, data) }/>
 							<button
 								class="flex items-center gap-2"
 								type="submit"
