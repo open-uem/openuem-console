@@ -106,7 +106,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 									<td class="!align-middle">
 										<form class="flex gap-2">
 											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
-											<input class="uk-input" type="text" name="max-upload-size" value={ settings.MaxUploadSize }/>
+											<input class="uk-input" type="text" name="max-upload-size" value={ settings.MaxUploadSize } spellcheck="false"/>
 											<button
 												class="flex items-center gap-2"
 												type="submit"

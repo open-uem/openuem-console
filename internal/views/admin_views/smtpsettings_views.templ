@@ -40,7 +40,7 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 									<legend class="uk-legend">{ i18n.T(ctx, "smtp.server_fieldset") }</legend>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="server">{ i18n.T(ctx, "smtp.server") }</label>
-										<input id="server" name="server" type="text" class="uk-input" value={ settings.SMTPServer } placeholder={ i18n.T(ctx, "smtp.server_placeholder") }/>
+										<input id="server" name="server" type="text" spellcheck="false" class="uk-input" value={ settings.SMTPServer } placeholder={ i18n.T(ctx, "smtp.server_placeholder") }/>
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="port">{ i18n.T(ctx, "smtp.port") }</label>
@@ -51,7 +51,7 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 									<legend class="uk-legend">{ i18n.T(ctx, "smtp.auth_fieldset") }</legend>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="user">{ i18n.T(ctx, "smtp.user") }</label>
-										<input id="user" name="user" type="text" class="uk-input" value={ settings.SMTPUser } placeholder={ i18n.T(ctx, "smtp.user_placeholder") }/>
+										<input id="user" name="user" type="text" spellcheck="false" class="uk-input" value={ settings.SMTPUser } placeholder={ i18n.T(ctx, "smtp.user_placeholder") }/>
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="password">{ i18n.T(ctx, "smtp.password") }</label>

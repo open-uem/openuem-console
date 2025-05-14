@@ -26,7 +26,7 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 
 		if name != "" {
 			if orgMetadataId == "" {
-				if err := h.Model.NewOrgMetadata(name, description); err != nil {
+				if err := h.Model.NewOrgMetadata(name, description, commonInfo); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			} else {
@@ -34,7 +34,7 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 				if err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
-				if err := h.Model.UpdateOrgMetadata(id, name, description); err != nil {
+				if err := h.Model.UpdateOrgMetadata(id, name, description, commonInfo); err != nil {
 					return RenderError(c, partials.ErrorMessage(err.Error(), false))
 				}
 			}
@@ -52,17 +52,17 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		if err := h.Model.DeleteOrgMetadata(id); err != nil {
+		if err := h.Model.DeleteOrgMetadata(id, commonInfo); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 	}
 
-	p.NItems, err = h.Model.CountAllOrgMetadata()
+	p.NItems, err = h.Model.CountAllOrgMetadata(commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	data, err := h.Model.GetOrgMetadataByPage(p)
+	data, err := h.Model.GetOrgMetadataByPage(p, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

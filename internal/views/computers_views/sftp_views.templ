@@ -126,7 +126,7 @@ templ NewFolderIcon() {
 templ NewFolderDialog(agent *ent.Agent, cwd string, commonInfo *partials.CommonInfo) {
 	<form class="flex gap-4">
 		<input type="hidden" name="cwd" value={ cwd }/>
-		<input type="text" id="itemName" name="itemName" placeholder={ i18n.T(ctx, "inventory.file_browser.folder_name") } class="uk-input" value=""/>
+		<input type="text" id="itemName" name="itemName" spellcheck="false" placeholder={ i18n.T(ctx, "inventory.file_browser.folder_name") } class="uk-input" value=""/>
 		<button
 			type="button"
 			class="uk-button uk-button-primary flex gap-2"
@@ -453,6 +453,7 @@ templ RenameEntry(agent *ent.Agent, cwd, parent string, file fs.FileInfo, isDir 
 		<input
 			type="text"
 			name="newName"
+			spellcheck="false"
 			class="uk-input mx-2 hidden"
 			placeholder={ i18n.T(ctx, "inventory.file_browser.new_name") }
 			_="on keyup

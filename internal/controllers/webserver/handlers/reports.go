@@ -433,7 +433,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	appliedTags, err := h.Model.GetAppliedTags()
+	appliedTags, err := h.Model.GetAppliedTags(commonInfo)
 	if err != nil {
 		return nil, err
 	}

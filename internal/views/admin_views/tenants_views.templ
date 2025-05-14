@@ -260,6 +260,7 @@ templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExis
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												placeholder={ i18n.T(ctx, "tenants.name") + "..." }
 												required
 											/>
@@ -282,6 +283,7 @@ templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExis
 												name="site-name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												value={ i18n.T(ctx, "DefaultSite") }
 												placeholder={ i18n.T(ctx, "Site.one") + "..." }
 												required
@@ -335,6 +337,7 @@ templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, a
 												name="name"
 												class="uk-input"
 												type="text"
+												spellcheck="false"
 												if t.Description == "DefaultTenant" {
 													value={ i18n.T(ctx, t.Description) }
 												} else {
