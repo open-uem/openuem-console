@@ -225,7 +225,7 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 					hx-push-url="false"
 				} else {
 					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/notes", id))) }
-					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("s/computers/%s/notes", id)))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/notes", id)))) }
 					hx-push-url="true"
 				}
 				hx-target="#main"
