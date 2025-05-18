@@ -38,16 +38,18 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 								{ i18n.T(ctx, "settings.global") }
 							}
 						</p>
-						<button
-							class="flex items-center my-4 uk-button uk-button-primary"
-							type="submit"
-							hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/inherit", commonInfo.TenantID))) }
-							hx-push-url="false"
-							hx-target="#main"
-							hx-swap="outerHTML"
-						>
-							{ i18n.T(ctx,"settings.apply_global") }
-						</button>
+						if commonInfo.TenantID != "-1" {
+							<button
+								class="flex items-center my-4 uk-button uk-button-primary"
+								type="submit"
+								hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/inherit", commonInfo.TenantID))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								{ i18n.T(ctx,"settings.apply_global") }
+							</button>
+						}
 					</div>
 					<div class="uk-card-body">
 						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
