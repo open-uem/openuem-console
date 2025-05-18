@@ -49,36 +49,6 @@ func New(dbUrl string, driverName, domain string) (*Model, error) {
 		}
 	}
 
-	// Create default orgs and sites #feat-119
-	if err := model.CreateDefaultTenantAndSite(); err != nil {
-		return nil, err
-	}
-
-	// Associate agents without site to default site #feat-119
-	if err := model.AssociateAgentsToDefaultTenantAndSite(); err != nil {
-		return nil, err
-	}
-
-	// Associate tags without tenant to default tenant #feat-119
-	if err := model.AssociateTagsToDefaultTenant(); err != nil {
-		return nil, err
-	}
-
-	// Associate metadata without tenant to default tenant #feat-119
-	if err := model.AssociateMetadataToDefaultTenant(); err != nil {
-		return nil, err
-	}
-
-	// Associate profiles without tenant to default tenant #feat-119
-	if err := model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
-		return nil, err
-	}
-
-	// Associate domain to default site #feat-119
-	if err := model.AssociateDomainToDefaultSite(domain); err != nil {
-		return nil, err
-	}
-
 	return &model, nil
 }
 

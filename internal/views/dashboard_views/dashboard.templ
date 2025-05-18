@@ -171,7 +171,7 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 							<td class="!align-middle text-center">
 								<a
 									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled")) }
-									hx-get={ string(templ.URL(fmt.Sprintf(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled")))) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
