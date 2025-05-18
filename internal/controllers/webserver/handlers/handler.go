@@ -194,7 +194,6 @@ func (h *Handler) StartNATSConnectJob() error {
 				h.ServerStream, err = h.JetStream.Stream(ctx, "SERVERS_STREAM")
 				if err != nil {
 					log.Printf("[ERROR]: Server Stream could not be created or updated, reason: %v", err)
-					return
 				}
 
 				if err := h.TaskScheduler.RemoveJob(h.NATSConnectJob.ID()); err != nil {

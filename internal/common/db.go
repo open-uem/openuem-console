@@ -23,6 +23,36 @@ func (w *Worker) StartDBConnectJob() error {
 			log.Println("[WARN]: could not create initial settings")
 		}
 
+		// Create default orgs and sites #feat-119
+		if err := w.Model.CreateDefaultTenantAndSite(); err != nil {
+			log.Println("[WARN]: could not create initial settings")
+		}
+
+		// Associate agents without site to default site #feat-119
+		if err := w.Model.AssociateAgentsToDefaultTenantAndSite(); err != nil {
+			log.Println("[WARN]: could not associate agents to default tenant and site")
+		}
+
+		// Associate tags without tenant to default tenant #feat-119
+		if err := w.Model.AssociateTagsToDefaultTenant(); err != nil {
+			log.Println("[WARN]: could not associate tags to default tenant")
+		}
+
+		// Associate metadata without tenant to default tenant #feat-119
+		if err := w.Model.AssociateMetadataToDefaultTenant(); err != nil {
+			log.Println("[WARN]: could not associate metadata to default tenant")
+		}
+
+		// Associate profiles without tenant to default tenant #feat-119
+		if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
+			log.Println("[WARN]: could not associate profiles to default tenant and site")
+		}
+
+		// Associate domain to default site #feat-119
+		if err := w.Model.AssociateDomainToDefaultSite(w.Domain); err != nil {
+			log.Println("[WARN]: could not associate domain to default site")
+		}
+
 		w.StartConsoleService()
 
 		// Start a job to check latest OpenUEM releases
@@ -64,6 +94,36 @@ func (w *Worker) StartDBConnectJob() error {
 
 				if err := w.Model.CreateInitialSettings(); err != nil {
 					log.Println("[WARN]: could not create initial settings")
+				}
+
+				// Create default orgs and sites #feat-119
+				if err := w.Model.CreateDefaultTenantAndSite(); err != nil {
+					log.Println("[WARN]: could not create default tenant and site")
+				}
+
+				// Associate agents without site to default site #feat-119
+				if err := w.Model.AssociateAgentsToDefaultTenantAndSite(); err != nil {
+					log.Println("[WARN]: could not associate agents to default tenant and site")
+				}
+
+				// Associate tags without tenant to default tenant #feat-119
+				if err := w.Model.AssociateTagsToDefaultTenant(); err != nil {
+					log.Println("[WARN]: could not associate tags to default tenant")
+				}
+
+				// Associate metadata without tenant to default tenant #feat-119
+				if err := w.Model.AssociateMetadataToDefaultTenant(); err != nil {
+					log.Println("[WARN]: could not associate metadata to default tenant")
+				}
+
+				// Associate profiles without tenant to default tenant #feat-119
+				if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
+					log.Println("[WARN]: could not associate profiles to default tenant and site")
+				}
+
+				// Associate domain to default site #feat-119
+				if err := w.Model.AssociateDomainToDefaultSite(w.Domain); err != nil {
+					log.Println("[WARN]: could not associate domain to default site")
 				}
 
 				w.StartConsoleService()
