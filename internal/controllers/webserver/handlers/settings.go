@@ -112,6 +112,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if c.FormValue("use-brew") != "" {
+			if err := h.Model.UpdateUseBrew(settings.ID, settings.UseBrew); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.use_brew_could_not_be_saved"), true))
+			}
+		}
+
 		if settings.WinGetFrequency != 0 {
 			return h.ChangeWingetFrequency(c, settings)
 		}
@@ -182,6 +188,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	wingetFrequency := c.FormValue("winget-configure-frequency")
 	useWinget := c.FormValue("use-winget")
 	useFlatpak := c.FormValue("use-flatpak")
+	useBrew := c.FormValue("use-brew")
 	disableSFTP := c.FormValue("disable-sftp")
 	disableRemoteAssistance := c.FormValue("disable-remote-assistance")
 	detectRemoteAgents := c.FormValue("detect-remote-agents")
@@ -309,6 +316,13 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.UseFlatpak, err = strconv.ParseBool(useFlatpak)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.use_flatpak_invalid"))
+		}
+	}
+
+	if useBrew != "" {
+		settings.UseBrew, err = strconv.ParseBool(useBrew)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.use_brew_invalid"))
 		}
 	}
 

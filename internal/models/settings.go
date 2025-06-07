@@ -24,6 +24,7 @@ type GeneralSettings struct {
 	WinGetFrequency          int
 	UseWinget                bool
 	UseFlatpak               bool
+	UseBrew                  bool
 	SFTPDisabled             bool
 	RemoteAssistanceDisabled bool
 	DetectRemoteAgents       bool
@@ -334,6 +335,7 @@ func (m *Model) GetGeneralSettings(tenantID string) (*openuem_ent.Settings, erro
 			settings.FieldProfilesApplicationFrequenceInMinutes,
 			settings.FieldUseWinget,
 			settings.FieldUseFlatpak,
+			settings.FieldUseBrew,
 			settings.FieldDisableSftp,
 			settings.FieldDisableRemoteAssistance,
 			settings.FieldDetectRemoteAgents,
@@ -353,6 +355,7 @@ func (m *Model) GetGeneralSettings(tenantID string) (*openuem_ent.Settings, erro
 			settings.FieldProfilesApplicationFrequenceInMinutes,
 			settings.FieldUseWinget,
 			settings.FieldUseFlatpak,
+			settings.FieldUseBrew,
 			settings.FieldDisableSftp,
 			settings.FieldDisableRemoteAssistance,
 			settings.FieldDetectRemoteAgents,
@@ -460,6 +463,32 @@ func (m *Model) GetDefaultUseFlatpak(tenantID string) (bool, error) {
 	return s.UseFlatpak, nil
 }
 
+func (m *Model) UpdateUseBrew(settingsId int, useBrew bool) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetUseBrew(useBrew).Exec(context.Background())
+}
+
+func (m *Model) GetDefaultUseBrew(tenantID string) (bool, error) {
+	var err error
+	var s *openuem_ent.Settings
+
+	if tenantID == "-1" {
+		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldUseBrew).Only(context.Background())
+	} else {
+		id, err := strconv.Atoi(tenantID)
+		if err != nil {
+			return false, err
+		}
+
+		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldUseBrew).Only(context.Background())
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return s.UseBrew, nil
+}
+
 func (m *Model) CloneGlobalSettings(tenantID int) error {
 	s, err := m.Client.Settings.Query().WithTag().Where(settings.Not(settings.HasTenant())).Only(context.Background())
 	if err != nil {
@@ -489,6 +518,7 @@ func (m *Model) CloneGlobalSettings(tenantID int) error {
 		SetSessionLifetimeInMinutes(s.SessionLifetimeInMinutes).
 		SetUpdateChannel(s.UpdateChannel).
 		SetUseFlatpak(s.UseFlatpak).
+		SetUseBrew(s.UseBrew).
 		SetUseWinget(s.UseWinget).
 		SetUserCertYearsValid(s.UserCertYearsValid).
 		SetTenantID(tenantID)
@@ -529,6 +559,7 @@ func (m *Model) ApplyGlobalSettings(tenantID int) error {
 		SetSessionLifetimeInMinutes(s.SessionLifetimeInMinutes).
 		SetUpdateChannel(s.UpdateChannel).
 		SetUseFlatpak(s.UseFlatpak).
+		SetUseBrew(s.UseBrew).
 		SetUseWinget(s.UseWinget).
 		SetUserCertYearsValid(s.UserCertYearsValid).
 		SetTenantID(tenantID)

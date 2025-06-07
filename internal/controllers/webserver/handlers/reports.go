@@ -1138,6 +1138,15 @@ func getUnknownPNG() string {
 	return filepath.Join(cwd, "assets", "img", "os", "question.png")
 }
 
+func getApplePNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "apple.png")
+}
+
 func getOperatingSystemPNG(os string) string {
 	switch os {
 	case "windows":
@@ -1156,6 +1165,8 @@ func getOperatingSystemPNG(os string) string {
 		return getAlmaLinuxPNG()
 	case "rocky":
 		return getRockyLinuxPNG()
+	case "macOS":
+		return getApplePNG()
 	default:
 		return getUnknownPNG()
 	}

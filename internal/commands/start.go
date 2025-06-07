@@ -73,6 +73,15 @@ func startConsole(cCtx *cli.Context) error {
 		log.Fatalf("[FATAL]: could not create flatpak temp dir: %v", err)
 	}
 
+	// Create brew directory
+	worker.BrewDBFolder = filepath.Join(cwd, "tmp", "brew")
+	if strings.HasSuffix(cwd, "tmp") {
+		worker.BrewDBFolder = filepath.Join(cwd, "brew")
+	}
+	if err := worker.CreateBrewDBDir(); err != nil {
+		log.Fatalf("[FATAL]: could not create brew temp dir: %v", err)
+	}
+
 	// Create common software directory
 	worker.CommonSoftwareDBFolder = filepath.Join(cwd, "tmp", "commondb")
 	if strings.HasSuffix(cwd, "tmp") {

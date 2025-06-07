@@ -52,6 +52,32 @@ func (w *Worker) StartCommonPackagesDBJob() error {
 		}
 	}
 
+	brewDB, err := models.OpenBrewDB(w.BrewDBFolder)
+	if err != nil {
+		log.Println("[INFO]: could not get brew database")
+	} else {
+		rows, err := brewDB.Query(`SELECT DISTINCT id, name FROM apps`)
+		if err != nil {
+			log.Println("[INFO]: could not query brew apps")
+		} else {
+			packages := []nats.SoftwarePackage{}
+			defer rows.Close()
+			for rows.Next() {
+				var p nats.SoftwarePackage
+				err := rows.Scan(&p.ID, &p.Name)
+				if err != nil {
+					log.Printf("[ERROR]: could not get brew db row, reason: %v", err)
+					break
+				}
+				packages = append(packages, p)
+			}
+
+			if err := models.InsertCommonSoftware(commonDB, packages, "brew"); err != nil {
+				log.Printf("[ERROR]: could not insert brew apps to common software database, reason: %v", err)
+			}
+		}
+	}
+
 	wingetDB, err := models.OpenWingetDB(w.WinGetDBFolder)
 	if err != nil {
 		log.Println("[INFO]: could not get winget database")

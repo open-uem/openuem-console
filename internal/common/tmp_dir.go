@@ -34,6 +34,16 @@ func (w *Worker) CreateFlatpakDBDir() error {
 	return nil
 }
 
+func (w *Worker) CreateBrewDBDir() error {
+	if _, err := os.Stat(w.BrewDBFolder); os.IsNotExist(err) {
+		if err := os.MkdirAll(w.BrewDBFolder, 0770); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (w *Worker) CreateCommonSoftwareDBDir() error {
 	if _, err := os.Stat(w.CommonSoftwareDBFolder); os.IsNotExist(err) {
 		if err := os.MkdirAll(w.CommonSoftwareDBFolder, 0770); err != nil {

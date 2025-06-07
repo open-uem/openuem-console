@@ -400,6 +400,35 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 								</td>
 							</tr>
 							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_brew_title") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "settings.use_brew_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+										<select class="uk-select" name="use-brew">
+											<option value="true" selected?={ settings.UseBrew }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UseBrew }>{ i18n.T(ctx, "No") }</option>
+										</select>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											if commonInfo.TenantID == "-1" {
+												hx-post="/admin/settings"
+											} else {
+												hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+											}
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-settings-14"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-14" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr>
 								<td class="!align-middle">{ i18n.T(ctx, "settings.disable_sftp_title") }</td>
 								<td class="!align-middle">{ i18n.T(ctx, "settings.disable_sftp_description") }</td>
 								<td class="!align-middle">
@@ -420,10 +449,10 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-14"
+											htmx-indicator="#save-settings-15"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-14" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-15" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 										</button>
 									</form>
 								</td>
@@ -449,10 +478,10 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-15"
+											htmx-indicator="#save-settings-16"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-15" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-16" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 										</button>
 									</form>
 								</td>
@@ -478,10 +507,10 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-16"
+											htmx-indicator="#save-settings-17"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-16" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-17" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 										</button>
 									</form>
 								</td>
@@ -507,10 +536,10 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-push-url="false"
 											hx-target="#main"
 											hx-swap="outerHTML"
-											htmx-indicator="#save-settings-17"
+											htmx-indicator="#save-settings-18"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
-											<uk-icon id="save-settings-17" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											<uk-icon id="save-settings-18" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 										</button>
 									</form>
 								</td>

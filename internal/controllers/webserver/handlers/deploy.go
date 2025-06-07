@@ -67,6 +67,15 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		allSources = append(allSources, "flatpak")
 	}
 
+	useBrew, err := h.Model.GetDefaultUseBrew(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if useBrew {
+		allSources = append(allSources, "brew")
+	}
+
 	filteredSources := []string{}
 	for index := range allSources {
 		value := c.FormValue(fmt.Sprintf("filterBySource%d", index))
@@ -81,6 +90,9 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		}
 		if useFlatpak {
 			filteredSources = append(allSources, "flatpak")
+		}
+		if useBrew {
+			filteredSources = append(allSources, "brew")
 		}
 	}
 
@@ -137,6 +149,8 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		f.AgentOSVersions = []string{"windows"}
 	case "flatpak":
 		f.AgentOSVersions = []string{"ubuntu", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky"}
+	case "brew":
+		f.AgentOSVersions = []string{"macOS"}
 	}
 
 	tmpAllAgents := []string{}

@@ -35,6 +35,7 @@ type Worker struct {
 	NATSServers                       string
 	WinGetDBFolder                    string
 	FlatpakDBFolder                   string
+	BrewDBFolder                      string
 	CommonSoftwareDBFolder            string
 	OrgName                           string
 	OrgProvince                       string
@@ -52,6 +53,8 @@ type Worker struct {
 	DownloadLatestReleaseJobDuration  time.Duration
 	DownloadFlatpakDBJob              gocron.Job
 	DownloadFlatpakJobDuration        time.Duration
+	DownloadBrewDBJob                 gocron.Job
+	DownloadBrewJobDuration           time.Duration
 	CommonSoftwareDBJob               gocron.Job
 	CommonSoftwareJobDuration         time.Duration
 	Version                           string
@@ -91,7 +94,13 @@ func (w *Worker) StartWorker() {
 		return
 	}
 
-	// Start a job to create sofwate package table from flatpak and winget databases
+	// Start a job to download Brew database
+	if err := w.StartBrewDBDownloadJob(); err != nil {
+		log.Printf("[ERROR]: could not start brew.db download job, reason: %s", err.Error())
+		return
+	}
+
+	// Start a job to create sofwate package table from flatpak, brew, and winget databases
 	if err := w.StartCommonPackagesDBJob(); err != nil {
 		log.Printf("[ERROR]: could not start job to create common packages db, reason: %s", err.Error())
 		return

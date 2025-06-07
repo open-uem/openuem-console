@@ -3,7 +3,9 @@ package partials
 import "strings"
 
 templ Manufacturer(brand string) {
-	if strings.Contains(brand, "asus") {
+	if strings.Contains(brand, "apple") {
+		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
+	} else if strings.Contains(brand, "asus") {
 		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "hp") {
 		<i class="si si-hp si--color uk-cloak text-3xl"></i>
