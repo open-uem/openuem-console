@@ -1229,7 +1229,11 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		// Create new random PIN
-		pin, err := utils.GenerateRandomPIN()
+		pinLength := 6
+		if agent.Os == "macOS" {
+			pinLength = 8
+		}
+		pin, err := utils.GenerateRandomPIN(pinLength)
 		if err != nil {
 			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))

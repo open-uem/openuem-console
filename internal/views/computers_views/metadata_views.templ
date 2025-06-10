@@ -26,7 +26,7 @@ templ ComputerMetadata(c echo.Context, p partials.PaginationAndSort, agent *ent.
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "metadata", agent.VncProxyPort, confirmDelete, commonInfo)
+				@ComputersNavbar(agent.ID, "metadata", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
