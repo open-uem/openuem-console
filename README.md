@@ -1,5 +1,7 @@
 # OpenUEM - Console
 
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+
 The Console is OpenUEM's Web User Interface
 
 ![OpenUEM Console](https://openuem.eu/assets/images/computers_list-f73a20393ef227fa2509c0230a417c04.png)
