@@ -429,6 +429,8 @@ en:
     use_winget_is_false: "WinGet has been disabled in General Settings"
     could_not_get_flatpak_use: "Could not get Use Flatpak setting from database"
     use_flatpak_is_false: "Flatpak has been disabled in General Settings"
+    could_not_get_brew_use: "Could not get Use Brew setting from database"
+    use_brew_is_false: "Brew has been disabled in General Settings"
     could_not_search_packages: "Could not set packages, reason: %s"
     could_not_count_packages: "Could not count packages, reason: %s"
   uninstall:
@@ -705,6 +707,11 @@ en:
     use_flatpak_success: Flatpak setting has been saved
     use_flatpak_invalid: Selected value for use flatpak is not valid
     use_flatpak_could_not_be_saved: Use flatpak value could not be saved
+    use_brew_title: Use Brew
+    use_brew_description: Use Brew to search and install new MacOS packages
+    use_brew_success: Brew setting has been saved
+    use_brew_invalid: Selected value for use brew is not valid
+    use_brew_could_not_be_saved: Use brew value could not be saved
     disable_sftp_title: Disable SFTP
     disable_sftp_description: SFTP is disabled globally for every agent
     disable_sftp_success: SFTP setting has been saved

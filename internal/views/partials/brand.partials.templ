@@ -11,6 +11,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "adobe") {
 		<i class="si si-adobe si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "apple") {
+		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "autofirma") {
 		<uk-icon hx-history="false" icon="shield-check" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "db browser") {
@@ -129,6 +131,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-qemu si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "rancher") {
 		<i class="si si-rancher si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "safari") {
+		<i class="si si-safari si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "samsung") {
 		<i class="si si-samsung si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "slack") {
@@ -175,6 +179,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-toshiba si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "acer") || strings.Contains(publisher, "acer") {
 		<i class="si si-acer si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "apple") {
+		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(publisher, "microsoft") {
 		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
 	} else if strings.Contains(name, "msi") || strings.Contains(publisher, "msi") {

@@ -207,7 +207,7 @@ templ ComputerActions(index int, agent models.Computer, commonInfo *partials.Com
 					hx-swap="outerHTML"
 				><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon> { i18n.T(ctx, "Delete") }</a>
 			</li>
-			if agent.IP != "" {
+			if agent.IP != "" && agent.OS != "macOS" {
 				<li>
 					<a
 						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", agent.ID)))) }

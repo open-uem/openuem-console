@@ -25,7 +25,7 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 						</span>
 					}
 				</div>
-				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete, commonInfo)
+				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}

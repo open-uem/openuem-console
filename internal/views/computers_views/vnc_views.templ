@@ -36,7 +36,14 @@ templ VNC(c echo.Context, agent *ent.Agent, domainSuffix string, connected, requ
 						<div id="vncConnectPanel" class={ "flex gap-4 items-center my-4", templ.KV("hidden", !connected) }>
 							if requestPIN {
 								<span>PIN: </span>
-								<uk-input-pin name="vncPIN" id="vncPIN" uk-cloak></uk-input-pin>
+								<uk-input-pin
+									name="vncPIN"
+									id="vncPIN"
+									if agent.Os == "macOS" {
+										length="8"
+									}
+									uk-cloak
+								></uk-input-pin>
 							} else {
 								<div class="hidden" id="vncPIN">
 									<input type="hidden"/>

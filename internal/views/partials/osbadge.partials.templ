@@ -24,6 +24,8 @@ templ OSBadge(agentOS string) {
 			<i class="si si-rockylinux si--color uk-cloak text-2xl"></i>
 		case "kali":
 			<i class="si si-kalilinux si--color uk-cloak text-2xl"></i>
+		case "macOS":
+			<i class="si si-apple uk-text-default uk-cloak text-2xl mb-1"></i>
 	}
 }
 
@@ -33,5 +35,7 @@ templ PackageManagementTool(source string) {
 			<i class="ri-windows-fill ri-2x text-blue-600"></i>
 		case "flatpak":
 			<i class="si si-linux uk-cloak text-3xl"></i>
+		case "brew":
+			<i class="si si-apple uk-cloak text-3xl"></i>
 	}
 }

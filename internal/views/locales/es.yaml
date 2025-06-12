@@ -427,6 +427,8 @@ es:
     use_winget_is_false: "WinGet ha sido desactivado en la Configuración General"
     could_not_get_flatpak_use: "No se pudo consultar la configuración de uso de Flatpak en la base de datos"
     use_flatpak_is_false: "Flatpak ha sido desactivado en la Configuración General"
+    could_not_get_brew_use: "No se pudo consultar la configuración de uso de Brew en la base de datos"
+    use_brew_is_false: "Brew ha sido desactivado en la Configuración General"
     could_not_search_packages: "No pude buscar los paquetes, razón: %s"
     could_not_count_packages: "No pude contar los paquetes, razón: %s"
   uninstall:
@@ -701,6 +703,11 @@ es:
     use_flatpak_success: La configuración de Flatpak se ha guardado
     use_flatpak_invalid: El valor seleccionado para usar flatpak no es válido
     use_flatpak_could_not_be_saved: No se pudo guardar el valor de uso de flatpak
+    use_brew_title: Usar Brew
+    use_brew_description: Usar Brew para buscar e instalar nuevos paquetes en Linux
+    use_brew_success: La configuración de Brew se ha guardado
+    use_brew_invalid: El valor seleccionado para usar brew no es válido
+    use_brew_could_not_be_saved: No se pudo guardar el valor de uso de brew
     disable_sftp_title: Inhabilitar SFTP
     disable_sftp_description: SFTP está inhabilitado globalmente para cada agente
     disable_sftp_success: La configuración de SFTP se ha guardado

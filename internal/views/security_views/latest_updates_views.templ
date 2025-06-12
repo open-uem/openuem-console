@@ -45,8 +45,16 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 								for _, update := range updates {
 									<tr>
 										<td>{ update.Title }</td>
-										<td>{ commonInfo.Translator.FmtDateMedium(update.Date) }</td>
-										<td><a class="underline text-blue-500" target="_blank" rel="noopener" href={ templ.URL(update.SupportURL) }>{ update.SupportURL }</a></td>
+										if update.Date.IsZero() {
+											<td class="!align-middle">-</td>
+										} else {
+											<td>{ commonInfo.Translator.FmtDateMedium(update.Date) }</td>
+										}
+										if update.SupportURL != "" {
+											<td><a class="underline text-blue-500" target="_blank" rel="noopener" href={ templ.URL(update.SupportURL) }>{ update.SupportURL }</a></td>
+										} else {
+											<td class="!align-middle">-</td>
+										}
 									</tr>
 								}
 								if len(updates) < p.PageSize {

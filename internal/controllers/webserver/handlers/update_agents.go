@@ -69,6 +69,14 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			switch agentInfo.Os {
 			case "debian", "ubuntu", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky":
 				agentInfo.Os = "linux"
+			case "macOS":
+				agentInfo.Os = "darwin"
+				macArch := strings.TrimSpace(agentInfo.Edges.Computer.ProcessorArch)
+				if macArch == "x86_64" {
+					arch = "amd64"
+				} else {
+					arch = "arm64"
+				}
 			}
 
 			releaseToBeApplied, err := h.Model.GetAgentsReleaseByType(release.ReleaseTypeAgent, channel, agentInfo.Os, arch, sr)

@@ -735,6 +735,16 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
 		}
 
+	} else if agent.Os == "macOS" {
+		f = filters.DeployPackageFilter{Sources: []string{"brew"}}
+		useBrew, err := h.Model.GetDefaultUseBrew(commonInfo.TenantID)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_brew_use"), true))
+		}
+
+		if !useBrew {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_brew_is_false"), true))
+		}
 	} else {
 		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
 		useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
@@ -1219,7 +1229,11 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		}
 
 		// Create new random PIN
-		pin, err := utils.GenerateRandomPIN()
+		pinLength := 6
+		if agent.Os == "macOS" {
+			pinLength = 8
+		}
+		pin, err := utils.GenerateRandomPIN(pinLength)
 		if err != nil {
 			log.Printf("[ERROR]: could not generate random PIN, reason: %v\n", err)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.vnc_pin_not_generated"), false))

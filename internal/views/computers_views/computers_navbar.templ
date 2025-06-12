@@ -6,7 +6,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo, agentOS string) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "overview") }>
 			<a
@@ -181,7 +181,7 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				{ i18n.T(ctx, "DeployShort") }
 			</a>
 		</li>
-		if vncProxyPort != "" {
+		if vncProxyPort != "" && agentOS != "macOS" {
 			<li class={ templ.KV("uk-active", active == "remote-assistance") }>
 				<a
 					if confirmDelete {

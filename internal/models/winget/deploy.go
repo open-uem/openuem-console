@@ -193,6 +193,15 @@ func OpenFlatpakDB(indexPath string) (*sql.DB, error) {
 	return sql.Open("sqlite3", dbPath)
 }
 
+func OpenBrewDB(indexPath string) (*sql.DB, error) {
+	dbPath := filepath.Join(indexPath, "brew.db")
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("database doesn't exist, reason: %v", err)
+	}
+
+	return sql.Open("sqlite3", dbPath)
+}
+
 func OpenCommonDB(indexPath string) (*sql.DB, error) {
 	dbPath := filepath.Join(indexPath, "common.db")
 
