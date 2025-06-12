@@ -70,6 +70,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			case "debian", "ubuntu", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky":
 				agentInfo.Os = "linux"
 			case "macOS":
+				agentInfo.Os = "darwin"
 				macArch := strings.TrimSpace(agentInfo.Edges.Computer.ProcessorArch)
 				if macArch == "x86_64" {
 					arch = "amd64"
