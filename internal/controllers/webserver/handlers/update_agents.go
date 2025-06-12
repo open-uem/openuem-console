@@ -64,6 +64,8 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			switch agentInfo.Edges.Computer.ProcessorArch {
 			case "x64", "x86_64":
 				arch = "amd64"
+			case "aarch64":
+				arch = "arm64"
 			}
 
 			switch agentInfo.Os {
