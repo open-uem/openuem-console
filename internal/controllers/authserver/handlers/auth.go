@@ -159,11 +159,12 @@ func (h *Handler) Auth(c echo.Context) error {
 	}
 
 	if h.ReverseProxyAuthPort != "" {
-		return c.Redirect(http.StatusFound, c.Request().Referer()+fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID))
+		url := strings.TrimSuffix(c.Request().Referer(), "/")
+		url += fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID)
+		return c.Redirect(http.StatusFound, url)
 	} else {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID))
 	}
-
 }
 
 func getIssuerFromCert(cert, caCert *x509.Certificate) (*x509.Certificate, error) {
