@@ -67,11 +67,12 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 										<input
 											name="filterByAppName"
 											class="uk-search-input"
+											autocomplete="off"
 											type="search"
 											placeholder={ i18n.T(ctx, "agents.deploy_search") }
 											aria-label="Search"
 											_="on keyup
-										if my.value.length > 3 then
+										if my.value.length > 1 then
 											remove @disabled from #search-packages
 										else
 											add @disabled to #search-packages
