@@ -24,14 +24,14 @@ func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) 
 		settings.FieldMessageFrom)
 
 	if tenantID == "-1" {
-		s, err = query.Where(settings.Not(settings.HasTenant())).Select(settings.FieldUseFlatpak).Only(context.Background())
+		s, err = query.Where(settings.Not(settings.HasTenant())).Only(context.Background())
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
 			return nil, err
 		}
 
-		s, err = query.Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldUseFlatpak).Only(context.Background())
+		s, err = query.Where(settings.HasTenantWith(tenant.ID(id))).Only(context.Background())
 	}
 
 	if err != nil {
