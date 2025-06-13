@@ -66,6 +66,7 @@ templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *pa
 								<input
 									name="filterByAppName"
 									class="uk-search-input"
+									autocomplete="off"
 									type="search"
 									placeholder={ i18n.T(ctx, "Search") }
 									aria-label="Search"
