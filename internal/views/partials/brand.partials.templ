@@ -25,10 +25,14 @@ templ Brand(name, publisher string) {
 		<i class="si si-nvidia si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(publisher, "nvidia") {
 		<i class="si si-nvidia si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(publisher, "anydesk") {
+		<i class="si si-anydesk uk-text-default uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "asus") {
 		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
 	} else if strings.Contains(publisher, "asus") {
 		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
+	} else if strings.Contains(name, "beekeeper studio") {
+		<i class="si si-beekeeperstudio si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "brave") {
 		<i class="si si-brave si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "bitdefender") {
@@ -51,7 +55,7 @@ templ Brand(name, publisher string) {
 		<i class="si si-filezilla si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "fortinet") || strings.Contains(publisher, "fortinet") {
 		<i class="si si-fortinet si--color uk-cloak text-2xl"></i>
-	} else if strings.Contains(name, "git") {
+	} else if strings.Contains(publisher, "git") {
 		<i class="si si-git si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "gmail") {
 		<i class="si si-gmail si--color uk-cloak text-2xl"></i>
@@ -59,7 +63,7 @@ templ Brand(name, publisher string) {
 		<i class="si si-googlechrome si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "google") || strings.Contains(publisher, "google") {
 		<i class="si si-google si--color uk-cloak text-2xl"></i>
-	} else if strings.Contains(name, "go") {
+	} else if strings.Contains(publisher, "go") {
 		<i class="si si-go si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "gimp") {
 		<i class="si si-gimp si--color uk-cloak text-3xl"></i>
@@ -67,13 +71,13 @@ templ Brand(name, publisher string) {
 		<i class="si si-gnome si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "greenshot") {
 		<uk-icon hx-history="false" icon="brush" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
-	} else if strings.Contains(name, "hp") || strings.Contains(publisher, "hp") {
+	} else if strings.Contains(publisher, "hp") {
 		<i class="si si-hp si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "insomnia") {
 		<i class="si si-insomnia si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "winrt") {
 		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
-	} else if strings.Contains(name, "intel") || strings.Contains(publisher, "intel") {
+	} else if strings.Contains(publisher, "intel") {
 		<i class="si si-intel si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "inkscape") {
 		<i class="si si-inkscape uk-text-default uk-cloak text-2xl"></i>
@@ -81,10 +85,16 @@ templ Brand(name, publisher string) {
 		<uk-icon hx-history="false" icon="package" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "irfanview") {
 		<uk-icon hx-history="false" icon="image" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
+	} else if strings.Contains(name, "iterm") {
+		<i class="si si-iterm2 uk-text-default uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "java") || strings.Contains(name, "openjdk") {
 		<uk-icon hx-history="false" icon="coffee" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
-	} else if strings.Contains(name, "keepas") {
+	} else if strings.Contains(publisher, "jetbrains") {
+		<i class="si si-jetbrains uk-text-default uk-cloak text-3xl"></i>
+	} else if strings.Contains(name, "keepass") {
 		<uk-icon hx-history="false" icon="folder-key" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
+	} else if strings.Contains(name, "keeweb") {
+		<i class="si si-keeweb si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "kingston") {
 		<i class="si si-kingstontechnology uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "libreoffice") {
@@ -115,6 +125,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-opera si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "palo alto") || strings.Contains(publisher, "palo alto") {
 		<i class="si si-paloaltonetworks si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "plex") {
+		<i class="si si-plex si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "pgadmin") {
 		<i class="si si-postgresql si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "postgresql") {
@@ -135,6 +147,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-safari si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "samsung") {
 		<i class="si si-samsung si--color uk-cloak text-4xl"></i>
+	} else if strings.Contains(name, "shazam") {
+		<i class="si si-shazam si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "slack") {
 		<i class="si si-slack si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "sophos") {
@@ -145,12 +159,16 @@ templ Brand(name, publisher string) {
 		<i class="si si-sqlite si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "steam") {
 		<i class="si si-steam uk-text-default uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "sublime") {
+		<i class="si si-sublimetext si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "telegram") {
 		<i class="si si-telegram si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "thunderbird") {
 		<i class="si si-thunderbird si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "ubuntu") {
 		<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "unarchiver") {
+		<uk-icon hx-history="false" icon="package-open" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "vim") {
 		<i class="si si-vim si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "vlc media player") || strings.Contains(name, "vlc") {
@@ -161,6 +179,8 @@ templ Brand(name, publisher string) {
 		<i class="ri-windows-fill ri-2x text-blue-600"></i>
 	} else if strings.Contains(name, "wireshark") {
 		<i class="si si-wireshark si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "xcode") {
+		<i class="si si-xcode si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "yast") {
 		<i class="si si-opensuse si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "youtube") {
