@@ -151,6 +151,8 @@ github.com/open-uem/nats v0.0.0-20250514125548-3bae96c53080 h1:Sq5vg52YJni0pifg2
 github.com/open-uem/nats v0.0.0-20250514125548-3bae96c53080/go.mod h1:JB6zAM56L+iD+BLn3o/vNdg9X5IFn52dSvltnIdiQAQ=
 github.com/open-uem/utils v0.0.0-20250610103233-92d3a95ff479 h1:HLc3jlPY5uy3EiacfQvzk2bTDIfgdkpVNZpcZdmWG1E=
 github.com/open-uem/utils v0.0.0-20250610103233-92d3a95ff479/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
+github.com/open-uem/utils v0.0.0-20250611060546-cab35b3801b9 h1:u54f6Oq97w7FDHl9oOWKe97TRddxhfqrAPCdXRwiF2A=
+github.com/open-uem/utils v0.0.0-20250611060546-cab35b3801b9/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
 github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1 h1:OwLny9z8SqKVqPMVoJCMftGPB9A7T96W/5o70Yhanus=
 github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1/go.mod h1:dXSggJ7Na4J4WTII2YmxKmlpwlHzMjuHUrBJkn1/DrU=
 github.com/pdfcpu/pdfcpu v0.10.2 h1:DB2dWuoq0eF0QwHjgyLirYKLTCzFOoZdmmIUSu72aL0=
