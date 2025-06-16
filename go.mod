@@ -29,7 +29,7 @@ require (
 	github.com/nats-io/nats.go v1.41.2
 	github.com/open-uem/ent v0.0.0-20250607102336-cee6366c74d8
 	github.com/open-uem/nats v0.0.0-20250514125548-3bae96c53080
-	github.com/open-uem/utils v0.0.0-20250610103233-92d3a95ff479
+	github.com/open-uem/utils v0.0.0-20250611060546-cab35b3801b9
 	github.com/open-uem/wingetcfg v0.0.0-20250317160420-5c7e4c410be1
 	github.com/pkg/sftp v1.13.9
 	github.com/stretchr/testify v1.10.0

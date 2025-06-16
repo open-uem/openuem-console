@@ -1,4 +1,4 @@
-FROM golang:1.24.2 AS build
+FROM golang:1.24.4 AS build
 COPY . ./
 RUN go install github.com/a-h/templ/cmd/templ@v0.3.857
 RUN templ generate
