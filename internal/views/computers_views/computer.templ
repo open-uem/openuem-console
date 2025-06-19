@@ -50,7 +50,11 @@ templ Computer(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, c
 								<tr>
 									<th>{ i18n.T(ctx, "inventory.hardware.manufacturer") }</th>
 									<td>
-										@partials.Manufacturer(strings.ToLower(agent.Edges.Computer.Manufacturer))
+										if agent.Edges.Computer.Manufacturer != "Unknown" || !strings.Contains(strings.ToLower(agent.Edges.Computer.Model),"raspberry") {
+											@partials.Manufacturer(strings.ToLower(agent.Edges.Computer.Manufacturer))
+										} else {
+											@partials.Manufacturer(strings.ToLower(agent.Edges.Computer.Model))
+										}
 									</td>
 								</tr>
 								<tr>
