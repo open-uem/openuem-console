@@ -23,9 +23,11 @@ templ Manufacturer(brand string) {
 		<i class="si si-vmware si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(brand, "lenovo") {
 		<i class="si si-lenovo si--color uk-cloak text-5xl"></i>
+	} else if strings.Contains(brand, "raspberry") {
+		<i class="si si-raspberrypi si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(brand, "razer") {
 		<i class="si si-razer si--color uk-cloak text-3xl"></i>
-	} else if strings.Contains(brand, "msi") {
+	} else if strings.Contains(brand, "msi") || strings.Contains(brand, "micro-star") {
 		<i class="si si-msi si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(brand, "toshiba") {
 		<i class="si si-toshiba si--color uk-cloak text-3xl"></i>
