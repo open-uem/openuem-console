@@ -56,6 +56,7 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 						@partials.SelectRegistryTaskSubtype(nil)
 						@partials.SelectLocalUserTaskSubtype(nil)
 						@partials.SelectLocalGroupTaskSubtype(nil)
+						@partials.SelectMSITaskSubtype(nil)
 					</div>
 					<div class="w-1/2 hidden" id="package-partial">
 						@partials.WingetPackageSearch(nil)
@@ -68,6 +69,9 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 					</div>
 					<div class="w-1/2 hidden" id="local-group-partial">
 						@partials.LocalGroupComponent(nil)
+					</div>
+					<div class="w-1/2 hidden" id="msi-partial">
+						@partials.MSIComponent(nil)
 					</div>
 					<div class="w-1/2 hidden">
 						@partials.CommandText()
