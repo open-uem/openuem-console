@@ -14,16 +14,18 @@ templ SelectTaskType(task *ent.Task) {
 		<select
 			class="uk-select"
 			_="
-            on change 
+            on change
                 if my.value is '' then
                     add .hidden to <div[id^='package'] />
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
+                    add .hidden to <div[id^='msi'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
                     set #local-group-task-type.value to ''
+                    set #msi-task-type.value to ''
                 end
                 if my.value is 'package_type' then 
                     remove .hidden from #package-partial
@@ -31,9 +33,11 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='registry'] />
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
+                    add .hidden to <div[id^='msi'] />
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
                     set #local-group-task-type.value to ''
+                    set #msi-task-type.value to ''
                 end
                 if my.value is 'registry_type' then 
                     add .hidden to <div[id^='package'] />
@@ -41,9 +45,11 @@ templ SelectTaskType(task *ent.Task) {
                     remove .hidden from #registry-subtask
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
+                    add .hidden to <div[id^='msi'] />
                     set #package-task-type.value to ''
                     set #local-user-task-type.value to ''
                     set #local-group-task-type.value to ''
+                    set #msi-task-type.value to ''
                 end
                 if my.value is 'local_user_subtype' then 
                     add .hidden to <div[id^='package'] />
@@ -51,9 +57,11 @@ templ SelectTaskType(task *ent.Task) {
                     remove .hidden from #local-user-partial
                     remove .hidden from #local-user-subtask
                     add .hidden to <div[id^='local-group'] />
+                    add .hidden to <div[id^='msi'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-group-task-type.value to ''
+                    set #msi-task-type.value to ''
                 end
                 if my.value is 'local_group_subtype' then 
                     add .hidden to <div[id^='package'] />
@@ -61,6 +69,19 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='local-user'] />
                     remove .hidden from #local-group-partial
                     remove .hidden from #local-group-subtask
+                    add .hidden to <div[id^='msi'] />
+                    set #package-task-type.value to ''
+                    set #registry-task-type.value to ''
+                    set #local-user-task-type.value to ''
+                    set #msi-task-type.value to ''
+                end
+                if my.value is 'msi_type' then 
+                    add .hidden to <div[id^='package'] />
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    remove .hidden from #msi-partial
+                    remove .hidden from #msi-subtask
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
@@ -81,6 +102,9 @@ templ SelectTaskType(task *ent.Task) {
 			</option>
 			<option value="local_group_subtype" selected?={ IsLocalGroupTask(task) }>
 				{ i18n.T(ctx, "tasks.local_group_subtype") }
+			</option>
+			<option value="msi_type" selected?={ IsMSITask(task) }>
+				{ i18n.T(ctx, "tasks.msi_subtype") }
 			</option>
 		</select>
 	</div>
@@ -434,6 +458,60 @@ templ SelectLocalGroupTaskSubtype(task *ent.Task) {
 	</div>
 }
 
+templ SelectMSITaskSubtype(task *ent.Task) {
+	<div id="msi-subtask" class={ templ.KV("hidden", !IsMSITask(task)) }>
+		<label class="uk-form-label" for="msi-task-type">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="msi-task-type"
+			name="msi-task-type"
+			_="
+            on change
+                if my.value is '' then
+                    add .hidden to #msi-productid-section
+                    add .hidden to #msi-path-section
+                    add .hidden to #msi-arguments-section
+                    add .hidden to #msi-log-path-section
+                    add .hidden to #msi-hash-alg-section
+                    add .hidden to #msi-file-hash-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #msi-path.value to ''
+                    set #msi-arguments.value to ''
+                    set #msi-log-path.value to ''
+                    set #msi-hash-alg.value to ''
+                end
+                if my.value is 'msi_install' or my.value is 'msi_uninstall' then 
+                    remove .hidden from #msi-productid-section
+                    remove .hidden from #msi-path-section
+                    remove .hidden from #msi-arguments-section
+                    remove .hidden from #msi-log-path-section
+                    remove .hidden from #msi-hash-alg-section
+                    add .hidden to #msi-file-hash-section
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    set #msi-productid.value to ''
+                    set #msi-path.value to ''
+                    set #msi-arguments.value to ''
+                    set #msi-log-path.value to ''
+                    set #msi-hash-alg.value to ''
+                    set #msi-hash.value to ''
+                end                
+            end							
+        "
+			disabled?={ task != nil }
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "msi_install" } selected?={ task != nil && task.Type.String() == "msi_install" }>{ i18n.T(ctx, "tasks.msi_install") }</option>
+			<option value={ "msi_uninstall" } selected?={  task != nil && task.Type.String() == "msi_uninstall" }>{ i18n.T(ctx, "tasks.msi_uninstall") }</option>
+		</select>
+	</div>
+}
+
 func IsPackageTask(task *ent.Task) bool {
 	packageTasks := []string{"winget_install", "winget_delete"}
 	return task != nil && slices.Contains(packageTasks, task.Type.String())
@@ -452,4 +530,9 @@ func IsLocalUserTask(task *ent.Task) bool {
 func IsLocalGroupTask(task *ent.Task) bool {
 	groupTasks := []string{"add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group"}
 	return task != nil && slices.Contains(groupTasks, task.Type.String())
+}
+
+func IsMSITask(task *ent.Task) bool {
+	msiTasks := []string{"msi_install", "msi_uninstall"}
+	return task != nil && slices.Contains(msiTasks, task.Type.String())
 }

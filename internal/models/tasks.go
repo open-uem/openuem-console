@@ -40,6 +40,12 @@ type TaskConfig struct {
 	LocalGroupMembers                 string
 	LocalGroupMembersToInclude        string
 	LocalGroupMembersToExclude        string
+	MsiProductID                      string
+	MsiPath                           string
+	MsiArguments                      string
+	MsiLogPath                        string
+	MsiHashAlgorithm                  string
+	MsiFileHash                       string
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -122,6 +128,17 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
+	case "msi_install", "msi_uninstall":
+		query := m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetMsiProductid(cfg.MsiProductID).
+			SetMsiPath(cfg.MsiPath).
+			SetMsiArguments(cfg.MsiArguments).
+			SetMsiLogPath(cfg.MsiLogPath)
+
+		if cfg.MsiHashAlgorithm != "" && cfg.MsiFileHash != "" {
+			query = query.SetMsiFileHashAlg(task.MsiFileHashAlg(cfg.MsiHashAlgorithm)).SetMsiFileHash(cfg.MsiFileHash)
+		}
+		return query.Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -186,6 +203,18 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
+	case "msi_install", "msi_uninstall":
+		query := m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetMsiProductid(cfg.MsiProductID).
+			SetMsiPath(cfg.MsiPath).
+			SetMsiArguments(cfg.MsiArguments).
+			SetMsiLogPath(cfg.MsiLogPath)
+
+		if cfg.MsiHashAlgorithm != "" && cfg.MsiFileHash != "" {
+			query = query.SetMsiFileHashAlg(task.MsiFileHashAlg(cfg.MsiHashAlgorithm)).SetMsiFileHash(cfg.MsiFileHash)
+		}
+
+		return query.Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }

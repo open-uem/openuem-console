@@ -58,6 +58,7 @@ templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partia
 						@partials.SelectRegistryTaskSubtype(task)
 						@partials.SelectLocalUserTaskSubtype(task)
 						@partials.SelectLocalGroupTaskSubtype(task)
+						@partials.SelectMSITaskSubtype(task)
 						if task != nil {
 							<input type="hidden" name="selected-task-type" value={ task.Type.String() }/>
 						}
@@ -73,6 +74,9 @@ templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partia
 					</div>
 					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalGroupTask(task)) } id="local-group-partial">
 						@partials.LocalGroupComponent(task)
+					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsMSITask(task)) } id="msi-partial">
+						@partials.MSIComponent(task)
 					</div>
 					<div class="w-1/2">
 						@partials.CommandText()
