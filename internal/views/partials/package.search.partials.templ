@@ -10,7 +10,7 @@ import (
 
 templ WingetPackageSearch(task *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div class={ templ.KV("hidden", !IsPackageTask(task) || (IsPackageTask(task) && task.PackageID != "")) } id="package-search-section">
+		<div class={ templ.KV("hidden", task != nil && task.PackageID != "") } id="package-search-section">
 			<label class="uk-form-label" for="package-search">
 				{ i18n.T(ctx, "tasks.edit.select_package") }
 			</label>
@@ -45,7 +45,7 @@ templ WingetPackageSearch(task *ent.Task) {
 				</div>
 			</div>
 		</div>
-		<div class={ templ.KV("hidden", !IsPackageTask(task) || (IsPackageTask(task) && task.PackageID == "")) } id="package-selected-section">
+		<div class={ templ.KV("hidden", task == nil || task.PackageID == "") } id="package-selected-section">
 			<label class="uk-form-label" for="task-type">
 				{ i18n.T(ctx, "tasks.edit.selected_package") }
 			</label>

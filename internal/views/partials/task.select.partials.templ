@@ -3,10 +3,38 @@ package partials
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"slices"
 )
 
-templ SelectTaskType(task *ent.Task) {
+templ SelectTaskAgentType(t *ent.Task) {
+	<div>
+		<label class="uk-form-label" for="task-agent-type">
+			{ i18n.T(ctx, "tasks.task_agent") }
+		</label>
+		<select
+			id="task-agent-type"
+			name="task-agent-type"
+			class="uk-select"
+			disabled?={ t != nil }
+			hx-trigger="change"
+			hx-get="/profiles/task-types"
+			hx-target="#select-task-type"
+			hx-swap="innerHTML"
+			_="on change      
+                add .hidden to #select-task-subtype
+                add .hidden to #task-definition
+            end"
+		>
+			<option value="">{ i18n.T(ctx, "tasks.task_agent_description") }</option>
+			<option value="windows" selected?={ t != nil && task.AgentType("windows") == t.AgentType }>Windows</option>
+			<option value="linux" selected?={ t != nil && task.AgentType("linux") == t.AgentType }>Linux</option>
+			<option value="macos" selected?={ t != nil && task.AgentType("macos") == t.AgentType }>MacOS</option>
+		</select>
+	</div>
+}
+
+templ SelectTaskType(t *ent.Task, agentType string) {
 	<div>
 		<label class="uk-form-label" for="task-type">
 			{ i18n.T(ctx, "tasks.task_type") }
@@ -15,525 +43,180 @@ templ SelectTaskType(task *ent.Task) {
 			id="task-type"
 			name="task-type"
 			class="uk-select"
-			_="
-            on change
-                if my.value is '' then
-                    add .hidden to <div[id^='package'] />
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    add .hidden to <div[id^='msi'] />
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #package-task-type.value to ''
-                    set #registry-task-type.value to ''
-                    set #local-user-task-type.value to ''
-                    set #local-group-task-type.value to ''
-                    set #msi-task-type.value to ''
+			disabled?={ t != nil }
+			hx-trigger="change"
+			hx-get="/profiles/task-subtypes"
+			hx-target="#select-task-subtype"
+			hx-swap="innerHTML"
+			_="on change      
+                remove .hidden from #select-task-subtype
+                if my.value == 'powershell_type' then
+                    remove .hidden from #task-definition
+                else
+                    add .hidden to #task-definition
                 end
-                if my.value is 'package_type' then 
-                    remove .hidden from #package-partial
-                    remove .hidden from #package-subtask
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    add .hidden to <div[id^='msi'] />
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #registry-task-type.value to ''
-                    set #local-user-task-type.value to ''
-                    set #local-group-task-type.value to ''
-                    set #msi-task-type.value to ''
-                end
-                if my.value is 'registry_type' then 
-                    add .hidden to <div[id^='package'] />
-                    remove .hidden from #registry-partial
-                    remove .hidden from #registry-subtask
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    add .hidden to <div[id^='msi'] />
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #package-task-type.value to ''
-                    set #local-user-task-type.value to ''
-                    set #local-group-task-type.value to ''
-                    set #msi-task-type.value to ''
-                end
-                if my.value is 'local_user_subtype' then 
-                    add .hidden to <div[id^='package'] />
-                    add .hidden to <div[id^='registry'] />
-                    remove .hidden from #local-user-partial
-                    remove .hidden from #local-user-subtask
-                    add .hidden to <div[id^='local-group'] />
-                    add .hidden to <div[id^='msi'] />
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #package-task-type.value to ''
-                    set #registry-task-type.value to ''
-                    set #local-group-task-type.value to ''
-                    set #msi-task-type.value to ''
-                end
-                if my.value is 'local_group_subtype' then 
-                    add .hidden to <div[id^='package'] />
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    remove .hidden from #local-group-partial
-                    remove .hidden from #local-group-subtask
-                    add .hidden to <div[id^='msi'] />
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #package-task-type.value to ''
-                    set #registry-task-type.value to ''
-                    set #local-user-task-type.value to ''
-                    set #msi-task-type.value to ''
-                end
-                if my.value is 'msi_type' then 
-                    add .hidden to <div[id^='package'] />
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    remove .hidden from #msi-partial
-                    remove .hidden from #msi-subtask
-                    add .hidden to <div[id^='powershell-partial'] />
-                    set #package-task-type.value to ''
-                    set #registry-task-type.value to ''
-                    set #local-user-task-type.value to ''
-                end
-
-                if my.value is 'powershell_type' then 
-                    add .hidden to <div[id^='package'] />
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    add .hidden to <div[id^='msi'] />
-                    remove .hidden from #powershell-partial
-                    set #powershell-script.value to ''                    
-                end
-            end							
-        "
-			disabled?={ task != nil }
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_type") }</option>
-			<option value="package_type" selected?={ IsPackageTask(task) }>
-				{ i18n.T(ctx, "tasks.package_subtype") }
-			</option>
-			<option value="registry_type" selected?={ IsRegistryTask(task) }>
-				{ i18n.T(ctx, "tasks.registry_subtype") }
-			</option>
-			<option value="local_user_subtype" selected?={ IsLocalUserTask(task) }>
+			if agentType == "windows" {
+				<option value="package_type" selected?={ IsWinGetPackageTask(t) }>
+					{ i18n.T(ctx, "tasks.package_winget_subtype") }
+				</option>
+			}
+			if agentType == "windows" {
+				<option value="registry_type" selected?={ IsRegistryTask(t) }>
+					{ i18n.T(ctx, "tasks.registry_subtype") }
+				</option>
+			}
+			<option value="local_user_subtype" selected?={ IsLocalUserTask(t) }>
 				{ i18n.T(ctx, "tasks.local_user_subtype") }
 			</option>
-			<option value="local_group_subtype" selected?={ IsLocalGroupTask(task) }>
+			<option value="local_group_subtype" selected?={ IsLocalGroupTask(t) }>
 				{ i18n.T(ctx, "tasks.local_group_subtype") }
 			</option>
-			<option value="msi_type" selected?={ IsMSITask(task) }>
-				{ i18n.T(ctx, "tasks.msi_subtype") }
-			</option>
-			<option value="powershell_type" selected?={ IsPowerShellTask(task) }>
-				{ i18n.T(ctx, "tasks.powershell_subtype") }
-			</option>
+			if agentType == "windows" {
+				<option value="msi_type" selected?={ IsMSITask(t) }>
+					{ i18n.T(ctx, "tasks.msi_subtype") }
+				</option>
+				<option value="powershell_type" selected?={ IsPowerShellTask(t) }>
+					{ i18n.T(ctx, "tasks.powershell_subtype") }
+				</option>
+			}
 		</select>
 	</div>
 }
 
-templ SelectPackageTaskSubtype(task *ent.Task) {
-	<div id="package-subtask" class={ templ.KV("hidden", !IsPackageTask(task)) }>
-		<label class="uk-form-label" for="package-task-type">
+templ SelectWinGetPackageTaskSubtype(t *ent.Task) {
+	<div id="package-subtask">
+		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="package-task-type"
-			name="package-task-type"
-			_="
-            on change 
-                if my.value is '' then
-                    add .hidden to #package-search-section
-                    add .hidden to #package-selected-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #package-search.value to ''
-                    set #package-id.value to ''
-                    set #package-name.value to ''
-                end
-                if my.value is 'winget_install' then 
-                    remove .hidden from #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #package-search.value to ''
-                    set #package-id.value to ''
-                    set #package-name.value to ''
-                    add .hidden to #package-selected-section
-                end
-                if my.value is 'winget_delete' then 
-                    remove .hidden from #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #package-search.value to ''
-                    set #package-id.value to ''
-                    set #package-name.value to ''
-                    add .hidden to #package-selected-section
-                end
-            end							
-        "
-			disabled?={ task != nil }
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "winget_install" } selected?={ task != nil && task.Type.String() == "winget_install" }>{ i18n.T(ctx, "tasks.winget_install") }</option>
-			<option value={ "winget_delete" } selected?={  task != nil && task.Type.String() == "winget_delete" }>{ i18n.T(ctx, "tasks.winget_delete") }</option>
+			<option value={ "winget_install" } selected?={ t != nil && t.Type.String() == "winget_install" }>{ i18n.T(ctx, "tasks.winget_install") }</option>
+			<option value={ "winget_delete" } selected?={ t != nil && t.Type.String() == "winget_delete" }>{ i18n.T(ctx, "tasks.winget_delete") }</option>
 		</select>
 	</div>
 }
 
-templ SelectRegistryTaskSubtype(task *ent.Task) {
-	<div id="registry-subtask" class={ templ.KV("hidden", !IsRegistryTask(task)) }>
-		<label class="uk-form-label" for="registry-task-type">
+templ SelectRegistryTaskSubtype(t *ent.Task) {
+	<div id="registry-subtask">
+		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="registry-task-type"
-			name="registry-task-type"
-			_="
-            on change 
-                if my.value is '' then
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-                if my.value is 'add_registry_key' then 
-                    remove .hidden from #registry-key-section
-                    add .hidden to #registry-key-value-name-section
-                    add .hidden to #registry-value-types-section
-                    add .hidden to #registry-value-data-section
-                    add .hidden to #registry-key-force-section
-                    add .hidden to #registry-value-force-section
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-                if my.value is 'remove_registry_key' then 
-                    remove .hidden from #registry-key-section
-                    add .hidden to #registry-key-value-name-section
-                    add .hidden to #registry-value-types-section
-                    add .hidden to #registry-value-data-section
-                    remove .hidden from #registry-key-force-section
-                    add .hidden to #registry-value-force-section
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-                if my.value is 'update_registry_key_default_value' then
-                    remove .hidden from #registry-key-section
-                    add .hidden to #registry-key-value-name-section
-                    remove .hidden from #registry-value-types-section
-                    remove .hidden from #registry-value-data-section
-                    add .hidden to #registry-key-force-section
-                    remove .hidden from #registry-value-force-section
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-                if my.value is 'add_registry_key_value' then
-                    remove .hidden from #registry-key-section
-                    remove .hidden from #registry-key-value-name-section
-                    remove .hidden from #registry-value-types-section
-                    remove .hidden from #registry-value-data-section
-                    add .hidden to #registry-key-force-section
-                    remove .hidden from #registry-value-force-section
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-                if my.value is 'remove_registry_key_value' then 
-                    remove .hidden from #registry-key-section
-                    remove .hidden from #registry-key-value-name-section
-                    add .hidden to #registry-value-types-section
-                    add .hidden to #registry-value-data-section
-                    add .hidden to #registry-key-force-section
-                    add .hidden to #registry-value-force-section
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #registry-key.value to ''
-                    set #registry-value-name.value to ''
-                    set #registry-value-data.value to ''
-                    set #registry-value-type.value to ''
-                    set #registry-hex.checked to false
-                    set #registry-key-force.checked to false
-                    set #registry-value-force.checked to false
-                end
-            end							
-        "
-			disabled?={ task != nil }
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_registry_key" } selected?={  task != nil && task.Type.String() == "add_registry_key" }>{ i18n.T(ctx, "tasks.add_registry_key") }</option>
-			<option value={ "add_registry_key_value" } selected?={  task != nil && task.Type.String() == "add_registry_key_value" }>{ i18n.T(ctx, "tasks.add_registry_key_value") }</option>
-			<option value={ "update_registry_key_default_value" } selected?={  task != nil && task.Type.String() == "update_registry_key_default_value" }>{ i18n.T(ctx, "tasks.update_registry_key_default_value") }</option>
-			<option value={ "remove_registry_key" } selected?={  task != nil && task.Type.String() == "remove_registry_key" }>{ i18n.T(ctx, "tasks.remove_registry_key") }</option>
-			<option value={ "remove_registry_key_value" } selected?={  task != nil && task.Type.String() == "remove_registry_key_value" }>{ i18n.T(ctx, "tasks.remove_registry_key_value") }</option>
+			<option value={ "add_registry_key" } selected?={  t != nil && t.Type.String() == "add_registry_key" }>{ i18n.T(ctx, "tasks.add_registry_key") }</option>
+			<option value={ "add_registry_key_value" } selected?={  t != nil && t.Type.String() == "add_registry_key_value" }>{ i18n.T(ctx, "tasks.add_registry_key_value") }</option>
+			<option value={ "update_registry_key_default_value" } selected?={  t != nil && t.Type.String() == "update_registry_key_default_value" }>{ i18n.T(ctx, "tasks.update_registry_key_default_value") }</option>
+			<option value={ "remove_registry_key" } selected?={  t != nil && t.Type.String() == "remove_registry_key" }>{ i18n.T(ctx, "tasks.remove_registry_key") }</option>
+			<option value={ "remove_registry_key_value" } selected?={  t != nil && t.Type.String() == "remove_registry_key_value" }>{ i18n.T(ctx, "tasks.remove_registry_key_value") }</option>
 		</select>
 	</div>
 }
 
-templ SelectLocalUserTaskSubtype(task *ent.Task) {
-	<div id="local-user-subtask" class={ templ.KV("hidden", !IsLocalUserTask(task)) }>
-		<label class="uk-form-label" for="local-user-task-type">
+templ SelectLocalUserTaskSubtype(t *ent.Task) {
+	<div id="local-user-subtask">
+		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="local-user-task-type"
-			name="local-user-task-type"
-			_="
-            on change 
-                if my.value is '' then
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry']/>
-                    add .hidden to <div[id^='local-user']/>
-                    add .hidden to <div[id^='local-group']/>
-                    set #local-user-username.value to ''
-                    set #local-user-description.value to ''
-                    set #local-user-fullname.value to ''
-                    set #local-user-password.value to ''
-                    set #local-user-disabled.checked to false
-                    set #local-user-password-change-disallow.checked to false
-                    set #local-user-password-change-required.checked to false
-                    set #local-user-password-never-expires.checked to false
-                end
-                if my.value is 'add_local_user' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    remove .hidden from #local-user-username-section
-                    remove .hidden from #local-user-description-section
-                    remove .hidden from #local-user-fullname-section
-                    remove .hidden from #local-user-password-section
-                    remove .hidden from #local-user-disabled-section
-                    remove .hidden from #local-user-password-change-disallow-section
-                    remove .hidden from #local-user-password-change-required-section
-                    remove .hidden from #local-user-never-expires-section
-                    add .hidden to <div[id^='local-group'] />
-                    set #local-user-username.value to ''
-                    set #local-user-description.value to ''
-                    set #local-user-fullname.value to ''
-                    set #local-user-password.value to ''
-                    set #local-user-disabled.checked to false
-                    set #local-user-password-change-disallow.checked to false
-                    set #local-user-password-change-required.checked to false
-                    set #local-user-password-never-expires.checked to false
-                end
-                if my.value is 'remove_local_user' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    remove .hidden from #local-user-username-section
-                    add .hidden to #local-user-description-section
-                    add .hidden to #local-user-fullname-section
-                    add .hidden to #local-user-password-section
-                    add .hidden to #local-user-disabled-section
-                    add .hidden to #local-user-password-change-disallow-section
-                    add .hidden to #local-user-password-change-required-section
-                    add .hidden to #local-user-never-expires-section
-                    add .hidden to <div[id^='local-group'] />
-                    set #local-user-username.value to ''
-                    set #local-user-description.value to ''
-                    set #local-user-fullname.value to ''
-                    set #local-user-password.value to ''
-                    set #local-user-disabled.checked to false
-                    set #local-user-password-change-disallow.checked to false
-                    set #local-user-password-change-required.checked to false
-                    set #local-user-password-never-expires.checked to false
-                end
-            end							
-        "
-			disabled?={ task != nil }
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_local_user" } selected?={ task != nil && task.Type.String() == "add_local_user" }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
-			<option value={ "remove_local_user" } selected?={  task != nil && task.Type.String() == "remove_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+			<option value={ "add_local_user" } selected?={ t != nil && t.Type.String() == "add_local_user" }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
+			<option value={ "remove_local_user" } selected?={  t != nil && t.Type.String() == "remove_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
 		</select>
 	</div>
 }
 
-templ SelectLocalGroupTaskSubtype(task *ent.Task) {
-	<div id="local-group-subtask" class={ templ.KV("hidden", !IsLocalGroupTask(task)) }>
-		<label class="uk-form-label" for="local-group-task-type">
+templ SelectLocalGroupTaskSubtype(t *ent.Task) {
+	<div id="local-group-subtask">
+		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="local-group-task-type"
-			name="local-group-task-type"
-			_="
-            on change 
-                if my.value is '' then
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry']/>
-                    add .hidden to <div[id^='local-user']/>
-                    add .hidden to <div[id^='local-group']/>
-                    set #local-group-name.value to ''
-                    set #local-group-description.value to ''
-                    set #local-group-members.value to ''
-                    set #local-group-members-to-include.value to ''
-                    set #local-group-members-to-exclude.value to ''
-                end
-                if my.value is 'add_local_group' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    remove .hidden from #local-group-name-section
-                    remove .hidden from #local-group-description-section
-                    remove .hidden from #local-group-members-section
-                    add .hidden to #local-group-members-to-include-section
-                    add .hidden to #local-group-members-to-exclude-section
-                    set #local-group-name.value to ''
-                    set #local-group-description.value to ''
-                    set #local-group-members.value to ''
-                    set #local-group-members-to-include.value to ''
-                    set #local-group-members-to-exclude.value to ''
-                end
-                if my.value is 'remove_local_group' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    remove .hidden from #local-group-name-section
-                    add .hidden to #local-group-description-section
-                    add .hidden to #local-group-members-section
-                    add .hidden to #local-group-members-to-include-section
-                    add .hidden to #local-group-members-to-exclude-section
-                    set #local-group-name.value to ''
-                    set #local-group-description.value to ''
-                    set #local-group-members.value to ''
-                    set #local-group-members-to-include.value to ''
-                    set #local-group-members-to-exclude.value to ''
-                end
-                if my.value is 'add_users_to_local_group' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    remove .hidden from #local-group-name-section
-                    add .hidden to #local-group-description-section
-                    add .hidden to #local-group-members-section
-                    remove .hidden from #local-group-members-to-include-section
-                    add .hidden to #local-group-members-to-exclude-section
-                    set #local-group-name.value to ''
-                    set #local-group-description.value to ''
-                    set #local-group-members.value to ''
-                    set #local-group-members-to-include.value to ''
-                    set #local-group-members-to-exclude.value to ''
-                end
-                if my.value is 'remove_users_from_local_group' then 
-                    add .hidden to #package-search-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    remove .hidden from #local-group-name-section
-                    add .hidden to #local-group-description-section
-                    add .hidden to #local-group-members-section
-                    add .hidden to #local-group-members-to-include-section
-                    remove .hidden from #local-group-members-to-exclude-section
-                    set #local-group-name.value to ''
-                    set #local-group-description.value to ''
-                    set #local-group-members.value to ''
-                    set #local-group-members-to-include.value to ''
-                    set #local-group-members-to-exclude.value to ''
-                end
-            end							
-        "
-			disabled?={ task != nil }
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_local_group" } selected?={ task != nil && task.Type.String() == "add_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
-			<option value={ "remove_local_group" } selected?={  task != nil && task.Type.String() == "remove_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
-			<option value={ "add_users_to_local_group" } selected?={ task != nil && task.Type.String() == "add_users_to_local_group" }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
-			<option value={ "remove_users_from_local_group" } selected?={  task != nil && task.Type.String() == "remove_users_from_local_group" }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
+			<option value={ "add_local_group" } selected?={ t != nil && t.Type.String() == "add_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
+			<option value={ "remove_local_group" } selected?={  t != nil && t.Type.String() == "remove_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
+			<option value={ "add_users_to_local_group" } selected?={ t != nil && t.Type.String() == "add_users_to_local_group" }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
+			<option value={ "remove_users_from_local_group" } selected?={  t != nil && t.Type.String() == "remove_users_from_local_group" }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
 		</select>
 	</div>
 }
 
-templ SelectMSITaskSubtype(task *ent.Task) {
-	<div id="msi-subtask" class={ templ.KV("hidden", !IsMSITask(task)) }>
-		<label class="uk-form-label" for="msi-task-type">
+templ SelectMSITaskSubtype(t *ent.Task) {
+	<div id="msi-subtask">
+		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
 		</label>
 		<select
 			class="uk-select"
-			id="msi-task-type"
-			name="msi-task-type"
-			_="
-            on change
-                if my.value is '' then
-                    add .hidden to #msi-productid-section
-                    add .hidden to #msi-path-section
-                    add .hidden to #msi-arguments-section
-                    add .hidden to #msi-log-path-section
-                    add .hidden to #msi-hash-alg-section
-                    add .hidden to #msi-file-hash-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #msi-path.value to ''
-                    set #msi-arguments.value to ''
-                    set #msi-log-path.value to ''
-                    set #msi-hash-alg.value to ''
-                end
-                if my.value is 'msi_install' or my.value is 'msi_uninstall' then 
-                    remove .hidden from #msi-productid-section
-                    remove .hidden from #msi-path-section
-                    remove .hidden from #msi-arguments-section
-                    remove .hidden from #msi-log-path-section
-                    remove .hidden from #msi-hash-alg-section
-                    add .hidden to #msi-file-hash-section
-                    add .hidden to <div[id^='registry'] />
-                    add .hidden to <div[id^='local-user'] />
-                    add .hidden to <div[id^='local-group'] />
-                    set #msi-productid.value to ''
-                    set #msi-path.value to ''
-                    set #msi-arguments.value to ''
-                    set #msi-log-path.value to ''
-                    set #msi-hash-alg.value to ''
-                    set #msi-hash.value to ''
-                end                
-            end							
-        "
-			disabled?={ task != nil }
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "msi_install" } selected?={ task != nil && task.Type.String() == "msi_install" }>{ i18n.T(ctx, "tasks.msi_install") }</option>
-			<option value={ "msi_uninstall" } selected?={  task != nil && task.Type.String() == "msi_uninstall" }>{ i18n.T(ctx, "tasks.msi_uninstall") }</option>
+			<option value={ "msi_install" } selected?={ t != nil && t.Type.String() == "msi_install" }>{ i18n.T(ctx, "tasks.msi_install") }</option>
+			<option value={ "msi_uninstall" } selected?={  t != nil && t.Type.String() == "msi_uninstall" }>{ i18n.T(ctx, "tasks.msi_uninstall") }</option>
 		</select>
 	</div>
 }
 
-func IsPackageTask(task *ent.Task) bool {
+func IsWinGetPackageTask(task *ent.Task) bool {
 	packageTasks := []string{"winget_install", "winget_delete"}
 	return task != nil && slices.Contains(packageTasks, task.Type.String())
 }

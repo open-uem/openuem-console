@@ -8,7 +8,7 @@ import (
 
 templ MSIComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div id="msi-productid-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-productid-section">
 			<label class="uk-form-label" for="msi-productid">
 				{ i18n.T(ctx, "tasks.msi_productid") }
 			</label>
@@ -26,7 +26,7 @@ templ MSIComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="msi-path-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-path-section">
 			<label class="uk-form-label" for="msi-path">
 				{ i18n.T(ctx, "tasks.msi_path") }
 			</label>
@@ -44,7 +44,7 @@ templ MSIComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="msi-arguments-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-arguments-section">
 			<label class="uk-form-label" for="msi-arguments">
 				{ i18n.T(ctx, "tasks.msi_arguments") }
 			</label>
@@ -62,7 +62,7 @@ templ MSIComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="msi-log-path-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-log-path-section">
 			<label class="uk-form-label" for="msi-log-path">
 				{ i18n.T(ctx, "tasks.msi_log_path") }
 			</label>
@@ -80,7 +80,7 @@ templ MSIComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="msi-hash-alg-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-hash-alg-section">
 			<label class="uk-form-label" for="msi-hash-alg">{ i18n.T(ctx, "tasks.msi_hashalg") }</label>
 			<select
 				id="msi-hash-alg"
@@ -103,7 +103,7 @@ templ MSIComponent(t *ent.Task) {
 				<option value={ wingetcfg.FileHashSHA512 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA512 }>{ wingetcfg.FileHashSHA512 }</option>
 			</select>
 		</div>
-		<div id="msi-file-hash-section" class={ templ.KV("hidden", !IsMSITask(t)) }>
+		<div id="msi-file-hash-section">
 			<label class="uk-form-label" for="msi-hash">
 				{ i18n.T(ctx, "tasks.msi_filehash") }
 			</label>

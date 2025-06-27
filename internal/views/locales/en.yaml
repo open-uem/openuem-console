@@ -989,7 +989,7 @@ en:
     invalid_registry_value_name: "Registry value's name cannot be empty"
     invalid_registry_value_type: "Invalid registry value's type"
     invalid_registry_value_data: "Registry value's data cannot be empty"
-    package_subtype: "Package management with WinGet"
+    package_winget_subtype: "Package management with WinGet"
     registry_subtype: "Registry management"
     local_user_subtype: "Local users management"
     unexpected_multiple_strings: "Several strings were introduced but type selected is not MultiString"
@@ -1054,6 +1054,8 @@ en:
     powershell_run_once: "Run only once if successful"
     powershell_run_always: "Run every time the profile is applied"
     powershell_wrong_run_config: "Run configuration is not valid"
+    task_agent: "Agent's OS"
+    task_agent_description: "Specify the OS agent..."
 
     new:
       title: "New task"

@@ -8,7 +8,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partials.CommonInfo) {
+templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks")}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
@@ -26,7 +26,7 @@ templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partia
 			<div class="uk-card-body">
 				<form
 					class="flex flex-col gap-4 my-6"
-					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID)))) }
+					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID)))) }
 					hx-target="#main"
 					hx-swap="outerHTML"
 					hx-push-url="false"
@@ -48,41 +48,50 @@ templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partia
 								autocapitalize="off"
 								spellcheck="false"
 							>
-								{ task.Name }
+								{ t.Name }
 							</textarea>
 						</div>
 					</div>
 					<div class="flex flex-col gap-4 w-1/2">
-						@partials.SelectTaskType(task)
-						@partials.SelectPackageTaskSubtype(task)
-						@partials.SelectRegistryTaskSubtype(task)
-						@partials.SelectLocalUserTaskSubtype(task)
-						@partials.SelectLocalGroupTaskSubtype(task)
-						@partials.SelectMSITaskSubtype(task)
-						if task != nil {
-							<input type="hidden" name="selected-task-type" value={ task.Type.String() }/>
+						@partials.SelectTaskAgentType(t)
+						<div id="select-task-type">
+							@partials.SelectTaskType(t, t.AgentType.String())
+						</div>
+						<div id="select-task-subtype">
+							switch t.Type {
+								case "winget_install", "winget_delete":
+									@partials.SelectWinGetPackageTaskSubtype(t)
+								case "add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value":
+									@partials.SelectRegistryTaskSubtype(t)
+								case "add_local_user", "remove_local_user":
+									@partials.SelectLocalUserTaskSubtype(t)
+								case "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group":
+									@partials.SelectLocalGroupTaskSubtype(t)
+								case "msi_install", "msi_uninstall":
+									@partials.SelectMSITaskSubtype(t)
+							}
+						</div>
+						if t != nil {
+							<input type="hidden" name="selected-task-type" value={ t.Type.String() }/>
 						}
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPackageTask(task)) } id="package-partial">
-						@partials.WingetPackageSearch(task)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsWinGetPackageTask(t)) } id="package-partial">
+						@partials.WingetPackageSearch(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(task)) } id="registry-partial">
-						@partials.RegistryComponent(task)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(t)) } id="registry-partial">
+						@partials.RegistryComponent(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalUserTask(task)) } id="local-user-partial">
-						@partials.LocalUserComponent(task)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalUserTask(t)) } id="local-user-partial">
+						@partials.LocalUserComponent(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalGroupTask(task)) } id="local-group-partial">
-						@partials.LocalGroupComponent(task)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalGroupTask(t)) } id="local-group-partial">
+						@partials.LocalGroupComponent(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsMSITask(task)) } id="msi-partial">
-						@partials.MSIComponent(task)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsMSITask(t)) } id="msi-partial">
+						@partials.MSIComponent(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPowerShellTask(task)) } id="powershell-partial">
-						@partials.PowerShellComponent(task)
-					</div>
-					<div class="w-1/2">
-						@partials.CommandText()
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPowerShellTask(t)) } id="powershell-partial">
+						@partials.PowerShellComponent(t)
 					</div>
 					<div class="flex gap-4 my-4">
 						<button type="submit" class="uk-button uk-button-primary">
