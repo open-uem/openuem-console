@@ -984,7 +984,7 @@ es:
     invalid_registry_value_name: "El nombre del valor de clave de registro no puede estar vacío"
     invalid_registry_value_type: "Tipo de valor de registro no válido"
     invalid_registry_value_data: "Los datos para el valor de clave de registro no pueden estar vacíos"
-    package_subtype: "Gestión de paquetes con WinGet"
+    package_winget_subtype: "Gestión de paquetes con WinGet"
     registry_subtype: "Gestión de registro"
     local_user_subtype: "Gestión de usuarios locales"
     unexpected_multiple_strings: "Se han introducido varias cadenas de texto pero el tipo seleccionado no es MultiString"
@@ -1049,6 +1049,8 @@ es:
     powershell_run_once: "Ejecutar solo una vez si tiene éxito"
     powershell_run_always: "Ejecutar cada vez que se aplique el perfil"
     powershell_wrong_run_config: "La configuración de ejecución no es válida"
+    task_agent: "S.O del agente"
+    task_agent_description: "Especifique el S.O del agente..."
 
     new:
       title: "Nueva tarea"

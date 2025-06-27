@@ -8,6 +8,8 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/profiles_views"
 )
@@ -336,4 +338,62 @@ func (h *Handler) ProfileIssues(c echo.Context) error {
 	}
 
 	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, issues, profile, commonInfo), commonInfo))
+}
+
+func (h *Handler) ProfileTaskTypes(c echo.Context) error {
+	agentType := c.QueryParam("task-agent-type")
+	if agentType != "" {
+		return RenderView(c, partials.SelectTaskType(nil, agentType))
+	}
+	return nil
+}
+
+func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
+	taskType := c.QueryParam("task-type")
+
+	switch taskType {
+	case "package_type":
+		return RenderView(c, partials.SelectWinGetPackageTaskSubtype(nil))
+	case "registry_type":
+		return RenderView(c, partials.SelectRegistryTaskSubtype(nil))
+	case "local_user_subtype":
+		return RenderView(c, partials.SelectLocalUserTaskSubtype(nil))
+	case "local_group_subtype":
+		return RenderView(c, partials.SelectLocalGroupTaskSubtype(nil))
+	case "msi_type":
+		return RenderView(c, partials.SelectMSITaskSubtype(nil))
+	case "powershell_type":
+		c.Response().Header().Set("HX-Retarget", "#task-definition")
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+		c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+		c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+		return partials.PowerShellComponent(nil).Render(c.Request().Context(), c.Response().Writer)
+	}
+
+	return nil
+}
+
+func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
+	taskType := c.QueryParam("task-subtype")
+
+	t := ent.Task{}
+	switch taskType {
+	case "winget_install", "winget_delete":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.WingetPackageSearch(&t))
+	case "add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.RegistryComponent(&t))
+	case "add_local_user", "remove_local_user":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.LocalUserComponent(&t))
+	case "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.LocalGroupComponent(&t))
+	case "msi_install", "msi_uninstall":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.MSIComponent(&t))
+	}
+
+	return nil
 }

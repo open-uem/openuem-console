@@ -127,20 +127,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
 
-	if c.FormValue("package-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("package-task-type")
-	}
-	if c.FormValue("registry-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("registry-task-type")
-	}
-	if c.FormValue("local-user-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("local-user-task-type")
-	}
-	if c.FormValue("local-group-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("local-group-task-type")
-	}
-	if c.FormValue("msi-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("msi-task-type")
+	if c.FormValue("task-subtype") != "" {
+		taskConfig.TaskType = c.FormValue("task-subtype")
 	}
 	if c.FormValue("powershell-script") != "" {
 		taskConfig.TaskType = "powershell_script"
@@ -304,7 +292,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.PowerShellRunConfig = c.FormValue("powershell-run")
-	if taskConfig.PowerShellRunConfig != task.ScriptRunAlways.String() && taskConfig.PowerShellRunConfig != task.ScriptRunOnce.String() {
+	if taskType == "powershell_type" && taskConfig.PowerShellRunConfig != task.ScriptRunAlways.String() && taskConfig.PowerShellRunConfig != task.ScriptRunOnce.String() {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_wrong_run_config"))
 	}
 

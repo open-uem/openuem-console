@@ -38,7 +38,7 @@ templ PowerShellComponent(t *ent.Task) {
 				name="powershell-run"
 			>
 				<option value={ "once" } selected?={ t == nil ||  t.ScriptRun.String() == "once" }>{ i18n.T(ctx, "tasks.powershell_run_once") }</option>
-				<option value={ "always" } selected?={ t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.powershell_run_always") }</option>
+				<option value={ "always" } selected?={ t != nil && t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.powershell_run_always") }</option>
 			</select>
 		</div>
 	</div>

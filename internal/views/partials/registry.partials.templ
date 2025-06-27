@@ -10,7 +10,7 @@ import (
 
 templ RegistryComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div id="registry-key-section" class={ templ.KV("hidden", !IsRegistryTask(t)) }>
+		<div id="registry-key-section">
 			<label class="uk-form-label" for="registry-key">
 				{ i18n.T(ctx, "tasks.registry_key") }
 			</label>
@@ -27,7 +27,10 @@ templ RegistryComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="registry-key-value-name-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeAddRegistryKeyValue && t.Type != task.TypeRemoveRegistryKeyValue)) }>
+		<div
+			id="registry-key-value-name-section"
+			class={ templ.KV("hidden", t.Type != task.TypeAddRegistryKeyValue && t.Type != task.TypeRemoveRegistryKeyValue) }
+		>
 			<label class="uk-form-label" for="registry-value-name">
 				{ i18n.T(ctx, "tasks.registry_value_name") }
 			</label>
@@ -44,10 +47,10 @@ templ RegistryComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="registry-value-types-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
+		<div id="registry-value-types-section" class={ templ.KV("hidden", t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue) }>
 			@RegistryTypes(t)
 		</div>
-		<div id="registry-value-data-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
+		<div id="registry-value-data-section" class={ templ.KV("hidden", t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue) }>
 			<label class="uk-form-label" for="registry-value-data">
 				{ i18n.T(ctx, "tasks.registry_value_data") }
 			</label>
@@ -70,7 +73,7 @@ templ RegistryComponent(t *ent.Task) {
 				</textarea>
 			</div>
 		</div>
-		<div id="registry-key-force-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeRemoveRegistryKey)) }>
+		<div id="registry-key-force-section" class={ templ.KV("hidden", t.Type != task.TypeRemoveRegistryKey) }>
 			<div class="flex items-center space-x-2">
 				<input
 					class="uk-toggle-switch uk-toggle-switch-primary"
@@ -82,7 +85,7 @@ templ RegistryComponent(t *ent.Task) {
 				<label class="uk-form-label" for="registry-key-force">{ i18n.T(ctx, "tasks.force_registry_key") }</label>
 			</div>
 		</div>
-		<div id="registry-value-force-section" class={ templ.KV("hidden", !IsRegistryTask(t) || (IsRegistryTask(t) && t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue)) }>
+		<div id="registry-value-force-section" class={ templ.KV("hidden", t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue) }>
 			<div class="flex items-center space-x-2">
 				<input
 					class="uk-toggle-switch uk-toggle-switch-primary"

@@ -350,6 +350,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.DELETE("/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
 	e.GET("/profiles/:uuid/confirm-delete", h.ConfirmDeleteProfile, h.IsAuthenticated)
 	e.GET("/profiles/:uuid/issues", h.ProfileIssues, h.IsAuthenticated)
+	e.GET("/profiles/task-types", h.ProfileTaskTypes)
+	e.GET("/profiles/task-subtypes", h.ProfileTaskSubTypes)
+	e.GET("/profiles/task-definition", h.ProfileTaskDefinition)
 
 	e.GET("/tenant/:tenant/site/:site/profiles", func(c echo.Context) error { return h.Profiles(c, "") }, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/profiles/new", h.NewProfile, h.IsAuthenticated)
