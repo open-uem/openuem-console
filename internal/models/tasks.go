@@ -46,6 +46,8 @@ type TaskConfig struct {
 	MsiLogPath                        string
 	MsiHashAlgorithm                  string
 	MsiFileHash                       string
+	PowerShellScript                  string
+	PowerShellRunConfig               string
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -139,6 +141,9 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			query = query.SetMsiFileHashAlg(task.MsiFileHashAlg(cfg.MsiHashAlgorithm)).SetMsiFileHash(cfg.MsiFileHash)
 		}
 		return query.Exec(context.Background())
+	case "powershell_script":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+			SetScript(cfg.PowerShellScript).SetScriptRun(task.ScriptRun(cfg.PowerShellRunConfig)).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -215,6 +220,8 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 		}
 
 		return query.Exec(context.Background())
+	case "powershell_script":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetScript(cfg.PowerShellScript).SetScriptRun(task.ScriptRun(cfg.PowerShellRunConfig)).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
