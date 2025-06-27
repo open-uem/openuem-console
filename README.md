@@ -4,7 +4,7 @@
 
 The Console is OpenUEM's Web User Interface
 
-![OpenUEM Console](https://openuem.eu/assets/images/computers_list-f73a20393ef227fa2509c0230a417c04.png)
+![OpenUEM console](https://github.com/user-attachments/assets/795cf36c-91ed-40e2-8b3a-abcff5d46305)
 
 The console allows you to perform the following actions:
 
