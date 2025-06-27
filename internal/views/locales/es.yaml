@@ -1041,6 +1041,14 @@ es:
     msi_path_not_empty: "La ruta MSI no puede estar vacía"
     unexpected_msi_hash_algorithm: "Algoritmo de hash no reconocido"
     msi_specify_both_hash_inputs: "Debe especificar tanto el algoritmo como el valor de hash del fichero"
+    powershell_subtype: "Ejecutar script de PowerShell"
+    powershell_script: "Script de PowerShell"
+    powershell_script_description: "Introduce el script que será ejecutado"
+    powershell_not_empty: "El script no puede estar vacío"
+    powershell_run: "Configuración de ejecución"
+    powershell_run_once: "Ejecutar solo una vez si tiene éxito"
+    powershell_run_always: "Ejecutar cada vez que se aplique el perfil"
+    powershell_wrong_run_config: "La configuración de ejecución no es válida"
 
     new:
       title: "Nueva tarea"

@@ -1,0 +1,45 @@
+package partials
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+)
+
+templ PowerShellComponent(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div id="powershell-script-section">
+			<label class="uk-form-label" for="powershell-script">
+				{ i18n.T(ctx, "tasks.powershell_script") }
+			</label>
+			<textarea
+				id="powershell-script"
+				name="powershell-script"
+				class="uk-textarea font-mono bg-black text-white"
+				placeholder={ i18n.T(ctx, "tasks.powershell_script_description") }
+				rows="15"
+				aria-label={ i18n.T(ctx, "tasks.powershell_script_description") }
+				autocomplete="off"
+				autocorrect="off"
+				autocapitalize="off"
+				spellcheck="false"
+			>
+				if t != nil {
+					{ t.Script }
+				}
+			</textarea>
+		</div>
+		<div id="powershell-run-section">
+			<label class="uk-form-label" for="powershell-run">
+				{ i18n.T(ctx, "tasks.powershell_run") }
+			</label>
+			<select
+				class="uk-select"
+				id="powershell-run"
+				name="powershell-run"
+			>
+				<option value={ "once" } selected?={ t == nil ||  t.ScriptRun.String() == "once" }>{ i18n.T(ctx, "tasks.powershell_run_once") }</option>
+				<option value={ "always" } selected?={ t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.powershell_run_always") }</option>
+			</select>
+		</div>
+	</div>
+}

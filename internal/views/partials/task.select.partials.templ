@@ -12,6 +12,8 @@ templ SelectTaskType(task *ent.Task) {
 			{ i18n.T(ctx, "tasks.task_type") }
 		</label>
 		<select
+			id="task-type"
+			name="task-type"
 			class="uk-select"
 			_="
             on change
@@ -21,6 +23,7 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
                     add .hidden to <div[id^='msi'] />
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
@@ -34,6 +37,7 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
                     add .hidden to <div[id^='msi'] />
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
                     set #local-group-task-type.value to ''
@@ -46,6 +50,7 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='local-user'] />
                     add .hidden to <div[id^='local-group'] />
                     add .hidden to <div[id^='msi'] />
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #package-task-type.value to ''
                     set #local-user-task-type.value to ''
                     set #local-group-task-type.value to ''
@@ -58,6 +63,7 @@ templ SelectTaskType(task *ent.Task) {
                     remove .hidden from #local-user-subtask
                     add .hidden to <div[id^='local-group'] />
                     add .hidden to <div[id^='msi'] />
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-group-task-type.value to ''
@@ -70,6 +76,7 @@ templ SelectTaskType(task *ent.Task) {
                     remove .hidden from #local-group-partial
                     remove .hidden from #local-group-subtask
                     add .hidden to <div[id^='msi'] />
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
@@ -82,9 +89,20 @@ templ SelectTaskType(task *ent.Task) {
                     add .hidden to <div[id^='local-group'] />
                     remove .hidden from #msi-partial
                     remove .hidden from #msi-subtask
+                    add .hidden to <div[id^='powershell-partial'] />
                     set #package-task-type.value to ''
                     set #registry-task-type.value to ''
                     set #local-user-task-type.value to ''
+                end
+
+                if my.value is 'powershell_type' then 
+                    add .hidden to <div[id^='package'] />
+                    add .hidden to <div[id^='registry'] />
+                    add .hidden to <div[id^='local-user'] />
+                    add .hidden to <div[id^='local-group'] />
+                    add .hidden to <div[id^='msi'] />
+                    remove .hidden from #powershell-partial
+                    set #powershell-script.value to ''                    
                 end
             end							
         "
@@ -105,6 +123,9 @@ templ SelectTaskType(task *ent.Task) {
 			</option>
 			<option value="msi_type" selected?={ IsMSITask(task) }>
 				{ i18n.T(ctx, "tasks.msi_subtype") }
+			</option>
+			<option value="powershell_type" selected?={ IsPowerShellTask(task) }>
+				{ i18n.T(ctx, "tasks.powershell_subtype") }
 			</option>
 		</select>
 	</div>
@@ -535,4 +556,9 @@ func IsLocalGroupTask(task *ent.Task) bool {
 func IsMSITask(task *ent.Task) bool {
 	msiTasks := []string{"msi_install", "msi_uninstall"}
 	return task != nil && slices.Contains(msiTasks, task.Type.String())
+}
+
+func IsPowerShellTask(task *ent.Task) bool {
+	powershellTasks := []string{"powershell_script"}
+	return task != nil && slices.Contains(powershellTasks, task.Type.String())
 }

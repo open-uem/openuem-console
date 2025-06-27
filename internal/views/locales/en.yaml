@@ -1046,6 +1046,14 @@ en:
     msi_path_not_empty: "MSI path cannot be empty"
     unexpected_msi_hash_algorithm: "Unrecognized hash algorithm"
     msi_specify_both_hash_inputs: "You must specify both the hash algorithm and the file hash"
+    powershell_subtype: "Execute PowerShell script"
+    powershell_script: "PowerShell script"
+    powershell_script_description: "Introduce the script to be executed"
+    powershell_not_empty: "The script cannot be empty"
+    powershell_run: "Run configuration"
+    powershell_run_once: "Run only once if successful"
+    powershell_run_always: "Run every time the profile is applied"
+    powershell_wrong_run_config: "Run configuration is not valid"
 
     new:
       title: "New task"

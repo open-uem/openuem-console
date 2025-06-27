@@ -171,6 +171,10 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 												<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembersToInclude }</span>
 											case "remove_users_from_local_group":
 												<span>{ task.LocalGroupName + " - x - " + task.LocalGroupMembersToExclude }</span>
+											case "msi_install", "msi_uninstall":
+												<span>{ task.MsiProductid }</span>
+											case "powershell_script":
+												<span>{ i18n.T(ctx, "tasks.powershell_subtype") }</span>
 											default:
 												<span>-</span>
 										}
@@ -228,5 +232,11 @@ templ TaskTypeIcon(taskType string) {
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_users_to_local_group") } uk-cloack></uk-icon>
 		case "remove_users_from_local_group":
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_users_from_local_group") } uk-cloack></uk-icon>
+		case "msi_install":
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_install") } uk-cloack></uk-icon>
+		case "msi_uninstall":
+			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_uninstall") } uk-cloack></uk-icon>
+		case "powershell_script":
+			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.powershell_script") } uk-cloack></uk-icon>
 	}
 }

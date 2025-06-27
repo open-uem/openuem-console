@@ -73,6 +73,9 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 					<div class="w-1/2 hidden" id="msi-partial">
 						@partials.MSIComponent(nil)
 					</div>
+					<div class="w-1/2 hidden" id="powershell-partial">
+						@partials.PowerShellComponent(nil)
+					</div>
 					<div class="w-1/2 hidden">
 						@partials.CommandText()
 					</div>

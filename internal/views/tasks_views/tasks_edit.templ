@@ -78,6 +78,9 @@ templ EditTask(c echo.Context, profileID int, task *ent.Task, commonInfo *partia
 					<div class={ "w-1/2", templ.KV("hidden", !partials.IsMSITask(task)) } id="msi-partial">
 						@partials.MSIComponent(task)
 					</div>
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPowerShellTask(task)) } id="powershell-partial">
+						@partials.PowerShellComponent(task)
+					</div>
 					<div class="w-1/2">
 						@partials.CommandText()
 					</div>

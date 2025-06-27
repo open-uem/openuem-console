@@ -9,6 +9,7 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/tasks_views"
@@ -118,6 +119,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		"remove_users_from_local_group",
 		"msi_install",
 		"msi_uninstall",
+		"powershell_script",
 	}
 
 	taskConfig.Description = c.FormValue("task-description")
@@ -139,6 +141,9 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 	if c.FormValue("msi-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("msi-task-type")
+	}
+	if c.FormValue("powershell-script") != "" {
+		taskConfig.TaskType = "powershell_script"
 	}
 	if c.FormValue("selected-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("selected-task-type")
@@ -289,6 +294,18 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") &&
 		((taskConfig.MsiFileHash == "" && taskConfig.MsiHashAlgorithm != "") || (taskConfig.MsiFileHash != "" && taskConfig.MsiHashAlgorithm == "")) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_specify_both_hash_inputs"))
+	}
+
+	// PowerShell Script
+	taskType := c.FormValue("task-type")
+	taskConfig.PowerShellScript = c.FormValue("powershell-script")
+	if taskType == "powershell_type" && taskConfig.PowerShellScript == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_not_empty"))
+	}
+
+	taskConfig.PowerShellRunConfig = c.FormValue("powershell-run")
+	if taskConfig.PowerShellRunConfig != task.ScriptRunAlways.String() && taskConfig.PowerShellRunConfig != task.ScriptRunOnce.String() {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_wrong_run_config"))
 	}
 
 	return &taskConfig, nil
