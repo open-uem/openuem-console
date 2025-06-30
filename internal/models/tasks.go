@@ -40,6 +40,9 @@ type TaskConfig struct {
 	LocalGroupMembers                 string
 	LocalGroupMembersToInclude        string
 	LocalGroupMembersToExclude        string
+	LocalGroupID                      string
+	LocalGroupSystem                  bool
+	LocalGroupForce                   bool
 	MsiProductID                      string
 	MsiPath                           string
 	MsiArguments                      string
@@ -48,6 +51,7 @@ type TaskConfig struct {
 	MsiFileHash                       string
 	PowerShellScript                  string
 	PowerShellRunConfig               string
+	AgentsType                        string
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -72,17 +76,17 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
 	switch cfg.TaskType {
 	case "winget_install", "winget_delete":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
 	case "add_registry_key":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case "remove_registry_key":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case "update_registry_key_default_value":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetRegistryKey(cfg.RegistryKey).SetRegistryKeyValueType(task.RegistryKeyValueType(cfg.RegistryKeyValueType)).
 			SetRegistryKeyValueData(cfg.RegistryKeyValueData).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case "add_registry_key_value":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).
 			SetRegistryKeyValueType(task.RegistryKeyValueType(cfg.RegistryKeyValueType)).
@@ -90,11 +94,11 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetRegistryHex(cfg.RegistryHex).
 			SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case "remove_registry_key_value":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).Exec(context.Background())
 	case "add_local_user":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
 			SetLocalUserFullname(cfg.LocalUserFullName).
@@ -105,33 +109,44 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
 			Exec(context.Background())
 	case "remove_local_user":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
 	case "add_local_group":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembers(cfg.LocalGroupMembers).
 			Exec(context.Background())
 	case "remove_local_group":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalGroupName(cfg.LocalGroupName).
 			Exec(context.Background())
+	case "add_unix_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupID(cfg.LocalGroupID).
+			SetLocalGroupSystem(cfg.LocalGroupSystem).
+			Exec(context.Background())
+	case "remove_unix_local_group":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupForce(cfg.LocalGroupForce).
+			Exec(context.Background())
 	case "add_users_to_local_group":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToInclude(cfg.LocalGroupMembersToInclude).
 			Exec(context.Background())
 	case "remove_users_from_local_group":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
 	case "msi_install", "msi_uninstall":
-		query := m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		query := m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetMsiProductid(cfg.MsiProductID).
 			SetMsiPath(cfg.MsiPath).
 			SetMsiArguments(cfg.MsiArguments).
@@ -142,7 +157,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		}
 		return query.Exec(context.Background())
 	case "powershell_script":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetProfileID(profileID).
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetScript(cfg.PowerShellScript).SetScriptRun(task.ScriptRun(cfg.PowerShellRunConfig)).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
@@ -151,7 +166,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) error {
 	switch cfg.TaskType {
 	case "winget_install", "winget_delete":
-		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
 	case "add_registry_key":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case "remove_registry_key":
@@ -195,6 +210,17 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 	case "remove_local_group":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
 			SetLocalGroupName(cfg.LocalGroupName).
+			Exec(context.Background())
+	case "add_unix_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupID(cfg.LocalGroupID).
+			SetLocalGroupSystem(cfg.LocalGroupSystem).
+			Exec(context.Background())
+	case "remove_unix_local_group":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalGroupName(cfg.LocalGroupName).
+			SetLocalGroupForce(cfg.LocalGroupForce).
 			Exec(context.Background())
 	case "add_users_to_local_group":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).

@@ -724,7 +724,8 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	if agent.Os == "windows" {
+	switch agent.Os {
+	case "windows":
 		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
 		useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 		if err != nil {
@@ -734,8 +735,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		if !useWinget {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
 		}
-
-	} else if agent.Os == "macOS" {
+	case "macos":
 		f = filters.DeployPackageFilter{Sources: []string{"brew"}}
 		useBrew, err := h.Model.GetDefaultUseBrew(commonInfo.TenantID)
 		if err != nil {
@@ -745,7 +745,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		if !useBrew {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_brew_is_false"), true))
 		}
-	} else {
+	default:
 		f = filters.DeployPackageFilter{Sources: []string{"flatpak"}}
 		useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
 		if err != nil {

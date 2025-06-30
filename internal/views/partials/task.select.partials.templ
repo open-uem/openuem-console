@@ -68,16 +68,27 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.registry_subtype") }
 				</option>
 			}
-			<option value="local_user_subtype" selected?={ IsLocalUserTask(t) }>
-				{ i18n.T(ctx, "tasks.local_user_subtype") }
-			</option>
-			<option value="local_group_subtype" selected?={ IsLocalGroupTask(t) }>
-				{ i18n.T(ctx, "tasks.local_group_subtype") }
-			</option>
+			if agentType == "windows" {
+				<option value="local_user_subtype" selected?={ IsLocalUserTask(t) }>
+					{ i18n.T(ctx, "tasks.local_user_subtype") }
+				</option>
+			}
+			if agentType == "windows" {
+				<option value="local_group_subtype" selected?={ IsWindowsLocalGroupTask(t) }>
+					{ i18n.T(ctx, "tasks.local_group_subtype") }
+				</option>
+			}
+			if agentType == "linux" {
+				<option value="unix_local_group_subtype" selected?={ IsUnixLocalGroupTask(t) }>
+					{ i18n.T(ctx, "tasks.local_group_subtype") }
+				</option>
+			}
 			if agentType == "windows" {
 				<option value="msi_type" selected?={ IsMSITask(t) }>
 					{ i18n.T(ctx, "tasks.msi_subtype") }
 				</option>
+			}
+			if agentType == "windows" {
 				<option value="powershell_type" selected?={ IsPowerShellTask(t) }>
 					{ i18n.T(ctx, "tasks.powershell_subtype") }
 				</option>
@@ -164,7 +175,7 @@ templ SelectLocalUserTaskSubtype(t *ent.Task) {
 	</div>
 }
 
-templ SelectLocalGroupTaskSubtype(t *ent.Task) {
+templ SelectWindowsLocalGroupTaskSubtype(t *ent.Task) {
 	<div id="local-group-subtask">
 		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
@@ -187,6 +198,31 @@ templ SelectLocalGroupTaskSubtype(t *ent.Task) {
 			<option value={ "remove_local_group" } selected?={  t != nil && t.Type.String() == "remove_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
 			<option value={ "add_users_to_local_group" } selected?={ t != nil && t.Type.String() == "add_users_to_local_group" }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
 			<option value={ "remove_users_from_local_group" } selected?={  t != nil && t.Type.String() == "remove_users_from_local_group" }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
+		</select>
+	</div>
+}
+
+templ SelectUnixLocalGroupTaskSubtype(t *ent.Task) {
+	<div id="local-group-subtask">
+		<label class="uk-form-label" for="task-subtype">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "add_unix_local_group" } selected?={ t != nil && t.Type.String() == "add_unix_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
+			<option value={ "remove_unix_local_group" } selected?={  t != nil && t.Type.String() == "remove_unix_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
 		</select>
 	</div>
 }
@@ -231,8 +267,13 @@ func IsLocalUserTask(task *ent.Task) bool {
 	return task != nil && slices.Contains(userTasks, task.Type.String())
 }
 
-func IsLocalGroupTask(task *ent.Task) bool {
+func IsWindowsLocalGroupTask(task *ent.Task) bool {
 	groupTasks := []string{"add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group"}
+	return task != nil && slices.Contains(groupTasks, task.Type.String())
+}
+
+func IsUnixLocalGroupTask(task *ent.Task) bool {
+	groupTasks := []string{"add_unix_local_group", "remove_unix_local_group"}
 	return task != nil && slices.Contains(groupTasks, task.Type.String())
 }
 

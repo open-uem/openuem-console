@@ -115,6 +115,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		"remove_local_user",
 		"add_local_group",
 		"remove_local_group",
+		"add_unix_local_group",
+		"remove_unix_local_group",
 		"add_users_to_local_group",
 		"remove_users_from_local_group",
 		"msi_install",
@@ -136,6 +138,14 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	if c.FormValue("selected-task-type") != "" {
 		taskConfig.TaskType = c.FormValue("selected-task-type")
 	}
+
+	taskID := c.Param("id")
+
+	agentsType := c.FormValue("task-agent-type")
+	if taskID == "" && (agentsType == "" || !slices.Contains([]string{"windows", "linux", "macos"}, agentsType)) {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.wrong_agenttype"))
+	}
+	taskConfig.AgentsType = agentsType
 
 	if !slices.Contains(validTasks, taskConfig.TaskType) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
@@ -251,6 +261,29 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.LocalGroupMembersToExclude = c.FormValue("local-group-members-to-exclude")
 	if taskConfig.LocalGroupMembersToExclude != "" && taskConfig.LocalGroupMembers != "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_members_excluded_and_members_exclusive"))
+	}
+
+	// Local UNIX group
+	taskConfig.LocalGroupName = c.FormValue("local-unix-group-name")
+	if (taskConfig.TaskType == "add_unix_local_group" || taskConfig.TaskType == "remove_unix_local_group") && taskConfig.LocalGroupName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
+	}
+
+	taskConfig.LocalGroupID = c.FormValue("local-group-id")
+	if taskConfig.TaskType == "add_unix_local_group" && taskConfig.LocalGroupID != "" {
+		if _, err := strconv.Atoi(taskConfig.LocalGroupID); err != nil {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_gid_integer"))
+		}
+	}
+
+	localGroupSystem := c.FormValue("local-group-system")
+	if localGroupSystem == "on" {
+		taskConfig.LocalGroupSystem = true
+	}
+
+	localGroupForce := c.FormValue("local-group-force")
+	if localGroupForce == "on" {
+		taskConfig.LocalGroupForce = true
 	}
 
 	// MSI

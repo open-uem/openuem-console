@@ -6,7 +6,7 @@ import (
 	"github.com/open-uem/ent/task"
 )
 
-templ LocalGroupComponent(t *ent.Task) {
+templ WindowsLocalGroupComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
 		<div id="local-group-name-section">
 			<label class="uk-form-label" for="local-group-name">
@@ -19,7 +19,7 @@ templ LocalGroupComponent(t *ent.Task) {
 				name="local-group-name"
 				spellcheck="false"
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_name") }
-				spellcheck="false"
+				autocomplete="off"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_name") }
 				if t != nil {
 					value={ t.LocalGroupName }
@@ -37,7 +37,7 @@ templ LocalGroupComponent(t *ent.Task) {
 				name="local-group-description"
 				spellcheck="false"
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_description") }
-				spellcheck="false"
+				autocomplete="off"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_description") }
 				if t != nil {
 					value={ t.LocalGroupDescription }
@@ -55,7 +55,7 @@ templ LocalGroupComponent(t *ent.Task) {
 				name="local-group-members"
 				spellcheck="false"
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members") }
-				spellcheck="false"
+				autocomplete="off"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members") }
 				if t != nil {
 					value={ t.LocalGroupMembers }
@@ -72,6 +72,7 @@ templ LocalGroupComponent(t *ent.Task) {
 				id="local-group-members-to-include"
 				name="local-group-members-to-include"
 				spellcheck="false"
+				autocomplete="off"
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members_to_include") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members_to_include") }
@@ -90,6 +91,7 @@ templ LocalGroupComponent(t *ent.Task) {
 				id="local-group-members-to-exclude"
 				name="local-group-members-to-exclude"
 				spellcheck="false"
+				autocomplete="off"
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_members_to_exclude") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_members_to_exclude") }
@@ -97,6 +99,55 @@ templ LocalGroupComponent(t *ent.Task) {
 					value={ t.LocalGroupMembersToExclude }
 				}
 			/>
+		</div>
+	</div>
+}
+
+templ UnixLocalGroupComponent(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div id="local-unix-group-name-section">
+			<label class="uk-form-label" for="local-unix-group-name">
+				{ i18n.T(ctx, "tasks.local_group_name") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="local-unix-group-name"
+				name="local-unix-group-name"
+				spellcheck="false"
+				autocomplete="off"
+				placeholder={ i18n.T(ctx, "tasks.introduce_local_group_name") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.introduce_local_group_name") }
+				if t != nil {
+					value={ t.LocalGroupName }
+				}
+			/>
+		</div>
+		<div id="local-group-id-section" class={ templ.KV("hidden", t.Type != task.TypeAddUnixLocalGroup) }>
+			<label class="uk-form-label" for="local-group-id">
+				{ i18n.T(ctx, "tasks.local_group_id_description") }
+			</label>
+			<input
+				type="number"
+				class="uk-input"
+				id="local-group-id"
+				name="local-group-id"
+				spellcheck="false"
+				autocomplete="off"
+				placeholder={ i18n.T(ctx, "tasks.local_group_id_description") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.local_group_id_description") }
+				if t != nil {
+					value={ t.LocalGroupID }
+				}
+			/>
+		</div>
+		<div id="local-group-system-section" class={ templ.KV("hidden", t.Type != task.TypeAddUnixLocalGroup) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-group-system" name="local-group-system" type="checkbox" checked?={ t != nil && t.LocalGroupSystem }/> { i18n.T(ctx, "tasks.local_group_system") }</label>
+		</div>
+		<div id="local-group-force-section" class={ templ.KV("hidden", t.Type != task.TypeRemoveUnixLocalGroup) }>
+			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-group-force" name="local-group-force" type="checkbox" checked?={ t != nil && t.LocalGroupForce }/> { i18n.T(ctx, "tasks.local_group_force") }</label>
 		</div>
 	</div>
 }

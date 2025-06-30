@@ -359,7 +359,9 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 	case "local_user_subtype":
 		return RenderView(c, partials.SelectLocalUserTaskSubtype(nil))
 	case "local_group_subtype":
-		return RenderView(c, partials.SelectLocalGroupTaskSubtype(nil))
+		return RenderView(c, partials.SelectWindowsLocalGroupTaskSubtype(nil))
+	case "unix_local_group_subtype":
+		return RenderView(c, partials.SelectUnixLocalGroupTaskSubtype(nil))
 	case "msi_type":
 		return RenderView(c, partials.SelectMSITaskSubtype(nil))
 	case "powershell_type":
@@ -389,7 +391,10 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 		return RenderView(c, partials.LocalUserComponent(&t))
 	case "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group":
 		t.Type = task.Type(taskType)
-		return RenderView(c, partials.LocalGroupComponent(&t))
+		return RenderView(c, partials.WindowsLocalGroupComponent(&t))
+	case "add_unix_local_group", "remove_unix_local_group":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.UnixLocalGroupComponent(&t))
 	case "msi_install", "msi_uninstall":
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.MSIComponent(&t))
