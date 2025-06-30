@@ -1027,6 +1027,11 @@ en:
     local_group_description_is_required: "The description of the group is required"
     local_group_members_included_and_members_exclusive: "You cannot specify both members and members to include as these are mutually exclusive"
     local_group_members_excluded_and_members_exclusive: "You cannot specify both members and members to exclude as these are mutually exclusive"
+    local_group_id: "GID"
+    local_group_id_description: "Group's ID (optional)"
+    local_gid_integer: "GID must be an integer"
+    local_group_system: "Create group as a system group"
+    local_group_force: "Delete a group even if it is the primary group of a user"
     msi_subtype: "Manage MSI packages"
     msi_install: "Install MSI package"
     msi_uninstall: "Uninstall MSI package"
@@ -1056,6 +1061,7 @@ en:
     powershell_wrong_run_config: "Run configuration is not valid"
     task_agent: "Agent's OS"
     task_agent_description: "Specify the OS agent..."
+    wrong_agenttype: "Agent's type is not valid"
 
     new:
       title: "New task"

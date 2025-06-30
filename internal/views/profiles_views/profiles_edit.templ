@@ -135,11 +135,12 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							</thead>
 							for index, task := range tasks {
 								<tr>
-									<td class="!align-middle">
+									<td class="flex gap-4 items-center !align-middle">
 										@TaskTypeIcon(task.Type.String())
+										@TaskAgentIcon(task.AgentType.String())
 									</td>
 									<td
-										class="!align-middle underline hover:cursor-pointer"
+										class="items-center !align-middle underline hover:cursor-pointer"
 									>
 										<a
 											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID))) }
@@ -149,7 +150,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 											hx-swap="outerHTML"
 										>{ task.Name }</a>
 									</td>
-									<td>
+									<td class="items-center !align-middle">
 										switch task.Type.String() {
 											case "winget_install", "winget_delete":
 												<span>{ task.PackageName }</span>
@@ -159,13 +160,13 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 												<span>{ task.RegistryKey + " <- " + task.RegistryKeyValueName }</span>
 											case "add_local_user", "remove_local_user":
 												<span>{ task.LocalUserUsername }</span>
-											case "add_local_group":
+											case "add_local_group", "add_unix_local_group":
 												if task.LocalGroupMembers != "" {
 													<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembers }</span>
 												} else {
 													<span>{ task.LocalGroupName }</span>
 												}
-											case "remove_local_group":
+											case "remove_local_group", "remove_unix_local_group":
 												<span>{ task.LocalGroupName }</span>
 											case "add_users_to_local_group":
 												<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembersToInclude }</span>
@@ -179,7 +180,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 												<span>-</span>
 										}
 									</td>
-									<td>
+									<td class="items-center !align-middle">
 										@partials.MoreButton(index)
 										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
@@ -224,9 +225,9 @@ templ TaskTypeIcon(taskType string) {
 			<uk-icon hx-history="false" icon="user-round-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_add") } uk-cloack></uk-icon>
 		case "remove_local_user":
 			<uk-icon hx-history="false" icon="user-round-x" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_remove") } uk-cloack></uk-icon>
-		case "add_local_group":
+		case "add_local_group", "add_unix_local_group":
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_local_group") } uk-cloack></uk-icon>
-		case "remove_local_group":
+		case "remove_local_group", "remove_unix_local_group":
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_local_group") } uk-cloack></uk-icon>
 		case "add_users_to_local_group":
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_users_to_local_group") } uk-cloack></uk-icon>
@@ -238,5 +239,16 @@ templ TaskTypeIcon(taskType string) {
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_uninstall") } uk-cloack></uk-icon>
 		case "powershell_script":
 			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.powershell_script") } uk-cloack></uk-icon>
+	}
+}
+
+templ TaskAgentIcon(agent string) {
+	switch agent {
+		case "windows":
+			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "linux":
+			<i class="si si-linux uk-cloak text-2xl"></i>
+		case "macos":
+			<i class="si si-apple uk-cloak text-2xl"></i>
 	}
 }
