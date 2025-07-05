@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -101,74 +102,59 @@ func (h *Handler) EditTask(c echo.Context) error {
 }
 
 func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
-	taskConfig := models.TaskConfig{}
+	taskType := ""
 
-	validTasks := []string{
-		"winget_install",
-		"winget_delete",
-		"add_registry_key",
-		"remove_registry_key",
-		"update_registry_key_default_value",
-		"add_registry_key_value",
-		"remove_registry_key_value",
-		"add_local_user",
-		"remove_local_user",
-		"add_local_group",
-		"remove_local_group",
-		"add_unix_local_group",
-		"remove_unix_local_group",
-		"add_users_to_local_group",
-		"remove_users_from_local_group",
-		"msi_install",
-		"msi_uninstall",
-		"powershell_script",
+	if c.FormValue("task-subtype") != "" {
+		taskType = c.FormValue("task-subtype")
+	}
+	if c.FormValue("powershell-script") != "" {
+		taskType = "powershell_script"
+	}
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
+	taskID := c.Param("id")
+	agentsType := c.FormValue("task-agent-type")
+	if taskID == "" && (agentsType == "" || !slices.Contains([]string{"windows", "linux", "macos"}, agentsType)) {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.wrong_agenttype"))
+	}
+
+	switch taskType {
+	case string(task.TypeAddLocalUser), string(task.TypeRemoveLocalUser):
+		return validateWindowsLocalUser(c)
+	case string(task.TypeAddRegistryKey), string(task.TypeAddRegistryKeyValue), string(task.TypeRemoveRegistryKey),
+		string(task.TypeRemoveRegistryKeyValue), string(task.TypeUpdateRegistryKeyDefaultValue):
+		return validateWindowsRegistry(c)
+	case string(task.TypeAddLinuxLocalUser):
+		return validateAddLinuxLocalUser(c)
+	case string(task.TypeRemoveLinuxLocalUser):
+		return validateRemoveLinuxLocalUser(c)
+	case string(task.TypeAddLocalGroup), string(task.TypeRemoveLocalGroup):
+		return validateWindowsLocalGroup(c)
+	case string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalGroup):
+		return validateUnixLocalGroup(c)
+	case string(task.TypeMsiInstall), string(task.TypeMsiUninstall):
+		return validateMSI(c)
+	case string(task.TypeWingetDelete), string(task.TypeWingetInstall), string(task.TypeWingetUpdate):
+		return validateWinGetPackage(c)
+	case string(task.TypePowershellScript):
+		return validatePowerShellScript(c)
+	default:
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
+	}
+}
+
+func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
 	}
 
 	taskConfig.Description = c.FormValue("task-description")
 	if taskConfig.Description == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
-
-	if c.FormValue("task-subtype") != "" {
-		taskConfig.TaskType = c.FormValue("task-subtype")
-	}
-	if c.FormValue("powershell-script") != "" {
-		taskConfig.TaskType = "powershell_script"
-	}
-	if c.FormValue("selected-task-type") != "" {
-		taskConfig.TaskType = c.FormValue("selected-task-type")
-	}
-
-	taskID := c.Param("id")
-
-	agentsType := c.FormValue("task-agent-type")
-	if taskID == "" && (agentsType == "" || !slices.Contains([]string{"windows", "linux", "macos"}, agentsType)) {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.wrong_agenttype"))
-	}
-	taskConfig.AgentsType = agentsType
-
-	if !slices.Contains(validTasks, taskConfig.TaskType) {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
-	}
-
-	taskConfig.ExecuteCommand = c.FormValue("execute-command")
-	if taskConfig.TaskType == "execute_command" && taskConfig.ExecuteCommand == "" {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.execute_command_not_empty"))
-	}
-
-	// Package management
-
-	taskConfig.PackageID = c.FormValue("package-id")
-	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageID == "" {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
-	}
-
-	taskConfig.PackageName = c.FormValue("package-name")
-	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
-	}
-
-	// Registry management
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
 	if (taskConfig.TaskType == "add_registry_key" || taskConfig.TaskType == "remove_registry_key") && taskConfig.RegistryKey == "" {
@@ -210,15 +196,31 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.RegistryForce = true
 	}
 
-	// Local User
+	return &taskConfig, nil
+}
+
+func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
 	taskConfig.LocalUserUsername = c.FormValue("local-user-username")
-	if (taskConfig.TaskType == "add_local_user" || taskConfig.TaskType == "remove_local_user") && taskConfig.LocalUserUsername == "" {
+	if taskConfig.LocalUserUsername == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
 	}
 
 	taskConfig.LocalUserDescription = c.FormValue("local-user-description")
 	taskConfig.LocalUserFullName = c.FormValue("local-user-fullname")
-	taskConfig.LocalUserPassword = c.FormValue("local-user-password")
+	password := c.FormValue("local-user-password")
+	if password != "" {
+		taskConfig.LocalUserPassword = c.FormValue("local-user-password")
+	}
 
 	localUserDisabled := c.FormValue("local-user-disabled")
 	if localUserDisabled == "on" {
@@ -240,7 +242,212 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.LocalUserNeverExpires = true
 	}
 
-	// Local group
+	return &taskConfig, nil
+}
+
+func validateAddLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
+	var err error
+
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskConfig.LocalUserUsername = c.FormValue("local-user-username")
+	if taskConfig.LocalUserUsername == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
+	}
+
+	taskConfig.LocalUserDescription = c.FormValue("local-user-description")
+	taskConfig.LocalUserFullName = c.FormValue("local-user-fullname")
+	password := c.FormValue("local-user-password")
+	if password != "" {
+		taskConfig.LocalUserPassword = c.FormValue("local-user-password")
+	}
+
+	taskConfig.LocalUserPrimaryGroup = c.FormValue("local-user-group")
+	taskConfig.LocalUserSupplementaryGroup = c.FormValue("local-user-groups")
+	taskConfig.LocalUserHome = c.FormValue("local-user-home")
+	taskConfig.LocalUserShell = c.FormValue("local-user-shell")
+	taskConfig.LocalUserUmask = c.FormValue("local-user-umask")
+
+	confirmPassword := c.FormValue("local-user-password-confirm")
+	if confirmPassword != taskConfig.LocalUserPassword {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_password_match"))
+	}
+
+	generateSSHKey := c.FormValue("local-user-generate-ssh-key")
+	if generateSSHKey == "on" {
+		taskConfig.LocalUserGenerateSSHKey = true
+	}
+
+	createHome := c.FormValue("local-user-create-home")
+	if createHome == "on" {
+		taskConfig.LocalUserCreateHome = true
+	}
+
+	skel := c.FormValue("local-user-skeleton")
+	if skel != "" && !taskConfig.LocalUserCreateHome {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_skel_requires_home"))
+	}
+	taskConfig.LocalUserSkeleton = skel
+
+	systemAccount := c.FormValue("local-user-system")
+	if systemAccount == "on" {
+		taskConfig.LocalUserSystemAccount = true
+	}
+
+	lockPassword := c.FormValue("local-user-password-lock")
+	if lockPassword == "on" {
+		taskConfig.LocalUserPasswordLock = true
+	}
+
+	localUID := c.FormValue("local-user-id")
+	if localUID != "" {
+		uid, err := strconv.Atoi(localUID)
+
+		if err != nil || uid < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_uid_integer"))
+		}
+		taskConfig.LocalUserID = localUID
+	}
+
+	expires := c.FormValue("local-user-expires")
+	if expires != "" {
+		expiresTime, err := time.ParseInLocation("2006-01-02", expires, time.Local)
+		if err != nil {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_could_not_parse_expire"))
+		}
+		taskConfig.LocalUserExpires = fmt.Sprintf("%d", expiresTime.Unix())
+	}
+
+	expireMax := c.FormValue("local-user-password-expire-max")
+	if expireMax != "" {
+		num, err := strconv.Atoi(expireMax)
+		if err != nil || num < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_password_expire_max_not_valid"))
+		}
+	}
+	taskConfig.LocalUserPasswordExpireMax = expireMax
+
+	expireMin := c.FormValue("local-user-password-expire-min")
+	if expireMin != "" {
+		num, err := strconv.Atoi(expireMin)
+		if err != nil || num < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_password_expire_min_not_valid"))
+		}
+	}
+	taskConfig.LocalUserPasswordExpireMin = expireMin
+
+	expireDisable := c.FormValue("local-user-password-expire-account-disable")
+	if expireDisable != "" {
+		num, err := strconv.Atoi(expireDisable)
+		if err != nil || num < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_password_expire_account_disable_not_valid"))
+		}
+	}
+	taskConfig.LocalUserPasswordExpireAccountDisable = expireDisable
+
+	expireWarning := c.FormValue("local-user-password-expire-warn")
+	if expireWarning != "" {
+		num, err := strconv.Atoi(expireWarning)
+		if err != nil || num < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_password_expire_warn_not_valid"))
+		}
+	}
+	taskConfig.LocalUserPasswordExpireWarn = expireWarning
+
+	sshKeyBits := c.FormValue("local-user-ssh-key-bits")
+	if sshKeyBits != "" {
+		num, err := strconv.Atoi(sshKeyBits)
+		if err != nil || num < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_ssh_key_bits_not_valid"))
+		}
+	}
+	taskConfig.LocalUserSSHKeyBits = sshKeyBits
+	taskConfig.LocalUserSSHKeyComment = c.FormValue("local-user-ssh-key-comment")
+	taskConfig.LocalUserSSHKeyFile = c.FormValue("local-user-ssh-key-file")
+	taskConfig.LocalUserSSHKeyPassphrase = c.FormValue("local-user-ssh-key-passphrase")
+	taskConfig.LocalUserSSHKeyType = c.FormValue("local-user-ssh-key-type")
+
+	var uidMaxValue = 0
+	uidMax := c.FormValue("local-user-uid-max")
+	if uidMax != "" {
+		uidMaxValue, err = strconv.Atoi(uidMax)
+		if err != nil || uidMaxValue < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_uid_max_not_valid"))
+		}
+	}
+	taskConfig.LocalUserUIDMax = uidMax
+
+	var uidMinValue = 0
+	uidMin := c.FormValue("local-user-uid-min")
+	if uidMin != "" {
+		uidMinValue, err = strconv.Atoi(uidMin)
+		if err != nil || uidMinValue < 0 {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_uid_min_not_valid"))
+		}
+	}
+	taskConfig.LocalUserUIDMin = uidMin
+
+	if uidMin != "" && uidMax != "" {
+		if uidMinValue >= uidMaxValue {
+			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_max_min_error"))
+		}
+	}
+
+	append := c.FormValue("local-user-append")
+	if append == "on" {
+		taskConfig.LocalUserAppend = true
+	}
+
+	overwriteSSHKey := c.FormValue("local-user-force")
+	if overwriteSSHKey == "on" {
+		taskConfig.LocalUserForce = true
+	}
+
+	return &taskConfig, nil
+}
+
+func validateRemoveLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskConfig.LocalUserUsername = c.FormValue("local-user-username")
+	if taskConfig.LocalUserUsername == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_user_username_is_required"))
+	}
+
+	removeDirectories := c.FormValue("local-user-force")
+	if removeDirectories == "on" {
+		taskConfig.LocalUserForce = true
+	}
+
+	return &taskConfig, nil
+}
+func validateWindowsLocalGroup(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
 	taskConfig.LocalGroupName = c.FormValue("local-group-name")
 	if (taskConfig.TaskType == "add_local_group" || taskConfig.TaskType == "remove_local_group" || taskConfig.TaskType == "add_users_to_local_group" || taskConfig.TaskType == "remove_users_from_local_group") && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
@@ -263,10 +470,28 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_members_excluded_and_members_exclusive"))
 	}
 
-	// Local UNIX group
+	return &taskConfig, nil
+}
+
+func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
 	taskConfig.LocalGroupName = c.FormValue("local-unix-group-name")
 	if (taskConfig.TaskType == "add_unix_local_group" || taskConfig.TaskType == "remove_unix_local_group") && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
+	}
+
+	taskConfig.LocalGroupDescription = c.FormValue("local-group-description")
+	if taskConfig.TaskType == "add_local_group" && taskConfig.LocalGroupName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_description_is_required"))
 	}
 
 	taskConfig.LocalGroupID = c.FormValue("local-group-id")
@@ -286,7 +511,20 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.LocalGroupForce = true
 	}
 
-	// MSI
+	return &taskConfig, nil
+}
+
+func validateMSI(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
 	taskConfig.MsiProductID = c.FormValue("msi-productid")
 	if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") && taskConfig.MsiProductID == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_productid_not_empty"))
@@ -317,7 +555,20 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_specify_both_hash_inputs"))
 	}
 
-	// PowerShell Script
+	return &taskConfig, nil
+}
+
+func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
 	taskType := c.FormValue("task-type")
 	taskConfig.PowerShellScript = c.FormValue("powershell-script")
 	if taskType == "powershell_type" && taskConfig.PowerShellScript == "" {
@@ -327,6 +578,30 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.PowerShellRunConfig = c.FormValue("powershell-run")
 	if taskType == "powershell_type" && taskConfig.PowerShellRunConfig != task.ScriptRunAlways.String() && taskConfig.PowerShellRunConfig != task.ScriptRunOnce.String() {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_wrong_run_config"))
+	}
+
+	return &taskConfig, nil
+}
+
+func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   c.FormValue("task-subtype"),
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskConfig.PackageID = c.FormValue("package-id")
+	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageID == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
+	}
+
+	taskConfig.PackageName = c.FormValue("package-name")
+	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
 
 	return &taskConfig, nil
