@@ -16,42 +16,67 @@ import (
 )
 
 type TaskConfig struct {
-	TaskType                          string
-	ExecuteCommand                    string
-	PackageID                         string
-	PackageName                       string
-	Description                       string
-	RegistryKey                       string
-	RegistryKeyValue                  string
-	RegistryKeyValueType              string
-	RegistryKeyValueData              string
-	RegistryHex                       bool
-	RegistryForce                     bool
-	LocalUserUsername                 string
-	LocalUserDescription              string
-	LocalUserFullName                 string
-	LocalUserPassword                 string
-	LocalUserDisabled                 bool
-	LocalUserPasswordChangeNotAllowed bool
-	LocalUserPasswordChangeRequired   bool
-	LocalUserNeverExpires             bool
-	LocalGroupName                    string
-	LocalGroupDescription             string
-	LocalGroupMembers                 string
-	LocalGroupMembersToInclude        string
-	LocalGroupMembersToExclude        string
-	LocalGroupID                      string
-	LocalGroupSystem                  bool
-	LocalGroupForce                   bool
-	MsiProductID                      string
-	MsiPath                           string
-	MsiArguments                      string
-	MsiLogPath                        string
-	MsiHashAlgorithm                  string
-	MsiFileHash                       string
-	PowerShellScript                  string
-	PowerShellRunConfig               string
-	AgentsType                        string
+	TaskType                              string
+	ExecuteCommand                        string
+	PackageID                             string
+	PackageName                           string
+	Description                           string
+	RegistryKey                           string
+	RegistryKeyValue                      string
+	RegistryKeyValueType                  string
+	RegistryKeyValueData                  string
+	RegistryHex                           bool
+	RegistryForce                         bool
+	LocalUserUsername                     string
+	LocalUserDescription                  string
+	LocalUserFullName                     string
+	LocalUserPassword                     string
+	LocalUserDisabled                     bool
+	LocalUserPasswordChangeNotAllowed     bool
+	LocalUserPasswordChangeRequired       bool
+	LocalUserNeverExpires                 bool
+	LocalUserID                           string
+	LocalUserPrimaryGroup                 string
+	LocalUserSupplementaryGroup           string
+	LocalUserCreateHome                   bool
+	LocalUserGenerateSSHKey               bool
+	LocalUserSystemAccount                bool
+	LocalUserHome                         string
+	LocalUserShell                        string
+	LocalUserUmask                        string
+	LocalUserSkeleton                     string
+	LocalUserExpires                      string
+	LocalUserPasswordLock                 bool
+	LocalUserPasswordExpireMax            string
+	LocalUserPasswordExpireMin            string
+	LocalUserPasswordExpireAccountDisable string
+	LocalUserPasswordExpireWarn           string
+	LocalUserSSHKeyBits                   string
+	LocalUserSSHKeyComment                string
+	LocalUserSSHKeyFile                   string
+	LocalUserSSHKeyPassphrase             string
+	LocalUserSSHKeyType                   string
+	LocalUserUIDMax                       string
+	LocalUserUIDMin                       string
+	LocalUserForce                        bool
+	LocalUserAppend                       bool
+	LocalGroupName                        string
+	LocalGroupDescription                 string
+	LocalGroupMembers                     string
+	LocalGroupMembersToInclude            string
+	LocalGroupMembersToExclude            string
+	LocalGroupID                          string
+	LocalGroupSystem                      bool
+	LocalGroupForce                       bool
+	MsiProductID                          string
+	MsiPath                               string
+	MsiArguments                          string
+	MsiLogPath                            string
+	MsiHashAlgorithm                      string
+	MsiFileHash                           string
+	PowerShellScript                      string
+	PowerShellRunConfig                   string
+	AgentsType                            string
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -107,6 +132,42 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserPasswordChangeNotAllowed(cfg.LocalUserPasswordChangeNotAllowed).
 			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
+			Exec(context.Background())
+	case "add_linux_local_user":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserDescription(cfg.LocalUserDescription).
+			SetLocalUserGroup(cfg.LocalUserPrimaryGroup).
+			SetLocalUserGroups(cfg.LocalUserSupplementaryGroup).
+			SetLocalUserHome(cfg.LocalUserHome).
+			SetLocalUserShell(cfg.LocalUserShell).
+			SetLocalUserCreateHome(cfg.LocalUserCreateHome).
+			SetLocalUserSkeleton(cfg.LocalUserSkeleton).
+			SetLocalUserUmask(cfg.LocalUserUmask).
+			SetLocalUserGenerateSSHKey(cfg.LocalUserGenerateSSHKey).
+			SetLocalUserSystem(cfg.LocalUserSystemAccount).
+			SetLocalUserPassword(cfg.LocalUserPassword).
+			SetLocalUserID(cfg.LocalUserID).
+			SetLocalUserExpires(cfg.LocalUserExpires).
+			SetLocalUserPasswordLock(cfg.LocalUserPasswordLock).
+			SetLocalUserPasswordExpireMax(cfg.LocalUserPasswordExpireMax).
+			SetLocalUserPasswordExpireMin(cfg.LocalUserPasswordExpireMin).
+			SetLocalUserPasswordExpireAccountDisable(cfg.LocalUserPasswordExpireAccountDisable).
+			SetLocalUserPasswordExpireWarn(cfg.LocalUserPasswordExpireWarn).
+			SetLocalUserSSHKeyBits(cfg.LocalUserSSHKeyBits).
+			SetLocalUserSSHKeyComment(cfg.LocalUserSSHKeyComment).
+			SetLocalUserSSHKeyFile(cfg.LocalUserSSHKeyFile).
+			SetLocalUserSSHKeyPassphrase(cfg.LocalUserSSHKeyPassphrase).
+			SetLocalUserSSHKeyType(cfg.LocalUserSSHKeyType).
+			SetLocalUserIDMax(cfg.LocalUserUIDMax).
+			SetLocalUserIDMin(cfg.LocalUserUIDMin).
+			SetLocalUserForce(cfg.LocalUserForce).
+			SetLocalUserAppend(cfg.LocalUserAppend).
+			Exec(context.Background())
+	case "remove_linux_local_user":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserForce(cfg.LocalUserForce).
 			Exec(context.Background())
 	case "remove_local_user":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
@@ -196,6 +257,42 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 			SetLocalUserPasswordChangeNotAllowed(cfg.LocalUserPasswordChangeNotAllowed).
 			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
+			Exec(context.Background())
+	case "add_linux_local_user":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserDescription(cfg.LocalUserDescription).
+			SetLocalUserGroup(cfg.LocalUserPrimaryGroup).
+			SetLocalUserGroups(cfg.LocalUserSupplementaryGroup).
+			SetLocalUserHome(cfg.LocalUserHome).
+			SetLocalUserShell(cfg.LocalUserShell).
+			SetLocalUserCreateHome(cfg.LocalUserCreateHome).
+			SetLocalUserSkeleton(cfg.LocalUserSkeleton).
+			SetLocalUserUmask(cfg.LocalUserUmask).
+			SetLocalUserGenerateSSHKey(cfg.LocalUserGenerateSSHKey).
+			SetLocalUserSystem(cfg.LocalUserSystemAccount).
+			SetLocalUserPassword(cfg.LocalUserPassword).
+			SetLocalUserID(cfg.LocalUserID).
+			SetLocalUserExpires(cfg.LocalUserExpires).
+			SetLocalUserPasswordLock(cfg.LocalUserPasswordLock).
+			SetLocalUserPasswordExpireMax(cfg.LocalUserPasswordExpireMax).
+			SetLocalUserPasswordExpireMin(cfg.LocalUserPasswordExpireMin).
+			SetLocalUserPasswordExpireAccountDisable(cfg.LocalUserPasswordExpireAccountDisable).
+			SetLocalUserPasswordExpireWarn(cfg.LocalUserPasswordExpireWarn).
+			SetLocalUserSSHKeyBits(cfg.LocalUserSSHKeyBits).
+			SetLocalUserSSHKeyComment(cfg.LocalUserSSHKeyComment).
+			SetLocalUserSSHKeyFile(cfg.LocalUserSSHKeyFile).
+			SetLocalUserSSHKeyPassphrase(cfg.LocalUserSSHKeyPassphrase).
+			SetLocalUserSSHKeyType(cfg.LocalUserSSHKeyType).
+			SetLocalUserIDMax(cfg.LocalUserUIDMax).
+			SetLocalUserIDMin(cfg.LocalUserUIDMin).
+			SetLocalUserForce(cfg.LocalUserForce).
+			SetLocalUserAppend(cfg.LocalUserAppend).
+			Exec(context.Background())
+	case "remove_linux_local_user":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
+			SetLocalUserUsername(cfg.LocalUserUsername).
+			SetLocalUserForce(cfg.LocalUserForce).
 			Exec(context.Background())
 	case "remove_local_user":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).

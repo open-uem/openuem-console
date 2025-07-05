@@ -4,6 +4,8 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
+	"strconv"
+	"time"
 )
 
 templ LocalUserComponent(t *ent.Task) {
@@ -21,7 +23,7 @@ templ LocalUserComponent(t *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_username") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_username") }
-				if t != nil {
+				if t.Name != "" {
 					value={ t.LocalUserUsername }
 				}
 			/>
@@ -39,7 +41,7 @@ templ LocalUserComponent(t *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_description") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_description") }
-				if t != nil {
+				if t.Name != "" {
 					value={ t.LocalUserDescription }
 				}
 			/>
@@ -57,7 +59,7 @@ templ LocalUserComponent(t *ent.Task) {
 				placeholder={ i18n.T(ctx, "tasks.introduce_local_user_fullname") }
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.introduce_local_user_fullname") }
-				if t != nil {
+				if t.Name != "" {
 					value={ t.LocalUserFullname }
 				}
 			/>
@@ -73,7 +75,7 @@ templ LocalUserComponent(t *ent.Task) {
 				name="local-user-password"
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.local_user_password") }
-				if t != nil {
+				if t.Name != "" {
 					value={ t.LocalUserPassword }
 				}
 				autocomplete="off"
@@ -92,4 +94,545 @@ templ LocalUserComponent(t *ent.Task) {
 			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-never-expires" name="local-user-password-never-expires" type="checkbox" checked?={ t != nil && t.LocalUserPasswordNeverExpires }/> { i18n.T(ctx, "tasks.local_user_never_expires") }</label>
 		</div>
 	</div>
+}
+
+templ LinuxLocalUserComponent(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div class="flex gap-2">
+			<div id="local-user-username-section" class="w-1/3">
+				<label class="uk-form-label" for="local-user-username">
+					{ i18n.T(ctx, "tasks.local_user_username") }
+				</label>
+				<input
+					type="text"
+					class="uk-input"
+					id="local-user-username"
+					name="local-user-username"
+					spellcheck="false"
+					placeholder={ i18n.T(ctx, "tasks.introduce_local_user_username") }
+					spellcheck="false"
+					aria-label={ i18n.T(ctx, "tasks.introduce_local_user_username") }
+					if t.Name != "" {
+						value={ t.LocalUserUsername }
+					}
+				/>
+			</div>
+			if t.Type == task.TypeAddLinuxLocalUser {
+				<div id="local-user-description-section" class="w-2/3">
+					<label class="uk-form-label" for="local-user-description">
+						{ i18n.T(ctx, "tasks.local_user_description") }
+					</label>
+					<input
+						type="text"
+						class="uk-input"
+						id="local-user-description"
+						name="local-user-description"
+						spellcheck="false"
+						placeholder={ i18n.T(ctx, "tasks.introduce_local_user_description") }
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.introduce_local_user_description") }
+						if t.Name != "" {
+							value={ t.LocalUserDescription }
+						}
+					/>
+				</div>
+			}
+		</div>
+		if t.Type == task.TypeAddLinuxLocalUser {
+			<div class="flex gap-2">
+				<div id="local-user-group-section" class="w-1/3">
+					<label class="uk-form-label" for="local-user-group">
+						{ i18n.T(ctx, "tasks.local_user_group_description") }
+					</label>
+					<input
+						type="text"
+						class="uk-input"
+						id="local-user-group"
+						name="local-user-group"
+						spellcheck="false"
+						autocomplete="off"
+						placeholder={ i18n.T(ctx, "tasks.introduce_local_user_group_description") }
+						aria-label={ i18n.T(ctx, "tasks.introduce_local_user_group_description") }
+						if t.Name != "" {
+							value={ t.LocalUserGroup }
+						}
+					/>
+				</div>
+				<div id="local-user-groups-section" class="w-2/3">
+					<label class="uk-form-label" for="local-user-groups">
+						{ i18n.T(ctx, "tasks.local_user_groups_description") }
+					</label>
+					<input
+						type="text"
+						class="uk-input"
+						id="local-user-groups"
+						name="local-user-groups"
+						spellcheck="false"
+						autocomplete="off"
+						placeholder={ i18n.T(ctx, "tasks.introduce_local_user_groups_description") }
+						aria-label={ i18n.T(ctx, "tasks.introduce_local_user_groups_description") }
+						if t.Name != "" {
+							value={ t.LocalUserGroups }
+						}
+					/>
+				</div>
+			</div>
+		}
+		if t.Type == task.TypeAddLinuxLocalUser {
+			<div class="flex gap-2">
+				<div id="local-user-create-home" class="w-1/3">
+					<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-create-home" name="local-user-create-home" type="checkbox" checked?={ t.Name == "" || t.LocalUserCreateHome }/> { i18n.T(ctx, "tasks.local_user_create_home") }</label>
+				</div>
+				<div id="local-user-generate-ssh-key" class="w-1/3">
+					<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-generate-ssh-key" name="local-user-generate-ssh-key" type="checkbox" checked?={ t.Name != "" && t.LocalUserGenerateSSHKey }/> { i18n.T(ctx, "tasks.local_user_generate_ssh_key") }</label>
+				</div>
+				<div id="local-user-system" class="w-1/3">
+					<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-system" name="local-user-system" type="checkbox" checked?={ t.Name != "" && t.LocalUserSystem }/> { i18n.T(ctx, "tasks.local_user_system") }</label>
+				</div>
+			</div>
+		}
+		if t.Type == task.TypeAddLinuxLocalUser {
+			<div class="flex gap-2">
+				<div id="local-user-password-section" class="w-1/3">
+					<label class="uk-form-label" for="local-user-password">
+						{ i18n.T(ctx, "tasks.local_user_password") }
+					</label>
+					<input
+						type="password"
+						class="uk-input"
+						id="local-user-password"
+						name="local-user-password"
+						spellcheck="false"
+						autocomplete="off"
+						placeholder={ i18n.T(ctx, "tasks.local_user_password_description") }
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.local_user_password_description") }
+						if t.Name != "" && t.LocalUserPassword !="" {
+							value={ t.LocalUserPassword }
+						}
+					/>
+				</div>
+				<div id="local-user-confir-password-section" class="w-1/3">
+					<label class="uk-form-label" for="local-user-password-confirm">
+						{ i18n.T(ctx, "tasks.local_user_password_confirm") }
+					</label>
+					<input
+						type="password"
+						class="uk-input"
+						id="local-user-password-confirm"
+						name="local-user-password-confirm"
+						spellcheck="false"
+						autocomplete="off"
+						placeholder={ i18n.T(ctx, "tasks.local_user_password_confirm_description") }
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.local_user_password_confirm_description") }
+						if t.Name != "" && t.LocalUserPassword !="" {
+							value={ t.LocalUserPassword }
+						}
+					/>
+				</div>
+				<div id="local-user-id-section" class={ "w-1/3", templ.KV("hidden", t.Type != task.TypeAddLinuxLocalUser) }>
+					<label class="uk-form-label" for="local-user-id">
+						UID
+					</label>
+					<input
+						type="number"
+						class="uk-input"
+						id="local-user-id"
+						name="local-user-id"
+						spellcheck="false"
+						autocomplete="off"
+						placeholder={ i18n.T(ctx, "tasks.local_user_id_description") }
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.local_user_id_description") }
+						if t.Name != "" {
+							value={ t.LocalUserID }
+						}
+					/>
+				</div>
+			</div>
+		}
+		<div class="flex gap-2">
+			<div id="local-user-force" class="w-1/3">
+				<label class="uk-text-small uk-text-bold">
+					<input
+						class="uk-checkbox"
+						id="local-user-force"
+						name="local-user-force"
+						type="checkbox"
+						if t.Type == task.TypeAddLinuxLocalUser {
+							checked?={ t.Name != "" && t.LocalUserForce }
+						}
+					/>
+					if t.Type == task.TypeAddLinuxLocalUser {
+						{ i18n.T(ctx, "tasks.local_user_overwrite_ssh_key") }
+					} else {
+						{ i18n.T(ctx, "tasks.local_user_remove_directories") }
+					}
+				</label>
+			</div>
+		</div>
+		if t.Type == task.TypeAddLinuxLocalUser {
+			<div id="local-user-advanced-toggle-section">
+				<div class="flex items-center space-x-2">
+					<input
+						class="uk-toggle-switch uk-toggle-switch-primary"
+						id="local-user-advanced-toggle"
+						name="local-user-advanced-toggle"
+						type="checkbox"
+						_="on change
+						if me.checked then
+							remove .hidden from #local-user-advanced-section
+						else
+							add .hidden to #local-user-advanced-section
+						end
+					end"
+					/>
+					<label class="uk-form-label" for="local-user-advanced-toggle">{ i18n.T(ctx, "tasks.local_user_advanced") }</label>
+				</div>
+			</div>
+		}
+		<div id="local-user-advanced-section" class="hidden">
+			<div class="flex flex-col gap-4">
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-shell-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-shell">
+								{ i18n.T(ctx, "tasks.local_user_shell_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-shell"
+								name="local-user-shell"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_shell_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_shell_description") }
+								if t.Name != "" {
+									value={ t.LocalUserShell }
+								}
+							/>
+						</div>
+						<div id="local-user-home-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-home">
+								{ i18n.T(ctx, "tasks.local_user_home_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-home"
+								name="local-user-home"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_home_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_home_description") }
+								if t.Name != "" {
+									value={ t.LocalUserHome }
+								}
+							/>
+						</div>
+					</div>
+				}
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-skeleton-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-skeleton">
+								{ i18n.T(ctx, "tasks.local_user_skeleton_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-skeleton"
+								name="local-user-skeleton"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_skeleton_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_skeleton_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSkeleton }
+								}
+							/>
+						</div>
+						<div id="local-user-umask-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-umask">
+								{ i18n.T(ctx, "tasks.local_user_umask_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-umask"
+								name="local-user-umask"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_umask_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_umask_description") }
+								if t.Name != "" {
+									value={ t.LocalUserUmask }
+								}
+							/>
+						</div>
+					</div>
+				}
+				<div class="flex gap-2">
+					if t.Type == task.TypeAddLinuxLocalUser {
+						<div id="local-user-password-lock" class="w-1/3">
+							<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-lock" name="local-user-password-lock" type="checkbox" checked?={ t.Name != "" && t.LocalUserPasswordLock }/> { i18n.T(ctx, "tasks.local_user_password_lock") }</label>
+						</div>
+						<div id="local-user-nonunique" class="w-1/3">
+							<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-nonunique" name="local-user-nonunique" type="checkbox" checked?={ t.Name != "" && t.LocalUserNonunique }/> { i18n.T(ctx, "tasks.local_user_nonunique") }</label>
+						</div>
+					}
+				</div>
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-append" class="w-1/3">
+							<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-append" name="local-user-append" type="checkbox" checked?={ t.Name != "" && t.LocalUserAppend }/> { i18n.T(ctx, "tasks.local_user_append") }</label>
+						</div>
+					</div>
+				}
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-password-expire-max-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-password-expire-max">
+								{ i18n.T(ctx, "tasks.local_user_password_expire_max_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-password-expire-max"
+								name="local-user-password-expire-max"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_max_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_max_description") }
+								if t.Name != "" {
+									value={ t.LocalUserPasswordExpireMax }
+								}
+							/>
+						</div>
+						<div id="local-user-password-expire-min-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-password-expire-min">
+								{ i18n.T(ctx, "tasks.local_user_password_expire_min_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-password-expire-min"
+								name="local-user-password-expire-min"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_min_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_min_description") }
+								if t.Name != "" {
+									value={ t.LocalUserPasswordExpireMin }
+								}
+							/>
+						</div>
+					</div>
+				}
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-password-expire-account-disable-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-password-expire-account-disable">
+								{ i18n.T(ctx, "tasks.local_user_password_expire_account_disable_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-password-expire-account-disable"
+								name="local-user-password-expire-account-disable"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_account_disable_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_account_disable_description") }
+								if t.Name != "" {
+									value={ t.LocalUserPasswordExpireAccountDisable }
+								}
+							/>
+						</div>
+						<div id="local-user-password-expire-warn-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-password-expire-warn">
+								{ i18n.T(ctx, "tasks.local_user_password_expire_warn_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-password-expire-warn"
+								name="local-user-password-expire-warn"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_warn_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_password_expire_warn_description") }
+								if t.Name != "" {
+									value={ t.LocalUserPasswordExpireWarn }
+								}
+							/>
+						</div>
+					</div>
+				}
+				if t.Type == task.TypeAddLinuxLocalUser {
+					<div class="flex gap-2">
+						<div id="local-user-ssh-key-bits" class="w-1/2">
+							<label class="uk-form-label" for="local-user-ssh-key-bits">
+								{ i18n.T(ctx, "tasks.local_user_ssh_key_bits_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-ssh-key-bits"
+								name="local-user-ssh-key-bits"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_bits_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_bits_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSSHKeyBits }
+								}
+							/>
+						</div>
+						<div id="local-user-ssh-key-comment" class="w-1/2">
+							<label class="uk-form-label" for="local-user-ssh-key-comment">
+								{ i18n.T(ctx, "tasks.local_user_ssh_key_comment_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-ssh-key-comment"
+								name="local-user-ssh-key-comment"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_comment_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_comment_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSSHKeyComment }
+								}
+							/>
+						</div>
+					</div>
+					<div class="flex gap-2">
+						<div id="local-user-ssh-key-file" class="w-1/2">
+							<label class="uk-form-label" for="local-user-ssh-key-file">
+								{ i18n.T(ctx, "tasks.local_user_ssh_key_file_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-ssh-key-file"
+								name="local-user-ssh-key-file"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_file_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_file_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSSHKeyFile }
+								}
+							/>
+						</div>
+						<div id="local-user-ssh-key-passphrase" class="w-1/2">
+							<label class="uk-form-label" for="local-user-ssh-key-passphrase">
+								{ i18n.T(ctx, "tasks.local_user_ssh_key_passphrase_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-ssh-key-passphrase"
+								name="local-user-ssh-key-passphrase"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_passphrase_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_passphrase_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSSHKeyPassphrase }
+								}
+							/>
+						</div>
+					</div>
+					<div class="flex gap-2">
+						<div id="local-user-ssh-key-type" class="w-1/2">
+							<label class="uk-form-label" for="local-user-ssh-key-type">
+								{ i18n.T(ctx, "tasks.local_user_ssh_key_type_description") }
+							</label>
+							<input
+								type="text"
+								class="uk-input"
+								id="local-user-ssh-key-type"
+								name="local-user-ssh-key-type"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_type_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_ssh_key_type_description") }
+								if t.Name != "" {
+									value={ t.LocalUserSSHKeyType }
+								}
+							/>
+						</div>
+					</div>
+					<div class="flex gap-2">
+						<div id="local-user-uid-min-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-uid-min">
+								{ i18n.T(ctx, "tasks.local_user_uid_min_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-uid-min"
+								name="local-user-uid-min"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_uid_min_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_uid_min_description") }
+								if t.Name != "" {
+									value={ t.LocalUserIDMin }
+								}
+							/>
+						</div>
+						<div id="local-user-uid-max-section" class="w-1/2">
+							<label class="uk-form-label" for="local-user-uid-max">
+								{ i18n.T(ctx, "tasks.local_user_uid_max_description") }
+							</label>
+							<input
+								type="number"
+								class="uk-input"
+								id="local-user-uid-max"
+								name="local-user-uid-max"
+								spellcheck="false"
+								placeholder={ i18n.T(ctx, "tasks.introduce_local_user_uid_max_description") }
+								spellcheck="false"
+								aria-label={ i18n.T(ctx, "tasks.introduce_local_user_uid_max_description") }
+								if t.Name != "" {
+									value={ t.LocalUserIDMax }
+								}
+							/>
+						</div>
+					</div>
+					<div class="flex gap-2">
+						<div id="local-user-expires-section" class="w-1/3">
+							<label class="uk-form-label" for="local-user-expires">
+								{ i18n.T(ctx, "tasks.local_user_expires_description") }
+							</label>
+							<input
+								id="local-user-expires"
+								name="local-user-expires"
+								type="date"
+								class="uk-input"
+								if t.Name != "" {
+									value={ getDateFromUnix(t.LocalUserExpires) }
+								}
+							/>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Ref: https://stackoverflow.com/questions/43431046/convert-unix-epoch-as-a-string-to-time-time-on-go
+func getDateFromUnix(date string) string {
+	sec, err := strconv.ParseInt(date, 10, 64)
+	if err == nil {
+		return time.Unix(sec, 0).Format("2006-01-02")
+	}
+	return ""
 }

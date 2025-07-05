@@ -73,6 +73,11 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.local_user_subtype") }
 				</option>
 			}
+			if agentType == "linux" {
+				<option value="linux_local_user_subtype" selected?={ IsLinuxLocalUserTask(t) }>
+					{ i18n.T(ctx, "tasks.local_user_subtype") }
+				</option>
+			}
 			if agentType == "windows" {
 				<option value="local_group_subtype" selected?={ IsWindowsLocalGroupTask(t) }>
 					{ i18n.T(ctx, "tasks.local_group_subtype") }
@@ -227,6 +232,31 @@ templ SelectUnixLocalGroupTaskSubtype(t *ent.Task) {
 	</div>
 }
 
+templ SelectLinuxLocalUserTaskSubtype(t *ent.Task) {
+	<div id="local-user-subtask">
+		<label class="uk-form-label" for="task-subtype">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "add_linux_local_user" } selected?={ t != nil && t.Type.String() == "add_linux_local_user" }>{ i18n.T(ctx, "tasks.local_linux_user_add") }</option>
+			<option value={ "remove_linux_local_user" } selected?={  t != nil && t.Type.String() == "remove_linux_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+		</select>
+	</div>
+}
+
 templ SelectMSITaskSubtype(t *ent.Task) {
 	<div id="msi-subtask">
 		<label class="uk-form-label" for="task-subtype">
@@ -274,6 +304,11 @@ func IsWindowsLocalGroupTask(task *ent.Task) bool {
 
 func IsUnixLocalGroupTask(task *ent.Task) bool {
 	groupTasks := []string{"add_unix_local_group", "remove_unix_local_group"}
+	return task != nil && slices.Contains(groupTasks, task.Type.String())
+}
+
+func IsLinuxLocalUserTask(task *ent.Task) bool {
+	groupTasks := []string{"add_linux_local_user", "remove_linux_local_user"}
 	return task != nil && slices.Contains(groupTasks, task.Type.String())
 }
 

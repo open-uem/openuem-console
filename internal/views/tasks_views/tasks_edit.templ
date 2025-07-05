@@ -69,6 +69,8 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectWindowsLocalGroupTaskSubtype(t)
 								case "add_unix_local_group", "remove_unix_local_group":
 									@partials.SelectUnixLocalGroupTaskSubtype(t)
+								case "add_linux_local_user", "remove_linux_local_user":
+									@partials.SelectLinuxLocalUserTaskSubtype(t)
 								case "msi_install", "msi_uninstall":
 									@partials.SelectMSITaskSubtype(t)
 							}
@@ -83,8 +85,8 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(t)) } id="registry-partial">
 						@partials.RegistryComponent(t)
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLocalUserTask(t)) } id="local-user-partial">
-						@partials.LocalUserComponent(t)
+					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLinuxLocalUserTask(t)) } id="local-user-partial">
+						@partials.LinuxLocalUserComponent(t)
 					</div>
 					<div class={ "w-1/2", templ.KV("hidden", !partials.IsWindowsLocalGroupTask(t)) } id="local-group-partial">
 						@partials.WindowsLocalGroupComponent(t)
