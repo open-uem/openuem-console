@@ -107,9 +107,15 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	if c.FormValue("task-subtype") != "" {
 		taskType = c.FormValue("task-subtype")
 	}
+
 	if c.FormValue("powershell-script") != "" {
 		taskType = "powershell_script"
 	}
+
+	if c.FormValue("unix-script") != "" {
+		taskType = "unix_script"
+	}
+
 	if c.FormValue("selected-task-type") != "" {
 		taskType = c.FormValue("selected-task-type")
 	}
@@ -140,6 +146,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return validateWinGetPackage(c)
 	case string(task.TypePowershellScript):
 		return validatePowerShellScript(c)
+	case string(task.TypeUnixScript):
+		return validateUnixScript(c)
 	default:
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
 	}
@@ -560,7 +568,7 @@ func validateMSI(c echo.Context) (*models.TaskConfig, error) {
 
 func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   "powershell_script",
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -570,15 +578,38 @@ func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskType := c.FormValue("task-type")
-	taskConfig.PowerShellScript = c.FormValue("powershell-script")
-	if taskType == "powershell_type" && taskConfig.PowerShellScript == "" {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_not_empty"))
+	taskConfig.ShellScript = c.FormValue("powershell-script")
+	if taskType == "powershell_type" && taskConfig.ShellScript == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_not_empty"))
 	}
 
-	taskConfig.PowerShellRunConfig = c.FormValue("powershell-run")
-	if taskType == "powershell_type" && taskConfig.PowerShellRunConfig != task.ScriptRunAlways.String() && taskConfig.PowerShellRunConfig != task.ScriptRunOnce.String() {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.powershell_wrong_run_config"))
+	taskConfig.ShellRunConfig = c.FormValue("powershell-run")
+	if taskType == "powershell_type" && taskConfig.ShellRunConfig != task.ScriptRunAlways.String() && taskConfig.ShellRunConfig != task.ScriptRunOnce.String() {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_wrong_run_config"))
 	}
+
+	return &taskConfig, nil
+}
+
+func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
+	taskConfig := models.TaskConfig{
+		TaskType:   "unix_script",
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskType := c.FormValue("task-type")
+	taskConfig.ShellScript = c.FormValue("unix-script")
+	if taskType == "unix_script_type" && taskConfig.ShellScript == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_not_empty"))
+	}
+
+	taskConfig.ShellExecute = c.FormValue("unix-script-executable")
+	taskConfig.ShellCreates = c.FormValue("unix-script-creates")
 
 	return &taskConfig, nil
 }

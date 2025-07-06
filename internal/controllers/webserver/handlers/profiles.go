@@ -372,6 +372,12 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
 		c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 		return partials.PowerShellComponent(nil).Render(c.Request().Context(), c.Response().Writer)
+	case "unix_script_type":
+		c.Response().Header().Set("HX-Retarget", "#task-definition")
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+		c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+		c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+		return partials.UnixScriptComponent(nil).Render(c.Request().Context(), c.Response().Writer)
 	}
 
 	return nil

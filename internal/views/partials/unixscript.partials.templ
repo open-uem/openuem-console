@@ -1,0 +1,68 @@
+package partials
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+)
+
+templ UnixScriptComponent(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div id="unix-script-section">
+			<label class="uk-form-label" for="unix-script">
+				{ i18n.T(ctx, "tasks.shell_script") }
+			</label>
+			<textarea
+				id="unix-script"
+				name="unix-script"
+				class="uk-textarea font-mono bg-black text-white"
+				placeholder={ i18n.T(ctx, "tasks.shell_script_description") }
+				rows="15"
+				aria-label={ i18n.T(ctx, "tasks.shell_script_description") }
+				autocomplete="off"
+				autocorrect="off"
+				autocapitalize="off"
+				spellcheck="false"
+			>
+				if t != nil {
+					{ t.Script }
+				}
+			</textarea>
+		</div>
+		<div id="unix-executable-section">
+			<label class="uk-form-label" for="unix-script-executable">
+				{ i18n.T(ctx, "tasks.unix_script_executable_description") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="unix-script-executable"
+				name="unix-script-executable"
+				spellcheck="false"
+				autocomplete="off"
+				placeholder={ i18n.T(ctx, "tasks.introduce_unix_script_executable") }
+				aria-label={ i18n.T(ctx, "tasks.introduce_unix_script_executable") }
+				if t != nil {
+					value={ t.ScriptExecutable }
+				}
+			/>
+		</div>
+		<div id="unix-executable-section">
+			<label class="uk-form-label" for="unix-script-creates">
+				{ i18n.T(ctx, "tasks.unix_script_creates_description") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="unix-script-creates"
+				name="unix-script-creates"
+				spellcheck="false"
+				autocomplete="off"
+				placeholder={ i18n.T(ctx, "tasks.introduce_unix_script_creates") }
+				aria-label={ i18n.T(ctx, "tasks.introduce_unix_script_creates") }
+				if t != nil {
+					value={ t.ScriptCreates }
+				}
+			/>
+		</div>
+	</div>
+}
