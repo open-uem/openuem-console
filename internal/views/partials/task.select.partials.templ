@@ -50,7 +50,7 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 			hx-swap="innerHTML"
 			_="on change      
                 remove .hidden from #select-task-subtype
-                if my.value == 'powershell_type' then
+                if my.value == 'powershell_type' or my.value == 'unix_script_type' then
                     remove .hidden from #task-definition
                 else
                     add .hidden to #task-definition
@@ -96,6 +96,11 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 			if agentType == "windows" {
 				<option value="powershell_type" selected?={ IsPowerShellTask(t) }>
 					{ i18n.T(ctx, "tasks.powershell_subtype") }
+				</option>
+			}
+			if agentType == "linux" {
+				<option value="unix_script_type" selected?={ IsUnixScriptTask(t) }>
+					{ i18n.T(ctx, "tasks.unix_script_subtype") }
 				</option>
 			}
 		</select>
@@ -320,4 +325,9 @@ func IsMSITask(task *ent.Task) bool {
 func IsPowerShellTask(task *ent.Task) bool {
 	powershellTasks := []string{"powershell_script"}
 	return task != nil && slices.Contains(powershellTasks, task.Type.String())
+}
+
+func IsUnixScriptTask(task *ent.Task) bool {
+	unixScriptTasks := []string{"unix_script"}
+	return task != nil && slices.Contains(unixScriptTasks, task.Type.String())
 }

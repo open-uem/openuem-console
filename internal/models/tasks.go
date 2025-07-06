@@ -74,8 +74,10 @@ type TaskConfig struct {
 	MsiLogPath                            string
 	MsiHashAlgorithm                      string
 	MsiFileHash                           string
-	PowerShellScript                      string
-	PowerShellRunConfig                   string
+	ShellScript                           string
+	ShellRunConfig                        string
+	ShellExecute                          string
+	ShellCreates                          string
 	AgentsType                            string
 }
 
@@ -219,7 +221,10 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return query.Exec(context.Background())
 	case "powershell_script":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
-			SetScript(cfg.PowerShellScript).SetScriptRun(task.ScriptRun(cfg.PowerShellRunConfig)).Exec(context.Background())
+			SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
+	case "unix_script":
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -344,7 +349,9 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 
 		return query.Exec(context.Background())
 	case "powershell_script":
-		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetScript(cfg.PowerShellScript).SetScriptRun(task.ScriptRun(cfg.PowerShellRunConfig)).Exec(context.Background())
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
+	case "unix_script":
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }

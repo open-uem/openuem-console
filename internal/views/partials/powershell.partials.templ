@@ -15,9 +15,9 @@ templ PowerShellComponent(t *ent.Task) {
 				id="powershell-script"
 				name="powershell-script"
 				class="uk-textarea font-mono bg-black text-white"
-				placeholder={ i18n.T(ctx, "tasks.powershell_script_description") }
+				placeholder={ i18n.T(ctx, "tasks.shell_script_description") }
 				rows="15"
-				aria-label={ i18n.T(ctx, "tasks.powershell_script_description") }
+				aria-label={ i18n.T(ctx, "tasks.shell_script_description") }
 				autocomplete="off"
 				autocorrect="off"
 				autocapitalize="off"
@@ -30,15 +30,15 @@ templ PowerShellComponent(t *ent.Task) {
 		</div>
 		<div id="powershell-run-section">
 			<label class="uk-form-label" for="powershell-run">
-				{ i18n.T(ctx, "tasks.powershell_run") }
+				{ i18n.T(ctx, "tasks.shell_run") }
 			</label>
 			<select
 				class="uk-select"
 				id="powershell-run"
 				name="powershell-run"
 			>
-				<option value={ "once" } selected?={ t == nil ||  t.ScriptRun.String() == "once" }>{ i18n.T(ctx, "tasks.powershell_run_once") }</option>
-				<option value={ "always" } selected?={ t != nil && t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.powershell_run_always") }</option>
+				<option value={ "once" } selected?={ t == nil ||  t.ScriptRun.String() == "once" }>{ i18n.T(ctx, "tasks.shell_run_once") }</option>
+				<option value={ "always" } selected?={ t != nil && t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.shell_run_always") }</option>
 			</select>
 		</div>
 	</div>

@@ -79,27 +79,46 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 							<input type="hidden" name="selected-task-type" value={ t.Type.String() }/>
 						}
 					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsWinGetPackageTask(t)) } id="package-partial">
-						@partials.WingetPackageSearch(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsRegistryTask(t)) } id="registry-partial">
-						@partials.RegistryComponent(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsLinuxLocalUserTask(t)) } id="local-user-partial">
-						@partials.LinuxLocalUserComponent(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsWindowsLocalGroupTask(t)) } id="local-group-partial">
-						@partials.WindowsLocalGroupComponent(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsUnixLocalGroupTask(t)) } id="local-group-partial">
-						@partials.UnixLocalGroupComponent(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsMSITask(t)) } id="msi-partial">
-						@partials.MSIComponent(t)
-					</div>
-					<div class={ "w-1/2", templ.KV("hidden", !partials.IsPowerShellTask(t)) } id="powershell-partial">
-						@partials.PowerShellComponent(t)
-					</div>
+					if partials.IsWinGetPackageTask(t) {
+						<div class="w-1/2" id="package-partial">
+							@partials.WingetPackageSearch(t)
+						</div>
+					}
+					if partials.IsRegistryTask(t) {
+						<div class="w-1/2" id="registry-partial">
+							@partials.RegistryComponent(t)
+						</div>
+					}
+					if partials.IsLinuxLocalUserTask(t) {
+						<div class="w-1/2" id="local-user-partial">
+							@partials.LinuxLocalUserComponent(t)
+						</div>
+					}
+					if partials.IsWindowsLocalGroupTask(t) {
+						<div class="w-1/2" id="local-group-partial">
+							@partials.WindowsLocalGroupComponent(t)
+						</div>
+					}
+					if partials.IsUnixLocalGroupTask(t) {
+						<div class="w-1/2" id="local-group-partial">
+							@partials.UnixLocalGroupComponent(t)
+						</div>
+					}
+					if partials.IsMSITask(t) {
+						<div class="w-1/2" id="msi-partial">
+							@partials.MSIComponent(t)
+						</div>
+					}
+					if partials.IsPowerShellTask(t) {
+						<div class="w-1/2" id="powershell-partial">
+							@partials.PowerShellComponent(t)
+						</div>
+					}
+					if partials.IsUnixScriptTask(t) {
+						<div class="w-1/2" id="unix-script-partial">
+							@partials.UnixScriptComponent(t)
+						</div>
+					}
 					<div class="flex gap-4 my-4">
 						<button type="submit" class="uk-button uk-button-primary">
 							{ i18n.T(ctx, "tasks.edit.save") }
