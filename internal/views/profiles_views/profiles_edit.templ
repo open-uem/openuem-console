@@ -211,8 +211,12 @@ templ TaskTypeIcon(taskType string) {
 	switch taskType {
 		case "winget_install":
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_install") } uk-cloack></uk-icon>
+		case "flatpak_install":
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.flatpak_install") } uk-cloack></uk-icon>
 		case "winget_delete":
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_delete") } uk-cloack></uk-icon>
+		case "flatpak_uninstall":
+			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.flatpak_uninstall") } uk-cloack></uk-icon>
 		case "execute_command":
 			<uk-icon hx-history="false" icon="play" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.execute_command") } uk-cloack></uk-icon>
 		case "add_registry_key", "add_registry_key_value":

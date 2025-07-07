@@ -339,6 +339,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/network-printers", h.NetworkPrinters, h.IsAuthenticated)
 
 	e.POST("/packages", h.SearchWingetPackages, h.IsAuthenticated)
+	e.POST("/flatpak", h.SearchFlatpakPackages, h.IsAuthenticated)
 
 	e.GET("/profiles", func(c echo.Context) error { return h.Profiles(c, "") }, h.IsAuthenticated)
 	e.GET("/profiles/new", h.NewProfile, h.IsAuthenticated)

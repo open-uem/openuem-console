@@ -103,6 +103,11 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.unix_script_subtype") }
 				</option>
 			}
+			if agentType == "linux" {
+				<option value="flatpak_type" selected?={ IsFlatpakTask(t) }>
+					{ i18n.T(ctx, "tasks.flatpak_subtype") }
+				</option>
+			}
 		</select>
 	</div>
 }
@@ -287,47 +292,78 @@ templ SelectMSITaskSubtype(t *ent.Task) {
 	</div>
 }
 
-func IsWinGetPackageTask(task *ent.Task) bool {
-	packageTasks := []string{"winget_install", "winget_delete"}
-	return task != nil && slices.Contains(packageTasks, task.Type.String())
+templ SelectFlatpakPackageTaskSubtype(t *ent.Task) {
+	<div id="flatpak-subtask">
+		<label class="uk-form-label" for="task-subtype">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ "flatpak_install" } selected?={ t != nil && t.Type.String() == "flatpak_install" }>{ i18n.T(ctx, "tasks.flatpak_install") }</option>
+			<option value={ "flatpak_uninstall" } selected?={ t != nil && t.Type.String() == "flatpak_uninstall" }>{ i18n.T(ctx, "tasks.flatpak_uninstall") }</option>
+		</select>
+	</div>
 }
 
-func IsRegistryTask(task *ent.Task) bool {
-	registryTasks := []string{"add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value"}
-	return task != nil && slices.Contains(registryTasks, task.Type.String())
+func IsWinGetPackageTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeWingetInstall), string(task.TypeWingetDelete)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsLocalUserTask(task *ent.Task) bool {
-	userTasks := []string{"add_local_user", "remove_local_user"}
-	return task != nil && slices.Contains(userTasks, task.Type.String())
+func IsRegistryTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddRegistryKey), string(task.TypeAddRegistryKeyValue), string(task.TypeUpdateRegistryKeyDefaultValue),
+		string(task.TypeRemoveRegistryKeyValue), string(task.TypeRemoveRegistryKeyValue)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsWindowsLocalGroupTask(task *ent.Task) bool {
-	groupTasks := []string{"add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group"}
-	return task != nil && slices.Contains(groupTasks, task.Type.String())
+func IsLocalUserTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddLocalUser), string(task.TypeRemoveLocalUser)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsUnixLocalGroupTask(task *ent.Task) bool {
-	groupTasks := []string{"add_unix_local_group", "remove_unix_local_group"}
-	return task != nil && slices.Contains(groupTasks, task.Type.String())
+func IsWindowsLocalGroupTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddLocalGroup), string(task.TypeRemoveLocalGroup), string(task.TypeAddUsersToLocalGroup), string(task.TypeRemoveUsersFromLocalGroup)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsLinuxLocalUserTask(task *ent.Task) bool {
-	groupTasks := []string{"add_linux_local_user", "remove_linux_local_user"}
-	return task != nil && slices.Contains(groupTasks, task.Type.String())
+func IsUnixLocalGroupTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveLinuxLocalUser)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsMSITask(task *ent.Task) bool {
-	msiTasks := []string{"msi_install", "msi_uninstall"}
-	return task != nil && slices.Contains(msiTasks, task.Type.String())
+func IsLinuxLocalUserTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddLinuxLocalUser), string(task.TypeRemoveLinuxLocalUser)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsPowerShellTask(task *ent.Task) bool {
-	powershellTasks := []string{"powershell_script"}
-	return task != nil && slices.Contains(powershellTasks, task.Type.String())
+func IsMSITask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeMsiInstall), string(task.TypeMsiUninstall)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsUnixScriptTask(task *ent.Task) bool {
-	unixScriptTasks := []string{"unix_script"}
-	return task != nil && slices.Contains(unixScriptTasks, task.Type.String())
+func IsPowerShellTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypePowershellScript)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
+}
+
+func IsUnixScriptTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeUnixScript)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
+}
+
+func IsFlatpakTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeFlatpakInstall), string(task.TypeFlatpakUninstall)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
 }

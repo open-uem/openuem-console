@@ -378,6 +378,8 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
 		c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 		return partials.UnixScriptComponent(nil).Render(c.Request().Context(), c.Response().Writer)
+	case "flatpak_type":
+		return RenderView(c, partials.SelectFlatpakPackageTaskSubtype(nil))
 	}
 
 	return nil
@@ -409,6 +411,9 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 	case "msi_install", "msi_uninstall":
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.MSIComponent(&t))
+	case "flatpak_install", "flatpak_uninstall":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.FlatpakPackageSearch(&t))
 	}
 
 	return nil
