@@ -1126,6 +1126,10 @@ es:
     unix_script_subtype: "Ejecutar script de shell"
     unix_script_creates_description: "Evitar reejecución"
     introduce_unix_script_creates: "La ruta a un archivo que debe existir para evitar la reejecución. Por ejemplo, crea el fichero al final de la ejecución con éxito"
+    flatpak_subtype: "Gestión de paquetes con Flatpak"
+    flatpak_install: "Instalar paquete"
+    flatpak_uninstall: "Desinstalar paquete"
+    flatpak_latest: "Mantener actualizado"
 
     new:
       title: "Nueva tarea"

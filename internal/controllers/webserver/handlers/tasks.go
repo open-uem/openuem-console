@@ -148,14 +148,21 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 		return validatePowerShellScript(c)
 	case string(task.TypeUnixScript):
 		return validateUnixScript(c)
+	case string(task.TypeFlatpakInstall), string(task.TypeFlatpakUninstall):
+		return validateFlatpakWinGetPackage(c)
 	default:
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
 	}
 }
 
 func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -208,8 +215,13 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -256,8 +268,13 @@ func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {
 func validateAddLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	var err error
 
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -423,8 +440,13 @@ func validateAddLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateRemoveLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -446,8 +468,13 @@ func validateRemoveLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	return &taskConfig, nil
 }
 func validateWindowsLocalGroup(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -482,8 +509,13 @@ func validateWindowsLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -523,8 +555,13 @@ func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateMSI(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -567,8 +604,13 @@ func validateMSI(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
+	taskType := "powershell_script"
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   "powershell_script",
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -577,7 +619,7 @@ func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
 
-	taskType := c.FormValue("task-type")
+	taskType = c.FormValue("task-type")
 	taskConfig.ShellScript = c.FormValue("powershell-script")
 	if taskType == "powershell_type" && taskConfig.ShellScript == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_not_empty"))
@@ -592,8 +634,13 @@ func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
+	taskType := "unix_script"
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   "unix_script",
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -602,7 +649,7 @@ func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
 
-	taskType := c.FormValue("task-type")
+	taskType = c.FormValue("task-type")
 	taskConfig.ShellScript = c.FormValue("unix-script")
 	if taskType == "unix_script_type" && taskConfig.ShellScript == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_not_empty"))
@@ -615,8 +662,13 @@ func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
 }
 
 func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
 	taskConfig := models.TaskConfig{
-		TaskType:   c.FormValue("task-subtype"),
+		TaskType:   taskType,
 		AgentsType: c.FormValue("task-agent-type"),
 	}
 
@@ -633,6 +685,40 @@ func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.PackageName = c.FormValue("package-name")
 	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+	}
+
+	return &taskConfig, nil
+}
+
+func validateFlatpakWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
+	taskConfig := models.TaskConfig{
+		TaskType:   taskType,
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskConfig.PackageID = c.FormValue("flatpak-id")
+	if (taskConfig.TaskType == "flatpak_install" || taskConfig.TaskType == "flatpak_uninstall") && taskConfig.PackageID == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
+	}
+
+	taskConfig.PackageName = c.FormValue("flatpak-name")
+	if (taskConfig.TaskType == "flatpak_install" || taskConfig.TaskType == "flatpak_uninstall") && taskConfig.PackageName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+	}
+
+	latest := c.FormValue("flatpak-latest")
+	if latest == "on" {
+		taskConfig.PackageLatest = true
 	}
 
 	return &taskConfig, nil

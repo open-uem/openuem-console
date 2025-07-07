@@ -73,6 +73,8 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectLinuxLocalUserTaskSubtype(t)
 								case "msi_install", "msi_uninstall":
 									@partials.SelectMSITaskSubtype(t)
+								case "flatpak_install", "flatpak_uninstall":
+									@partials.SelectFlatpakPackageTaskSubtype(t)
 							}
 						</div>
 						if t != nil {
@@ -117,6 +119,11 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					if partials.IsUnixScriptTask(t) {
 						<div class="w-1/2" id="unix-script-partial">
 							@partials.UnixScriptComponent(t)
+						</div>
+					}
+					if partials.IsFlatpakTask(t) {
+						<div class="w-1/2" id="flatpak-partial">
+							@partials.FlatpakPackageSearch(t)
 						</div>
 					}
 					<div class="flex gap-4 my-4">

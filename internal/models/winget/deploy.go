@@ -184,6 +184,36 @@ func SearchAllPackages(packageName string, wingetFolder string) ([]nats.Software
 	return packages, nil
 }
 
+func SearchAllFlatpakPackages(packageName string, folder string) ([]nats.SoftwarePackage, error) {
+	var rows *sql.Rows
+	var err error
+
+	db, err := OpenFlatpakDB(folder)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err = db.Query(`SELECT DISTINCT id, name FROM apps WHERE name LIKE ? ORDER BY name ASC`, "%"+packageName+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Scan our rows
+	var packages []nats.SoftwarePackage
+	for rows.Next() {
+		var p nats.SoftwarePackage
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			return nil, err
+		}
+		packages = append(packages, p)
+	}
+
+	return packages, nil
+}
+
 func OpenFlatpakDB(indexPath string) (*sql.DB, error) {
 	dbPath := filepath.Join(indexPath, "flatpak.db")
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {

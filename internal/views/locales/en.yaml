@@ -1131,6 +1131,10 @@ en:
     unix_script_subtype: "Execute shell script"
     unix_script_creates_description: "Avoid re-execution (optional)"
     introduce_unix_script_creates: "The path to a file that should exist to avoid re-execution. For example, create that file at the end of the script if successful"
+    flatpak_subtype: "Package management with Flatpak"
+    flatpak_install: "Install package"
+    flatpak_uninstall: "Uninstall package"
+    flatpak_latest: "Keep package updated"
 
     new:
       title: "New task"

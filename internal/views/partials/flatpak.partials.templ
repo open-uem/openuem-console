@@ -1,0 +1,130 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
+	"github.com/open-uem/nats"
+	"strings"
+)
+
+templ FlatpakPackageSearch(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="flatpak-search-section">
+			<label class="uk-form-label" for="flatpak-search">
+				{ i18n.T(ctx, "tasks.edit.select_package") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="flatpak-search"
+				name="flatpak-search"
+				placeholder={ i18n.T(ctx, "tasks.edit.introduce_package_name") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.edit.introduce_package_name") }
+				hx-post="/flatpak"
+				hx-trigger="keyup[target.value.length > 2]"
+				hx-target="#select-flatpak-dropdown"
+				hx-swap="outerHTML"
+				_="
+                    on keyup
+                        if my.value.length < 2 then
+                            remove .uk-open from #select-flatpak-dropdown
+                        end
+                    end
+
+                    on click 
+                        remove .uk-open from #select-flatpak-dropdown
+                        add .hidden to #flatpak-selected-section 
+                    end
+                "
+			/>
+			<div id="select-flatpak-dropdown" class="uk-drop uk-dropdown">
+				<div class="uk-dropdown-nav uk-nav">
+					<div class="flex flex-col gap-1 overflow-y-auto max-h-40"></div>
+				</div>
+			</div>
+		</div>
+		<div class={ templ.KV("hidden", t == nil || t.PackageID == "") } id="flatpak-selected-section">
+			<label class="uk-form-label" for="task-type">
+				{ i18n.T(ctx, "tasks.edit.selected_package") }
+			</label>
+			<div class="flex gap-2">
+				<input
+					type="hidden"
+					id="flatpak-id"
+					name="flatpak-id"
+					if t != nil {
+						value={ t.PackageID }
+					}
+				/>
+				<div class="uk-inline w-full">
+					<button
+						type="button"
+						title={ i18n.T(ctx, "Remove") }
+						_="on click 
+                                set #flatpak-name.value to ''
+                                add .hidden to #flatpak-selected-section
+                                remove .hidden from #flatpak-search-section
+                            end"
+						class="uk-form-icon uk-form-icon-flip"
+					>
+						<uk-icon icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
+					</button>
+					<input
+						class="uk-input w-full"
+						type="text"
+						spellcheck="false"
+						id="flatpak-name"
+						name="flatpak-name"
+						if t != nil {
+							value={ t.PackageName }
+						}
+						readonly
+					/>
+				</div>
+			</div>
+		</div>
+		if t != nil && t.Type == task.TypeFlatpakInstall {
+			<div id="flatpak-latest-section">
+				<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="flatpak-latest" name="flatpak-latest" type="checkbox" checked?={ t != nil && t.PackageLatest }/> { i18n.T(ctx, "tasks.flatpak_latest") }</label>
+			</div>
+		}
+	</div>
+}
+
+templ SearchFlatpakPacketResult(packages []nats.SoftwarePackage) {
+	<div id="select-flatpak-dropdown" class="uk-drop uk-dropdown uk-open mt-2">
+		<div class="uk-dropdown-nav uk-nav">
+			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">
+				if len(packages) > 0 {
+					for _, item := range packages {
+						<div
+							class="w-full border-b"
+							title={ item.Name }
+							_={ fmt.Sprintf(`
+                                on click 
+                                    remove .uk-open from #select-flatpak-dropdown
+                                    set #flatpak-id.value to '%s'
+                                    set #flatpak-name.value to '%s'
+                                    set #flatpak-search.value to ''
+                                    remove .hidden from #flatpak-selected-section
+                                    add .hidden to #flatpak-search-section
+                                end`, item.ID, item.Name) }
+						>
+							<button type="button">
+								<div class="flex items-center gap-4 text-left p-2">
+									@Brand(strings.ToLower(item.Name), "")
+									{ item.Name }
+								</div>
+							</button>
+						</div>
+					}
+				} else {
+					<div class="flex gap-2 text-left p-2">{ i18n.T(ctx, "tasks.edit.no_package_found") } </div>
+				}
+			</div>
+		</div>
+	</div>
+}
