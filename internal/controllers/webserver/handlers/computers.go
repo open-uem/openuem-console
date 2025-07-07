@@ -735,7 +735,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		if !useWinget {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
 		}
-	case "macos":
+	case "macos", "macOS":
 		f = filters.DeployPackageFilter{Sources: []string{"brew"}}
 		useBrew, err := h.Model.GetDefaultUseBrew(commonInfo.TenantID)
 		if err != nil {
