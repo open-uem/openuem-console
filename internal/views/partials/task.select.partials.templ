@@ -83,7 +83,7 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.local_group_subtype") }
 				</option>
 			}
-			if agentType == "linux" {
+			if agentType == "linux" || agentType == "macos" {
 				<option value="unix_local_group_subtype" selected?={ IsUnixLocalGroupTask(t) }>
 					{ i18n.T(ctx, "tasks.local_group_subtype") }
 				</option>
@@ -98,7 +98,7 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.powershell_subtype") }
 				</option>
 			}
-			if agentType == "linux" {
+			if agentType == "linux" || agentType == "macos" {
 				<option value="unix_script_type" selected?={ IsUnixScriptTask(t) }>
 					{ i18n.T(ctx, "tasks.unix_script_subtype") }
 				</option>
