@@ -380,6 +380,10 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 		return partials.UnixScriptComponent(nil).Render(c.Request().Context(), c.Response().Writer)
 	case "flatpak_type":
 		return RenderView(c, partials.SelectFlatpakPackageTaskSubtype(nil))
+	case "brew_formula_type":
+		return RenderView(c, partials.SelectHomeBrewFormulaTaskSubtype(nil))
+	case "brew_cask_type":
+		return RenderView(c, partials.SelectHomeBrewCaskTaskSubtype(nil))
 	}
 
 	return nil
@@ -413,7 +417,10 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 		return RenderView(c, partials.MSIComponent(&t))
 	case "flatpak_install", "flatpak_uninstall":
 		t.Type = task.Type(taskType)
-		return RenderView(c, partials.FlatpakPackageSearch(&t))
+		return RenderView(c, partials.FlatpakPackageManagement(&t))
+	case "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade", "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
+		t.Type = task.Type(taskType)
+		return RenderView(c, partials.HomeBrewPackageManagement(&t))
 	}
 
 	return nil

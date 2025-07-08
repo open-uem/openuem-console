@@ -340,6 +340,8 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.POST("/packages", h.SearchWingetPackages, h.IsAuthenticated)
 	e.POST("/flatpak", h.SearchFlatpakPackages, h.IsAuthenticated)
+	e.POST("/brew-formulae", h.SearchHomeBrewFormulaePackages, h.IsAuthenticated)
+	e.POST("/brew-casks", h.SearchHomeBrewCasksPackages, h.IsAuthenticated)
 
 	e.GET("/profiles", func(c echo.Context) error { return h.Profiles(c, "") }, h.IsAuthenticated)
 	e.GET("/profiles/new", h.NewProfile, h.IsAuthenticated)
