@@ -149,7 +149,10 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	case string(task.TypeUnixScript):
 		return validateUnixScript(c)
 	case string(task.TypeFlatpakInstall), string(task.TypeFlatpakUninstall):
-		return validateFlatpakWinGetPackage(c)
+		return validateFlatpakPackage(c)
+	case string(task.TypeBrewFormulaInstall), string(task.TypeBrewFormulaUninstall), string(task.TypeBrewFormulaUpgrade),
+		string(task.TypeBrewCaskInstall), string(task.TypeBrewCaskUninstall), string(task.TypeBrewCaskUpgrade):
+		return validateHomeBrew(c)
 	default:
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
 	}
@@ -690,7 +693,7 @@ func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	return &taskConfig, nil
 }
 
-func validateFlatpakWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
+func validateFlatpakPackage(c echo.Context) (*models.TaskConfig, error) {
 	taskType := c.FormValue("task-subtype")
 	if c.FormValue("selected-task-type") != "" {
 		taskType = c.FormValue("selected-task-type")
@@ -719,6 +722,65 @@ func validateFlatpakWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	latest := c.FormValue("flatpak-latest")
 	if latest == "on" {
 		taskConfig.PackageLatest = true
+	}
+
+	return &taskConfig, nil
+}
+
+func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
+	taskConfig := models.TaskConfig{
+		TaskType:   taskType,
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	taskConfig.PackageID = c.FormValue("brew-id")
+	if taskConfig.PackageID == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
+	}
+
+	upgradeAll := c.FormValue("brew-upgrade-all")
+	if upgradeAll == "on" {
+		taskConfig.HomeBrewUpgradeAll = true
+	}
+
+	taskConfig.PackageName = c.FormValue("brew-name")
+	if taskConfig.PackageName == "" && !taskConfig.HomeBrewUpgradeAll {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+	}
+
+	installOptions := c.FormValue("brew-install-options")
+	if (taskConfig.TaskType == string(task.TypeBrewFormulaInstall) || taskConfig.TaskType == string(task.TypeBrewCaskInstall)) && installOptions != "" {
+		taskConfig.HomeBrewInstallOptions = installOptions
+	}
+
+	upgradeOptions := c.FormValue("brew-upgrade-options")
+	if taskConfig.TaskType == string(task.TypeBrewFormulaUpgrade) && upgradeOptions != "" {
+		taskConfig.HomeBrewUpgradeOptions = upgradeOptions
+	}
+
+	if taskConfig.TaskType == string(task.TypeBrewFormulaInstall) || taskConfig.TaskType == string(task.TypeBrewFormulaUpgrade) ||
+		taskConfig.TaskType == string(task.TypeBrewCaskInstall) || taskConfig.TaskType == string(task.TypeBrewCaskUpgrade) {
+		updateHomeBrew := c.FormValue("brew-update")
+		if updateHomeBrew == "on" {
+			taskConfig.HomeBrewUpdate = true
+		}
+	}
+
+	if taskConfig.TaskType == string(task.TypeBrewCaskUpgrade) {
+		greed := c.FormValue("brew-greed")
+		if greed == "on" {
+			taskConfig.HomeBrewGreedy = true
+		}
 	}
 
 	return &taskConfig, nil

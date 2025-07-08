@@ -80,6 +80,11 @@ type TaskConfig struct {
 	ShellExecute                          string
 	ShellCreates                          string
 	AgentsType                            string
+	HomeBrewUpgradeAll                    bool
+	HomeBrewUpdate                        bool
+	HomeBrewInstallOptions                string
+	HomeBrewUpgradeOptions                string
+	HomeBrewGreedy                        bool
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -228,6 +233,11 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case "flatpak_install", "flatpak_uninstall":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+	case task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String(),
+		task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String():
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
+			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -357,6 +367,12 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case "flatpak_install", "flatpak_uninstall":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+	case task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String(),
+		task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String():
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetPackageID(cfg.PackageID).
+			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
+			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
+
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }

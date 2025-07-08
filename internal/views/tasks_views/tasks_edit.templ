@@ -75,6 +75,10 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectMSITaskSubtype(t)
 								case "flatpak_install", "flatpak_uninstall":
 									@partials.SelectFlatpakPackageTaskSubtype(t)
+								case "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade":
+									@partials.SelectHomeBrewFormulaTaskSubtype(t)
+								case "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
+									@partials.SelectHomeBrewCaskTaskSubtype(t)
 							}
 						</div>
 						if t != nil {
@@ -123,7 +127,12 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					}
 					if partials.IsFlatpakTask(t) {
 						<div class="w-1/2" id="flatpak-partial">
-							@partials.FlatpakPackageSearch(t)
+							@partials.FlatpakPackageManagement(t)
+						</div>
+					}
+					if partials.IsHomeBrewFormulaTask(t) || partials.IsHomeBrewCaskTask(t) {
+						<div class="w-1/2" id="brew-partial">
+							@partials.HomeBrewPackageManagement(t)
 						</div>
 					}
 					<div class="flex gap-4 my-4">

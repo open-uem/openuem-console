@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-templ FlatpakPackageSearch(t *ent.Task) {
+templ FlatpakPackageManagement(t *ent.Task) {
 	<div class="flex flex-col gap-4">
 		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="flatpak-search-section">
 			<label class="uk-form-label" for="flatpak-search">

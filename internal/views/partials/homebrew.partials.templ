@@ -1,0 +1,184 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
+	"github.com/open-uem/nats"
+	"strings"
+)
+
+templ HomeBrewPackageManagement(t *ent.Task) {
+	<div class="flex flex-col gap-4">
+		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="brew-search-section">
+			<label class="uk-form-label" for="brew-search">
+				{ i18n.T(ctx, "tasks.edit.select_package") }
+			</label>
+			<input
+				type="text"
+				class="uk-input"
+				id="brew-search"
+				name="brew-search"
+				placeholder={ i18n.T(ctx, "tasks.edit.introduce_package_name") }
+				spellcheck="false"
+				aria-label={ i18n.T(ctx, "tasks.edit.introduce_package_name") }
+				if IsHomeBrewFormulaTask(t) {
+					hx-post="/brew-formulae"
+				} else {
+					hx-post="/brew-casks"
+				}
+				hx-trigger="keyup[target.value.length > 2]"
+				hx-target="#select-brew-dropdown"
+				hx-swap="outerHTML"
+				_="
+                    on keyup
+                        if my.value.length < 2 then
+                            remove .uk-open from #select-brew-dropdown
+                        end
+                    end
+
+                    on click 
+                        remove .uk-open from #select-brew-dropdown
+                        add .hidden to #brew-selected-section 
+                    end
+                "
+			/>
+			<div id="select-brew-dropdown" class="uk-drop uk-dropdown">
+				<div class="uk-dropdown-nav uk-nav">
+					<div class="flex flex-col gap-1 overflow-y-auto max-h-40"></div>
+				</div>
+			</div>
+		</div>
+		<div class={ templ.KV("hidden", t == nil || t.PackageID == "") } id="brew-selected-section">
+			<label class="uk-form-label" for="task-type">
+				{ i18n.T(ctx, "tasks.edit.selected_package") }
+			</label>
+			<div class="flex gap-2">
+				<input
+					type="hidden"
+					id="brew-id"
+					name="brew-id"
+					if t != nil {
+						value={ t.PackageID }
+					}
+				/>
+				<div class="uk-inline w-full">
+					<button
+						type="button"
+						title={ i18n.T(ctx, "Remove") }
+						_="on click 
+                                set #brew-name.value to ''
+                                add .hidden to #brew-selected-section
+                                remove .hidden from #brew-search-section
+                            end"
+						class="uk-form-icon uk-form-icon-flip"
+					>
+						<uk-icon icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
+					</button>
+					<input
+						class="uk-input w-full"
+						type="text"
+						spellcheck="false"
+						id="brew-name"
+						name="brew-name"
+						if t != nil {
+							value={ t.PackageName }
+						}
+						readonly
+					/>
+				</div>
+			</div>
+		</div>
+		if t != nil && (t.Type == task.TypeBrewFormulaInstall || t.Type == task.TypeBrewCaskInstall) {
+			<div id="brew-install-options-section" class="w-1/3">
+				<label class="uk-form-label" for="brew-install-options">
+					{ i18n.T(ctx, "tasks.brew_install_options") }
+				</label>
+				<input
+					type="text"
+					class="uk-input"
+					id="brew-install-options"
+					name="brew-install-options"
+					spellcheck="false"
+					autocomplete="off"
+					placeholder={ i18n.T(ctx, "tasks.brew_install_options_description") }
+					aria-label={ i18n.T(ctx, "tasks.brew_install_options_description") }
+					if t.Name != "" {
+						value={ t.BrewInstallOptions }
+					}
+				/>
+			</div>
+		}
+		if t != nil && t.Type == task.TypeBrewFormulaUpgrade {
+			<div id="brew-upgrade-options-section" class="w-1/3">
+				<label class="uk-form-label" for="brew-upgrade-options">
+					{ i18n.T(ctx, "tasks.brew_upgrade_options") }
+				</label>
+				<input
+					type="text"
+					class="uk-input"
+					id="brew-upgrade-options"
+					name="brew-upgrade-options"
+					spellcheck="false"
+					autocomplete="off"
+					placeholder={ i18n.T(ctx, "tasks.brew_upgrade_options_description") }
+					aria-label={ i18n.T(ctx, "tasks.brew_upgrade_options_description") }
+					if t.Name != "" {
+						value={ t.BrewUpgradeOptions }
+					}
+				/>
+			</div>
+		}
+		if t != nil && (t.Type == task.TypeBrewCaskUpgrade || t.Type == task.TypeBrewFormulaUpgrade) {
+			<div id="brew-upgrade-all-section">
+				<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="brew-upgrade-all" name="brew-upgrade-all" type="checkbox" checked?={ t != nil && t.BrewUpgradeAll }/> { i18n.T(ctx, "tasks.brew_upgrade_all") }</label>
+			</div>
+		}
+		if t != nil && t.Type == task.TypeBrewCaskUpgrade {
+			<div id="brew-upgrade-all-section">
+				<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="brew-greedy" name="brew-greedy" type="checkbox" checked?={ t != nil && t.BrewGreedy }/> { i18n.T(ctx, "tasks.brew_greedy") }</label>
+			</div>
+		}
+		if t != nil && (t.Type == task.TypeBrewCaskInstall || t.Type == task.TypeBrewCaskUpgrade || t.Type == task.TypeBrewFormulaInstall || t.Type == task.TypeBrewFormulaUpgrade) {
+			<div id="brew-update-section">
+				<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="brew-update" name="brew-update" type="checkbox" checked?={ t != nil && t.BrewUpdate }/> { i18n.T(ctx, "tasks.brew_update_homebrew") }</label>
+			</div>
+		}
+	</div>
+}
+
+templ SearchHomeBrewResult(packages []nats.SoftwarePackage) {
+	<div id="select-brew-dropdown" class="uk-drop uk-dropdown uk-open mt-2">
+		<div class="uk-dropdown-nav uk-nav">
+			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">
+				if len(packages) > 0 {
+					for _, item := range packages {
+						<div
+							class="w-full border-b"
+							title={ item.Name }
+							_={ fmt.Sprintf(`
+                                on click 
+                                    remove .uk-open from #select-brew-dropdown
+                                    set #brew-id.value to '%s'
+                                    set #brew-name.value to '%s'
+                                    set #brew-search.value to ''
+                                    remove .hidden from #brew-selected-section
+                                    add .hidden to #brew-search-section
+                                end`, item.ID, item.Name) }
+						>
+							<button type="button">
+								<div class="flex items-center gap-4 text-left p-2">
+									@Brand(strings.ToLower(item.Name), "")
+									{ item.Name }
+								</div>
+							</button>
+						</div>
+					}
+				} else {
+					<div class="flex gap-2 text-left p-2">{ i18n.T(ctx, "tasks.edit.no_package_found") } </div>
+				}
+			</div>
+		</div>
+	</div>
+}

@@ -152,7 +152,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 									</td>
 									<td class="items-center !align-middle">
 										switch task.Type.String() {
-											case "winget_install", "winget_delete":
+											case "winget_install", "winget_delete", "flatpak_install", "flatpak_uninstall", "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade", "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
 												<span>{ task.PackageName }</span>
 											case "add_registry_key", "remove_registry_key", "update_registry_key_default_value":
 												<span>{ task.RegistryKey }</span>
@@ -213,6 +213,18 @@ templ TaskTypeIcon(taskType string) {
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_install") } uk-cloack></uk-icon>
 		case "flatpak_install":
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.flatpak_install") } uk-cloack></uk-icon>
+		case "brew_formula_install":
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_install") } uk-cloack></uk-icon>
+		case "brew_cask_install":
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_install") } uk-cloack></uk-icon>
+		case "brew_formula_upgrade":
+			<uk-icon hx-history="false" icon="package-check" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_upgrade") } uk-cloack></uk-icon>
+		case "brew_cask_upgrade":
+			<uk-icon hx-history="false" icon="package-check" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_upgrade") } uk-cloack></uk-icon>
+		case "brew_formula_uninstall":
+			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_uninstall") } uk-cloack></uk-icon>
+		case "brew_cask_uninstall":
+			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_uninstall") } uk-cloack></uk-icon>
 		case "winget_delete":
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_delete") } uk-cloack></uk-icon>
 		case "flatpak_uninstall":

@@ -214,6 +214,68 @@ func SearchAllFlatpakPackages(packageName string, folder string) ([]nats.Softwar
 	return packages, nil
 }
 
+func SearchAllHomeBrewFormulaePackages(packageName string, folder string) ([]nats.SoftwarePackage, error) {
+	var rows *sql.Rows
+	var err error
+
+	db, err := OpenBrewDB(folder)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err = db.Query(`SELECT DISTINCT id, name FROM apps WHERE name LIKE ? AND not ID LIKE ? ORDER BY name ASC`, "%"+packageName+"%", "cask-%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Scan our rows
+	var packages []nats.SoftwarePackage
+	for rows.Next() {
+		var p nats.SoftwarePackage
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			return nil, err
+		}
+		packages = append(packages, p)
+	}
+
+	return packages, nil
+}
+
+func SearchAllHomeBrewCasksPackages(packageName string, folder string) ([]nats.SoftwarePackage, error) {
+	var rows *sql.Rows
+	var err error
+
+	db, err := OpenBrewDB(folder)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err = db.Query(`SELECT DISTINCT id, name FROM apps WHERE name LIKE ? AND ID LIKE ? ORDER BY name ASC`, "%"+packageName+"%", "cask-%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Scan our rows
+	var packages []nats.SoftwarePackage
+	for rows.Next() {
+		var p nats.SoftwarePackage
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		p.ID = strings.TrimPrefix(p.ID, "cask-")
+		packages = append(packages, p)
+	}
+
+	return packages, nil
+}
+
 func OpenFlatpakDB(indexPath string) (*sql.DB, error) {
 	dbPath := filepath.Join(indexPath, "flatpak.db")
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
