@@ -73,8 +73,8 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.local_user_subtype") }
 				</option>
 			}
-			if agentType == "linux" {
-				<option value="linux_local_user_subtype" selected?={ IsLinuxLocalUserTask(t) }>
+			if agentType == "linux" || agentType == "macos" {
+				<option value="unix_local_user_subtype" selected?={ IsUnixLocalUserTask(t) }>
 					{ i18n.T(ctx, "tasks.local_user_subtype") }
 				</option>
 			}
@@ -252,7 +252,7 @@ templ SelectUnixLocalGroupTaskSubtype(t *ent.Task) {
 	</div>
 }
 
-templ SelectLinuxLocalUserTaskSubtype(t *ent.Task) {
+templ SelectUnixLocalUserTaskSubtype(t *ent.Task) {
 	<div id="local-user-subtask">
 		<label class="uk-form-label" for="task-subtype">
 			{ i18n.T(ctx, "tasks.subtask_type") }
@@ -271,8 +271,8 @@ templ SelectLinuxLocalUserTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_linux_local_user" } selected?={ t != nil && t.Type.String() == "add_linux_local_user" }>{ i18n.T(ctx, "tasks.local_linux_user_add") }</option>
-			<option value={ "remove_linux_local_user" } selected?={  t != nil && t.Type.String() == "remove_linux_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+			<option value={ "add_unix_local_user" } selected?={ t != nil && t.Type.String() == "add_unix_local_user" }>{ i18n.T(ctx, "tasks.local_linux_user_add") }</option>
+			<option value={ "remove_unix_local_user" } selected?={  t != nil && t.Type.String() == "remove_unix_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
 		</select>
 	</div>
 }
@@ -401,12 +401,12 @@ func IsWindowsLocalGroupTask(t *ent.Task) bool {
 }
 
 func IsUnixLocalGroupTask(t *ent.Task) bool {
-	tasks := []string{string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveLinuxLocalUser)}
+	tasks := []string{string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalUser)}
 	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
-func IsLinuxLocalUserTask(t *ent.Task) bool {
-	tasks := []string{string(task.TypeAddLinuxLocalUser), string(task.TypeRemoveLinuxLocalUser)}
+func IsUnixLocalUserTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAddUnixLocalUser), string(task.TypeRemoveUnixLocalUser)}
 	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
