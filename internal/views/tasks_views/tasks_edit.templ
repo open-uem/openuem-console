@@ -69,8 +69,8 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectWindowsLocalGroupTaskSubtype(t)
 								case "add_unix_local_group", "remove_unix_local_group":
 									@partials.SelectUnixLocalGroupTaskSubtype(t)
-								case "add_linux_local_user", "remove_linux_local_user":
-									@partials.SelectLinuxLocalUserTaskSubtype(t)
+								case "add_unix_local_user", "remove_unix_local_user":
+									@partials.SelectUnixLocalUserTaskSubtype(t)
 								case "msi_install", "msi_uninstall":
 									@partials.SelectMSITaskSubtype(t)
 								case "flatpak_install", "flatpak_uninstall":
@@ -95,9 +95,9 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 							@partials.RegistryComponent(t)
 						</div>
 					}
-					if partials.IsLinuxLocalUserTask(t) {
+					if partials.IsUnixLocalUserTask(t) {
 						<div class="w-1/2" id="local-user-partial">
-							@partials.LinuxLocalUserComponent(t)
+							@partials.UnixLocalUserComponent(t)
 						</div>
 					}
 					if partials.IsWindowsLocalGroupTask(t) {

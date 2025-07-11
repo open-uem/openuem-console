@@ -132,10 +132,10 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	case string(task.TypeAddRegistryKey), string(task.TypeAddRegistryKeyValue), string(task.TypeRemoveRegistryKey),
 		string(task.TypeRemoveRegistryKeyValue), string(task.TypeUpdateRegistryKeyDefaultValue):
 		return validateWindowsRegistry(c)
-	case string(task.TypeAddLinuxLocalUser):
-		return validateAddLinuxLocalUser(c)
-	case string(task.TypeRemoveLinuxLocalUser):
-		return validateRemoveLinuxLocalUser(c)
+	case string(task.TypeAddUnixLocalUser):
+		return validateAddUnixLocalUser(c)
+	case string(task.TypeRemoveUnixLocalUser):
+		return validateRemoveUnixLocalUser(c)
 	case string(task.TypeAddLocalGroup), string(task.TypeRemoveLocalGroup):
 		return validateWindowsLocalGroup(c)
 	case string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalGroup):
@@ -268,7 +268,7 @@ func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	return &taskConfig, nil
 }
 
-func validateAddLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
+func validateAddUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	var err error
 
 	taskType := c.FormValue("task-subtype")
@@ -442,7 +442,7 @@ func validateAddLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	return &taskConfig, nil
 }
 
-func validateRemoveLinuxLocalUser(c echo.Context) (*models.TaskConfig, error) {
+func validateRemoveUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	taskType := c.FormValue("task-subtype")
 	if c.FormValue("selected-task-type") != "" {
 		taskType = c.FormValue("selected-task-type")

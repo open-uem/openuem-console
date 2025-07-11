@@ -141,7 +141,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
 			Exec(context.Background())
-	case "add_linux_local_user":
+	case "add_unix_local_user":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
@@ -172,7 +172,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserForce(cfg.LocalUserForce).
 			SetLocalUserAppend(cfg.LocalUserAppend).
 			Exec(context.Background())
-	case "remove_linux_local_user":
+	case "remove_unix_local_user":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserForce(cfg.LocalUserForce).
@@ -276,7 +276,7 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 			SetLocalUserPasswordChangeRequired(cfg.LocalUserPasswordChangeRequired).
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
 			Exec(context.Background())
-	case "add_linux_local_user":
+	case "add_unix_local_user":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
@@ -307,7 +307,7 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 			SetLocalUserForce(cfg.LocalUserForce).
 			SetLocalUserAppend(cfg.LocalUserAppend).
 			Exec(context.Background())
-	case "remove_linux_local_user":
+	case "remove_unix_local_user":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserForce(cfg.LocalUserForce).

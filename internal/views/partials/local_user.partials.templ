@@ -96,7 +96,7 @@ templ LocalUserComponent(t *ent.Task) {
 	</div>
 }
 
-templ LinuxLocalUserComponent(t *ent.Task) {
+templ UnixLocalUserComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
 		<div class="flex gap-2">
 			<div id="local-user-username-section" class="w-1/3">
@@ -117,7 +117,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 					}
 				/>
 			</div>
-			if t.Type == task.TypeAddLinuxLocalUser {
+			if t.Type == task.TypeAddUnixLocalUser {
 				<div id="local-user-description-section" class="w-2/3">
 					<label class="uk-form-label" for="local-user-description">
 						{ i18n.T(ctx, "tasks.local_user_description") }
@@ -138,7 +138,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 				</div>
 			}
 		</div>
-		if t.Type == task.TypeAddLinuxLocalUser {
+		if t.Type == task.TypeAddUnixLocalUser {
 			<div class="flex gap-2">
 				<div id="local-user-group-section" class="w-1/3">
 					<label class="uk-form-label" for="local-user-group">
@@ -178,7 +178,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 				</div>
 			</div>
 		}
-		if t.Type == task.TypeAddLinuxLocalUser {
+		if t.Type == task.TypeAddUnixLocalUser {
 			<div class="flex gap-2">
 				<div id="local-user-create-home" class="w-1/3">
 					<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-create-home" name="local-user-create-home" type="checkbox" checked?={ t.Name == "" || t.LocalUserCreateHome }/> { i18n.T(ctx, "tasks.local_user_create_home") }</label>
@@ -191,7 +191,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 				</div>
 			</div>
 		}
-		if t.Type == task.TypeAddLinuxLocalUser {
+		if t.Type == task.TypeAddUnixLocalUser {
 			<div class="flex gap-2">
 				<div id="local-user-password-section" class="w-1/3">
 					<label class="uk-form-label" for="local-user-password">
@@ -231,7 +231,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						}
 					/>
 				</div>
-				<div id="local-user-id-section" class={ "w-1/3", templ.KV("hidden", t.Type != task.TypeAddLinuxLocalUser) }>
+				<div id="local-user-id-section" class={ "w-1/3", templ.KV("hidden", t.Type != task.TypeAddUnixLocalUser) }>
 					<label class="uk-form-label" for="local-user-id">
 						UID
 					</label>
@@ -260,11 +260,11 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						id="local-user-force"
 						name="local-user-force"
 						type="checkbox"
-						if t.Type == task.TypeAddLinuxLocalUser {
+						if t.Type == task.TypeAddUnixLocalUser {
 							checked?={ t.Name != "" && t.LocalUserForce }
 						}
 					/>
-					if t.Type == task.TypeAddLinuxLocalUser {
+					if t.Type == task.TypeAddUnixLocalUser {
 						{ i18n.T(ctx, "tasks.local_user_overwrite_ssh_key") }
 					} else {
 						{ i18n.T(ctx, "tasks.local_user_remove_directories") }
@@ -272,7 +272,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 				</label>
 			</div>
 		</div>
-		if t.Type == task.TypeAddLinuxLocalUser {
+		if t.Type == task.TypeAddUnixLocalUser {
 			<div id="local-user-advanced-toggle-section">
 				<div class="flex items-center space-x-2">
 					<input
@@ -294,7 +294,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 		}
 		<div id="local-user-advanced-section" class="hidden">
 			<div class="flex flex-col gap-4">
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-shell-section" class="w-1/2">
 							<label class="uk-form-label" for="local-user-shell">
@@ -334,7 +334,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						</div>
 					</div>
 				}
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-skeleton-section" class="w-1/2">
 							<label class="uk-form-label" for="local-user-skeleton">
@@ -375,7 +375,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 					</div>
 				}
 				<div class="flex gap-2">
-					if t.Type == task.TypeAddLinuxLocalUser {
+					if t.Type == task.TypeAddUnixLocalUser {
 						<div id="local-user-password-lock" class="w-1/3">
 							<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-password-lock" name="local-user-password-lock" type="checkbox" checked?={ t.Name != "" && t.LocalUserPasswordLock }/> { i18n.T(ctx, "tasks.local_user_password_lock") }</label>
 						</div>
@@ -384,14 +384,14 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						</div>
 					}
 				</div>
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-append" class="w-1/3">
 							<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-append" name="local-user-append" type="checkbox" checked?={ t.Name != "" && t.LocalUserAppend }/> { i18n.T(ctx, "tasks.local_user_append") }</label>
 						</div>
 					</div>
 				}
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-password-expire-max-section" class="w-1/2">
 							<label class="uk-form-label" for="local-user-password-expire-max">
@@ -431,7 +431,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						</div>
 					</div>
 				}
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-password-expire-account-disable-section" class="w-1/2">
 							<label class="uk-form-label" for="local-user-password-expire-account-disable">
@@ -471,7 +471,7 @@ templ LinuxLocalUserComponent(t *ent.Task) {
 						</div>
 					</div>
 				}
-				if t.Type == task.TypeAddLinuxLocalUser {
+				if t.Type == task.TypeAddUnixLocalUser {
 					<div class="flex gap-2">
 						<div id="local-user-ssh-key-bits" class="w-1/2">
 							<label class="uk-form-label" for="local-user-ssh-key-bits">
