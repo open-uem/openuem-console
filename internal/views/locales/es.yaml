@@ -891,7 +891,6 @@ es:
     title: "Gestión de perfiles"
     description: "Los perfiles de equipo permiten definir un conjunto de tareas que se aplicarán a un conjunto de equipos. Las tareas incluyen la instalación de software, gestión de usuarios y grupos locales, modificación de entradas de registros... Haga click en la descripción del perfil para cambiar su definición y en el signo de advertencia para ver qué equipos tuvieron problemas a la hora de aplicar el perfil"
     no_profiles: "No se han encontrado perfiles para esta consulta"
-    only_windows: "Por ahora, los perfiles sólo están soportados en agentes Windows"
     add: "Añadir perfil"
     confirm_delete: "Confirme que desea eliminar este perfil de configuración"
     issues_found: "Incidencias"
