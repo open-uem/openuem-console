@@ -134,7 +134,14 @@ func (h *Handler) StartNATSConnectJob() error {
 					log.Println("[INFO]: server stream could be instantiated")
 					return nil
 				} else {
-					log.Printf("[ERROR]: Server Stream could not be instantiated, reason: %v", err)
+					serversExists, err := h.Model.ServersExists()
+					if err != nil {
+						log.Println("[INFO]: could not check if OpenUEM server exists")
+					} else {
+						if serversExists {
+							log.Printf("[ERROR]: Server Stream could not be instantiated, reason: %v", err)
+						}
+					}
 				}
 
 			} else {
