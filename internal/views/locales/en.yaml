@@ -894,7 +894,6 @@ en:
     title: "Profile management"
     description: "The endpoint profiles allow you to define a series of tasks that will be applied to several endpoints. The tasks include software installation, local users and groups management, registry management... Click on the profile's description to edit its definition and click on the warning sign to see which endpoints had problems to apply the profile"
     no_profiles: "No profiles have been found for this query"
-    only_windows: "For now, profiles are only supported for Windows endpoints"
     add: "Add profile"
     confirm_delete: "Confirm that you want to remove this endpoint profile"
     issues_found: "Issues"
