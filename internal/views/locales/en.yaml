@@ -1038,7 +1038,7 @@ en:
     msi_productid: "Product ID"
     msi_productid_description: "Introduce the product ID associated with the MSI file using the format {B20DDDFE-4854-4D4D-9723-2F9761437532}..."
     msi_path: "Path"
-    msi_path_description: "Introduce a path to an MSI file on the local machine, the path to an MSI package on a UNC drive, or a web URI..."
+    msi_path_description: "Introduce a local path, a UNC drive path, or a web URI..."
     msi_arguments: "Arguments"
     msi_arguments_description: "Optional arguments to pass to the package, /i, /x, /quiet and /norestart are used automatically..."
     msi_filehash: "File Hash"
