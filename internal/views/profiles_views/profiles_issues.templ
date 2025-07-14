@@ -34,16 +34,18 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 							</tr>
 						</thead>
 						for _, issue := range issues {
-							<tr>
-								<td class="!align-middle">
-									{ issue.Edges.Agents.Hostname }
-								</td>
-								<td class="!align-middle">
-									for line := range strings.SplitSeq(issue.Error, "\r\n") {
-										<p>{ line }</p>
-									}
-								</td>
-							</tr>
+							if issue.Edges.Agents != nil {
+								<tr>
+									<td class="!align-middle">
+										{ issue.Edges.Agents.Hostname }
+									</td>
+									<td class="!align-middle">
+										for line := range strings.SplitSeq(issue.Error, "\r\n") {
+											<p>{ line }</p>
+										}
+									</td>
+								</tr>
+							}
 						}
 					</table>
 					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles"))))
