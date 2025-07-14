@@ -618,7 +618,7 @@ type LogEntry struct {
 }
 
 templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntry, category, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}, {Title: "logs"}}, commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: "logs"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -688,7 +688,7 @@ templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntr
 }
 
 templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/%s", agent.ID))))}, {Title: i18n.T(ctx, "Settings")}}, commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: i18n.T(ctx, "Settings")}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
