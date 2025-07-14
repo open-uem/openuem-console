@@ -1033,7 +1033,7 @@ es:
     msi_productid: "ID de producto"
     msi_productid_description: "Introduzca el ID del producto asociado con el fichero MSI usando el formato {B20DDDFE-4854-4D4D-9723-2F9761437532}..."
     msi_path: "Ruta"
-    msi_path_description: "Introduzca la ruta del fichero MSI en la máquina local, la ruta al fichero MSI en una unidad UNC, o una URI web..."
+    msi_path_description: "Introduzca la ruta local del fichero MSI, la ruta UNC, o una URI web..."
     msi_arguments: "Argumentos"
     msi_arguments_description: "Argumentos opcionales para pasar al paquete, /i, /x, /quiet y /norestart se usan automáticamente..."
     msi_filehash: "Hash del fichero"

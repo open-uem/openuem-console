@@ -252,7 +252,7 @@ templ TaskTypeIcon(taskType string) {
 		case "remove_users_from_local_group":
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_users_from_local_group") } uk-cloack></uk-icon>
 		case "msi_install":
-			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_install") } uk-cloack></uk-icon>
+			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_install") } uk-cloack></uk-icon>
 		case "msi_uninstall":
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_uninstall") } uk-cloack></uk-icon>
 		case "powershell_script":
