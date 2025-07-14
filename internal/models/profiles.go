@@ -163,9 +163,21 @@ func (m *Model) RemoveTagFromProfile(profileId int, tagId int) error {
 }
 
 func (m *Model) CountAllProfileIssues(profileID int) (int, error) {
+	// Remove issues that has no agents associated
+	nDeleted, err := m.Client.ProfileIssue.Delete().Where(profileissue.Not(profileissue.HasAgents())).Exec(context.Background())
+	if err != nil {
+		return nDeleted, err
+	}
+
 	return m.Client.ProfileIssue.Query().Where(profileissue.HasProfileWith(profile.ID(profileID))).Count(context.Background())
 }
 
 func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID int) ([]*ent.ProfileIssue, error) {
+	// Remove issues that has no agents associated
+	_, err := m.Client.ProfileIssue.Delete().Where(profileissue.Not(profileissue.HasAgents())).Exec(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	return m.Client.ProfileIssue.Query().WithAgents().Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }
