@@ -49,7 +49,7 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.Country = cCtx.String("country")
 	w.ReverseProxyAuthPort = cCtx.String("reverse-proxy-auth-port")
 	w.ReverseProxyServer = cCtx.String("reverse-proxy-server")
-	w.Version = "0.8.0"
+	w.Version = "0.9.0"
 
 	return nil
 }

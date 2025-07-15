@@ -9,7 +9,7 @@ steps:
       platforms: linux/amd64
       repo: openuem/openuem-console
       tags:
-        - 0.8.0
+        - 0.9.0
         - latest
       username:
         from_secret: docker_username
