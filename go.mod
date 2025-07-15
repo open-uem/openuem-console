@@ -28,7 +28,7 @@ require (
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.41.2
 	github.com/open-uem/ent v0.0.0-20250709115553-5f5c33d1ce0e
-	github.com/open-uem/nats v0.0.0-20250514125548-3bae96c53080
+	github.com/open-uem/nats v0.0.0-20250630060536-99ac24ef63c9
 	github.com/open-uem/utils v0.0.0-20250702121339-316c5b599cd3
 	github.com/open-uem/wingetcfg v0.0.0-20250625110454-5d9433af7cf3
 	github.com/pkg/sftp v1.13.9
