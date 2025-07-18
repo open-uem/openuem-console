@@ -5,13 +5,17 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -21,6 +25,30 @@ import (
 	"github.com/open-uem/nats"
 	"golang.org/x/oauth2"
 )
+
+type OAuth2TokenResponse struct {
+	AccessToken      string `json:"access_token,omitempty"`
+	ExpiresIn        int    `json:"expires_in,omitempty"`
+	IDToken          string `json:"id_token,omitempty"`
+	TokenType        string `json:"token_type,omitempty"`
+	Error            string `json:"error,omitempty"`
+	ErrorDescription string `json:"error_description,omitempty"`
+}
+
+type UserInfoResponse struct {
+	Subject           string   `json:"sub,omitempty"`
+	Name              string   `json:"name,omitempty"`
+	GivenName         string   `json:"given_name,omitempty"`
+	FamilyName        string   `json:"family_name,omitempty"`
+	UpdatedAt         int      `json:"updated_at,omitempty"`
+	PreferredUsername string   `json:"preferred_username,omitempty"`
+	Email             string   `json:"email,omitempty"`
+	EmailVerified     bool     `json:"email_verified,omitempty"`
+	Phone             string   `json:"phone_number,omitempty"`
+	Error             string   `json:"error,omitempty"`
+	ErrorDescription  string   `json:"error_description,omitempty"`
+	Groups            []string `json:"groups"`
+}
 
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
@@ -37,26 +65,42 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 	// 	Endpoint:    provider.Endpoint(),
 	// }
 
-	// KEYCLOAK
-	provider, err := oidc.NewProvider(context.Background(), "http://localhost:8080/realms/openuem") // TODO - hardcoded must come from config
+	// // KEYCLOAK
+	// provider, err := oidc.NewProvider(context.Background(), "http://localhost:8080/realms/openuem") // TODO - hardcoded must come from config
+	// if err != nil {
+	// 	log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
+	// }
+
+	// oauth2Config := oauth2.Config{
+	// 	ClientID:    "openuem", // TODO - hardcoded must come from config
+	// 	RedirectURL: h.GetRedirectURI(c),
+	// 	Endpoint:    provider.Endpoint(),
+	// }
+
+	// Authentik
+
+	provider, err := oidc.NewProvider(context.Background(), "http://localhost:9000/application/o/open-uem/") // TODO - hardcoded must come from config
 	if err != nil {
 		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
 	}
 
 	oauth2Config := oauth2.Config{
-		ClientID:    "openuem", // TODO - hardcoded must come from config
+		ClientID:    "pSrshRiaYs1RFF1n7pBKkOO72nAOJmvE1KaAPcth", // TODO - hardcoded must come from config
 		RedirectURL: h.GetRedirectURI(c),
 		Endpoint:    provider.Endpoint(),
 	}
 
-	authProvider := "keycloak"                                // TODO - hardcoded must come from config
+	authProvider := "authentik"                               // TODO - hardcoded must come from config
 	cookieEncryptionKey := "LnQaKMKzSxL5MEY3fXSFDyYK5Jmi7rzi" // TODO - hardcoded must come from config
 
 	switch authProvider {
 	case "zitadel":
 		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone", "urn:zitadel:iam:org:project:id:zitadel:aud"}
 	case "keycloak":
+		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone"}
+	case "authentik":
 		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone"}
 	}
 
@@ -124,7 +168,7 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	// TODO Verify code if possible, I've verifier and I've the code how I can check if the code is valid? Is this needed?
 
-	authProvider := "keycloak" // TODO - hardcoded must come from config
+	authProvider := "authentik" // TODO - hardcoded must come from config
 
 	switch authProvider {
 	case "zitadel":
@@ -134,6 +178,11 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		}
 	case "keycloak":
 		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie)
+		if err != nil {
+			return err
+		}
+	case "authentik":
+		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie)
 		if err != nil {
 			return err
 		}
@@ -366,4 +415,104 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 	}
 
 	return echo.NewHTTPError(http.StatusForbidden, "An admin must approve your account")
+}
+
+func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifier string, endpoint string, clientID string) (string, error) {
+	var z OAuth2TokenResponse
+
+	v := url.Values{}
+
+	url := endpoint // TODO - remove hardcoded url
+	v.Set("grant_type", "authorization_code")
+	v.Set("code", code)
+	v.Set("redirect_uri", h.GetRedirectURI(c)) // TODO - remove hardcoded url
+	v.Set("client_id", clientID)
+	v.Set("code_verifier", verifier)
+
+	resp, err := http.PostForm(url, v)
+	if err != nil {
+		log.Printf("[ERROR]: could not send request to token endpoint, reason: %v", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("[ERROR]: Error while reading the response bytes, reason: %v", err)
+	}
+
+	// Debug
+	// log.Println(string([]byte(body)))
+
+	if err := json.Unmarshal(body, &z); err != nil {
+		log.Printf("[ERROR]: could not decode response from token endpoint, reason: %v", err)
+		return "", err
+	}
+
+	if z.Error != "" {
+		log.Printf("[ERROR]: found an error in the response from token endpoint, reason: %v", z.Error+" "+z.ErrorDescription)
+		return "", errors.New(z.Error + " " + z.ErrorDescription)
+	}
+
+	return z.AccessToken, nil
+}
+
+func (h *Handler) GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error) {
+	user := UserInfoResponse{}
+
+	// create request
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		log.Printf("[ERROR]: could not prepare HTTP get for user info endpoint, reason: %v", err)
+		return nil, err
+	}
+
+	// add access token
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	// send request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("[ERROR]: could not get HTTP response for user info endpoint, reason: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	// Debug
+	log.Println(string([]byte(body)))
+
+	if err := json.Unmarshal(body, &user); err != nil {
+		log.Printf("[ERROR]: could not decode response from user info endpoint, reason: %v", err)
+		return nil, err
+	}
+
+	if user.Error != "" {
+		log.Printf("[ERROR]: could not get user info from endpoint, reason: %v", err)
+		return nil, errors.New(user.Error)
+	}
+
+	return &user, nil
+}
+
+// Reference: https://stackoverflow.com/questions/76077022/how-to-validate-json-token-generated-by-keycloak-using-golang
+func parseRSAPublicKey(base64Encoded string) (*rsa.PublicKey, error) {
+	buf, err := base64.StdEncoding.DecodeString(base64Encoded)
+	if err != nil {
+		return nil, err
+	}
+	parsedKey, err := x509.ParsePKIXPublicKey(buf)
+	if err != nil {
+		return nil, err
+	}
+	publicKey, ok := parsedKey.(*rsa.PublicKey)
+	if ok {
+		return publicKey, nil
+	}
+	return nil, fmt.Errorf("unexpected key type %T", publicKey)
 }
