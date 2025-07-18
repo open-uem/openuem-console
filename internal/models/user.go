@@ -109,6 +109,14 @@ func (m *Model) AddImportedUser(uid, name, email, phone, country string) error {
 	return nil
 }
 
+func (m *Model) AddOIDCUser(uid, name, email, phone string, emailVerified bool) error {
+	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetEmailVerified(emailVerified).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_APPROVED).SetOpenid(true).Save(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *Model) UpdateUser(uid, name, email, phone, country string) error {
 	_, err := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now()).Save(context.Background())
 	if err != nil {

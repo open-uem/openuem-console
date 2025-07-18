@@ -459,8 +459,9 @@ en:
   forms:
     required: "This field cannot be empty"
   login:
-    description: "Use the digital certificate that has been provided to you for browser's authentication purposes or register to request one"
+    description: "Use the digital certificate that has been provided to you for browser's authentication purposes or register to request one. Alternatively, you can use OpenID Connect if enabled"
     button: "Login with digital certificate"
+    openid: "Login with OpenID Connect"
   register:
     description: "Fill the form to register in the application. The OpenUEM admin will review your request and generate a digital certificate for you to log in"
     button: "Register"
@@ -504,6 +505,8 @@ en:
     phone: "Phone"
     register: "Register"
     review_request: "Review request"
+    approved: "Account approved"
+    approve_account: "Approve account"
     pending_email_confirmation: "Pending email confirmation"
     certificate_sent: "Certificate sent"
     certificate_revoked: "Revoked certificate"

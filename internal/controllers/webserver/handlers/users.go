@@ -350,6 +350,25 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.email_confirmed"), "")
 }
 
+func (h *Handler) ApproveAccount(c echo.Context) error {
+	uid := c.Param("uid")
+	exists, err := h.Model.UserExists(uid)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if !exists {
+		return RenderError(c, partials.ErrorMessage("user doesn't exist", false))
+	}
+
+	err = h.Model.Client.User.UpdateOneID(uid).SetRegister(openuem_nats.REGISTER_APPROVED).Exec(context.Background())
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.approved"), "")
+}
+
 func (h *Handler) AskForConfirmation(c echo.Context) error {
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)

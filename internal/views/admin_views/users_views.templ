@@ -187,7 +187,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 										} else {
 											<td>-</td>
 										}
-										if user.Register == "users.completed" {
+										if user.Register == "users.completed" || user.Register == "users.approved" {
 											<td class="flex">
 												<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600 mr-2" uk-cloack></uk-icon>
 												{ i18n.T(ctx, user.Register) }
@@ -213,7 +213,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
-													if !user.EmailVerified && user.Email != "" {
+													if !user.Openid && !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
@@ -225,7 +225,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if !user.EmailVerified && user.Email != "" {
+													if !user.Openid && !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }
@@ -237,7 +237,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
+													if !user.Openid && user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
@@ -249,7 +249,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if user.EmailVerified && user.Register != openuem_nats.REGISTER_IN_REVIEW {
+													if !user.Openid && user.EmailVerified && user.Register != openuem_nats.REGISTER_IN_REVIEW {
 														<li>
 															<a
 																hx-target="#main"
@@ -258,6 +258,18 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
+															</a>
+														</li>
+													}
+													if user.Openid && user.Register == openuem_nats.REGISTER_IN_REVIEW {
+														<li>
+															<a
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/approve", user.ID))) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="user-round-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.approve_account") }
 															</a>
 														</li>
 													}

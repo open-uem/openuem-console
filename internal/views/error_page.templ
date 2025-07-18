@@ -1,5 +1,7 @@
 package views
 
+import "strings"
+
 templ ErrorPage(code, message string) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -31,6 +33,12 @@ templ ErrorPage(code, message string) {
 					switch code {
 						case "400":
 							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+						case "403":
+							if strings.Contains(message, "approve") {
+								<uk-icon hx-history="false" icon="user-round-check" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+							} else {
+								<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+							}
 						case "404":
 							<uk-icon hx-history="false" icon="search-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "500":

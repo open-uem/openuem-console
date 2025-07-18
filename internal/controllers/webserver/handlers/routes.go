@@ -96,6 +96,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/users/new", h.AddUser, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/askconfirm", h.AskForConfirmation, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/confirmemail", h.SetEmailConfirmed, h.IsAuthenticated)
+	e.POST("/admin/users/:uid/approve", h.ApproveAccount, h.IsAuthenticated)
 	e.DELETE("/admin/users/:uid", h.DeleteUser, h.IsAuthenticated)
 
 	e.GET("/admin/tenants/new", h.NewTenant, h.IsAuthenticated)
@@ -445,6 +446,9 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/tenant/:tenant/site/:site/tasks/:profile/confirm-delete/:task", h.ConfirmDeleteTask, h.IsAuthenticated)
 
 	e.POST("/render-markdown", h.RenderMarkdown, h.IsAuthenticated)
+
+	e.GET("/oidc", h.OIDCLogIn)
+	e.GET("/oidc/callback", h.OIDCCallback)
 }
 
 func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {

@@ -499,6 +499,8 @@ es:
     phone: "Teléfono"
     register: "Registro"
     review_request: "Revisar solicitud"
+    approved: "Cuenta aprobada"
+    approve_account: "Aprobar cuenta"
     pending_email_confirmation: "Confirmación de email pendiente"
     certificate_sent: "Certificado enviado"
     certificate_revoked: "Certificado revocado"
