@@ -24,24 +24,40 @@ import (
 
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
-	provider, err := oidc.NewProvider(context.Background(), "https://openuem-console-rms331.us1.zitadel.cloud") // TODO - hardcoded must come from config
+	// ZITADEL
+	// provider, err := oidc.NewProvider(context.Background(), "https://openuem-console-rms331.us1.zitadel.cloud") // TODO - hardcoded must come from config
+	// if err != nil {
+	// 	log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
+	// }
+
+	// oauth2Config := oauth2.Config{
+	// 	ClientID:    "329227437038756021", // TODO - hardcoded must come from config
+	// 	RedirectURL: h.GetRedirectURI(c),
+	// 	Endpoint:    provider.Endpoint(),
+	// }
+
+	// KEYCLOAK
+	provider, err := oidc.NewProvider(context.Background(), "http://localhost:8080/realms/openuem") // TODO - hardcoded must come from config
 	if err != nil {
 		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
 	}
 
 	oauth2Config := oauth2.Config{
-		ClientID:    "329227437038756021", // TODO - hardcoded must come from config
+		ClientID:    "openuem", // TODO - hardcoded must come from config
 		RedirectURL: h.GetRedirectURI(c),
 		Endpoint:    provider.Endpoint(),
 	}
 
-	authProvider := "zitadel"                                 // TODO - hardcoded must come from config
+	authProvider := "keycloak"                                // TODO - hardcoded must come from config
 	cookieEncryptionKey := "LnQaKMKzSxL5MEY3fXSFDyYK5Jmi7rzi" // TODO - hardcoded must come from config
 
 	switch authProvider {
 	case "zitadel":
 		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone", "urn:zitadel:iam:org:project:id:zitadel:aud"}
+	case "keycloak":
+		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone"}
 	}
 
 	state, err := randomBytestoHex(32)
@@ -108,11 +124,16 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	// TODO Verify code if possible, I've verifier and I've the code how I can check if the code is valid? Is this needed?
 
-	authProvider := "zitadel" // TODO - hardcoded must come from config
+	authProvider := "keycloak" // TODO - hardcoded must come from config
 
 	switch authProvider {
 	case "zitadel":
 		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie)
+		if err != nil {
+			return err
+		}
+	case "keycloak":
+		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie)
 		if err != nil {
 			return err
 		}
