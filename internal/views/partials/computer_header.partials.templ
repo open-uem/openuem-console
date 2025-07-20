@@ -1,0 +1,27 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+)
+
+templ ComputerHeader(p PaginationAndSort, agent *ent.Agent, commonInfo *CommonInfo) {
+	<div class="flex justify-between items-center">
+		<div class="flex gap-4 items-center">
+			<div class="flex items-center gap-4">
+				@OSBadge(agent.Os)
+				<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+			</div>
+			@ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+			if agent.IsRemote && commonInfo.DetectRemoteAgents {
+				<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+					<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+				</span>
+			}
+		</div>
+		<div class="flex gap-4">
+			@PDFReportButton(p, string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/reports/computer/%s", agent.ID)))), "reports.computer")
+		</div>
+	</div>
+}

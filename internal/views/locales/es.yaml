@@ -317,6 +317,12 @@ es:
       processor: "Procesador"
       architecture: "Arquitectura"
       num_cores: "Núm. Cores"
+      slot: "Ranura"
+      mem_type: "Tipo"
+      size: "Tamaño"
+      speed: "Velocidad"
+      part_number: "Núm. Parte"
+      vendor: "Proveedor"
     os:
       title: "Sistema Operativo"
       description: "Esta es la información del sistema operativo proporcionada por el agente de OpenUEM"
@@ -335,6 +341,7 @@ es:
       no_monitors: "No existe aún información sobre los monitores conectados"
       week_of_manufacture: "Semana de fabric."
       year_of_manufacture: "Año de fabric."
+      report_title: "Monitor #s"
     logical_disk:
       title: "Discos Lógicos"
       description: "Estos son los discos lógicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
@@ -352,6 +359,8 @@ es:
       mount_point: "Punto de montaje"
       filesystem_type: "Tipo Sist.Fich"
       no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
+      report_label: "Etiqueta: %s"
+      report_mount_point: "Punto de montaje: %s"
     file_browser:
       title: "Expl. Archivos"
       description: "Navegue por este disco lógico de forma remota usando SFTP. Haga clic en los tres puntos junto al icono de la carpeta o de fichero para mostrar un menú de acciones. También puede usar los iconos superiores para moverse a una carpeta superior, añadir una nueva carpeta, actualizar el contenido de la carpeta actual, subir un fichero a la carpeta actual o descargar varios ficheros y/o carpetas como un fichero ZIP o borrar varios elementos después de seleccionarlos"
@@ -369,6 +378,7 @@ es:
       descr: "Descripción"
       path: "Ruta"
       no_shares: "No existe aún información sobre los recursos compartidos"
+      report_title: "Recurso compartido #%s"
     printers:
       title: "Impresoras"
       description: "Estas son las impresoras conectadas a este equipo de acuerdo a lo informado por el agente de OpenUEM"
@@ -378,6 +388,7 @@ es:
       is_shared_printer: "¿Impr. Compartida?"
       no_printers: "No existe aún información sobre las impresoras conectadas"
       set_default: "Impresora por defecto"
+      report_title: "Impresora %s"
     network_adapters:
       title: "Adaptadores de red"
       description: "Estos son los adaptadores de red conectados a este equipo de acuerdo a lo informado por el agente de OpenUEM"
@@ -389,6 +400,7 @@ es:
       dns: "DNS"
       speed: "Velocidad"
       no_network_adapters: "No existe aún información disponible sobre los adaptadores de red conectados a este equipo"
+      report_title: "NIC #%s"
     apps:
       title: "Aplicaciones"
       description: "Estas son las aplicaciones encontradas en este equipo de acuerdo a lo informado por el agente de OpenUEM"
@@ -571,6 +583,8 @@ es:
     invalid_report_selected: "El informe seleccionado no es válido"
     could_not_initiate_report: "No se pudo inicializar el informe"
     could_not_generate_report: "No se pudo generar el informe"
+    computer_id_empty: "El ID del equipo no puede estar vacío"
+    computer_inventory: "Inventario de equipo"
   sessions:
     data: "Datos"
     description: "Estas son las sesiones abiertas en la consola de OpenUEM por los usuarios autenticados"

@@ -318,6 +318,12 @@ en:
       processor: "Processor"
       architecture: "Architecture"
       num_cores: "# Cores"
+      slot: "Slot"
+      mem_type: "Type"
+      size: "Size"
+      speed: "Speed"
+      part_number: "Part #"
+      vendor: "Vendor"
     os:
       title: "Operating System"
       description: "This is the information about the operating system reported by the OpenUEM agent"
@@ -336,6 +342,7 @@ en:
       no_monitors: "No monitors information is available yet"
       week_of_manufacture: "Week of manufacture"
       year_of_manufacture: "Year of manufacture"
+      report_title: "Monitor #%s"
     logical_disk:
       title: "Logical Disks"
       description: "These are the logical disks connected to this computer as reported by the OpenUEM agent"
@@ -353,6 +360,8 @@ en:
       mount_point: "Mount point"
       filesystem_type: "FS type"
       no_logical_disks: "No logical disks information is available yet"
+      report_label: "Label: %s"
+      report_mount_point: "Mount point: %s"
     file_browser:
       title: "File Browser"
       description: "Browse this logical drive remotely using SFTP. Click on the three dots icon to open an actions dropdown. Also you can use the icons bar to move to an upper folder, add a new folder, refresh the folder, upload a file, download many elements as a ZIP file or delete many elements after you select them"
@@ -370,6 +379,7 @@ en:
       descr: "Description"
       path: "Path"
       no_shares: "No shares information is available yet"
+      report_title: "Share #%s"
     printers:
       title: "Printers"
       description: "These are the printers connected to this computer as reported by the OpenUEM agent"
@@ -379,6 +389,7 @@ en:
       is_shared_printer: "Is shared printer?"
       no_printers: "No printers information is available yet"
       set_default: "Set as default printer"
+      report_title: "Printer %s"
     network_adapters:
       title: "Network Adapters"
       description: "These are the network adapters connected to this computer as reported by the OpenUEM agent"
@@ -390,11 +401,13 @@ en:
       dns: "DNS"
       speed: "Speed"
       no_network_adapters: "No network adapters information is available yet"
+      report_title: "NIC #%s"
     apps:
       title: "Apps"
       description: "These are the applications found in this computer as reported by the OpenUEM agent"
       installation_date: "Installation"
       no_apps: "No apps were found for this query"
+      report_title: "App %s"
 
   apps:
     title: "Apps"
@@ -559,6 +572,7 @@ en:
     no_info: "No updates history available yet"
   reports:
     description: "Export information from OpenUEM using the following predefined reports"
+    computer: "Generate computer report"
     agents: "Generate agents' report"
     computers: "Generate computers' report"
     antivirus: "Generate antivirus systems' report"
@@ -576,6 +590,8 @@ en:
     invalid_report_selected: "Selected report is not valid"
     could_not_initiate_report: "Could not initiate the report"
     could_not_generate_report: "Could not generate the report"
+    computer_id_empty: "The ID of the computer cannot be empty"
+    computer_inventory: "Computer inventory"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"

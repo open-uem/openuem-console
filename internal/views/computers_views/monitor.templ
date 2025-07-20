@@ -13,18 +13,7 @@ templ Monitors(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, c
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				<div class="flex gap-2 items-center">
-					<div class="flex items-center gap-4">
-						@partials.OSBadge(agent.Os)
-						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
-					</div>
-					@partials.ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
-					if agent.IsRemote && commonInfo.DetectRemoteAgents {
-						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
-							<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-						</span>
-					}
-				</div>
+				@partials.ComputerHeader(p, agent, commonInfo)
 				@ComputersNavbar(agent.ID, "monitors", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))

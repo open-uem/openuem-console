@@ -668,3 +668,33 @@ func (m *Model) RemovePrinter(agentId string, printerName string, c *partials.Co
 		return err
 	}
 }
+
+func (m *Model) GetAgentAppsInfo(agentId string, c *partials.CommonInfo) ([]*ent.App, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		apps, err := m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			All(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return apps, nil
+	} else {
+		apps, err := m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			All(context.Background())
+
+		if err != nil {
+			return nil, err
+		}
+		return apps, nil
+	}
+}

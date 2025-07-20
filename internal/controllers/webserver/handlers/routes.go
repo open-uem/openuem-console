@@ -378,6 +378,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
 
 	e.POST("/tenant/:tenant/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
@@ -385,6 +386,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
 
 	e.POST("/tenant/:tenant/site/:site/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
@@ -392,6 +394,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
 
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
