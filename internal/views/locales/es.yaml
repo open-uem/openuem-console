@@ -969,6 +969,8 @@ es:
     package_name_not_found: "No pude obtener el nombre del paquete"
     package_id_not_empty: "El ID del paquete no puede estar vacío"
     package_name_not_empty: "El nombre del paquete no puede ser vacío"
+    package_version_title: "Versión"
+    package_version_description: "La versión del paquete (opcional)..."
     task_type: "Tipo de tarea"
     subtask_type: "Tipo de subtarea"
     execute_command_label: "Comando a ejecutar"

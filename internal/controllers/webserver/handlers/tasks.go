@@ -671,8 +671,10 @@ func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig := models.TaskConfig{
-		TaskType:   taskType,
-		AgentsType: c.FormValue("task-agent-type"),
+		TaskType:       taskType,
+		AgentsType:     c.FormValue("task-agent-type"),
+		PackageVersion: c.FormValue("package-version"),
+		PackageLatest:  true,
 	}
 
 	taskConfig.Description = c.FormValue("task-description")
