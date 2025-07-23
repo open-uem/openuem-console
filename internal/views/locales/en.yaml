@@ -973,6 +973,8 @@ en:
     reboot: "Reboot endpoint"
     poweroff: "Shutdown endpoint"
     unexpected_task_type: "Unexpected task's type"
+    package_version_title: "Version"
+    package_version_description: "The version of the package (optional)..."
     package_name_not_found: "Could not get package name"
     package_id_not_empty: "Package ID cannot be empty"
     package_name_not_empty: "Package name cannot be empty"

@@ -45,44 +45,63 @@ templ WingetPackageSearch(task *ent.Task) {
 				</div>
 			</div>
 		</div>
-		<div class={ templ.KV("hidden", task == nil || task.PackageID == "") } id="package-selected-section">
-			<label class="uk-form-label" for="task-type">
-				{ i18n.T(ctx, "tasks.edit.selected_package") }
-			</label>
-			<div class="flex gap-2">
-				<input
-					type="hidden"
-					id="package-id"
-					name="package-id"
-					if task != nil {
-						value={ task.PackageID }
-					}
-				/>
-				<div class="uk-inline w-full">
-					<button
-						type="button"
-						title={ i18n.T(ctx, "Remove") }
-						_="on click 
+		<div class={ "flex flex-col gap-4", templ.KV("hidden", task == nil || task.PackageID == "") } id="package-selected-section">
+			<div>
+				<label class="uk-form-label" for="task-type">
+					{ i18n.T(ctx, "tasks.edit.selected_package") }
+				</label>
+				<div class="flex gap-2">
+					<input
+						type="hidden"
+						id="package-id"
+						name="package-id"
+						if task != nil {
+							value={ task.PackageID }
+						}
+					/>
+					<div class="uk-inline w-full">
+						<button
+							type="button"
+							title={ i18n.T(ctx, "Remove") }
+							_="on click 
                                 set #package-name.value to ''
                                 add .hidden to #package-selected-section
                                 remove .hidden from #package-search-section
                             end"
-						class="uk-form-icon uk-form-icon-flip"
-					>
-						<uk-icon icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
-					</button>
-					<input
-						class="uk-input w-full"
-						type="text"
-						spellcheck="false"
-						id="package-name"
-						name="package-name"
-						if task != nil {
-							value={ task.PackageName }
-						}
-						readonly
-					/>
+							class="uk-form-icon uk-form-icon-flip"
+						>
+							<uk-icon icon="x" hx-history="false" custom-class="h-4 w-4" uk-cloak></uk-icon>
+						</button>
+						<input
+							class="uk-input w-full"
+							type="text"
+							spellcheck="false"
+							id="package-name"
+							name="package-name"
+							if task != nil {
+								value={ task.PackageName }
+							}
+							readonly
+						/>
+					</div>
 				</div>
+			</div>
+			<div>
+				<label class="uk-form-label" for="package-version">
+					{ i18n.T(ctx, "tasks.package_version_title") }
+				</label>
+				<input
+					type="text"
+					class="uk-input"
+					id="package-version"
+					name="package-version"
+					placeholder={ i18n.T(ctx, "tasks.package_version_description") }
+					spellcheck="false"
+					aria-label={ i18n.T(ctx, "tasks.package_version_description") }
+					if task != nil {
+						value={ task.PackageVersion }
+					}
+				/>
 			</div>
 		</div>
 	</div>
