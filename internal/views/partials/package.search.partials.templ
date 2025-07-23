@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/nats"
 	"strings"
 )
 
-templ WingetPackageSearch(task *ent.Task) {
+templ WingetPackageSearch(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div class={ templ.KV("hidden", task != nil && task.PackageID != "") } id="package-search-section">
+		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="package-search-section">
 			<label class="uk-form-label" for="package-search">
 				{ i18n.T(ctx, "tasks.edit.select_package") }
 			</label>
@@ -45,9 +46,9 @@ templ WingetPackageSearch(task *ent.Task) {
 				</div>
 			</div>
 		</div>
-		<div class={ "flex flex-col gap-4", templ.KV("hidden", task == nil || task.PackageID == "") } id="package-selected-section">
+		<div class={ "flex flex-col gap-4", templ.KV("hidden", t == nil || t.PackageID == "") } id="package-selected-section">
 			<div>
-				<label class="uk-form-label" for="task-type">
+				<label class="uk-form-label" for="package-id">
 					{ i18n.T(ctx, "tasks.edit.selected_package") }
 				</label>
 				<div class="flex gap-2">
@@ -55,8 +56,8 @@ templ WingetPackageSearch(task *ent.Task) {
 						type="hidden"
 						id="package-id"
 						name="package-id"
-						if task != nil {
-							value={ task.PackageID }
+						if t != nil {
+							value={ t.PackageID }
 						}
 					/>
 					<div class="uk-inline w-full">
@@ -78,31 +79,52 @@ templ WingetPackageSearch(task *ent.Task) {
 							spellcheck="false"
 							id="package-name"
 							name="package-name"
-							if task != nil {
-								value={ task.PackageName }
+							if t != nil {
+								value={ t.PackageName }
 							}
 							readonly
 						/>
 					</div>
 				</div>
 			</div>
-			<div>
-				<label class="uk-form-label" for="package-version">
-					{ i18n.T(ctx, "tasks.package_version_title") }
-				</label>
-				<input
-					type="text"
-					class="uk-input"
-					id="package-version"
-					name="package-version"
-					placeholder={ i18n.T(ctx, "tasks.package_version_description") }
-					spellcheck="false"
-					aria-label={ i18n.T(ctx, "tasks.package_version_description") }
-					if task != nil {
-						value={ task.PackageVersion }
-					}
-				/>
-			</div>
+			if t != nil && t.Type == task.TypeWingetInstall {
+				<div id="package-version-section" class={ templ.KV("hidden", t != nil && t.PackageLatest) }>
+					<label class="uk-form-label" for="package-version">
+						{ i18n.T(ctx, "tasks.package_version_title") }
+					</label>
+					<input
+						type="text"
+						class="uk-input"
+						id="package-version"
+						name="package-version"
+						placeholder={ i18n.T(ctx, "tasks.package_version_description") }
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.package_version_description") }
+						if t != nil {
+							value={ t.PackageVersion }
+						}
+					/>
+				</div>
+				<div>
+					<label class="uk-text-small uk-text-bold">
+						<input
+							class="uk-checkbox"
+							id="package-use-latest"
+							name="package-use-latest"
+							type="checkbox"
+							checked?={ t != nil && t.PackageLatest }
+							_="on click
+							if me.checked then
+								add .hidden to #package-version-section
+							else
+								remove .hidden from #package-version-section
+							end
+						end"
+						/>
+						{ i18n.T(ctx, "tasks.flatpak_latest") }
+					</label>
+				</div>
+			}
 		</div>
 	</div>
 }
