@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/migrate"
 	"github.com/open-uem/ent/orgmetadata"
 	"github.com/open-uem/ent/profile"
@@ -147,8 +149,24 @@ func (m *Model) AssociateDomainToDefaultSite(domain string) error {
 
 	s, err := m.GetDefaultSite(t)
 	if err != nil {
-		return fmt.Errorf("coulf not find default site")
+		return fmt.Errorf("could not find default site")
 	}
 
 	return m.Client.Site.Update().SetDomain(domain).Where(site.ID(s.ID), site.HasTenantWith(tenant.ID(t.ID))).Exec(context.Background())
+}
+
+func (m *Model) SetDefaultNickname() error {
+	// look for agents that has no nickname and set it to the hostname
+	migrateAgents, err := m.Client.Agent.Query().Where(agent.Or(agent.Nickname(""), agent.NicknameIsNil())).All(context.Background())
+	if err != nil {
+		return fmt.Errorf("could not find agents without nickname")
+	}
+
+	for _, a := range migrateAgents {
+		if err := m.Client.Agent.Update().Where(agent.ID(a.ID)).SetNickname(a.Hostname).Exec(context.Background()); err != nil {
+			log.Printf("[ERROR]: could not set default nickname to agent: %s, reason: %v", a.Hostname, err)
+		}
+	}
+
+	return nil
 }

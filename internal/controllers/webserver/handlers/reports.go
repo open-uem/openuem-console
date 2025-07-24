@@ -96,10 +96,10 @@ func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileNam
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_agents"), false))
 	}
 
-	w.Write([]string{"hostname", "status", "os", "version", "ip", "last_contact"})
+	w.Write([]string{"name", "status", "os", "version", "ip", "last_contact"})
 
 	for _, agent := range allAgents {
-		record := []string{agent.Hostname, string(agent.AgentStatus), agent.Os, agent.Edges.Release.Version, agent.IP, agent.LastContact.Format("2006-01-02T15:03:04")}
+		record := []string{agent.Nickname, string(agent.AgentStatus), agent.Os, agent.Edges.Release.Version, agent.IP, agent.LastContact.Format("2006-01-02T15:03:04")}
 		if err := w.Write(record); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
 		}
@@ -137,10 +137,10 @@ func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, file
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_computers"), false))
 	}
 
-	w.Write([]string{"hostname", "os", "version", "username", "manufacturer", "model", "serial_number"})
+	w.Write([]string{"name", "os", "version", "username", "manufacturer", "model", "serial_number"})
 
 	for _, computer := range allComputers {
-		record := []string{computer.Hostname, computer.OS, computer.Version, computer.Username, computer.Manufacturer, computer.Model, computer.Serial}
+		record := []string{computer.Nickname, computer.OS, computer.Version, computer.Username, computer.Manufacturer, computer.Model, computer.Serial}
 		if err := w.Write(record); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
 		}
@@ -219,10 +219,10 @@ func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, file
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_all_antiviri"), false))
 	}
 
-	w.Write([]string{"hostname", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
+	w.Write([]string{"name", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
 
 	for _, antivirus := range allAntiviri {
-		record := []string{antivirus.Hostname, antivirus.OS, antivirus.Name, strconv.FormatBool(antivirus.IsActive), strconv.FormatBool(antivirus.IsUpdated)}
+		record := []string{antivirus.Nickname, antivirus.OS, antivirus.Name, strconv.FormatBool(antivirus.IsActive), strconv.FormatBool(antivirus.IsUpdated)}
 		if err := w.Write(record); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
 		}
@@ -260,7 +260,7 @@ func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileNa
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_get_system_updates"), false))
 	}
 
-	w.Write([]string{"hostname", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
+	w.Write([]string{"name", "os", "antivirus", "antivirus_enabled", "antivirus_updated"})
 
 	for _, update := range allSystemUpdates {
 		lastSearch := update.LastSearch.Format("2006-01-02T15:03:04")
@@ -273,7 +273,7 @@ func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileNa
 			lastInstall = "-"
 		}
 
-		record := []string{update.Hostname, update.OS, i18n.T(c.Request().Context(), update.SystemUpdateStatus), lastSearch, lastInstall, strconv.FormatBool(update.PendingUpdates)}
+		record := []string{update.Nickname, update.OS, i18n.T(c.Request().Context(), update.SystemUpdateStatus), lastSearch, lastInstall, strconv.FormatBool(update.PendingUpdates)}
 		if err := w.Write(record); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_write_to_csv"), false))
 		}
@@ -351,7 +351,7 @@ func GetAgentsReport(c echo.Context, agents []*ent.Agent) (core.Maroto, error) {
 	tableHeader := []core.Row{
 		getPageHeader(i18n.T(c.Request().Context(), "Agents")),
 		row.New(5).Add(
-			text.NewCol(2, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Align: align.Left, Left: 3, Style: fontstyle.Bold, Color: &props.WhiteColor}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.nickname"), props.Text{Size: 9, Align: align.Left, Left: 3, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "Status"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.os"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.version"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
@@ -378,7 +378,7 @@ func getAgentsTransactions(agents []*ent.Agent) []core.Row {
 		osImage := getOperatingSystemPNG(agent.Os)
 
 		r := row.New(4).Add(
-			text.NewCol(2, agent.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
+			text.NewCol(2, agent.Nickname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			text.NewCol(2, string(agent.AgentStatus), props.Text{Size: 8, Align: align.Center}),
 			image.NewFromFileCol(2, osImage, props.Rect{
 				Center:  true,
@@ -409,7 +409,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 		return nil, err
 	}
 
-	f.Hostname = c.FormValue("filterByHostname")
+	f.Nickname = c.FormValue("filterByNickname")
 
 	filteredAgentStatusOptions := []string{}
 	for index := range agents_views.AgentStatus {
@@ -529,7 +529,7 @@ func GetComputersReport(c echo.Context, computers []models.Computer) (core.Marot
 	tableHeader := []core.Row{
 		getPageHeader(i18n.T(c.Request().Context(), "Computers")),
 		row.New(5).Add(
-			text.NewCol(2, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.nickname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(1, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.version"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "agents.username"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
@@ -557,7 +557,7 @@ func getComputersTransactions(computers []models.Computer) []core.Row {
 		osImage := getOperatingSystemPNG(computer.OS)
 
 		r := row.New(4).Add(
-			text.NewCol(2, computer.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
+			text.NewCol(2, computer.Nickname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			image.NewFromFileCol(1, osImage, props.Rect{
 				Center:  true,
 				Percent: 75,
@@ -589,7 +589,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 		return nil, err
 	}
 
-	f.Hostname = c.FormValue("filterByHostname")
+	f.Nickname = c.FormValue("filterByNickname")
 	f.Username = c.FormValue("filterByUsername")
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
@@ -717,7 +717,7 @@ func GetAntiviriReport(c echo.Context, antiviri []models.Antivirus) (core.Maroto
 	tableHeader := []core.Row{
 		getPageHeader(i18n.T(c.Request().Context(), "Antivirus")),
 		row.New(5).Add(
-			text.NewCol(3, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
+			text.NewCol(3, i18n.T(c.Request().Context(), "agents.nickname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(3, i18n.T(c.Request().Context(), "Antivirus"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "antivirus.enabled"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
@@ -743,7 +743,7 @@ func getAntiviriTransactions(antiviri []models.Antivirus) []core.Row {
 		osImage := getOperatingSystemPNG(antivirus.OS)
 
 		r := row.New(4).Add(
-			text.NewCol(3, antivirus.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
+			text.NewCol(3, antivirus.Nickname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			image.NewFromFileCol(2, osImage, props.Rect{
 				Center:  true,
 				Percent: 75,
@@ -830,7 +830,7 @@ func GetSystemUpdatesReport(c echo.Context, updates []models.SystemUpdate) (core
 	tableHeader := []core.Row{
 		getPageHeader(i18n.T(c.Request().Context(), "updates.title")),
 		row.New(5).Add(
-			text.NewCol(2, i18n.T(c.Request().Context(), "agents.hostname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
+			text.NewCol(2, i18n.T(c.Request().Context(), "agents.nickname"), props.Text{Size: 9, Left: 3, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(1, "OS", props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(3, i18n.T(c.Request().Context(), "updates.status"), props.Text{Size: 9, Align: align.Left, Style: fontstyle.Bold, Color: &props.WhiteColor}),
 			text.NewCol(2, i18n.T(c.Request().Context(), "updates.last_search"), props.Text{Size: 9, Align: align.Center, Style: fontstyle.Bold, Color: &props.WhiteColor}),
@@ -867,7 +867,7 @@ func getSystemUpdatesTransactions(c echo.Context, updates []models.SystemUpdate)
 		}
 
 		r := row.New(4).Add(
-			text.NewCol(2, update.Hostname, props.Text{Size: 8, Left: 3, Align: align.Left}),
+			text.NewCol(2, update.Nickname, props.Text{Size: 8, Left: 3, Align: align.Left}),
 			image.NewFromFileCol(1, osImage, props.Rect{
 				Center:  true,
 				Percent: 75,
@@ -1303,12 +1303,11 @@ func (h *Handler) GetComputerReport(c echo.Context, agentID string, commonInfo *
 	m.AddRow(4, col.New(12))
 	m.AddRows(hwInfo...)
 
-	// m.AddRows(getComputersTransactions(computers)...)
-
 	return m, nil
 }
 
 func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *partials.CommonInfo) ([]core.Row, error) {
+	var r core.Row
 
 	rows := []core.Row{}
 	lightGreen := getLightGreenColor()
@@ -1363,11 +1362,16 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 
 	// Computer's name
 	osImage := getOperatingSystemPNG(hwInfo.Os)
-	r := row.New(4).Add(
-		text.NewCol(5, hwInfo.Hostname, props.Text{Size: 9, Align: align.Left, Style: "B"}),
-		text.NewCol(5, hwInfo.Description, props.Text{Size: 9, Align: align.Left}),
-		text.NewCol(2, hwInfo.EndpointType.String(), props.Text{Size: 9, Align: align.Left}),
-	)
+	if hwInfo.Nickname != hwInfo.Hostname {
+		r = row.New(4).Add(
+			text.NewCol(12, hwInfo.Nickname+" ( "+hwInfo.Hostname+" )", props.Text{Size: 9, Align: align.Left, Style: "B"}),
+		)
+	} else {
+		r = row.New(4).Add(
+			text.NewCol(12, hwInfo.Nickname, props.Text{Size: 9, Align: align.Left, Style: "B"}),
+		)
+	}
+
 	rows = append(rows, r)
 
 	// Empty row

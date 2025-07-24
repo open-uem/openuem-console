@@ -91,11 +91,11 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	applyAgentFilters(query, f)
 
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
-			agents, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldNickname)).All(context.Background())
 		} else {
-			agents, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldNickname)).All(context.Background())
 		}
 	case "os":
 		if p.SortOrder == "asc" {
@@ -273,8 +273,8 @@ func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo) ([]string, error) {
 }
 
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
-	if len(f.Hostname) > 0 {
-		query.Where(agent.HostnameContainsFold(f.Hostname))
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}
 
 	if len(f.AgentStatusOptions) > 0 {
@@ -708,11 +708,11 @@ func (m *Model) GetUpdateAgentsByPage(p partials.PaginationAndSort, f filters.Up
 	applyUpdateAgentsFilters(query, f)
 
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
-			agents, err = query.Order(ent.Asc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Asc(agent.FieldNickname)).All(context.Background())
 		} else {
-			agents, err = query.Order(ent.Desc(agent.FieldHostname)).All(context.Background())
+			agents, err = query.Order(ent.Desc(agent.FieldNickname)).All(context.Background())
 		}
 	case "version":
 		if p.SortOrder == "asc" {
@@ -823,8 +823,8 @@ func (m *Model) SaveAgentSettings(agentID string, settings openuem_nats.AgentSet
 }
 
 func applyUpdateAgentsFilters(query *ent.AgentQuery, f filters.UpdateAgentsFilter) {
-	if len(f.Hostname) > 0 {
-		query.Where(agent.HostnameContainsFold(f.Hostname))
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}
 
 	if len(f.Releases) > 0 {

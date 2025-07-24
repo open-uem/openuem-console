@@ -173,7 +173,7 @@ func (h *Handler) ShowUpdateAgentList(c echo.Context, r *openuem_ent.Release, su
 
 	// Get filters values
 	f := filters.UpdateAgentsFilter{}
-	f.Hostname = c.FormValue("filterByHostname")
+	f.Nickname = c.FormValue("filterByNickname")
 	f.TaskResult = c.FormValue("filterByTaskResult")
 	f.SelectedRelease = c.FormValue("filterBySelectedRelease")
 

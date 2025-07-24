@@ -37,7 +37,7 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 							if issue.Edges.Agents != nil {
 								<tr>
 									<td class="!align-middle">
-										{ issue.Edges.Agents.Hostname }
+										{ issue.Edges.Agents.Nickname }
 									</td>
 									<td class="!align-middle">
 										for line := range strings.SplitSeq(issue.Error, "\r\n") {

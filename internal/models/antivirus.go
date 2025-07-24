@@ -16,7 +16,7 @@ import (
 
 type Antivirus struct {
 	ID        string
-	Hostname  string
+	Nickname  string
 	OS        string
 	Name      string
 	IsActive  bool `sql:"is_active"`
@@ -26,7 +26,7 @@ type Antivirus struct {
 
 func mainAntivirusQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	// Info from agents waiting for admission won't be shown
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, antivirus.FieldName, antivirus.FieldIsActive, antivirus.FieldIsUpdated).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldNickname, agent.FieldOs, antivirus.FieldName, antivirus.FieldIsActive, antivirus.FieldIsUpdated).
 		LeftJoin(sql.Table(antivirus.Table)).
 		On(agent.FieldID, antivirus.OwnerColumn).
 		Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission)))
@@ -91,21 +91,21 @@ func (m *Model) GetAntiviriByPage(p partials.PaginationAndSort, f filters.Antivi
 
 	// Default sort
 	if p.SortBy == "" {
-		p.SortBy = "hostname"
+		p.SortBy = "nickname"
 		p.SortOrder = "desc"
 	}
 
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
 			err = query.Modify(func(s *sql.Selector) {
 				mainAntivirusQuery(s, p)
-				s.OrderBy(sql.Asc(agent.FieldHostname))
+				s.OrderBy(sql.Asc(agent.FieldNickname))
 			}).Scan(context.Background(), &antiviri)
 		} else {
 			err = query.Modify(func(s *sql.Selector) {
 				mainAntivirusQuery(s, p)
-				s.OrderBy(sql.Desc(agent.FieldHostname))
+				s.OrderBy(sql.Desc(agent.FieldNickname))
 			}).Scan(context.Background(), &antiviri)
 		}
 	case "agentOS":
@@ -213,8 +213,8 @@ func (m *Model) GetDetectedAntiviri(c *partials.CommonInfo) ([]string, error) {
 }
 
 func applyAntiviriFilters(query *ent.AgentQuery, f filters.AntivirusFilter) {
-	if len(f.Hostname) > 0 {
-		query.Where(agent.HostnameContainsFold(f.Hostname))
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}
 
 	if len(f.AgentOSVersions) > 0 {

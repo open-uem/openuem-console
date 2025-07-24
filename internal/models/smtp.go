@@ -25,6 +25,28 @@ func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) 
 
 	if tenantID == "-1" {
 		s, err = query.Where(settings.Not(settings.HasTenant())).Only(context.Background())
+		if err != nil {
+			if !openuem_ent.IsNotFound(err) {
+				return nil, err
+			} else {
+				if tenantID == "-1" {
+					if err := m.Client.Settings.Create().Exec(context.Background()); err != nil {
+						return nil, err
+					}
+					return query.Only(context.Background())
+				} else {
+					id, err := strconv.Atoi(tenantID)
+					if err != nil {
+						return nil, err
+					}
+
+					if err := m.CloneGlobalSettings(id); err != nil {
+						return nil, err
+					}
+					return query.Only(context.Background())
+				}
+			}
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -32,27 +54,26 @@ func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) 
 		}
 
 		s, err = query.Where(settings.HasTenantWith(tenant.ID(id))).Only(context.Background())
-	}
-
-	if err != nil {
-		if !openuem_ent.IsNotFound(err) {
-			return nil, err
-		} else {
-			if tenantID == "-1" {
-				if err := m.Client.Settings.Create().Exec(context.Background()); err != nil {
-					return nil, err
-				}
-				return query.Only(context.Background())
+		if err != nil {
+			if !openuem_ent.IsNotFound(err) {
+				return nil, err
 			} else {
-				id, err := strconv.Atoi(tenantID)
-				if err != nil {
-					return nil, err
-				}
+				if tenantID == "-1" {
+					if err := m.Client.Settings.Create().Exec(context.Background()); err != nil {
+						return nil, err
+					}
+					return query.Only(context.Background())
+				} else {
+					id, err := strconv.Atoi(tenantID)
+					if err != nil {
+						return nil, err
+					}
 
-				if err := m.CloneGlobalSettings(id); err != nil {
-					return nil, err
+					if err := m.CloneGlobalSettings(id); err != nil {
+						return nil, err
+					}
+					return query.Only(context.Background())
 				}
-				return query.Only(context.Background())
 			}
 		}
 	}

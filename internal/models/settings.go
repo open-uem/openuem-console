@@ -127,6 +127,9 @@ func (m *Model) GetDefaultAgentFrequency(tenantID string) (int, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldAgentReportFrequenceInMinutes).Only(context.Background())
+		if err != nil {
+			return 0, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -134,10 +137,9 @@ func (m *Model) GetDefaultAgentFrequency(tenantID string) (int, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldAgentReportFrequenceInMinutes).Only(context.Background())
-	}
-
-	if err != nil {
-		return 0, err
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	return s.AgentReportFrequenceInMinutes, nil
@@ -168,6 +170,9 @@ func (m *Model) GetDefaultRequestVNCPIN(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldRequestVncPin).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -175,10 +180,9 @@ func (m *Model) GetDefaultRequestVNCPIN(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldRequestVncPin).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.RequestVncPin, nil
@@ -194,6 +198,9 @@ func (m *Model) GetDefaultWingetFrequency(tenantID string) (int, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldProfilesApplicationFrequenceInMinutes).Only(context.Background())
+		if err != nil {
+			return 0, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -201,10 +208,9 @@ func (m *Model) GetDefaultWingetFrequency(tenantID string) (int, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldProfilesApplicationFrequenceInMinutes).Only(context.Background())
-	}
-
-	if err != nil {
-		return 0, err
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	return s.ProfilesApplicationFrequenceInMinutes, nil
@@ -220,6 +226,9 @@ func (m *Model) GetDefaultSFTPDisabled(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldDisableSftp).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -227,10 +236,9 @@ func (m *Model) GetDefaultSFTPDisabled(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldDisableSftp).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.DisableSftp, nil
@@ -246,6 +254,9 @@ func (m *Model) GetDefaultRemoteAssistanceDisabled(tenantID string) (bool, error
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldDisableRemoteAssistance).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -253,11 +264,11 @@ func (m *Model) GetDefaultRemoteAssistanceDisabled(tenantID string) (bool, error
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldDisableRemoteAssistance).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	}
 
-	if err != nil {
-		return false, err
-	}
 	return s.DisableRemoteAssistance, nil
 }
 
@@ -271,6 +282,9 @@ func (m *Model) GetDefaultDetectRemoteAgents(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldDetectRemoteAgents).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -278,11 +292,11 @@ func (m *Model) GetDefaultDetectRemoteAgents(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldDetectRemoteAgents).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	}
 
-	if err != nil {
-		return false, err
-	}
 	return s.DetectRemoteAgents, nil
 }
 
@@ -296,6 +310,9 @@ func (m *Model) GetDefaultAutoAdmitAgents(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldAutoAdmitAgents).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -303,10 +320,9 @@ func (m *Model) GetDefaultAutoAdmitAgents(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldAutoAdmitAgents).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.AutoAdmitAgents, nil
@@ -421,6 +437,9 @@ func (m *Model) GetDefaultUseWinget(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldUseWinget).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -428,10 +447,9 @@ func (m *Model) GetDefaultUseWinget(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldUseWinget).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.UseWinget, nil
@@ -447,6 +465,9 @@ func (m *Model) GetDefaultUseFlatpak(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldUseFlatpak).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -454,10 +475,9 @@ func (m *Model) GetDefaultUseFlatpak(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldUseFlatpak).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.UseFlatpak, nil
@@ -473,6 +493,9 @@ func (m *Model) GetDefaultUseBrew(tenantID string) (bool, error) {
 
 	if tenantID == "-1" {
 		s, err = m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldUseBrew).Only(context.Background())
+		if err != nil {
+			return false, err
+		}
 	} else {
 		id, err := strconv.Atoi(tenantID)
 		if err != nil {
@@ -480,10 +503,9 @@ func (m *Model) GetDefaultUseBrew(tenantID string) (bool, error) {
 		}
 
 		s, err = m.Client.Settings.Query().Where(settings.HasTenantWith(tenant.ID(id))).Select(settings.FieldUseBrew).Only(context.Background())
-	}
-
-	if err != nil {
-		return false, err
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return s.UseBrew, nil
