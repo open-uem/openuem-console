@@ -7,7 +7,7 @@ import (
 )
 
 type AgentFilter struct {
-	Hostname              string
+	Nickname              string
 	Versions              []string
 	AgentStatusOptions    []string
 	AgentOSVersions       []string
@@ -66,7 +66,7 @@ type SiteFilter struct {
 }
 
 type AntivirusFilter struct {
-	Hostname                string
+	Nickname                string
 	AntivirusNameOptions    []string
 	AntivirusUpdatedOptions []string
 	AntivirusEnabledOptions []string
@@ -74,7 +74,7 @@ type AntivirusFilter struct {
 }
 
 type SystemUpdatesFilter struct {
-	Hostname             string
+	Nickname             string
 	AgentOSVersions      []string
 	UpdateStatus         []string
 	LastSearchFrom       string
@@ -94,7 +94,7 @@ type CertificateFilter struct {
 }
 
 type UpdateAgentsFilter struct {
-	Hostname              string
+	Nickname              string
 	Releases              []string
 	Tags                  []int
 	TaskStatus            []string

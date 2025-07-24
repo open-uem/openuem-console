@@ -9443,6 +9443,10 @@ th.uk-text-break, td.uk-text-break {
   bottom: 0px;
 }
 
+.-left-5 {
+  left: -1.25rem;
+}
+
 .left-0 {
   left: 0px;
 }

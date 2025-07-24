@@ -298,7 +298,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 					<div class="uk-card-body mt-8 mb-2">
 						<div class="flex items-center gap-4">
 							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/selectpackagedeployment"))), "#main", "outerHTML", func() bool {
-								return f.Hostname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
+								return f.Nickname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
 							})
 							if len(agents) > 0 {
 								<button
@@ -380,8 +380,8 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 											</th>
 											<th>
 												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "agents.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
+													<span>{ i18n.T(ctx, "agents.nickname") }</span>
+													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
 												</div>
 											</th>
 											<th>
@@ -468,7 +468,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 													`,p.PageSize) }
 												/>
 											</td>
-											<td class="!align-middle">{ agent.Hostname }</td>
+											<td class="!align-middle">{ agent.Nickname }</td>
 											<td class="!align-middle">
 												@partials.OSBadge(agent.Os)
 											</td>

@@ -166,7 +166,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p := partials.NewPaginationAndSort()
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
 
-	p.SortBy = "hostname"
+	p.SortBy = "nickname"
 	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))

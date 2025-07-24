@@ -152,6 +152,7 @@ es:
     title: "Agentes"
     description: "Estos son los agentes que han contactado con el servidor de OpenUEM"
     hostname: "Nombre de host"
+    nickname: "Nombre"
     version: "Versión"
     os: "S.O"
     last_contact: "Último contacto"
@@ -186,6 +187,7 @@ es:
     no_deployments: "No se han encontrado despliegues para este equipo"
     deploy_empty_values: "El ID del agente, el ID del paquete o su nombre no se enviaron en la petición"
     filter_by_hostname: "Filtrar por nombre de equipo..."
+    filter_by_nickname: "Filtrar por nombre de equipo..."
     wol_title: "Wake On Lan"
     wol_description: "Envíe un paquete mágico Wake On Lan a la dirección MAC registrada del agente para despertar este equipo"
     wol_no_mac: "No hay una dirección MAC disponible a la que enviar el paquete WOL o el equipo no está en la red local"
@@ -305,6 +307,8 @@ es:
     could_not_get_tenant: "El sitio no está asociado a una organización"
     could_not_associate: "No se pudo asociar el equipo con el sitio y organización seleccionado, razón: %s"
     association_success: "El equipo ha sido asociado con el sitio y la organización seleccionados"
+    nickname_cannot_be_empty: "El nombre del equipo no puede estar vacío"
+    nickname_not_saved: "No se pudo guardar el nombre del equipo, razón: %s"
 
   inventory:
     hardware:
@@ -421,6 +425,7 @@ es:
     title: "Antivirus"
     description: "Esta es la información sobre los sistemas de antivirus informada por los agentes de OpenUEM que han contactado"
     hostname: "Nombre de equipo"
+    name: "Nombre"
     os: "S.O"
     enabled: "¿Antivirus activo?"
     updated: "¿Antivirus actualizado?"
@@ -551,6 +556,7 @@ es:
     description: "Esta es la información sobre actualizaciones de seguridad generada por los agentes que han contactado"
     no_updates_info: "No se ha encontrado información de actualizaciones para esta consulta"
     hostname: "Equipo"
+    nickname: "Nombre"
     os: "S.O"
     status: "Estado"
     last_search: "Últ. Búsqueda"

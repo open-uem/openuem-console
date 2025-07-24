@@ -28,7 +28,7 @@ func (suite *DeploymentTestSuite) SetupTest() {
 	_, err := client.Agent.Create().
 		SetID("agent1").
 		SetOs("windows").
-		SetHostname("agent1").
+		SetNickname("agent1").
 		SetAgentStatus(agent.AgentStatusEnabled).
 		Save(context.Background())
 	assert.NoError(suite.T(), err, "should create agent")
