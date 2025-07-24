@@ -39,7 +39,7 @@ func (suite *ComputersTestSuite) SetupTest() {
 		query := client.Agent.Create().
 			SetID(fmt.Sprintf("agent%d", i)).
 			SetOs("windows").
-			SetHostname(fmt.Sprintf("agent%d", i)).
+			SetNickname(fmt.Sprintf("agent%d", i)).
 			SetAgentStatus(agent.AgentStatusEnabled).
 			SetLastContact(time.Now())
 		if i%2 == 0 {
@@ -138,7 +138,7 @@ func (suite *ComputersTestSuite) TestGetComputersByPage() {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID, fmt.Sprintf("agent ID should be %d", 6-i))
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
 	items, err = suite.model.GetComputersByPage(suite.p, filters.AgentFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get computers by page")
@@ -146,7 +146,7 @@ func (suite *ComputersTestSuite) TestGetComputersByPage() {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID, fmt.Sprintf("agent ID should be %d", i))
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "desc"
 	items, err = suite.model.GetComputersByPage(suite.p, filters.AgentFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get computers by page")
@@ -234,7 +234,7 @@ func (suite *ComputersTestSuite) TestGetComputersByPage() {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID, fmt.Sprintf("agent ID should be %d", 6-i))
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
 	items, err = suite.model.GetComputersByPage(suite.p, filters.AgentFilter{Tags: []int{suite.tags[1]}}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get computers by page")
@@ -249,7 +249,7 @@ func (suite *ComputersTestSuite) TestCountAllComputers() {
 	assert.NoError(suite.T(), err, "should count all computers")
 	assert.Equal(suite.T(), 7, count, "should count 7 computers")
 
-	f := filters.AgentFilter{Hostname: "agent"}
+	f := filters.AgentFilter{Nickname: "agent"}
 	count, err = suite.model.CountAllComputers(f, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all computers")
 	assert.Equal(suite.T(), 7, count, "should count 7 computers")

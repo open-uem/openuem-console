@@ -233,6 +233,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
 	e.POST("/computers/:uuid/sites", h.GetDropdownSites, h.IsAuthenticated)
+	e.POST("/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -282,6 +283,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -331,6 +333,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/site/:site/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

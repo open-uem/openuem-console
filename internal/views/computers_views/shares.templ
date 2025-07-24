@@ -9,7 +9,7 @@ import (
 )
 
 templ Shares(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">

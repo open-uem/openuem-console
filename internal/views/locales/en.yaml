@@ -151,6 +151,7 @@ en:
     title: "Agents"
     description: "These are the agents that have contacted the server"
     hostname: "Hostname"
+    nickname: "Name"
     version: "Version"
     os: "OS"
     last_contact: "Last Contact"
@@ -185,6 +186,7 @@ en:
     no_deployments: "No deployments have been found for this computer"
     deploy_empty_values: "The agent id, package id or the package name were absent"
     filter_by_hostname: "Filter by hostname..."
+    filter_by_nickname: "Filter by name..."
     wol_title: "Wake On Lan"
     wol_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up"
     wol_no_mac: "No MAC Address is available to send the WOL packet or the agent is not in the local area network"
@@ -306,6 +308,8 @@ en:
     could_not_get_tenant: "The site is not associated with an organization"
     could_not_associate: "Could not associate the endpoint with the selected site and organization, reason: %s"
     association_success: "The endpoint has been associated with the selected site and organization"
+    nickname_cannot_be_empty: "The endpoint name cannot be empty"
+    nickname_not_saved: "The endpoint name could not be saved, reason: %s"
 
   inventory:
     hardware:
@@ -424,6 +428,7 @@ en:
     title: "Antivirus"
     description: "This is the information about antivirus reported by the agents that have contacted the server."
     hostname: "Hostname"
+    nickname: "Name"
     os: "OS"
     enabled: "Antivirus Enabled?"
     updated: "Antivirus Updated?"
@@ -557,6 +562,7 @@ en:
     description: "This is the information about security updates retrieved by the agents that have contacted the server"
     no_updates_info: "No security information was found for this query"
     hostname: "Hostname"
+    nickname: "Name"
     os: "OS"
     status: "Status"
     last_search: "Last Search"

@@ -42,7 +42,7 @@ func (suite *AgentsTestSuite) SetupTest() {
 			SetID(fmt.Sprintf("agent%d", i)).
 			SetOs("windows").
 			SetReleaseID(r.ID).
-			SetHostname(fmt.Sprintf("agent%d", i)).
+			SetNickname(fmt.Sprintf("agent%d", i)).
 			SetLastContact(time.Now()).
 			SetIP(fmt.Sprintf("192.168.1.%d", i)).
 			SetUpdateTaskExecution(time.Now()).
@@ -139,17 +139,17 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID)
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID)
@@ -157,7 +157,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "os"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -165,7 +165,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "os"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -173,7 +173,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -181,7 +181,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "version"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -189,7 +189,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "last_contact"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -197,7 +197,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "last_contact"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID)
@@ -205,7 +205,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "status"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	assert.Equal(suite.T(), "agent3", items[0].ID)
 	assert.Equal(suite.T(), "agent5", items[1].ID)
@@ -215,7 +215,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "status"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	assert.Equal(suite.T(), "agent1", items[0].ID)
 	assert.Equal(suite.T(), "agent0", items[1].ID)
@@ -225,7 +225,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "ip_address"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.ID)
@@ -233,7 +233,7 @@ func (suite *AgentsTestSuite) TestGetAgentsByPage() {
 
 	suite.p.SortBy = "ip_address"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Hostname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
+	items, err = suite.model.GetAgentsByPage(suite.p, filters.AgentFilter{Nickname: "agent"}, excludeWaitingForAdmissionAgents, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.ID)
@@ -245,7 +245,7 @@ func (suite *AgentsTestSuite) TestGetAgentById() {
 
 	item, err := suite.model.GetAgentById("agent1", &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agent by id")
-	assert.Equal(suite.T(), "agent1", item.Hostname)
+	assert.Equal(suite.T(), "agent1", item.Nickname)
 
 	_, err = suite.model.GetAgentById("agent7", &partials.CommonInfo{})
 	assert.Error(suite.T(), err, "should not get agent by id")
@@ -257,11 +257,11 @@ func (suite *AgentsTestSuite) TestCountAllAgents() {
 	assert.NoError(suite.T(), err, "should count all agents")
 	assert.Equal(suite.T(), 6, count, "should count 6 agents")
 
-	count, err = suite.model.CountAllAgents(filters.AgentFilter{Hostname: "agent"}, true, &partials.CommonInfo{})
+	count, err = suite.model.CountAllAgents(filters.AgentFilter{Nickname: "agent"}, true, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all agents")
 	assert.Equal(suite.T(), 6, count, "should count 6 agents")
 
-	count, err = suite.model.CountAllAgents(filters.AgentFilter{Hostname: "agent"}, false, &partials.CommonInfo{})
+	count, err = suite.model.CountAllAgents(filters.AgentFilter{Nickname: "agent"}, false, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all agents")
 	assert.Equal(suite.T(), 7, count, "should count 7 agents")
 
@@ -435,7 +435,7 @@ func (suite *AgentsTestSuite) TestCountAllUpdateAgents() {
 	assert.NoError(suite.T(), err, "should count all update agents")
 	assert.Equal(suite.T(), 6, count, "should count 6 agents")
 
-	count, err = suite.model.CountAllUpdateAgents(filters.UpdateAgentsFilter{Hostname: "agent0"}, &partials.CommonInfo{})
+	count, err = suite.model.CountAllUpdateAgents(filters.UpdateAgentsFilter{Nickname: "agent0"}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should count all update agents")
 	assert.Equal(suite.T(), 1, count, "should count 1 agents")
 
@@ -469,10 +469,10 @@ func (suite *AgentsTestSuite) TestGetAllUpdateAgents() {
 	assert.NoError(suite.T(), err, "should get all update agents")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 }
@@ -490,28 +490,28 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	items, err := suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
-		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Hostname)
+		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
-	suite.p.SortBy = "hostname"
+	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "desc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
-		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Hostname)
+		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
 	}
 
 	suite.p.SortBy = "version"
@@ -520,10 +520,10 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
@@ -533,10 +533,10 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
@@ -544,21 +544,21 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	suite.p.SortOrder = "asc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
-	assert.Equal(suite.T(), "agent3", items[0].Hostname)
-	assert.Equal(suite.T(), "agent5", items[1].Hostname)
-	assert.Equal(suite.T(), "agent0", items[2].Hostname)
-	assert.Equal(suite.T(), "agent2", items[3].Hostname)
-	assert.Equal(suite.T(), "agent4", items[4].Hostname)
+	assert.Equal(suite.T(), "agent3", items[0].Nickname)
+	assert.Equal(suite.T(), "agent5", items[1].Nickname)
+	assert.Equal(suite.T(), "agent0", items[2].Nickname)
+	assert.Equal(suite.T(), "agent2", items[3].Nickname)
+	assert.Equal(suite.T(), "agent4", items[4].Nickname)
 
 	suite.p.SortBy = "taskStatus"
 	suite.p.SortOrder = "desc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
-	assert.Equal(suite.T(), "agent0", items[0].Hostname)
-	assert.Equal(suite.T(), "agent2", items[1].Hostname)
-	assert.Equal(suite.T(), "agent4", items[2].Hostname)
-	assert.Equal(suite.T(), "agent6", items[3].Hostname)
-	assert.Equal(suite.T(), "agent3", items[4].Hostname)
+	assert.Equal(suite.T(), "agent0", items[0].Nickname)
+	assert.Equal(suite.T(), "agent2", items[1].Nickname)
+	assert.Equal(suite.T(), "agent4", items[2].Nickname)
+	assert.Equal(suite.T(), "agent6", items[3].Nickname)
+	assert.Equal(suite.T(), "agent3", items[4].Nickname)
 
 	suite.p.SortBy = "taskDescription"
 	suite.p.SortOrder = "asc"
@@ -566,10 +566,10 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
@@ -579,10 +579,10 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
@@ -592,10 +592,10 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
 		if i < 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
 		}
 		if i > 1 {
-			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Hostname)
+			assert.Equal(suite.T(), fmt.Sprintf("agent%d", i+1), item.Nickname)
 		}
 	}
 
@@ -604,28 +604,28 @@ func (suite *AgentsTestSuite) TestGetUpdateAgentsByPage() {
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
 	for i, item := range items {
-		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Hostname)
+		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
 	}
 
 	suite.p.SortBy = "taskResult"
 	suite.p.SortOrder = "asc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
-	assert.Equal(suite.T(), "agent3", items[0].Hostname)
-	assert.Equal(suite.T(), "agent5", items[1].Hostname)
-	assert.Equal(suite.T(), "agent0", items[2].Hostname)
-	assert.Equal(suite.T(), "agent2", items[3].Hostname)
-	assert.Equal(suite.T(), "agent4", items[4].Hostname)
+	assert.Equal(suite.T(), "agent3", items[0].Nickname)
+	assert.Equal(suite.T(), "agent5", items[1].Nickname)
+	assert.Equal(suite.T(), "agent0", items[2].Nickname)
+	assert.Equal(suite.T(), "agent2", items[3].Nickname)
+	assert.Equal(suite.T(), "agent4", items[4].Nickname)
 
 	suite.p.SortBy = "taskResult"
 	suite.p.SortOrder = "desc"
 	items, err = suite.model.GetUpdateAgentsByPage(suite.p, filters.UpdateAgentsFilter{}, &partials.CommonInfo{})
 	assert.NoError(suite.T(), err, "should get agents by page")
-	assert.Equal(suite.T(), "agent0", items[0].Hostname)
-	assert.Equal(suite.T(), "agent2", items[1].Hostname)
-	assert.Equal(suite.T(), "agent4", items[2].Hostname)
-	assert.Equal(suite.T(), "agent6", items[3].Hostname)
-	assert.Equal(suite.T(), "agent3", items[4].Hostname)
+	assert.Equal(suite.T(), "agent0", items[0].Nickname)
+	assert.Equal(suite.T(), "agent2", items[1].Nickname)
+	assert.Equal(suite.T(), "agent4", items[2].Nickname)
+	assert.Equal(suite.T(), "agent6", items[3].Nickname)
+	assert.Equal(suite.T(), "agent3", items[4].Nickname)
 
 }
 

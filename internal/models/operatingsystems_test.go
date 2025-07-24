@@ -28,7 +28,7 @@ func (suite *OperatingSystemsTestSuite) SetupTest() {
 		_, err := client.Agent.Create().
 			SetID(fmt.Sprintf("agent%d", i)).
 			SetOs("windows").
-			SetHostname(fmt.Sprintf("agent%d", i)).
+			SetNickname(fmt.Sprintf("agent%d", i)).
 			SetAgentStatus(agent.AgentStatusEnabled).
 			Save(context.Background())
 		assert.NoError(suite.T(), err, "should create agent")

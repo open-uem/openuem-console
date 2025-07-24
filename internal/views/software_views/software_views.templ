@@ -80,8 +80,8 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 											hx-target="#main"
 											hx-swap="outerHTML"
 											_="on htmx:configRequest
-													set event.detail.parameters['sortBy'] to 'hostname'
-												end"
+												set event.detail.parameters['sortBy'] to 'nickname'
+											end"
 										>
 											{ strconv.Itoa(app.Count) }
 										</span>

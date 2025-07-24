@@ -43,7 +43,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
 					@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML", func() bool {
-						return f.Hostname == "" && len(f.AgentOSVersions) == 0 &&
+						return f.Nickname == "" && len(f.AgentOSVersions) == 0 &&
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
 							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0
 					})
@@ -76,9 +76,9 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	<tr>
 		<th>
 			<div class="flex gap-1 items-center">
-				<span>{ i18n.T(ctx, "agents.hostname") }</span>
-				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
-				@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
+				<span>{ i18n.T(ctx, "agents.nickname") }</span>
+				@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+				@filters.FilterByText(c, p, "Nickname", f.Nickname, "agents.filter_by_nickname", "#main", "outerHTML")
 			</div>
 		</th>
 		<th>
@@ -143,7 +143,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 				hx-swap="outerHTML"
 			>
 				<div class="flex items-center gap-2">
-					<span class="underline">{ agent.Hostname }</span>
+					<span class="underline">{ agent.Nickname }</span>
 					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
 						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
 							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>

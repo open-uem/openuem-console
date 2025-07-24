@@ -58,10 +58,10 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
-			f.Hostname = u.Query().Get("filterByHostname")
+			f.Nickname = u.Query().Get("filterByNickname")
 		}
 	} else {
-		f.Hostname = c.FormValue("filterByHostname")
+		f.Nickname = c.FormValue("filterByNickname")
 	}
 
 	filteredAgentStatusOptions := []string{}

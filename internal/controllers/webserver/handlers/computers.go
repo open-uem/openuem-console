@@ -433,10 +433,10 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
-			f.Hostname = u.Query().Get("filterByHostname")
+			f.Nickname = u.Query().Get("filterByNickname")
 		}
 	} else {
-		f.Hostname = c.FormValue("filterByHostname")
+		f.Nickname = c.FormValue("filterByNickname")
 	}
 
 	if comesFromDialog {
