@@ -83,6 +83,7 @@ es:
   Required: "Requerido"
   Reset: "Reestablecer"
   Revoke: "Revocar"
+  RustDesk Settings: "Conf. RustDesk"
   Save: "Guardar"
   Schedule: "Programar"
   Security: "Seguridad"
@@ -169,8 +170,8 @@ es:
     vnc: "Serv. VNC"
     no_vnc: "Ninguno"
     vnc_title: "Asistencia remota"
-    vnc_description: "Inicie una sesión de asistencia remota. Si la sesión puede establecerse, se mostrará un PIN al usuario a menos que haya desactivado esta opción desde la configuración general. Utilice el PIN para autenticar su sesión."
-    vnc_new_tab: "Abrir la sesión en una nueva pestaña"
+    vnc_description: "Si el equipo del usuario remoto cuenta con un servidor VNC (Windows o Linux con X11) o Linux con Gnome Remote Desktop (RDP para Wayland) y siempre que el equipo remoto y el equipo desde el que se ofrece la asistencia tengan conectividad (LAN o VPN) puede abrir una sesión de asistencia desde OpenUEM"
+    vnc_new_tab: "Abrir la sesión VNC/RDP en una nueva pestaña"
     vnc_pin_not_generated: "No se pudo generar un PIN para la conexión VNC"
     vnc_could_not_marshal: "No se pudo preparar la petición de sesión VNC"
     no_supported_vnc: "No está disponible la asistencia remota debido a una de las siguientes razones. La asistencia remota ha sido inhabilitada de forma global, el equipo no está en la red local, no hay una dirección IP asignada al agente, ningún usuario ha iniciado sesión o no está instalado un servidor VNC soportado"
@@ -309,6 +310,7 @@ es:
     association_success: "El equipo ha sido asociado con el sitio y la organización seleccionados"
     nickname_cannot_be_empty: "El nombre del equipo no puede estar vacío"
     nickname_not_saved: "No se pudo guardar el nombre del equipo, razón: %s"
+    rustdesk: "Iniciar sesión con RustDesk"
 
   inventory:
     hardware:
@@ -1246,6 +1248,7 @@ es:
     filter_by_default_status: Filtrar por estado predeterminado
     no_tenants: No se han encontrado organizaciones para esta consulta
     could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
+    could_not_get_rustdesk_settings: "No se pudo obtener la configuracón de RustDesk de esta organización"
 
   sites:
     title: "Sitio"
@@ -1297,6 +1300,24 @@ es:
     could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
+
+  rustdesk:
+    settings_title: "RustDesk"
+    settings_description: "OpenUEM puede usar RustDesk para abrir sesiones de asistencia remota. RustDesk se puede instalar en los endpoints mediante las opciones de implementación de OpenUEM. Si utiliza su propio servidor de ID o servidor de retransmisión, puede introducir aquí el nombre de host o la dirección IP, y la clave utilizada para cifrar las comunicaciones. Si utiliza RustDesk Pro, también puede introducir el servidor API. Si no se configura aquí, se utilizarán los servidores públicos de RustDesk."
+    settings_rendezvous_server_title: "ID Server"
+    settings_rendezvous_server_description: "La dirección IP o el nombre de host de su servidor de identificación RustDesk (servidor hbbs)"
+    settings_relay_server_title: "Relay Server"
+    settings_relay_server_description: "La dirección IP o el nombre de host de su servidor de retransmisión RustDesk (servidor hbbr)"
+    settings_key_title: "Clave"
+    settings_key_description: "La clave pública utilizada para cifrar las comunicaciones (contenido del archivo id_ed25519.pub)"
+    settings_api_server_title: "API Server"
+    settings_api_server_description: "La dirección IP o el nombre de host de su servidor API de RustDesk (RustDesk Pro)"
+    settings_save: "Guardar configuración"
+    key_must_be_set: "La clave debe configurarse si se ha definido un servidor"
+    settings_not_saved: "No se pudieron guardar las configuraciones de RustDesk, razón: %"
+    settings_saved: "Se han guardado la configuración de RustDesk"
+    remote_description: "Si RustDesk está instalado tanto en el equipo remoto como en el equipo desde el que se brinda soporte, y si el protocolo rustdesk se ha registrado en el equipo del técnico, se puede iniciar una sesión de RustDesk independientemente de la ubicación de ambos"
+
   countries:
     Australia: "Australia"
     Austria: "Austria"

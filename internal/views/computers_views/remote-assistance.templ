@@ -29,19 +29,32 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.vnc_title") }</h3>
 						</div>
 						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.vnc_description") }</p>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "rustdesk.remote_description") }</p>
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
 					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) && agent.RemoteAssistance {
-						<div id="vnc">
-							<a
-								class="flex gap-2 items-center uk-text-small"
-								target="_blank"
-								rel="noopener"
-								href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
-							>
-								<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
-							</a>
+						<div class="flex flex-col gap-4">
+							<div id="vnc">
+								<a
+									class="flex gap-2 items-center uk-text-small"
+									target="_blank"
+									rel="noopener"
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
+								>
+									<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
+								</a>
+							</div>
+							<div id="rustdesk">
+								<a
+									class="flex gap-2 items-center uk-text-small"
+									target="_blank"
+									rel="noopener"
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
+								>
+									<i class="si si-rustdesk si--color text-xl uk-cloak"></i>{ i18n.T(ctx, "agents.rustdesk") }
+								</a>
+							</div>
 						</div>
 					} else {
 						if !agent.CertificateReady {

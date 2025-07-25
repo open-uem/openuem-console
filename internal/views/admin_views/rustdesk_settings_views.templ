@@ -1,0 +1,90 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ RustDeskSettings(c echo.Context, settings *ent.RustDesk, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "RustDesk Settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("smtp", agentsExists, serversExists, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="uk-card-title flex gap-2 items-center">
+							<i class="si si-rustdesk si--color text-xl uk-cloak"></i>
+							{ i18n.T(ctx, "rustdesk.settings_title") }
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "rustdesk.settings_description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form class="flex flex-col mt-6 gap-4 w-1/2">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_rendezvous_server_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_rendezvous_server_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="rustdesk-rendezvous-server" value={ settings.CustomRendezvousServer } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_relay_server_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_relay_server_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="rustdesk-relay-server" value={ settings.RelayServer } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_key_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_key_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="rustdesk-key" value={ settings.Key } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="rustdesk-api-server" value={ settings.APIServer } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+							</table>
+							<div class="flex flex-row-reverse">
+								<button
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									type="submit"
+									class="uk-button uk-button-primary"
+								>
+									{ i18n.T(ctx, "rustdesk.settings_save") }
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ RustDeskSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}

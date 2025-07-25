@@ -145,6 +145,22 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 			</a>
 		</li>
 		if commonInfo.TenantID != "-1" {
+			<li class={ templ.KV("uk-active", active == "rustdesk") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-rustdesk-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-rustdesk-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "RustDesk Settings") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID != "-1" {
 			<li class={ templ.KV("uk-active", active == "update-agents") }>
 				<a
 					if agentsExists {

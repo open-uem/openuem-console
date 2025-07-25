@@ -81,6 +81,7 @@ en:
   Required: "Required"
   Reset: "Reset"
   Revoke: "Revoke"
+  RustDesk Settings: "RustDesk Settings"
   Save: "Save"
   Schedule: "Schedule"
   Security: "Security"
@@ -168,8 +169,8 @@ en:
     vnc: "VNC server"
     no_vnc: "None"
     vnc_title: "Remote Assistance"
-    vnc_description: "Initiate a remote assistance session. If the session can be established a PIN will be shown to the user unless you've disabled that option from General Settings. Use that PIN as the password for the connection"
-    vnc_new_tab: "Open session in a new tab"
+    vnc_description: "If the remote user's computer has a VNC server (Windows or Linux with X11) or Linux with Gnome Remote Desktop (RDP for Wayland) and as long as the remote computer and the computer from which support is provided have connectivity (LAN or VPN) you can open a support session from OpenUEM"
+    vnc_new_tab: "Open VNC/RDP session in a new tab"
     vnc_pin_not_generated: "Could not generate PIN for VNC connection"
     vnc_could_not_marshal: "The VNC session request could not be prepared"
     no_supported_vnc: "Remote Assistance is not available due to one of the following reasons. Remote Assistance has been disabled globally, agent is not in the local network, IP address is not assigned to the agent, no user is logged in or no supported VNC server is installed"
@@ -310,6 +311,7 @@ en:
     association_success: "The endpoint has been associated with the selected site and organization"
     nickname_cannot_be_empty: "The endpoint name cannot be empty"
     nickname_not_saved: "The endpoint name could not be saved, reason: %s"
+    rustdesk: "Start RustDesk session"
 
   inventory:
     hardware:
@@ -1255,6 +1257,8 @@ en:
     filter_by_default_status: Filter by default status
     no_tenants: No tenants have been found for this query
     could_not_get_agents: "Could not get agents associated with this organization"
+    could_not_get_rustdesk_settings: "Could not get RustDesk settings associated with this organization"
+
   sites:
     title: "Sites"
     description: "OpenUEM supports multi-tenancy so you can manage different organizations. An organization can have one or more sites where endpoints are grouped"
@@ -1305,6 +1309,24 @@ en:
     could_not_convert_site_to_int: "The site ID: %s could not be converted to an int"
     choose_site: "Choose a site..."
     domain: "Domain"
+
+  rustdesk:
+    settings_title: "RustDesk"
+    settings_description: "OpenUEM can use RustDesk to open remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options. If you run your own ID server or Relay server, you can introduce here the hostname or IP address, and the key used to encrypt communications. If you have RustDesk Pro, you can also introduce the API server. If no settings are added here, the public RustDesk servers will be used"
+    settings_rendezvous_server_title: "ID Server"
+    settings_rendezvous_server_description: "The IP address or hostname of your RustDesk ID Server (hbbs server)"
+    settings_relay_server_title: "Relay Server"
+    settings_relay_server_description: "The IP address or hostname of your RustDesk Relay Server (hbbr server)"
+    settings_key_title: "Key"
+    settings_key_description: "The public key used to encrypt communications (content of file id_ed25519.pub)"
+    settings_api_server_title: "API Server"
+    settings_api_server_description: "The IP address or hostname of your RustDesk API Server (RustDesk Pro)"
+    settings_save: "Save settings"
+    key_must_be_set: "The key must be set if a server has been defined"
+    settings_not_saved: "RustDesk settings could not be saved, reason: %"
+    settings_saved: "RustDesk settings have been saved"
+    remote_description: "If RustDesk is installed on both the remote computer and the computer from which support is provided, and if the rustdesk protocol has been registered on the technician's computer, a RustDesk session can be started regardless of the location of both"
+
   countries:
     Australia: "Australia"
     Austria: "Austria"

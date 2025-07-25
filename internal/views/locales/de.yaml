@@ -81,6 +81,7 @@ de:
   Required: "Erforderlich"
   Reset: "Zurücksetzen"
   Revoke: "Widerrufen"
+  RustDesk Settings: "RustDesk-Einstellungen"
   Save: "Speichern"
   Schedule: "Zeitplan"
   Security: "Sicherheit"
@@ -167,8 +168,8 @@ de:
     vnc: "VNC-Server"
     no_vnc: "Keine"
     vnc_title: "Fernunterstützung"
-    vnc_description: "Eine Fernunterstützungssitzung starten. Wenn die Sitzung hergestellt werden kann, wird dem Benutzer eine PIN angezeigt, es sei denn, Sie haben diese Option in den allgemeinen Einstellungen deaktiviert. Verwenden Sie diese PIN als Passwort für die Verbindung"
-    vnc_new_tab: "Sitzung in neuem Tab öffnen"
+    vnc_description: "Wenn der Computer des Remote-Benutzers über einen VNC-Server (Windows oder Linux mit X11) oder Linux mit Gnome Remote Desktop (RDP für Wayland) verfügt und der Remote-Computer und der Computer, von dem aus Support bereitgestellt wird, über eine Verbindung (LAN oder VPN) verfügen, können Sie eine Support-Sitzung von OpenUEM aus öffnen."
+    vnc_new_tab: "VNC/RDP-Sitzung in neuem Tab öffnen"
     vnc_pin_not_generated: "PIN für VNC-Verbindung konnte nicht generiert werden"
     vnc_could_not_marshal: "Die VNC-Sitzungsanfrage konnte nicht vorbereitet werden"
     no_supported_vnc: "Fernunterstützung ist nicht verfügbar aufgrund eines der folgenden Gründe: Fernunterstützung wurde global deaktiviert, Agent ist nicht im lokalen Netzwerk, IP-Adresse ist dem Agent nicht zugewiesen, kein Benutzer ist angemeldet oder kein unterstützter VNC-Server ist installiert"
@@ -306,6 +307,7 @@ de:
     could_not_get_tenant: "Der Standort ist nicht mit einer Organisation verknüpft"
     could_not_associate: "Endpunkt konnte nicht mit dem ausgewählten Standort und der Organisation verknüpft werden, Grund: %s"
     association_success: "Der Endpunkt wurde mit dem ausgewählten Standort und der Organisation verknüpft"
+    rustdesk: "RustDesk-Sitzung starten"
 
   inventory:
     hardware:
@@ -1249,6 +1251,7 @@ de:
     filter_by_default_status: Nach Standard-Status filtern
     no_tenants: Für diese Abfrage wurden keine Mandanten gefunden
     could_not_get_agents: "Agents, die mit dieser Organisation verknüpft sind, konnten nicht abgerufen werden"
+    could_not_get_rustdesk_settings: "Die mit dieser Organisation verknüpften RustDesk-Einstellungen konnten nicht abgerufen werden"
   sites:
     title: "Standorte"
     description: "OpenUEM unterstützt Multi-Tenancy, sodass Sie verschiedene Organisationen verwalten können. Eine Organisation kann einen oder mehrere Standorte haben, in denen Endgeräte gruppiert sind"
@@ -1299,6 +1302,24 @@ de:
     could_not_convert_site_to_int: "Die Standort-ID: %s konnte nicht in eine Ganzzahl umgewandelt werden"
     choose_site: "Standort wählen..."
     domain: "Domain"
+
+  rustdesk:
+    settings_title: "RustDesk"
+    settings_description: "OpenUEM kann RustDesk zum Öffnen von Remote-Assistance-Sitzungen verwenden. RustDesk kann mithilfe der OpenUEM-Bereitstellungsoptionen auf den Endpunkten installiert werden. Wenn Sie einen eigenen ID-Server oder Relay-Server betreiben, können Sie hier den Hostnamen oder die IP-Adresse sowie den Schlüssel zur Verschlüsselung der Kommunikation angeben. Wenn Sie RustDesk Pro verwenden, können Sie auch den API-Server angeben. Wenn hier keine Einstellungen vorgenommen werden, werden die öffentlichen RustDesk-Server verwendet."
+    settings_rendezvous_server_title: "ID Server"
+    settings_rendezvous_server_description: "Die IP-Adresse oder der Hostname Ihres RustDesk-ID-Servers (hbbs-Server)"
+    settings_relay_server_title: "Relay Server"
+    settings_relay_server_description: "Die IP-Adresse oder der Hostname Ihres RustDesk Relay Servers (hbbr-Server)"
+    settings_key_title: "Schlüssel"
+    settings_key_description: "Der öffentliche Schlüssel, der zur Verschlüsselung der Kommunikation verwendet wird (Inhalt der Datei id_ed25519.pub)"
+    settings_api_server_title: "API Server"
+    settings_api_server_description: "Die IP-Adresse oder der Hostname Ihres RustDesk API-Servers (RustDesk Pro)"
+    settings_save: "Einstellungen speichern"
+    key_must_be_set: "Der Schlüssel muss gesetzt werden, wenn ein Server definiert wurde"
+    settings_not_saved: "RustDesk-Einstellungen konnten nicht gespeichert werden, Grund: %"
+    settings_saved: "RustDesk-Einstellungen wurden gespeichert"
+    remote_description: "Wenn RustDesk sowohl auf dem Remote-Computer als auch auf dem Computer, von dem aus Support geleistet wird, installiert ist und das RustDesk-Protokoll auf dem Computer des Technikers registriert wurde, kann eine RustDesk-Sitzung unabhängig vom Standort beider Computer gestartet werden."
+
   countries:
     Australia: "Australien"
     Austria: "Österreich"

@@ -131,6 +131,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/tenant/:tenant/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/admin/metadata", h.OrgMetadataManager, h.IsAuthenticated)
+	e.GET("/tenant/:tenant/admin/rustdesk", h.RustDeskSettings, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/admin/rustdesk", h.RustDeskSettings, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin/smtp", h.SMTPSettings, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin/smtp/test", h.TestSMTPSettings, h.IsAuthenticated)

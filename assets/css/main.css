@@ -9443,10 +9443,6 @@ th.uk-text-break, td.uk-text-break {
   bottom: 0px;
 }
 
-.-left-5 {
-  left: -1.25rem;
-}
-
 .left-0 {
   left: 0px;
 }
@@ -9818,6 +9814,10 @@ th.uk-text-break, td.uk-text-break {
   -webkit-user-select: all;
      -moz-user-select: all;
           user-select: all;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .flex-col {
@@ -10237,6 +10237,11 @@ th.uk-text-break, td.uk-text-break {
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .text-xs {
