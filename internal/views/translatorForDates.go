@@ -2,6 +2,7 @@ package views
 
 import (
 	"github.com/gohugoio/locales"
+	"github.com/gohugoio/locales/de"
 	"github.com/gohugoio/locales/en"
 	"github.com/gohugoio/locales/es"
 	"github.com/invopop/ctxi18n/i18n"
@@ -16,6 +17,8 @@ func GetTranslatorForDates(c echo.Context) locales.Translator {
 	switch i18nCode {
 	case "es":
 		l = es.New()
+	case "de":
+		l = de.New()
 	default:
 		l = en.New()
 	}
