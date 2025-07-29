@@ -236,6 +236,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.DELETE("/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
 	e.POST("/computers/:uuid/sites", h.GetDropdownSites, h.IsAuthenticated)
 	e.POST("/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
+	e.POST("/computers/:uuid/startrustdesk", h.RustDeskStart, h.IsAuthenticated)
+	e.POST("/computers/:uuid/stoprustdesk", h.RustDeskStop, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)

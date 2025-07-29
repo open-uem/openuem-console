@@ -10,7 +10,7 @@ import (
 
 var connectVNCHandle = templ.NewOnceHandle()
 
-templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo, errMessage string) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -21,7 +21,11 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
 				<div id="success" class="hidden"></div>
-				<div id="error" class="hidden"></div>
+				if errMessage != "" {
+					@partials.ErrorMessage(errMessage, true)
+				} else {
+					<div id="error" class="hidden"></div>
+				}
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<div class="flex items-center gap-2">
@@ -33,8 +37,8 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) && agent.RemoteAssistance {
-						<div class="flex flex-col gap-4">
+					<div class="flex flex-col gap-4">
+						if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) && agent.RemoteAssistance {
 							<div id="vnc">
 								<a
 									class="flex gap-2 items-center uk-text-small"
@@ -45,30 +49,88 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 									<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
 								</a>
 							</div>
-							<div id="rustdesk">
-								<a
-									class="flex gap-2 items-center uk-text-small"
-									target="_blank"
-									rel="noopener"
-									href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
-								>
-									<i class="si si-rustdesk si--color text-xl uk-cloak"></i>{ i18n.T(ctx, "agents.rustdesk") }
-								</a>
-							</div>
-						</div>
-					} else {
-						if !agent.CertificateReady {
-							<p class="uk-text-small uk-text-muted">
-								{ i18n.T(ctx, "agents.no_vnc_certificate") }
-							</p>
 						} else {
-							<p class="uk-text-small uk-text-muted">
-								{ i18n.T(ctx, "agents.no_supported_vnc") }
-							</p>
+							if !agent.CertificateReady {
+								<p class="uk-text-small uk-text-muted">
+									{ i18n.T(ctx, "agents.no_vnc_certificate") }
+								</p>
+							} else {
+								<p class="uk-text-small uk-text-muted">
+									{ i18n.T(ctx, "agents.no_supported_vnc") }
+								</p>
+							}
 						}
-					}
+						if agent.HasRustdesk {
+							@RustDeskInit(agent)
+						} else {
+							<div class="flex gap-2 items-center uk-text-small uk-text-muted">
+								<i id="rustdesk-icon" class="si si-rustdesk text-red-600 text-xl uk-cloak"></i>
+								{ i18n.T(ctx, "rustdesk.rustdesk_not_found") }
+							</div>
+						}
+					</div>
 				</div>
 			</div>
 		</div>
 	</main>
+}
+
+templ RustDeskInit(agent *ent.Agent) {
+	<div id="rustdesk">
+		<button
+			class="flex items-center gap-2 uk-text-small"
+			type="submit"
+			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/startrustdesk", agent.ID))) }
+			hx-push-url="false"
+			hx-target="#rustdesk"
+			hx-swap="outerHTML"
+			htmx-indicator="#rustdesk-start-spinner"
+			_="
+			on htmx:afterRequest remove .hidden from #rustdesk-icon
+			on click 
+				add .hidden to #rustdesk-icon									
+			end"
+		>
+			<i id="rustdesk-icon" class="si si-rustdesk si--color text-xl uk-cloak"></i>
+			<i id="rustdesk-start-spinner" class="si si-rustdesk si--color animate-spin htmx-indicator text-xl uk-cloak"></i>
+			{ i18n.T(ctx, "agents.rustdesk") }
+		</button>
+	</div>
+}
+
+templ RustDeskControl(agentID string, rustDeskID string, rustDeskPassword string, commonInfo *partials.CommonInfo) {
+	<div id="rustdesk" class="flex items-center gap-4">
+		<i id="rustdesk-icon" class="si si-rustdesk si--color text-xl uk-cloak"></i>
+		<i id="rustdesk-start-spinner" class="si si-rustdesk si--color animate-spin htmx-indicator text-xl uk-cloak"></i>
+		<a
+			if rustDeskPassword != "" {
+				href={ templ.SafeURL(fmt.Sprintf("rustdesk://connect/%s&password=%s", rustDeskID, rustDeskPassword)) }
+			} else {
+				href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", rustDeskID)) }
+			}
+		>
+			<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+		</a>
+		<button
+			class="flex items-center gap-2 uk-text-small"
+			type="submit"
+			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/stoprustdesk", agentID))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			htmx-indicator="#rustdesk-icon"
+			_="
+			on htmx:afterRequest remove .hidden from #rustdesk-start-spinner
+			on click 
+				add .hidden to #rustdesk-icon									
+			end"
+		>
+			<uk-icon hx-history="false" icon="monitor-stop" custom-class="text-red-600 h-6 w-6" uk-cloack></uk-icon>
+		</button>
+		if rustDeskPassword != "" {
+			<span class=" uk-text-small">{ i18n.T(ctx, "rustdesk.rustdesk_ready_with_password", rustDeskID, rustDeskPassword) }</span>
+		} else {
+			<span class=" uk-text-small">{ i18n.T(ctx, "rustdesk.rustdesk_ready", rustDeskID) }</span>
+		}
+	</div>
 }

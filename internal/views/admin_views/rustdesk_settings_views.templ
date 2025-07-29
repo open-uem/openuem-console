@@ -62,6 +62,33 @@ templ RustDeskSettings(c echo.Context, settings *ent.RustDesk, agentsExists, ser
 										<input class="uk-input" type="text" name="rustdesk-api-server" value={ settings.APIServer } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_direct_ip_access_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_direct_ip_access_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="rustdesk-direct-ip-access">
+											<option value="true" selected?={ settings.DirectIPAccess }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.DirectIPAccess }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_whitelist_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_whitelist_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="rustdesk-whitelist" value={ settings.Whitelist } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_permanent_password_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_permanent_password_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="rustdesk-password">
+											<option value="true" selected?={ settings.UsePermanentPassword }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UsePermanentPassword }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
 							</table>
 							<div class="flex flex-row-reverse">
 								<button

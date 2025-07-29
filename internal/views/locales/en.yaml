@@ -311,7 +311,7 @@ en:
     association_success: "The endpoint has been associated with the selected site and organization"
     nickname_cannot_be_empty: "The endpoint name cannot be empty"
     nickname_not_saved: "The endpoint name could not be saved, reason: %s"
-    rustdesk: "Start RustDesk session"
+    rustdesk: "Initiate a RustDesk session"
 
   inventory:
     hardware:
@@ -1312,7 +1312,7 @@ en:
 
   rustdesk:
     settings_title: "RustDesk"
-    settings_description: "OpenUEM can use RustDesk to open remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options. If you run your own ID server or Relay server, you can introduce here the hostname or IP address, and the key used to encrypt communications. If you have RustDesk Pro, you can also introduce the API server. If no settings are added here, the public RustDesk servers will be used"
+    settings_description: "OpenUEM can use RustDesk to open remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options. If you run your own ID server or Relay server, you can introduce here the hostname or IP address, and the key used to encrypt communications. If you have RustDesk Pro, you can also introduce the API server. If no server settings are added here, the public RustDesk servers will be used"
     settings_rendezvous_server_title: "ID Server"
     settings_rendezvous_server_description: "The IP address or hostname of your RustDesk ID Server (hbbs server)"
     settings_relay_server_title: "Relay Server"
@@ -1326,6 +1326,23 @@ en:
     settings_not_saved: "RustDesk settings could not be saved, reason: %"
     settings_saved: "RustDesk settings have been saved"
     remote_description: "If RustDesk is installed on both the remote computer and the computer from which support is provided, and if the rustdesk protocol has been registered on the technician's computer, a RustDesk session can be started regardless of the location of both"
+    could_not_prepare_request: "Could not prepare request to config and start RustDesk in the remote endpoint, reason: %v"
+    could_not_send_request: "Could not send request to config and start RustDesk in the remote endpoint, reason: %v"
+    could_not_decode_response: "Could not unmarshall endpoint response"
+    remote_error: "Agent had an error launching RustDesk in the remote machine, reason: %v"
+    rustdesk_not_found: "RustDesk is not available on the endpoint"
+    rustdesk_ready: "Remote RustDesk client is ready. Click the play icon to open (protocol handler must be set on your OS) or the stop icon to close it. You can also open your RustDesk app and enter the ID %s"
+    rustdesk_ready_with_password: "Remote RustDesk client is ready. Click the play icon to open (protocol handler must be set on your OS) or the stop icon to close it. You can also open your RustDesk app and enter the ID %s and password %s"
+    remote_stop_error: "Agent could not stop RestDusk in the remote endpoint, reason: %v"
+    settings_direct_ip_access_title: "Direct IP Access"
+    settings_direct_ip_access_description: "Enable direct IP P2P access. No server will be used, suitable for LAN"
+    settings_whitelist_title: "Whitelist"
+    settings_whitelist_description: "Comma-separated list of IPs allowed to connect"
+    settings_permanent_password_title: "Permanent password"
+    settings_permanent_password_description: "Use a random, permanent password when connecting to remote end"
+    could_not_parse_direct_ip: "Could not parse Direct IP access"
+    could_not_parse_permanent: "Could not parse permanent password"
+    could_not_generate_random_password: "Could not generate a random password"
 
   countries:
     Australia: "Australia"

@@ -27,8 +27,8 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.43.0
-	github.com/open-uem/ent v0.0.0-20250725082042-5318d5405941
-	github.com/open-uem/nats v0.0.0-20250725080333-0f01c26a2e80
+	github.com/open-uem/ent v0.0.0-20250728111942-2cd947553b50
+	github.com/open-uem/nats v0.0.0-20250728120354-5e367059539d
 	github.com/open-uem/utils v0.0.0-20250702121339-316c5b599cd3
 	github.com/open-uem/wingetcfg v0.0.0-20250723054912-02f24a659219
 	github.com/pkg/sftp v1.13.9
@@ -88,6 +88,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sethvargo/go-password v0.3.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect

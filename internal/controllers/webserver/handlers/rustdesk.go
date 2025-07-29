@@ -1,15 +1,117 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/sethvargo/go-password/password"
 )
+
+func (h *Handler) RustDeskStart(c echo.Context) error {
+	rustdeskSettings := &ent.RustDesk{}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	agentId := c.Param("uuid")
+
+	settings, err := h.Model.GetRustDeskSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_rustdesk_settings", err.Error()), true))
+	}
+
+	if len(settings) > 0 {
+		rustdeskSettings = settings[0]
+	}
+
+	rd := nats.RustDesk{
+		CustomRendezVousServer: rustdeskSettings.CustomRendezvousServer,
+		RelayServer:            rustdeskSettings.RelayServer,
+		Key:                    rustdeskSettings.Key,
+		APIServer:              rustdeskSettings.APIServer,
+		DirectIPAccess:         rustdeskSettings.DirectIPAccess,
+		Whitelist:              rustdeskSettings.Whitelist,
+	}
+
+	randomPassword := ""
+	if rustdeskSettings.UsePermanentPassword {
+		randomPassword, err = password.Generate(64, 10, 0, false, true)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_generate_random_password", err.Error()), true))
+		}
+		rd.PermanentPassword = randomPassword
+	}
+
+	data, err := json.Marshal(rd)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_prepare_request", err.Error()), true))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.rustdesk.start."+agentId, data, time.Duration(h.NATSTimeout)*time.Second)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_send_request", err.Error()), true))
+	}
+
+	result := nats.RustDeskResult{}
+	if err := json.Unmarshal(msg.Data, &result); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_decode_response", err.Error()), true))
+	}
+
+	if result.Error != "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.remote_error", result.Error), true))
+	}
+
+	return RenderView(c, computers_views.RustDeskControl(agentId, result.RustDeskID, randomPassword, commonInfo))
+}
+
+func (h *Handler) RustDeskStop(c echo.Context) error {
+	agentId := c.Param("uuid")
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+	p := partials.PaginationAndSort{}
+
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, err.Error()), commonInfo))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.rustdesk.stop."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, err.Error()), commonInfo))
+	}
+
+	result := nats.RustDeskResult{}
+	if err := json.Unmarshal(msg.Data, &result); err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, result.Error), commonInfo))
+	}
+
+	if result.Error != "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, result.Error), commonInfo))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, ""), commonInfo))
+}
 
 func (h *Handler) RustDeskSettings(c echo.Context) error {
 	var err error
@@ -33,12 +135,24 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 		key := c.FormValue("rustdesk-key")
 		apiServer := c.FormValue("rustdesk-api-server")
 
+		useDirectAccess, err := strconv.ParseBool(c.FormValue("rustdesk-direct-ip-access"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_parse_direct_ip"), true))
+		}
+
+		whitelist := c.FormValue("rustdesk-whitelist")
+
+		usePassword, err := strconv.ParseBool(c.FormValue("rustdesk-password"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_parse_permanent"), true))
+		}
+
 		if (rendezvousServer != "" || relayServer != "" || apiServer != "") && key == "" {
 			log.Println("key error")
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.key_must_be_set"), true))
 		}
 
-		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer); err != nil {
+		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, useDirectAccess, usePassword); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.settings_not_saved", err.Error()), true))
 		}
 
