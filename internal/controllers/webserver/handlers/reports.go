@@ -32,6 +32,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/reports_views"
 	"github.com/open-uem/utils"
+	"github.com/xuri/excelize/v2"
 )
 
 func (h *Handler) Reports(c echo.Context) error {
@@ -1723,4 +1724,724 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 	}
 
 	return rows, nil
+}
+
+func (h *Handler) GenerateComputerODSReport(c echo.Context) error {
+	fileName := uuid.NewString() + ".xlsx"
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.computer_id_empty"), true))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	hwInfo, err := h.Model.GetAgentComputerInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	osInfo, err := h.Model.GetAgentOSInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	monitorsInfo, err := h.Model.GetAgentMonitorsInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	ldInfo, err := h.Model.GetAgentLogicalDisksInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	sharesInfo, err := h.Model.GetAgentSharesInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	printersInfo, err := h.Model.GetAgentPrintersInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	nicInfo, err := h.Model.GetAgentNetworkAdaptersInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	swInfo, err := h.Model.GetAgentAppsInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	dstPath := filepath.Join(h.DownloadDir, fileName)
+
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	headerStyle, err := f.NewStyle(&excelize.Style{
+		Fill: excelize.Fill{Type: "pattern", Color: []string{"#007500"}, Pattern: 1},
+		Font: &excelize.Font{Color: "#FFFFFF"},
+	})
+	if err != nil {
+		return err
+	}
+
+	endpointNameStyle, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{Color: "#093bc4da", Size: 14, Bold: true},
+	})
+	if err != nil {
+		return err
+	}
+
+	tagStyle, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{Size: 12, Bold: true},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Hardware sheet
+	f.SetSheetName("Sheet1", "Hardware")
+	if hwInfo.Edges.Computer != nil {
+		if err := f.SetCellValue("Hardware", "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle("Hardware", "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue("Hardware", "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		if err := f.SetColWidth("Hardware", "B", "G", 30); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle("Hardware", "B4", "D4", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B4", i18n.T(c.Request().Context(), "inventory.hardware.manufacturer")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "C4", i18n.T(c.Request().Context(), "inventory.hardware.model")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "D4", i18n.T(c.Request().Context(), "inventory.hardware.serial")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B5", hwInfo.Edges.Computer.Manufacturer); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "C5", hwInfo.Edges.Computer.Model); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "D5", hwInfo.Edges.Computer.Serial); err != nil {
+			return err
+		}
+
+		if err := f.SetCellStyle("Hardware", "B7", "D7", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B7", i18n.T(c.Request().Context(), "inventory.hardware.processor")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "C7", i18n.T(c.Request().Context(), "inventory.hardware.architecture")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "D7", i18n.T(c.Request().Context(), "inventory.hardware.num_cores")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B8", hwInfo.Edges.Computer.Processor); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "C8", hwInfo.Edges.Computer.ProcessorArch); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "D8", hwInfo.Edges.Computer.ProcessorCores); err != nil {
+			return err
+		}
+
+		if err := f.SetCellStyle("Hardware", "B10", "B10", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B10", i18n.T(c.Request().Context(), "inventory.hardware.memory")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B11", fmt.Sprintf("%d MB", hwInfo.Edges.Computer.Memory)); err != nil {
+			return err
+		}
+
+		if err := f.SetCellStyle("Hardware", "B12", "G12", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "B12", i18n.T(c.Request().Context(), "inventory.hardware.slot")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "C12", i18n.T(c.Request().Context(), "inventory.hardware.size")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "D12", i18n.T(c.Request().Context(), "inventory.hardware.mem_type")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "E12", i18n.T(c.Request().Context(), "inventory.hardware.speed")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "F12", i18n.T(c.Request().Context(), "inventory.hardware.vendor")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue("Hardware", "G12", i18n.T(c.Request().Context(), "inventory.hardware.serial")); err != nil {
+			return err
+		}
+
+		for i, mSlot := range hwInfo.Edges.Memoryslots {
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("B%d", 13+i), mSlot.Slot); err != nil {
+				return err
+			}
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("C%d", 13+i), mSlot.Size); err != nil {
+				return err
+			}
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("D%d", 13+i), mSlot.Type); err != nil {
+				return err
+			}
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("E%d", 13+i), mSlot.Speed); err != nil {
+				return err
+			}
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("F%d", 13+i), mSlot.Manufacturer); err != nil {
+				return err
+			}
+			if err := f.SetCellValue("Hardware", fmt.Sprintf("G%d", 13+i), mSlot.SerialNumber); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	// Create OS sheet.
+	osSheetName := i18n.T(c.Request().Context(), "OS")
+	_, err = f.NewSheet(osSheetName)
+	if err != nil {
+		return err
+	}
+
+	if osInfo.Edges.Operatingsystem != nil {
+		if err := f.SetCellValue(osSheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(osSheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(osSheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		if err := f.SetColWidth(osSheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(osSheetName, "B5", "D5", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "B5", i18n.T(c.Request().Context(), "inventory.os.version")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "C5", i18n.T(c.Request().Context(), "inventory.os.desc")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "D5", i18n.T(c.Request().Context(), "inventory.os.architecture")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "B6", osInfo.Edges.Operatingsystem.Version); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "C6", osInfo.Edges.Operatingsystem.Description); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "D6", osInfo.Edges.Operatingsystem.Arch); err != nil {
+			return err
+		}
+
+		if err := f.SetCellStyle(osSheetName, "B8", "D8", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "B8", i18n.T(c.Request().Context(), "inventory.os.username")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "C8", i18n.T(c.Request().Context(), "inventory.os.installation")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "D8", i18n.T(c.Request().Context(), "inventory.os.last_bootup")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "B9", osInfo.Edges.Operatingsystem.Username); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "C9", commonInfo.Translator.FmtDateMedium(osInfo.Edges.Operatingsystem.InstallDate.Local())); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(osSheetName, "D9", commonInfo.Translator.FmtDateMedium(osInfo.Edges.Operatingsystem.LastBootupTime.Local())+" "+commonInfo.Translator.FmtTimeShort(osInfo.Edges.Operatingsystem.LastBootupTime.Local())); err != nil {
+			return err
+		}
+	}
+
+	// Create Monitors sheet.
+	if len(monitorsInfo.Edges.Monitors) > 0 {
+		monitorsSheetName := i18n.T(c.Request().Context(), "Monitors")
+		_, err = f.NewSheet(monitorsSheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(monitorsSheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(monitorsSheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(monitorsSheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(monitorsSheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, monitor := range monitorsInfo.Edges.Monitors {
+			if err := f.SetCellStyle(monitorsSheetName, fmt.Sprintf("B%d", 4+(index*6)), fmt.Sprintf("B%d", 4+(index*6)), tagStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("B%d", 4+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.report_title", strconv.Itoa(index+1))); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(monitorsSheetName, fmt.Sprintf("B%d", 5+(index*6)), fmt.Sprintf("D%d", 5+(index*6)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("B%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.manufacturer")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("C%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.model")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("D%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.serial")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("B%d", 6+(index*6)), monitor.Manufacturer); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("C%d", 6+(index*6)), monitor.Model); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("D%d", 6+(index*6)), monitor.Serial); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(monitorsSheetName, fmt.Sprintf("B%d", 7+(index*6)), fmt.Sprintf("C%d", 7+(index*6)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("B%d", 7+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.week_of_manufacture")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("C%d", 7+(index*6)), i18n.T(c.Request().Context(), "inventory.monitor.year_of_manufacture")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("B%d", 8+(index*6)), monitor.WeekOfManufacture); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(monitorsSheetName, fmt.Sprintf("C%d", 8+(index*6)), monitor.YearOfManufacture); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Create Logical disks sheet.
+	if len(ldInfo.Edges.Logicaldisks) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Logical Disks")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, ld := range ldInfo.Edges.Logicaldisks {
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 4+(index*6)), fmt.Sprintf("B%d", 4+(index*6)), tagStyle); err != nil {
+				return err
+			}
+			if hwInfo.Os == "windows" {
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.report_label", ld.Label)); err != nil {
+					return err
+				}
+				if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*6)), fmt.Sprintf("D%d", 5+(index*6)), headerStyle); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.volume_name")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.usage")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*6)), ld.VolumeName); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*6)), ld.Filesystem); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*6)), fmt.Sprintf("%d %%", ld.Usage)); err != nil {
+					return err
+				}
+			} else {
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.report_mount_point", ld.Label)); err != nil {
+					return err
+				}
+				if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*6)), fmt.Sprintf("D%d", 5+(index*6)), headerStyle); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem_type")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.usage")); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*6)), ld.VolumeName); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*6)), ld.Filesystem); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*6)), fmt.Sprintf("%d %%", ld.Usage)); err != nil {
+					return err
+				}
+
+			}
+
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 7+(index*6)), fmt.Sprintf("D%d", 7+(index*6)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 7+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.remaining_space")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 7+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.total_size")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 7+(index*6)), i18n.T(c.Request().Context(), "inventory.logical_disk.bitlocker")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 8+(index*6)), ld.RemainingSpaceInUnits); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 8+(index*6)), ld.SizeInUnits); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 8+(index*6)), ld.BitlockerStatus); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Shares info
+	if len(sharesInfo.Edges.Shares) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Shares")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, share := range sharesInfo.Edges.Shares {
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 4+(index*4)), fmt.Sprintf("B%d", 4+(index*4)), tagStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*4)), i18n.T(c.Request().Context(), "inventory.share.report_title", strconv.Itoa(index+1))); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*4)), fmt.Sprintf("D%d", 5+(index*4)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.share.name")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.share.descr")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.share.path")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*4)), share.Name); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*4)), share.Description); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*4)), share.Path); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Printers info
+	if len(printersInfo) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Printers")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "E", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, printer := range printersInfo {
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 4+(index*4)), fmt.Sprintf("B%d", 4+(index*4)), tagStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*4)), i18n.T(c.Request().Context(), "inventory.printers.report_title", printer.Name)); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*4)), fmt.Sprintf("E%d", 5+(index*4)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.printers.port")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.printers.is_default")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.printers.is_network_printer")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.printers.is_shared_printer")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*4)), printer.Port); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*4)), printer.IsDefault); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*4)), printer.IsNetwork); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", 6+(index*4)), printer.IsShared); err != nil {
+				return err
+			}
+
+		}
+	}
+
+	// NICs info
+	if len(nicInfo.Edges.Networkadapters) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Network Adapters")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, nic := range nicInfo.Edges.Networkadapters {
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 4+(index*8)), fmt.Sprintf("B%d", 4+(index*8)), tagStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*8)), nic.Name); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*8)), fmt.Sprintf("D%d", 5+(index*8)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.ip_address")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.mac_address")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.default_gateway")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*8)), nic.Addresses); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*8)), nic.MACAddress); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*8)), nic.DefaultGateway); err != nil {
+				return err
+			}
+
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 7+(index*8)), fmt.Sprintf("D%d", 7+(index*8)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 7+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.subnet")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 7+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.dhcp")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 7+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.speed")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 8+(index*8)), nic.Subnet); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 8+(index*8)), nic.DhcpEnabled); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 8+(index*8)), nic.Speed); err != nil {
+				return err
+			}
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 9+(index*8)), fmt.Sprintf("B%d", 9+(index*8)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 9+(index*8)), i18n.T(c.Request().Context(), "inventory.network_adapters.dns")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 10+(index*8)), nic.DNSServers); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Software info
+	if len(swInfo) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Software")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		for index, app := range swInfo {
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 4+(index*4)), fmt.Sprintf("B%d", 4+(index*4)), tagStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 4+(index*4)), app.Name); err != nil {
+				return err
+			}
+			if err := f.SetCellStyle(sheetName, fmt.Sprintf("B%d", 5+(index*4)), fmt.Sprintf("D%d", 5+(index*4)), headerStyle); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 5+(index*4)), i18n.T(c.Request().Context(), "Version")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 5+(index*4)), i18n.T(c.Request().Context(), "apps.publisher")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 5+(index*4)), i18n.T(c.Request().Context(), "inventory.apps.installation_date")); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*4)), app.Version); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*4)), app.Publisher); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*4)), app.InstallDate); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Save spreadsheet by the given path.
+	if err := f.SaveAs(dstPath); err != nil {
+		fmt.Println(err)
+	}
+
+	// Redirect to file
+	url := "/download/" + fileName
+	c.Response().Header().Set("HX-Redirect", url)
+
+	return c.String(http.StatusOK, "")
 }
