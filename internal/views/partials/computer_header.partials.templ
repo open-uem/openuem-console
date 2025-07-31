@@ -22,6 +22,7 @@ templ ComputerHeader(p PaginationAndSort, agent *ent.Agent, commonInfo *CommonIn
 			}
 		</div>
 		<div class="flex gap-4">
+			@CSVReportButton(p, string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/reports/computer/%s/ods", agent.ID)))), "reports.computer")
 			@PDFReportButton(p, string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/reports/computer/%s", agent.ID)))), "reports.computer")
 		</div>
 	</div>
