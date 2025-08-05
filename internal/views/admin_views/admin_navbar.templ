@@ -163,6 +163,22 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 			</li>
 		}
 		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "authentication") }>
+				<a
+					href="/admin/authentication"
+					hx-get="/admin/authentication"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-authentication-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-authentication-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "authentication.title") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID == "-1" {
 			<li class={ templ.KV("uk-active", active == "update-servers") }>
 				<a
 					if serversExists {

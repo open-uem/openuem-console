@@ -210,7 +210,7 @@ func WriteOIDCCookie(c echo.Context, name string, value string, secretKey string
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		Domain:   "andromeda.openuem.eu",
+		Domain:   "andromeda.openuem.eu", // TODO - hardcoded
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

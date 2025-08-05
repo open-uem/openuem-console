@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	entgo.io/ent v0.14.4
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/a-h/templ v0.3.857
+	github.com/a-h/templ v0.3.920
 	github.com/alexedwards/scs/pgxstore v0.0.0-20250417082927-ab20b3feb5e9
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/biter777/countries v1.7.5
@@ -28,7 +28,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.41.2
-	github.com/open-uem/ent v0.0.0-20250717101602-171352fe5e3d
+	github.com/open-uem/ent v0.0.0-20250805104609-869eead957b6
 	github.com/open-uem/nats v0.0.0-20250717101700-45922fb3baa4
 	github.com/open-uem/utils v0.0.0-20250702121339-316c5b599cd3
 	github.com/open-uem/wingetcfg v0.0.0-20250625110454-5d9433af7cf3
