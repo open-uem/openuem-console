@@ -99,38 +99,56 @@ templ RustDeskInit(agent *ent.Agent) {
 }
 
 templ RustDeskControl(agentID string, rustDeskID string, rustDeskPassword string, commonInfo *partials.CommonInfo) {
-	<div id="rustdesk" class="flex items-center gap-4">
-		<i id="rustdesk-icon" class="si si-rustdesk si--color text-xl uk-cloak"></i>
-		<i id="rustdesk-start-spinner" class="si si-rustdesk si--color animate-spin htmx-indicator text-xl uk-cloak"></i>
-		<a
+	<div id="rustdesk">
+		<div class="flex items-center gap-2 uk-text-small">
+			<i id="rustdesk-icon" class="si si-rustdesk text-green-600 text-xl uk-cloak"></i>
+			{ i18n.T(ctx, "rustdesk.rustdesk_ready") }
+		</div>
+		<div class="flex flex-col gap-4 mt-4">
+			<div class="flex gap-2 uk-text-small">
+				if rustDeskPassword != "" {
+					<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", rustDeskID, rustDeskPassword)) }>
+						<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "rustdesk.click_to_open") }
+					</a>
+				} else {
+					<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", rustDeskID)) }>
+						<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+						{ i18n.T(ctx, "rustdesk.click_to_open") }
+					</a>
+				}
+			</div>
+			<div class="flex gap-2 uk-text-small">
+				<uk-icon hx-history="false" icon="user-round" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span>{  i18n.T(ctx, "rustdesk.rustdesk_id") } </span>
+				<span id="rustdesk-id">{ rustDeskID }</span>
+				<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-id.textContent)"></uk-icon>
+			</div>
 			if rustDeskPassword != "" {
-				href={ templ.SafeURL(fmt.Sprintf("rustdesk://connect/%s&password=%s", rustDeskID, rustDeskPassword)) }
-			} else {
-				href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", rustDeskID)) }
+				<div class="flex gap-2 uk-text-small">
+					<uk-icon hx-history="false" icon="key-round" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					<span>{  i18n.T(ctx, "rustdesk.rustdesk_password") } </span>
+					<span id="rustdesk-password">{ rustDeskPassword }</span>
+					<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-password.textContent)"></uk-icon>
+				</div>
 			}
-		>
-			<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-		</a>
-		<button
-			class="flex items-center gap-2 uk-text-small"
-			type="submit"
-			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/stoprustdesk", agentID))) }
-			hx-push-url="false"
-			hx-target="#main"
-			hx-swap="outerHTML"
-			htmx-indicator="#rustdesk-icon"
-			_="
+			<button
+				class="flex items-center gap-2 uk-text-small"
+				type="submit"
+				hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/stoprustdesk", agentID))) }
+				hx-push-url="false"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				htmx-indicator="#rustdesk-icon"
+				_="
 			on htmx:afterRequest remove .hidden from #rustdesk-start-spinner
 			on click 
 				add .hidden to #rustdesk-icon									
 			end"
-		>
-			<uk-icon hx-history="false" icon="monitor-stop" custom-class="text-red-600 h-6 w-6" uk-cloack></uk-icon>
-		</button>
-		if rustDeskPassword != "" {
-			<span class=" uk-text-small">{ i18n.T(ctx, "rustdesk.rustdesk_ready_with_password", rustDeskID, rustDeskPassword) }</span>
-		} else {
-			<span class=" uk-text-small">{ i18n.T(ctx, "rustdesk.rustdesk_ready", rustDeskID) }</span>
-		}
+			>
+				<uk-icon hx-history="false" icon="monitor-stop" custom-class="text-red-600 h-6 w-6" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "rustdesk.click_to_close") }
+			</button>
+		</div>
 	</div>
 }

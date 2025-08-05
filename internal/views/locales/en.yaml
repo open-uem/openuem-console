@@ -1331,8 +1331,7 @@ en:
     could_not_decode_response: "Could not unmarshall endpoint response"
     remote_error: "Agent had an error launching RustDesk in the remote machine, reason: %v"
     rustdesk_not_found: "RustDesk is not available on the endpoint"
-    rustdesk_ready: "Remote RustDesk client is ready. Click the play icon to open (protocol handler must be set on your OS) or the stop icon to close it. You can also open your RustDesk app and enter the ID %s"
-    rustdesk_ready_with_password: "Remote RustDesk client is ready. Click the play icon to open (protocol handler must be set on your OS) or the stop icon to close it. You can also open your RustDesk app and enter the ID %s and password %s"
+    rustdesk_ready: "Remote RustDesk client is ready"
     remote_stop_error: "Agent could not stop RestDusk in the remote endpoint, reason: %v"
     settings_direct_ip_access_title: "Direct IP Access"
     settings_direct_ip_access_description: "Enable direct IP P2P access. No server will be used, suitable for LAN"
@@ -1343,6 +1342,10 @@ en:
     could_not_parse_direct_ip: "Could not parse Direct IP access"
     could_not_parse_permanent: "Could not parse permanent password"
     could_not_generate_random_password: "Could not generate a random password"
+    click_to_open: "Click to open your RustDesk app"
+    click_to_close: "Click to close the remote RustDesk app"
+    rustdesk_id: "RustDesk ID"
+    rustdesk_password: "RustDesk Password"
 
   countries:
     Australia: "Australia"
