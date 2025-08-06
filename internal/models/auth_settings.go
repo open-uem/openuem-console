@@ -6,7 +6,6 @@ import (
 
 	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
-	"github.com/open-uem/ent/authentication"
 	"github.com/sethvargo/go-password/password"
 )
 
@@ -36,7 +35,7 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 		SetUseCertificates(useCertificates).
 		SetAllowRegister(allowRegister).
 		SetUseOIDC(useOIDC).
-		SetOIDCProvider(authentication.OIDCProvider(provider)).
+		SetOIDCProvider(provider).
 		SetOIDCServer(server).
 		SetOIDCClientID(clientID).
 		SetOIDCRole(role).
@@ -45,13 +44,16 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 		SetOIDCAutoApprove(autoApprove)
 
 	// Create encryption key for OIDC cookie
-	if useOIDC && s.OIDCCookieEncriptionKey == "" {
-		key, err := password.Generate(64, 10, 0, false, true)
-		if err != nil {
-			return errors.New("could not generate the cookie encryption key")
+	if useOIDC {
+		if s.OIDCCookieEncriptionKey == "" {
+			key, err := password.Generate(64, 10, 0, false, true)
+			if err != nil {
+				return errors.New("could not generate the cookie encryption key")
+			}
+			update.SetOIDCCookieEncriptionKey(key)
 		}
-
-		update.SetOIDCCookieEncriptionKey(key)
+	} else {
+		update.SetOIDCCookieEncriptionKey("")
 	}
 
 	return update.Exec(context.Background())

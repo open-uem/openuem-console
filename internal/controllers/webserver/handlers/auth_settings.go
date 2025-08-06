@@ -6,7 +6,6 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	"github.com/open-uem/ent/authentication"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -42,6 +41,14 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_use_oidc"), true))
 		}
 
+		if !useOIDC {
+			oidcProvider = ""
+			oidcServer = ""
+			oidcClientID = ""
+			oidcRole = ""
+			oidcKeycloakPublicKey = ""
+		}
+
 		autoCreate, err := strconv.ParseBool(c.FormValue("authentication-oidc-auto-create"))
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_oidc_auto_create"), true))
@@ -52,7 +59,7 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_oidc_auto_approve"), true))
 		}
 
-		allowedProviders := []string{string(authentication.OIDCProviderAuthentik), string(authentication.OIDCProviderKeycloak), string(authentication.OIDCProviderZitadel)}
+		allowedProviders := []string{"authentik", "keycloak", "zitadel"}
 		if useOIDC && (oidcProvider == "" || (oidcProvider != "" && !slices.Contains(allowedProviders, oidcProvider))) {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.provider_not_valid"), true))
 		}
@@ -69,7 +76,7 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.role_required"), true))
 		}
 
-		if useOIDC && oidcRole != "" && oidcProvider == authentication.OIDCProviderKeycloak.String() && oidcKeycloakPublicKey == "" {
+		if useOIDC && oidcRole != "" && oidcProvider == "keycloak" && oidcKeycloakPublicKey == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.keycloak_public_key_required"), true))
 		}
 

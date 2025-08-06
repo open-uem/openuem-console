@@ -4,7 +4,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
-	"github.com/open-uem/ent/authentication"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -89,9 +88,9 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
                                             end"
 										>
 											<option value="" selected?={ settings.OIDCProvider == "" }>{ i18n.T(ctx, "authentication.oidc_provide_choose") }</option>
-											<option value={ authentication.OIDCProviderAuthentik } selected?={ settings.OIDCProvider == authentication.OIDCProviderAuthentik }>{ authentication.OIDCProviderAuthentik }</option>
-											<option value={ authentication.OIDCProviderKeycloak } selected?={  settings.OIDCProvider == authentication.OIDCProviderKeycloak }>{ authentication.OIDCProviderKeycloak }</option>
-											<option value={ authentication.OIDCProviderZitadel } selected?={  settings.OIDCProvider == authentication.OIDCProviderZitadel }>{ authentication.OIDCProviderZitadel }</option>
+											<option value="authentik" selected?={ settings.OIDCProvider == "authentik" }>authentik</option>
+											<option value="keycloak" selected?={  settings.OIDCProvider == "keycloak" }>keycloak</option>
+											<option value="zitadel" selected?={  settings.OIDCProvider == "zitadel" }>zitadel</option>
 										</select>
 									</td>
 								</tr>
@@ -116,7 +115,7 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 										<input class="uk-input" type="text" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
-								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != authentication.OIDCProviderKeycloak) }>
+								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != "keycloak") }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_description") }</td>
 									<td class="!align-middle">
