@@ -24,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 	"golang.org/x/oauth2"
 )
 
@@ -357,17 +358,25 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 }
 
 func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
+	}
+
 	// Check if user exists
 	userExists, err := h.Model.UserExists(u.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "cannot check if user exists in database")
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.cannot_check_if_user_exists"))
 	}
 
-	// If user doesn't exist create user in database that must await for review and redirect to message to wait for validation
+	// If user doesn't exist create user in database if auto creation is enabled
 	if !userExists {
-		if err := h.Model.AddOIDCUser(u.ID, u.Name, u.Email, u.Phone, u.EmailVerified); err != nil {
-			log.Printf("[ERROR]: we could not create the OIDC user, reason: %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "cannot create new OIDC user")
+		if settings.OIDCAutoCreateAccount {
+			if err := h.Model.AddOIDCUser(u.ID, u.Name, u.Email, u.Phone, u.EmailVerified); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.cannot_create_oidc_user", err.Error()))
+			}
+		} else {
+			echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.an_admin_must_create_your_account"))
 		}
 	}
 
@@ -377,7 +386,8 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "cannot get user from database")
 	}
 
-	if account.Register == nats.REGISTER_APPROVED || account.Register == nats.REGISTER_COMPLETE {
+	// If user has been approved by admin, auto approve is on or user already logged in (register completed)
+	if account.Register == nats.REGISTER_APPROVED || settings.OIDCAutoApprove || account.Register == nats.REGISTER_COMPLETE {
 		if err := h.CreateSession(c, account); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")

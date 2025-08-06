@@ -459,7 +459,6 @@ en:
   forms:
     required: "This field cannot be empty"
   login:
-    description: "Use the digital certificate that has been provided to you for browser's authentication purposes or register to request one. Alternatively, you can use OpenID Connect if enabled"
     button: "Login with digital certificate"
     openid: "Login with OpenID Connect"
   register:
@@ -1318,11 +1317,20 @@ en:
     could_not_parse_use_oidc: "Could not parse use OIDC"
     could_not_parse_oidc_auto_create: "Could not parse OIDC auto create"
     could_not_parse_oidc_auto_approve: "Could not parse OIDC auto approve"
+    could_not_reenable_certs: "Could not re-enable the use of certificates to log in, reason: %s"
     provider_not_valid: "The selected provider is not valid"
     client_id_is_required: "The Client ID is required"
     server_is_required: "The OIDC server is required"
     role_required: "The role or group is required"
     keycloak_public_key_required: "The public key for Keycloak is required"
+    at_least_one_auth_method: "At least one authentication method must be enabled"
+    login_with_certs: "Use the digital certificate that has been provided to you for browser's authentication purposes"
+    register_to_request_cert: "or register to request one"
+    login_with_oidc: "Use OpenID Connect with your Identity Provider to log in"
+    use_certs_must_be_enabled: "Use certs must be enabled if you allow users to register"
+    cannot_check_if_user_exists: "Cannot check if user exists in database"
+    cannot_create_oidc_user: "Cannot create new OIDC user, reason: %s"
+    an_admin_must_create_your_account: "An admin must create the account first in OpenUEM"
 
   countries:
     Australia: "Australia"

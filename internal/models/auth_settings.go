@@ -46,7 +46,7 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 	// Create encryption key for OIDC cookie
 	if useOIDC {
 		if s.OIDCCookieEncriptionKey == "" {
-			key, err := password.Generate(64, 10, 0, false, true)
+			key, err := password.Generate(32, 10, 0, false, true)
 			if err != nil {
 				return errors.New("could not generate the cookie encryption key")
 			}
@@ -57,4 +57,14 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 	}
 
 	return update.Exec(context.Background())
+}
+
+func (m *Model) ReEnableCertificatesAuth() error {
+
+	s, err := m.Client.Authentication.Query().Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return m.Client.Authentication.UpdateOneID(s.ID).SetUseCertificates(true).Exec(context.Background())
 }

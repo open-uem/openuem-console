@@ -58,6 +58,7 @@ type Worker struct {
 	CommonSoftwareDBJob               gocron.Job
 	CommonSoftwareJobDuration         time.Duration
 	Version                           string
+	ReenableCertAuth                  bool
 }
 
 func NewWorker(logName string) *Worker {

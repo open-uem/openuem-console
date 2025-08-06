@@ -17,9 +17,19 @@ templ Login(authSettings *ent.Authentication) {
 				/>
 				<div class="grid gap-2 text-center">
 					<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
-					<p class="text-balance text-muted-foreground">
-						{ i18n.T(ctx, "login.description") }
-					</p>
+					if authSettings.UseCertificates {
+						<p class="text-balance text-muted-foreground">
+							{ i18n.T(ctx, "authentication.login_with_certs") }
+							if authSettings.AllowRegister {
+								{ i18n.T(ctx, "authentication.register_to_request_cert") }
+							}
+						</p>
+					}
+					if authSettings.UseOIDC {
+						<p class="text-balance text-muted-foreground">
+							{ i18n.T(ctx, "authentication.login_with_oidc") }
+						</p>
+					}
 				</div>
 				<div class="grid gap-4">
 					if authSettings.UseCertificates {
