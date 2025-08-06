@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
@@ -52,48 +53,25 @@ type UserInfoResponse struct {
 
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
-	// ZITADEL
-	// provider, err := oidc.NewProvider(context.Background(), "https://openuem-console-rms331.us1.zitadel.cloud") // TODO - hardcoded must come from config
-	// if err != nil {
-	// 	log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
-	// }
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
+	}
 
-	// oauth2Config := oauth2.Config{
-	// 	ClientID:    "329227437038756021", // TODO - hardcoded must come from config
-	// 	RedirectURL: h.GetRedirectURI(c),
-	// 	Endpoint:    provider.Endpoint(),
-	// }
-
-	// // KEYCLOAK
-	// provider, err := oidc.NewProvider(context.Background(), "http://localhost:8080/realms/openuem") // TODO - hardcoded must come from config
-	// if err != nil {
-	// 	log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
-	// }
-
-	// oauth2Config := oauth2.Config{
-	// 	ClientID:    "openuem", // TODO - hardcoded must come from config
-	// 	RedirectURL: h.GetRedirectURI(c),
-	// 	Endpoint:    provider.Endpoint(),
-	// }
-
-	// Authentik
-
-	provider, err := oidc.NewProvider(context.Background(), "http://localhost:9000/application/o/open-uem/") // TODO - hardcoded must come from config
+	provider, err := oidc.NewProvider(context.Background(), settings.OIDCServer)
 	if err != nil {
 		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
 	}
 
 	oauth2Config := oauth2.Config{
-		ClientID:    "pSrshRiaYs1RFF1n7pBKkOO72nAOJmvE1KaAPcth", // TODO - hardcoded must come from config
+		ClientID:    settings.OIDCClientID,
 		RedirectURL: h.GetRedirectURI(c),
 		Endpoint:    provider.Endpoint(),
 	}
 
-	authProvider := "authentik"                               // TODO - hardcoded must come from config
-	cookieEncryptionKey := "LnQaKMKzSxL5MEY3fXSFDyYK5Jmi7rzi" // TODO - hardcoded must come from config
+	authProvider := settings.OIDCProvider
+	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
 
 	switch authProvider {
 	case "zitadel":
@@ -115,11 +93,11 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 	codeChallengeMethod := oauth2.SetAuthURLParam("code_challenge_method", "S256")
 
 	// Create encrypted cookies
-	if err := WriteOIDCCookie(c, "state", state, cookieEncryptionKey); err != nil {
+	if err := h.WriteOIDCCookie(c, "state", state, cookieEncryptionKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate OIDC state cookie")
 	}
 
-	if err := WriteOIDCCookie(c, "verifier", verifier, cookieEncryptionKey); err != nil {
+	if err := h.WriteOIDCCookie(c, "verifier", verifier, cookieEncryptionKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate OIDC verifier cookie")
 	}
 
@@ -135,6 +113,11 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	var oidcUser *ent.User
 
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
+	}
+
 	// Get code from request
 	code := c.QueryParam("code")
 	if code == "" {
@@ -147,7 +130,7 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get OIDC state from request")
 	}
 
-	cookieEncryptionKey := "LnQaKMKzSxL5MEY3fXSFDyYK5Jmi7rzi" // TODO - hardcoded must come from config
+	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
 
 	// Get state from cookie
 	stateFromCookie, err := ReadOIDCCookie(c, "state", cookieEncryptionKey)
@@ -168,21 +151,21 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	// TODO Verify code if possible, I've verifier and I've the code how I can check if the code is valid? Is this needed?
 
-	authProvider := "authentik" // TODO - hardcoded must come from config
+	authProvider := settings.OIDCProvider
 
 	switch authProvider {
 	case "zitadel":
-		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie)
+		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie, settings)
 		if err != nil {
 			return err
 		}
 	case "keycloak":
-		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie)
+		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie, settings)
 		if err != nil {
 			return err
 		}
 	case "authentik":
-		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie)
+		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie, settings)
 		if err != nil {
 			return err
 		}
@@ -203,14 +186,19 @@ func randomBytestoHex(count int) (string, error) {
 	return hex.EncodeToString(buf), nil
 }
 
-func WriteOIDCCookie(c echo.Context, name string, value string, secretKey string) error {
+func (h *Handler) WriteOIDCCookie(c echo.Context, name string, value string, secretKey string) error {
 	expiry := time.Now().Add(10 * time.Minute)
+
+	domain := h.ServerName
+	if h.ReverseProxyAuthPort != "" {
+		domain = h.ReverseProxyServer
+	}
 
 	cookie := &http.Cookie{
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		Domain:   "andromeda.openuem.eu", // TODO - hardcoded
+		Domain:   domain,
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
@@ -422,10 +410,10 @@ func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifi
 
 	v := url.Values{}
 
-	url := endpoint // TODO - remove hardcoded url
+	url := endpoint
 	v.Set("grant_type", "authorization_code")
 	v.Set("code", code)
-	v.Set("redirect_uri", h.GetRedirectURI(c)) // TODO - remove hardcoded url
+	v.Set("redirect_uri", h.GetRedirectURI(c))
 	v.Set("client_id", clientID)
 	v.Set("code_verifier", verifier)
 

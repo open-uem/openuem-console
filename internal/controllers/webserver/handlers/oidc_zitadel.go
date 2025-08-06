@@ -18,8 +18,8 @@ type ZitadelRolesResponse struct {
 	Message string   `json:"message"`
 }
 
-func (h *Handler) ZitadelGetUserRoles(accessToken string) (*ZitadelRolesResponse, error) {
-	u := "https://openuem-console-rms331.us1.zitadel.cloud/auth/v1/permissions/me/_search" // TODO - remove hardcoded url
+func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authentication) (*ZitadelRolesResponse, error) {
+	u := fmt.Sprintf("%s/auth/v1/permissions/me/_search", settings.OIDCServer)
 	roles := ZitadelRolesResponse{}
 
 	// create request
@@ -64,10 +64,10 @@ func (h *Handler) ZitadelGetUserRoles(accessToken string) (*ZitadelRolesResponse
 	return &roles, nil
 }
 
-func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string) (*ent.User, error) {
+func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication) (*ent.User, error) {
 	// Request token
-	endpoint := "https://openuem-console-rms331.us1.zitadel.cloud/oauth/v2/token" // TODO - remove hardcoded url
-	client := "329227437038756021"                                                // TODO - Hardcoded
+	endpoint := fmt.Sprintf("%s/oauth/v2/token", settings.OIDCServer)
+	client := settings.OIDCClientID
 
 	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, endpoint, client)
 	if err != nil {
@@ -75,19 +75,19 @@ func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string)
 	}
 
 	// Get user account info from remote endpoint
-	endpoint = "https://openuem-console-rms331.us1.zitadel.cloud/oidc/v1/userinfo" // TODO - remove hardcoded url
+	endpoint = fmt.Sprintf("%s/oidc/v1/userinfo", settings.OIDCServer)
 	u, err := h.GetUserInfo(accessToken, endpoint)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
 	}
 
 	// Get roles info from remote endpoint
-	data, err := h.ZitadelGetUserRoles(accessToken)
+	data, err := h.ZitadelGetUserRoles(accessToken, settings)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
 	}
 
-	if !slices.Contains(data.Roles, "openuem") { // TODO - hardcoded role
+	if settings.OIDCRole != "" && !slices.Contains(data.Roles, settings.OIDCRole) {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
 	}
 

@@ -31,7 +31,7 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 						</p>
 					</div>
 					<div class="uk-card-body">
-						<form class="flex flex-col mt-6 gap-4 w-2/3">
+						<form class="flex flex-col mt-6 gap-4 w-3/4">
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
 								<tr>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_certificates_title") }</td>
@@ -79,7 +79,7 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 									<td class="!align-middle">
 										<select
 											class="uk-select"
-											name="authentication-use-oidc"
+											name="authentication-oidc-provider"
 											_="on change
                                                 if me.value is 'keycloak' then
                                                     remove .hidden from #oidc-section-keycloak-public-key
@@ -95,11 +95,11 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 										</select>
 									</td>
 								</tr>
-								<tr id="oidc-section-endpoint" class={ templ.KV("hidden", !settings.UseOIDC) }>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_endpoint_title") }</td>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_endpoint_description") }</td>
+								<tr id="oidc-section-server" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="authentication-oidc-endpoint" placeholder={ i18n.T(ctx, "authentication.oidc_endpoint_placeholder") } value={ settings.OIDCEndpoint } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" name="authentication-oidc-server" value={ settings.OIDCServer } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-client-id" class={ templ.KV("hidden", !settings.UseOIDC) }>
@@ -116,7 +116,7 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 										<input class="uk-input" type="text" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
-								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", !settings.UseOIDC || settings.OIDCProvider != authentication.OIDCProviderKeycloak) }>
+								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != authentication.OIDCProviderKeycloak) }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_description") }</td>
 									<td class="!align-middle">

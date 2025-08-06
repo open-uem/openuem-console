@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"slices"
@@ -25,17 +26,17 @@ type KeycloakClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string) (*ent.User, error) {
+func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication) (*ent.User, error) {
 	// Request token
-	endpoint := "http://localhost:8080/realms/openuem/protocol/openid-connect/token" // TODO - hardcoded
-	client := "openuem"                                                              // TODO - Hardcoded
+	endpoint := fmt.Sprintf("%s/protocol/openid-connect/token", settings.OIDCServer)
+	client := settings.OIDCClientID
 	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, endpoint, client)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
 	}
 
-	// TODO - hardcoded the public key from Realms Settings -> Keys -> RS256 (get public key)
-	base64EncodedPublicKey := `MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsER9yw5s1zA3X9zb3SgThZr32sI4AEzp+LVlIdGYLfY6L1zFNBcGThcfiE7pHNVnDtwPOBVAdXQksx8xV/fIgC4W1wFXFLQmKGJ3civRsYLjPntJmnppb7TyIwXBMNnWvikn9gCMB1guUqgP1WCdaU7ur0J1oSlLpjQBQEfHBs56mjCQxnUvYl+hShECjxOhdvX6g6d/R2tmfTP/ix/zyY3XT9wvwf34ZQ1cVCzXlX0Y8qRaQ+SoPcjsH3TT4fRQp3Us+WR1qqzV6BdUbeikcFdSeH/63vANP2Fj1EiePC25xAGulZIMSE1scQWkp7Dz4HjapahYDCZ6kBgkcPGi5QIDAQAB`
+	// Use public key from Realms Settings -> Keys -> RS256 (get public key)
+	base64EncodedPublicKey := settings.OIDCKeycloakPublicKey
 	publicKey, err := parseRSAPublicKey(base64EncodedPublicKey)
 	if err != nil {
 		log.Println(err)
@@ -69,7 +70,7 @@ func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string
 	}
 
 	roles := claims.RealmAccess.Roles
-	if !slices.Contains(roles, "openuem") { // TODO - hardcoded role
+	if settings.OIDCRole != "" && !slices.Contains(roles, settings.OIDCRole) {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
 	}
 

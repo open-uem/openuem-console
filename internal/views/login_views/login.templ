@@ -2,10 +2,11 @@ package login_views
 
 import (
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 )
 
-templ Login() {
+templ Login(authSettings *ent.Authentication) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -21,35 +22,41 @@ templ Login() {
 					</p>
 				</div>
 				<div class="grid gap-4">
-					<a
-						href="/auth"
-						class="uk-button uk-button-primary text-white"
-						type="button"
-					>
-						<uk-icon hx-history="false" icon="log-in" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "login.button") }
-					</a>
-					<a
-						href="/oidc"
-						class="uk-button uk-button-primary text-white"
-						type="button"
-						_="on click remove .hidden from #oidc-spinner"
-					>
-						<div id="oidc-spinner" class="hidden">
-							<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
-						</div>
-						<i class="si si-openid si--color uk-cloak text-2xl mx-2"></i>{ i18n.T(ctx, "login.openid") }
-					</a>
-					<button
-						href="/register"
-						hx-get="/register"
-						hx-push-url="true"
-						hx-target="body"
-						hx-swap="outerHTML"
-						class="uk-button uk-button-default"
-						type="button"
-					>
-						<uk-icon hx-history="false" icon="user-plus" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.button") }
-					</button>
+					if authSettings.UseCertificates {
+						<a
+							href="/auth"
+							class="uk-button uk-button-primary text-white"
+							type="button"
+						>
+							<uk-icon hx-history="false" icon="log-in" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "login.button") }
+						</a>
+					}
+					if authSettings.UseOIDC {
+						<a
+							href="/oidc"
+							class="uk-button uk-button-primary text-white"
+							type="button"
+							_="on click remove .hidden from #oidc-spinner"
+						>
+							<div id="oidc-spinner" class="hidden">
+								<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+							</div>
+							<i class="si si-openid si--color uk-cloak text-2xl mx-2"></i>{ i18n.T(ctx, "login.openid") }
+						</a>
+					}
+					if authSettings.AllowRegister {
+						<button
+							href="/register"
+							hx-get="/register"
+							hx-push-url="true"
+							hx-target="body"
+							hx-swap="outerHTML"
+							class="uk-button uk-button-default"
+							type="button"
+						>
+							<uk-icon hx-history="false" icon="user-plus" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.button") }
+						</button>
+					}
 				</div>
 			</div>
 		</div>

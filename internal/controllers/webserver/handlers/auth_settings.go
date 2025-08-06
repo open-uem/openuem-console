@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"slices"
+	"strconv"
+
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent/authentication"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -17,31 +21,61 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		// rendezvousServer := c.FormValue("rustdesk-rendezvous-server")
-		// relayServer := c.FormValue("rustdesk-relay-server")
-		// key := c.FormValue("rustdesk-key")
-		// apiServer := c.FormValue("rustdesk-api-server")
+		oidcProvider := c.FormValue("authentication-oidc-provider")
+		oidcServer := c.FormValue("authentication-oidc-server")
+		oidcClientID := c.FormValue("authentication-oidc-client-id")
+		oidcRole := c.FormValue("authentication-oidc-role")
+		oidcKeycloakPublicKey := c.FormValue("authentication-oidc-keycloak-public-key")
 
-		// useDirectAccess, err := strconv.ParseBool(c.FormValue("rustdesk-direct-ip-access"))
-		// if err != nil {
-		// 	return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_parse_direct_ip"), true))
-		// }
+		useCertificates, err := strconv.ParseBool(c.FormValue("authentication-use-certificates"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_use_certificates"), true))
+		}
 
-		// whitelist := c.FormValue("rustdesk-whitelist")
+		allowRegister, err := strconv.ParseBool(c.FormValue("authentication-allow-register"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_allow_register"), true))
+		}
 
-		// usePassword, err := strconv.ParseBool(c.FormValue("rustdesk-password"))
-		// if err != nil {
-		// 	return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_parse_permanent"), true))
-		// }
+		useOIDC, err := strconv.ParseBool(c.FormValue("authentication-use-oidc"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_use_oidc"), true))
+		}
 
-		// if (rendezvousServer != "" || relayServer != "" || apiServer != "") && key == "" {
-		// 	log.Println("key error")
-		// 	return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.key_must_be_set"), true))
-		// }
+		autoCreate, err := strconv.ParseBool(c.FormValue("authentication-oidc-auto-create"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_oidc_auto_create"), true))
+		}
 
-		// if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, useDirectAccess, usePassword); err != nil {
-		// 	return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.settings_not_saved", err.Error()), true))
-		// }
+		autoApprove, err := strconv.ParseBool(c.FormValue("authentication-oidc-auto-approve"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_oidc_auto_approve"), true))
+		}
+
+		allowedProviders := []string{string(authentication.OIDCProviderAuthentik), string(authentication.OIDCProviderKeycloak), string(authentication.OIDCProviderZitadel)}
+		if useOIDC && (oidcProvider == "" || (oidcProvider != "" && !slices.Contains(allowedProviders, oidcProvider))) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.provider_not_valid"), true))
+		}
+
+		if useOIDC && oidcServer == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.server_is_required"), true))
+		}
+
+		if useOIDC && oidcClientID == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.client_id_is_required"), true))
+		}
+
+		if useOIDC && (autoCreate || autoApprove) && oidcRole == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.role_required"), true))
+		}
+
+		if useOIDC && oidcRole != "" && oidcProvider == authentication.OIDCProviderKeycloak.String() && oidcKeycloakPublicKey == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.keycloak_public_key_required"), true))
+		}
+
+		if err := h.Model.SaveAuthenticationSettings(useCertificates, allowRegister, useOIDC, oidcProvider, oidcServer, oidcClientID, oidcRole, oidcKeycloakPublicKey, autoCreate, autoApprove); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.settings_not_saved", err.Error()), true))
+		}
 
 		successMessage = i18n.T(c.Request().Context(), "authentication.settings_saved")
 	}
