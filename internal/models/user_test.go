@@ -271,7 +271,7 @@ func (suite *UserTestSuite) TestEmailExists() {
 }
 
 func (suite *UserTestSuite) TestAddUser() {
-	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES")
+	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", true)
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
@@ -285,7 +285,7 @@ func (suite *UserTestSuite) TestAddUser() {
 }
 
 func (suite *UserTestSuite) TestAddImportedUser() {
-	err := suite.model.AddImportedUser("user7", "User7", "user7@example.com", "", "ES")
+	err := suite.model.AddImportedUser("user7", "User7", "user7@example.com", "", "ES", true)
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
