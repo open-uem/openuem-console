@@ -3,6 +3,7 @@ package register_views
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -19,6 +20,7 @@ type RegisterValidations struct {
 	CountryRequired  bool
 	CountryInvalid   bool
 	PasswordRequired bool
+	OpenIDRequired   bool
 }
 
 type RegisterValues struct {
@@ -28,9 +30,10 @@ type RegisterValues struct {
 	Phone    string
 	Country  string
 	Password string
+	OpenID   bool
 }
 
-templ Register(c echo.Context, values RegisterValues, validations RegisterValidations, defaultCountry string) {
+templ Register(c echo.Context, values RegisterValues, validations RegisterValidations, defaultCountry string, settings *ent.Authentication) {
 	<main id="main" class="flex items-center justify-center h-screen">
 		<div class="uk-card uk-card-body uk-card-default w-1/4">
 			<div class="flex flex-col gap-4">
@@ -238,6 +241,19 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 						</div>
 						<div id="phone-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.PhoneRequired, ) }>{ i18n.T(ctx, "forms.required") }</div>
 						<div id="phone-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.PhoneInvalid) }>{ i18n.T(ctx, "register.wrong_phone") }</div>
+					</div>
+					<div class="uk-margin">
+						<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "authentication.type") }</label>
+						<div class="uk-form-controls">
+							<select class="uk-select" name="oidc">
+								if settings.UseCertificates {
+									<option value="no" selected?={ settings.UseCertificates }>{ i18n.T(ctx, "authentication.certificate") }</option>
+								}
+								if settings.UseOIDC {
+									<option value="yes" selected?={ !settings.UseCertificates }>{ i18n.T(ctx, "authentication.oidc") }</option>
+								}
+							</select>
+						</div>
 					</div>
 					<div class="uk-margin">
 						<label class="uk-form-label" for="password">{ i18n.T(ctx, "register.certificate_password") }</label>

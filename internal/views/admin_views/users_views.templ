@@ -238,7 +238,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
-													if !user.Openid && !user.EmailVerified && user.Email != "" {
+													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/confirmemail", user.ID))) }
@@ -250,7 +250,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if !user.Openid && !user.EmailVerified && user.Email != "" {
+													if !user.EmailVerified && user.Email != "" {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/askconfirm", user.ID))) }

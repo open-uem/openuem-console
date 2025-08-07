@@ -462,7 +462,7 @@ en:
     button: "Login with digital certificate"
     openid: "Login with OpenID Connect"
   register:
-    description: "Fill the form to register in the application. The OpenUEM admin will review your request and generate a digital certificate for you to log in"
+    description: "Fill the form to register in the application. An OpenUEM admin will review your request"
     button: "Register"
     uid: "User ID"
     name: "Name"

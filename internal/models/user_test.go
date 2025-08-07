@@ -315,7 +315,7 @@ func (suite *UserTestSuite) TestUpdateUser() {
 }
 
 func (suite *UserTestSuite) TestRegisterUser() {
-	err := suite.model.RegisterUser("user7", "User7", "user7@example.com", "", "ES", "apassword")
+	err := suite.model.RegisterUser("user7", "User7", "user7@example.com", "", "ES", "apassword", true)
 	assert.NoError(suite.T(), err, "should register a user")
 
 	user, err := suite.model.GetUserById("user7")

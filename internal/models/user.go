@@ -129,8 +129,8 @@ func (m *Model) UpdateUser(uid, name, email, phone, country string) error {
 	return query.Exec(context.Background())
 }
 
-func (m *Model) RegisterUser(uid, name, email, phone, country, password string) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCertClearPassword(password).SetCreated(time.Now()).Save(context.Background())
+func (m *Model) RegisterUser(uid, name, email, phone, country, password string, oidc bool) error {
+	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCertClearPassword(password).SetOpenid(oidc).SetCreated(time.Now()).Save(context.Background())
 	if err != nil {
 		return err
 	}
