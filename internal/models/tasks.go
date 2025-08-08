@@ -21,6 +21,7 @@ type TaskConfig struct {
 	PackageID                             string
 	PackageName                           string
 	PackageLatest                         bool
+	PackageVersion                        string
 	Description                           string
 	RegistryKey                           string
 	RegistryKeyValue                      string
@@ -109,7 +110,7 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
 	switch cfg.TaskType {
 	case "winget_install", "winget_delete":
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case "add_registry_key":
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case "remove_registry_key":
@@ -245,7 +246,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) error {
 	switch cfg.TaskType {
 	case "winget_install", "winget_delete":
-		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).Exec(context.Background())
+		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case "add_registry_key":
 		return m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case "remove_registry_key":

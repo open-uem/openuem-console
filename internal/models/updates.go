@@ -17,7 +17,7 @@ import (
 
 type SystemUpdate struct {
 	ID                 string
-	Hostname           string
+	Nickname           string
 	OS                 string
 	SystemUpdateStatus string    `sql:"system_update_status"`
 	LastInstall        time.Time `sql:"last_install"`
@@ -28,7 +28,7 @@ type SystemUpdate struct {
 
 func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	// Info from agents waiting for admission won't be shown
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, systemupdate.FieldSystemUpdateStatus, systemupdate.FieldLastInstall, systemupdate.FieldLastSearch, systemupdate.FieldPendingUpdates).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldNickname, agent.FieldOs, systemupdate.FieldSystemUpdateStatus, systemupdate.FieldLastInstall, systemupdate.FieldLastSearch, systemupdate.FieldPendingUpdates).
 		LeftJoin(sql.Table(systemupdate.Table)).
 		On(agent.FieldID, systemupdate.OwnerColumn).
 		Where(sql.And(sql.NEQ(agent.FieldAgentStatus, agent.AgentStatusWaitingForAdmission)))
@@ -88,21 +88,21 @@ func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.S
 
 	// Default sort
 	if p.SortBy == "" {
-		p.SortBy = "hostname"
+		p.SortBy = "nickname"
 		p.SortOrder = "desc"
 	}
 
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
 			err = query.Modify(func(s *sql.Selector) {
 				mainUpdatesQuery(s, p)
-				s.OrderBy(sql.Asc(agent.FieldHostname))
+				s.OrderBy(sql.Asc(agent.FieldNickname))
 			}).Scan(context.Background(), &systemUpdates)
 		} else {
 			err = query.Modify(func(s *sql.Selector) {
 				mainUpdatesQuery(s, p)
-				s.OrderBy(sql.Desc(agent.FieldHostname))
+				s.OrderBy(sql.Desc(agent.FieldNickname))
 			}).Scan(context.Background(), &systemUpdates)
 		}
 	case "agentOS":
@@ -199,8 +199,8 @@ func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.S
 }
 
 func applySystemUpdatesFilters(query *ent.AgentQuery, f filters.SystemUpdatesFilter) {
-	if len(f.Hostname) > 0 {
-		query.Where(agent.HostnameContainsFold(f.Hostname))
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}
 
 	if len(f.AgentOSVersions) > 0 {

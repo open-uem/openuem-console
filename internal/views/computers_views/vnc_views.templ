@@ -9,7 +9,7 @@ import (
 )
 
 templ VNC(c echo.Context, agent *ent.Agent, domainSuffix string, connected, requestPIN bool, pin string, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, commonInfo)
 	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-1">

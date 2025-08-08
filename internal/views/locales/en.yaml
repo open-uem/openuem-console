@@ -151,6 +151,7 @@ en:
     title: "Agents"
     description: "These are the agents that have contacted the server"
     hostname: "Hostname"
+    nickname: "Name"
     version: "Version"
     os: "OS"
     last_contact: "Last Contact"
@@ -185,6 +186,7 @@ en:
     no_deployments: "No deployments have been found for this computer"
     deploy_empty_values: "The agent id, package id or the package name were absent"
     filter_by_hostname: "Filter by hostname..."
+    filter_by_nickname: "Filter by name..."
     wol_title: "Wake On Lan"
     wol_description: "Send a Wake On Lan magic packet to the agent's registered MAC Address to wake this computer up"
     wol_no_mac: "No MAC Address is available to send the WOL packet or the agent is not in the local area network"
@@ -306,6 +308,8 @@ en:
     could_not_get_tenant: "The site is not associated with an organization"
     could_not_associate: "Could not associate the endpoint with the selected site and organization, reason: %s"
     association_success: "The endpoint has been associated with the selected site and organization"
+    nickname_cannot_be_empty: "The endpoint name cannot be empty"
+    nickname_not_saved: "The endpoint name could not be saved, reason: %s"
 
   inventory:
     hardware:
@@ -318,6 +322,12 @@ en:
       processor: "Processor"
       architecture: "Architecture"
       num_cores: "# Cores"
+      slot: "Slot"
+      mem_type: "Type"
+      size: "Size"
+      speed: "Speed"
+      part_number: "Part #"
+      vendor: "Vendor"
     os:
       title: "Operating System"
       description: "This is the information about the operating system reported by the OpenUEM agent"
@@ -336,6 +346,7 @@ en:
       no_monitors: "No monitors information is available yet"
       week_of_manufacture: "Week of manufacture"
       year_of_manufacture: "Year of manufacture"
+      report_title: "Monitor #%s"
     logical_disk:
       title: "Logical Disks"
       description: "These are the logical disks connected to this computer as reported by the OpenUEM agent"
@@ -353,6 +364,8 @@ en:
       mount_point: "Mount point"
       filesystem_type: "FS type"
       no_logical_disks: "No logical disks information is available yet"
+      report_label: "Label: %s"
+      report_mount_point: "Mount point: %s"
     file_browser:
       title: "File Browser"
       description: "Browse this logical drive remotely using SFTP. Click on the three dots icon to open an actions dropdown. Also you can use the icons bar to move to an upper folder, add a new folder, refresh the folder, upload a file, download many elements as a ZIP file or delete many elements after you select them"
@@ -370,6 +383,7 @@ en:
       descr: "Description"
       path: "Path"
       no_shares: "No shares information is available yet"
+      report_title: "Share #%s"
     printers:
       title: "Printers"
       description: "These are the printers connected to this computer as reported by the OpenUEM agent"
@@ -379,6 +393,7 @@ en:
       is_shared_printer: "Is shared printer?"
       no_printers: "No printers information is available yet"
       set_default: "Set as default printer"
+      report_title: "Printer %s"
     network_adapters:
       title: "Network Adapters"
       description: "These are the network adapters connected to this computer as reported by the OpenUEM agent"
@@ -390,11 +405,13 @@ en:
       dns: "DNS"
       speed: "Speed"
       no_network_adapters: "No network adapters information is available yet"
+      report_title: "NIC #%s"
     apps:
       title: "Apps"
       description: "These are the applications found in this computer as reported by the OpenUEM agent"
       installation_date: "Installation"
       no_apps: "No apps were found for this query"
+      report_title: "App %s"
 
   apps:
     title: "Apps"
@@ -411,6 +428,7 @@ en:
     title: "Antivirus"
     description: "This is the information about antivirus reported by the agents that have contacted the server."
     hostname: "Hostname"
+    nickname: "Name"
     os: "OS"
     enabled: "Antivirus Enabled?"
     updated: "Antivirus Updated?"
@@ -549,6 +567,7 @@ en:
     description: "This is the information about security updates retrieved by the agents that have contacted the server"
     no_updates_info: "No security information was found for this query"
     hostname: "Hostname"
+    nickname: "Name"
     os: "OS"
     status: "Status"
     last_search: "Last Search"
@@ -564,6 +583,7 @@ en:
     no_info: "No updates history available yet"
   reports:
     description: "Export information from OpenUEM using the following predefined reports"
+    computer: "Generate computer report"
     agents: "Generate agents' report"
     computers: "Generate computers' report"
     antivirus: "Generate antivirus systems' report"
@@ -581,6 +601,8 @@ en:
     invalid_report_selected: "Selected report is not valid"
     could_not_initiate_report: "Could not initiate the report"
     could_not_generate_report: "Could not generate the report"
+    computer_id_empty: "The ID of the computer cannot be empty"
+    computer_inventory: "Computer inventory"
   sessions:
     data: "Data"
     description: "These are the sessions opened by authenticated users at the OpenUEM console"
@@ -962,6 +984,8 @@ en:
     reboot: "Reboot endpoint"
     poweroff: "Shutdown endpoint"
     unexpected_task_type: "Unexpected task's type"
+    package_version_title: "Version"
+    package_version_description: "The version of the package (optional)..."
     package_name_not_found: "Could not get package name"
     package_id_not_empty: "Package ID cannot be empty"
     package_name_not_empty: "Package name cannot be empty"

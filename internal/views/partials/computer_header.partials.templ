@@ -1,0 +1,83 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+)
+
+templ ComputerHeader(p PaginationAndSort, agent *ent.Agent, commonInfo *CommonInfo) {
+	<div class="flex justify-between items-center">
+		<div class="flex gap-4 items-center">
+			<div class="flex items-center gap-4">
+				@OSBadge(agent.Os)
+				@EndpointName(agent.ID, agent.Nickname, commonInfo)
+			</div>
+			@ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
+			if agent.IsRemote && commonInfo.DetectRemoteAgents {
+				<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "agents.is_remote")) }>
+					<uk-icon hx-history="false" icon="plane" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+				</span>
+			}
+		</div>
+		<div class="flex gap-4">
+			@CSVReportButton(p, string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/reports/computer/%s/ods", agent.ID)))), "reports.computer")
+			@PDFReportButton(p, string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/reports/computer/%s", agent.ID)))), "reports.computer")
+		</div>
+	</div>
+}
+
+templ EndpointName(agentID string, name string, commonInfo *CommonInfo) {
+	<div id="endpoint-name" class="flex gap-2 items-center">
+		<div class="uk-inline">
+			<form>
+				<input
+					id="nickname"
+					name="nickname"
+					class="uk-input uk-text-bold uk-text-large"
+					disabled
+					value={ name }
+					if len(name) > 0 {
+						size={ len(name) + 10 }
+					}
+					_="on focus 
+						set myValue to me.value
+						set me.value to ''
+						set me.value to myValue
+					end"
+				/>
+				<button
+					id="nickname-edit"
+					class="uk-form-icon uk-form-icon-flip"
+					type="button"
+					_="on click 
+						remove .hidden from #nickname-save
+						add .hidden to #nickname-edit
+						remove @disabled from #nickname
+						call #nickname.focus()
+					end"
+				>
+					<uk-icon icon="pencil"></uk-icon>
+				</button>
+				<button
+					id="nickname-save"
+					class="uk-form-icon uk-form-icon-flip hidden"
+					type="button"
+					hx-post={ string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/nickname", agentID)))) }
+					hx-push-url="false"
+					hx-target="#endpoint-name"
+					hx-swap="outerHTML"
+					hx-indicator="save-nickname-spinner"
+				>
+					<uk-icon icon="save"></uk-icon>
+				</button>
+				<uk-icon id="save-nickname-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator animate-spin" uk-cloack></uk-icon>
+			</form>
+		</div>
+	</div>
+}
+
+templ ComputerBreadcrumb(c echo.Context, agent *ent.Agent, commonInfo *CommonInfo) {
+	@Header(c, []Breadcrumb{{Title: "Computers", Url: string(templ.URL(GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Nickname, Url: string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}}, commonInfo)
+}

@@ -23,7 +23,7 @@ func (suite *TagsTestSuite) SetupTest() {
 	client := enttest.Open(suite.t, "sqlite3", "file:ent?mode=memory&_fk=1")
 	suite.model = Model{Client: client}
 
-	agent, err := client.Agent.Create().SetID("agent1").SetOs("windows").SetHostname("agent1").AddTagIDs().Save(context.Background())
+	agent, err := client.Agent.Create().SetID("agent1").SetOs("windows").SetNickname("agent1").AddTagIDs().Save(context.Background())
 	assert.NoError(suite.T(), err, "should create agent")
 
 	for i := 0; i <= 6; i++ {

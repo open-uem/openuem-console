@@ -95,7 +95,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 									<div class="flex items-center gap-4">
 										@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML", "get", refresh, false)
 										@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML", func() bool {
-											return f.Hostname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
+											return f.Nickname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
 												len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&
 												len(f.TaskLastExecutionFrom) == 0 && len(f.TaskLastExecutionTo) == 0
 										})
@@ -221,9 +221,9 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												</th>
 												<th class="w-2/12">
 													<div class="flex gap-1 items-center">
-														<span>{ i18n.T(ctx, "agents.hostname") }</span>
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
-														@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
+														<span>{ i18n.T(ctx, "agents.nickname") }</span>
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+														@filters.FilterByText(c, p, "Nickname", f.Nickname, "agents.filter_by_nickname", "#main", "outerHTML")
 													</div>
 												</th>
 												<th class="w-1/12">
@@ -244,7 +244,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 												<th class="w-1/12">
 													<div class="flex gap-1 items-center">
 														{ i18n.T(ctx, "admin.update.agents.task_status") }
-														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "taskStatus", "alpha", "#main", "outerHTML", "get")
+														@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "taskStatus", "alpha", "#main", "outerHTML", "get")
 														@filters.FilterByOptions(c, p, "TaskStatus", "admin.update.agents.filter_by_status", availableTaskStatus, f.TaskStatus, "#main", "outerHTML", true, func() bool {
 															return len(f.TaskStatus) == 0
 														})
@@ -349,7 +349,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 														`,p.PageSize) }
 													/>
 												</td>
-												<td class="!align-middle">{ agent.Hostname }</td>
+												<td class="!align-middle">{ agent.Nickname }</td>
 												<td class="!align-middle">
 													<div class="flex items-center gap-2">
 														{ agent.Edges.Release.Version }

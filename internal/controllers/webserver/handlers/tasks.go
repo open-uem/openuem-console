@@ -671,8 +671,15 @@ func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig := models.TaskConfig{
-		TaskType:   taskType,
-		AgentsType: c.FormValue("task-agent-type"),
+		TaskType:       taskType,
+		AgentsType:     c.FormValue("task-agent-type"),
+		PackageVersion: c.FormValue("package-version"),
+	}
+
+	useLatest := c.FormValue("package-use-latest")
+	if useLatest == "on" {
+		taskConfig.PackageLatest = true
+		taskConfig.PackageVersion = ""
 	}
 
 	taskConfig.Description = c.FormValue("task-description")

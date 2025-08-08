@@ -36,7 +36,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
 							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", func() bool {
-								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.UpdateStatus) == 0 &&
+								return len(f.Nickname) == 0 && len(f.AgentOSVersions) == 0 && len(f.UpdateStatus) == 0 &&
 									f.LastSearchFrom == "" && f.LastSearchTo == "" &&
 									f.LastInstallFrom == "" && f.LastInstallTo == "" &&
 									len(f.PendingUpdateOptions) == 0
@@ -49,9 +49,9 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									<tr>
 										<th>
 											<div class="flex gap-1 items-center">
-												<span>{ i18n.T(ctx, "updates.hostname") }</span>
-												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
+												<span>{ i18n.T(ctx, "updates.nickname") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByText(c, p, "Nickname", f.Nickname, "agents.filter_by_nickname", "#main", "outerHTML")
 											</div>
 										</th>
 										<th>
@@ -108,7 +108,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 												hx-target="#main"
 												hx-swap="outerHTML"
 											>
-												{ systemUpdate.Hostname }
+												{ systemUpdate.Nickname }
 											</td>
 											<td class="!align-middle">
 												@partials.OSBadge(systemUpdate.OS)

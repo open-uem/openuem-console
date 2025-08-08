@@ -7,7 +7,6 @@ import (
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
-	"strconv"
 )
 
 templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AntivirusFilter, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int, commonInfo *partials.CommonInfo) {
@@ -36,7 +35,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
 							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security"))), "#main", "outerHTML", func() bool {
-								return len(f.Hostname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
+								return len(f.Nickname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
 									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
 							
 							})
@@ -44,59 +43,53 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 						</div>
 						if len(antiviri) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
-								<form class="mt-5 mb-2">
-									<input id="page" type="hidden" name="page" value={ strconv.Itoa(p.CurrentPage) }/>
-									<input id="pageSize" type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
-									<input id="sortBy" type="hidden" name="sortBy" value={ p.SortBy }/>
-									<input id="sortOrder" type="hidden" name="sortOrder" value={ p.SortOrder }/>
-									<thead>
-										<tr>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "updates.hostname") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "updates.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
-													@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "antivirus.os") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML", "get")
-													@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
-														return len(f.AgentOSVersions) == 0
-													})
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-1 items-center">
-													<span>{ i18n.T(ctx, "antivirus.title") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML", "get")
-													@filters.FilterByOptions(c, p, "AntivirusName", "antivirus.filter_by_name", detectedAntiviri, f.AntivirusNameOptions, "#main", "outerHTML", false, func() bool {
-														return len(f.AntivirusNameOptions) == 0
-													})
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-2 items-center justify-center">
-													<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML", "get")
-													@filters.FilterByOptions(c, p, "AntivirusEnabled", "antivirus.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AntivirusEnabledOptions, "#main", "outerHTML", true, func() bool {
-														return len(f.AntivirusEnabledOptions) == 0
-													})
-												</div>
-											</th>
-											<th>
-												<div class="flex gap-2 items-center justify-center">
-													<span>{ i18n.T(ctx,"antivirus.updated") }</span>
-													@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML", "get")
-													@filters.FilterByOptions(c, p, "AntivirusUpdated", "antivirus.filter_by_updated", []string{"UpdatedYes", "UpdatedNo"}, f.AntivirusUpdatedOptions, "#main", "outerHTML", true, func() bool {
-														return len(f.AntivirusUpdatedOptions) == 0
-													})
-												</div>
-											</th>
-										</tr>
-									</thead>
-								</form>
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "antivirus.nickname") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByText(c, p, "Nickname", f.Nickname, "agents.filter_by_nickname", "#main", "outerHTML")
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "antivirus.os") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
+													return len(f.AgentOSVersions) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "antivirus.title") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByOptions(c, p, "AntivirusName", "antivirus.filter_by_name", detectedAntiviri, f.AntivirusNameOptions, "#main", "outerHTML", false, func() bool {
+													return len(f.AntivirusNameOptions) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center justify-center">
+												<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByOptions(c, p, "AntivirusEnabled", "antivirus.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AntivirusEnabledOptions, "#main", "outerHTML", true, func() bool {
+													return len(f.AntivirusEnabledOptions) == 0
+												})
+											</div>
+										</th>
+										<th>
+											<div class="flex gap-2 items-center justify-center">
+												<span>{ i18n.T(ctx,"antivirus.updated") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML", "get")
+												@filters.FilterByOptions(c, p, "AntivirusUpdated", "antivirus.filter_by_updated", []string{"UpdatedYes", "UpdatedNo"}, f.AntivirusUpdatedOptions, "#main", "outerHTML", true, func() bool {
+													return len(f.AntivirusUpdatedOptions) == 0
+												})
+											</div>
+										</th>
+									</tr>
+								</thead>
 								<tbody>
 									for _, antivirus := range antiviri {
 										<tr>
@@ -107,7 +100,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 												hx-target="#main"
 												hx-swap="outerHTML"
 											>
-												{ antivirus.Hostname }
+												{ antivirus.Nickname }
 											</td>
 											<td class="!align-middle">
 												@partials.OSBadge(antivirus.OS)

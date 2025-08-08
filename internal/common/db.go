@@ -53,6 +53,11 @@ func (w *Worker) StartDBConnectJob() error {
 			log.Println("[WARN]: could not associate domain to default site")
 		}
 
+		// Nickname uses the hostname as the default value
+		if err := w.Model.SetDefaultNickname(); err != nil {
+			log.Println("[WARN]: could not default nickname to default site")
+		}
+
 		w.StartConsoleService()
 
 		// Start a job to check latest OpenUEM releases

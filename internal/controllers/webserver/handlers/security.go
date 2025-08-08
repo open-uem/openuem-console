@@ -136,7 +136,7 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 		return nil, nil, nil, err
 	}
 
-	f.Hostname = c.FormValue("filterByHostname")
+	f.Nickname = c.FormValue("filterByNickname")
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {
@@ -194,7 +194,7 @@ func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdate
 		return nil, nil, nil, err
 	}
 
-	f.Hostname = c.FormValue("filterByHostname")
+	f.Nickname = c.FormValue("filterByNickname")
 
 	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
 	if err != nil {

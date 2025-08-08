@@ -153,7 +153,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 									<td class="items-center !align-middle">
 										switch task.Type.String() {
 											case "winget_install", "winget_delete", "flatpak_install", "flatpak_uninstall", "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade", "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
-												<span>{ task.PackageName }</span>
+												<span>{ task.PackageName + " " + task.PackageVersion }</span>
 											case "add_registry_key", "remove_registry_key", "update_registry_key_default_value":
 												<span>{ task.RegistryKey }</span>
 											case "add_registry_key_value", "remove_registry_key_value":

@@ -47,7 +47,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 				<div class="flex justify-between mt-8">
 					<div class="flex items-center gap-4">
 						@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), "#main", "outerHTML", func() bool {
-							return f.Hostname == "" && len(f.AgentStatusOptions) == 0 &&
+							return f.Nickname == "" && len(f.AgentStatusOptions) == 0 &&
 								len(f.AgentOSVersions) == 0 && len(f.Tags) == 0 &&
 								f.ContactFrom == "" && f.ContactTo == "" && len(f.IsRemote) == 0
 						})
@@ -259,9 +259,9 @@ templ AgentsTableHead(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 			</th>
 			<th>
 				<div class="flex gap-1 items-center">
-					<span>{ i18n.T(ctx, "agents.hostname") }</span>
-					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.hostname"), "hostname", "alpha", "#main", "outerHTML", "get")
-					@filters.FilterByText(c, p, "Hostname", f.Hostname, "agents.filter_by_hostname", "#main", "outerHTML")
+					<span>{ i18n.T(ctx, "agents.nickname") }</span>
+					@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+					@filters.FilterByText(c, p, "Nickname", f.Nickname, "agents.filter_by_nickname", "#main", "outerHTML")
 				</div>
 			</th>
 			<th>
@@ -414,7 +414,7 @@ templ AgentsTableBody(p partials.PaginationAndSort, agents []*ent.Agent, tags []
 				hx-swap="outerHTML"
 			>
 				<div class="flex items-center gap-2">
-					<span class="underline">{ agent.Hostname }</span>
+					<span class="underline">{ agent.Nickname }</span>
 					if agent.RestartRequired {
 						@partials.AlertIcon(i18n.T(ctx, "agents.restart_required"))
 					}
@@ -618,7 +618,7 @@ type LogEntry struct {
 }
 
 templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntry, category, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: "logs"}}, commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: "logs"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -626,7 +626,7 @@ templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntr
 				<div class="flex gap-2 items-center">
 					<div class="flex items-center gap-4">
 						@partials.OSBadge(agent.Os)
-						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+						<span class="uk-text-bold uk-text-large">{ agent.Nickname }</span>
 					</div>
 				</div>
 				<div class="uk-card uk-card-default">
@@ -688,7 +688,7 @@ templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntr
 }
 
 templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Hostname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: i18n.T(ctx, "Settings")}}, commonInfo)
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents"))))}, {Title: i18n.T(ctx, "Settings")}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
@@ -701,7 +701,7 @@ templ AgentSettings(c echo.Context, agent *ent.Agent, successMessage, errMessage
 				<div class="flex gap-2 items-center">
 					<div class="flex items-center gap-4">
 						@partials.OSBadge(agent.Os)
-						<span class="uk-text-bold uk-text-large">{ agent.Hostname }</span>
+						<span class="uk-text-bold uk-text-large">{ agent.Nickname }</span>
 					</div>
 				</div>
 				<div class="uk-card uk-card-default">

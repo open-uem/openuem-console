@@ -22,7 +22,8 @@ import (
 
 type Computer struct {
 	ID           string
-	Hostname     string
+	Hostname     string `sql:"hostname"`
+	Nickname     string `sql:"nickname"`
 	OS           string
 	Version      string
 	IP           string
@@ -71,7 +72,7 @@ func (m *Model) CountAllComputers(f filters.AgentFilter, c *partials.CommonInfo)
 }
 
 func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
-	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial, agent.FieldIsRemote, agent.FieldLastContact).
+	s.Select(sql.As(agent.FieldID, "ID"), agent.FieldHostname, agent.FieldNickname, agent.FieldOs, "`t2`.`version`", agent.FieldIP, agent.FieldMAC, operatingsystem.FieldUsername, computer.FieldManufacturer, computer.FieldModel, computer.FieldSerial, agent.FieldIsRemote, agent.FieldLastContact).
 		LeftJoin(sql.Table(computer.Table)).
 		On(agent.FieldID, computer.OwnerColumn).
 		LeftJoin(sql.Table(operatingsystem.Table)).
@@ -89,11 +90,11 @@ func mainQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	// part of the groupby
 
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
-			query = query.Order(agent.ByHostname())
+			query = query.Order(agent.ByNickname())
 		} else {
-			query = query.Order(agent.ByHostname(sql.OrderDesc()))
+			query = query.Order(agent.ByNickname(sql.OrderDesc()))
 		}
 	case "os":
 		if p.SortOrder == "asc" {
@@ -160,16 +161,16 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 
 	// Apply sort
 	switch p.SortBy {
-	case "hostname":
+	case "nickname":
 		if p.SortOrder == "asc" {
 			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Asc(agent.FieldHostname))
+				s.OrderBy(sql.Asc(agent.FieldNickname))
 			}).Scan(context.Background(), &computers)
 		} else {
 			err = query.Modify(func(s *sql.Selector) {
 				mainQuery(s, p)
-				s.OrderBy(sql.Desc(agent.FieldHostname))
+				s.OrderBy(sql.Desc(agent.FieldNickname))
 			}).Scan(context.Background(), &computers)
 		}
 	case "os":
@@ -283,8 +284,8 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 }
 
 func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
-	if len(f.Hostname) > 0 {
-		query.Where(agent.HostnameContainsFold(f.Hostname))
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}
 
 	if len(f.Username) > 0 {
@@ -666,5 +667,35 @@ func (m *Model) RemovePrinter(agentId string, printerName string, c *partials.Co
 			Where(printer.Name(printerName), printer.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
 			Exec(context.Background())
 		return err
+	}
+}
+
+func (m *Model) GetAgentAppsInfo(agentId string, c *partials.CommonInfo) ([]*ent.App, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		apps, err := m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			All(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return apps, nil
+	} else {
+		apps, err := m.Client.App.Query().
+			Where(app.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			All(context.Background())
+
+		if err != nil {
+			return nil, err
+		}
+		return apps, nil
 	}
 }

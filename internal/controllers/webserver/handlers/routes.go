@@ -236,6 +236,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
 	e.POST("/computers/:uuid/sites", h.GetDropdownSites, h.IsAuthenticated)
+	e.POST("/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -285,6 +286,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -334,6 +336,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/generaterdp", h.GenerateRDPFile, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/printers/:printer/default", h.SetDefaultPrinter, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/site/:site/computers/:uuid/printers/:printer", h.RemovePrinter, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/computers/:uuid/nickname", h.Nickname, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 
@@ -381,21 +384,27 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
+	e.POST("/reports/computer/:uuid/ods", h.GenerateComputerODSReport, h.IsAuthenticated)
 
 	e.POST("/tenant/:tenant/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/reports/computer/:uuid/ods", h.GenerateComputerODSReport, h.IsAuthenticated)
 
 	e.POST("/tenant/:tenant/site/:site/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/antivirus", h.GenerateAntivirusReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/updates", h.GenerateUpdatesReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/software", h.GenerateSoftwareReport, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/reports/computer/:uuid", h.GenerateComputerReport, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/reports/:report/csv", h.GenerateCSVReports, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/reports/computer/:uuid/ods", h.GenerateComputerODSReport, h.IsAuthenticated)
 
 	e.GET("/security", h.ListAntivirusStatus, h.IsAuthenticated)
 	e.POST("/security", h.ListAntivirusStatus, h.IsAuthenticated)
