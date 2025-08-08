@@ -36,7 +36,7 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 		SetAllowRegister(allowRegister).
 		SetUseOIDC(useOIDC).
 		SetOIDCProvider(provider).
-		SetOIDCServer(server).
+		SetOIDCIssuerURL(server).
 		SetOIDCClientID(clientID).
 		SetOIDCRole(role).
 		SetOIDCKeycloakPublicKey(publicKey).

@@ -52,6 +52,11 @@ type UserInfoResponse struct {
 	Groups            []string `json:"groups"`
 }
 
+type WellKnownEndpoints struct {
+	TokenEndpoint    string `json:"token_endpoint"`
+	UserInfoEndpoint string `json:"userinfo_endpoint"`
+}
+
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 	settings, err := h.Model.GetAuthenticationSettings()
@@ -59,7 +64,7 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
 	}
 
-	provider, err := oidc.NewProvider(context.Background(), settings.OIDCServer)
+	provider, err := oidc.NewProvider(context.Background(), settings.OIDCIssuerURL)
 	if err != nil {
 		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
@@ -119,6 +124,12 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
 	}
 
+	provider, err := oidc.NewProvider(context.Background(), settings.OIDCIssuerURL)
+	if err != nil {
+		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
+	}
+
 	// Get code from request
 	code := c.QueryParam("code")
 	if code == "" {
@@ -156,17 +167,17 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	switch authProvider {
 	case "zitadel":
-		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie, settings)
+		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie, settings, provider)
 		if err != nil {
 			return err
 		}
 	case "keycloak":
-		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie, settings)
+		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie, settings, provider)
 		if err != nil {
 			return err
 		}
 	case "authentik":
-		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie, settings)
+		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie, settings, provider)
 		if err != nil {
 			return err
 		}
@@ -376,7 +387,7 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.cannot_create_oidc_user", err.Error()))
 			}
 		} else {
-			echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.an_admin_must_create_your_account"))
+			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.an_admin_must_create_your_account"))
 		}
 	}
 

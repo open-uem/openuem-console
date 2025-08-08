@@ -84,7 +84,11 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
                                                     remove .hidden from #oidc-section-keycloak-public-key
                                                 else    
                                                     add .hidden to #oidc-section-keycloak-public-key
-                                                end                                            
+                                                end
+												set #authentication-oidc-server.value to ''   
+												set #authentication-oidc-client-id.value to ''   
+												set #authentication-oidc-role.value to ''   
+												set #authentication-oidc-keycloak-public-key.value to ''                                          
                                             end"
 										>
 											<option value="" selected?={ settings.OIDCProvider == "" }>{ i18n.T(ctx, "authentication.oidc_provide_choose") }</option>
@@ -98,28 +102,28 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="authentication-oidc-server" value={ settings.OIDCServer } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" id="authentication-oidc-server" name="authentication-oidc-server" value={ settings.OIDCIssuerURL } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-client-id" class={ templ.KV("hidden", !settings.UseOIDC) }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_client_id_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_client_id_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="authentication-oidc-client-id" value={ settings.OIDCClientID } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" id="authentication-oidc-client-id" name="authentication-oidc-client-id" value={ settings.OIDCClientID } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-role" class={ templ.KV("hidden", !settings.UseOIDC) }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" id="authentication-oidc-role" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != "keycloak") }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="authentication-oidc-keycloak-public-key" value={ settings.OIDCKeycloakPublicKey } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" id="authentication-oidc-keycloak-public-key" name="authentication-oidc-keycloak-public-key" value={ settings.OIDCKeycloakPublicKey } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-auto-create" class={ templ.KV("hidden", !settings.UseOIDC) }>

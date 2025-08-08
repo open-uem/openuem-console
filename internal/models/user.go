@@ -97,7 +97,7 @@ func (m *Model) AddUser(uid, name, email, phone, country string, oidc bool) erro
 	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetOpenid(oidc).SetCreated(time.Now())
 
 	if oidc {
-		query.SetRegister(openuem_nats.REGISTER_IN_REVIEW)
+		query.SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW)
 	}
 
 	return query.Exec(context.Background())

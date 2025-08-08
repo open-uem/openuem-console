@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 )
@@ -18,8 +19,44 @@ type ZitadelRolesResponse struct {
 	Message string   `json:"message"`
 }
 
+func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication, provider *oidc.Provider) (*ent.User, error) {
+	// Request token
+	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
+	}
+
+	// Get user account info from remote endpoint
+	u, err := h.GetUserInfo(accessToken, provider.UserInfoEndpoint())
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
+	}
+
+	if settings.OIDCRole != "" {
+		// Get roles info from remote endpoint
+		data, err := h.ZitadelGetUserRoles(accessToken, settings)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
+		}
+
+		if !slices.Contains(data.Roles, settings.OIDCRole) {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
+		}
+	}
+
+	myUser := ent.User{
+		ID:            u.PreferredUsername,
+		Name:          u.GivenName + " " + u.FamilyName,
+		Email:         u.Email,
+		Phone:         u.Phone,
+		EmailVerified: u.EmailVerified,
+	}
+
+	return &myUser, nil
+}
+
 func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authentication) (*ZitadelRolesResponse, error) {
-	u := fmt.Sprintf("%s/auth/v1/permissions/me/_search", settings.OIDCServer)
+	u := fmt.Sprintf("%s/auth/v1/permissions/me/_search", settings.OIDCIssuerURL)
 	roles := ZitadelRolesResponse{}
 
 	// create request
@@ -62,42 +99,4 @@ func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authenti
 	}
 
 	return &roles, nil
-}
-
-func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication) (*ent.User, error) {
-	// Request token
-	endpoint := fmt.Sprintf("%s/oauth/v2/token", settings.OIDCServer)
-	client := settings.OIDCClientID
-
-	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, endpoint, client)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
-	}
-
-	// Get user account info from remote endpoint
-	endpoint = fmt.Sprintf("%s/oidc/v1/userinfo", settings.OIDCServer)
-	u, err := h.GetUserInfo(accessToken, endpoint)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
-	}
-
-	// Get roles info from remote endpoint
-	data, err := h.ZitadelGetUserRoles(accessToken, settings)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
-	}
-
-	if settings.OIDCRole != "" && !slices.Contains(data.Roles, settings.OIDCRole) {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
-	}
-
-	myUser := ent.User{
-		ID:            u.PreferredUsername,
-		Name:          u.GivenName + " " + u.FamilyName,
-		Email:         u.Email,
-		Phone:         u.Phone,
-		EmailVerified: u.EmailVerified,
-	}
-
-	return &myUser, nil
 }

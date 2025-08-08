@@ -23,7 +23,7 @@ type RegisterRequest struct {
 	Email    string `form:"email" validate:"required,email"`
 	Phone    string `form:"phone" validate:"required,e164"`
 	Country  string `form:"country" validate:"required,iso3166_1_alpha2"`
-	Password string `form:"password" validate:"required"`
+	Password string `form:"password"`
 	OpenID   bool   `form:"oidc" validate:"required"`
 }
 
@@ -128,9 +128,11 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			validations.PhoneInvalid = true
 		}
 
-		errs = validate.Var(r.Password, "required")
-		if errs != nil {
-			validations.PasswordRequired = true
+		if !r.OpenID {
+			errs = validate.Var(r.Password, "required")
+			if errs != nil {
+				validations.PasswordRequired = true
+			}
 		}
 
 		errs = validate.Var(r.OpenID, "required")

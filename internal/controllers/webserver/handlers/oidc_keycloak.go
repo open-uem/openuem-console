@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"slices"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
@@ -26,20 +26,16 @@ type KeycloakClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication) (*ent.User, error) {
+func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication, provider *oidc.Provider) (*ent.User, error) {
 	// Request token
-	endpoint := fmt.Sprintf("%s/protocol/openid-connect/token", settings.OIDCServer)
-	client := settings.OIDCClientID
-	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, endpoint, client)
+	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
 	}
 
 	// Use public key from Realms Settings -> Keys -> RS256 (get public key)
-	base64EncodedPublicKey := settings.OIDCKeycloakPublicKey
-	publicKey, err := parseRSAPublicKey(base64EncodedPublicKey)
+	publicKey, err := parseRSAPublicKey(settings.OIDCKeycloakPublicKey)
 	if err != nil {
-		log.Println(err)
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not parse Keycloak RSA public key")
 	}
 

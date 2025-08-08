@@ -245,17 +245,31 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 					<div class="uk-margin">
 						<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "authentication.type") }</label>
 						<div class="uk-form-controls">
-							<select class="uk-select" name="oidc">
+							<select
+								class="uk-select"
+								name="oidc"
+								_="on change
+									if me.value is 'yes' then
+										add .hidden to #password-section
+										remove @required from #mypassword
+										remove @disabled from #SendRegister
+									else    
+										remove .hidden from #password-section
+										add @required to #mypassword
+										add @disabled to #SendRegister
+									end                                            
+								end"
+							>
 								if settings.UseCertificates {
-									<option value="no" selected?={ settings.UseCertificates }>{ i18n.T(ctx, "authentication.certificate") }</option>
+									<option value="no" selected?={ !values.OpenID }>{ i18n.T(ctx, "authentication.certificate") }</option>
 								}
 								if settings.UseOIDC {
-									<option value="yes" selected?={ !settings.UseCertificates }>{ i18n.T(ctx, "authentication.oidc") }</option>
+									<option value="yes" selected?={ values.OpenID }>{ i18n.T(ctx, "authentication.oidc") }</option>
 								}
 							</select>
 						</div>
 					</div>
-					<div class="uk-margin">
+					<div id="password-section" class={ "uk-margin",templ.KV("hidden", values.OpenID) }>
 						<label class="uk-form-label" for="password">{ i18n.T(ctx, "register.certificate_password") }</label>
 						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
 							<input
