@@ -207,3 +207,13 @@ func applyUsersFilter(query *ent.UserQuery, f filters.UserFilter) {
 		query.Where(user.RegisterIn(f.RegisterOptions...))
 	}
 }
+
+func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken string, idToken string, tokenType string, expiry int) error {
+	return m.Client.User.UpdateOneID(uid).
+		SetAccessToken(accessToken).
+		SetRefreshToken(refreshToken).
+		SetIDToken(idToken).
+		SetTokenType(tokenType).
+		SetTokenExpiry(expiry).
+		Exec(context.Background())
+}

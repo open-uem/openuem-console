@@ -21,20 +21,20 @@ type ZitadelRolesResponse struct {
 
 func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication, provider *oidc.Provider) (*ent.User, error) {
 	// Request token
-	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
+	oAuth2TokenResponse, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
 	}
 
 	// Get user account info from remote endpoint
-	u, err := h.GetUserInfo(accessToken, provider.UserInfoEndpoint())
+	u, err := h.GetUserInfo(oAuth2TokenResponse.AccessToken, provider.UserInfoEndpoint())
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
 	}
 
 	if settings.OIDCRole != "" {
 		// Get roles info from remote endpoint
-		data, err := h.ZitadelGetUserRoles(accessToken, settings)
+		data, err := h.ZitadelGetUserRoles(oAuth2TokenResponse.AccessToken, settings)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
 		}
@@ -50,6 +50,11 @@ func (h *Handler) ZitadelOIDCLogIn(c echo.Context, code string, verifier string,
 		Email:         u.Email,
 		Phone:         u.Phone,
 		EmailVerified: u.EmailVerified,
+		RefreshToken:  oAuth2TokenResponse.RefreshToken,
+		AccessToken:   oAuth2TokenResponse.AccessToken,
+		TokenType:     oAuth2TokenResponse.TokenType,
+		TokenExpiry:   oAuth2TokenResponse.ExpiresIn,
+		IDToken:       oAuth2TokenResponse.IDToken,
 	}
 
 	return &myUser, nil
@@ -94,7 +99,7 @@ func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authenti
 	}
 
 	if roles.Message != "" {
-		log.Printf("[ERROR]: could not get roles from permissions endpoint, reason: %v", err)
+		log.Printf("[ERROR]: could not get roles from permissions endpoint, reason: %v", roles.Message)
 		return nil, errors.New(roles.Message)
 	}
 

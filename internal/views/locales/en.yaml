@@ -1337,6 +1337,8 @@ en:
     oidc: "Uses OpenID Connect to log in"
     certificate: "Uses certificates to log in"
     type: "Authentication type"
+    could_not_get_user_id: "Could not get user ID from session"
+    could_not_get_user_info: "Could not get user info from session, reason: %s"
 
   countries:
     Australia: "Australia"

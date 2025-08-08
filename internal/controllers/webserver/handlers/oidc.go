@@ -30,6 +30,7 @@ import (
 
 type OAuth2TokenResponse struct {
 	AccessToken      string `json:"access_token,omitempty"`
+	RefreshToken     string `json:"refresh_token,omitempty"`
 	ExpiresIn        int    `json:"expires_in,omitempty"`
 	IDToken          string `json:"id_token,omitempty"`
 	TokenType        string `json:"token_type,omitempty"`
@@ -404,6 +405,11 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
 		}
 
+		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
+			log.Printf("[ERROR]: could not save refresh token, reason: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "could not save refresh token for user")
+		}
+
 		myTenant, err := h.Model.GetDefaultTenant()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -426,7 +432,7 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 	return echo.NewHTTPError(http.StatusForbidden, "An admin must approve your account")
 }
 
-func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifier string, endpoint string, clientID string) (string, error) {
+func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifier string, endpoint string, clientID string) (*OAuth2TokenResponse, error) {
 	var z OAuth2TokenResponse
 
 	v := url.Values{}
@@ -441,7 +447,7 @@ func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifi
 	resp, err := http.PostForm(url, v)
 	if err != nil {
 		log.Printf("[ERROR]: could not send request to token endpoint, reason: %v", err)
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -455,15 +461,15 @@ func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifi
 
 	if err := json.Unmarshal(body, &z); err != nil {
 		log.Printf("[ERROR]: could not decode response from token endpoint, reason: %v", err)
-		return "", err
+		return nil, err
 	}
 
 	if z.Error != "" {
 		log.Printf("[ERROR]: found an error in the response from token endpoint, reason: %v", z.Error+" "+z.ErrorDescription)
-		return "", errors.New(z.Error + " " + z.ErrorDescription)
+		return nil, errors.New(z.Error + " " + z.ErrorDescription)
 	}
 
-	return z.AccessToken, nil
+	return &z, nil
 }
 
 func (h *Handler) GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error) {
@@ -494,7 +500,7 @@ func (h *Handler) GetUserInfo(accessToken string, endpoint string) (*UserInfoRes
 	}
 
 	// Debug
-	log.Println(string([]byte(body)))
+	// log.Println(string([]byte(body)))
 
 	if err := json.Unmarshal(body, &user); err != nil {
 		log.Printf("[ERROR]: could not decode response from user info endpoint, reason: %v", err)

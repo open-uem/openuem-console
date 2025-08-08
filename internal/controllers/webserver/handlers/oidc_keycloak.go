@@ -28,7 +28,7 @@ type KeycloakClaims struct {
 
 func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string, settings *ent.Authentication, provider *oidc.Provider) (*ent.User, error) {
 	// Request token
-	accessToken, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
+	oAuth2TokenResponse, err := h.ExchangeCodeForAccessToken(c, code, verifier, provider.Endpoint().TokenURL, settings.OIDCClientID)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
 	}
@@ -40,7 +40,7 @@ func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string
 	}
 
 	// Parse JWT token
-	t, err := jwt.ParseWithClaims(accessToken, &KeycloakClaims{}, func(token *jwt.Token) (any, error) {
+	t, err := jwt.ParseWithClaims(oAuth2TokenResponse.AccessToken, &KeycloakClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, "unexpected signing method")
 		}
@@ -76,6 +76,11 @@ func (h *Handler) KeycloakOIDCLogIn(c echo.Context, code string, verifier string
 		Name:          claims.GivenName + " " + claims.FamilyName,
 		Email:         claims.Email,
 		EmailVerified: claims.EmailVerified,
+		RefreshToken:  oAuth2TokenResponse.RefreshToken,
+		AccessToken:   oAuth2TokenResponse.AccessToken,
+		TokenType:     oAuth2TokenResponse.TokenType,
+		TokenExpiry:   oAuth2TokenResponse.ExpiresIn,
+		IDToken:       oAuth2TokenResponse.IDToken,
 	}
 
 	return &myUser, nil
