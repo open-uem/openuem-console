@@ -93,16 +93,30 @@ func (m *Model) EmailExists(email string) (bool, error) {
 	return m.Client.User.Query().Where(user.Email(email)).Exist(context.Background())
 }
 
-func (m *Model) AddUser(uid, name, email, phone, country string) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now()).Save(context.Background())
-	if err != nil {
-		return err
+func (m *Model) AddUser(uid, name, email, phone, country string, oidc bool) error {
+	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetOpenid(oidc).SetCreated(time.Now())
+
+	if oidc {
+		query.SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW)
 	}
-	return nil
+
+	return query.Exec(context.Background())
 }
 
-func (m *Model) AddImportedUser(uid, name, email, phone, country string) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_CERTIFICATE_SENT).Save(context.Background())
+func (m *Model) AddImportedUser(uid, name, email, phone, country string, oidc bool) error {
+	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetOpenid(oidc).SetCreated(time.Now())
+
+	if oidc {
+		query.SetRegister(openuem_nats.REGISTER_IN_REVIEW)
+	} else {
+		query.SetRegister(openuem_nats.REGISTER_CERTIFICATE_SENT)
+	}
+
+	return query.Exec(context.Background())
+}
+
+func (m *Model) AddOIDCUser(uid, name, email, phone string, emailVerified bool) error {
+	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetEmailVerified(emailVerified).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_APPROVED).SetOpenid(true).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -110,15 +124,13 @@ func (m *Model) AddImportedUser(uid, name, email, phone, country string) error {
 }
 
 func (m *Model) UpdateUser(uid, name, email, phone, country string) error {
-	_, err := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now()).Save(context.Background())
-	if err != nil {
-		return err
-	}
-	return nil
+	query := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now())
+
+	return query.Exec(context.Background())
 }
 
-func (m *Model) RegisterUser(uid, name, email, phone, country, password string) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCertClearPassword(password).SetCreated(time.Now()).Save(context.Background())
+func (m *Model) RegisterUser(uid, name, email, phone, country, password string, oidc bool) error {
+	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCertClearPassword(password).SetOpenid(oidc).SetCreated(time.Now()).Save(context.Background())
 	if err != nil {
 		return err
 	}
@@ -194,4 +206,14 @@ func applyUsersFilter(query *ent.UserQuery, f filters.UserFilter) {
 	if len(f.RegisterOptions) > 0 {
 		query.Where(user.RegisterIn(f.RegisterOptions...))
 	}
+}
+
+func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken string, idToken string, tokenType string, expiry int) error {
+	return m.Client.User.UpdateOneID(uid).
+		SetAccessToken(accessToken).
+		SetRefreshToken(refreshToken).
+		SetIDToken(idToken).
+		SetTokenType(tokenType).
+		SetTokenExpiry(expiry).
+		Exec(context.Background())
 }

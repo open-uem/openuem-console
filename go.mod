@@ -10,8 +10,9 @@ require (
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
-	github.com/go-co-op/gocron/v2 v2.16.2
-	github.com/go-echarts/go-echarts/v2 v2.6.1
+	github.com/coreos/go-oidc/v3 v3.14.1
+	github.com/go-co-op/gocron/v2 v2.16.1
+	github.com/go-echarts/go-echarts/v2 v2.5.3
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/gohugoio/locales v0.14.0
@@ -27,17 +28,19 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.43.0
-	github.com/open-uem/ent v0.0.0-20250723115242-206989488bbe
+	github.com/open-uem/ent v0.0.0-20250808084751-7afc68eac018
 	github.com/open-uem/nats v0.0.0-20250717101700-45922fb3baa4
 	github.com/open-uem/utils v0.0.0-20250702121339-316c5b599cd3
 	github.com/open-uem/wingetcfg v0.0.0-20250723054912-02f24a659219
 	github.com/pkg/sftp v1.13.9
+	github.com/sethvargo/go-password v0.3.1
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.7
 	github.com/wneessen/go-mail v0.6.2
 	github.com/xuri/excelize/v2 v2.9.1
 	golang.org/x/crypto v0.40.0
 	golang.org/x/mod v0.26.0
+	golang.org/x/oauth2 v0.30.0
 	golang.org/x/sys v0.34.0
 	gopkg.in/ini.v1 v1.67.0
 	software.sslmate.com/src/go-pkcs12 v0.6.0
@@ -56,6 +59,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/f-amaral/go-async v0.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-openapi/inflect v0.21.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

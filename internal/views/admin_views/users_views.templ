@@ -89,6 +89,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped ">
 								<thead>
 									<tr>
+										<th></th>
 										<th>
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "users.uid") }</span>
@@ -161,55 +162,79 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 								</thead>
 								for index, user := range users {
 									<tr>
-										<td>{ user.ID }</td>
-										<td class="underline">
+										<td class="!align-middle">
+											if user.Openid {
+												<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "authentication.oidc")) }>
+													<i class="si si-openid si--color text-xl uk-cloak mx-1"></i>
+												</span>
+											} else {
+												<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "authentication.certificate")) }>
+													<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 ml-1 mr-2" uk-cloack></uk-icon>
+												</span>
+											}
+										</td>
+										<td class="!align-middle underline">
 											<a
 												href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
 												hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
 												hx-target="#main"
 												hx-swap="outerHTML"
 											>
-												{ user.Name }
+												{ user.ID }
 											</a>
 										</td>
-										if user.Email != "" {
-											<td>{ user.Email }</td>
+										if user.Name != "" {
+											<td class="!align-middle underline">
+												<a
+													href={ templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID)) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													{ user.Name }
+												</a>
+											</td>
 										} else {
-											<td>-</td>
+											<td class="!align-middle">-</td>
+										}
+										if user.Email != "" {
+											<td class="!align-middle">{ user.Email }</td>
+										} else {
+											<td class="!align-middle">-</td>
 										}
 										if user.Country != "" {
-											<td><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
+											<td class="!align-middle"><span class={ "fi", "fi-" + strings.ToLower(user.Country) }></span></td>
 										} else {
-											<td>-</td>
+											<td class="!align-middle">-</td>
 										}
 										if user.Phone != "" {
-											<td>{ user.Phone }</td>
+											<td class="!align-middle">{ user.Phone }</td>
 										} else {
-											<td>-</td>
+											<td class="!align-middle">-</td>
 										}
-										if user.Register == "users.completed" {
-											<td class="flex">
+										if user.Register == "users.completed" || user.Register == "users.approved" {
+											<td class="flex items-center">
 												<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600 mr-2" uk-cloack></uk-icon>
 												{ i18n.T(ctx, user.Register) }
 											</td>
 										} else {
-											<td class="flex">
+											<td class="flex items-center">
 												<uk-icon hx-history="false" icon="message-circle-warning" custom-class="h-5 w-5 text-orange-600 mr-2" uk-cloack></uk-icon>
 												{ i18n.T(ctx, user.Register) }
 											</td>
 										}
 										/* <td>- </td> */
 										if user.Created.IsZero() {
-											<td>-</td>
+											<td class="!align-middle">-</td>
 										} else {
-											<td>{ commonInfo.Translator.FmtDateMedium(user.Created.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Created.Local()) } </td>
+											<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(user.Created.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Created.Local()) } </td>
 										}
 										if user.Modified.IsZero() {
-											<td>-</td>
+											<td class="!align-middle">-</td>
 										} else {
-											<td>{ commonInfo.Translator.FmtDateMedium(user.Modified.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Modified.Local()) } </td>
+											<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(user.Modified.Local()) + " " + commonInfo.Translator.FmtTimeShort(user.Modified.Local()) } </td>
 										}
-										<td>
+										<td class="!align-middle">
 											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
@@ -237,7 +262,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
+													if !user.Openid && user.EmailVerified && user.Register == openuem_nats.REGISTER_IN_REVIEW {
 														<li>
 															<a
 																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/certificate", user.ID))) }
@@ -249,7 +274,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if user.EmailVerified && user.Register != openuem_nats.REGISTER_IN_REVIEW {
+													if !user.Openid && user.EmailVerified && user.Register != openuem_nats.REGISTER_IN_REVIEW {
 														<li>
 															<a
 																hx-target="#main"
@@ -258,6 +283,18 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 																hx-push-url="false"
 															>
 																<uk-icon hx-history="false" icon="file-key" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.regenerate_certificate") }
+															</a>
+														</li>
+													}
+													if user.Openid && user.Register == openuem_nats.REGISTER_IN_REVIEW {
+														<li>
+															<a
+																hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/approve", user.ID))) }
+																hx-target="#main"
+																hx-push-url="false"
+																hx-swap="outerHTML"
+															>
+																<uk-icon hx-history="false" icon="user-round-check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "users.approve_account") }
 															</a>
 														</li>
 													}
@@ -292,7 +329,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 	</main>
 }
 
-templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, settings *ent.Authentication) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -331,6 +368,19 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 												{ i18n.T(ctx, "new.user.uid_help") }
 											</div>
 										</div>
+										<div class="uk-margin">
+											<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "authentication.type") }</label>
+											<div class="uk-form-controls">
+												<select class="uk-select" name="oidc">
+													if settings.UseCertificates {
+														<option value="no" selected?={ settings.UseCertificates }>{ i18n.T(ctx, "authentication.certificate") }</option>
+													}
+													if settings.UseOIDC {
+														<option value="yes" selected?={ !settings.UseCertificates }>{ i18n.T(ctx, "authentication.oidc") }</option>
+													}
+												</select>
+											</div>
+										</div>
 									</div>
 								</fieldset>
 								<fieldset class="uk-fieldset w-1/6">
@@ -344,7 +394,6 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 												type="text"
 												spellcheck="false"
 												placeholder={ i18n.T(ctx, "users.name") + "..." }
-												required
 											/>
 										</div>
 									</div>
@@ -398,7 +447,7 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 	</main>
 }
 
-templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, settings *ent.Authentication) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: "Users", Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -479,6 +528,20 @@ templ EditUser(c echo.Context, user *openuem_ent.User, defaultCountry string, ag
 												end"
 											/>
 										</div>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="form-stacked-text">{ i18n.T(ctx, "authentication.type") }</label>
+										<input
+											id="oidc"
+											name="oidc"
+											class="uk-input"
+											if user.Openid {
+												value={ i18n.T(ctx, "authentication.oidc") }
+											} else {
+												value={ i18n.T(ctx, "authentication.certificate") }
+											}
+											disabled
+										/>
 									</div>
 								</fieldset>
 							</div>

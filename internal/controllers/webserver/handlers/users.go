@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/form/v4"
@@ -24,10 +25,11 @@ import (
 
 type NewUser struct {
 	UID     string `form:"uid" validate:"required"`
-	Name    string `form:"name" validate:"required"`
+	Name    string `form:"name"`
 	Email   string `form:"email" validate:"required,email"`
 	Phone   string `form:"phone"`
 	Country string `form:"country"`
+	OpenID  bool   `form:"oidc"`
 }
 
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
@@ -124,6 +126,11 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 func (h *Handler) NewUser(c echo.Context) error {
 	var err error
 
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
+	}
+
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
@@ -144,7 +151,7 @@ func (h *Handler) NewUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.NewUser(c, defaultCountry, agentsExists, serversExists, commonInfo, settings), commonInfo))
 }
 
 func (h *Handler) AddUser(c echo.Context) error {
@@ -167,7 +174,7 @@ func (h *Handler) AddUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country)
+	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country, u.OpenID)
 	if err != nil {
 		// TODO manage duplicate key error
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
@@ -178,11 +185,15 @@ func (h *Handler) AddUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := sendConfirmationEmail(h, c, addedUser); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	if !u.OpenID {
+		if err := sendConfirmationEmail(h, c, addedUser); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+		successMessage = i18n.T(c.Request().Context(), "new.user.success")
+	} else {
+		successMessage = i18n.T(c.Request().Context(), "new.user.success_oidc")
 	}
 
-	successMessage = i18n.T(c.Request().Context(), "new.user.success")
 	return h.ListUsers(c, successMessage, errMessage)
 }
 
@@ -350,6 +361,25 @@ func (h *Handler) SetEmailConfirmed(c echo.Context) error {
 	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.email_confirmed"), "")
 }
 
+func (h *Handler) ApproveAccount(c echo.Context) error {
+	uid := c.Param("uid")
+	exists, err := h.Model.UserExists(uid)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	if !exists {
+		return RenderError(c, partials.ErrorMessage("user doesn't exist", false))
+	}
+
+	err = h.Model.Client.User.UpdateOneID(uid).SetRegister(openuem_nats.REGISTER_APPROVED).Exec(context.Background())
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.approved"), "")
+}
+
 func (h *Handler) AskForConfirmation(c echo.Context) error {
 	uid := c.Param("uid")
 	user, err := h.Model.GetUserById(uid)
@@ -370,6 +400,11 @@ func (h *Handler) EditUser(c echo.Context) error {
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
+	}
+
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
 	}
 
 	uid := c.Param("uid")
@@ -401,7 +436,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry, agentsExists, serversExists, commonInfo, settings), commonInfo))
 }
 
 func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {
@@ -464,13 +499,17 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		if len(record) != 5 {
+		user := openuem_ent.User{}
+
+		if len(record) != 6 {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_error_wrong_format", index), false))
 		}
 
 		if record[0] == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_required", "userid", index), false))
 		}
+		user.ID = record[0]
+		user.Name = record[1]
 
 		if record[2] == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_required", "email", index), false))
@@ -481,24 +520,28 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_email", index), false))
 			}
 		}
+		user.Email = record[2]
 
 		if record[3] != "" {
 			if errs := validate.Var(strings.ToUpper(record[3]), "iso3166_1_alpha2"); errs != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_country", index, record[3]), false))
 			}
 		}
+		user.Country = strings.ToUpper(record[3])
+		user.Phone = record[4]
+
+		if record[5] != "" {
+			user.Openid, err = strconv.ParseBool(record[5])
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_oidc", index), false))
+			}
+		}
 
 		index++
 
-		user := openuem_ent.User{}
-		user.ID = record[0]
-		user.Name = record[1]
-		user.Email = record[2]
-		user.Country = strings.ToUpper(record[3])
-		user.Phone = record[4]
 		user.CertClearPassword = pkcs12.DefaultPassword
 
-		err = h.Model.AddImportedUser(user.ID, user.Name, user.Email, user.Phone, user.Country)
+		err = h.Model.AddImportedUser(user.ID, user.Name, user.Email, user.Phone, user.Country, user.Openid)
 		if err != nil {
 			// TODO manage duplicate key error
 			errors = append(errors, err.Error())

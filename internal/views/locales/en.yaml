@@ -477,10 +477,10 @@ en:
   forms:
     required: "This field cannot be empty"
   login:
-    description: "Use the digital certificate that has been provided to you for browser's authentication purposes or register to request one"
     button: "Login with digital certificate"
+    openid: "Login with OpenID Connect"
   register:
-    description: "Fill the form to register in the application. The OpenUEM admin will review your request and generate a digital certificate for you to log in"
+    description: "Fill the form to register in the application. An OpenUEM admin will review your request"
     button: "Register"
     uid: "User ID"
     name: "Name"
@@ -507,9 +507,11 @@ en:
   new:
     user:
       title: "New User"
-      description: "Create a new user for the OpenUEM console. The user will receive an email with a digital certificate attached to it. This certificate must be installed in any browser that will be used to manage the organization"
-      uid_help: "This user ID must be a unique string and will be used to identify the digital certificate when the browser shows a list of certificates that can be used to log in"
+      description: "Create a new user for the OpenUEM console. If you select to use certificates for log in, the user will receive an email with a digital certificate attached to it. This certificate must be installed in any browser that will be used to manage the organization"
+      uid_help: "This user ID must be a unique string and will be used to identify the digital certificate's owner or match the username after a successful Open ID Connect authentication"
       success: "A new user has been added. The user will receive an email to confirm the address. Afterwards the administrator must generate a digital certificate"
+      success_oidc: "A new user has been added"
+      authentication: "Authentication type"
   users:
     add: "Add User"
     completed: "Completed"
@@ -522,6 +524,8 @@ en:
     phone: "Phone"
     register: "Register"
     review_request: "Review request"
+    approved: "Account approved"
+    approve_account: "Approve account"
     pending_email_confirmation: "Pending email confirmation"
     certificate_sent: "Certificate sent"
     certificate_revoked: "Revoked certificate"
@@ -547,13 +551,14 @@ en:
     filter_by_modification: Filter by modification date
     filter_by_register_status: Filter by registration status
     csv_file: CSV File
-    csv_description: Upload a comma-separated values file with no header row and rows using the following format 'userid,fullname,email,country,phone'. Country is a two-letter ISO 3166 Alpha-2 code like 'es'. All fields are optional except userid and email
+    csv_description: Upload a comma-separated values file with no header row and rows using the following format 'userid,fullname,email,country,phone,oidc'. Country is a two-letter ISO 3166 Alpha-2 code like 'es'. OIDC must be 'true' if OAuth is to be used; otherwise, use 'false'. All fields are optional except userid and email
     import_success: Users file has been received and be processed shortly
     import_error_wrong_format: The CSV row %d has a wrong format
     import_required: Field %s in row %d is required and cannot be empty
     import_wrong_country: Country %s in row %d must be a valid two letter ISO3166 Alpha2 code
     import_wrong_email: Email in row %d must be a valid address
     import_wrong_users: "We encountered errors for the following users: %s"
+    import_wrong_oidc: "OpenID Connect value in row %d must be true or false"
     admin_cannot_be_removed: "The admin user cannot be removed"
     new_confirmation_email_sent: "A new confirmation email has been sent to "
     email_confirmed: "Email has been confirmed"
@@ -1305,6 +1310,60 @@ en:
     could_not_convert_site_to_int: "The site ID: %s could not be converted to an int"
     choose_site: "Choose a site..."
     domain: "Domain"
+
+  authentication:
+    title: "Authentication"
+    description: "Configure how OpenUEM console authenticates your users and severals aspects related to user accounts"
+    could_not_get_settings: "could not get authentication settings, reason: %s"
+    settings_save: "Save settings"
+    settings_saved: "Authentication settings have been saved"
+    settings_not_saved: "Authentication settings could not be saved, reason: %s"
+    use_certificates_title: "Use certificates to log in"
+    use_certificates_description: "Use certificates signed by OpenUEM CA to log in the console"
+    allow_register_title: "Show Register in log in page"
+    allow_register_description: "A register button that links to a form will be available"
+    use_oidc_title: "Use Open ID Connect"
+    use_oidc_description: "OpenID connect allows you to use supported external identity providers to log in"
+    oidc_provider_title: "OIDC Provider"
+    oidc_provider_description: "Choose an OpenUEM-compatible OIDC provider"
+    oidc_provide_choose: "Choose your provider"
+    oidc_url_title: "OIDC URL"
+    oidc_url_description: "OIDC provider's url that connects you with identity providers (for example https://example.com/application/o/open-uem/)"
+    oidc_client_id_title: "OIDC Client ID"
+    oidc_client_id_description: "The Client ID for your OIDC application"
+    oidc_role_or_group_title: "OIDC Role or group"
+    oidc_role_or_group_description: "A role or group that the user has to be a member of in order to log in (openuem, for example)"
+    oidc_keycloak_public_key_title: "OIDC Keycloak Public Key"
+    oidc_keycloak_public_key_description: "If the role/group is selected we need the public Key that can be retrieved from Realm Settings - Key"
+    oidc_autocreate_account_title: "OIDC create account (auto)"
+    oidc_autocreate_account_description: "If a user is a member of the defined role or group, an account is automatically created; otherwise, the account must first be created in OpenUEM"
+    oidc_autoapprove_account_title: "OIDC approve account (auto)"
+    oidc_autoapprove_account_description: "If a user is a member of the defined role or group the access is approved automatically; otherwise, the account must first be approved in OpenUEM"
+    could_not_parse_use_certificates: "Could not parse the use of certificates"
+    could_not_parse_allow_register: "Could not parse allow register"
+    could_not_parse_use_oidc: "Could not parse use OIDC"
+    could_not_parse_oidc_auto_create: "Could not parse OIDC auto create"
+    could_not_parse_oidc_auto_approve: "Could not parse OIDC auto approve"
+    could_not_reenable_certs: "Could not re-enable the use of certificates to log in, reason: %s"
+    provider_not_valid: "The selected provider is not valid"
+    client_id_is_required: "The Client ID is required"
+    oidc_url_is_required: "The OIDC URL is required"
+    role_required: "The role or group is required"
+    keycloak_public_key_required: "The public key for Keycloak is required"
+    at_least_one_auth_method: "At least one authentication method must be enabled"
+    login_with_certs: "Use the digital certificate that has been provided to you for browser's authentication purposes"
+    register_to_request_cert: "or register to request one"
+    login_with_oidc: "Use OpenID Connect with your Identity Provider to log in"
+    use_certs_must_be_enabled: "Use certs must be enabled if you allow users to register"
+    cannot_check_if_user_exists: "Cannot check if user exists in database"
+    cannot_create_oidc_user: "Cannot create new OIDC user, reason: %s"
+    an_admin_must_create_your_account: "An admin must create the account first in OpenUEM"
+    oidc: "Uses OpenID Connect to log in"
+    certificate: "Uses certificates to log in"
+    type: "Authentication type"
+    could_not_get_user_id: "Could not get user ID from session"
+    could_not_get_user_info: "Could not get user info from session, reason: %s"
+
   countries:
     Australia: "Australia"
     Austria: "Austria"

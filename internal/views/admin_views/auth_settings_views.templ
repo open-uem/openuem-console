@@ -1,0 +1,174 @@
+package admin_views
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, successMessage string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "authentication.title"), Url: "/admin/authentication"}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("authentication", agentsExists, serversExists, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="uk-card-title flex gap-2 items-center">
+							{ i18n.T(ctx, "authentication.title") }
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "authentication.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form class="flex flex-col mt-6 gap-4 w-3/4">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_certificates_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_certificates_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="authentication-use-certificates">
+											<option value="true" selected?={ settings.UseCertificates }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UseCertificates }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr id="allow-register-section" class={ templ.KV("hidden", !settings.UseCertificates) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.allow_register_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.allow_register_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="authentication-allow-register">
+											<option value="true" selected?={ settings.AllowRegister }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.AllowRegister }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_oidc_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_oidc_description") }</td>
+									<td class="!align-middle">
+										<select
+											class="uk-select"
+											name="authentication-use-oidc"
+											_="on change
+                                                if me.value is 'true' then
+                                                    remove .hidden from <tr[id^=oidc-section]/>
+                                                else    
+                                                    add .hidden to <tr[id^=oidc-section]/>
+                                                end                                            
+                                            end"
+										>
+											<option value="true" selected?={ settings.UseOIDC }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UseOIDC }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr id="oidc-section-provider" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_provider_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_provider_description") }</td>
+									<td class="!align-middle">
+										<select
+											class="uk-select"
+											name="authentication-oidc-provider"
+											_="on change
+                                                if me.value is 'keycloak' then
+                                                    remove .hidden from #oidc-section-keycloak-public-key
+                                                else    
+                                                    add .hidden to #oidc-section-keycloak-public-key
+                                                end
+												set #authentication-oidc-server.value to ''   
+												set #authentication-oidc-client-id.value to ''   
+												set #authentication-oidc-role.value to ''   
+												set #authentication-oidc-keycloak-public-key.value to ''                                          
+                                            end"
+										>
+											<option value="" selected?={ settings.OIDCProvider == "" }>{ i18n.T(ctx, "authentication.oidc_provide_choose") }</option>
+											<option value="authentik" selected?={ settings.OIDCProvider == "authentik" }>authentik</option>
+											<option value="keycloak" selected?={  settings.OIDCProvider == "keycloak" }>keycloak</option>
+											<option value="zitadel" selected?={  settings.OIDCProvider == "zitadel" }>zitadel</option>
+										</select>
+									</td>
+								</tr>
+								<tr id="oidc-section-server" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_url_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_url_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-server" name="authentication-oidc-server" value={ settings.OIDCIssuerURL } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr id="oidc-section-client-id" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_client_id_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_client_id_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-client-id" name="authentication-oidc-client-id" value={ settings.OIDCClientID } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr id="oidc-section-role" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-role" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != "keycloak") }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-keycloak-public-key" name="authentication-oidc-keycloak-public-key" value={ settings.OIDCKeycloakPublicKey } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr id="oidc-section-auto-create" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_autocreate_account_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_autocreate_account_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="authentication-oidc-auto-create">
+											<option value="true" selected?={ settings.OIDCAutoCreateAccount }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.OIDCAutoCreateAccount }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr id="oidc-section-auto-approve" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_autoapprove_account_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_autoapprove_account_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="authentication-oidc-auto-approve">
+											<option value="true" selected?={ settings.OIDCAutoApprove }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.OIDCAutoApprove }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+							</table>
+							<div class="flex flex-row-reverse">
+								<button
+									hx-post="/admin/authentication"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									type="submit"
+									class="uk-button uk-button-primary"
+								>
+									{ i18n.T(ctx, "authentication.settings_save") }
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ AuthenticationSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}
