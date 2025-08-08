@@ -26,9 +26,9 @@ require (
 	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
 	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/microcosm-cc/bluemonday v1.0.27
-	github.com/mssola/useragent v1.0.0	
+	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.43.0
-	github.com/open-uem/ent v0.0.0-20250808084751-7afc68eac018		
+	github.com/open-uem/ent v0.0.0-20250808084751-7afc68eac018
 	github.com/open-uem/nats v0.0.0-20250717101700-45922fb3baa4
 	github.com/open-uem/utils v0.0.0-20250702121339-316c5b599cd3
 	github.com/open-uem/wingetcfg v0.0.0-20250723054912-02f24a659219
@@ -37,10 +37,11 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.7
 	github.com/wneessen/go-mail v0.6.2
-	golang.org/x/crypto v0.37.0
-	golang.org/x/mod v0.24.0
+	github.com/xuri/excelize/v2 v2.9.1
+	golang.org/x/crypto v0.40.0
+	golang.org/x/mod v0.26.0
 	golang.org/x/oauth2 v0.30.0
-	golang.org/x/sys v0.32.0
+	golang.org/x/sys v0.34.0
 	gopkg.in/ini.v1 v1.67.0
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )

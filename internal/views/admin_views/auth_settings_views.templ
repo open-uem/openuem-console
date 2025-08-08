@@ -99,8 +99,8 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 									</td>
 								</tr>
 								<tr id="oidc-section-server" class={ templ.KV("hidden", !settings.UseOIDC) }>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_title") }</td>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_server_description") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_url_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_url_description") }</td>
 									<td class="!align-middle">
 										<input class="uk-input" type="text" id="authentication-oidc-server" name="authentication-oidc-server" value={ settings.OIDCIssuerURL } spellcheck="false" autocomplete="off" autofocus/>
 									</td>

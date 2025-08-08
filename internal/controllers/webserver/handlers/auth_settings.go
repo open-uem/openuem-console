@@ -78,7 +78,7 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 		}
 
 		if useOIDC && oidcServer == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.server_is_required"), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.oidc_url_is_required"), true))
 		}
 
 		if useOIDC && oidcClientID == "" {

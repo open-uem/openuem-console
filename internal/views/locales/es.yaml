@@ -472,10 +472,10 @@ es:
   forms:
     required: "Este campo no puede estar vacío"
   login:
-    description: "Use el certificado digital que se le ha proporcionado para identificarse desde su navegador o regístrese para solicitar uno"
     button: "Inicie sesión con certificado digital"
+    openid: "Iniciar sesión con OpenID Connect"
   register:
-    description: "Rellene los datos del formulario para registarse en la aplicación. El administrador de OpenUEM revisará su solicitud y generará un certificado digital para que pueda acceder"
+    description: "Complete el formulario para registrarse en la aplicación. Un administrador de OpenUEM revisará su solicitud."
     button: "Regístrese"
     uid: "ID de Usuario"
     name: "Nombre"
@@ -501,9 +501,11 @@ es:
   new:
     user:
       title: "Nuevo Usuario"
-      description: "Añada un nuevo usuario para la consola de OpenUEM. El usuario recibirá un correo electrónico con un certificado digital como fichero adjunto. Este certificado debe instalarse en cualquier navegador que vaya a utilizarse para gestionar la organización"
-      uid_help: "Este ID de usuario debe ser una cadena de texto única y será utilizada para identificar el certificado digital cuando el navegador muestre una lista de certificados que pueden utilizarse para iniciar sesión"
+      description: "Cree un nuevo usuario para la consola OpenUEM. Si selecciona usar certificados para iniciar sesión, el usuario recibirá un correo electrónico con un certificado digital adjunto. Este certificado debe estar instalado en cualquier navegador que se utilice para administrar la organización."
+      uid_help: "Este ID de usuario debe ser una cadena única y se utilizará para identificar al propietario del certificado digital o coincidir con el nombre de usuario después de una autenticación exitosa de Open ID Connect."
       success: "Se ha añadido un nuevo usuario que deberá confirmar su correo. Posteriormente el administrador deberá generar del certificado"
+      success_oidc: "Se ha añadido un nuevo usuario"
+      authentication: "Tipo de autenticación"
   users:
     add: "Agregar Usuario"
     completed: "Completado"
@@ -543,13 +545,14 @@ es:
     filter_by_modification: Filtar por fecha de modificación
     filter_by_register_status: Filtrar por estado del registro
     csv_file: Fichero CSV
-    csv_description: Suba un fichero de valores separados por coma sin cabecera y en el que las filas siguen el formato 'userid,nombre,email,país,teléfono'. País es un código de dos letras ISO 3166 Alpha-2 como 'es'. Todos los campos son opcionales salvo los campos userid y email
+    csv_description: Suba un archivo de valores separados por comas sin filas de encabezado y con filas con el siguiente formato: 'userid,fullname,email,country,phone,oidc'. El país es un código ISO 3166 Alfa-2 de dos letras, como 'es'. El valor de OIDC debe ser 'true' si se va a usar OAuth; de lo contrario, use 'false'. Todos los campos son opcionales, excepto el de ID de usuario y correo electrónico
     import_success: El fichero de usuarios se ha recibido y será procesado en breve
     import_error_wrong_format: La fila %d CSV tiene un formato erróneo
     import_required: El campo %s en la fila %d es obligatorio y no puede estar vacío
     import_wrong_country: País %s en la fila %d debe ser un código ISO3166 Alpha2 de dos letras
     import_wrong_email: Email en la fila %d debe contener una dirección válida
     import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
+    import_wrong_oidc: "El valor de OpenID Connect en la fila %d debe ser true o false"
     admin_cannot_be_removed: "El usuario admin no puede ser eliminado"
     new_confirmation_email_sent: "Se ha enviado un nuevo email de confirmación a "
     email_confirmed: "La dirección de correo electrónico ha sido confirmada"
@@ -1299,6 +1302,60 @@ es:
     could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
+
+  authentication:
+    title: "Autenticación"
+    description: "Configure cómo la consola OpenUEM autentica a sus usuarios y varios aspectos relacionados con las cuentas de usuario"
+    could_not_get_settings: "no se pudieron obtener la configuración de autenticación, motivo: %s"
+    settings_save: "Guardar configuración"
+    settings_saved: "La configuración de autenticación se ha guardado"
+    settings_not_saved: "La configuración de autenticación no se pudo guardar, razón: %s"
+    use_certificates_title: "Usar certificados para iniciar sesión"
+    use_certificates_description: "Usar certificados firmados por la OpenUEM CA para iniciar sesión en la consola"
+    allow_register_title: "Mostrar Registo en la página de inicio de sesión"
+    allow_register_description: "Un botón de registro que enlaza con un formulario estará disponible"
+    use_oidc_title: "Usar Open ID Connect"
+    use_oidc_description: "OpenID connect le permite usar proveedores de identidad externos para iniciar sesión"
+    oidc_provider_title: "Proveedor OIDC"
+    oidc_provider_description: "Elegir un proveedor OIDC compatible con OpenUEM"
+    oidc_provide_choose: "Elija su proveedor"
+    oidc_url_title: "OIDC URL"
+    oidc_url_description: "URL del proveedor OIDC que le conecta con sus proveedores de identidad (por ejemplo https://example.com/application/o/open-uem/)"
+    oidc_client_id_title: "ID de cliente OIDC"
+    oidc_client_id_description: "El ID de cliente para su aplicación OIDC"
+    oidc_role_or_group_title: "Rol o grupo de OIDC"
+    oidc_role_or_group_description: "Un rol o grupo del que el usuario debe ser miembro para poder iniciar sesión (openuem, por ejemplo)"
+    oidc_keycloak_public_key_title: "Clave pública de OIDC Keycloak"
+    oidc_keycloak_public_key_description: "Si se selecciona el rol/grupo, necesitamos la clave pública que se puede recuperar desde Configuración del Realm Settings - Key"
+    oidc_autocreate_account_title: "Crear cuenta de OIDC (automáticamente)"
+    oidc_autocreate_account_description: "Si un usuario es miembro del rol o grupo definido, se crea automáticamente una cuenta; de lo contrario, primero se debe crear la cuenta en OpenUEM"
+    oidc_autoapprove_account_title: "Aprobación de cuenta de OIDC (automática)"
+    oidc_autoapprove_account_description: "Si un usuario es miembro del rol o grupo definido, el acceso se aprueba automáticamente; de lo contrario, la cuenta primero debe aprobarse en OpenUEM"
+    could_not_parse_use_certificates: "No se pudo analizar el uso de certificados"
+    could_not_parse_allow_register: "No se pudo analizar el registro permitido"
+    could_not_parse_use_oidc: "No se pudo analizar el uso de OIDC"
+    could_not_parse_oidc_auto_create: "No se pudo analizar la creación automática de una cuenta OIDC"
+    could_not_parse_oidc_auto_approve: "No se pudo analizar la aprobación automática de una cuenta OIDC"
+    could_not_reenable_certs: "No se pudo volver a habilitar el uso de certificados para iniciar sesión, motivo: %s"
+    provider_not_valid: "El proveedor seleccionado no es válido"
+    client_id_is_required: "Se requiere el ID del cliente"
+    oidc_url_is_required: "Se requiere la URL del OIDC"
+    role_required: "Se requiere el rol o grupo"
+    keycloak_public_key_required: "Se requiere la clave pública para Keycloak"
+    at_least_one_auth_method: "Se debe habilitar al menos un método de autenticación"
+    login_with_certs: "Utilice el certificado digital que se le ha proporcionado para fines de autenticación del navegador"
+    register_to_request_cert: "o regístrese para solicitar uno"
+    login_with_oidc: "Utilice OpenID Connect con su proveedor de identidad para iniciar sesión"
+    use_certs_must_be_enabled: "El uso de certificados debe estar habilitado si permite que los usuarios se registren"
+    cannot_check_if_user_exists: "No se puede verificar si el usuario existe en la base de datos."
+    cannot_create_oidc_user: "No se puede crear un nuevo usuario OIDC, motivo: %s"
+    an_admin_must_create_your_account: "Un administrador debe crear primero la cuenta en OpenUEM"
+    oidc: "Utiliza OpenID Connect para iniciar sesión"
+    certificate: "Utiliza certificados para iniciar sesión"
+    type: "Tipo de autenticación"
+    could_not_get_user_id: "No se pudo obtener el ID de usuario de la sesión"
+    could_not_get_user_info: "No se pudo obtener la información del usuario de la sesión, motivo: %s"
+
   countries:
     Australia: "Australia"
     Austria: "Austria"
