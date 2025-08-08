@@ -545,7 +545,7 @@ es:
     filter_by_modification: Filtar por fecha de modificación
     filter_by_register_status: Filtrar por estado del registro
     csv_file: Fichero CSV
-    csv_description: Suba un archivo de valores separados por comas sin filas de encabezado y con filas con el siguiente formato: 'userid,fullname,email,country,phone,oidc'. El país es un código ISO 3166 Alfa-2 de dos letras, como 'es'. El valor de OIDC debe ser 'true' si se va a usar OAuth; de lo contrario, use 'false'. Todos los campos son opcionales, excepto el de ID de usuario y correo electrónico
+    csv_description: Suba un archivo de valores separados por comas sin filas de encabezado y con filas con el siguiente formato 'userid,fullname,email,country,phone,oidc'. El país es un código ISO 3166 Alfa-2 de dos letras, como 'es'. El valor de OIDC debe ser 'true' si se va a usar OAuth; de lo contrario, use 'false'. Todos los campos son opcionales, excepto el de ID de usuario y correo electrónico
     import_success: El fichero de usuarios se ha recibido y será procesado en breve
     import_error_wrong_format: La fila %d CSV tiene un formato erróneo
     import_required: El campo %s en la fila %d es obligatorio y no puede estar vacío
