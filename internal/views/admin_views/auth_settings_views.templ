@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/auth"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -80,11 +81,6 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 											class="uk-select"
 											name="authentication-oidc-provider"
 											_="on change
-                                                if me.value is 'keycloak' then
-                                                    remove .hidden from #oidc-section-keycloak-public-key
-                                                else    
-                                                    add .hidden to #oidc-section-keycloak-public-key
-                                                end
 												set #authentication-oidc-server.value to ''   
 												set #authentication-oidc-client-id.value to ''   
 												set #authentication-oidc-role.value to ''   
@@ -92,9 +88,10 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
                                             end"
 										>
 											<option value="" selected?={ settings.OIDCProvider == "" }>{ i18n.T(ctx, "authentication.oidc_provide_choose") }</option>
-											<option value="authentik" selected?={ settings.OIDCProvider == "authentik" }>authentik</option>
-											<option value="keycloak" selected?={  settings.OIDCProvider == "keycloak" }>keycloak</option>
-											<option value="zitadel" selected?={  settings.OIDCProvider == "zitadel" }>zitadel</option>
+											<option value={ auth.AUTHELIA } selected?={ settings.OIDCProvider == auth.AUTHELIA }>{ auth.AUTHELIA }</option>
+											<option value={ auth.AUTHENTIK } selected?={ settings.OIDCProvider == auth.AUTHENTIK }>{ auth.AUTHENTIK }</option>
+											<option value={ auth.KEYCLOAK } selected?={  settings.OIDCProvider == auth.KEYCLOAK }>{ auth.KEYCLOAK }</option>
+											<option value={ auth.ZITADEL } selected?={  settings.OIDCProvider == auth.ZITADEL }>{ auth.ZITADEL }</option>
 										</select>
 									</td>
 								</tr>
@@ -117,13 +114,6 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_description") }</td>
 									<td class="!align-middle">
 										<input class="uk-input" type="text" id="authentication-oidc-role" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
-									</td>
-								</tr>
-								<tr id="oidc-section-keycloak-public-key" class={ templ.KV("hidden", settings.OIDCProvider != "keycloak") }>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_title") }</td>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_keycloak_public_key_description") }</td>
-									<td class="!align-middle">
-										<input class="uk-input" type="text" id="authentication-oidc-keycloak-public-key" name="authentication-oidc-keycloak-public-key" value={ settings.OIDCKeycloakPublicKey } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
 								<tr id="oidc-section-auto-create" class={ templ.KV("hidden", !settings.UseOIDC) }>
