@@ -5,8 +5,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -16,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -24,6 +23,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/auth"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"golang.org/x/oauth2"
 )
@@ -53,9 +53,9 @@ type UserInfoResponse struct {
 	Groups            []string `json:"groups"`
 }
 
-type WellKnownEndpoints struct {
-	TokenEndpoint    string `json:"token_endpoint"`
-	UserInfoEndpoint string `json:"userinfo_endpoint"`
+type ZitadelRolesResponse struct {
+	Roles   []string `json:"result"`
+	Message string   `json:"message"`
 }
 
 func (h *Handler) OIDCLogIn(c echo.Context) error {
@@ -80,13 +80,12 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 	authProvider := settings.OIDCProvider
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
 
+	oauth2Config.Scopes = []string{"openid", "profile", "email"}
 	switch authProvider {
-	case "zitadel":
-		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone", "urn:zitadel:iam:org:project:id:zitadel:aud"}
-	case "keycloak":
-		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone"}
-	case "authentik":
-		oauth2Config.Scopes = []string{oidc.ScopeOpenID, "profile", "email", "phone"}
+	case auth.AUTHELIA:
+		oauth2Config.Scopes = append(oauth2Config.Scopes, "groups")
+	case auth.ZITADEL:
+		oauth2Config.Scopes = append(oauth2Config.Scopes, "phone", "urn:zitadel:iam:org:project:id:zitadel:aud")
 	}
 
 	state, err := randomBytestoHex(32)
@@ -118,8 +117,6 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 func (h *Handler) OIDCCallback(c echo.Context) error {
 
-	var oidcUser *ent.User
-
 	settings, err := h.Model.GetAuthenticationSettings()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
@@ -131,16 +128,18 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not instantiate OIDC provider")
 	}
 
+	errorDescription := c.QueryParam("error_description")
+
 	// Get code from request
 	code := c.QueryParam("code")
 	if code == "" {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get OIDC code from request")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorDescription)
 	}
 
 	// Get state from request
 	state := c.QueryParam("state")
 	if state == "" {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get OIDC state from request")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorDescription)
 	}
 
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
@@ -164,28 +163,58 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	// TODO Verify code if possible, I've verifier and I've the code how I can check if the code is valid? Is this needed?
 
+	// Get access token in exchange of code
+	oAuth2TokenResponse, err := h.ExchangeCodeForAccessToken(c, code, verifierFromCookie, provider.Endpoint().TokenURL, settings.OIDCClientID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not exchange OIDC code for token")
+	}
+
 	authProvider := settings.OIDCProvider
 
-	switch authProvider {
-	case "zitadel":
-		oidcUser, err = h.ZitadelOIDCLogIn(c, code, verifierFromCookie, settings, provider)
-		if err != nil {
-			return err
+	// Get user account info from remote endpoint
+	u, err := GetUserInfo(oAuth2TokenResponse.AccessToken, provider.UserInfoEndpoint())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
+	}
+
+	// Get user information
+	oidcUser := ent.User{
+		ID:            u.PreferredUsername,
+		Name:          u.Name,
+		Email:         u.Email,
+		EmailVerified: u.EmailVerified,
+		Phone:         u.Phone,
+		RefreshToken:  oAuth2TokenResponse.RefreshToken,
+		AccessToken:   oAuth2TokenResponse.AccessToken,
+		TokenType:     oAuth2TokenResponse.TokenType,
+		TokenExpiry:   oAuth2TokenResponse.ExpiresIn,
+		IDToken:       oAuth2TokenResponse.IDToken,
+	}
+
+	// Check if user is member of specified group or role
+	if authProvider == auth.ZITADEL {
+		if settings.OIDCRole != "" {
+			// Get roles info from remote endpoint
+			data, err := h.ZitadelGetUserRoles(oAuth2TokenResponse.AccessToken, settings)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
+			}
+
+			if !slices.Contains(data.Roles, settings.OIDCRole) {
+				return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
+			}
 		}
-	case "keycloak":
-		oidcUser, err = h.KeycloakOIDCLogIn(c, code, verifierFromCookie, settings, provider)
-		if err != nil {
-			return err
-		}
-	case "authentik":
-		oidcUser, err = h.AuthentikOIDCLogIn(c, code, verifierFromCookie, settings, provider)
-		if err != nil {
-			return err
+	} else {
+
+		if settings.OIDCRole != "" {
+			if !slices.Contains(u.Groups, settings.OIDCRole) {
+				return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
+			}
 		}
 	}
 
 	// Manage session
-	return h.ManageOIDCSession(c, oidcUser)
+	return h.ManageOIDCSession(c, &oidcUser)
 }
 
 // Reference: https://chrisguitarguy.com/2022/12/07/oauth-pkce-with-go/
@@ -472,7 +501,7 @@ func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifi
 	return &z, nil
 }
 
-func (h *Handler) GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error) {
+func GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error) {
 	user := UserInfoResponse{}
 
 	// create request
@@ -515,19 +544,48 @@ func (h *Handler) GetUserInfo(accessToken string, endpoint string) (*UserInfoRes
 	return &user, nil
 }
 
-// Reference: https://stackoverflow.com/questions/76077022/how-to-validate-json-token-generated-by-keycloak-using-golang
-func parseRSAPublicKey(base64Encoded string) (*rsa.PublicKey, error) {
-	buf, err := base64.StdEncoding.DecodeString(base64Encoded)
+func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authentication) (*ZitadelRolesResponse, error) {
+	u := fmt.Sprintf("%s/auth/v1/permissions/me/_search", settings.OIDCIssuerURL)
+	roles := ZitadelRolesResponse{}
+
+	// create request
+	req, err := http.NewRequest("POST", u, nil)
 	if err != nil {
+		log.Printf("[ERROR]: could not prepare HTTP get for permissions endpoint, reason: %v", err)
 		return nil, err
 	}
-	parsedKey, err := x509.ParsePKIXPublicKey(buf)
+
+	// add access token
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	req.Header.Add("Accept", "application/json")
+
+	// send request
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("[ERROR]: could not get HTTP response from permissions endpoint, reason: %v", err)
 		return nil, err
 	}
-	publicKey, ok := parsedKey.(*rsa.PublicKey)
-	if ok {
-		return publicKey, nil
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("[ERROR]: could not read response bytes, reason: %v", err)
+		return nil, err
 	}
-	return nil, fmt.Errorf("unexpected key type %T", publicKey)
+
+	// DEBUG
+	// log.Println(string([]byte(body)))
+
+	if err := json.Unmarshal(body, &roles); err != nil {
+		log.Printf("[ERROR]: could not unmarshal response from permissions endpoint, reason: %v", err)
+		return nil, err
+	}
+
+	if roles.Message != "" {
+		log.Printf("[ERROR]: could not get roles from permissions endpoint, reason: %v", roles.Message)
+		return nil, errors.New(roles.Message)
+	}
+
+	return &roles, nil
 }

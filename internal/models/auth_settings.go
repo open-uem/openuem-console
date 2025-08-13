@@ -24,7 +24,7 @@ func (m *Model) GetAuthenticationSettings() (*openuem_ent.Authentication, error)
 }
 
 func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister bool, useOIDC bool, provider string,
-	server string, clientID string, role string, publicKey string, autoCreate bool, autoApprove bool) error {
+	server string, clientID string, role string, autoCreate bool, autoApprove bool) error {
 
 	s, err := m.Client.Authentication.Query().Only(context.Background())
 	if err != nil {
@@ -39,7 +39,6 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 		SetOIDCIssuerURL(server).
 		SetOIDCClientID(clientID).
 		SetOIDCRole(role).
-		SetOIDCKeycloakPublicKey(publicKey).
 		SetOIDCAutoCreateAccount(autoCreate).
 		SetOIDCAutoApprove(autoApprove)
 

@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/auth"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -38,14 +40,17 @@ func (h *Handler) Logout(c echo.Context) error {
 		}
 
 		switch settings.OIDCProvider {
-		case "authentik":
+		case auth.AUTHELIA:
+			logoutURL = fmt.Sprintf("%s/logout?rd=%s", settings.OIDCIssuerURL, redirecURI)
+		case auth.AUTHENTIK:
 			logoutURL = fmt.Sprintf("%send-session/", settings.OIDCIssuerURL)
-		case "keycloak":
+		case auth.KEYCLOAK:
 			logoutURL = fmt.Sprintf("%s/protocol/openid-connect/logout?client_id=%s&post_logout_redirect_uri=%s", settings.OIDCIssuerURL, settings.OIDCClientID, redirecURI)
-		case "zitadel":
+		case auth.ZITADEL:
 			logoutURL = fmt.Sprintf("%s/oidc/v1/end_session?client_id=%s&post_logout_redirect_uri=%s", settings.OIDCIssuerURL, settings.OIDCClientID, redirecURI)
 		}
 
+		log.Println(logoutURL)
 		c.Response().Header().Set("HX-Redirect", logoutURL)
 		return c.String(http.StatusFound, "")
 	}
