@@ -136,6 +136,15 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			if err := views.ErrorPage("401", message).Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)
 			}
+		case http.StatusForbidden:
+			message := "Forbidden"
+			if he.Message != nil {
+				message = he.Message.(string)
+			}
+
+			if err := views.ErrorPage("403", message).Render(c.Request().Context(), c.Response().Writer); err != nil {
+				c.Logger().Error(err)
+			}
 		case http.StatusMethodNotAllowed:
 			if err := views.ErrorPage("405", "Method Not Allowed").Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)

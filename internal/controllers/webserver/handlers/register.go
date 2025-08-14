@@ -23,7 +23,8 @@ type RegisterRequest struct {
 	Email    string `form:"email" validate:"required,email"`
 	Phone    string `form:"phone" validate:"required,e164"`
 	Country  string `form:"country" validate:"required,iso3166_1_alpha2"`
-	Password string `form:"password" validate:"required"`
+	Password string `form:"password"`
+	OpenID   bool   `form:"oidc" validate:"required"`
 }
 
 func (h *Handler) SignIn(c echo.Context) error {
@@ -34,7 +35,12 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return err
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry)))
+	settings, err := h.Model.GetAuthenticationSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
+	}
+
+	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings)))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
@@ -63,6 +69,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		values.Phone = r.Phone
 		values.Country = r.Country
 		values.Password = r.Password
+		values.OpenID = r.OpenID
 
 		errs := validate.Var(r.UID, "required")
 		if errs != nil {
@@ -121,15 +128,27 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			validations.PhoneInvalid = true
 		}
 
-		errs = validate.Var(r.Password, "required")
-		if errs != nil {
-			validations.PasswordRequired = true
+		if !r.OpenID {
+			errs = validate.Var(r.Password, "required")
+			if errs != nil {
+				validations.PasswordRequired = true
+			}
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry)))
+		errs = validate.Var(r.OpenID, "required")
+		if errs != nil {
+			validations.OpenIDRequired = true
+		}
+
+		settings, err := h.Model.GetAuthenticationSettings()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
+		}
+
+		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings)))
 	}
 
-	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password); err != nil {
+	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password, r.OpenID); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
