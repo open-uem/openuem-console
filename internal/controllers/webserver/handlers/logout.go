@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -50,7 +49,6 @@ func (h *Handler) Logout(c echo.Context) error {
 			logoutURL = fmt.Sprintf("%s/oidc/v1/end_session?client_id=%s&post_logout_redirect_uri=%s", settings.OIDCIssuerURL, settings.OIDCClientID, redirecURI)
 		}
 
-		log.Println(logoutURL)
 		c.Response().Header().Set("HX-Redirect", logoutURL)
 		return c.String(http.StatusFound, "")
 	}
