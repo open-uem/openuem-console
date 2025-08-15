@@ -30,6 +30,10 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 	}
 
 	agentId := c.Param("uuid")
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
 
 	settings, err := h.Model.GetRustDeskSettings(tenantID)
 	if err != nil {
@@ -77,7 +81,12 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.remote_error", result.Error), true))
 	}
 
-	return RenderView(c, computers_views.RustDeskControl(agentId, result.RustDeskID, randomPassword, commonInfo))
+	rustDeskID := result.RustDeskID
+	if settings[0].DirectIPAccess {
+		rustDeskID = agent.IP
+	}
+
+	return RenderView(c, computers_views.RustDeskControl(agentId, rustDeskID, randomPassword, commonInfo))
 }
 
 func (h *Handler) RustDeskStop(c echo.Context) error {

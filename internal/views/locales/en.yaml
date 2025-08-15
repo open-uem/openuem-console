@@ -1370,7 +1370,7 @@ en:
 
   rustdesk:
     settings_title: "RustDesk"
-    settings_description: "OpenUEM can use RustDesk to open remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options. If you run your own ID server or Relay server, you can introduce here the hostname or IP address, and the key used to encrypt communications. If you have RustDesk Pro, you can also introduce the API server. If no server settings are added here, the public RustDesk servers will be used"
+    settings_description: "OpenUEM can use RustDesk for remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options"
     settings_rendezvous_server_title: "ID Server"
     settings_rendezvous_server_description: "The IP address or hostname of your RustDesk ID Server (hbbs server)"
     settings_relay_server_title: "Relay Server"
