@@ -314,6 +314,10 @@ func (h *Handler) DeleteSite(c echo.Context) error {
 	}
 
 	s, err := h.Model.GetSiteById(tenantID, siteID)
+	if err != nil {
+		return h.ListSites(c, "", i18n.T(c.Request().Context(), "sites.could_not_find_site"), false)
+	}
+
 	if s.IsDefault {
 		return h.ListSites(c, "", i18n.T(c.Request().Context(), "sites.default_cannot_be_deleted"), false)
 	}

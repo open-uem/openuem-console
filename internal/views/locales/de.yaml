@@ -1302,6 +1302,8 @@ de:
     could_not_convert_site_to_int: "Die Standort-ID: %s konnte nicht in eine Ganzzahl umgewandelt werden"
     choose_site: "Standort wählen..."
     domain: "Domain"
+    could_not_find_site: "Die Site konnte nicht gefunden werden"
+    could_not_find_tenant: "Die Organisation konnte nicht gefunden werden."
 
   authentication:
     title: "Authentifizierung"

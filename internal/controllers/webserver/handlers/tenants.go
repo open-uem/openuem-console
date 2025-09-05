@@ -278,6 +278,9 @@ func (h *Handler) DeleteTenant(c echo.Context) error {
 	}
 
 	t, err := h.Model.GetTenantByID(tenantID)
+	if err != nil {
+		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.could_not_find_tenant"), false)
+	}
 	if t.IsDefault {
 		return h.ListTenants(c, "", i18n.T(c.Request().Context(), "tenants.default_cannot_be_deleted"), false)
 	}
