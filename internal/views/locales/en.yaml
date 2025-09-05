@@ -1310,6 +1310,8 @@ en:
     could_not_convert_site_to_int: "The site ID: %s could not be converted to an int"
     choose_site: "Choose a site..."
     domain: "Domain"
+    could_not_find_site: "Could not find the site"
+    could_not_find_tenant: "Could not find the organization"
 
   authentication:
     title: "Authentication"

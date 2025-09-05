@@ -1302,6 +1302,8 @@ es:
     could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
+    could_not_find_site: "No se pudo encontrar el sitio"
+    could_not_find_tenant: "No se pudo encontrar la organización"
 
   authentication:
     title: "Autenticación"
