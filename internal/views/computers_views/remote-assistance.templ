@@ -10,7 +10,7 @@ import (
 
 var connectVNCHandle = templ.NewOnceHandle()
 
-templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo, errMessage string) {
+templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete, hasRustDeskSettings bool, commonInfo *partials.CommonInfo, errMessage string) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -60,7 +60,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 								</p>
 							}
 						}
-						if agent.HasRustdesk {
+						if agent.HasRustdesk && hasRustDeskSettings {
 							@RustDeskInit(agent)
 						} else {
 							<div class="flex gap-2 items-center uk-text-small uk-text-muted">

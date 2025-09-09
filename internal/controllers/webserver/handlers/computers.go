@@ -395,7 +395,15 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, ""), commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	_, err = h.Model.GetRustDeskSettings(tenantID)
+	hasRustDeskSettings := err == nil
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, ""), commonInfo))
 }
 
 func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {

@@ -82,7 +82,7 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 	}
 
 	rustDeskID := result.RustDeskID
-	if settings[0].DirectIPAccess {
+	if rustdeskSettings.DirectIPAccess {
 		rustDeskID = agent.IP
 	}
 
@@ -97,29 +97,37 @@ func (h *Handler) RustDeskStop(c echo.Context) error {
 		return err
 	}
 
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	_, err = h.Model.GetRustDeskSettings(tenantID)
+	hasRustDeskSettings := err == nil
+
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, err.Error()), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, err.Error()), commonInfo))
 	}
 
 	msg, err := h.NATSConnection.Request("agent.rustdesk.stop."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, err.Error()), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, err.Error()), commonInfo))
 	}
 
 	result := nats.RustDeskResult{}
 	if err := json.Unmarshal(msg.Data, &result); err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, result.Error), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, result.Error), commonInfo))
 	}
 
 	if result.Error != "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, result.Error), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, result.Error), commonInfo))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, commonInfo, ""), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, ""), commonInfo))
 }
 
 func (h *Handler) RustDeskSettings(c echo.Context) error {
