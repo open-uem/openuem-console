@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/open-uem/ent/enttest"
@@ -17,16 +18,26 @@ type OrgMetadataTestSuite struct {
 	model      Model
 	p          partials.PaginationAndSort
 	metadataId int
+	commonInfo *partials.CommonInfo
 }
 
 func (suite *OrgMetadataTestSuite) SetupTest() {
 	client := enttest.Open(suite.t, "sqlite3", "file:ent?mode=memory&_fk=1")
 	suite.model = Model{Client: client}
 
+	t, err := suite.model.CreateDefaultTenant()
+	assert.NoError(suite.T(), err, "should create default tenant")
+
+	s, err := suite.model.CreateDefaultSite(t)
+	assert.NoError(suite.T(), err, "should create default site")
+
+	suite.commonInfo = &partials.CommonInfo{TenantID: strconv.Itoa(t.ID), SiteID: strconv.Itoa(s.ID)}
+
 	for i := 0; i <= 6; i++ {
 		m, err := client.OrgMetadata.Create().
 			SetName(fmt.Sprintf("metadata%d", i)).
 			SetDescription(fmt.Sprintf("metadata%d description", i)).
+			SetTenantID(t.ID).
 			Save(context.Background())
 		assert.NoError(suite.T(), err, "set metadata description")
 		suite.metadataId = m.ID
@@ -36,7 +47,7 @@ func (suite *OrgMetadataTestSuite) SetupTest() {
 }
 
 func (suite *OrgMetadataTestSuite) TestGetAllOrgMetadata() {
-	items, err := suite.model.GetAllOrgMetadata(&partials.CommonInfo{})
+	items, err := suite.model.GetAllOrgMetadata(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all org metadata")
 
 	for i, item := range items {
@@ -45,7 +56,7 @@ func (suite *OrgMetadataTestSuite) TestGetAllOrgMetadata() {
 }
 
 func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
-	items, err := suite.model.GetOrgMetadataByPage(suite.p, &partials.CommonInfo{})
+	items, err := suite.model.GetOrgMetadataByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get org metadata by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("metadata%d", i), item.Name)
@@ -54,7 +65,7 @@ func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetOrgMetadataByPage(suite.p, &partials.CommonInfo{})
+	items, err = suite.model.GetOrgMetadataByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get org metadata by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("metadata%d", i), item.Name)
@@ -63,7 +74,7 @@ func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetOrgMetadataByPage(suite.p, &partials.CommonInfo{})
+	items, err = suite.model.GetOrgMetadataByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get org metadata by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("metadata%d", 6-i), item.Name)
@@ -72,7 +83,7 @@ func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
 
 	suite.p.SortBy = "description"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetOrgMetadataByPage(suite.p, &partials.CommonInfo{})
+	items, err = suite.model.GetOrgMetadataByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get org metadata by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("metadata%d", i), item.Name)
@@ -81,7 +92,7 @@ func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
 
 	suite.p.SortBy = "description"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetOrgMetadataByPage(suite.p, &partials.CommonInfo{})
+	items, err = suite.model.GetOrgMetadataByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get org metadata by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("metadata%d", 6-i), item.Name)
@@ -90,36 +101,36 @@ func (suite *OrgMetadataTestSuite) TestGetOrgMetadataByPage() {
 }
 
 func (suite *OrgMetadataTestSuite) TestCountAllOrgMetadata() {
-	count, err := suite.model.CountAllOrgMetadata(&partials.CommonInfo{})
+	count, err := suite.model.CountAllOrgMetadata(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all org metadata")
 	assert.Equal(suite.T(), count, 7, "should have 7 metadata")
 }
 
 func (suite *OrgMetadataTestSuite) TestNewOrgMetadata() {
-	err := suite.model.NewOrgMetadata("metadata7", "metadata7 description", &partials.CommonInfo{})
+	err := suite.model.NewOrgMetadata("metadata7", "metadata7 description", suite.commonInfo)
 	assert.NoError(suite.T(), err, "should create metadata")
 
-	items, err := suite.model.GetAllOrgMetadata(&partials.CommonInfo{})
+	items, err := suite.model.GetAllOrgMetadata(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all org metadata")
 	assert.Equal(suite.T(), "metadata7", items[7].Name, "should have metadata7 name")
 	assert.Equal(suite.T(), "metadata7 description", items[7].Description, "should have metadata7 description")
 }
 
 func (suite *OrgMetadataTestSuite) TestUpdateOrgMetadata() {
-	err := suite.model.UpdateOrgMetadata(suite.metadataId, "metadata7", "metadata7 description", &partials.CommonInfo{})
+	err := suite.model.UpdateOrgMetadata(suite.metadataId, "metadata7", "metadata7 description", suite.commonInfo)
 	assert.NoError(suite.T(), err, "should update metadata")
 
-	items, err := suite.model.GetAllOrgMetadata(&partials.CommonInfo{})
+	items, err := suite.model.GetAllOrgMetadata(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all org metadata")
 	assert.Equal(suite.T(), "metadata7", items[6].Name, "should have metadata7 name")
 	assert.Equal(suite.T(), "metadata7 description", items[6].Description, "should have metadata7 description")
 }
 
 func (suite *OrgMetadataTestSuite) TestDeleteOrgMetadata() {
-	err := suite.model.DeleteOrgMetadata(suite.metadataId, &partials.CommonInfo{})
+	err := suite.model.DeleteOrgMetadata(suite.metadataId, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should delete metadata")
 
-	count, err := suite.model.CountAllOrgMetadata(&partials.CommonInfo{})
+	count, err := suite.model.CountAllOrgMetadata(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all org metadata")
 	assert.Equal(suite.T(), count, 6, "should have 6 metadata")
 }

@@ -270,8 +270,8 @@ func (suite *UserTestSuite) TestEmailExists() {
 	assert.Equal(suite.T(), false, exists, "email should not exist")
 }
 
-func (suite *UserTestSuite) TestAddUser() {
-	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", true)
+func (suite *UserTestSuite) TestAddLocalUser() {
+	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", false)
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
@@ -284,8 +284,22 @@ func (suite *UserTestSuite) TestAddUser() {
 	assert.Equal(suite.T(), "users.pending_email_confirmation", user.Register, "user should have users.pending_email_confirmation register status")
 }
 
+func (suite *UserTestSuite) TestAddOIDCUser() {
+	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", true)
+	assert.NoError(suite.T(), err, "should add a new user")
+
+	user, err := suite.model.GetUserById("user7")
+	assert.NoError(suite.T(), err, "should get recently created user")
+	assert.Equal(suite.T(), "user7", user.ID, "user should have user7 id")
+	assert.Equal(suite.T(), "User7", user.Name, "user should have User7 name")
+	assert.Equal(suite.T(), "user7@example.com", user.Email, "user should have user7@example.com email")
+	assert.Equal(suite.T(), "", user.Phone, "user should have empty phone")
+	assert.Equal(suite.T(), "ES", user.Country, "user should have ES country")
+	assert.Equal(suite.T(), "users.review_request", user.Register, "user should have users.review_request register status")
+}
+
 func (suite *UserTestSuite) TestAddImportedUser() {
-	err := suite.model.AddImportedUser("user7", "User7", "user7@example.com", "", "ES", true)
+	err := suite.model.AddImportedUser("user7", "User7", "user7@example.com", "", "ES", false)
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
@@ -296,6 +310,20 @@ func (suite *UserTestSuite) TestAddImportedUser() {
 	assert.Equal(suite.T(), "", user.Phone, "user should have empty phone")
 	assert.Equal(suite.T(), "ES", user.Country, "user should have ES country")
 	assert.Equal(suite.T(), "users.certificate_sent", user.Register, "user should have users.certificate_sent register status")
+}
+
+func (suite *UserTestSuite) TestAddImporteOIDCdUser() {
+	err := suite.model.AddImportedUser("user7", "User7", "user7@example.com", "", "ES", true)
+	assert.NoError(suite.T(), err, "should add a new user")
+
+	user, err := suite.model.GetUserById("user7")
+	assert.NoError(suite.T(), err, "should get recently created user")
+	assert.Equal(suite.T(), "user7", user.ID, "user should have user7 id")
+	assert.Equal(suite.T(), "User7", user.Name, "user should have User7 name")
+	assert.Equal(suite.T(), "user7@example.com", user.Email, "user should have user7@example.com email")
+	assert.Equal(suite.T(), "", user.Phone, "user should have empty phone")
+	assert.Equal(suite.T(), "ES", user.Country, "user should have ES country")
+	assert.Equal(suite.T(), "users.review_request", user.Register, "user should have users.review_request register status")
 }
 
 func (suite *UserTestSuite) TestUpdateUser() {
