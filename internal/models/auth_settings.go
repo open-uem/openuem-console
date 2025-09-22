@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/sethvargo/go-password/password"
 )
@@ -13,7 +12,7 @@ func (m *Model) GetAuthenticationSettings() (*openuem_ent.Authentication, error)
 
 	settings, err := m.Client.Authentication.Query().Only(context.Background())
 	if err != nil {
-		if !ent.IsNotFound(err) {
+		if !openuem_ent.IsNotFound(err) {
 			return nil, err
 		}
 
