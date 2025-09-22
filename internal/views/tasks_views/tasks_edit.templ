@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -59,26 +60,28 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 						</div>
 						<div id="select-task-subtype">
 							switch t.Type {
-								case "winget_install", "winget_delete":
+								case task.TypeWingetInstall, task.TypeWingetDelete:
 									@partials.SelectWinGetPackageTaskSubtype(t)
-								case "add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value":
+								case task.TypeAddRegistryKey, task.TypeAddRegistryKeyValue, task.TypeUpdateRegistryKeyDefaultValue, task.TypeRemoveRegistryKey, task.TypeRemoveRegistryKeyValue:
 									@partials.SelectRegistryTaskSubtype(t)
-								case "add_local_user", "remove_local_user":
+								case task.TypeAddLocalUser, task.TypeRemoveLocalUser:
 									@partials.SelectLocalUserTaskSubtype(t)
-								case "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group":
+								case task.TypeAddLocalGroup, task.TypeRemoveLocalGroup, task.TypeAddUsersToLocalGroup, task.TypeRemoveUsersFromLocalGroup:
 									@partials.SelectWindowsLocalGroupTaskSubtype(t)
-								case "add_unix_local_group", "remove_unix_local_group":
+								case task.TypeAddUnixLocalGroup, task.TypeRemoveUnixLocalGroup:
 									@partials.SelectUnixLocalGroupTaskSubtype(t)
-								case "add_unix_local_user", "remove_unix_local_user":
+								case task.TypeAddUnixLocalUser, task.TypeRemoveUnixLocalUser:
 									@partials.SelectUnixLocalUserTaskSubtype(t)
-								case "msi_install", "msi_uninstall":
+								case task.TypeMsiInstall, task.TypeMsiUninstall:
 									@partials.SelectMSITaskSubtype(t)
-								case "flatpak_install", "flatpak_uninstall":
+								case task.TypeFlatpakInstall, task.TypeFlatpakUninstall:
 									@partials.SelectFlatpakPackageTaskSubtype(t)
-								case "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade":
+								case task.TypeBrewFormulaInstall, task.TypeBrewFormulaUninstall, task.TypeBrewFormulaUpgrade:
 									@partials.SelectHomeBrewFormulaTaskSubtype(t)
-								case "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
+								case task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
 									@partials.SelectHomeBrewCaskTaskSubtype(t)
+								case task.TypeAptInstall, task.TypeAptRemove, task.TypeAptUpdate, task.TypeAptUpdateAll, task.TypeAptUpgradeOs:
+									@partials.SelectAPTTaskSubtype(t)
 							}
 						</div>
 						if t != nil {

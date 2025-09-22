@@ -1178,6 +1178,12 @@ en:
     brew_greedy: "Upgrade casks that auto update (greedy)"
     brew_install_options_description: "Options flags to install a package..."
     brew_upgrade_options_description: "Options flags to upgrade a package..."
+    apt_subtype: "Package management with APT"
+    apt_install: "Install package"
+    apt_remove: "Remove package"
+    apt_update: "Update package"
+    apt_update_all: "Update all packages"
+    apt_upgrade_os: "Upgrade OS"
 
     new:
       title: "New task"

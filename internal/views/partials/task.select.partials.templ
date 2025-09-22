@@ -118,6 +118,11 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.brew_cask_subtype") }
 				</option>
 			}
+			if agentType == "linux" {
+				<option value="apt_type" selected?={ IsAPTTask(t) }>
+					{ i18n.T(ctx, "tasks.apt_subtype") }
+				</option>
+			}
 		</select>
 	</div>
 }
@@ -379,6 +384,34 @@ templ SelectHomeBrewCaskTaskSubtype(t *ent.Task) {
 	</div>
 }
 
+templ SelectAPTTaskSubtype(t *ent.Task) {
+	<div id="local-apt-subtask">
+		<label class="uk-form-label" for="task-subtype">
+			{ i18n.T(ctx, "tasks.subtask_type") }
+		</label>
+		<select
+			class="uk-select"
+			id="task-subtype"
+			name="task-subtype"
+			hx-trigger="change"
+			hx-get="/profiles/task-definition"
+			hx-target="#task-definition"
+			hx-swap="innerHTML"
+			disabled?={ t != nil }
+			_="on change      
+                remove .hidden from #task-definition
+            end"
+		>
+			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
+			<option value={ task.TypeAptInstall } selected?={ t != nil && t.Type == task.TypeAptInstall }>{ i18n.T(ctx, "tasks.apt_install") }</option>
+			<option value={ task.TypeAptRemove } selected?={  t != nil && t.Type == task.TypeAptRemove }>{ i18n.T(ctx, "tasks.apt_remove") }</option>
+			<option value={ task.TypeAptUpdate } selected?={  t != nil && t.Type == task.TypeAptUpdate }>{ i18n.T(ctx, "tasks.apt_update") }</option>
+			<option value={ task.TypeAptUpdateAll } selected?={  t != nil && t.Type == task.TypeAptUpdateAll }>{ i18n.T(ctx, "tasks.apt_update_all") }</option>
+			<option value={ task.TypeAptUpgradeOs } selected?={  t != nil && t.Type == task.TypeAptUpgradeOs }>{ i18n.T(ctx, "tasks.apt_upgrade_os") }</option>
+		</select>
+	</div>
+}
+
 func IsWinGetPackageTask(t *ent.Task) bool {
 	tasks := []string{string(task.TypeWingetInstall), string(task.TypeWingetDelete)}
 	return t != nil && slices.Contains(tasks, t.Type.String())
@@ -437,5 +470,10 @@ func IsHomeBrewFormulaTask(t *ent.Task) bool {
 
 func IsHomeBrewCaskTask(t *ent.Task) bool {
 	tasks := []string{string(task.TypeBrewCaskInstall), string(task.TypeBrewCaskUpgrade), string(task.TypeBrewCaskUninstall)}
+	return t != nil && slices.Contains(tasks, t.Type.String())
+}
+
+func IsAPTTask(t *ent.Task) bool {
+	tasks := []string{string(task.TypeAptInstall), string(task.TypeAptRemove), string(task.TypeAptUpdate), string(task.TypeAptUpdateAll), string(task.TypeAptUpgradeOs)}
 	return t != nil && slices.Contains(tasks, t.Type.String())
 }
