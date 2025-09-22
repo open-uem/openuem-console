@@ -384,6 +384,8 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 		return RenderView(c, partials.SelectHomeBrewFormulaTaskSubtype(nil))
 	case "brew_cask_type":
 		return RenderView(c, partials.SelectHomeBrewCaskTaskSubtype(nil))
+	case "apt_type":
+		return RenderView(c, partials.SelectAPTTaskSubtype(nil))
 	}
 
 	return nil

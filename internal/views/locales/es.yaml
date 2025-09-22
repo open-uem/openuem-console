@@ -1171,6 +1171,12 @@ es:
     brew_greedy: "Actualizar casks que se auto actualizan (greedy)"
     brew_install_options_description: "Opciones de banderas para instalar un paquete..."
     brew_upgrade_options_description: "Opciones de banderas para actualizar un paquete..."
+    apt_subtype: "Gestión de paquetes con APT"
+    apt_install: "Instalar paquete"
+    apt_remove: "Eliminar paquete"
+    apt_update: "Actualizar paquete"
+    apt_update_all: "Actualizar todos los paquetes"
+    apt_upgrade_os: "Subir de versión de S.O"
 
     new:
       title: "Nueva tarea"
