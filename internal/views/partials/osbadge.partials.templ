@@ -3,7 +3,7 @@ package partials
 templ OSBadge(agentOS string) {
 	switch agentOS {
 		case "windows":
-			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+			<i class="ri-windows-fill ri-2x text-blue-600" style="margin-left: -3px;"></i>
 		case "ubuntu":
 			<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
 		case "debian":
@@ -19,7 +19,7 @@ templ OSBadge(agentOS string) {
 		case "arch":
 			<i class="si si-archlinux si--color uk-cloak text-2xl"></i>
 		case "almalinux":
-			<i class="si si-almalinux si--color uk-cloak text-2xl"></i>
+			<i class="si si-almalinux uk-text-default uk-cloak text-2xl"></i>
 		case "rocky":
 			<i class="si si-rockylinux si--color uk-cloak text-2xl"></i>
 		case "kali":

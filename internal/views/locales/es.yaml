@@ -139,6 +139,7 @@ es:
   OS: "S.O"
   Monitors: "Monitores"
   Logical Disks: "Discos lógicos"
+  Physical Disks: "Discos físicos"
   Shares: "Compartido"
   Network Adapters: "Adapt. de Red"
   Printers: "Impresoras"
@@ -353,7 +354,7 @@ es:
       description: "Estos son los discos lógicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
       label: "Etiqueta"
       volume_name: "Nombre de volumen"
-      filesystem: "Sist. Ficheros"
+      filesystem: "Sist. Fich."
       usage: "Uso"
       total_size: "Tamaño Total"
       remaining_space: "Espacio Disponible"
@@ -367,6 +368,14 @@ es:
       no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
       report_label: "Etiqueta: %s"
       report_mount_point: "Punto de montaje: %s"
+    physical_disk:
+      title: "Discos físicos"
+      description: "Estos son los discos físicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
+      device: "Dispositivo"
+      model: "Fabricante y modelo"
+      serial: "Número de serie"
+      size: "Tamaño"
+      no_physical_disks: "No existe aún información sobre los discos físicos conectados"
     file_browser:
       title: "Expl. Archivos"
       description: "Navegue por este disco lógico de forma remota usando SFTP. Haga clic en los tres puntos junto al icono de la carpeta o de fichero para mostrar un menú de acciones. También puede usar los iconos superiores para moverse a una carpeta superior, añadir una nueva carpeta, actualizar el contenido de la carpeta actual, subir un fichero a la carpeta actual o descargar varios ficheros y/o carpetas como un fichero ZIP o borrar varios elementos después de seleccionarlos"
@@ -1173,6 +1182,12 @@ es:
     brew_greedy: "Actualizar casks que se auto actualizan (greedy)"
     brew_install_options_description: "Opciones de banderas para instalar un paquete..."
     brew_upgrade_options_description: "Opciones de banderas para actualizar un paquete..."
+    apt_subtype: "Gestión de paquetes con APT"
+    apt_install: "Instalar paquete"
+    apt_remove: "Eliminar paquete"
+    apt_update: "Actualizar paquete"
+    apt_update_all: "Actualizar todos los paquetes"
+    apt_upgrade_os: "Subir de versión de S.O"
 
     new:
       title: "Nueva tarea"
@@ -1305,6 +1320,8 @@ es:
     could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
+    could_not_find_site: "No se pudo encontrar el sitio"
+    could_not_find_tenant: "No se pudo encontrar la organización"
 
   authentication:
     title: "Autenticación"

@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/open-uem/ent/enttest"
@@ -13,21 +14,30 @@ import (
 
 type TagsTestSuite struct {
 	suite.Suite
-	t     enttest.TestingT
-	model Model
-	p     partials.PaginationAndSort
-	tagId int
+	t          enttest.TestingT
+	model      Model
+	p          partials.PaginationAndSort
+	tagId      int
+	commonInfo *partials.CommonInfo
 }
 
 func (suite *TagsTestSuite) SetupTest() {
 	client := enttest.Open(suite.t, "sqlite3", "file:ent?mode=memory&_fk=1")
 	suite.model = Model{Client: client}
 
-	agent, err := client.Agent.Create().SetID("agent1").SetOs("windows").SetNickname("agent1").AddTagIDs().Save(context.Background())
+	t, err := suite.model.CreateDefaultTenant()
+	assert.NoError(suite.T(), err, "should create default tenant")
+
+	s, err := suite.model.CreateDefaultSite(t)
+	assert.NoError(suite.T(), err, "should create default site")
+
+	suite.commonInfo = &partials.CommonInfo{TenantID: strconv.Itoa(t.ID), SiteID: strconv.Itoa(s.ID)}
+
+	agent, err := client.Agent.Create().SetID("agent1").SetHostname("test1").SetOs("windows").SetNickname("agent1").AddSiteIDs(s.ID).AddTagIDs().Save(context.Background())
 	assert.NoError(suite.T(), err, "should create agent")
 
 	for i := 0; i <= 6; i++ {
-		tag, err := client.Tag.Create().SetTag(fmt.Sprintf("Tag%d", i)).SetDescription(fmt.Sprintf("My tag %d", i)).SetColor(fmt.Sprintf("#f%df%df%d", i, i, i)).Save(context.Background())
+		tag, err := client.Tag.Create().SetTag(fmt.Sprintf("Tag%d", i)).SetTenantID(t.ID).SetDescription(fmt.Sprintf("My tag %d", i)).SetColor(fmt.Sprintf("#f%df%df%d", i, i, i)).Save(context.Background())
 		assert.NoError(suite.T(), err)
 		suite.tagId = tag.ID
 		if i%2 == 0 {
@@ -40,7 +50,7 @@ func (suite *TagsTestSuite) SetupTest() {
 }
 
 func (suite *TagsTestSuite) TestGetAllTags() {
-	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
+	tags, err := suite.model.GetAllTags(suite.commonInfo)
 
 	assert.NoError(suite.T(), err, "should get all tags")
 
@@ -52,7 +62,7 @@ func (suite *TagsTestSuite) TestGetAllTags() {
 }
 
 func (suite *TagsTestSuite) TestGetAppliedTags() {
-	tags, err := suite.model.GetAppliedTags(&partials.CommonInfo{})
+	tags, err := suite.model.GetAppliedTags(suite.commonInfo)
 
 	assert.NoError(suite.T(), err, "should get all tags applied")
 
@@ -60,13 +70,13 @@ func (suite *TagsTestSuite) TestGetAppliedTags() {
 }
 
 func (suite *TagsTestSuite) TestGetTagsByPage() {
-	tags, err := suite.model.GetTagsByPage(suite.p, &partials.CommonInfo{})
+	tags, err := suite.model.GetTagsByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all tags by page")
 	assert.Equal(suite.T(), 5, len(tags), "five tags should be retrieved")
 
 	suite.p.SortBy = "tag"
 	suite.p.SortOrder = "desc"
-	tags, err = suite.model.GetTagsByPage(suite.p, &partials.CommonInfo{})
+	tags, err = suite.model.GetTagsByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get tags by page")
 	assert.Equal(suite.T(), "Tag6", tags[0].Tag, "tag should be Tag6")
 	assert.Equal(suite.T(), "Tag5", tags[1].Tag, "tag should be Tag5")
@@ -86,7 +96,7 @@ func (suite *TagsTestSuite) TestGetTagsByPage() {
 
 	suite.p.SortBy = "tag"
 	suite.p.SortOrder = "asc"
-	tags, err = suite.model.GetTagsByPage(suite.p, &partials.CommonInfo{})
+	tags, err = suite.model.GetTagsByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get tags by page")
 	assert.Equal(suite.T(), "Tag0", tags[0].Tag, "tag should be Tag0")
 	assert.Equal(suite.T(), "Tag1", tags[1].Tag, "tag should be Tag1")
@@ -106,7 +116,7 @@ func (suite *TagsTestSuite) TestGetTagsByPage() {
 
 	suite.p.SortBy = "description"
 	suite.p.SortOrder = "desc"
-	tags, err = suite.model.GetTagsByPage(suite.p, &partials.CommonInfo{})
+	tags, err = suite.model.GetTagsByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get tags by page")
 	assert.Equal(suite.T(), "Tag6", tags[0].Tag, "tag should be Tag6")
 	assert.Equal(suite.T(), "Tag5", tags[1].Tag, "tag should be Tag5")
@@ -127,7 +137,7 @@ func (suite *TagsTestSuite) TestGetTagsByPage() {
 	suite.p.SortBy = "description"
 	suite.p.SortOrder = "asc"
 	suite.p.CurrentPage = 2
-	tags, err = suite.model.GetTagsByPage(suite.p, &partials.CommonInfo{})
+	tags, err = suite.model.GetTagsByPage(suite.p, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get tags by page")
 	assert.Equal(suite.T(), "Tag5", tags[0].Tag, "tag should be Tag5")
 	assert.Equal(suite.T(), "Tag6", tags[1].Tag, "tag should be Tag6")
@@ -138,20 +148,20 @@ func (suite *TagsTestSuite) TestGetTagsByPage() {
 }
 
 func (suite *TagsTestSuite) TestCountAllTags() {
-	count, err := suite.model.CountAllTags(&partials.CommonInfo{})
+	count, err := suite.model.CountAllTags(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all tags")
 	assert.Equal(suite.T(), 7, count, "tags count should be 7")
 }
 
 func (suite *TagsTestSuite) TestNewTag() {
-	err := suite.model.NewTag("Tag8", "My tag 8", "#f8f8f8", &partials.CommonInfo{})
+	err := suite.model.NewTag("Tag8", "My tag 8", "#f8f8f8", suite.commonInfo)
 	assert.NoError(suite.T(), err, "should create a new tags")
 
-	count, err := suite.model.CountAllTags(&partials.CommonInfo{})
+	count, err := suite.model.CountAllTags(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all tags")
 	assert.Equal(suite.T(), 8, count, "tags count should be 8")
 
-	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
+	tags, err := suite.model.GetAllTags(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")
@@ -160,10 +170,10 @@ func (suite *TagsTestSuite) TestNewTag() {
 }
 
 func (suite *TagsTestSuite) TestUpdateTag() {
-	err := suite.model.UpdateTag(suite.tagId, "Tag8", "My tag 8", "#f8f8f8", &partials.CommonInfo{})
+	err := suite.model.UpdateTag(suite.tagId, "Tag8", "My tag 8", "#f8f8f8", suite.commonInfo)
 	assert.NoError(suite.T(), err, "should update a tag")
 
-	tags, err := suite.model.GetAllTags(&partials.CommonInfo{})
+	tags, err := suite.model.GetAllTags(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")
@@ -172,10 +182,10 @@ func (suite *TagsTestSuite) TestUpdateTag() {
 }
 
 func (suite *TagsTestSuite) TestDeleteTag() {
-	err := suite.model.DeleteTag(suite.tagId, &partials.CommonInfo{})
+	err := suite.model.DeleteTag(suite.tagId, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should delete a tag")
 
-	count, err := suite.model.CountAllTags(&partials.CommonInfo{})
+	count, err := suite.model.CountAllTags(suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all tags")
 	assert.Equal(suite.T(), 6, count, "tags count should be 6")
 }

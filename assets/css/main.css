@@ -9516,6 +9516,10 @@ th.uk-text-break, td.uk-text-break {
   margin-bottom: 0px !important;
 }
 
+.-ml-1 {
+  margin-left: -0.25rem;
+}
+
 .-mt-4 {
   margin-top: -1rem;
 }
@@ -9534,6 +9538,10 @@ th.uk-text-break, td.uk-text-break {
 
 .mb-6 {
   margin-bottom: 1.5rem;
+}
+
+.ml-1 {
+  margin-left: 0.25rem;
 }
 
 .ml-2 {
@@ -9574,6 +9582,10 @@ th.uk-text-break, td.uk-text-break {
 
 .mt-8 {
   margin-top: 2rem;
+}
+
+.-ml-2 {
+  margin-left: -0.5rem;
 }
 
 .inline-block {

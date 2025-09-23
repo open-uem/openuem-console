@@ -30,6 +30,7 @@ func (suite *ReleasesTestSuite) SetupTest() {
 	for i := 0; i <= 6; i++ {
 		_, err := client.Agent.Create().
 			SetID(fmt.Sprintf("agent%d", i)).
+			SetHostname(fmt.Sprintf("agent%d", i)).
 			SetOs("windows").
 			SetNickname(fmt.Sprintf("agent%d", i)).
 			SetAgentStatus(agent.AgentStatusEnabled).
@@ -46,13 +47,13 @@ func (suite *ReleasesTestSuite) SetupTest() {
 			SetIsCritical(false).
 			SetReleaseDate(time.Now()).
 			SetReleaseNotes("url").
-			SetVersion(fmt.Sprintf("0.1.%d", i)).
-			AddAgentIDs(fmt.Sprintf("agent%d", i))
+			SetVersion(fmt.Sprintf("0.1.%d", i))
 
 		if i%2 == 0 {
 			query.SetReleaseType(release.ReleaseTypeServer)
 		} else {
 			query.SetReleaseType(release.ReleaseTypeAgent)
+			query.AddAgentIDs(fmt.Sprintf("agent%d", i))
 		}
 
 		if i%3 == 0 {

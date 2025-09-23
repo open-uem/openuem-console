@@ -271,6 +271,31 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, agent, confirmDelete, commonInfo), commonInfo))
 }
 
+func (h *Handler) PhysicalDisks(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+
+	if agentId == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	agent, err := h.Model.GetAgentPhysicalDisksInfo(agentId, commonInfo)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+	p := partials.PaginationAndSort{}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.PhysicalDisks(c, p, agent, confirmDelete, commonInfo), commonInfo))
+}
+
 func (h *Handler) Shares(c echo.Context) error {
 	var err error
 

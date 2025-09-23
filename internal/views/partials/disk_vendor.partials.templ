@@ -1,0 +1,37 @@
+package partials
+
+import "strings"
+
+templ DiskVendor(model string) {
+	if strings.Contains(model, "apple") {
+		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
+	} else if strings.Contains(model, "asus") {
+		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
+	} else if strings.Contains(model, "corsair") {
+		<i class="si si-corsair si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(model, "dell") {
+		<i class="si si-dell si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(model, "hp") {
+		<i class="si si-hp si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(model, "intel") {
+		<i class="si si-intel si--color uk-cloak text-4xl"></i>
+	} else if strings.Contains(model, "kingston") {
+		<i class="si si-kingstontechnology uk-text-default uk-cloak text-2xl"></i>
+	} else if strings.Contains(model, "lenovo") {
+		<i class="si si-lenovo si--color uk-cloak text-5xl"></i>
+	} else if strings.Contains(model, "microsoft") {
+		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
+	} else if strings.Contains(model, "qemu") {
+		<i class="si si-qemu si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(model, "samsung") {
+		<i class="si si-samsung si--color uk-cloak text-4xl"></i>
+	} else if strings.Contains(model, "seagate") {
+		<i class="si si-seagate si--color uk-cloak text-4xl"></i>
+	} else if strings.Contains(model, "toshiba") {
+		<i class="si si-toshiba si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(model, "wd") || strings.Contains(model, "western digital") {
+		<i class="si si-westerndigital si--color uk-cloak text-4xl"></i>
+	} else {
+		<uk-icon hx-history="false" icon="hard-drive" custom-class="h-5 w-5" uk-cloack></uk-icon>
+	}
+}

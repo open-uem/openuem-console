@@ -138,6 +138,7 @@ de:
   Other: "Andere"
   Monitors: "Monitore"
   Logical Disks: "Logische Laufwerke"
+  Physical Disks: "Physische Festplatten"
   Shares: "Freigaben"
   Network Adapters: "Netzwerkadapter"
   Printers: "Drucker"
@@ -364,6 +365,14 @@ de:
       no_logical_disks: "Noch keine Informationen zu logischen Laufwerken verfügbar"
       report_label: "Bezeichnung: %s"
       report_mount_point: "Einhängepunkt: %s"
+    physical_disk:
+      title: "Physische Festplatten"
+      description: "Dies sind die vom OpenUEM-Agenten gemeldeten physischen Festplatten, die mit diesem Computer verbunden sind"
+      device: "Gerät"
+      model: "Anbieter und Modell"
+      serial: "Seriennummer"
+      size: "Größe"
+      no_physical_disks: "Es sind noch keine Informationen zu physischen Festplatten verfügbar"
     file_browser:
       title: "Dateibrowser"
       description: "Durchsuchen Sie dieses logische Laufwerk remote über SFTP. Klicken Sie auf das Drei-Punkte-Symbol, um ein Aktionsmenü zu öffnen. Sie können auch die Symbolleiste verwenden, um zu einem übergeordneten Ordner zu wechseln, einen neuen Ordner hinzuzufügen, den Ordner zu aktualisieren, eine Datei hochzuladen, viele Elemente als ZIP-Datei herunterzuladen oder viele Elemente nach der Auswahl zu löschen"
@@ -1172,6 +1181,12 @@ de:
     brew_greedy: "Upgrade casks that auto update (greedy)"
     brew_install_options_description: "Options flags to install a package..."
     brew_upgrade_options_description: "Options flags to upgrade a package..."
+    apt_subtype: "Paketverwaltung mit APT"
+    apt_install: "Paket installieren"
+    apt_remove: "Paket entfernen"
+    apt_update: "Paket aktualisieren"
+    apt_update_all: "Aktualisieren Sie alle Pakete"
+    apt_upgrade_os: "Aktualisieren Sie das Betriebssystem"
 
     new:
       title: "Neue Aufgabe"
@@ -1305,6 +1320,8 @@ de:
     could_not_convert_site_to_int: "Die Standort-ID: %s konnte nicht in eine Ganzzahl umgewandelt werden"
     choose_site: "Standort wählen..."
     domain: "Domain"
+    could_not_find_site: "Die Site konnte nicht gefunden werden"
+    could_not_find_tenant: "Die Organisation konnte nicht gefunden werden."
 
   authentication:
     title: "Authentifizierung"
