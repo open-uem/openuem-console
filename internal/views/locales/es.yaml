@@ -138,6 +138,7 @@ es:
   OS: "S.O"
   Monitors: "Monitores"
   Logical Disks: "Discos lógicos"
+  Physical Disks: "Discos físicos"
   Shares: "Compartido"
   Network Adapters: "Adapt. de Red"
   Printers: "Impresoras"
@@ -365,6 +366,13 @@ es:
       no_logical_disks: "No existe aún información sobre los discos lógicos conectados"
       report_label: "Etiqueta: %s"
       report_mount_point: "Punto de montaje: %s"
+    physical_disk:
+      title: "Discos físicos"
+      description: "Estos son los discos físicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
+      model: "Fabricante y modelo"
+      serial: "Número de serie"
+      size: "Tamaño"
+      no_physical_disks: "No existe aún información sobre los discos físicos conectados"
     file_browser:
       title: "Expl. Archivos"
       description: "Navegue por este disco lógico de forma remota usando SFTP. Haga clic en los tres puntos junto al icono de la carpeta o de fichero para mostrar un menú de acciones. También puede usar los iconos superiores para moverse a una carpeta superior, añadir una nueva carpeta, actualizar el contenido de la carpeta actual, subir un fichero a la carpeta actual o descargar varios ficheros y/o carpetas como un fichero ZIP o borrar varios elementos después de seleccionarlos"

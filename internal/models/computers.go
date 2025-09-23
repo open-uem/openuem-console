@@ -478,6 +478,37 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo)
 	}
 }
 
+func (m *Model) GetAgentPhysicalDisksInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	} else {
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+			Where(agent.ID(agentId)).
+			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
+			Only(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return agent, nil
+	}
+}
+
 func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent.Agent, error) {
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {

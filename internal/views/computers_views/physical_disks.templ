@@ -1,0 +1,65 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strings"
+)
+
+templ PhysicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@partials.ComputerHeader(p, agent, commonInfo)
+				@ComputersNavbar(agent.ID, "physical-disks", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
+				if confirmDelete {
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="hard-drive" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.physical_disk.title") }</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "inventory.physical_disk.description") }
+						</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					if len(agent.Edges.Physicaldisks) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
+							<thead>
+								<tr>
+									<th></th>
+									<th>{ i18n.T(ctx, "inventory.physical_disk.model") }</th>
+									<th>{ i18n.T(ctx, "inventory.physical_disk.serial") }</th>
+									<th>{ i18n.T(ctx, "inventory.physical_disk.size") }</th>
+								</tr>
+							</thead>
+							for _, disk := range agent.Edges.Physicaldisks {
+								<tr>
+									<td class="!align-middle">
+										@partials.DiskVendor(strings.ToLower(disk.Model))
+									</td>
+									<td class="!align-middle">{ disk.Model }</td>
+									<td class="!align-middle">{ disk.SerialNumber }</td>
+									<td class="!align-middle">{ disk.SizeInUnits }</td>
+								</tr>
+							}
+						</table>
+					} else {
+						<p class="uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "inventory.physical_disk.no_physical_disks") }
+						</p>
+					}
+				</div>
+			</div>
+		</div>
+	</main>
+}
