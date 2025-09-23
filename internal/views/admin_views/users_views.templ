@@ -314,9 +314,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 									</tr>
 								}
 							</table>
-							if p.NItems / p.PageSize > 1 {
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/users")
-							}
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/users")
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "users.no_users") }
