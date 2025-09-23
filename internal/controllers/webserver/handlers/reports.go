@@ -1213,6 +1213,16 @@ func getApplePNG() string {
 	return filepath.Join(cwd, "assets", "img", "os", "apple.png")
 }
 
+func getHDDEmoji() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+
+	return filepath.Join(cwd, "assets", "img", "reports", "minidisc.png")
+}
+
 func getOperatingSystemPNG(os string) string {
 	switch os {
 	case "windows":
@@ -1332,6 +1342,12 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 	}
 
 	ldInfo, err := h.Model.GetAgentLogicalDisksInfo(agentID, commonInfo)
+	if err != nil {
+		log.Printf("[ERROR]: report error %v", err)
+		return nil, err
+	}
+
+	pdInfo, err := h.Model.GetAgentPhysicalDisksInfo(agentID, commonInfo)
 	if err != nil {
 		log.Printf("[ERROR]: report error %v", err)
 		return nil, err
@@ -1622,6 +1638,33 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 		}
 	}
 
+	// Physical disks info
+	if len(pdInfo.Edges.Physicaldisks) > 0 {
+		r = row.New(5).Add(
+			image.NewFromFileCol(1, getHDDEmoji(), props.Rect{
+				Percent: 75,
+				Center:  true,
+			}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+			text.NewCol(4, i18n.T(c.Request().Context(), "inventory.physical_disk.title"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+		)
+		rows = append(rows, r)
+
+		for _, pd := range pdInfo.Edges.Physicaldisks {
+			r = row.New(5).Add(
+				text.NewCol(2, i18n.T(c.Request().Context(), "inventory.physical_disk.model"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+				text.NewCol(3, pd.Model, props.Text{Size: 7, Align: align.Center, Top: 0.7}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+				text.NewCol(2, i18n.T(c.Request().Context(), "inventory.physical_disk.serial"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+				text.NewCol(3, pd.SerialNumber, props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+				text.NewCol(1, i18n.T(c.Request().Context(), "inventory.physical_disk.size"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+				text.NewCol(1, pd.SizeInUnits, props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+			)
+			rows = append(rows, r)
+		}
+
+		r = row.New(4).Add(col.New(12))
+		rows = append(rows, r)
+	}
+
 	// Shares info
 	if len(sharesInfo.Edges.Shares) > 0 {
 		for index, share := range sharesInfo.Edges.Shares {
@@ -1755,6 +1798,11 @@ func (h *Handler) GenerateComputerODSReport(c echo.Context) error {
 	}
 
 	ldInfo, err := h.Model.GetAgentLogicalDisksInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
+	pdInfo, err := h.Model.GetAgentPhysicalDisksInfo(agentID, commonInfo)
 	if err != nil {
 		return err
 	}
@@ -2167,6 +2215,63 @@ func (h *Handler) GenerateComputerODSReport(c echo.Context) error {
 				return err
 			}
 			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 8+(index*6)), ld.BitlockerStatus); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Create Physical disks sheet.
+	if len(pdInfo.Edges.Physicaldisks) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Physical Disks")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		if err := f.SetCellStyle(sheetName, "B4", "B4", tagStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B4", i18n.T(c.Request().Context(), "inventory.physical_disk.title")); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B5", "D5", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B5", i18n.T(c.Request().Context(), "inventory.physical_disk.model")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "C5", i18n.T(c.Request().Context(), "inventory.physical_disk.serial")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "D5", i18n.T(c.Request().Context(), "inventory.physical_disk.size")); err != nil {
+			return err
+		}
+
+		for index, pd := range pdInfo.Edges.Physicaldisks {
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*6)), pd.Model); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*6)), pd.SerialNumber); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*6)), pd.SizeInUnits); err != nil {
 				return err
 			}
 		}
