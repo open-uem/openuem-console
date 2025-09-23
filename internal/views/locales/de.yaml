@@ -366,6 +366,7 @@ de:
     physical_disk:
       title: "Physische Festplatten"
       description: "Dies sind die vom OpenUEM-Agenten gemeldeten physischen Festplatten, die mit diesem Computer verbunden sind"
+      device: "Gerät"
       model: "Anbieter und Modell"
       serial: "Seriennummer"
       size: "Größe"
