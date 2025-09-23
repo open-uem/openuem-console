@@ -1594,8 +1594,8 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 				r = row.New(5).Add(
 					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.volume_name"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, ld.VolumeName, props.Text{Size: 7, Align: align.Center, Top: 0.7}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
-					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
-					text.NewCol(2, ld.Filesystem, props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+					text.NewCol(1, i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+					text.NewCol(3, ld.Filesystem, props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.usage"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, fmt.Sprintf("%d %%", ld.Usage), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
 				)
@@ -1612,8 +1612,8 @@ func (h *Handler) getComputerInfo(c echo.Context, agentID string, commonInfo *pa
 				rows = append(rows, r)
 
 				r = row.New(5).Add(
-					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
-					text.NewCol(2, ld.VolumeName, props.Text{Size: 7, Align: align.Center, Top: 0.7}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
+					text.NewCol(1, i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
+					text.NewCol(3, ld.VolumeName, props.Text{Size: 7, Align: align.Center, Top: 0.7}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.filesystem_type"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, ld.Filesystem, props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BorderColor: &props.BlackColor, BorderType: border.Full}),
 					text.NewCol(2, i18n.T(c.Request().Context(), "inventory.logical_disk.usage"), props.Text{Size: 7, Align: align.Left, Left: 1, Top: 1}).WithStyle(&props.Cell{BackgroundColor: lightGreen, BorderColor: &props.BlackColor, BorderType: border.Full}),

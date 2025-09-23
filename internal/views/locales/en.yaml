@@ -370,6 +370,7 @@ en:
     physical_disk:
       title: "Physical Disks"
       description: "These are the physical disks connected to this computer as reported by the OpenUEM agent"
+      device: "Device"
       model: "Vendor and Model"
       serial: "Serial Number"
       size: "Size"

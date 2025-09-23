@@ -37,6 +37,9 @@ templ PhysicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 							<thead>
 								<tr>
 									<th></th>
+									if agent.Os != "windows" {
+										<th>{ i18n.T(ctx, "inventory.physical_disk.device") }</th>
+									}
 									<th>{ i18n.T(ctx, "inventory.physical_disk.model") }</th>
 									<th>{ i18n.T(ctx, "inventory.physical_disk.serial") }</th>
 									<th>{ i18n.T(ctx, "inventory.physical_disk.size") }</th>
@@ -47,6 +50,9 @@ templ PhysicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 									<td class="!align-middle">
 										@partials.DiskVendor(strings.ToLower(disk.Model))
 									</td>
+									if agent.Os != "windows" {
+										<td class="!align-middle">{ disk.DeviceID }</td>
+									}
 									<td class="!align-middle">{ disk.Model }</td>
 									<td class="!align-middle">{ disk.SerialNumber }</td>
 									<td class="!align-middle">{ disk.SizeInUnits }</td>

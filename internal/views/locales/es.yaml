@@ -352,7 +352,7 @@ es:
       description: "Estos son los discos lógicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
       label: "Etiqueta"
       volume_name: "Nombre de volumen"
-      filesystem: "Sist. Ficheros"
+      filesystem: "Sist. Fich."
       usage: "Uso"
       total_size: "Tamaño Total"
       remaining_space: "Espacio Disponible"
@@ -369,6 +369,7 @@ es:
     physical_disk:
       title: "Discos físicos"
       description: "Estos son los discos físicos conectados a este equipo de acuerdo a la información proporcionada por el agente de OpenUEM"
+      device: "Dispositivo"
       model: "Fabricante y modelo"
       serial: "Número de serie"
       size: "Tamaño"
