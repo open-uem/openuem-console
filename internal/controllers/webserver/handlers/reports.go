@@ -1802,6 +1802,11 @@ func (h *Handler) GenerateComputerODSReport(c echo.Context) error {
 		return err
 	}
 
+	pdInfo, err := h.Model.GetAgentPhysicalDisksInfo(agentID, commonInfo)
+	if err != nil {
+		return err
+	}
+
 	sharesInfo, err := h.Model.GetAgentSharesInfo(agentID, commonInfo)
 	if err != nil {
 		return err
@@ -2210,6 +2215,63 @@ func (h *Handler) GenerateComputerODSReport(c echo.Context) error {
 				return err
 			}
 			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 8+(index*6)), ld.BitlockerStatus); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Create Physical disks sheet.
+	if len(pdInfo.Edges.Physicaldisks) > 0 {
+
+		sheetName := i18n.T(c.Request().Context(), "Physical Disks")
+		_, err = f.NewSheet(sheetName)
+		if err != nil {
+			return err
+		}
+
+		if err := f.SetColWidth(sheetName, "B", "D", 50); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B2", hwInfo.Nickname); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B2", "C2", endpointNameStyle); err != nil {
+			return err
+		}
+
+		if hwInfo.Nickname != hwInfo.Hostname {
+			if err := f.SetCellValue(sheetName, "C2", hwInfo.Hostname); err != nil {
+				return err
+			}
+		}
+
+		if err := f.SetCellStyle(sheetName, "B4", "B4", tagStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B4", i18n.T(c.Request().Context(), "inventory.physical_disk.title")); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheetName, "B5", "D5", headerStyle); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "B5", i18n.T(c.Request().Context(), "inventory.physical_disk.model")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "C5", i18n.T(c.Request().Context(), "inventory.physical_disk.serial")); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheetName, "D5", i18n.T(c.Request().Context(), "inventory.physical_disk.size")); err != nil {
+			return err
+		}
+
+		for index, pd := range pdInfo.Edges.Physicaldisks {
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", 6+(index*6)), pd.Model); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", 6+(index*6)), pd.SerialNumber); err != nil {
+				return err
+			}
+			if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", 6+(index*6)), pd.SizeInUnits); err != nil {
 				return err
 			}
 		}
