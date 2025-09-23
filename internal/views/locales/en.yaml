@@ -137,6 +137,7 @@ en:
   Other: "Other"
   Monitors: "Monitors"
   Logical Disks: "Logical Disks"
+  Physical Disks: "Physical Disks"
   Shares: "Shares"
   Network Adapters: "Network Adapters"
   Printers: "Printers"
@@ -366,6 +367,13 @@ en:
       no_logical_disks: "No logical disks information is available yet"
       report_label: "Label: %s"
       report_mount_point: "Mount point: %s"
+    physical_disk:
+      title: "Physical Disks"
+      description: "These are the physical disks connected to this computer as reported by the OpenUEM agent"
+      model: "Vendor and Model"
+      serial: "Serial Number"
+      size: "Size"
+      no_physical_disks: "No physical disks information is available yet"
     file_browser:
       title: "File Browser"
       description: "Browse this logical drive remotely using SFTP. Click on the three dots icon to open an actions dropdown. Also you can use the icons bar to move to an upper folder, add a new folder, refresh the folder, upload a file, download many elements as a ZIP file or delete many elements after you select them"
