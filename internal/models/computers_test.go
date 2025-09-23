@@ -115,6 +115,15 @@ func (suite *ComputersTestSuite) SetupTest() {
 	}
 
 	for i := range 7 {
+		query := client.PhysicalDisk.Create().
+			SetDeviceID(fmt.Sprintf("physicalDisk%d", i)).
+			SetModel(fmt.Sprintf("physicalDisk%d", i)).
+			SetOwnerID("agent1")
+		err := query.Exec(context.Background())
+		assert.NoError(suite.T(), err, "should create physical disk")
+	}
+
+	for i := range 7 {
 		query := client.Share.Create().
 			SetName(fmt.Sprintf("share%d", i)).
 			SetDescription(fmt.Sprintf("description%d", i)).
@@ -349,6 +358,19 @@ func (suite *ComputersTestSuite) TestGetAgentLogicalDisksInfo() {
 	assert.Equal(suite.T(), "logicalDisk1", item.Edges.Logicaldisks[1].Label, "logicalDisk should be logicalDisk1")
 
 	_, err = suite.model.GetAgentLogicalDisksInfo("agent7", suite.commonInfo)
+	assert.Error(suite.T(), err, "should not found agent7")
+	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
+}
+
+func (suite *ComputersTestSuite) TestGetAgentPhysicalDisksInfo() {
+	var err error
+
+	item, err := suite.model.GetAgentPhysicalDisksInfo("agent1", suite.commonInfo)
+	assert.NoError(suite.T(), err, "should found agent1")
+	assert.Equal(suite.T(), "physicalDisk0", item.Edges.Physicaldisks[0].Model, "physicalDisk should be physicalDisk0")
+	assert.Equal(suite.T(), "physicalDisk1", item.Edges.Physicaldisks[1].Model, "physicalDisk should be physicalDisk1")
+
+	_, err = suite.model.GetAgentPhysicalDisksInfo("agent7", suite.commonInfo)
 	assert.Error(suite.T(), err, "should not found agent7")
 	assert.Equal(suite.T(), true, openuem_ent.IsNotFound(err), "should raise not found error")
 }
