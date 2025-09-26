@@ -170,8 +170,8 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.disabled_antivirus") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled")) }
-									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusEnabled1=Disabled"))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus?filterByAntivirusEnabled1=Disabled")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus?filterByAntivirusEnabled1=Disabled"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
@@ -185,8 +185,8 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.outdated_antivirus") }</th>
 							<td class="!align-middle text-center">
 								<a
-									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusUpdated1=UpdatedNo")) }
-									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates?filterByAntivirusUpdated1=UpdatedNo"))) }
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus?filterByAntivirusUpdated1=UpdatedNo")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus?filterByAntivirusUpdated1=UpdatedNo"))) }
 									hx-target="#main"
 									hx-swap="outerHTML"
 									hx-push-url="true"
