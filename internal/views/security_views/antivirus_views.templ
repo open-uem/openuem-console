@@ -107,7 +107,11 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 											</td>
 											<td class="!align-middle">
 												if len(antivirus.Name) == 0 {
-													{ i18n.T(ctx, "Unsupported") }
+													if antivirus.OS == "windows" {
+														{ i18n.T(ctx, "Not Found") }
+													} else {
+														{ i18n.T(ctx, "Unsupported") }
+													}
 												} else {
 													{ antivirus.Name }
 												}
