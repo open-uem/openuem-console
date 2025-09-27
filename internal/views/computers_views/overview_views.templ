@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	openuem_agent "github.com/open-uem/ent/agent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"golang.org/x/mod/semver"
 	"strconv"
@@ -173,12 +174,13 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 								<td>
 									<form class="flex gap-2 items-center">
 										<select class="uk-select w-3/4" name="endpoint-type">
-											<option value="DesktopPC" selected?={ agent.EndpointType == "DesktopPC" }>{ i18n.T(ctx, "DesktopPC") }</option>
-											<option value="Laptop" selected?={ agent.EndpointType == "Laptop" }>{ i18n.T(ctx, "Laptop") }</option>
-											<option value="Server" selected?={ agent.EndpointType == "Server" }>{ i18n.T(ctx, "Server") }</option>
-											<option value="Tablet" selected?={ agent.EndpointType == "Tablet" }>{ i18n.T(ctx, "Tablet") }</option>
-											<option value="VM" selected?={ agent.EndpointType == "VM" }>{ i18n.T(ctx, "VM") }</option>
-											<option value="Other" selected?={ agent.EndpointType == "Other" }>{ i18n.T(ctx, "Other") }</option>
+											<option value={ openuem_agent.EndpointTypeDesktopPC } selected?={ agent.EndpointType == openuem_agent.EndpointTypeDesktopPC }>{ i18n.T(ctx,  openuem_agent.EndpointTypeDesktopPC.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeLaptop } selected?={ agent.EndpointType == openuem_agent.EndpointTypeLaptop }>{ i18n.T(ctx, openuem_agent.EndpointTypeLaptop.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeServer } selected?={ agent.EndpointType == openuem_agent.EndpointTypeServer }>{ i18n.T(ctx, openuem_agent.EndpointTypeServer.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeTablet } selected?={ agent.EndpointType == openuem_agent.EndpointTypeTablet }>{ i18n.T(ctx, openuem_agent.EndpointTypeTablet.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeVM } selected?={ agent.EndpointType ==  openuem_agent.EndpointTypeVM }>{ i18n.T(ctx, openuem_agent.EndpointTypeVM.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeAllInOne } selected?={ agent.EndpointType == openuem_agent.EndpointTypeAllInOne }>{ i18n.T(ctx,  openuem_agent.EndpointTypeAllInOne.String()) }</option>
+											<option value={ openuem_agent.EndpointTypeOther } selected?={ agent.EndpointType == openuem_agent.EndpointTypeOther }>{ i18n.T(ctx, openuem_agent.EndpointTypeOther.String()) }</option>
 										</select>
 										<button
 											class="flex items-center gap-8"
