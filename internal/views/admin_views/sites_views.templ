@@ -211,7 +211,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/admin/tenants/%s/sites", commonInfo.TenantID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))))
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "sites.no_tenants") }
