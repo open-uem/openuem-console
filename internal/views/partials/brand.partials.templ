@@ -71,7 +71,7 @@ templ Brand(name, publisher string) {
 		<i class="si si-gnome si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "greenshot") {
 		<uk-icon hx-history="false" icon="brush" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
-	} else if strings.Contains(publisher, "hp") {
+	} else if strings.Contains(publisher, "hp") || strings.Contains(publisher, "hewlett-packard") {
 		<i class="si si-hp si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "insomnia") {
 		<i class="si si-insomnia si--color uk-cloak text-3xl"></i>

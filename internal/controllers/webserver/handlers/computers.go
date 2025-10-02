@@ -428,7 +428,15 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	_, err = h.Model.GetRustDeskSettings(tenantID)
 	hasRustDeskSettings := err == nil
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, commonInfo, ""), commonInfo))
+	domain := h.Domain
+	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {
+		domain = agent.Edges.Site[0].Domain
+	}
+
+	_, err = net.LookupIP(agent.Hostname + "." + domain)
+	isHostResolvedByDNS := err == nil
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, isHostResolvedByDNS, commonInfo, ""), commonInfo))
 }
 
 func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {
@@ -1297,6 +1305,32 @@ func (h *Handler) ComputerStartVNC(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RemoteDesktop(c, agent, domain, false, false, "", commonInfo), commonInfo))
 	}
 	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.VNC(c, agent, domain, false, false, "", commonInfo), commonInfo))
+}
+
+func (h *Handler) ComputerStartRustDesk(c echo.Context) error {
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+
+	agent, err := h.Model.GetAgentById(agentId, commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
+	}
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetRustDeskSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_rustdesk_settings", err.Error()), true))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex("| Computers", computers_views.RustDesk(c, agent, settings, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerStopVNC(c echo.Context) error {

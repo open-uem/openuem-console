@@ -10,7 +10,7 @@ import (
 
 var connectVNCHandle = templ.NewOnceHandle()
 
-templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete, hasRustDeskSettings bool, commonInfo *partials.CommonInfo, errMessage string) {
+templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete, hasRustDeskSettings, isHostResolvedByDNS bool, commonInfo *partials.CommonInfo, errMessage string) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -32,42 +32,18 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 							<uk-icon hx-history="false" icon="life-buoy" custom-class="h-5 w-5" uk-cloack></uk-icon>
 							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.vnc_title") }</h3>
 						</div>
-						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.vnc_description") }</p>
-						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "rustdesk.remote_description") }</p>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "agents.remote_assistance_description") }</p>
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					<div class="flex flex-col gap-4">
-						if len(agent.IP) != 0 && len(agent.Vnc) != 0 && len(agent.Edges.Operatingsystem.Username) != 0 && agent.CertificateReady && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) && agent.RemoteAssistance {
-							<div id="vnc">
-								<a
-									class="flex gap-2 items-center uk-text-small"
-									target="_blank"
-									rel="noopener"
-									href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
-								>
-									<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
-								</a>
-							</div>
-						} else {
-							if !agent.CertificateReady {
-								<p class="uk-text-small uk-text-muted">
-									{ i18n.T(ctx, "agents.no_vnc_certificate") }
-								</p>
-							} else {
-								<p class="uk-text-small uk-text-muted">
-									{ i18n.T(ctx, "agents.no_supported_vnc") }
-								</p>
-							}
+					<div class="flex gap-4">
+						if agent.Os != "macOS" && !agent.IsWayland {
+							@VNCChecks(agent, isHostResolvedByDNS, commonInfo)
 						}
-						if agent.HasRustdesk && hasRustDeskSettings {
-							@RustDeskInit(agent)
-						} else {
-							<div class="flex gap-2 items-center uk-text-small uk-text-muted">
-								<i id="rustdesk-icon" class="si si-rustdesk text-red-600 text-xl uk-cloak"></i>
-								{ i18n.T(ctx, "rustdesk.rustdesk_not_found") }
-							</div>
+						if agent.Os != "macOS" && agent.IsWayland {
+							@RDPChecks(agent, isHostResolvedByDNS, commonInfo)
 						}
+						@RustDeskChecks(agent, hasRustDeskSettings, commonInfo)
 					</div>
 				</div>
 			</div>
@@ -75,10 +51,253 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 	</main>
 }
 
+templ VNCChecks(agent *ent.Agent, isHostResolvedByDNS bool, commonInfo *partials.CommonInfo) {
+	<div class="uk-card uk-card-body uk-card-default w-1/2">
+		<h3 class="uk-card-title">VNC</h3>
+		<div class="flex flex-col gap-2 uk-text-small uk-text-muted uk-margin">
+			<div class="flex gap-2">
+				if !agent.RemoteAssistance {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_disabled") }
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_enabled") }
+				}
+			</div>
+			<div class="flex gap-2">
+				if agent.Vnc == "" {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_vnc_not_found") }
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href="https://openuem.eu/docs/Advanced%20Topics/vnc"
+					>
+						<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					</a>
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.vnc_server_installed", agent.Vnc ) }
+				}
+			</div>
+			<div class="flex gap-2">
+				if agent.Edges.Operatingsystem.Username == "" {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_no_logged_user") }
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href="https://openuem.eu/docs/Advanced%20Topics/vnc"
+					>
+						<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					</a>
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_has_logged_user", agent.Edges.Operatingsystem.Username ) }
+				}
+			</div>
+			<div class="flex gap-2">
+				if agent.CertificateReady {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.vnc_certs") }
+				} else {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.no_vnc_certs") }
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/?filterByNickname=%s", agent.Hostname))) }
+					>
+						<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					</a>
+				}
+			</div>
+			<div class="flex gap-2 items-center">
+				if isHostResolvedByDNS {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.vnc_host_resolved") }
+				}
+			</div>
+			<div class="flex gap-2 items-center">
+				if agent.IP != "" {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_ip") }
+				} else {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_no_ip") }
+				}
+			</div>
+			if agent.IP != "" && agent.Vnc != "" && agent.Edges.Operatingsystem.Username != "" && agent.CertificateReady && agent.RemoteAssistance {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
+					>
+						<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
+					</a>
+				</div>
+			} else {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon> { i18n.T(ctx, "agents.remote_assistance_checks_failed") }
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ RDPChecks(agent *ent.Agent, isHostResolvedByDNS bool, commonInfo *partials.CommonInfo) {
+	<div class="uk-card uk-card-body uk-card-default w-1/2">
+		<h3 class="uk-card-title">RDP</h3>
+		<div class="flex flex-col gap-2 uk-text-small uk-text-muted uk-margin">
+			<div class="flex gap-2">
+				if agent.Vnc == "" {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_rdp_not_found") }
+					// <a
+					// 	class="flex gap-2 items-center uk-text-small"
+					// 	target="_blank"
+					// 	rel="noopener"
+					// 	href="https://openuem.eu/docs/Advanced%20Topics/vnc"
+					// >
+					// 	<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					// </a>
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_rdp_found" ) }
+				}
+			</div>
+			<div class="flex gap-2">
+				if agent.Edges.Operatingsystem.Username == "" {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_no_logged_user") }
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href="https://openuem.eu/docs/Advanced%20Topics/vnc"
+					>
+						<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					</a>
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_has_logged_user", agent.Edges.Operatingsystem.Username ) }
+				}
+			</div>
+			<div class="flex gap-2">
+				if agent.CertificateReady {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.rdp_certs") }
+				} else {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.no_rdp_certs") }
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/agents/?filterByNickname=%s", agent.Hostname))) }
+					>
+						<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+					</a>
+				}
+			</div>
+			<div class="flex gap-2 items-center">
+				if isHostResolvedByDNS {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.vnc_host_resolved") }
+				}
+			</div>
+			<div class="flex gap-2 items-center">
+				if agent.IP != "" {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_ip") }
+				} else {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.remote_assistance_no_ip") }
+				}
+			</div>
+			<div class="flex gap-2 items-center">
+				<uk-icon icon="triangle-alert" hx-history="false" custom-class="h-5 w-5 text-yellow-600" uk-cloak></uk-icon>
+				{ i18n.T(ctx, "agents.remote_assistance_rdp_unknown") }
+			</div>
+			if agent.IP != "" && agent.Vnc == "GnomeRemoteDesktopRDP" && agent.Edges.Operatingsystem.Username != "" && agent.CertificateReady {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID))) }
+					>
+						<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
+					</a>
+				</div>
+			} else {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon> { i18n.T(ctx, "agents.remote_assistance_checks_failed") }
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ RustDeskChecks(agent *ent.Agent, hasRustDeskSettings bool, commonInfo *partials.CommonInfo) {
+	<div class="uk-card uk-card-body uk-card-default w-1/2">
+		<h3 class="uk-card-title">RustDesk</h3>
+		<div class="flex flex-col gap-2 uk-text-small uk-text-muted uk-margin">
+			<div class="flex gap-2">
+				if !agent.HasRustdesk {
+					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.rustdesk_not_found") }
+				} else {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.rustdesk_found") }
+				}
+			</div>
+			<div class="flex gap-2">
+				if hasRustDeskSettings {
+					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+					{ i18n.T(ctx, "agents.rustdesk_settings") }
+				} else {
+					<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.no_rustdesk_settings") }
+				}
+				<a
+					class="flex gap-2 items-center uk-text-small"
+					target="_blank"
+					rel="noopener"
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)) }
+				>
+					<uk-icon icon="info" hx-history="false" custom-class="h-5 w-5 text-blue-600" uk-cloak></uk-icon>
+				</a>
+			</div>
+			if agent.RemoteAssistance && agent.HasRustdesk {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<a
+						class="flex gap-2 items-center uk-text-small"
+						target="_blank"
+						rel="noopener"
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/rustdesk", agent.ID))) }
+					>
+						<uk-icon hx-history="false" icon="screen-share" custom-class="h-5 w-5" uk-cloak></uk-icon> { i18n.T(ctx, "agents.vnc_new_tab") }
+					</a>
+				</div>
+			} else {
+				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
+					<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon> { i18n.T(ctx, "agents.remote_assistance_checks_failed") }
+				</div>
+			}
+		</div>
+	</div>
+}
+
 templ RustDeskInit(agent *ent.Agent) {
 	<div id="rustdesk">
 		<button
-			class="flex items-center gap-2 uk-text-small"
+			class="flex items-center gap-2 uk-text-small uk-button uk-button-default"
 			type="submit"
 			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/startrustdesk", agent.ID))) }
 			hx-push-url="false"
@@ -86,7 +305,7 @@ templ RustDeskInit(agent *ent.Agent) {
 			hx-swap="outerHTML"
 			htmx-indicator="#rustdesk-start-spinner"
 			_="
-			on htmx:afterRequest remove .hidden from #rustdesk-icon
+			on htmx:afterRequest add .hidden to #rustdesk-icon
 			on click 
 				add .hidden to #rustdesk-icon									
 			end"
@@ -98,7 +317,7 @@ templ RustDeskInit(agent *ent.Agent) {
 	</div>
 }
 
-templ RustDeskControl(agentID string, rustDeskID string, rustDeskPassword string, commonInfo *partials.CommonInfo) {
+templ RustDeskControl(agentID string, rustDeskID string, useDirectIPIfPossible bool, IPAddress string, rustDeskPassword string, commonInfo *partials.CommonInfo) {
 	<div id="rustdesk">
 		<div class="flex items-center gap-2 uk-text-small">
 			<i id="rustdesk-icon" class="si si-rustdesk text-green-600 text-xl uk-cloak"></i>
@@ -124,6 +343,27 @@ templ RustDeskControl(agentID string, rustDeskID string, rustDeskPassword string
 				<span id="rustdesk-id">{ rustDeskID }</span>
 				<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-id.textContent)"></uk-icon>
 			</div>
+			if useDirectIPIfPossible {
+				<div class="flex gap-2 uk-text-small">
+					if rustDeskPassword != "" {
+						<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", IPAddress, rustDeskPassword)) }>
+							<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "rustdesk.click_to_open_direct") }
+						</a>
+					} else {
+						<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", IPAddress)) }>
+							<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "rustdesk.click_to_open_direct") }
+						</a>
+					}
+				</div>
+				<div class="flex gap-2 uk-text-small">
+					<uk-icon hx-history="false" icon="user-round" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					<span>{  i18n.T(ctx, "rustdesk.rustdesk_id") } </span>
+					<span id="rustdesk-ip">{ IPAddress }</span>
+					<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-ip.textContent)"></uk-icon>
+				</div>
+			}
 			if rustDeskPassword != "" {
 				<div class="flex gap-2 uk-text-small">
 					<uk-icon hx-history="false" icon="key-round" custom-class="h-5 w-5" uk-cloack></uk-icon>
