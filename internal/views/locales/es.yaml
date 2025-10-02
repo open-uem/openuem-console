@@ -1308,7 +1308,7 @@ es:
     import_error_wrong_format: "La fila CSV %d tiene un formato incorrecto"
     import_required: "El campo %s en la fila %d es obligatorio y no puede estar vacío"
     import_wrong_sites: "Hemos encontrado errores para los siguientes sitios: %s"
-    confirm_delete: "¿Está seguro de quiere eliminar este sitio? Todos los agentes asociados, perfiles, etiquetas, metadatos y otras configuraciones serán eliminados de la base de datos"
+    confirm_delete: "¿Está seguro de quiere eliminar este sitio? Todos los agentes y perfiles sociados serán eliminados de la base de datos"
     delete_error: "No se pudo eliminar el sitio, razón: %s"
     filter_by_name: Filtrar por nombre...
     filter_by_creation: Filter by creation date
