@@ -1342,7 +1342,7 @@ en:
     import_error_wrong_format: "The CSV row %d has a wrong format"
     import_required: "Field %s in row %d is required and cannot be empty"
     import_wrong_sites: "We encountered errors for the following sites: %s"
-    confirm_delete: "Are you sure that you want to delete this site? All the associated agents, profiles, tags, metadata and other settings will be removed from the database"
+    confirm_delete: "Are you sure that you want to delete this site? All the associated agents and profiles will be removed from the database"
     delete_error: "Could not delete the organization, reason: %s"
     filter_by_name: Filter by name...
     filter_by_creation: Filter by creation date

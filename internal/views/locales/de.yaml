@@ -1311,7 +1311,7 @@ de:
     import_error_wrong_format: "Die CSV-Zeile %d hat ein falsches Format"
     import_required: "Feld %s in Zeile %d ist erforderlich und darf nicht leer sein"
     import_wrong_sites: "Wir haben Fehler für die folgenden Standorte festgestellt: %s"
-    confirm_delete: "Sind Sie sicher, dass Sie diesen Standort löschen möchten? Alle zugehörigen Agents, Profile, Tags, Metadaten und andere Einstellungen werden aus der Datenbank entfernt"
+    confirm_delete: Möchten Sie diese Site wirklich löschen? Alle zugehörigen Agenten und Profile werden aus der Datenbank entfernt.
     delete_error: "Organisation konnte nicht gelöscht werden, Grund: %s"
     filter_by_name: Nach Name filtern...
     filter_by_creation: Nach Erstellungsdatum filtern
