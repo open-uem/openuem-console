@@ -30,10 +30,7 @@ func AgentsByOsVersion(ctx context.Context, agents []models.Agent, countAllAgent
 		}),
 	)
 
-	leftTitle := "19.5%"
-	if countAllAgents < 10 {
-		leftTitle = "22%"
-	}
+	leftTitle := getLeftTitlePercentage(countAllAgents)
 
 	textStyle := opts.TextStyle{FontSize: 36, Color: "#777"}
 
