@@ -32,10 +32,7 @@ func AgentsByLastReportDate(ctx context.Context, countReportedLast24, countAllAg
 		}),
 	)
 
-	leftTitle := "19.5%"
-	if countAllAgents < 10 {
-		leftTitle = "22%"
-	}
+	leftTitle := getLeftTitlePercentage(countAllAgents)
 
 	colors := opts.Colors{"#48C639", "#C63948"}
 
