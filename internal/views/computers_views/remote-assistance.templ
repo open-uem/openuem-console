@@ -305,7 +305,7 @@ templ RustDeskInit(agent *ent.Agent) {
 			hx-swap="outerHTML"
 			htmx-indicator="#rustdesk-start-spinner"
 			_="
-			on htmx:afterRequest add .hidden to #rustdesk-icon
+			on htmx:afterRequest remove .hidden from #rustdesk-icon
 			on click 
 				add .hidden to #rustdesk-icon									
 			end"
