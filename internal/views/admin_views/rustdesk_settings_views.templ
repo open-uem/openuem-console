@@ -9,12 +9,16 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ RustDeskSettings(c echo.Context, settings *ent.RustDesk, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "RustDesk Settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)))}}, commonInfo)
+templ RustDeskSettings(c echo.Context, settings *ent.Rustdesk, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
+	if commonInfo.TenantID == "-1" {
+		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "RustDesk Settings"), Url: "/admin/rustdesk"}}, commonInfo)
+	} else {
+		@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "RustDesk Settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)))}}, commonInfo)
+	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@ConfigNavbar("smtp", agentsExists, serversExists, commonInfo)
+				@ConfigNavbar("rustdesk", agentsExists, serversExists, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -30,6 +34,18 @@ templ RustDeskSettings(c echo.Context, settings *ent.RustDesk, agentsExists, ser
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "rustdesk.settings_description") }
 						</p>
+						if commonInfo.TenantID != "-1" {
+							<button
+								class="flex items-center my-4 uk-button uk-button-primary"
+								type="submit"
+								hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk/inherit", commonInfo.TenantID))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								{ i18n.T(ctx,"rustdesk.apply_global_settings") }
+							</button>
+						}
 					</div>
 					<div class="uk-card-body">
 						<form class="flex flex-col mt-6 gap-4 w-1/2">
@@ -55,13 +71,14 @@ templ RustDeskSettings(c echo.Context, settings *ent.RustDesk, agentsExists, ser
 										<input class="uk-input" type="text" name="rustdesk-key" value={ settings.Key } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
-								<tr>
-									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_title") }</td>
-									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_description") }</td>
-									<td class="!align-middle">
-										<input class="uk-input" type="text" name="rustdesk-api-server" value={ settings.APIServer } spellcheck="false" autocomplete="off" autofocus/>
-									</td>
-								</tr>
+								// Future support for API server
+								// <tr>
+								// 	<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_title") }</td>
+								// 	<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_api_server_description") }</td>
+								// 	<td class="!align-middle">
+								// 		<input class="uk-input" type="text" name="rustdesk-api-server" value={ settings.APIServer } spellcheck="false" autocomplete="off" autofocus/>
+								// 	</td>
+								// </tr>
 								<tr>
 									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_direct_ip_access_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_direct_ip_access_description") }</td>

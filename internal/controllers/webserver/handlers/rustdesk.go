@@ -17,7 +17,7 @@ import (
 )
 
 func (h *Handler) RustDeskStart(c echo.Context) error {
-	rustdeskSettings := &ent.RustDesk{}
+	rustdeskSettings := &ent.Rustdesk{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -97,8 +97,7 @@ func (h *Handler) RustDeskStop(c echo.Context) error {
 		RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	_, err = h.Model.GetRustDeskSettings(tenantID)
-	hasRustDeskSettings := err == nil
+	hasRustDeskSettings := h.Model.HasRustDeskSettings(tenantID)
 
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
@@ -129,16 +128,23 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 	var err error
 	var successMessage string
 
-	rustdeskSettings := &ent.RustDesk{}
+	rustdeskSettings := &ent.Rustdesk{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
 	}
 
-	tenantID, err := strconv.Atoi(commonInfo.TenantID)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	tenantID := -1
+	tID := c.Param("tenant")
+	if tID != "" {
+		tenantID, err = strconv.Atoi(tID)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+		}
+		commonInfo.TenantID = tID
+	} else {
+		commonInfo.TenantID = "-1"
 	}
 
 	if c.Request().Method == "POST" {
@@ -171,9 +177,18 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 		successMessage = i18n.T(c.Request().Context(), "rustdesk.settings_saved")
 	}
 
-	settings, err := h.Model.GetRustDeskSettings(tenantID)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_rustdesk_settings", err.Error()), true))
+	settings := []*ent.Rustdesk{}
+
+	if tenantID == -1 {
+		settings, err = h.Model.GetGlobalRustDeskSettings()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_global_rustdesk_settings", err.Error()), true))
+		}
+	} else {
+		settings, err = h.Model.GetTenantRustDeskSettings(tenantID)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_rustdesk_settings", err.Error()), true))
+		}
 	}
 
 	if len(settings) > 0 {
@@ -189,6 +204,38 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
+
+	return RenderView(c, admin_views.RustDeskSettingsIndex(" | RustDesk Settings", admin_views.RustDeskSettings(c, rustdeskSettings, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo), successMessage), commonInfo))
+}
+
+func (h *Handler) ApplyGlobalRustDeskSettings(c echo.Context) error {
+	rustdeskSettings := &ent.Rustdesk{}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	settings, err := h.Model.GetGlobalRustDeskSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_get_global_rustdesk_settings", err.Error()), true))
+	}
+
+	if len(settings) > 0 {
+		rustdeskSettings = settings[0]
+	}
+
+	agentsExists, err := h.Model.AgentsExists(commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	serversExists, err := h.Model.ServersExists()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	successMessage := ""
 
 	return RenderView(c, admin_views.SMTPSettingsIndex(" | RustDesk Settings", admin_views.RustDeskSettings(c, rustdeskSettings, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo), successMessage), commonInfo))
 }

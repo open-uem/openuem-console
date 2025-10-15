@@ -330,7 +330,7 @@ en:
     rustdesk_found: "RustDesk is installed on the endpoint"   
     rustdesk_not_found: "The RustDesk binary was not found on the endpoint"
     rustdesk_settings: "There are RustDesk settings for this organization"         
-    no_rustdesk_settings: "There are no RustDesk settings for this organization"
+    no_rustdesk_settings: "There are no RustDesk settings for this organization, proceed anyway"
     vnc_certs: "The agent reported that it has a valid certificate to encrypt VNC traffic"
     rdp_certs: "The agent reported that it has a valid certificate to encrypt RDP traffic"
     no_vnc_certs: "The agent hasn't reported that it has a digital certificate to encrypt VNC traffic. Force a new report or regenerate certificates from the actions menu"
@@ -1301,7 +1301,8 @@ en:
     filter_by_default_status: Filter by default status
     no_tenants: No tenants have been found for this query
     could_not_get_agents: "Could not get agents associated with this organization"
-    could_not_get_rustdesk_settings: "Could not get RustDesk settings associated with this organization"
+    could_not_get_rustdesk_settings: "Could not get RustDesk settings associated with this organization"    
+    could_not_get_global_rustdesk_settings: "Could not get global RustDesk settings associated with this organization"    
 
   sites:
     title: "Sites"
@@ -1445,6 +1446,8 @@ en:
     click_to_close: "Click to close the remote RustDesk app"
     rustdesk_id: "RustDesk ID"
     rustdesk_password: "RustDesk Password"
+    click_to_open_web_client: "Click to open the RustDesk web app"
+    apply_global_settings: "Apply global RustDesk settings"
 
   countries:
     Australia: "Australia"

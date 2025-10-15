@@ -130,6 +130,10 @@ templ VNCChecks(agent *ent.Agent, isHostResolvedByDNS bool, commonInfo *partials
 					{ i18n.T(ctx, "agents.remote_assistance_no_ip") }
 				}
 			</div>
+			<div class="flex gap-2 items-center">
+				<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "agents.remote_assistance_rdp_unknown") }
+			</div>
 			if agent.IP != "" && agent.Vnc != "" && agent.Edges.Operatingsystem.Username != "" && agent.CertificateReady && agent.RemoteAssistance {
 				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
 					<a
@@ -221,7 +225,7 @@ templ RDPChecks(agent *ent.Agent, isHostResolvedByDNS bool, commonInfo *partials
 				}
 			</div>
 			<div class="flex gap-2 items-center">
-				<uk-icon icon="triangle-alert" hx-history="false" custom-class="h-5 w-5 text-yellow-600" uk-cloak></uk-icon>
+				<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
 				{ i18n.T(ctx, "agents.remote_assistance_rdp_unknown") }
 			</div>
 			if agent.IP != "" && agent.Vnc == "GnomeRemoteDesktopRDP" && agent.Edges.Operatingsystem.Username != "" && agent.CertificateReady {
@@ -336,6 +340,12 @@ templ RustDeskControl(agentID string, rustDeskID string, useDirectIPIfPossible b
 						{ i18n.T(ctx, "rustdesk.click_to_open") }
 					</a>
 				}
+			</div>
+			<div class="flex gap-2 uk-text-small">
+				<a class="flex gap-2" href="https://rustdesk.com/web/" target="_blank" rel="noopener">
+					<uk-icon hx-history="false" icon="globe" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "rustdesk.click_to_open_web_client") }
+				</a>
 			</div>
 			<div class="flex gap-2 uk-text-small">
 				<uk-icon hx-history="false" icon="user-round" custom-class="h-5 w-5" uk-cloack></uk-icon>

@@ -425,8 +425,7 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 		RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	_, err = h.Model.GetRustDeskSettings(tenantID)
-	hasRustDeskSettings := err == nil
+	hasRustDeskSettings := h.Model.HasRustDeskSettings(tenantID)
 
 	domain := h.Domain
 	if len(agent.Edges.Site) == 1 && agent.Edges.Site[0].Domain != "" {

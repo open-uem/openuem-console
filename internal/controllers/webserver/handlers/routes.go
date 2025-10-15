@@ -125,6 +125,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.DELETE("/admin/update-servers/:serverId", h.UpdateServers, h.IsAuthenticated)
 	e.POST("/admin/update-servers/confirm", h.UpdateServersConfirm, h.IsAuthenticated)
 	e.POST("/admin/confirm-delete-server/:serverId", h.DeleteServerConfirm, h.IsAuthenticated)
+	e.GET("/admin/rustdesk", h.RustDeskSettings, h.IsAuthenticated)
+	e.POST("/admin/rustdesk", h.RustDeskSettings, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/admin", h.TagManager, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/admin", h.TagManager, h.IsAuthenticated)
@@ -154,6 +156,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/admin/sites/:site", h.EditSite, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/admin/sites/:site/confirm-delete", func(c echo.Context) error { return h.ListSites(c, "", "", true) }, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/admin/sites/:site", h.DeleteSite, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/admin/rustdesk/inherit", h.ApplyGlobalRustDeskSettings, h.IsAuthenticated)
 
 	e.GET("/dashboard", h.Dashboard, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/dashboard", h.Dashboard, h.IsAuthenticated)
