@@ -47,7 +47,7 @@ templ RegistryComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="registry-value-types-section" class={ templ.KV("hidden", t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue) }>
+		<div id="registry-value-types-section" class={ templ.KV("hidden", t.Type != task.TypeAddRegistryKeyValue) }>
 			@RegistryTypes(t)
 		</div>
 		<div id="registry-value-data-section" class={ templ.KV("hidden", t.Type != task.TypeUpdateRegistryKeyDefaultValue && t.Type != task.TypeAddRegistryKeyValue) }>
@@ -60,7 +60,7 @@ templ RegistryComponent(t *ent.Task) {
 					name="registry-value-data"
 					class="uk-textarea"
 					rows="2"
-					placeholder={ i18n.T(ctx, "tasks.new.text") }
+					placeholder={ i18n.T(ctx, "tasks.introduce_registry_value_data") }
 					aria-label={ i18n.T(ctx, "tasks.registry_value_data") }
 					autocomplete="off"
 					autocorrect="off"

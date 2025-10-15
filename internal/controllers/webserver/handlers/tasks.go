@@ -127,31 +127,32 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	switch taskType {
-	case string(task.TypeAddLocalUser), string(task.TypeRemoveLocalUser):
+	case task.TypeAddLocalUser.String(), task.TypeRemoveLocalUser.String():
 		return validateWindowsLocalUser(c)
-	case string(task.TypeAddRegistryKey), string(task.TypeAddRegistryKeyValue), string(task.TypeRemoveRegistryKey),
-		string(task.TypeRemoveRegistryKeyValue), string(task.TypeUpdateRegistryKeyDefaultValue):
+	case task.TypeAddRegistryKey.String(), task.TypeAddRegistryKeyValue.String(), task.TypeRemoveRegistryKey.String(),
+		task.TypeRemoveRegistryKeyValue.String(), task.TypeUpdateRegistryKeyDefaultValue.String():
 		return validateWindowsRegistry(c)
-	case string(task.TypeAddUnixLocalUser):
+	case task.TypeAddUnixLocalUser.String():
 		return validateAddUnixLocalUser(c)
-	case string(task.TypeRemoveUnixLocalUser):
+	case task.TypeRemoveUnixLocalUser.String():
 		return validateRemoveUnixLocalUser(c)
-	case string(task.TypeAddLocalGroup), string(task.TypeRemoveLocalGroup):
+	case task.TypeAddLocalGroup.String(), task.TypeRemoveLocalGroup.String(),
+		task.TypeAddUsersToLocalGroup.String(), task.TypeRemoveUsersFromLocalGroup.String():
 		return validateWindowsLocalGroup(c)
-	case string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalGroup):
+	case task.TypeAddUnixLocalGroup.String(), task.TypeRemoveUnixLocalGroup.String():
 		return validateUnixLocalGroup(c)
-	case string(task.TypeMsiInstall), string(task.TypeMsiUninstall):
+	case task.TypeMsiInstall.String(), task.TypeMsiUninstall.String():
 		return validateMSI(c)
-	case string(task.TypeWingetDelete), string(task.TypeWingetInstall), string(task.TypeWingetUpdate):
+	case task.TypeWingetDelete.String(), task.TypeWingetInstall.String(), task.TypeWingetUpdate.String():
 		return validateWinGetPackage(c)
-	case string(task.TypePowershellScript):
+	case task.TypePowershellScript.String():
 		return validatePowerShellScript(c)
-	case string(task.TypeUnixScript):
+	case task.TypeUnixScript.String():
 		return validateUnixScript(c)
-	case string(task.TypeFlatpakInstall), string(task.TypeFlatpakUninstall):
+	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():
 		return validateFlatpakPackage(c)
-	case string(task.TypeBrewFormulaInstall), string(task.TypeBrewFormulaUninstall), string(task.TypeBrewFormulaUpgrade),
-		string(task.TypeBrewCaskInstall), string(task.TypeBrewCaskUninstall), string(task.TypeBrewCaskUpgrade):
+	case task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String(),
+		task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String():
 		return validateHomeBrew(c)
 	default:
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
@@ -175,12 +176,12 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
-	if (taskConfig.TaskType == "add_registry_key" || taskConfig.TaskType == "remove_registry_key") && taskConfig.RegistryKey == "" {
+	if (taskConfig.TaskType == task.TypeAddRegistryKey.String() || taskConfig.TaskType == task.TypeRemoveRegistryKey.String()) && taskConfig.RegistryKey == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_not_empty"))
 	}
 
 	taskConfig.RegistryKeyValue = c.FormValue("registry-value-name")
-	if (taskConfig.TaskType == "add_registry_key_value" || taskConfig.TaskType == "remove_registry_key_value") && taskConfig.RegistryKeyValue == "" {
+	if (taskConfig.TaskType == task.TypeAddRegistryKeyValue.String() || taskConfig.TaskType == task.TypeRemoveRegistryKeyValue.String()) && taskConfig.RegistryKeyValue == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_name"))
 	}
 
@@ -190,7 +191,7 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.RegistryKeyValueData = c.FormValue("registry-value-data")
-	if (taskConfig.TaskType == "update_registry_key_default_value") && taskConfig.RegistryKeyValueData == "" {
+	if (taskConfig.TaskType == task.TypeUpdateRegistryKeyDefaultValue.String()) && taskConfig.RegistryKeyValueData == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.invalid_registry_value_data"))
 	}
 
@@ -487,12 +488,12 @@ func validateWindowsLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.LocalGroupName = c.FormValue("local-group-name")
-	if (taskConfig.TaskType == "add_local_group" || taskConfig.TaskType == "remove_local_group" || taskConfig.TaskType == "add_users_to_local_group" || taskConfig.TaskType == "remove_users_from_local_group") && taskConfig.LocalGroupName == "" {
+	if (taskConfig.TaskType == task.TypeAddLocalGroup.String() || taskConfig.TaskType == task.TypeRemoveLocalGroup.String() || taskConfig.TaskType == task.TypeAddUsersToLocalGroup.String() || taskConfig.TaskType == task.TypeRemoveUsersFromLocalGroup.String()) && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
 	}
 
 	taskConfig.LocalGroupDescription = c.FormValue("local-group-description")
-	if taskConfig.TaskType == "add_local_group" && taskConfig.LocalGroupName == "" {
+	if taskConfig.TaskType == task.TypeAddLocalGroup.String() && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_description_is_required"))
 	}
 
@@ -528,17 +529,17 @@ func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.LocalGroupName = c.FormValue("local-unix-group-name")
-	if (taskConfig.TaskType == "add_unix_local_group" || taskConfig.TaskType == "remove_unix_local_group") && taskConfig.LocalGroupName == "" {
+	if (taskConfig.TaskType == task.TypeAddUnixLocalGroup.String() || taskConfig.TaskType == task.TypeRemoveUnixLocalGroup.String()) && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_name_is_required"))
 	}
 
 	taskConfig.LocalGroupDescription = c.FormValue("local-group-description")
-	if taskConfig.TaskType == "add_local_group" && taskConfig.LocalGroupName == "" {
+	if taskConfig.TaskType == task.TypeAddLocalGroup.String() && taskConfig.LocalGroupName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_group_description_is_required"))
 	}
 
 	taskConfig.LocalGroupID = c.FormValue("local-group-id")
-	if taskConfig.TaskType == "add_unix_local_group" && taskConfig.LocalGroupID != "" {
+	if taskConfig.TaskType == task.TypeAddUnixLocalGroup.String() && taskConfig.LocalGroupID != "" {
 		if _, err := strconv.Atoi(taskConfig.LocalGroupID); err != nil {
 			return nil, errors.New(i18n.T(c.Request().Context(), "tasks.local_gid_integer"))
 		}
@@ -573,32 +574,32 @@ func validateMSI(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
 	}
 
-	taskConfig.MsiProductID = c.FormValue("msi-productid")
-	if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") && taskConfig.MsiProductID == "" {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_productid_not_empty"))
-	}
+	// taskConfig.MsiProductID = c.FormValue("msi-productid")
+	// if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") && taskConfig.MsiProductID == "" {
+	// 	return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_productid_not_empty"))
+	// }
 
 	taskConfig.MsiPath = c.FormValue("msi-path")
-	if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") && taskConfig.MsiPath == "" {
+	if (taskConfig.TaskType == task.TypeMsiInstall.String() || taskConfig.TaskType == task.TypeMsiUninstall.String()) && taskConfig.MsiPath == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_path_not_empty"))
 	}
 
 	taskConfig.MsiArguments = c.FormValue("msi-arguments")
 	taskConfig.MsiLogPath = c.FormValue("msi-log-path")
-	taskConfig.MsiFileHash = c.FormValue("msi-hash")
+	// taskConfig.MsiFileHash = c.FormValue("msi-hash")
 
-	if taskConfig.MsiHashAlgorithm != "" &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashMD5 &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashRIPEMD160 &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA1 &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA256 &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA384 &&
-		taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA512 {
-		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_msi_hash_algorithm"))
-	}
-	taskConfig.MsiHashAlgorithm = c.FormValue("msi-hash-alg")
+	// if taskConfig.MsiHashAlgorithm != "" &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashMD5 &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashRIPEMD160 &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA1 &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA256 &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA384 &&
+	// 	taskConfig.MsiHashAlgorithm != wingetcfg.FileHashSHA512 {
+	// 	return nil, errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_msi_hash_algorithm"))
+	// }
+	// taskConfig.MsiHashAlgorithm = c.FormValue("msi-hash-alg")
 
-	if (taskConfig.TaskType == "msi_install" || taskConfig.TaskType == "msi_uninstall") &&
+	if (taskConfig.TaskType == task.TypeMsiInstall.String() || taskConfig.TaskType == task.TypeMsiUninstall.String()) &&
 		((taskConfig.MsiFileHash == "" && taskConfig.MsiHashAlgorithm != "") || (taskConfig.MsiFileHash != "" && taskConfig.MsiHashAlgorithm == "")) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.msi_specify_both_hash_inputs"))
 	}
@@ -688,12 +689,12 @@ func validateWinGetPackage(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.PackageID = c.FormValue("package-id")
-	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageID == "" {
+	if (taskConfig.TaskType == task.TypeWingetInstall.String() || taskConfig.TaskType == task.TypeWingetDelete.String()) && taskConfig.PackageID == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
 	}
 
 	taskConfig.PackageName = c.FormValue("package-name")
-	if (taskConfig.TaskType == "winget_install" || taskConfig.TaskType == "winget_delete") && taskConfig.PackageName == "" {
+	if (taskConfig.TaskType == task.TypeWingetInstall.String() || taskConfig.TaskType == task.TypeWingetDelete.String()) && taskConfig.PackageName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
 
@@ -717,12 +718,12 @@ func validateFlatpakPackage(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.PackageID = c.FormValue("flatpak-id")
-	if (taskConfig.TaskType == "flatpak_install" || taskConfig.TaskType == "flatpak_uninstall") && taskConfig.PackageID == "" {
+	if (taskConfig.TaskType == task.TypeFlatpakInstall.String() || taskConfig.TaskType == task.TypeFlatpakUninstall.String()) && taskConfig.PackageID == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_id_not_empty"))
 	}
 
 	taskConfig.PackageName = c.FormValue("flatpak-name")
-	if (taskConfig.TaskType == "flatpak_install" || taskConfig.TaskType == "flatpak_uninstall") && taskConfig.PackageName == "" {
+	if (taskConfig.TaskType == task.TypeFlatpakInstall.String() || taskConfig.TaskType == task.TypeFlatpakUninstall.String()) && taskConfig.PackageName == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
 
@@ -766,7 +767,7 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	installOptions := c.FormValue("brew-install-options")
-	if (taskConfig.TaskType == string(task.TypeBrewFormulaInstall) || taskConfig.TaskType == string(task.TypeBrewCaskInstall)) && installOptions != "" {
+	if (taskConfig.TaskType == task.TypeBrewFormulaInstall.String() || taskConfig.TaskType == task.TypeBrewCaskInstall.String()) && installOptions != "" {
 		taskConfig.HomeBrewInstallOptions = installOptions
 	}
 
@@ -775,15 +776,15 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.HomeBrewUpgradeOptions = upgradeOptions
 	}
 
-	if taskConfig.TaskType == string(task.TypeBrewFormulaInstall) || taskConfig.TaskType == string(task.TypeBrewFormulaUpgrade) ||
-		taskConfig.TaskType == string(task.TypeBrewCaskInstall) || taskConfig.TaskType == string(task.TypeBrewCaskUpgrade) {
+	if taskConfig.TaskType == task.TypeBrewFormulaInstall.String() || taskConfig.TaskType == task.TypeBrewFormulaUpgrade.String() ||
+		taskConfig.TaskType == task.TypeBrewCaskInstall.String() || taskConfig.TaskType == task.TypeBrewCaskUpgrade.String() {
 		updateHomeBrew := c.FormValue("brew-update")
 		if updateHomeBrew == "on" {
 			taskConfig.HomeBrewUpdate = true
 		}
 	}
 
-	if taskConfig.TaskType == string(task.TypeBrewCaskUpgrade) {
+	if taskConfig.TaskType == task.TypeBrewCaskUpgrade.String() {
 		greed := c.FormValue("brew-greed")
 		if greed == "on" {
 			taskConfig.HomeBrewGreedy = true

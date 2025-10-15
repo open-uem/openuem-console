@@ -396,31 +396,32 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 
 	t := ent.Task{}
 	switch taskType {
-	case "winget_install", "winget_delete":
+	case task.TypeWingetInstall.String(), task.TypeWingetDelete.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.WingetPackageSearch(&t))
-	case "add_registry_key", "add_registry_key_value", "update_registry_key_default_value", "remove_registry_key", "remove_registry_key_value":
+	case task.TypeAddRegistryKey.String(), task.TypeAddRegistryKeyValue.String(), task.TypeUpdateRegistryKeyDefaultValue.String(),
+		task.TypeRemoveRegistryKey.String(), task.TypeRemoveRegistryKeyValue.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.RegistryComponent(&t))
-	case "add_local_user", "remove_local_user":
+	case task.TypeAddLocalUser.String(), task.TypeRemoveLocalUser.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.LocalUserComponent(&t))
-	case "add_local_group", "remove_local_group", "add_users_to_local_group", "remove_users_from_local_group":
+	case task.TypeAddLocalGroup.String(), task.TypeRemoveLocalGroup.String(), task.TypeAddUsersToLocalGroup.String(), task.TypeRemoveUsersFromLocalGroup.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.WindowsLocalGroupComponent(&t))
-	case "add_unix_local_group", "remove_unix_local_group":
+	case task.TypeAddUnixLocalGroup.String(), task.TypeRemoveUnixLocalGroup.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.UnixLocalGroupComponent(&t))
-	case "add_unix_local_user", "modify_unix_local_user", "remove_unix_local_user":
+	case task.TypeAddUnixLocalUser.String(), task.TypeModifyUnixLocalUser.String(), task.TypeRemoveUnixLocalUser.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.UnixLocalUserComponent(&t))
-	case "msi_install", "msi_uninstall":
+	case task.TypeMsiInstall.String(), task.TypeMsiUninstall.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.MSIComponent(&t))
-	case "flatpak_install", "flatpak_uninstall":
+	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.FlatpakPackageManagement(&t))
-	case "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade", "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
+	case task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String(), task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.HomeBrewPackageManagement(&t))
 	}

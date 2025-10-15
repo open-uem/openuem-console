@@ -124,21 +124,25 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							<thead>
 								<tr>
 									<th class="w-1/12"></th>
+									<th class="w-1/12">{ i18n.T(ctx, "Version") }</th>
 									<th class="w-5/12">
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "profiles.edit.task_description") }</span>
 										</div>
 									</th>
-									<th class="w-5/12">{ i18n.T(ctx, "More info") }</th>
+									<th class="w-4/12">{ i18n.T(ctx, "More info") }</th>
 									<th class="w-1/12"></th>
 								</tr>
 							</thead>
 							for index, task := range tasks {
 								<tr>
-									<td class="flex gap-4 items-center !align-middle">
-										@TaskTypeIcon(task.Type.String())
-										@TaskAgentIcon(task.AgentType.String())
+									<td class="items-center !align-middle">
+										<div class="flex gap-4">
+											@TaskTypeIcon(task.Type.String())
+											@TaskAgentIcon(task.AgentType.String())
+										</div>
 									</td>
+									<td class="items-center !align-middle">{ task.Version }</td>
 									<td
 										class="items-center !align-middle underline hover:cursor-pointer"
 									>
