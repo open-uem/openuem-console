@@ -32,28 +32,28 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					hx-swap="outerHTML"
 					hx-push-url="false"
 				>
-					<div class="w-1/2">
-						<label class="uk-form-label" for="task-description">
-							{ i18n.T(ctx, "tasks.new.name") }
-						</label>
-						<div class="uk-form-controls">
-							<textarea
-								id="task-description"
-								name="task-description"
-								class="uk-textarea"
-								rows="2"
-								placeholder={ i18n.T(ctx, "tasks.new.text") }
-								aria-label="Task description"
-								autocomplete="off"
-								autocorrect="off"
-								autocapitalize="off"
-								spellcheck="false"
-							>
-								{ t.Name }
-							</textarea>
-						</div>
-					</div>
 					<div class="flex flex-col gap-4 w-1/2">
+						<div>
+							<label class="uk-form-label" for="task-description">
+								{ i18n.T(ctx, "tasks.new.name") }
+							</label>
+							<div class="uk-form-controls">
+								<textarea
+									id="task-description"
+									name="task-description"
+									class="uk-textarea"
+									rows="2"
+									placeholder={ i18n.T(ctx, "tasks.new.text") }
+									aria-label="Task description"
+									autocomplete="off"
+									autocorrect="off"
+									autocapitalize="off"
+									spellcheck="false"
+								>
+									{ t.Name }
+								</textarea>
+							</div>
+						</div>
 						@partials.SelectTaskAgentType(t)
 						<div id="select-task-type">
 							@partials.SelectTaskType(t, t.AgentType.String())
@@ -96,6 +96,11 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					if partials.IsRegistryTask(t) {
 						<div class="w-1/2" id="registry-partial">
 							@partials.RegistryComponent(t)
+						</div>
+					}
+					if partials.IsLocalUserTask(t) {
+						<div class="w-1/2" id="local-user-partial">
+							@partials.LocalUserComponent(t)
 						</div>
 					}
 					if partials.IsUnixLocalUserTask(t) {

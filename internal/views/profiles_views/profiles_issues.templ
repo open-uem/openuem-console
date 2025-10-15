@@ -29,8 +29,8 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
 						<thead>
 							<tr>
-								<th class="w-1/3"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
-								<th class="w-2/3"><span>{ i18n.T(ctx, "profiles.issues.errors_found") }</span></th>
+								<th class="w-1/4"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
+								<th class="w-3/4"><span>{ i18n.T(ctx, "profiles.issues.errors_found") }</span></th>
 							</tr>
 						</thead>
 						for _, issue := range issues {
@@ -40,7 +40,7 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 										{ issue.Edges.Agents.Nickname }
 									</td>
 									<td class="!align-middle">
-										for line := range strings.SplitSeq(issue.Error, "\r\n") {
+										for line := range strings.SplitSeq(issue.Error, ", ") {
 											<p>{ line }</p>
 										}
 									</td>
