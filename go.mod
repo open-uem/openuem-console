@@ -1,6 +1,6 @@
 module github.com/open-uem/openuem-console
 
-go 1.24.4
+go 1.25.3
 
 require (
 	entgo.io/ent v0.14.4
