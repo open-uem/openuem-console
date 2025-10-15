@@ -151,12 +151,11 @@ func (w *Worker) GenerateConsoleConfig() error {
 	w.ReverseProxyServer = key.String()
 
 	key, err = cfg.Section("Console").GetKey("reenablecertauth")
-	if err != nil {
-		return err
-	}
-	w.ReenableCertAuth, err = key.Bool()
-	if err != nil {
-		return err
+	if err == nil {
+		w.ReenableCertAuth, err = key.Bool()
+		if err != nil {
+			return err
+		}
 	}
 
 	key, err = cfg.Section("Server").GetKey("Version")

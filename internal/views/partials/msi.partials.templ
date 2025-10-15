@@ -3,29 +3,29 @@ package partials
 import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
-	"github.com/open-uem/wingetcfg/wingetcfg"
 )
 
 templ MSIComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
-		<div id="msi-productid-section">
-			<label class="uk-form-label" for="msi-productid">
-				{ i18n.T(ctx, "tasks.msi_productid") }
-			</label>
-			<input
-				type="text"
-				class="uk-input"
-				id="msi-productid"
-				name="msi-productid"
-				spellcheck="false"
-				placeholder={ i18n.T(ctx, "tasks.msi_productid_description") }
-				spellcheck="false"
-				aria-label={ i18n.T(ctx, "tasks.msi_productid_description") }
-				if t != nil {
-					value={ t.MsiProductid }
-				}
-			/>
-		</div>
+		// ProductID no longer required
+		// <div id="msi-productid-section">
+		// 	<label class="uk-form-label" for="msi-productid">
+		// 		{ i18n.T(ctx, "tasks.msi_productid") }
+		// 	</label>
+		// 	<input
+		// 		type="text"
+		// 		class="uk-input"
+		// 		id="msi-productid"
+		// 		name="msi-productid"
+		// 		spellcheck="false"
+		// 		placeholder={ i18n.T(ctx, "tasks.msi_productid_description") }
+		// 		spellcheck="false"
+		// 		aria-label={ i18n.T(ctx, "tasks.msi_productid_description") }
+		// 		if t != nil {
+		// 			value={ t.MsiProductid }
+		// 		}
+		// 	/>
+		// </div>
 		<div id="msi-path-section">
 			<label class="uk-form-label" for="msi-path">
 				{ i18n.T(ctx, "tasks.msi_path") }
@@ -80,46 +80,47 @@ templ MSIComponent(t *ent.Task) {
 				}
 			/>
 		</div>
-		<div id="msi-hash-alg-section">
-			<label class="uk-form-label" for="msi-hash-alg">{ i18n.T(ctx, "tasks.msi_hashalg") }</label>
-			<select
-				id="msi-hash-alg"
-				name="msi-hash-alg"
-				class="uk-select"
-				_="on change
-                    if my.value is not empty then 
-                        remove .hidden from #msi-file-hash-section
-                    else
-                        add .hidden to #msi-file-hash-section
-                    end
-                end"
-			>
-				<option value="">{ i18n.T(ctx, "tasks.msi_hashalg_description") }</option>
-				<option value={ wingetcfg.FileHashMD5 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashMD5 }>{ wingetcfg.FileHashMD5 }</option>
-				<option value={ wingetcfg.FileHashRIPEMD160 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashRIPEMD160 }>{ wingetcfg.FileHashRIPEMD160 }</option>
-				<option value={ wingetcfg.FileHashSHA1 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA1 }>{ wingetcfg.FileHashSHA1 }</option>
-				<option value={ wingetcfg.FileHashSHA256 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA256 }>{ wingetcfg.FileHashSHA256 }</option>
-				<option value={ wingetcfg.FileHashSHA384 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA384 }>{ wingetcfg.FileHashSHA384 }</option>
-				<option value={ wingetcfg.FileHashSHA512 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA512 }>{ wingetcfg.FileHashSHA512 }</option>
-			</select>
-		</div>
-		<div id="msi-file-hash-section">
-			<label class="uk-form-label" for="msi-hash">
-				{ i18n.T(ctx, "tasks.msi_filehash") }
-			</label>
-			<input
-				type="text"
-				class="uk-input"
-				id="msi-hash"
-				name="msi-hash"
-				spellcheck="false"
-				placeholder={ i18n.T(ctx, "tasks.msi_filehash_description") }
-				spellcheck="false"
-				aria-label={ i18n.T(ctx, "tasks.msi_filehash_description") }
-				if t != nil {
-					value={ t.MsiFileHash }
-				}
-			/>
-		</div>
+		// TODO - recover file hash section with MSI
+		// <div id="msi-hash-alg-section">
+		// 	<label class="uk-form-label" for="msi-hash-alg">{ i18n.T(ctx, "tasks.msi_hashalg") }</label>
+		// 	<select
+		// 		id="msi-hash-alg"
+		// 		name="msi-hash-alg"
+		// 		class="uk-select"
+		// 		_="on change
+		//             if my.value is not empty then 
+		//                 remove .hidden from #msi-file-hash-section
+		//             else
+		//                 add .hidden to #msi-file-hash-section
+		//             end
+		//         end"
+		// 	>
+		// 		<option value="">{ i18n.T(ctx, "tasks.msi_hashalg_description") }</option>
+		// 		<option value={ wingetcfg.FileHashMD5 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashMD5 }>{ wingetcfg.FileHashMD5 }</option>
+		// 		<option value={ wingetcfg.FileHashRIPEMD160 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashRIPEMD160 }>{ wingetcfg.FileHashRIPEMD160 }</option>
+		// 		<option value={ wingetcfg.FileHashSHA1 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA1 }>{ wingetcfg.FileHashSHA1 }</option>
+		// 		<option value={ wingetcfg.FileHashSHA256 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA256 }>{ wingetcfg.FileHashSHA256 }</option>
+		// 		<option value={ wingetcfg.FileHashSHA384 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA384 }>{ wingetcfg.FileHashSHA384 }</option>
+		// 		<option value={ wingetcfg.FileHashSHA512 } selected?={ t != nil && t.MsiFileHashAlg.String() == wingetcfg.FileHashSHA512 }>{ wingetcfg.FileHashSHA512 }</option>
+		// 	</select>
+		// </div>
+		// <div id="msi-file-hash-section">
+		// 	<label class="uk-form-label" for="msi-hash">
+		// 		{ i18n.T(ctx, "tasks.msi_filehash") }
+		// 	</label>
+		// 	<input
+		// 		type="text"
+		// 		class="uk-input"
+		// 		id="msi-hash"
+		// 		name="msi-hash"
+		// 		spellcheck="false"
+		// 		placeholder={ i18n.T(ctx, "tasks.msi_filehash_description") }
+		// 		spellcheck="false"
+		// 		aria-label={ i18n.T(ctx, "tasks.msi_filehash_description") }
+		// 		if t != nil {
+		// 			value={ t.MsiFileHash }
+		// 		}
+		// 	/>
+		// </div>
 	</div>
 }

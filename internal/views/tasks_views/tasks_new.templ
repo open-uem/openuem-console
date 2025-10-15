@@ -31,6 +31,11 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 					hx-swap="outerHTML"
 					hx-push-url="false"
 				>
+					<div class="flex flex-col gap-4 w-1/2">
+						@partials.SelectTaskAgentType(nil)
+						<div id="select-task-type"></div>
+						<div id="select-task-subtype"></div>
+					</div>
 					<div class="w-1/2">
 						<label class="uk-form-label" for="task-description">
 							{ i18n.T(ctx, "tasks.new.name") }
@@ -49,11 +54,6 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 								spellcheck="false"
 							></textarea>
 						</div>
-					</div>
-					<div class="flex flex-col gap-4 w-1/2">
-						@partials.SelectTaskAgentType(nil)
-						<div id="select-task-type"></div>
-						<div id="select-task-subtype"></div>
 					</div>
 					<div id="task-definition" class="gap-4 w-1/2"></div>
 					<div class="flex gap-4 my-4">

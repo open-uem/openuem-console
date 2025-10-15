@@ -146,8 +146,8 @@ templ SelectWinGetPackageTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "winget_install" } selected?={ t != nil && t.Type.String() == "winget_install" }>{ i18n.T(ctx, "tasks.winget_install") }</option>
-			<option value={ "winget_delete" } selected?={ t != nil && t.Type.String() == "winget_delete" }>{ i18n.T(ctx, "tasks.winget_delete") }</option>
+			<option value={ task.TypeWingetInstall.String() } selected?={ t != nil && t.Type == task.TypeWingetInstall }>{ i18n.T(ctx, "tasks.winget_install") }</option>
+			<option value={ task.TypeWingetDelete.String() } selected?={ t != nil && t.Type == task.TypeWingetDelete }>{ i18n.T(ctx, "tasks.winget_delete") }</option>
 		</select>
 	</div>
 }
@@ -171,11 +171,11 @@ templ SelectRegistryTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_registry_key" } selected?={  t != nil && t.Type.String() == "add_registry_key" }>{ i18n.T(ctx, "tasks.add_registry_key") }</option>
-			<option value={ "add_registry_key_value" } selected?={  t != nil && t.Type.String() == "add_registry_key_value" }>{ i18n.T(ctx, "tasks.add_registry_key_value") }</option>
-			<option value={ "update_registry_key_default_value" } selected?={  t != nil && t.Type.String() == "update_registry_key_default_value" }>{ i18n.T(ctx, "tasks.update_registry_key_default_value") }</option>
-			<option value={ "remove_registry_key" } selected?={  t != nil && t.Type.String() == "remove_registry_key" }>{ i18n.T(ctx, "tasks.remove_registry_key") }</option>
-			<option value={ "remove_registry_key_value" } selected?={  t != nil && t.Type.String() == "remove_registry_key_value" }>{ i18n.T(ctx, "tasks.remove_registry_key_value") }</option>
+			<option value={ task.TypeAddRegistryKey.String() } selected?={  t != nil && t.Type == task.TypeAddRegistryKey }>{ i18n.T(ctx, "tasks.add_registry_key") }</option>
+			<option value={ task.TypeAddRegistryKeyValue.String() } selected?={  t != nil && t.Type == task.TypeAddRegistryKeyValue }>{ i18n.T(ctx, "tasks.add_registry_key_value") }</option>
+			<option value={ task.TypeUpdateRegistryKeyDefaultValue.String() } selected?={  t != nil && t.Type ==  task.TypeUpdateRegistryKeyDefaultValue }>{ i18n.T(ctx, "tasks.update_registry_key_default_value") }</option>
+			<option value={ task.TypeRemoveRegistryKey.String() } selected?={  t != nil && t.Type == task.TypeRemoveRegistryKey }>{ i18n.T(ctx, "tasks.remove_registry_key") }</option>
+			<option value={ task.TypeRemoveRegistryKeyValue.String() } selected?={  t != nil && t.Type == task.TypeRemoveRegistryKeyValue }>{ i18n.T(ctx, "tasks.remove_registry_key_value") }</option>
 		</select>
 	</div>
 }
@@ -199,8 +199,8 @@ templ SelectLocalUserTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_local_user" } selected?={ t != nil && t.Type.String() == "add_local_user" }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
-			<option value={ "remove_local_user" } selected?={  t != nil && t.Type.String() == "remove_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+			<option value={ task.TypeAddLocalUser.String() } selected?={ t != nil && t.Type == task.TypeAddLocalUser }>{ i18n.T(ctx, "tasks.local_user_add") }</option>
+			<option value={ task.TypeRemoveLocalUser.String() } selected?={  t != nil && t.Type == task.TypeRemoveLocalUser }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
 		</select>
 	</div>
 }
@@ -224,10 +224,10 @@ templ SelectWindowsLocalGroupTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_local_group" } selected?={ t != nil && t.Type.String() == "add_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
-			<option value={ "remove_local_group" } selected?={  t != nil && t.Type.String() == "remove_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
-			<option value={ "add_users_to_local_group" } selected?={ t != nil && t.Type.String() == "add_users_to_local_group" }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
-			<option value={ "remove_users_from_local_group" } selected?={  t != nil && t.Type.String() == "remove_users_from_local_group" }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
+			<option value={ task.TypeAddLocalGroup.String() } selected?={ t != nil && t.Type == task.TypeAddLocalGroup }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
+			<option value={ task.TypeRemoveLocalGroup.String() } selected?={  t != nil && t.Type == task.TypeRemoveLocalGroup }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
+			<option value={ task.TypeAddUsersToLocalGroup.String() } selected?={ t != nil && t.Type ==  task.TypeAddUsersToLocalGroup }>{ i18n.T(ctx, "tasks.add_users_to_local_group") }</option>
+			<option value={ task.TypeRemoveUsersFromLocalGroup.String() } selected?={  t != nil && t.Type == task.TypeRemoveUsersFromLocalGroup }>{ i18n.T(ctx, "tasks.remove_users_from_local_group") }</option>
 		</select>
 	</div>
 }
@@ -251,8 +251,8 @@ templ SelectUnixLocalGroupTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_unix_local_group" } selected?={ t != nil && t.Type.String() == "add_unix_local_group" }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
-			<option value={ "remove_unix_local_group" } selected?={  t != nil && t.Type.String() == "remove_unix_local_group" }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
+			<option value={ task.TypeAddUnixLocalGroup.String() } selected?={ t != nil && t.Type == task.TypeAddUnixLocalGroup }>{ i18n.T(ctx, "tasks.add_local_group") }</option>
+			<option value={ task.TypeRemoveUnixLocalGroup.String() } selected?={  t != nil && t.Type == task.TypeRemoveUnixLocalGroup }>{ i18n.T(ctx, "tasks.remove_local_group") }</option>
 		</select>
 	</div>
 }
@@ -276,8 +276,8 @@ templ SelectUnixLocalUserTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "add_unix_local_user" } selected?={ t != nil && t.Type.String() == "add_unix_local_user" }>{ i18n.T(ctx, "tasks.local_linux_user_add") }</option>
-			<option value={ "remove_unix_local_user" } selected?={  t != nil && t.Type.String() == "remove_unix_local_user" }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
+			<option value={ task.TypeAddUnixLocalUser.String() } selected?={ t != nil && t.Type == task.TypeAddUnixLocalUser }>{ i18n.T(ctx, "tasks.local_linux_user_add") }</option>
+			<option value={ task.TypeRemoveUnixLocalUser.String() } selected?={  t != nil && t.Type == task.TypeRemoveUnixLocalUser }>{ i18n.T(ctx, "tasks.local_user_remove") }</option>
 		</select>
 	</div>
 }
@@ -301,8 +301,8 @@ templ SelectMSITaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "msi_install" } selected?={ t != nil && t.Type.String() == "msi_install" }>{ i18n.T(ctx, "tasks.msi_install") }</option>
-			<option value={ "msi_uninstall" } selected?={  t != nil && t.Type.String() == "msi_uninstall" }>{ i18n.T(ctx, "tasks.msi_uninstall") }</option>
+			<option value={ task.TypeMsiInstall.String() } selected?={ t != nil && t.Type == task.TypeMsiInstall }>{ i18n.T(ctx, "tasks.msi_install") }</option>
+			<option value={ task.TypeMsiUninstall.String() } selected?={  t != nil && t.Type == task.TypeMsiUninstall }>{ i18n.T(ctx, "tasks.msi_uninstall") }</option>
 		</select>
 	</div>
 }
@@ -326,8 +326,8 @@ templ SelectFlatpakPackageTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "flatpak_install" } selected?={ t != nil && t.Type.String() == "flatpak_install" }>{ i18n.T(ctx, "tasks.flatpak_install") }</option>
-			<option value={ "flatpak_uninstall" } selected?={ t != nil && t.Type.String() == "flatpak_uninstall" }>{ i18n.T(ctx, "tasks.flatpak_uninstall") }</option>
+			<option value={ task.TypeFlatpakInstall.String() } selected?={ t != nil && t.Type == task.TypeFlatpakInstall }>{ i18n.T(ctx, "tasks.flatpak_install") }</option>
+			<option value={ task.TypeFlatpakUninstall.String() } selected?={ t != nil && t.Type == task.TypeFlatpakUninstall }>{ i18n.T(ctx, "tasks.flatpak_uninstall") }</option>
 		</select>
 	</div>
 }
@@ -351,9 +351,9 @@ templ SelectHomeBrewFormulaTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "brew_formula_install" } selected?={ t != nil && t.Type.String() == "brew_formula_install" }>{ i18n.T(ctx, "tasks.brew_formula_install") }</option>
-			<option value={ "brew_formula_upgrade" } selected?={ t != nil && t.Type.String() == "brew_formula_upgrade" }>{ i18n.T(ctx, "tasks.brew_formula_upgrade") }</option>
-			<option value={ "brew_formula_uninstall" } selected?={ t != nil && t.Type.String() == "brew_formula_uninstall" }>{ i18n.T(ctx, "tasks.brew_formula_uninstall") }</option>
+			<option value={ task.TypeBrewFormulaInstall.String() } selected?={ t != nil && t.Type == task.TypeBrewFormulaInstall }>{ i18n.T(ctx, "tasks.brew_formula_install") }</option>
+			<option value={ task.TypeBrewFormulaUpgrade.String() } selected?={ t != nil && t.Type == task.TypeBrewFormulaUpgrade }>{ i18n.T(ctx, "tasks.brew_formula_upgrade") }</option>
+			<option value={ task.TypeBrewFormulaUninstall.String() } selected?={ t != nil && t.Type ==  task.TypeBrewFormulaUninstall }>{ i18n.T(ctx, "tasks.brew_formula_uninstall") }</option>
 		</select>
 	</div>
 }
@@ -377,9 +377,9 @@ templ SelectHomeBrewCaskTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ "brew_cask_install" } selected?={ t != nil && t.Type.String() == "brew_cask_install" }>{ i18n.T(ctx, "tasks.brew_cask_install") }</option>
-			<option value={ "brew_cask_upgrade" } selected?={ t != nil && t.Type.String() == "brew_cask_upgrade" }>{ i18n.T(ctx, "tasks.brew_cask_upgrade") }</option>
-			<option value={ "brew_cask_uninstall" } selected?={ t != nil && t.Type.String() == "brew_cask_uninstall" }>{ i18n.T(ctx, "tasks.brew_cask_uninstall") }</option>
+			<option value={ task.TypeBrewCaskInstall.String() } selected?={ t != nil && t.Type == task.TypeBrewCaskInstall }>{ i18n.T(ctx, "tasks.brew_cask_install") }</option>
+			<option value={ task.TypeBrewCaskUpgrade.String() } selected?={ t != nil && t.Type == task.TypeBrewCaskUpgrade }>{ i18n.T(ctx, "tasks.brew_cask_upgrade") }</option>
+			<option value={ task.TypeBrewCaskUninstall.String() } selected?={ t != nil && t.Type == task.TypeBrewCaskUninstall }>{ i18n.T(ctx, "tasks.brew_cask_uninstall") }</option>
 		</select>
 	</div>
 }
@@ -403,11 +403,11 @@ templ SelectAPTTaskSubtype(t *ent.Task) {
             end"
 		>
 			<option value="">{ i18n.T(ctx, "tasks.choose_task_subtype") }</option>
-			<option value={ task.TypeAptInstall } selected?={ t != nil && t.Type == task.TypeAptInstall }>{ i18n.T(ctx, "tasks.apt_install") }</option>
-			<option value={ task.TypeAptRemove } selected?={  t != nil && t.Type == task.TypeAptRemove }>{ i18n.T(ctx, "tasks.apt_remove") }</option>
-			<option value={ task.TypeAptUpdate } selected?={  t != nil && t.Type == task.TypeAptUpdate }>{ i18n.T(ctx, "tasks.apt_update") }</option>
-			<option value={ task.TypeAptUpdateAll } selected?={  t != nil && t.Type == task.TypeAptUpdateAll }>{ i18n.T(ctx, "tasks.apt_update_all") }</option>
-			<option value={ task.TypeAptUpgradeOs } selected?={  t != nil && t.Type == task.TypeAptUpgradeOs }>{ i18n.T(ctx, "tasks.apt_upgrade_os") }</option>
+			<option value={ task.TypeAptInstall.String() } selected?={ t != nil && t.Type == task.TypeAptInstall }>{ i18n.T(ctx, "tasks.apt_install") }</option>
+			<option value={ task.TypeAptRemove.String() } selected?={  t != nil && t.Type == task.TypeAptRemove }>{ i18n.T(ctx, "tasks.apt_remove") }</option>
+			<option value={ task.TypeAptUpdate.String() } selected?={  t != nil && t.Type == task.TypeAptUpdate }>{ i18n.T(ctx, "tasks.apt_update") }</option>
+			<option value={ task.TypeAptUpdateAll.String() } selected?={  t != nil && t.Type == task.TypeAptUpdateAll }>{ i18n.T(ctx, "tasks.apt_update_all") }</option>
+			<option value={ task.TypeAptUpgradeOs.String() } selected?={  t != nil && t.Type == task.TypeAptUpgradeOs }>{ i18n.T(ctx, "tasks.apt_upgrade_os") }</option>
 		</select>
 	</div>
 }
