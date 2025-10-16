@@ -182,9 +182,6 @@ func (h *Handler) AddSite(c echo.Context) error {
 	}
 
 	domain := c.FormValue("domain")
-	if domain == "" {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.domain_cannot_be_empty"), true))
-	}
 
 	err = h.Model.AddSite(tenantID, name, isDefault, domain)
 	if err != nil {
@@ -233,9 +230,6 @@ func (h *Handler) EditSite(c echo.Context) error {
 		}
 
 		domain := c.FormValue("domain")
-		if domain == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.domain_cannot_be_empty"), true))
-		}
 
 		if s.Description != name {
 			exists, err := h.Model.SiteNameTaken(tenantID, name)
