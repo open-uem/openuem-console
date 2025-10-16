@@ -1141,6 +1141,15 @@ func getDebianPNG() string {
 	return filepath.Join(cwd, "assets", "img", "os", "debian.png")
 }
 
+func getNeonPNG() string {
+	cwd, err := utils.GetWd()
+	if err != nil {
+		log.Println("[ERROR]: could not get working directory")
+		return ""
+	}
+	return filepath.Join(cwd, "assets", "img", "os", "neon.png")
+}
+
 func getUbuntuPNG() string {
 	cwd, err := utils.GetWd()
 	if err != nil {
@@ -1243,6 +1252,8 @@ func getOperatingSystemPNG(os string) string {
 		return getRockyLinuxPNG()
 	case "macOS":
 		return getApplePNG()
+	case "neon":
+		return getNeonPNG()
 	default:
 		return getUnknownPNG()
 	}
