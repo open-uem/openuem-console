@@ -69,7 +69,7 @@ func (h *Handler) UpdateAgents(c echo.Context) error {
 			}
 
 			switch agentInfo.Os {
-			case "debian", "ubuntu", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky":
+			case "debian", "ubuntu", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky", "neon":
 				agentInfo.Os = "linux"
 			case "macOS":
 				agentInfo.Os = "darwin"
