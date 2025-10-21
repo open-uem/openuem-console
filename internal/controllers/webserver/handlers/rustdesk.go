@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
@@ -55,7 +56,7 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 
 	randomPassword := ""
 	if rustdeskSettings.UsePermanentPassword {
-		randomPassword, err = password.Generate(64, 10, 0, false, true)
+		randomPassword, err = password.Generate(32, 10, 0, false, true)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.could_not_generate_random_password", err.Error()), true))
 		}
@@ -81,7 +82,15 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.remote_error", result.Error), true))
 	}
 
-	return RenderView(c, computers_views.RustDeskControl(agentId, result.RustDeskID, rustdeskSettings.DirectIPAccess, agent.IP, randomPassword, commonInfo))
+	IPAddresses := []string{}
+	for _, n := range agent.Edges.Networkadapters {
+		addresses := strings.Split(n.Addresses, ",")
+		for _, a := range addresses {
+			IPAddresses = append(IPAddresses, a)
+		}
+	}
+
+	return RenderView(c, computers_views.RustDeskControl(agentId, result.RustDeskID, rustdeskSettings, IPAddresses, randomPassword, agent.IsWayland && agent.IsFlatpakRustdesk, commonInfo))
 }
 
 func (h *Handler) RustDeskStop(c echo.Context) error {
