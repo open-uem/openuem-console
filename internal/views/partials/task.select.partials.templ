@@ -118,11 +118,12 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 					{ i18n.T(ctx, "tasks.brew_cask_subtype") }
 				</option>
 			}
-			if agentType == "linux" {
-				<option value="apt_type" selected?={ IsAPTTask(t) }>
-					{ i18n.T(ctx, "tasks.apt_subtype") }
-				</option>
-			}
+			// TODO - Future apt subtype
+			// if agentType == "linux" {
+			// 	<option value="apt_type" selected?={ IsAPTTask(t) }>
+			// 		{ i18n.T(ctx, "tasks.apt_subtype") }
+			// 	</option>
+			// }
 		</select>
 	</div>
 }
