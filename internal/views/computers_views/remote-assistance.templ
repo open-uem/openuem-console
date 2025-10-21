@@ -340,14 +340,6 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 				<i id="rustdesk-icon" class="si si-rustdesk text-green-600 text-xl uk-cloak"></i>
 				{ i18n.T(ctx, "rustdesk.rustdesk_ready") }
 			</div>
-			<button
-				title={ i18n.T(ctx, "Close") }
-				class="flex items-center gap-2 uk-text-small uk-button uk-button-default"
-				_="on click call window.close()"
-			>
-				<uk-icon hx-history="false" icon="x" custom-class="text-red-600 h-6 w-6" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "Close") }
-			</button>
 		</div>
 		if flatpakException {
 			<div class="flex gap-2 items-center">
@@ -470,11 +462,7 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 						hx-target="#main"
 						hx-swap="outerHTML"
 						htmx-indicator="#rustdesk-icon"
-						_="
-					on htmx:afterRequest remove .hidden from #rustdesk-start-spinner
-					on click 
-						add .hidden to #rustdesk-icon									
-					end"
+						_="on htmx:afterRequest	if #error matches .hidden call window.close()"
 					>
 						<uk-icon hx-history="false" icon="monitor-stop" custom-class="text-red-600 h-6 w-6" uk-cloack></uk-icon>
 						{ i18n.T(ctx, "rustdesk.click_to_close") }
