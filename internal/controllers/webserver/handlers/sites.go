@@ -387,7 +387,6 @@ func (h *Handler) ImportSites(c echo.Context) error {
 		}
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_read_error", err.Error()), false))
-
 		}
 
 		if len(record) != 2 {
@@ -396,10 +395,6 @@ func (h *Handler) ImportSites(c echo.Context) error {
 
 		if record[0] == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_required", "orgname", index), false))
-		}
-
-		if record[1] == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.import_required", "domain", index), false))
 		}
 
 		index++
