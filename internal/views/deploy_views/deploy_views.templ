@@ -110,7 +110,7 @@ templ DeployNavbar(active string, commonInfo *partials.CommonInfo) {
 		<li class={ templ.KV("uk-active", active == "install") }>
 			<a
 				href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")) }
-				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/deploy/install")))) }
+				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install"))) }
 				hx-push-url="true"
 				hx-target="#main"
 				hx-swap="outerHTML"
