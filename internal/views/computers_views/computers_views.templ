@@ -144,7 +144,7 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 			>
 				<div class="flex items-center gap-2">
 					<span class="underline">{ agent.Nickname }</span>
-					if (time.Now().Sub(agent.LastContact).Hours()) > 24 {
+					if (time.Since(time.Now()).Hours()) > 24 {
 						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
 							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>

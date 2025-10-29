@@ -70,14 +70,14 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
                                     end
                                 "
 									>
-										<option value={ "dontApplyToAll" } selected?={ !profile.ApplyToAll && (profile.Edges.Tags == nil || len(profile.Edges.Tags) == 0) }>{ i18n.T(ctx, "profiles.dont_assign") }</option>
+										<option value={ "dontApplyToAll" } selected?={ !profile.ApplyToAll && len(profile.Edges.Tags) == 0 }>{ i18n.T(ctx, "profiles.dont_assign") }</option>
 										<option value={ "applyToAll" } selected?={ profile.ApplyToAll }>{ i18n.T(ctx, "profiles.assign_all") }</option>
-										<option value={ "useTags" } selected?={ profile.Edges.Tags != nil && len(profile.Edges.Tags) > 0 }>{ i18n.T(ctx, "profiles.assign_tags") }</option>
+										<option value={ "useTags" } selected?={ len(profile.Edges.Tags) > 0 }>{ i18n.T(ctx, "profiles.assign_tags") }</option>
 									</select>
 								</div>
 							</div>
 							<div>
-								<div id="profile-tags" class={ templ.KV("invisible", profile.Edges.Tags == nil || len(profile.Edges.Tags) == 0), templ.KV("visible", len(profile.Edges.Tags) > 0) }>
+								<div id="profile-tags" class={ templ.KV("invisible", len(profile.Edges.Tags) == 0), templ.KV("visible", len(profile.Edges.Tags) > 0) }>
 									<label class="uk-form-label" for="profile-tags-section">
 										{ i18n.T(ctx, "profiles.edit.select_tags") }
 									</label>
@@ -115,7 +115,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							</button>
 						</div>
 					</div>
-					if profile.Edges.Tasks == nil || len(profile.Edges.Tasks) == 0 {
+					if len(profile.Edges.Tasks) == 0 {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "profiles.edit.no_tasks") }
 						</p>

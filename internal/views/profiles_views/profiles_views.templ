@@ -91,7 +91,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 									if profile.ApplyToAll {
 										@ShowAppliedToAll()
 									} else {
-										if profile.Edges.Tags != nil && len(profile.Edges.Tags) > 0 {
+										if len(profile.Edges.Tags) > 0 {
 											@partials.ShowAppliedTagsWithoutRemoveOption(profile.Edges.Tags)
 										} else {
 											@ShowAppliedToNone()
