@@ -9704,10 +9704,6 @@ th.uk-text-break, td.uk-text-break {
   width: 16.666667%;
 }
 
-.w-12 {
-  width: 3rem;
-}
-
 .w-14 {
   width: 3.5rem;
 }
@@ -9724,6 +9720,10 @@ th.uk-text-break, td.uk-text-break {
   width: 66.666667%;
 }
 
+.w-20 {
+  width: 5rem;
+}
+
 .w-28 {
   width: 7rem;
 }
@@ -9738,6 +9738,10 @@ th.uk-text-break, td.uk-text-break {
 
 .w-4 {
   width: 1rem;
+}
+
+.w-4\/12 {
+  width: 33.333333%;
 }
 
 .w-40 {
@@ -9794,14 +9798,6 @@ th.uk-text-break, td.uk-text-break {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-16 {
-  width: 4rem;
-}
-
-.w-20 {
-  width: 5rem;
 }
 
 .flex-1 {
@@ -10369,11 +10365,6 @@ th.uk-text-break, td.uk-text-break {
 .text-yellow-300 {
   --tw-text-opacity: 1;
   color: rgb(253 224 71 / var(--tw-text-opacity));
-}
-
-.text-yellow-600 {
-  --tw-text-opacity: 1;
-  color: rgb(202 138 4 / var(--tw-text-opacity));
 }
 
 .text-yellow-700 {
