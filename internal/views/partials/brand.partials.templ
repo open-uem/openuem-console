@@ -6,11 +6,11 @@ templ Brand(name, publisher string) {
 	if strings.Contains(name, "7-zip") {
 		<i class="si si-7zip uk-text-default uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "acrobat") {
-		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
+		<uk-icon hx-history="false" icon="file-text" custom-class="mx-auto h-6 w-6 text-red-600" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "adobe acrobat") {
-		<i class="si si-adobeacrobatreader si--color uk-cloak text-2xl"></i>
+		<uk-icon hx-history="false" icon="file-text" custom-class="mx-auto h-6 w-6 text-red-600" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "adobe") {
-		<i class="si si-adobe si--color uk-cloak text-2xl"></i>
+		<uk-icon hx-history="false" icon="file-text" custom-class="mx-auto h-6 w-6 text-red-600" uk-cloack></uk-icon>
 	} else if strings.Contains(name, "apple") {
 		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "autofirma") {
@@ -71,7 +71,7 @@ templ Brand(name, publisher string) {
 		<i class="si si-gnome si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "greenshot") {
 		<uk-icon hx-history="false" icon="brush" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
-	} else if strings.Contains(publisher, "hp") {
+	} else if strings.Contains(publisher, "hp") || strings.Contains(publisher, "hewlett-packard") {
 		<i class="si si-hp si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "insomnia") {
 		<i class="si si-insomnia si--color uk-cloak text-3xl"></i>
@@ -143,8 +143,10 @@ templ Brand(name, publisher string) {
 		<i class="si si-qemu si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "rancher") {
 		<i class="si si-rancher si--color uk-cloak text-2xl"></i>
-	} else if strings.Contains(name, "safari") {
-		<i class="si si-safari si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "rancher") {
+		<i class="si si-rancher si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "rustdesk") {
+		<i class="si si-rustdesk si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "samsung") {
 		<i class="si si-samsung si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "shazam") {

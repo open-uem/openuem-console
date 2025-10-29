@@ -110,5 +110,5 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.AuthenticationSettingsIndex(" | RustDesk Settings", admin_views.AuthenticationSettings(c, settings, agentsExists, serversExists, commonInfo, successMessage), commonInfo))
+	return RenderView(c, admin_views.AuthenticationSettingsIndex(" | Authentication Settings", admin_views.AuthenticationSettings(c, settings, agentsExists, serversExists, commonInfo, successMessage), commonInfo))
 }

@@ -80,8 +80,9 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectHomeBrewFormulaTaskSubtype(t)
 								case task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
 									@partials.SelectHomeBrewCaskTaskSubtype(t)
-								case task.TypeAptInstall, task.TypeAptRemove, task.TypeAptUpdate, task.TypeAptUpdateAll, task.TypeAptUpgradeOs:
-									@partials.SelectAPTTaskSubtype(t)
+									// Future APT subtype
+									// case task.TypeAptInstall, task.TypeAptRemove, task.TypeAptUpdate, task.TypeAptUpdateAll, task.TypeAptUpgradeOs:
+									// 	@partials.SelectAPTTaskSubtype(t)
 							}
 						</div>
 						if t != nil {

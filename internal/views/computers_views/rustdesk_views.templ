@@ -1,0 +1,86 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ RustDesk(c echo.Context, agent *ent.Agent, settings []*ent.Rustdesk, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID))))}, {Title: i18n.T(ctx, "agents.vnc_title"), Url: ""}}, commonInfo)
+	<main id="main" class="grid flex-1 items-start gap-4 px-4 py-2 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-1">
+				<div id="error" class="hidden"></div>
+				<div id="vnc" class="flex flex-col">
+					@RustDeskInit(agent)
+					// <div class="flex items-center gap-2">
+					// 	<button
+					// 		title={ i18n.T(ctx, "Connect") }
+					// 		class={ "uk-button uk-button-primary flex items-center gap-2 pr-6", templ.KV("hidden", connected) }
+					// 		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startvnc", agent.ID)))) }
+					// 		hx-target="#main"
+					// 		hx-swap="outerHTML"
+					// 		htmx-indicator="#vnc-connect-spinner"
+					// 	>
+					// 		<uk-icon id="vnc-connect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon> { i18n.T(ctx, "Connect") }
+					// 	</button>
+					// 	<button
+					// 		title={ i18n.T(ctx, "Close") }
+					// 		class={ "uk-button uk-button-default", templ.KV("hidden", connected) }
+					// 		_="on click call window.close()"
+					// 	>
+					// 		{ i18n.T(ctx, "Close") }
+					// 	</button>
+					// 	<div id="vncConnectPanel" class={ "flex gap-4 items-center my-4", templ.KV("hidden", !connected) }>
+					// 		if requestPIN {
+					// 			<span>PIN: </span>
+					// 			<uk-input-pin
+					// 				name="vncPIN"
+					// 				id="vncPIN"
+					// 				if agent.Os == "macOS" {
+					// 					length="8"
+					// 				}
+					// 				uk-cloak
+					// 			></uk-input-pin>
+					// 		} else {
+					// 			<div class="hidden" id="vncPIN">
+					// 				<input type="hidden"/>
+					// 				<input type="hidden"/>
+					// 				<input type="hidden"/>
+					// 				<input type="hidden"/>
+					// 				<input type="hidden"/>
+					// 				<input type="hidden"/>
+					// 				<input type="hidden" name="vncPIN" value={ pin }/>
+					// 			</div>
+					// 		}
+					// 		<button type="button" class="flex items-center gap-2 uk-button bg-blue-700 hover:bg-blue-500 text-white my-2" id="connectVNC">
+					// 			<uk-icon hx-history="false" icon="key" custom-class="h-4 w-4" uk-cloack></uk-icon>
+					// 			{ i18n.T(ctx, "Authenticate") }
+					// 		</button>
+					// 	</div>
+					// 	<input id="vncHostname" type="hidden" value={ agent.Hostname + "." + domainSuffix }/>
+					// 	<input id="vncPort" type="hidden" value={ agent.VncProxyPort }/>
+					// 	<button
+					// 		id="disconnectVNC"
+					// 		class={ "uk-button uk-button-danger flex items-center gap-2 my-4", templ.KV("hidden", !connected) }
+					// 		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/stopvnc", agent.ID)))) }
+					// 		hx-target="#main"
+					// 		hx-swap="outerHTML"
+					// 		htmx-indicator="#vnc-disconnect-spinner"
+					// 	>
+					// 		<uk-icon hx-history="false" icon="screen-share-off" custom-class="h-4 w-4" uk-cloack></uk-icon>
+					// 		{ i18n.T(ctx, "Disconnect") }
+					// 		<uk-icon id="vnc-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					// 	</button>
+					// 	<div id="status" class="uk-text-muted uk-text-small"></div>
+					// </div>
+					// <div id="screen"></div>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script type="module" src="/assets/js/novnc.js"></script>
+}

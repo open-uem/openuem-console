@@ -198,25 +198,23 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				{ i18n.T(ctx, "DeployShort") }
 			</a>
 		</li>
-		if vncProxyPort != "" && agentOS != "macOS" {
-			<li class={ templ.KV("uk-active", active == "remote-assistance") }>
-				<a
-					if confirmDelete {
-						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id))) }
-						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id)))) }
-						hx-push-url="false"
-					} else {
-						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id))) }
-						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id)))) }
-						hx-push-url="true"
-					}
-					hx-target="#main"
-					hx-swap="outerHTML"
-				>
-					{ i18n.T(ctx, "Remote Assistance") }
-				</a>
-			</li>
-		}
+		<li class={ templ.KV("uk-active", active == "remote-assistance") }>
+			<a
+				if confirmDelete {
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance?delete=true", id)))) }
+					hx-push-url="false"
+				} else {
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/remote-assistance", id)))) }
+					hx-push-url="true"
+				}
+				hx-target="#main"
+				hx-swap="outerHTML"
+			>
+				{ i18n.T(ctx, "Remote Assistance") }
+			</a>
+		</li>
 		<li class={ templ.KV("uk-active", active == "power") }>
 			<a
 				if confirmDelete {

@@ -11,7 +11,7 @@ templ DiskVendor(model string) {
 		<i class="si si-corsair si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(model, "dell") {
 		<i class="si si-dell si--color uk-cloak text-3xl"></i>
-	} else if strings.Contains(model, "hp") {
+	} else if strings.Contains(model, "hp") || strings.Contains(model, "hewlett-packard") {
 		<i class="si si-hp si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(model, "intel") {
 		<i class="si si-intel si--color uk-cloak text-4xl"></i>

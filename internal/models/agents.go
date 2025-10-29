@@ -154,13 +154,13 @@ func (m *Model) GetAgentById(agentId string, c *partials.CommonInfo) (*ent.Agent
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		return agent, err
 	} else {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}

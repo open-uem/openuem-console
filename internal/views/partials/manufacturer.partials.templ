@@ -7,9 +7,11 @@ templ Manufacturer(brand string) {
 		<i class="si si-apple uk-text-default uk-cloak text-2xl"></i>
 	} else if strings.Contains(brand, "asus") {
 		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
+	} else if strings.Contains(brand, "gigabyte") {
+		<img src="/assets/img/svg/gigabyte.svg" class="w-20"/>
 	} else if strings.Contains(brand, "hetzner") {
 		<i class="si si-hetzner si--color uk-cloak text-3xl"></i>
-	} else if strings.Contains(brand, "hp") {
+	} else if strings.Contains(brand, "hp") || strings.Contains(brand, "hewlett-packard") {
 		<i class="si si-hp si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(brand, "dell") {
 		<i class="si si-dell si--color uk-cloak text-3xl"></i>

@@ -161,9 +161,11 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 			</td>
 			<td class="!align-middle">{ strings.Title(agent.Version) } </td>
 			<td class="!align-middle">{ agent.Username } </td>
-			<td class="!align-middle text-center">
+			<td class="!align-middle">
 				if agent.Manufacturer != "Unknown" || !strings.Contains(strings.ToLower(agent.Model),"raspberry") {
-					@partials.Manufacturer(strings.ToLower(agent.Manufacturer))
+					<div class="flex justify-center">
+						@partials.Manufacturer(strings.ToLower(agent.Manufacturer))
+					</div>
 				} else {
 					@partials.Manufacturer(strings.ToLower(agent.Model))
 				}

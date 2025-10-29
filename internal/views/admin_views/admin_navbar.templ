@@ -125,25 +125,6 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				</a>
 			</li>
 		}
-		<li class={ templ.KV("uk-active", active == "settings") }>
-			<a
-				if commonInfo.TenantID != "-1" {
-					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID)) }
-					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
-				} else {
-					href="/admin/settings"
-					hx-get="/admin/settings"
-				}
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-				hx-indicator="#admin-settings-spinner"
-				class="flex items-center gap-1"
-			>
-				<uk-icon id="admin-settings-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				{ i18n.T(ctx, "General Settings") }
-			</a>
-		</li>
 		if commonInfo.TenantID != "-1" {
 			<li class={ templ.KV("uk-active", active == "update-agents") }>
 				<a
@@ -212,5 +193,43 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				</a>
 			</li>
 		}
+		<li class={ templ.KV("uk-active", active == "rustdesk") }>
+			<a
+				if commonInfo.TenantID != "-1" {
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/rustdesk", commonInfo.TenantID))) }
+				} else {
+					href="/admin/rustdesk"
+					hx-get="/admin/rustdesk"
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				hx-indicator="#admin-rustdesk-spinner"
+				class="flex items-center gap-1"
+			>
+				<uk-icon id="admin-rustdesk-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+				RustDesk
+			</a>
+		</li>
+		<li class={ templ.KV("uk-active", active == "settings") }>
+			<a
+				if commonInfo.TenantID != "-1" {
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/settings", commonInfo.TenantID))) }
+				} else {
+					href="/admin/settings"
+					hx-get="/admin/settings"
+				}
+				hx-push-url="true"
+				hx-target="#main"
+				hx-swap="outerHTML"
+				hx-indicator="#admin-settings-spinner"
+				class="flex items-center gap-1"
+			>
+				<uk-icon id="admin-settings-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "General Settings") }
+			</a>
+		</li>
 	</ul>
 }
