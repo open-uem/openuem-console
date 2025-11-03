@@ -110,7 +110,7 @@ func StartConsoleFlags() []cli.Flag {
 			Name:    "re-enable-certificates-auth",
 			Usage:   "if you disabled the use of certificates to log in and cannot use OIDC you can re-enable it again",
 			EnvVars: []string{"RE_ENABLE_CERTIFICATES_AUTH"},
-			Value:   true,
+			Value:   false,
 		},
 	}
 }
