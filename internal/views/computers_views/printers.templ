@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"net/url"
 )
 
 templ Printers(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, printers []*ent.Printer, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo) {
@@ -75,7 +76,7 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, p
 											<ul class="uk-dropdown-nav uk-nav">
 												<li>
 													<a
-														hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers/%s/default", agent.ID, printer.Name)))) }
+														hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers/%s/default", agent.ID, url.QueryEscape(printer.Name))))) }
 														hx-target="#main"
 														hx-push-url="false"
 														hx-swap="outerHTML"
@@ -90,7 +91,7 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, p
 												</li>
 												<li>
 													<a
-														hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers/%s", agent.ID, printer.Name)))) }
+														hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/printers/%s", agent.ID, url.QueryEscape(printer.Name))))) }
 														hx-target="#main"
 														hx-push-url="false"
 														hx-swap="outerHTML"
