@@ -2,9 +2,13 @@ package models
 
 import (
 	"context"
+	"errors"
+	"log"
 	"time"
 
+	"github.com/alexedwards/argon2id"
 	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/recoverycode"
 	"github.com/open-uem/ent/user"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -141,6 +145,28 @@ func (m *Model) GetUserById(uid string) (*ent.User, error) {
 	return m.Client.User.Get(context.Background(), uid)
 }
 
+func (m *Model) ConsumeRecoveryCode(uid string, code string) bool {
+	hashes, err := m.Client.RecoveryCode.Query().Where(recoverycode.HasUserWith(user.ID(uid))).All(context.Background())
+	if err != nil {
+		log.Println("[ERROR]: could not find recovery codes for this user")
+		return false
+	}
+
+	for _, hash := range hashes {
+		match, err := argon2id.ComparePasswordAndHash(code, hash.Code)
+		if err == nil && match {
+			if err := m.Client.RecoveryCode.Update().SetUsed(true).Where(recoverycode.ID(hash.ID)).Exec(context.Background()); err != nil {
+				log.Printf("[ERROR]: could not invalidate recovery code %s, reason: %v", code, err)
+				return false
+			}
+			return true
+		}
+	}
+
+	log.Println("[ERROR]: could not find the recovery code")
+	return false
+}
+
 func (m *Model) ConfirmEmail(uid string) error {
 	return m.Client.User.Update().SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Where(user.ID(uid)).Exec(context.Background())
 }
@@ -216,4 +242,117 @@ func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken s
 		SetTokenType(tokenType).
 		SetTokenExpiry(expiry).
 		Exec(context.Background())
+}
+
+func (m *Model) CreateDefaultAdminPassword() error {
+	exist, err := m.Client.User.Query().Where(user.ID("openuem")).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		hash, err := argon2id.CreateHash("pa$$word", argon2id.DefaultParams)
+		if err != nil {
+			return err
+		}
+
+		return m.Client.User.Create().
+			SetID("openuem").
+			SetRegister("users.force_change_password").
+			SetName("OpenUEM Administrator").
+			SetPasswd(true).
+			SetHash(hash).
+			Exec(context.Background())
+	}
+
+	return nil
+}
+
+func (m *Model) ChangePassword(username string, password string) error {
+	exist, err := m.Client.User.Query().Where(user.ID(username)).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
+		if err != nil {
+			return err
+		}
+
+		// Save password
+		return m.Client.User.Update().Where(user.ID(username)).SetRegister("users.completed").SetHash(hash).Exec(context.Background())
+	} else {
+		return errors.New("user not found")
+	}
+}
+
+func (m *Model) SaveTOTPSecretKey(username string, secret string) error {
+	exist, err := m.Client.User.Query().Where(user.ID(username)).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		return m.Client.User.Update().Where(user.ID(username)).SetTotpSecret(secret).Exec(context.Background())
+	} else {
+		return errors.New("user not found")
+	}
+}
+
+func (m *Model) SaveRecoveryCodes(username string, codes []string) error {
+	exist, err := m.Client.User.Query().Where(user.ID(username)).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		// Check for existing recovery codes
+		hasCodes, err := m.Client.RecoveryCode.Query().Where(recoverycode.HasUserWith(user.ID(username))).Exist(context.Background())
+		if err != nil {
+			return err
+		}
+
+		// Delete existing codes
+		if hasCodes {
+			if _, err := m.Client.RecoveryCode.Delete().Where(recoverycode.HasUserWith(user.ID(username))).Exec(context.Background()); err != nil {
+				return err
+			}
+		}
+
+		// Generate hashes
+		for _, c := range codes {
+			hash, err := argon2id.CreateHash(c, argon2id.DefaultParams)
+			if err != nil {
+				return err
+			}
+
+			if err := m.Client.RecoveryCode.Create().SetUserID(username).SetCode(hash).Exec(context.Background()); err != nil {
+				return err
+			}
+		}
+
+		return m.Client.User.Update().SetUse2fa(true).SetTotpSecretConfirmed(true).Where(user.ID(username)).Exec(context.Background())
+	} else {
+		return errors.New("user not found")
+	}
+}
+
+func (m *Model) GetUserHash(username string) (*ent.User, error) {
+	return m.Client.User.Query().Select(user.FieldHash).Where(user.ID(username)).First(context.Background())
+}
+
+func (m *Model) GetUserTOTPSecret(username string) (*ent.User, error) {
+	return m.Client.User.Query().Select(user.FieldTotpSecret).Where(user.ID(username)).First(context.Background())
+}
+
+func (m *Model) Disable2FA(username string) error {
+	// Delete recovery codes
+	_, err := m.Client.RecoveryCode.Delete().Where(recoverycode.HasUserWith(user.ID(username))).Exec(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// Disable 2FA and remove TOTP secret
+	return m.Client.User.UpdateOneID(username).SetUse2fa(false).SetTotpSecret("").SetTotpSecretConfirmed(false).Exec(context.Background())
 }

@@ -50,6 +50,9 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
+	// Add CSRF middleware
+	e.Use(mw.CSRF())
+
 	// Add sessions middleware
 	e.Use(session.LoadAndSave(s.Manager))
 

@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"net/http"
+
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/views/login_views"
 )
 
 func (h *Handler) Register(e *echo.Echo) {
@@ -473,6 +477,22 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/oidc", h.OIDCLogIn)
 	e.GET("/oidc/callback", h.OIDCCallback)
+
+	e.GET("/login/userpass", h.LoginUserPassword)
+	e.POST("/login/userpass", h.LoginPasswordAuth)
+	e.POST("/login/changepass", h.LoginPasswordChange)
+	e.GET("/login/forgotpass", h.LoginForgotPass)
+	e.POST("/login/totpregister", h.Register2FA)
+	e.POST("/login/totpconfirm", h.LoginTOTPConfirm)
+	e.POST("/login/totpvalidate", h.LoginTOTPValidate)
+	e.POST("/login/totpbackuprequested", h.LoginTOTPBackupRequest)
+	e.POST("/login/totpbackupcheck", h.LoginTOTPBackupCheck)
+
+	e.GET("/myaccount", h.MyAccount, h.IsAuthenticated)
+	e.POST("/myaccount/password", h.MyAccountPassword, h.IsAuthenticated)
+	e.POST("/myaccount/enable2fa", h.Enable2FA, h.IsAuthenticated)
+	e.POST("/myaccount/disable2fa", h.Disable2FA, h.IsAuthenticated)
+	e.POST("/myaccount/register2fa", h.Enabled2FA, h.IsAuthenticated)
 }
 
 func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
@@ -480,6 +500,35 @@ func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
 		// Redirect to Login if user has no session
 		if !h.SessionManager.Manager.Exists(c.Request().Context(), "uid") {
 			return h.Login(c)
+		}
+
+		// get uid from session
+		username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
+		if username == "" {
+			return h.Login(c)
+		}
+
+		// get user from database
+		user, err := h.Model.GetUserById(username)
+		if err != nil {
+			return h.Login(c)
+		}
+
+		// if use 2fa
+		if user.Use2fa {
+			// check if user has been 2FA authenticated
+			twofa := h.SessionManager.Manager.GetBool(c.Request().Context(), "twofa")
+			if !twofa {
+				if user.Passwd {
+					return h.Login(c)
+				}
+
+				csrfToken, ok := c.Get("csrf").(string)
+				if !ok || csrfToken == "" {
+					return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
+				}
+				return RenderLogin(c, login_views.LoginIndex(login_views.Enter2FA(username), csrfToken))
+			}
 		}
 
 		return next(c)

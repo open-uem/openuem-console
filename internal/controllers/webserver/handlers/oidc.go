@@ -380,7 +380,7 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		// if it's the first time let's confirm login and remove the cert password
+		// if it's the first time let's confirm login
 		if err := h.Model.ConfirmLogIn(user.ID); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

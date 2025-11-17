@@ -57,3 +57,21 @@ func RenderSuccess(c echo.Context, cmp templ.Component) error {
 	c.Response().Header().Set("HX-Reswap", "outerHTML show:window:top")
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
+
+func RenderLoginPartial(c echo.Context, cmp templ.Component) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set("HX-Retarget", "#login")
+	c.Response().Header().Set("HX-Reswap", "outerHTML")
+	return cmp.Render(c.Request().Context(), c.Response().Writer)
+}
+
+func RenderAccountPartial(c echo.Context, cmp templ.Component) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set("HX-Retarget", "#account")
+	c.Response().Header().Set("HX-Reswap", "outerHTML")
+	return cmp.Render(c.Request().Context(), c.Response().Writer)
+}

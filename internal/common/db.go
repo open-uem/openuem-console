@@ -58,6 +58,11 @@ func (w *Worker) StartDBConnectJob() error {
 			log.Println("[WARN]: could not default nickname to default site")
 		}
 
+		// Create argon2 default password for openuem admin if not exist
+		if err := w.Model.CreateDefaultAdminPassword(); err != nil {
+			log.Println("[WARN]: could not create default openuem password")
+		}
+
 		w.StartConsoleService()
 
 		// Start a job to check latest OpenUEM releases
@@ -129,6 +134,11 @@ func (w *Worker) StartDBConnectJob() error {
 				// Associate domain to default site #feat-119
 				if err := w.Model.AssociateDomainToDefaultSite(w.Domain); err != nil {
 					log.Println("[WARN]: could not associate domain to default site")
+				}
+
+				// Create argon2 default password for openuem admin if not exist
+				if err := w.Model.CreateDefaultAdminPassword(); err != nil {
+					log.Println("[WARN]: could not create default openuem password")
 				}
 
 				w.StartConsoleService()

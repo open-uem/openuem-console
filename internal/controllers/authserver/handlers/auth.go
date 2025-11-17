@@ -130,6 +130,9 @@ func (h *Handler) Auth(c echo.Context) error {
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+		// if user.Use2fa {
+		// 	h.SessionManager.Manager.Put(c.Request().Context(), "twofa", true)
+		// }
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -145,6 +148,11 @@ func (h *Handler) Auth(c echo.Context) error {
 		if err := h.Model.ConfirmLogIn(uid); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+	}
+
+	// TODO - if 2FA redirect to login and 2FA
+	if user.Use2fa {
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s", h.ServerName, h.ConsolePort))
 	}
 
 	// TODO - Get user's default tenant and site
