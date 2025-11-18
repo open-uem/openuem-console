@@ -20,8 +20,8 @@ de:
   Connect: "Verbinden"
   Create: "Erstellen"
   Dashboard: "Dashboard"
-  DateFrom: Von
-  DateTo: Bis
+  DateFrom: "Von"
+  DateTo: "Bis"
   DefaultTenant: "Standard-Organisation"
   DefaultSite: "Standard-Standort"
   Delete: "Löschen"
@@ -63,7 +63,7 @@ de:
   More info: "Weitere Informationen"
   Name: "Name"
   No Contact: "Kein Kontakt"
-  Not fount: "Nicht gefunden"
+  Not found: "Nicht gefunden"
   None: "Keine"
   Notes: "Notizen"
   Now: "Jetzt"
@@ -123,7 +123,7 @@ de:
   UpdatedNo: "Nicht aktualisiert"
   UpdateAll: "Alle aktualisieren"
   UpdateSelected: "Ausgewählte aktualisieren"
-  Updated at: Aktualisiert am %s
+  Updated at: "Aktualisiert am %s"
   Updates: "Updates"
   Upload: "Hochladen"
   User:
@@ -337,7 +337,6 @@ de:
     no_rdp_certs: "Der Agent hat kein digitales Zertifikat zur Verschlüsselung des RDP-Verkehrs gemeldet. Erzwingen Sie einen neuen Bericht oder generieren Sie Zertifikate über das Aktionsmenü neu."
     vnc_server_installed: "%s ist auf dem Endpunkt installiert"
     vnc_host_resolved: "Der Remote-Hostname scheint durch DNS aufgelöst zu werden"
-
   inventory:
     hardware:
       title: "Hardware"
@@ -405,7 +404,7 @@ de:
       title: "Dateibrowser"
       description: "Durchsuchen Sie dieses logische Laufwerk remote über SFTP. Klicken Sie auf das Drei-Punkte-Symbol, um ein Aktionsmenü zu öffnen. Sie können auch die Symbolleiste verwenden, um zu einem übergeordneten Ordner zu wechseln, einen neuen Ordner hinzuzufügen, den Ordner zu aktualisieren, eine Datei hochzuladen, viele Elemente als ZIP-Datei herunterzuladen oder viele Elemente nach der Auswahl zu löschen"
       folder_name: "Ordnername..."
-      current_folder: "Aktueller Ordner:"
+      current_folder: "Aktueller Ordner: "
       empty_folder: "Dieser Ordner ist leer!"
       open_folder: "Ordner öffnen"
       new_name: "Neuer Name..."
@@ -447,7 +446,6 @@ de:
       installation_date: "Installation"
       no_apps: "Keine Apps für diese Abfrage gefunden"
       report_title: "App %s"
-
   apps:
     title: "Apps"
     description: "Dies sind die in Ihrer Organisation gefundenen Anwendungen, wie sie von OpenUEM-Agenten gemeldet wurden"
@@ -679,145 +677,145 @@ de:
     no_serial: "Keine Zertifikat-Seriennummer in der Anfrage gefunden"
     no_certificates: "Keine Zertifikate für diese Anfrage gefunden"
   smtp:
-    title: SMTP
+    title: "SMTP"
     description: "Konfigurieren Sie Ihren SMTP-Anbieter, um E-Mail-Benachrichtigungen zu senden."
-    server_fieldset: SMTP-Server
-    server: Server
-    server_placeholder: Name Ihres SMTP-Servers...
-    port: Port
-    port_placeholder: Port Ihres SMTP-Servers...
-    auth_fieldset: SMTP-Authentifizierung
-    user: Benutzer
-    user_placeholder: Ihr SMTP-Auth-Benutzer
-    password: Passwort
-    password_placeholder: Ihr SMTP-Passwort...
-    auth_type: Auth-Typ
-    from_fieldset: Mail Von
-    from_placeholder: E-Mail-Adresse...
-    id_cannot_be_empty: Einstellungs-ID kann nicht leer sein
-    id_invalid: Einstellungs-ID ist nicht gültig
-    server_invalid: Server ist nicht gültig
-    server_cannot_be_empty: Server kann nicht leer sein
-    port_invalid: Port ist nicht gültig
-    port_cannot_be_empty: Port kann nicht leer sein
-    auth_invalid: Auth-Typ ist nicht gültig
-    mailfrom_cannot_be_empty: Mail Von kann nicht leer sein
-    mailfrom_invalid: Mail Von ist nicht gültig
-    saved: SMTP-Einstellungen gespeichert!
-    test: Einstellungen testen
-    test_success: E-Mail-Test wurde erfolgreich an %s gesendet!
+    server_fieldset: "SMTP-Server"
+    server: "Server"
+    server_placeholder: "Name Ihres SMTP-Servers..."
+    port: "Port"
+    port_placeholder: "Port Ihres SMTP-Servers..."
+    auth_fieldset: "SMTP-Authentifizierung"
+    user: "Benutzer"
+    user_placeholder: "Ihr SMTP-Auth-Benutzer"
+    password: "Passwort"
+    password_placeholder: "Ihr SMTP-Passwort..."
+    auth_type: "Auth-Typ"
+    from_fieldset: "Mail Von"
+    from_placeholder: "E-Mail-Adresse..."
+    id_cannot_be_empty: "Einstellungs-ID kann nicht leer sein"
+    id_invalid: "Einstellungs-ID ist nicht gültig"
+    server_invalid: "Server ist nicht gültig"
+    server_cannot_be_empty: "Server kann nicht leer sein"
+    port_invalid: "Port ist nicht gültig"
+    port_cannot_be_empty: "Port kann nicht leer sein"
+    auth_invalid: "Auth-Typ ist nicht gültig"
+    mailfrom_cannot_be_empty: "Mail Von kann nicht leer sein"
+    mailfrom_invalid: "Mail Von ist nicht gültig"
+    saved: "SMTP-Einstellungen gespeichert!"
+    test: "Einstellungen testen"
+    test_success: "E-Mail-Test wurde erfolgreich an %s gesendet!"
   settings:
-    title: Allgemeine Einstellungen
-    description: OpenUEM hat einige Einstellungen, die sein Verhalten konfigurieren.
+    title: "Allgemeine Einstellungen"
+    description: "OpenUEM hat einige Einstellungen, die sein Verhalten konfigurieren."
     global: "Dies sind globale OpenUEM-Einstellungen, die von Organisationen übernommen werden. Verwenden Sie das Organisations-Dropdown-Menü, um deren Einstellungen zu ändern"
     tenant: "Dies sind die spezifischen Einstellungen für diese Organisation. Diese Einstellungen werden von der globalen Konfiguration übernommen, aber Sie können sie überschreiben oder die Schaltfläche verwenden, um die globalen Einstellungen erneut anzuwenden"
-    country_title: Land
-    country_description: Standardland für Benutzerregistrierung
-    nats_timeout_title: NATS-Timeout
-    nats_timeout_description: Standard-NATS-Request-Timeout in Sekunden
-    max_upload_title: Maximale Upload-Größe
-    max_upload_description: Maximale Upload-Größe für Dateien ausgedrückt in GB (G), MB (M) oder KB (K)
-    user_cert_years_title: Benutzerzertifikat-Dauer
-    user_cert_years_description: Die Dauer in Jahren des Benutzerzertifikats
-    id_cannot_be_empty: Einstellungs-ID kann nicht leer sein
-    id_invalid: Einstellungs-ID ist nicht gültig
-    country_invalid: Länder-ID ist nicht gültig
-    cert_years_invalid: Anzahl der Jahre für Benutzerzertifikat ist nicht gültig
-    nats_timeout_invalid: NATS-Timeout ist nicht gültig
-    max_upload_size_invalid: Maximale Upload-Größe ist nicht gültig
-    saved: Allgemeine Einstellungen gespeichert!
-    reload: Diese Einstellung wurde gespeichert, aber der Konsolen-Dienst muss manuell neu gestartet werden, damit sie wirksam wird
-    refresh_title: Automatische Aktualisierung
-    refresh_description: Einige Seiten werden automatisch aktualisiert. Legen Sie die Aktualisierungsperiode in Minuten fest
-    refresh_invalid: Aktualisierungszeit ist nicht gültig
-    session_lifetime_title: Sitzungslebensdauer
-    session_lifetime_description: Sitzungslebensdauer in Minuten. Nach Ablauf dieser Zeit wird die Sitzung geschlossen
-    session_lifetime_invalid: Sitzungslebensdauer ist nicht gültig
-    update_channel_title: Update-Kanal
-    update_channel_description: Kanal, der zum Prüfen und Herunterladen von OpenUEM-Updates verwendet wird
-    update_channel_invalid: Kanal ist nicht gültig
-    agent_frequency_title: Agenten-Berichtshäufigkeit
-    agent_frequency_description: Agenten senden neue Berichte periodisch entsprechend der in Minuten festgelegten Häufigkeit
-    agent_frequency_invalid: Agenten-Berichtshäufigkeit ist nicht gültig
-    agent_frequency_success: Eine neue Häufigkeit wurde den Agenten mitgeteilt
-    agent_frequency_could_not_be_saved: Die neue Häufigkeit konnte nicht in der Datenbank gespeichert werden
-    agent_frequency_error: Die neue Häufigkeit kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut
-    request_pin_title: VNC-PIN vom Benutzer anfordern
-    request_pin_description: Wenn eine VNC-Sitzung startet, ist es erforderlich, den Benutzer nach der PIN zu fragen, die auf dem Bildschirm angezeigt wird
-    request_pin_invalid: Die gewählte Option ist nicht gültig
-    request_pin_could_not_be_saved: PIN-Anfrageoption konnte nicht in der Datenbank gespeichert werden
-    request_pin_could_not_be_read: PIN-Anfrageoption konnte nicht aus der Datenbank gelesen werden
-    add_tag_admitted_title: Tag zu zugelassenen Agenten hinzufügen
-    add_tag_admitted_description: Wenn ein Agent zugelassen wird, fügen Sie automatisch den folgenden Tag hinzu. Verwenden Sie die leere Option, um das Taggen zu vermeiden
-    add_tag_select: Tag auswählen
-    add_tag_admitted_could_not_be_saved: Der Tag, der einem kürzlich zugelassenen Agent zugeordnet ist, konnte nicht gespeichert werden
-    add_tag_admitted_could_not_be_cleared: Der Tag für kürzlich zugelassene Agenten konnte nicht aufgehoben werden
-    add_tag_invalid: Die Tag-ID ist nicht gültig
-    winget_configure_frequency_title: Profilanwendungshäufigkeit
+    country_title: "Land"
+    country_description: "Standardland für Benutzerregistrierung"
+    nats_timeout_title: "NATS-Timeout"
+    nats_timeout_description: "Standard-NATS-Request-Timeout in Sekunden"
+    max_upload_title: "Maximale Upload-Größe"
+    max_upload_description: "Maximale Upload-Größe für Dateien ausgedrückt in GB (G), MB (M) oder KB (K)"
+    user_cert_years_title: "Benutzerzertifikat-Dauer"
+    user_cert_years_description: "Die Dauer in Jahren des Benutzerzertifikats"
+    id_cannot_be_empty: "Einstellungs-ID kann nicht leer sein"
+    id_invalid: "Einstellungs-ID ist nicht gültig"
+    country_invalid: "Länder-ID ist nicht gültig"
+    cert_years_invalid: "Anzahl der Jahre für Benutzerzertifikat ist nicht gültig"
+    nats_timeout_invalid: "NATS-Timeout ist nicht gültig"
+    max_upload_size_invalid: "Maximale Upload-Größe ist nicht gültig"
+    saved: "Allgemeine Einstellungen gespeichert!"
+    reload: "Diese Einstellung wurde gespeichert, aber der Konsolen-Dienst muss manuell neu gestartet werden, damit sie wirksam wird"
+    refresh_title: "Automatische Aktualisierung"
+    refresh_description: "Einige Seiten werden automatisch aktualisiert. Legen Sie die Aktualisierungsperiode in Minuten fest"
+    refresh_invalid: "Aktualisierungszeit ist nicht gültig"
+    session_lifetime_title: "Sitzungslebensdauer"
+    session_lifetime_description: "Sitzungslebensdauer in Minuten. Nach Ablauf dieser Zeit wird die Sitzung geschlossen"
+    session_lifetime_invalid: "Sitzungslebensdauer ist nicht gültig"
+    update_channel_title: "Update-Kanal"
+    update_channel_description: "Kanal, der zum Prüfen und Herunterladen von OpenUEM-Updates verwendet wird"
+    update_channel_invalid: "Kanal ist nicht gültig"
+    agent_frequency_title: "Agenten-Berichtshäufigkeit"
+    agent_frequency_description: "Agenten senden neue Berichte periodisch entsprechend der in Minuten festgelegten Häufigkeit"
+    agent_frequency_invalid: "Agenten-Berichtshäufigkeit ist nicht gültig"
+    agent_frequency_success: "Eine neue Häufigkeit wurde den Agenten mitgeteilt"
+    agent_frequency_could_not_be_saved: "Die neue Häufigkeit konnte nicht in der Datenbank gespeichert werden"
+    agent_frequency_error: "Die neue Häufigkeit kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut"
+    request_pin_title: "VNC-PIN vom Benutzer anfordern"
+    request_pin_description: "Wenn eine VNC-Sitzung startet, ist es erforderlich, den Benutzer nach der PIN zu fragen, die auf dem Bildschirm angezeigt wird"
+    request_pin_invalid: "Die gewählte Option ist nicht gültig"
+    request_pin_could_not_be_saved: "PIN-Anfrageoption konnte nicht in der Datenbank gespeichert werden"
+    request_pin_could_not_be_read: "PIN-Anfrageoption konnte nicht aus der Datenbank gelesen werden"
+    add_tag_admitted_title: "Tag zu zugelassenen Agenten hinzufügen"
+    add_tag_admitted_description: "Wenn ein Agent zugelassen wird, fügen Sie automatisch den folgenden Tag hinzu. Verwenden Sie die leere Option, um das Taggen zu vermeiden"
+    add_tag_select: "Tag auswählen"
+    add_tag_admitted_could_not_be_saved: "Der Tag, der einem kürzlich zugelassenen Agent zugeordnet ist, konnte nicht gespeichert werden"
+    add_tag_admitted_could_not_be_cleared: "Der Tag für kürzlich zugelassene Agenten konnte nicht aufgehoben werden"
+    add_tag_invalid: "Die Tag-ID ist nicht gültig"
+    winget_configure_frequency_title: "Profilanwendungshäufigkeit"
     winget_configure_frequency_description: "Agenten wenden Endpunktprofile entsprechend der in Minuten festgelegten Häufigkeit an (Mindestwert 30)"
-    winget_configure_frequency_success: Eine neue Häufigkeit wurde den Agenten mitgeteilt
-    winget_configure_frequency_could_not_be_saved: Die neue Häufigkeit konnte nicht in der Datenbank gespeichert werden
-    winget_configure_frequency_invalid: Ausgewählte Häufigkeit ist nicht gültig
-    winget_configure_frequency_error: Die neue Häufigkeit kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut
-    use_winget_title: WinGet verwenden
-    use_winget_description: WinGet zum Suchen und Installieren neuer Windows-Pakete verwenden
-    use_winget_success: WinGet-Einstellung wurde gespeichert
-    use_winget_invalid: Ausgewählter Wert für WinGet verwenden ist nicht gültig
-    use_winget_could_not_be_saved: WinGet-Wert konnte nicht gespeichert werden
-    use_flatpak_title: Flatpak verwenden
-    use_flatpak_description: Flatpak zum Suchen und Installieren neuer Linux-Pakete verwenden
-    use_flatpak_success: Flatpak-Einstellung wurde gespeichert
-    use_flatpak_invalid: Ausgewählter Wert für Flatpak verwenden ist nicht gültig
-    use_flatpak_could_not_be_saved: Flatpak-Wert konnte nicht gespeichert werden
-    use_brew_title: Brew verwenden
-    use_brew_description: Brew zum Suchen und Installieren neuer MacOS-Pakete verwenden
-    use_brew_success: Brew-Einstellung wurde gespeichert
-    use_brew_invalid: Ausgewählter Wert für Brew verwenden ist nicht gültig
-    use_brew_could_not_be_saved: Brew-Wert konnte nicht gespeichert werden
-    disable_sftp_title: SFTP deaktivieren
-    disable_sftp_description: SFTP ist global für jeden Agent deaktiviert
-    disable_sftp_success: SFTP-Einstellung wurde gespeichert
-    disable_sftp_invalid: Ausgewählter Wert für SFTP-Dienst ist nicht gültig
-    disable_sftp_could_not_be_saved: SFTP-Diensteinstellungen konnten nicht gespeichert werden
-    disable_sftp_error: Die neuen SFTP-Diensteinstellungen können den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut
-    disable_sftp_to_all: SFTP-Einstellung konnte nicht für alle Agenten aktualisiert werden
-    could_not_get_sftp_general_setting: SFTP-Allgemeineinstellung konnte nicht abgerufen werden
-    disable_remote_assistance_title: Fernunterstützung deaktivieren
-    disable_remote_assistance_description: Fernunterstützung ist global für jeden Agent deaktiviert
-    disable_remote_assistance_success: Fernunterstützungseinstellung wurde gespeichert
-    disable_remote_assistance_invalid: Ausgewählter Wert für Fernunterstützung ist nicht gültig
-    disable_remote_assistance_could_not_be_saved: Fernunterstützungseinstellung konnte nicht gespeichert werden
-    disable_remote_assistance_error: Die neue Fernunterstützungseinstellung kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut
-    disable_remote_assistance_to_all: Fernunterstützungseinstellung konnte nicht für alle Agenten aktualisiert werden
-    detect_remote_agents_title: Remote-Agenten erkennen
-    detect_remote_agents_description: OpenUEM markiert Agenten als remote, deren gemeldete IP-Adresse nicht mit der per DNS aufgelösten IP-Adresse übereinstimmt
-    detect_remote_agents_success: Einstellung zur Erkennung von Remote-Agenten wurde gespeichert
-    detect_remote_agents_invalid: Ausgewählter Wert für Remote-Agentenerkennung ist nicht gültig
-    detect_remote_agents_could_not_be_saved: Einstellung zur Erkennung von Remote-Agenten konnte nicht gespeichert werden
-    could_not_get_detect_remote_agents_setting: Allgemeineinstellung zur Remote-Agentenerkennung konnte nicht abgerufen werden
-    auto_admit_agents_title: Agenten automatisch zulassen
-    auto_admit_agents_description: OpenUEM lässt Agenten automatisch zu, ohne zu warten, dass der Administrator sie zulässt. Beachten Sie, dass Sie die Zertifikatsgenerierung für den Agent über das Aktionsmenü des Agents anfordern müssen, wenn Sie sich über SFTP oder VNC/RDP verbinden möchten
-    auto_admit_agents_success: Die Einstellung zum automatischen Zulassen von Agenten wurde gespeichert
-    auto_admit_agents_invalid: Ausgewählter Wert für automatisches Zulassen von Agenten ist nicht gültig
-    auto_admit_agents_could_not_be_saved: Einstellung zum automatischen Zulassen von Agenten konnte nicht gespeichert werden
-    could_not_get_auto_admit_agents_setting: Einstellung zum automatischen Zulassen von Agenten konnte nicht aktualisiert werden
+    winget_configure_frequency_success: "Eine neue Häufigkeit wurde den Agenten mitgeteilt"
+    winget_configure_frequency_could_not_be_saved: "Die neue Häufigkeit konnte nicht in der Datenbank gespeichert werden"
+    winget_configure_frequency_invalid: "Ausgewählte Häufigkeit ist nicht gültig"
+    winget_configure_frequency_error: "Die neue Häufigkeit kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut"
+    use_winget_title: "WinGet verwenden"
+    use_winget_description: "WinGet zum Suchen und Installieren neuer Windows-Pakete verwenden"
+    use_winget_success: "WinGet-Einstellung wurde gespeichert"
+    use_winget_invalid: "Ausgewählter Wert für WinGet verwenden ist nicht gültig"
+    use_winget_could_not_be_saved: "WinGet-Wert konnte nicht gespeichert werden"
+    use_flatpak_title: "Flatpak verwenden"
+    use_flatpak_description: "Flatpak zum Suchen und Installieren neuer Linux-Pakete verwenden"
+    use_flatpak_success: "Flatpak-Einstellung wurde gespeichert"
+    use_flatpak_invalid: "Ausgewählter Wert für Flatpak verwenden ist nicht gültig"
+    use_flatpak_could_not_be_saved: "Flatpak-Wert konnte nicht gespeichert werden"
+    use_brew_title: "Brew verwenden"
+    use_brew_description: "Brew zum Suchen und Installieren neuer MacOS-Pakete verwenden"
+    use_brew_success: "Brew-Einstellung wurde gespeichert"
+    use_brew_invalid: "Ausgewählter Wert für Brew verwenden ist nicht gültig"
+    use_brew_could_not_be_saved: "Brew-Wert konnte nicht gespeichert werden"
+    disable_sftp_title: "SFTP deaktivieren"
+    disable_sftp_description: "SFTP ist global für jeden Agent deaktiviert"
+    disable_sftp_success: "SFTP-Einstellung wurde gespeichert"
+    disable_sftp_invalid: "Ausgewählter Wert für SFTP-Dienst ist nicht gültig"
+    disable_sftp_could_not_be_saved: "SFTP-Diensteinstellungen konnten nicht gespeichert werden"
+    disable_sftp_error: "Die neuen SFTP-Diensteinstellungen können den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut"
+    disable_sftp_to_all: "SFTP-Einstellung konnte nicht für alle Agenten aktualisiert werden"
+    could_not_get_sftp_general_setting: "SFTP-Allgemeineinstellung konnte nicht abgerufen werden"
+    disable_remote_assistance_title: "Fernunterstützung deaktivieren"
+    disable_remote_assistance_description: "Fernunterstützung ist global für jeden Agent deaktiviert"
+    disable_remote_assistance_success: "Fernunterstützungseinstellung wurde gespeichert"
+    disable_remote_assistance_invalid: "Ausgewählter Wert für Fernunterstützung ist nicht gültig"
+    disable_remote_assistance_could_not_be_saved: "Fernunterstützungseinstellung konnte nicht gespeichert werden"
+    disable_remote_assistance_error: "Die neue Fernunterstützungseinstellung kann den Agenten jetzt nicht mitgeteilt werden, versuchen Sie es später erneut"
+    disable_remote_assistance_to_all: "Fernunterstützungseinstellung konnte nicht für alle Agenten aktualisiert werden"
+    detect_remote_agents_title: "Remote-Agenten erkennen"
+    detect_remote_agents_description: "OpenUEM markiert Agenten als remote, deren gemeldete IP-Adresse nicht mit der per DNS aufgelösten IP-Adresse übereinstimmt"
+    detect_remote_agents_success: "Einstellung zur Erkennung von Remote-Agenten wurde gespeichert"
+    detect_remote_agents_invalid: "Ausgewählter Wert für Remote-Agentenerkennung ist nicht gültig"
+    detect_remote_agents_could_not_be_saved: "Einstellung zur Erkennung von Remote-Agenten konnte nicht gespeichert werden"
+    could_not_get_detect_remote_agents_setting: "Allgemeineinstellung zur Remote-Agentenerkennung konnte nicht abgerufen werden"
+    auto_admit_agents_title: "Agenten automatisch zulassen"
+    auto_admit_agents_description: "OpenUEM lässt Agenten automatisch zu, ohne zu warten, dass der Administrator sie zulässt. Beachten Sie, dass Sie die Zertifikatsgenerierung für den Agent über das Aktionsmenü des Agents anfordern müssen, wenn Sie sich über SFTP oder VNC/RDP verbinden möchten"
+    auto_admit_agents_success: "Die Einstellung zum automatischen Zulassen von Agenten wurde gespeichert"
+    auto_admit_agents_invalid: "Ausgewählter Wert für automatisches Zulassen von Agenten ist nicht gültig"
+    auto_admit_agents_could_not_be_saved: "Einstellung zum automatischen Zulassen von Agenten konnte nicht gespeichert werden"
+    could_not_get_auto_admit_agents_setting: "Einstellung zum automatischen Zulassen von Agenten konnte nicht aktualisiert werden"
     apply_global: "Globale Einstellungen anwenden"
     could_not_apply_global_settings: "Globale Einstellungen konnten nicht angewendet werden, Grund: %s"
   restore:
-    title: Wiederherstellen
-    description: Hier können Sie einige kritische Elemente von OpenUEM wiederherstellen, falls etwas schrecklich schief geht
-    agent_rollback_title: Agenten wiederherstellen
-    agent_rollback_description: Wenn die Agenten nach einem Update, das Sie auf Abruf angewendet haben, nicht richtig funktionieren und Sie zur vorherigen Version zurückkehren müssen. Dies gilt für alle Agenten
-    messenger_rollback_title: Messenger wiederherstellen
-    messenger_rollback_description: Messenger zeigt Nachrichten an Benutzer an und wird automatisch aktualisiert, sobald eine neue Version verfügbar ist. Bei Bedarf können Sie zurücksetzen
-    updater_rollback_title: Updater wiederherstellen
-    updater_rollback_description: Der Updater ist verantwortlich für die Aktualisierung der Agenten (auf Abruf) und des Messengers (automatisch). Dieser Updater wird automatisch aktualisiert, wenn eine neue Version verfügbar ist. Bei Bedarf können Sie zurücksetzen
-    database_title: Datenbank wiederherstellen
-    database_description: Wenn Sie aus der Datenbank die Agenten und ihre zugehörigen Informationen entfernen müssen, während die Benutzer, die sich in der Konsole anmelden können, und die Zertifikatsinformationen beibehalten werden
-    confirm_restore: Sind Sie sicher, dass Sie diese Wiederherstellungsaktion durchführen möchten? Diese Aktion ist irreversibel
+    title: "Wiederherstellen"
+    description: "Hier können Sie einige kritische Elemente von OpenUEM wiederherstellen, falls etwas schrecklich schief geht"
+    agent_rollback_title: "Agenten wiederherstellen"
+    agent_rollback_description: "Wenn die Agenten nach einem Update, das Sie auf Abruf angewendet haben, nicht richtig funktionieren und Sie zur vorherigen Version zurückkehren müssen. Dies gilt für alle Agenten"
+    messenger_rollback_title: "Messenger wiederherstellen"
+    messenger_rollback_description: "Messenger zeigt Nachrichten an Benutzer an und wird automatisch aktualisiert, sobald eine neue Version verfügbar ist. Bei Bedarf können Sie zurücksetzen"
+    updater_rollback_title: "Updater wiederherstellen"
+    updater_rollback_description: "Der Updater ist verantwortlich für die Aktualisierung der Agenten (auf Abruf) und des Messengers (automatisch). Dieser Updater wird automatisch aktualisiert, wenn eine neue Version verfügbar ist. Bei Bedarf können Sie zurücksetzen"
+    database_title: "Datenbank wiederherstellen"
+    database_description: "Wenn Sie aus der Datenbank die Agenten und ihre zugehörigen Informationen entfernen müssen, während die Benutzer, die sich in der Konsole anmelden können, und die Zertifikatsinformationen beibehalten werden"
+    confirm_restore: "Sind Sie sicher, dass Sie diese Wiederherstellungsaktion durchführen möchten? Diese Aktion ist irreversibel"
     restore_requested: "Die Wiederherstellungsanfrage wurde an alle aktiven Agenten gesendet"
-    confirm_delete_database: Sind Sie sicher, dass Sie alle Tabellen mit Agenten und ihren Informationen löschen möchten?
-    delete_database_requested: Die Informationen wurden gelöscht
+    confirm_delete_database: "Sind Sie sicher, dass Sie alle Tabellen mit Agenten und ihren Informationen löschen möchten?"
+    delete_database_requested: "Die Informationen wurden gelöscht"
   notes:
     updated: "Notizen wurden aktualisiert"
     no_notes: "Notiz hinzufügen..."
@@ -924,30 +922,30 @@ de:
         could_not_parse_server_id: "Die Server-ID konnte nicht geparst werden"
         could_not_delete: "Der Server konnte nicht gelöscht werden, Grund: %s"
   dashboard:
-    outdated_agents: Agenten mit veralteten Versionen
-    no_auto_update: Endpunkte, die System-Updates nicht automatisch herunterladen/installieren
-    pending_update_agents: Endpunkte mit ausstehenden System-Updates
-    disabled_antivirus: Endpunkte ohne aktives Antivirus-System
-    outdated_antivirus: Endpunkte mit veralteten Virendatenbanken
-    nats_server_status: NATS-Server-Status
-    openuem_updater_api_status: OpenUEM-Updater-API-Status
-    agent_worker_status: Agenten-Worker-Status
-    notification_worker_status: Benachrichtigungs-Worker-Status
-    cert_manager_worker_status: Zertifikat-Manager-Worker-Status
-    vnc: Endpunkte, die VNC-Verbindung unterstützen
-    num_vendor: Anzahl verschiedener Gerätehersteller
-    num_printers: Anzahl verschiedener gefundener Drucker
-    num_applied_tags: Anzahl angewendeter Tags
-    num_disabled_agents: Deaktivierte Agenten
-    num_waiting_for_admission: Agenten, die auf Zulassung warten
-    num_apps_found: Gefundene Anwendungen
-    num_deployments: Software-Bereitstellungen mit OpenUEM durchgeführt
-    num_openuem_users: Anzahl OpenUEM-Benutzer
-    num_sessions: Anzahl in der Konsole geöffneter Sitzungen
-    num_os_users: Anzahl Benutzer mit zugewiesenem Endpunkt
-    no_reported_in_last_24h: Agenten, die in den letzten 24h nicht gemeldet haben
-    num_upgradable_agents: Agenten, die aktualisiert werden können
-    certificates_to_expire: Zertifikate, die in zwei Monaten ablaufen
+    outdated_agents: "Agenten mit veralteten Versionen"
+    no_auto_update: "Endpunkte, die System-Updates nicht automatisch herunterladen/installieren"
+    pending_update_agents: "Endpunkte mit ausstehenden System-Updates"
+    disabled_antivirus: "Endpunkte ohne aktives Antivirus-System"
+    outdated_antivirus: "Endpunkte mit veralteten Virendatenbanken"
+    nats_server_status: "NATS-Server-Status"
+    openuem_updater_api_status: "OpenUEM-Updater-API-Status"
+    agent_worker_status: "Agenten-Worker-Status"
+    notification_worker_status: "Benachrichtigungs-Worker-Status"
+    cert_manager_worker_status: "Zertifikat-Manager-Worker-Status"
+    vnc: "Endpunkte, die VNC-Verbindung unterstützen"
+    num_vendor: "Anzahl verschiedener Gerätehersteller"
+    num_printers: "Anzahl verschiedener gefundener Drucker"
+    num_applied_tags: "Anzahl angewendeter Tags"
+    num_disabled_agents: "Deaktivierte Agenten"
+    num_waiting_for_admission: "Agenten, die auf Zulassung warten"
+    num_apps_found: "Gefundene Anwendungen"
+    num_deployments: "Software-Bereitstellungen mit OpenUEM durchgeführt"
+    num_openuem_users: "Anzahl OpenUEM-Benutzer"
+    num_sessions: "Anzahl in der Konsole geöffneter Sitzungen"
+    num_os_users: "Anzahl Benutzer mit zugewiesenem Endpunkt"
+    no_reported_in_last_24h: "Agenten, die in den letzten 24h nicht gemeldet haben"
+    num_upgradable_agents: "Agenten, die aktualisiert werden können"
+    certificates_to_expire: "Zertifikate, die in zwei Monaten ablaufen"
   nats:
     not_connected: "Diese Aktion kann jetzt nicht ausgeführt werden, wir sind nicht mit dem NATS-Server verbunden, bitte versuchen Sie es in ein paar Minuten erneut"
     no_responder: "Der Agent hat die Anfrage nicht erhalten, möglicherweise läuft er nicht oder es gibt ein Kommunikationsproblem, bitte versuchen Sie es in ein paar Minuten erneut"
@@ -1219,7 +1217,6 @@ de:
     apt_update: "Paket aktualisieren"
     apt_update_all: "Aktualisieren Sie alle Pakete"
     apt_upgrade_os: "Aktualisieren Sie das Betriebssystem"
-
     new:
       title: "Neue Aufgabe"
       name: "Aufgabenbeschreibung"
@@ -1254,7 +1251,6 @@ de:
   packages:
     required_params_missing: "Erforderliche Parameter fehlen"
     source_not_found: "Der zugehörige Paketmanager konnte nicht gefunden werden"
-
   tenants:
     title: "Organisationen"
     description: "OpenUEM unterstützt Multi-Tenancy, sodass Sie verschiedene Organisationen verwalten können. Eine Organisation kann eine oder mehrere Standorte haben, in denen Endgeräte gruppiert sind. Eine Standard-Organisation wird mit einem Standard-Standort erstellt, wo Endgeräte hinzugefügt werden, wenn keine Organisation und/oder Standort für den Agent konfiguriert ist"
@@ -1295,15 +1291,14 @@ de:
     import_wrong_tenants: "Wir haben Fehler für die folgenden Mandanten festgestellt: %s"
     confirm_delete: "Sind Sie sicher, dass Sie diese Organisation löschen möchten? Alle zugehörigen Agents, Profile, Tags, Metadaten und andere Einstellungen werden aus der Datenbank entfernt"
     delete_error: "Organisation konnte nicht gelöscht werden, Grund: %s"
-    filter_by_name: Nach Name filtern...
-    filter_by_creation: Nach Erstellungsdatum filtern
-    filter_by_modification: Nach Änderungsdatum filtern
-    filter_by_default_status: Nach Standard-Status filtern
-    no_tenants: Für diese Abfrage wurden keine Mandanten gefunden
+    filter_by_name: "Nach Name filtern..."
+    filter_by_creation: "Nach Erstellungsdatum filtern"
+    filter_by_modification: "Nach Änderungsdatum filtern"
+    filter_by_default_status: "Nach Standard-Status filtern"
+    no_tenants: "Für diese Abfrage wurden keine Mandanten gefunden"
     could_not_get_agents: "Agents, die mit dieser Organisation verknüpft sind, konnten nicht abgerufen werden"
     could_not_get_rustdesk_settings: "Die mit dieser Organisation verknüpften RustDesk-Einstellungen konnten nicht abgerufen werden."    
-    could_not_get_global_rustdesk_settings: "Die globalen RustDesk-Einstellungen für diese Organisation konnten nicht abgerufen werden."    
-
+    could_not_get_global_rustdesk_settings: "Die globalen RustDesk-Einstellungen für diese Organisation konnten nicht abgerufen werden."
   sites:
     title: "Standorte"
     description: "OpenUEM unterstützt Multi-Tenancy, sodass Sie verschiedene Organisationen verwalten können. Eine Organisation kann einen oder mehrere Standorte haben, in denen Endgeräte gruppiert sind"
@@ -1345,13 +1340,13 @@ de:
     import_error_wrong_format: "Die CSV-Zeile %d hat ein falsches Format"
     import_required: "Feld %s in Zeile %d ist erforderlich und darf nicht leer sein"
     import_wrong_sites: "Wir haben Fehler für die folgenden Standorte festgestellt: %s"
-    confirm_delete: Möchten Sie diese Site wirklich löschen? Alle zugehörigen Agenten und Profile werden aus der Datenbank entfernt.
+    confirm_delete: "Möchten Sie diese Site wirklich löschen? Alle zugehörigen Agenten und Profile werden aus der Datenbank entfernt."
     delete_error: "Organisation konnte nicht gelöscht werden, Grund: %s"
-    filter_by_name: Nach Name filtern...
-    filter_by_creation: Nach Erstellungsdatum filtern
-    filter_by_modification: Nach Änderungsdatum filtern
-    filter_by_default_status: Nach Standard-Status filtern
-    no_tenants: Für diese Abfrage wurden keine Mandanten gefunden
+    filter_by_name: "Nach Name filtern..."
+    filter_by_creation: "Nach Erstellungsdatum filtern"
+    filter_by_modification: "Nach Änderungsdatum filtern"
+    filter_by_default_status: "Nach Standard-Status filtern"
+    no_tenants: "Für diese Abfrage wurden keine Mandanten gefunden"
     could_not_get_agents: "Agents, die mit dieser Organisation verknüpft sind, konnten nicht abgerufen werden"
     could_not_convert_site_to_int: "Die Standort-ID: %s konnte nicht in eine Ganzzahl umgewandelt werden"
     choose_site: "Standort wählen..."
@@ -1359,7 +1354,6 @@ de:
     domain_optional: "Domain (optional)"
     could_not_find_site: "Die Site konnte nicht gefunden werden"
     could_not_find_tenant: "Die Organisation konnte nicht gefunden werden."
-
   authentication:
     title: "Authentifizierung"
     description: "Konfigurieren Sie, wie die OpenUEM-Konsole Ihre Benutzer authentifiziert und verschiedene Aspekte im Zusammenhang mit Benutzerkonten"
@@ -1377,7 +1371,7 @@ de:
     oidc_provider_description: "Wählen Sie einen OpenUEM-kompatiblen OIDC-Anbieter"
     oidc_provide_choose: "Wählen Sie Ihren Anbieter"
     oidc_url_title: "OIDC-URL"
-    oidc_url_description: "URL des OIDC-Anbieters, der Sie mit Identitätsanbietern verbindet (z. B. https://example.com/application/o/open-uem/)"
+    oidc_url_description: "URL des OIDC-Anbieters, der Sie mit Identitätsanbietern verbindet (z. B. https://example.com/application/o/open-uem/): "
     oidc_client_id_title: "OIDC-Client-ID"
     oidc_client_id_description: "Die Client-ID für Ihre OIDC-Anwendung"
     oidc_role_or_group_title: "OIDC-Rolle oder -Gruppe"
@@ -1412,7 +1406,6 @@ de:
     type: "Authentifizierungstyp"
     could_not_get_user_id: "Benutzer-ID konnte nicht aus Sitzung abgerufen werden"
     could_not_get_user_info: "Benutzerinformationen konnten nicht aus der Sitzung abgerufen werden, Grund: %s"
-
   rustdesk:
     settings_title: "RustDesk"
     settings_description: "OpenUEM kann RustDesk für Remote-Assistance-Sitzungen verwenden. RustDesk kann mithilfe der OpenUEM-Bereitstellungsoptionen auf den Endpunkten installiert werden."
@@ -1426,13 +1419,13 @@ de:
     settings_api_server_description: "Die IP-Adresse oder der Hostname Ihres RustDesk API-Servers (RustDesk Pro)"
     settings_save: "Einstellungen speichern"
     key_must_be_set: "Der Schlüssel muss gesetzt werden, wenn ein Server definiert wurde"
-    settings_not_saved: "RustDesk-Einstellungen konnten nicht gespeichert werden, Grund: %"
+    settings_not_saved: "RustDesk-Einstellungen konnten nicht gespeichert werden, Grund: %s"
     settings_saved: "RustDesk-Einstellungen wurden gespeichert"
     remote_description: "Wenn RustDesk sowohl auf dem Remote-Computer als auch auf dem Computer, von dem aus Support geleistet wird, installiert ist und das RustDesk-Protokoll auf dem Computer des Technikers registriert wurde, kann eine RustDesk-Sitzung unabhängig vom Standort beider Computer gestartet werden."
     could_not_prepare_request: "Die Anforderung zum Konfigurieren und Starten von RustDesk im Remote-Endpunkt konnte nicht vorbereitet werden. Grund: %v"
     could_not_send_request: "Die Anfrage an die Konfiguration konnte nicht gesendet und RustDesk im Remote-Endpunkt gestartet werden, Grund: %v"
     could_not_decode_response: "Endpunktantwort konnte nicht deserialisiert werden"
-    remote_error: "Beim Starten von RustDesk auf dem Remotecomputer ist beim Agenten ein Fehler aufgetreten, Grund: %v"    
+    remote_error: "Beim Starten von RustDesk auf dem Remotecomputer ist beim Agenten ein Fehler aufgetreten, Grund: %s"    
     rustdesk_ready: "Der Remote-RustDesk-Client ist bereit"
     remote_stop_error: "Der Agent konnte RustDesk im Remote-Endpunkt nicht stoppen, Grund: %v"
     settings_direct_ip_access_title: "Direkter IP-Zugriff"
@@ -1461,7 +1454,6 @@ de:
     apply_global_settings: "Globale RustDesk-Einstellungen anwenden"
     rustdesk_flatpak_wayland: "Auf dem Remote-Endpunkt ist eine RustDesk-App mit Flatpak auf einem Wayland-Display installiert. Die App kann nicht remote geöffnet werden, da der Benutzer angeben muss, welcher Bildschirm verwendet werden soll. Bitte informieren Sie Ihren Benutzer, dass er zuerst die RustDesk-Anwendung öffnen muss."
     rustdesk_check_warn: "Es wird empfohlen, den Agenten zu zwingen, einen Bericht zu senden, wenn einige Prüfungen als fehlgeschlagen angezeigt werden oder ein NATS-Fehler angezeigt wird"
-
   countries:
     Australia: "Australien"
     Austria: "Österreich"
