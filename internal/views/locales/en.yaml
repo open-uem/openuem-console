@@ -20,8 +20,8 @@ en:
   Connect: "Connect"
   Create: "Create"
   Dashboard: "Dashboard"
-  DateFrom: From
-  DateTo: To
+  DateFrom: "From"
+  DateTo: "To"
   DefaultTenant: "Default Organization"
   DefaultSite: "Default Site"
   Delete: "Delete"
@@ -123,7 +123,7 @@ en:
   UpdatedNo: "Not Updated"
   UpdateAll: "Update all"
   UpdateSelected: "Update selected"
-  Updated at: Updated at %s
+  Updated at: "Updated at %s"
   Updates: "Updates"
   Upload: "Upload"
   User:
@@ -327,9 +327,9 @@ en:
     nickname_cannot_be_empty: "The endpoint name cannot be empty"
     nickname_not_saved: "The endpoint name could not be saved, reason: %s"
     rustdesk: "Initiate a RustDesk session"
-    rustdesk_found: "RustDesk is installed on the endpoint"   
+    rustdesk_found: "RustDesk is installed on the endpoint"
     rustdesk_not_found: "The RustDesk binary was not found on the endpoint"
-    rustdesk_settings: "There are RustDesk settings for this organization"         
+    rustdesk_settings: "There are RustDesk settings for this organization"
     no_rustdesk_settings: "There are no RustDesk settings for this organization, proceed anyway"
     vnc_certs: "The agent reported that it has a valid certificate to encrypt VNC traffic"
     rdp_certs: "The agent reported that it has a valid certificate to encrypt RDP traffic"
@@ -337,7 +337,6 @@ en:
     no_rdp_certs: "The agent hasn't reported that it has a digital certificate to encrypt RDP traffic. Force a new report or regenerate certificates from the actions menu"
     vnc_server_installed: "%s is installed on the endpoint"
     vnc_host_resolved: "The remote hostname seems to be resolved by DNS"
-
   inventory:
     hardware:
       title: "Hardware"
@@ -405,7 +404,7 @@ en:
       title: "File Browser"
       description: "Browse this logical drive remotely using SFTP. Click on the three dots icon to open an actions dropdown. Also you can use the icons bar to move to an upper folder, add a new folder, refresh the folder, upload a file, download many elements as a ZIP file or delete many elements after you select them"
       folder_name: "Folder's name..."
-      current_folder: "Current Folder:"
+      current_folder: "Current Folder: "
       empty_folder: "This folder is empty!"
       open_folder: "Open Folder"
       new_name: "New name..."
@@ -447,7 +446,6 @@ en:
       installation_date: "Installation"
       no_apps: "No apps were found for this query"
       report_title: "App %s"
-
   apps:
     title: "Apps"
     description: "These are the applications found in your organization as reported by OpenUEM agents"
@@ -574,24 +572,24 @@ en:
     certificate_requested: "A client certificate has been requested for this user"
     deleted: "User has been deleted"
     edit:
-      title: Edit User
-      description: Edit this user's profile
-      success: User's profile has been updated
-    no_users: No users have been found
-    filter_by_username: Filter by username...
-    filter_by_name: Filter by name...
-    filter_by_email: Filter by email...
-    filter_by_phone: Filter by phone...
-    filter_by_creation: Filter by creation date
-    filter_by_modification: Filter by modification date
-    filter_by_register_status: Filter by registration status
-    csv_file: CSV File
-    csv_description: Upload a comma-separated values file with no header row and rows using the following format 'userid,fullname,email,country,phone,oidc'. Country is a two-letter ISO 3166 Alpha-2 code like 'es'. OIDC must be 'true' if OAuth is to be used; otherwise, use 'false'. All fields are optional except userid and email
-    import_success: Users file has been received and be processed shortly
-    import_error_wrong_format: The CSV row %d has a wrong format
-    import_required: Field %s in row %d is required and cannot be empty
-    import_wrong_country: Country %s in row %d must be a valid two letter ISO3166 Alpha2 code
-    import_wrong_email: Email in row %d must be a valid address
+      title: "Edit User"
+      description: "Edit this user's profile"
+      success: "User's profile has been updated"
+    no_users: "No users have been found"
+    filter_by_username: "Filter by username..."
+    filter_by_name: "Filter by name..."
+    filter_by_email: "Filter by email..."
+    filter_by_phone: "Filter by phone..."
+    filter_by_creation: "Filter by creation date"
+    filter_by_modification: "Filter by modification date"
+    filter_by_register_status: "Filter by registration status"
+    csv_file: "CSV File"
+    csv_description: "Upload a comma-separated values file with no header row and rows using the following format 'userid,fullname,email,country,phone,oidc'. Country is a two-letter ISO 3166 Alpha-2 code like 'es'. OIDC must be 'true' if OAuth is to be used; otherwise, use 'false'. All fields are optional except userid and email"
+    import_success: "Users file has been received and be processed shortly"
+    import_error_wrong_format: "The CSV row %d has a wrong format"
+    import_required: "Field %s in row %d is required and cannot be empty"
+    import_wrong_country: "Country %s in row %d must be a valid two letter ISO3166 Alpha2 code"
+    import_wrong_email: "Email in row %d must be a valid address"
     import_wrong_users: "We encountered errors for the following users: %s"
     import_wrong_oidc: "OpenID Connect value in row %d must be true or false"
     admin_cannot_be_removed: "The admin user cannot be removed"
@@ -611,7 +609,7 @@ en:
     history: "Recent Updates"
   updates_history:
     title: "Updates History"
-    description: "This is the history of the most recent updates applied to this computer as reported by the OpeUEM Agent"
+    description: "This is the history of the most recent updates applied to this computer as reported by the OpenUEM Agent"
     update_title: "Description"
     date: "Installation Date"
     support_url: "Support URL"
@@ -663,7 +661,7 @@ en:
     no_metadata: "No metadata for your org has been defined yet"
     new: "New metadata name..."
     optional_description: "Optional description..."
-    confirm_delete: "Are you sure that you want to remove this metadata, note that this operation is destructive and will remove any existing metadata value associated to the endpoings managed by OpenUEM"
+    confirm_delete: "Are you sure that you want to remove this metadata, note that this operation is destructive and will remove any existing metadata value associated to the endpoints managed by OpenUEM"
     edit: "Edit the metadata name and/or description according to your needs"
   certificates:
     title: "Certificates"
@@ -674,150 +672,150 @@ en:
     filter_by_description: "Filter by description..."
     filter_by_types: "Filter by certificate type..."
     filter_by_expiry: "Filter by expiration date..."
-    confirm_revocation: "Confirm that you want to revocate this certificate. This action is irreversible and this certificate will no longer be valid for authentication"
+    confirm_revocation: "Confirm that you want to revoke this certificate. This action is irreversible and this certificate will no longer be valid for authentication"
     revocation_success: "The certificate has been revoked"
     no_serial: "No certificate serial number was found in the request"
     no_certificates: "No certificates have been found for this request"
   smtp:
-    title: SMTP
+    title: "SMTP"
     description: "Configure your SMTP provider in order to send email notifications."
-    server_fieldset: SMTP Server
-    server: Server
-    server_placeholder: Your SMTP server name...
-    port: Port
-    port_placeholder: Your SMTP server port...
-    auth_fieldset: SMTP Authentication
-    user: User
-    user_placeholder: Your SMTP auth user
-    password: Password
-    password_placeholder: Your SMTP password...
-    auth_type: Auth Type
-    from_fieldset: Mail From
-    from_placeholder: Email address...
-    id_cannot_be_empty: Settings ID cannot be empty
-    id_invalid: Settings ID is not valid
-    server_invalid: Server is not valid
-    server_cannot_be_empty: Server cannot be empty
-    port_invalid: Port is not valid
-    port_cannot_be_empty: Port cannot be empty
-    auth_invalid: Auth type is not valid
-    mailfrom_cannot_be_empty: Mail From cannot be empty
-    mailfrom_invalid: Mail From is not valid
-    saved: SMTP Settings saved!
-    test: Test settings
-    test_success: Email test was sent successfully to %s!
+    server_fieldset: "SMTP Server"
+    server: "Server"
+    server_placeholder: "Your SMTP server name..."
+    port: "Port"
+    port_placeholder: "Your SMTP server port..."
+    auth_fieldset: "SMTP Authentication"
+    user: "User"
+    user_placeholder: "Your SMTP auth user"
+    password: "Password"
+    password_placeholder: "Your SMTP password..."
+    auth_type: "Auth Type"
+    from_fieldset: "Mail From"
+    from_placeholder: "Email address..."
+    id_cannot_be_empty: "Settings ID cannot be empty"
+    id_invalid: "Settings ID is not valid"
+    server_invalid: "Server is not valid"
+    server_cannot_be_empty: "Server cannot be empty"
+    port_invalid: "Port is not valid"
+    port_cannot_be_empty: "Port cannot be empty"
+    auth_invalid: "Auth type is not valid"
+    mailfrom_cannot_be_empty: "Mail From cannot be empty"
+    mailfrom_invalid: "Mail From is not valid"
+    saved: "SMTP Settings saved!"
+    test: "Test settings"
+    test_success: "Email test was sent successfully to %s!"
   settings:
-    title: General Settings
-    description: OpenUEM has some settings that configure its behavior.
+    title: "General Settings"
+    description: "OpenUEM has some settings that configure its behavior."
     global: "These are OpenUEM global settings which are inherited by organizations. Use the organization drop-down menu to change its settings"
-    tenant: "This are the specific settings for this organization. This settings are inherited from the global config, but you can override them or you can use the button to apply the global settings again"
-    country_title: Country
-    country_description: Default country for user registration
-    nats_timeout_title: NATS Timeout
-    nats_timeout_description: Default NATS request timeout in seconds
-    max_upload_title: Max Upload Size
-    max_upload_description: Max upload size for files expressed in GB (G), MB (M) or KB (K)
-    user_cert_years_title: User cert duration
-    user_cert_years_description: The duration in years of the user certificate
-    id_cannot_be_empty: Settings ID cannot be empty
-    id_invalid: Settings ID is not valid
-    country_invalid: Country ID is not valid
-    cert_years_invalid: Number of years for user certificate is not valid
-    nats_timeout_invalid: NATS timeout is not valid
-    max_upload_size_invalid: Max Upload Size is not valid
-    saved: General Settings saved!
-    reload: This setting has been saved, but the console service must be restarted by hand for it to take effect
-    refresh_title: Automatic Refresh
-    refresh_description: Some pages refresh automatically. Set the refresh period in minutes
-    refresh_invalid: Refresh time is not valid
-    session_lifetime_title: Session Lifetime
-    session_lifetime_description: Session lifetime in minutes. Once that time expires the session will be closed
-    session_lifetime_invalid: Session lifetime is not valid
-    update_channel_title: Updates channel
-    update_channel_description: Channel used to check and download OpenUEM's updates
-    update_channel_invalid: Channel is not valid
-    agent_frequency_title: Agents report frequency
-    agent_frequency_description: Agents will send new reports periodically according to the frequence set in minutes
-    agent_frequency_invalid: Agent report frequency is not valid
-    agent_frequency_success: A new frequency has been communicated to the agents
-    agent_frequency_could_not_be_saved: The new frequency could not be saved to the database
-    agent_frequency_error: The new frequency cannot be communicated to the agents now, retry later
-    request_pin_title: Request VNC PIN to user
-    request_pin_description: When a VNC session starts, it's required to ask the user the PIN that is shown in the screen
-    request_pin_invalid: The chosen option is not valid
-    request_pin_could_not_be_saved: PIN request option could not be saved to the database
-    request_pin_could_not_be_read: Request PIN option could not be read from database
-    add_tag_admitted_title: Add a tag to admitted agents
-    add_tag_admitted_description: When an agent is admitted add the following tag to it automatically. Use empty option to avoid tagging
-    add_tag_select: Select a tag
-    add_tag_admitted_could_not_be_saved: The tag associated to a recently admitted agent could not be saved
-    add_tag_admitted_could_not_be_cleared: Could not unassign the tag for recently admitted agents
-    add_tag_invalid: The tag id is not valid
-    winget_configure_frequency_title: Profile application frequency
-    winget_configure_frequency_description: "Agents will apply endpoints profiles according to the frequence set in minutes (minimum value 30)"
-    winget_configure_frequency_success: A new frequency has been communicated to the agents
-    winget_configure_frequency_could_not_be_saved: The new frequency could not be saved to the database
-    winget_configure_frequency_invalid: Selected frequency is not valid
-    winget_configure_frequency_error: The new frequency cannot be communicated to the agents now, retry later
-    use_winget_title: Use WinGet
-    use_winget_description: Use WinGet to search and install new Windows packages
-    use_winget_success: WinGet setting has been saved
-    use_winget_invalid: Selected value for use winget is not valid
-    use_winget_could_not_be_saved: Use winget value could not be saved
-    use_flatpak_title: Use Flatpak
-    use_flatpak_description: Use Flatpak to search and install new Linux packages
-    use_flatpak_success: Flatpak setting has been saved
-    use_flatpak_invalid: Selected value for use flatpak is not valid
-    use_flatpak_could_not_be_saved: Use flatpak value could not be saved
-    use_brew_title: Use Brew
-    use_brew_description: Use Brew to search and install new MacOS packages
-    use_brew_success: Brew setting has been saved
-    use_brew_invalid: Selected value for use brew is not valid
-    use_brew_could_not_be_saved: Use brew value could not be saved
-    disable_sftp_title: Disable SFTP
-    disable_sftp_description: SFTP is disabled globally for every agent
-    disable_sftp_success: SFTP setting has been saved
-    disable_sftp_invalid: Selected value for SFTP service is not valid
-    disable_sftp_could_not_be_saved: SFTP service settings could not be saved
-    disable_sftp_error: The new SFTP service settings cannot be communicated to the agents now, retry later
-    disable_sftp_to_all: Could not update SFTP setting to all agents
-    could_not_get_sftp_general_setting: Could not get SFTP general setting
-    disable_remote_assistance_title: Disable Remote Assistance
-    disable_remote_assistance_description: Remote Assistance is disabled globally for every agent
-    disable_remote_assistance_success: Remote Assistance setting has been saved
-    disable_remote_assistance_invalid: Selected value for Remote Assistance is not valid
-    disable_remote_assistance_could_not_be_saved: Remote Assistance setting could not be saved
-    disable_remote_assistance_error: The new Remote Assistance setting cannot be communicated to the agents now, retry later
-    disable_remote_assistance_to_all: Could not update remote assistance setting to all agents
-    detect_remote_agents_title: Detect remote agents
-    detect_remote_agents_description: OpenUEM will mark as remote agents to those agents with a reported IP address that doesn't match the IP address resolved by DNS
-    detect_remote_agents_success: Detect remote agents setting has been saved
-    detect_remote_agents_invalid: Selected value for Detect remote agents is not valid
-    detect_remote_agents_could_not_be_saved: Detect remote agents setting could not be saved
-    could_not_get_detect_remote_agents_setting: Could not get Detect remote agents general setting
-    auto_admit_agents_title: Admit agents automatically
-    auto_admit_agents_description: OpenUEM will admit automatically agents without waiting for the admin to admit them. Note that you'll have to request to generate certificates for the agent from the agent's actions menu if you want to connect using SFTP or VNC/RDP
-    auto_admit_agents_success: The admit agents automatically setting has been saved
-    auto_admit_agents_invalid: Selected value for admit agents automatically is not valid
-    auto_admit_agents_could_not_be_saved: Admit agents automatically setting could not be saved
-    could_not_get_auto_admit_agents_setting: Could not update admit agents automatically setting
+    tenant: "These are the specific settings for this organization. These settings are inherited from the global config, but you can override them or you can use the button to apply the global settings again"
+    country_title: "Country"
+    country_description: "Default country for user registration"
+    nats_timeout_title: "NATS Timeout"
+    nats_timeout_description: "Default NATS request timeout in seconds"
+    max_upload_title: "Max Upload Size"
+    max_upload_description: "Max upload size for files expressed in GB (G), MB (M) or KB (K)"
+    user_cert_years_title: "User cert duration"
+    user_cert_years_description: "The duration in years of the user certificate"
+    id_cannot_be_empty: "Settings ID cannot be empty"
+    id_invalid: "Settings ID is not valid"
+    country_invalid: "Country ID is not valid"
+    cert_years_invalid: "Number of years for user certificate is not valid"
+    nats_timeout_invalid: "NATS timeout is not valid"
+    max_upload_size_invalid: "Max Upload Size is not valid"
+    saved: "General Settings saved!"
+    reload: "This setting has been saved, but the console service must be restarted by hand for it to take effect"
+    refresh_title: "Automatic Refresh"
+    refresh_description: "Some pages refresh automatically. Set the refresh period in minutes"
+    refresh_invalid: "Refresh time is not valid"
+    session_lifetime_title: "Session Lifetime"
+    session_lifetime_description: "Session lifetime in minutes. Once that time expires the session will be closed"
+    session_lifetime_invalid: "Session lifetime is not valid"
+    update_channel_title: "Updates channel"
+    update_channel_description: "Channel used to check and download OpenUEM's updates"
+    update_channel_invalid: "Channel is not valid"
+    agent_frequency_title: "Agents report frequency"
+    agent_frequency_description: "Agents will send new reports periodically according to the frequency set in minutes"
+    agent_frequency_invalid: "Agent report frequency is not valid"
+    agent_frequency_success: "A new frequency has been communicated to the agents"
+    agent_frequency_could_not_be_saved: "The new frequency could not be saved to the database"
+    agent_frequency_error: "The new frequency cannot be communicated to the agents now, retry later"
+    request_pin_title: "Request VNC PIN to user"
+    request_pin_description: "When a VNC session starts, it's required to ask the user the PIN that is shown in the screen"
+    request_pin_invalid: "The chosen option is not valid"
+    request_pin_could_not_be_saved: "PIN request option could not be saved to the database"
+    request_pin_could_not_be_read: "Request PIN option could not be read from database"
+    add_tag_admitted_title: "Add a tag to admitted agents"
+    add_tag_admitted_description: "When an agent is admitted add the following tag to it automatically. Use empty option to avoid tagging"
+    add_tag_select: "Select a tag"
+    add_tag_admitted_could_not_be_saved: "The tag associated to a recently admitted agent could not be saved"
+    add_tag_admitted_could_not_be_cleared: "Could not unassign the tag for recently admitted agents"
+    add_tag_invalid: "The tag id is not valid"
+    winget_configure_frequency_title: "Profile application frequency"
+    winget_configure_frequency_description: "Agents will apply endpoints profiles according to the frequency set in minutes (minimum value 30)"
+    winget_configure_frequency_success: "A new frequency has been communicated to the agents"
+    winget_configure_frequency_could_not_be_saved: "The new frequency could not be saved to the database"
+    winget_configure_frequency_invalid: "Selected frequency is not valid"
+    winget_configure_frequency_error: "The new frequency cannot be communicated to the agents now, retry later"
+    use_winget_title: "Use WinGet"
+    use_winget_description: "Use WinGet to search and install new Windows packages"
+    use_winget_success: "WinGet setting has been saved"
+    use_winget_invalid: "Selected value for use winget is not valid"
+    use_winget_could_not_be_saved: "Use winget value could not be saved"
+    use_flatpak_title: "Use Flatpak"
+    use_flatpak_description: "Use Flatpak to search and install new Linux packages"
+    use_flatpak_success: "Flatpak setting has been saved"
+    use_flatpak_invalid: "Selected value for use flatpak is not valid"
+    use_flatpak_could_not_be_saved: "Use flatpak value could not be saved"
+    use_brew_title: "Use Brew"
+    use_brew_description: "Use Brew to search and install new MacOS packages"
+    use_brew_success: "Brew setting has been saved"
+    use_brew_invalid: "Selected value for use brew is not valid"
+    use_brew_could_not_be_saved: "Use brew value could not be saved"
+    disable_sftp_title: "Disable SFTP"
+    disable_sftp_description: "SFTP is disabled globally for every agent"
+    disable_sftp_success: "SFTP setting has been saved"
+    disable_sftp_invalid: "Selected value for SFTP service is not valid"
+    disable_sftp_could_not_be_saved: "SFTP service settings could not be saved"
+    disable_sftp_error: "The new SFTP service settings cannot be communicated to the agents now, retry later"
+    disable_sftp_to_all: "Could not update SFTP setting to all agents"
+    could_not_get_sftp_general_setting: "Could not get SFTP general setting"
+    disable_remote_assistance_title: "Disable Remote Assistance"
+    disable_remote_assistance_description: "Remote Assistance is disabled globally for every agent"
+    disable_remote_assistance_success: "Remote Assistance setting has been saved"
+    disable_remote_assistance_invalid: "Selected value for Remote Assistance is not valid"
+    disable_remote_assistance_could_not_be_saved: "Remote Assistance setting could not be saved"
+    disable_remote_assistance_error: "The new Remote Assistance setting cannot be communicated to the agents now, retry later"
+    disable_remote_assistance_to_all: "Could not update remote assistance setting to all agents"
+    detect_remote_agents_title: "Detect remote agents"
+    detect_remote_agents_description: "OpenUEM will mark as remote agents to those agents with a reported IP address that doesn't match the IP address resolved by DNS"
+    detect_remote_agents_success: "Detect remote agents setting has been saved"
+    detect_remote_agents_invalid: "Selected value for Detect remote agents is not valid"
+    detect_remote_agents_could_not_be_saved: "Detect remote agents setting could not be saved"
+    could_not_get_detect_remote_agents_setting: "Could not get Detect remote agents general setting"
+    auto_admit_agents_title: "Admit agents automatically"
+    auto_admit_agents_description: "OpenUEM will admit automatically agents without waiting for the admin to admit them. Note that you'll have to request to generate certificates for the agent from the agent's actions menu if you want to connect using SFTP or VNC/RDP"
+    auto_admit_agents_success: "The admit agents automatically setting has been saved"
+    auto_admit_agents_invalid: "Selected value for admit agents automatically is not valid"
+    auto_admit_agents_could_not_be_saved: "Admit agents automatically setting could not be saved"
+    could_not_get_auto_admit_agents_setting: "Could not update admit agents automatically setting"
     apply_global: "Apply global settings"
     could_not_apply_global_settings: "Could not apply global settings, reason: %s"
   restore:
-    title: Restore
-    description: Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong
-    agent_rollback_title: Restore agentes
-    agent_rollback_description: If the agents don't work fine after an update that you applied on demand and you need to roll back to the previous version. This applies to all agents
-    messenger_rollback_title: Restore Messenger
-    messenger_rollback_description: Messenger shows message to users and is updated automatically as soon as a new version is ready. If needed you can roll back
-    updater_rollback_title: Restore Updater
-    updater_rollback_description: The updater is responsible of updating the agents (on demand) and Messenger (automatically). This updater is automatically updated if a new version is available. If needed you can roll back
-    database_title: Restore database
-    database_description: If you need to remove from the database the agents and their associated information while keeping the users that can log in the console and the certificates information
-    confirm_restore: Are you sure that you want to perform this restore action? This action is irreversible
+    title: "Restore"
+    description: "Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong"
+    agent_rollback_title: "Restore agents"
+    agent_rollback_description: "If the agents don't work fine after an update that you applied on demand and you need to roll back to the previous version. This applies to all agents"
+    messenger_rollback_title: "Restore Messenger"
+    messenger_rollback_description: "Messenger shows message to users and is updated automatically as soon as a new version is ready. If needed you can roll back"
+    updater_rollback_title: "Restore Updater"
+    updater_rollback_description: "The updater is responsible of updating the agents (on demand) and Messenger (automatically). This updater is automatically updated if a new version is available. If needed you can roll back"
+    database_title: "Restore database"
+    database_description: "If you need to remove from the database the agents and their associated information while keeping the users that can log in the console and the certificates information"
+    confirm_restore: "Are you sure that you want to perform this restore action? This action is irreversible"
     restore_requested: "The restoration request has been sent to all alive agents"
-    confirm_delete_database: Are you sure that you want to delete all the tables containing agents and their information?
-    delete_database_requested: The information has been deleted
+    confirm_delete_database: "Are you sure that you want to delete all the tables containing agents and their information?"
+    delete_database_requested: "The information has been deleted"
   notes:
     updated: "Notes have been updated"
     no_notes: "Add a note..."
@@ -836,7 +834,7 @@ en:
     disabled: "Automatic updates are disabled"
     notify_before_download: "Updates are downloaded and installed by user intervention"
     notify_before_installation: "Updates are installed by user intervention"
-    notify_scheduled_installation: "Updates are downloaded an installed automatically"
+    notify_scheduled_installation: "Updates are downloaded and installed automatically"
     filter_by_last_search: "Filter by last updates search"
     filter_by_last_install: "Filter by last updates installation"
     filter_by_pendingupdate: "Filter by pending updates status"
@@ -857,8 +855,8 @@ en:
         current: "Up-to-date Version"
         critical: "Critical Update"
         available: "Update Available"
-        confirm_update_selected: "Do you want to continue updating the selected agents to versión %s?"
-        confirm_update_all: "Do you want to continue updating ALL selected agents to versión %s?"
+        confirm_update_selected: "Do you want to continue updating the selected agents to version %s?"
+        confirm_update_all: "Do you want to continue updating ALL selected agents to version %s?"
         confirm_specify_when: "If you wish, you can specify the day and time that you want the agents to install the update, otherwise the update will start as soon as possible"
         confirm_rollback_all: "Do you want to continue rolling back ALL selected agents to the previous running version?"
         confirm_rollback_when: "If you wish, you can specify the day and time that you want the agents to perform the roll back, otherwise the roll back will start as soon as possible"
@@ -924,30 +922,30 @@ en:
         could_not_parse_server_id: "The server id could not be parsed"
         could_not_delete: "The server could not be deleted, reason: %s"
   dashboard:
-    outdated_agents: Agents running outdated versions
-    no_auto_update: Endpoints that doesn't download/install system updates automatically
-    pending_update_agents: Endpoints with pending system updates
-    disabled_antivirus: Endpoints without an active antivirus system
-    outdated_antivirus: Endpoints running outdated virus databases
-    nats_server_status: NATS Server status
-    openuem_updater_api_status: OpenUEM Updater API status
-    agent_worker_status: Agent Worker status
-    notification_worker_status: Notification Worker status
-    cert_manager_worker_status: Cert Manager Worker status
-    vnc: Endpoints that support VNC connection
-    num_vendor: Number of different equipment vendors
-    num_printers: Number of different printers found
-    num_applied_tags: Number of tags applied
-    num_disabled_agents: Disabled agents
-    num_waiting_for_admission: Agents waiting for admission
-    num_apps_found: Applications found
-    num_deployments: Software deployments performed using OpenUEM
-    num_openuem_users: Number of OpenUEM users
-    num_sessions: Number of sessions opened in the console
-    num_os_users: Number of users with and endpoint assigned
-    no_reported_in_last_24h: Agents that haven't reported in the last 24h
-    num_upgradable_agents: Agents that can be upgraded
-    certificates_to_expire: Certificates that expires in two months
+    outdated_agents: "Agents running outdated versions"
+    no_auto_update: "Endpoints that doesn't download/install system updates automatically"
+    pending_update_agents: "Endpoints with pending system updates"
+    disabled_antivirus: "Endpoints without an active antivirus system"
+    outdated_antivirus: "Endpoints running outdated virus databases"
+    nats_server_status: "NATS Server status"
+    openuem_updater_api_status: "OpenUEM Updater API status"
+    agent_worker_status: "Agent Worker status"
+    notification_worker_status: "Notification Worker status"
+    cert_manager_worker_status: "Cert Manager Worker status"
+    vnc: "Endpoints that support VNC connection"
+    num_vendor: "Number of different equipment vendors"
+    num_printers: "Number of different printers found"
+    num_applied_tags: "Number of tags applied"
+    num_disabled_agents: "Disabled agents"
+    num_waiting_for_admission: "Agents waiting for admission"
+    num_apps_found: "Applications found"
+    num_deployments: "Software deployments performed using OpenUEM"
+    num_openuem_users: "Number of OpenUEM users"
+    num_sessions: "Number of sessions opened in the console"
+    num_os_users: "Number of users with an endpoint assigned"
+    no_reported_in_last_24h: "Agents that haven't reported in the last 24h"
+    num_upgradable_agents: "Agents that can be upgraded"
+    certificates_to_expire: "Certificates that expires in two months"
   nats:
     not_connected: "This action cannot be executed now, we're not connected to the NATS server, please try again in a few minutes"
     no_responder: "The agent did not receive the request, maybe it's not running or there's a communication issue, please try again in a few minutes"
@@ -1086,7 +1084,7 @@ en:
     local_group_members_to_include: "Members to include in the group"
     introduce_local_group_members_to_include: "List of usernames that you want to add to the group separated by ; (user1;user2) ..."
     local_group_members_to_exclude: "Members to exclude from the group"
-    introduce_local_group_members_to_exclude: "List of usernames that you want to remove from the grupo separated by ;  (user1;user2)..."
+    introduce_local_group_members_to_exclude: "List of usernames that you want to remove from the group separated by ; (user1;user2)..."
     local_group_name_is_required: "The name of the group is required"
     local_group_description_is_required: "The description of the group is required"
     local_group_members_included_and_members_exclusive: "You cannot specify both members and members to include as these are mutually exclusive"
@@ -1137,14 +1135,14 @@ en:
     local_user_password_description: "SHA512 will be generated when saved..."
     local_user_password_confirm: "Confirm password"
     local_user_password_confirm_description: "Confirm password..."
-    introduce_local_user_group_description: "Sets the user’s primary group, it must exists..."
+    introduce_local_user_group_description: "Sets the user's primary group, it must exists..."
     introduce_local_user_groups_description: "Sets the supplementary groups (must exist), comma separated list..."
     local_user_home_description: "User's home directory (optional)"
-    introduce_local_user_home_description: "Optionally set the user’s home directory..."
+    introduce_local_user_home_description: "Optionally set the user's home directory..."
     local_user_skeleton_description: "Home skeleton directory (optional)"
     introduce_local_user_skeleton_description: "Optionally set a home skeleton directory..."
     local_user_shell_description: "User's shell (optional)"
-    introduce_local_user_shell_description: "Optionally set the user’s shell..."
+    introduce_local_user_shell_description: "Optionally set the user's shell..."
     local_user_system: "System account"
     local_user_expires_description: "Expires (optional)"
     local_user_password_lock: "Lock password"
@@ -1219,7 +1217,6 @@ en:
     apt_update: "Update package"
     apt_update_all: "Update all packages"
     apt_upgrade_os: "Upgrade OS"
-
     new:
       title: "New task"
       name: "Task description"
@@ -1254,7 +1251,6 @@ en:
   packages:
     required_params_missing: "Required params are missing"
     source_not_found: "Could not find the associated package manager"
-
   tenants:
     title: "Organizations"
     description: "OpenUEM supports multi-tenancy so you can manage different organizations. An organization can have one or more sites where endpoints are grouped. A default organization is created with a default site where endpoints are added if no organization and/or site is configured for the agent"
@@ -1282,7 +1278,7 @@ en:
     default_cannot_be_deleted: "The selected organization is the default organization, please choose another organization as default before removing this one"
     could_not_count_tenants: "Could not count existing organizations"
     new_title: "New organization"
-    new_description: "Create a new organization giving it a name and choose if this organization will be the default organization associated with and endpoint. Every organization must have one associated site that will be created automatically, so add a name for that initial site too"
+    new_description: "Create a new organization giving it a name and choose if this organization will be the default organization associated with an endpoint. Every organization must have one associated site that will be created automatically, so add a name for that initial site too"
     new_success: "The organization was created"
     new_error: "Could not create the new organization, reason: %s"
     site_name_cannot_be_empty: "The site name cannot be empty"
@@ -1295,15 +1291,14 @@ en:
     import_wrong_tenants: "We encountered errors for the following tenants: %s"
     confirm_delete: "Are you sure that you want to delete this organization? All the associated agents, profiles, tags, metadata and other settings will be removed from the database"
     delete_error: "Could not delete the organization, reason: %s"
-    filter_by_name: Filter by name...
-    filter_by_creation: Filter by creation date
-    filter_by_modification: Filter by modification date
-    filter_by_default_status: Filter by default status
-    no_tenants: No tenants have been found for this query
+    filter_by_name: "Filter by name..."
+    filter_by_creation: "Filter by creation date"
+    filter_by_modification: "Filter by modification date"
+    filter_by_default_status: "Filter by default status"
+    no_tenants: "No tenants have been found for this query"
     could_not_get_agents: "Could not get agents associated with this organization"
-    could_not_get_rustdesk_settings: "Could not get RustDesk settings associated with this organization"    
-    could_not_get_global_rustdesk_settings: "Could not get global RustDesk settings associated with this organization"    
-
+    could_not_get_rustdesk_settings: "Could not get RustDesk settings associated with this organization"
+    could_not_get_global_rustdesk_settings: "Could not get global RustDesk settings associated with this organization"
   sites:
     title: "Sites"
     description: "OpenUEM supports multi-tenancy so you can manage different organizations. An organization can have one or more sites where endpoints are grouped"
@@ -1315,7 +1310,7 @@ en:
     created: "Created at"
     modified: "Modified at"
     edit_title: "Edit site"
-    edit_description: "Change the site's name, or choose if this site will be the default organization where agents are grouped by default if agent has no information about where it should be added. Note that and organization requires that at least one and at most one site is selected as default"
+    edit_description: "Change the site's name, or choose if this site will be the default site where agents are grouped by default if agent has no information about where it should be added. Note that an organization requires that at least one and at most one site is selected as default"
     edit_description_vnc: "If you intend to use the remote assistance with VNC or RDP in a local area network, add the domain (e.g. example.com) that will be used as the DNS suffix that will be used to resolve the agent's name in your network"
     edit_success: "The site has been modified"
     tenant_cannot_be_empty: "The organization ID cannot be empty"
@@ -1333,7 +1328,7 @@ en:
     default_cannot_be_deleted: "The selected site is the default site, please choose another site as default before removing this one"
     could_not_count_sites: "Could not count existing sites"
     new_title: "New site"
-    new_description: "Create a new site giving it a name and choose if this site will be the default site associated with and endpoint that has no org and site config"
+    new_description: "Create a new site giving it a name and choose if this site will be the default site associated with an endpoint that has no org and site config"
     new_description_vnc: "If you intend to use the remote assistance with VNC or RDP in a local area network, add the domain (e.g. example.com) that will be used as the DNS suffix that will be used to resolve the agent's name in your network"
     new_success: "The site was created"
     new_error: "Could not create the new site, reason: %s"
@@ -1346,23 +1341,22 @@ en:
     import_required: "Field %s in row %d is required and cannot be empty"
     import_wrong_sites: "We encountered errors for the following sites: %s"
     confirm_delete: "Are you sure that you want to delete this site? All the associated agents and profiles will be removed from the database"
-    delete_error: "Could not delete the organization, reason: %s"
-    filter_by_name: Filter by name...
-    filter_by_creation: Filter by creation date
-    filter_by_modification: Filter by modification date
-    filter_by_default_status: Filter by default status
-    no_tenants: No tenants have been found for this query
-    could_not_get_agents: "Could not get agents associated with this organization"
+    delete_error: "Could not delete the site, reason: %s"
+    filter_by_name: "Filter by name..."
+    filter_by_creation: "Filter by creation date"
+    filter_by_modification: "Filter by modification date"
+    filter_by_default_status: "Filter by default status"
+    no_tenants: "No tenants have been found for this query"
+    could_not_get_agents: "Could not get agents associated with this site"
     could_not_convert_site_to_int: "The site ID: %s could not be converted to an int"
     choose_site: "Choose a site..."
     domain: "Domain"
     domain_optional: "Domain (optional)"
     could_not_find_site: "Could not find the site"
     could_not_find_tenant: "Could not find the organization"
-
   authentication:
     title: "Authentication"
-    description: "Configure how OpenUEM console authenticates your users and severals aspects related to user accounts"
+    description: "Configure how OpenUEM console authenticates your users and several aspects related to user accounts"
     could_not_get_settings: "could not get authentication settings, reason: %s"
     settings_save: "Save settings"
     settings_saved: "Authentication settings have been saved"
@@ -1412,7 +1406,6 @@ en:
     type: "Authentication type"
     could_not_get_user_id: "Could not get user ID from session"
     could_not_get_user_info: "Could not get user info from session, reason: %s"
-
   rustdesk:
     settings_title: "RustDesk"
     settings_description: "OpenUEM can use RustDesk for remote assistance sessions. RustDesk can be installed on the endpoints using OpenUEM deployment options"
@@ -1426,13 +1419,13 @@ en:
     settings_api_server_description: "The IP address or hostname of your RustDesk API Server (RustDesk Pro)"
     settings_save: "Save settings"
     key_must_be_set: "The key must be set if a server has been defined"
-    settings_not_saved: "RustDesk settings could not be saved, reason: %"
+    settings_not_saved: "RustDesk settings could not be saved, reason: %s"
     settings_saved: "RustDesk settings have been saved"
     remote_description: "If RustDesk is installed on both the remote computer and the computer from which support is provided, and if the rustdesk protocol has been registered on the technician's computer, a RustDesk session can be started regardless of the location of both"
     could_not_prepare_request: "Could not prepare request to config and start RustDesk in the remote endpoint, reason: %v"
     could_not_send_request: "Could not send request to config and start RustDesk in the remote endpoint, reason: %v"
-    could_not_decode_response: "Could not unmarshall endpoint response"
-    remote_error: "Agent had an error launching RustDesk in the remote machine, reason: %v"    
+    could_not_decode_response: "Could not unmarshal endpoint response"
+    remote_error: "Agent had an error launching RustDesk in the remote machine, reason: %s"
     rustdesk_ready: "Remote RustDesk client is ready"
     remote_stop_error: "Agent could not stop RustDesk in the remote endpoint, reason: %v"
     settings_direct_ip_access_title: "Direct IP Access"
@@ -1452,16 +1445,15 @@ en:
     rustdesk_direct_ip: "IP Address (LAN): "
     rustdesk_server_pubkey: "Server pubkey: "
     rustdesk_allowed_ip: "Allowed IPs: "
-    rustdesk_relay_server: "Relay Server:"
-    rustdesk_rendezvous_server: "IDs Server:"
+    rustdesk_relay_server: "Relay Server: "
+    rustdesk_rendezvous_server: "IDs Server: "
     rustdesk_connect: "Use the following links to open the RustDesk application. These links contain all the information for establishing a connection, except for the RustDesk web client."
     rustdesk_settings: "These are the credentials and settings used for this connection, in case you need to configure your RustDesk client manually"
-    rustdesk_rollback: "OpenUEM replaces the RustDesk configuration used on your endpoint. Use the following button to close the RustDesk application on the remote computer and revert the configuration."    
+    rustdesk_rollback: "OpenUEM replaces the RustDesk configuration used on your endpoint. Use the following button to close the RustDesk application on the remote computer and revert the configuration."
     click_to_open_web_client: "Open the RustDesk web app"
     apply_global_settings: "Apply global RustDesk settings"
     rustdesk_flatpak_wayland: "Remote endpoint has a RustDesk app installed with Flatpak on a Wayland display. The app cannot be opened remotely as the user must specify which screen must be used, so please inform your user that she has to open the RustDesk application first"
     rustdesk_check_warn: "It is recommended to force the agent to send a report if some checks are shown as failed or if a NATS error is displayed"
-
   countries:
     Australia: "Australia"
     Austria: "Austria"

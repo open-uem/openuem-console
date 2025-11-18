@@ -20,10 +20,10 @@ es:
   Connect: "Conectar"
   Create: "Crear"
   Dashboard: "Panel de control"
-  DateFrom: Desde
+  DateFrom: "Desde"
   DefaultTenant: "Org. por defecto"
   DefaultSite: "Sitio por defecto"
-  DateTo: Hasta
+  DateTo: "Hasta"
   Delete: "Borrar"
   Deploy: "Despliegue de software"
   Description: "Descripción"
@@ -82,7 +82,7 @@ es:
   Rename: "Renombrar"
   Reports: "Informes"
   Required: "Requerido"
-  Reset: "Reestablecer"
+  Reset: "Restablecer"
   Revoke: "Revocar"
   RustDesk Settings: "Conf. RustDesk"
   Save: "Guardar"
@@ -124,7 +124,7 @@ es:
   UpdatedNo: "No actualizado"
   UpdateAll: "Actualizar todos"
   UpdateSelected: "Actualizar seleccionados"
-  Updated at: Actualizado a las %s
+  Updated at: "Actualizado a las %s"
   Updates: "Actualizaciones"
   Upload: "Subir fichero"
   User:
@@ -327,17 +327,16 @@ es:
     nickname_cannot_be_empty: "El nombre del equipo no puede estar vacío"
     nickname_not_saved: "No se pudo guardar el nombre del equipo, razón: %s"
     rustdesk: "Iniciar sesión con RustDesk"
-    rustdesk_found: "RustDesk está instalado en el equipo"   
+    rustdesk_found: "RustDesk está instalado en el equipo"
     rustdesk_not_found: "No se encontró el binario RustDesk en el equipo"
-    rustdesk_settings: "Hay configuraciones de RustDesk para esta organización"         
+    rustdesk_settings: "Hay configuraciones de RustDesk para esta organización"
     no_rustdesk_settings: "No hay configuraciones de RustDesk para esta organización, continúe de todos modos"
     vnc_certs: "El agente informó que tiene un certificado válido para cifrar el tráfico VNC"
     rdp_certs: "El agente informó que tiene un certificado válido para cifrar el tráfico RDP"
     no_vnc_certs: "El agente ha informado que no tiene un certificado digital para cifrar el tráfico VNC. Fuerce un nuevo informe o regenere los certificados desde el menú de acciones."
     no_rdp_certs: "El agente ha informado que no tiene un certificado digital para cifrar el tráfico RDP. Fuerce un nuevo informe o regenere los certificados desde el menú de acciones."
     vnc_server_installed: "% s está instalado en el equipo"
-    vnc_host_resolved: "El nombre de host remoto  poder resolverse por DNS"
-
+    vnc_host_resolved: "El nombre de host remoto parece poder resolverse por DNS"
   inventory:
     hardware:
       title: "Hardware"
@@ -405,7 +404,7 @@ es:
       title: "Expl. Archivos"
       description: "Navegue por este disco lógico de forma remota usando SFTP. Haga clic en los tres puntos junto al icono de la carpeta o de fichero para mostrar un menú de acciones. También puede usar los iconos superiores para moverse a una carpeta superior, añadir una nueva carpeta, actualizar el contenido de la carpeta actual, subir un fichero a la carpeta actual o descargar varios ficheros y/o carpetas como un fichero ZIP o borrar varios elementos después de seleccionarlos"
       folder_name: "Nombre de la carpeta..."
-      current_folder: "Carpeta actual:"
+      current_folder: "Carpeta actual: "
       empty_folder: "Esta carpeta está vacía"
       open_folder: "Abrir carpeta"
       new_name: "Nuevo nombre..."
@@ -447,7 +446,6 @@ es:
       installation_date: "Fecha Inst."
       no_apps: "No existe aún información disponible sobre las aplicaciones de este equipo"
       report_title: "App %s"
-
   apps:
     title: "Aplicaciones"
     description: "Estas son las aplicaciones encontradas en su organización de acuerdo a lo que han informado los agentes de OpenUEM"
@@ -472,7 +470,7 @@ es:
     filter_by_enabled: "Filtrar por estado de activación del antivirus"
     filter_by_updated: "Filtrar por estado de actualización del antivirus"
   install:
-    title: "Instalación  de software"
+    title: "Instalación de software"
     phase_1: "Busca paquetes de software que pueden ser instalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe instalarse"
     phase_2: "Selecciona los agentes en los que deseas instalar"
     search_empty_error: "Por favor escribe el nombre de un paquete a buscar"
@@ -484,8 +482,8 @@ es:
     use_flatpak_is_false: "Flatpak ha sido desactivado en la Configuración General"
     could_not_get_brew_use: "No se pudo consultar la configuración de uso de Brew en la base de datos"
     use_brew_is_false: "Brew ha sido desactivado en la Configuración General"
-    could_not_search_packages: "No pude buscar los paquetes, razón: %s"
-    could_not_count_packages: "No pude contar los paquetes, razón: %s"
+    could_not_search_packages: "No se pueden buscar los paquetes, razón: %s"
+    could_not_count_packages: "No se pueden contar los paquetes, razón: %s"
   uninstall:
     title: "Desinstalación de software"
     phase_1: "Busca paquetes de software que pueden ser desinstalados por los agentes de OpenUEM bajo demanda. Después use el botón asociado a cada paquete para seleccionar en qué agentes debe desinstalarse"
@@ -574,25 +572,25 @@ es:
     certificate_requested: "Un certificado de cliente ha sido solicitado para este usuario"
     deleted: "El usuario ha sido borrado"
     edit:
-      title: Editar usuario
-      description: Edite este perfil de usuario
-      success: El perfil del usuario se ha actualizado
-    no_users: No se han encontrado usuarios
-    filter_by_username: Filtrar por usuario...
-    filter_by_name: Filtrar por nombre...
-    filter_by_email: Filtrar por email...
-    filter_by_phone: Filtrar por teléfono...
-    filter_by_creation: Filtar por fecha de creación
-    filter_by_modification: Filtar por fecha de modificación
-    filter_by_register_status: Filtrar por estado del registro
-    csv_file: Fichero CSV
-    csv_description: Suba un archivo de valores separados por comas sin filas de encabezado y con filas con el siguiente formato 'userid,fullname,email,country,phone,oidc'. El país es un código ISO 3166 Alfa-2 de dos letras, como 'es'. El valor de OIDC debe ser 'true' si se va a usar OAuth; de lo contrario, use 'false'. Todos los campos son opcionales, excepto el de ID de usuario y correo electrónico
-    import_success: El fichero de usuarios se ha recibido y será procesado en breve
-    import_error_wrong_format: La fila %d CSV tiene un formato erróneo
-    import_required: El campo %s en la fila %d es obligatorio y no puede estar vacío
-    import_wrong_country: País %s en la fila %d debe ser un código ISO3166 Alpha2 de dos letras
-    import_wrong_email: Email en la fila %d debe contener una dirección válida
-    import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
+      title: "Editar usuario"
+      description: "Edite este perfil de usuario"
+      success: "El perfil del usuario se ha actualizado"
+    no_users: "No se han encontrado usuarios"
+    filter_by_username: "Filtrar por usuario..."
+    filter_by_name: "Filtrar por nombre..."
+    filter_by_email: "Filtrar por email..."
+    filter_by_phone: "Filtrar por teléfono..."
+    filter_by_creation: "Filtar por fecha de creación"
+    filter_by_modification: "Filtar por fecha de modificación"
+    filter_by_register_status: "Filtrar por estado del registro"
+    csv_file: "Fichero CSV"
+    csv_description: "Suba un archivo de valores separados por comas sin filas de encabezado y con filas con el siguiente formato 'userid,fullname,email,country,phone,oidc'. El país es un código ISO 3166 Alfa-2 de dos letras, como 'es'. El valor de OIDC debe ser 'true' si se va a usar OAuth; de lo contrario, use 'false'. Todos los campos son opcionales, excepto el de ID de usuario y correo electrónico"
+    import_success: "El fichero de usuarios se ha recibido y será procesado en breve"
+    import_error_wrong_format: "La fila %d CSV tiene un formato erróneo"
+    import_required: "El campo %s en la fila %d es obligatorio y no puede estar vacío"
+    import_wrong_country: "País %s en la fila %d debe ser un código ISO3166 Alpha2 de dos letras"
+    import_wrong_email: "Email en la fila %d debe contener una dirección válida"
+    import_wrong_users: "Encontramos errores para los siguientes usuarios"
     import_wrong_oidc: "El valor de OpenID Connect en la fila %d debe ser true o false"
     admin_cannot_be_removed: "El usuario admin no puede ser eliminado"
     new_confirmation_email_sent: "Se ha enviado un nuevo email de confirmación a "
@@ -631,8 +629,8 @@ es:
     could_not_get_all_agents: "No se pudieron obtener los datos de todos los agentes"
     could_not_get_all_computers: "No se pudieron obtener los datos de todos los equipos"
     could_not_get_all_software: "No se pudieron obtener los datos del software"
-    could_not_get_all_antiviri: "No se pudo obtener los datos de los antivirus"
-    could_not_get_system_updates: "No se pudo obtener los datos de las actualizaciones del sistema"
+    could_not_get_all_antiviri: "No se pudieron obtener los datos de los antivirus"
+    could_not_get_system_updates: "No se pudieron obtener los datos de las actualizaciones del sistema"
     invalid_report_selected: "El informe seleccionado no es válido"
     could_not_initiate_report: "No se pudo inicializar el informe"
     could_not_generate_report: "No se pudo generar el informe"
@@ -679,149 +677,149 @@ es:
     no_serial: "No se ha indicado el número de serie del certificado en la petición"
     no_certificates: "No se han encontrado certificados para esta consulta"
   smtp:
-    title: SMTP
+    title: "SMTP"
     description: "Configura tu proveedor SMTP para poder enviar notificaciones por email."
-    server_fieldset: Servidor SMTP
-    server: Servidor
-    server_placeholder: El nombre del servidor SMTP...
-    port: Puerto
-    port_placeholder: El puerto del servidor SMTP...
-    auth_fieldset: Autenticación SMTP
-    user: Usuario
-    user_placeholder: El usuario SMTP...
-    password: Contraseña
-    password_placeholder: La contraseña SMTP...
-    auth_type: Tipo Autent.
-    from_fieldset: Mail From
-    from_placeholder: Email de origen...
-    id_cannot_be_empty: El ID de configuración no puede estar vacío
-    id_invalid: El ID de configuración no es válido
-    server_invalid: El servidor no es válido
-    server_cannot_be_empty: El servidor no puede estar vacío
-    port_invalid: El puerto no es válido
-    port_cannot_be_empty: El puerto no puede estar vacío
-    auth_invalid: El tipo de autenticación no es válido
-    mailfrom_cannot_be_empty: El campo Mail From no puede estar vacío
-    mailfrom_invalid: El campo Mail From no es válido
-    saved: La configuración SMTP se ha guardado
-    test: Probar config.
-    test_success: Se envió con éxito el email de prueba a %s
+    server_fieldset: "Servidor SMTP"
+    server: "Servidor"
+    server_placeholder: "El nombre del servidor SMTP..."
+    port: "Puerto"
+    port_placeholder: "El puerto del servidor SMTP..."
+    auth_fieldset: "Autenticación SMTP"
+    user: "Usuario"
+    user_placeholder: "El usuario SMTP..."
+    password: "Contraseña"
+    password_placeholder: "La contraseña SMTP..."
+    auth_type: "Tipo Autent."
+    from_fieldset: "Mail From"
+    from_placeholder: "Email de origen..."
+    id_cannot_be_empty: "El ID de configuración no puede estar vacío"
+    id_invalid: "El ID de configuración no es válido"
+    server_invalid: "El servidor no es válido"
+    server_cannot_be_empty: "El servidor no puede estar vacío"
+    port_invalid: "El puerto no es válido"
+    port_cannot_be_empty: "El puerto no puede estar vacío"
+    auth_invalid: "El tipo de autenticación no es válido"
+    mailfrom_cannot_be_empty: "El campo Mail From no puede estar vacío"
+    mailfrom_invalid: "El campo Mail From no es válido"
+    saved: "La configuración SMTP se ha guardado"
+    test: "Probar config."
+    test_success: "Se envió con éxito el email de prueba a %s"
   settings:
-    title: Configuración general
-    description: OpenUEM tiene algunos ajustes que configuran su comportamiento.
+    title: "Configuración general"
+    description: "OpenUEM tiene algunos ajustes que configuran su comportamiento."
     global: "Estos son los ajustes globales de OpenUEM y que son heredados por las organizaciones. Use el menú de desplegable de organización para cambiar sus ajustes"
     tenant: "Estos son los ajustes específicos para esta organización. Estos ajuste se heredan de la configuración global, pero se pueden sobrescribir o puede usar el botón para aplicar nuevamente la configuración global"
-    country_title: País
-    country_description: País por defecto para el registro de usuarios
-    nats_timeout_title: NATS Timeout
-    nats_timeout_description: Timeout de petición NATS en segundos
-    max_upload_title: Tamaño máximo de subida
-    max_upload_description: Tamaño máximo de subida para ficheros expresado en GB (G), MB (M) o KB (K)
-    user_cert_years_title: Duración certificado Usuario
-    user_cert_years_description: La duración en años del certificado de usuario
-    id_cannot_be_empty: El ID de configuración no puede estar vacío
-    id_invalid: El ID de configuración no es válido
-    country_invalid: El ID de país no es válido
-    cert_years_invalid: Número de años para el certificado de usuario no es válido
-    nats_timeout_invalid: El timeout de NATS no es válido
-    max_upload_size_invalid: El tamaño máximo de subida no es válido
-    saved: La configuración general se ha guardado
-    reload: Esta configuración se ha guardado, pero el servicio de la consola debe reiniciarse manualmente para que surta efecto
-    refresh_title: Refresco automático
-    refresh_description: Algunas páginas se actualizan automáticamente. Configure el periodo de refresco en minutos
-    refresh_invalid: El tiempo de refresco no es válido
-    session_lifetime_title: Tiempo de vida de la sesión
-    session_lifetime_description: Tiempo de vida de la sesión en minutos pasado el cual se cerrará la sesión
-    session_lifetime_invalid: Tiempo de vida de sesión no válido
-    update_channel_title: Canal de actualizaciones
-    update_channel_description: Canal utilizado para la comprobación y descarga de actualizaciones de OpenUEM
-    update_channel_invalid: Canal no válido
-    agent_frequency_title: Frecuencia de informes de los agentes
-    agent_frequency_description: Los agentes enviarán periódicamente un informe con la frecuencia indicada en minutos
-    agent_frequency_invalid: La frecuencia de generación de informes del agente no es válida
-    agent_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
-    agent_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
-    agent_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
-    request_pin_title: Solicitar PIN al usuario
-    request_pin_description: Cuando se realice una conexión VNC se pedirá al usuario el PIN que se muestra en su pantalla
-    request_pin_invalid: La opción seleccionada no es válida
-    request_pin_could_not_be_saved: La opción de petición de PIN no ha podido guardarse en la base de datos
-    request_pin_could_not_be_read: La opción de petición de PIN no ha podido leerse de la base de datos
-    add_tag_admitted_title: Añadir una etiqueta a los agentes admitidos
-    add_tag_admitted_description: Cuando se admite un agente añadir la siguiente etiqueta automáticamente. Usar la opción vacía para evitar el etiquetado
-    add_tag_select: Seleccione una etiqueta
-    add_tag_admitted_could_not_be_saved: No se pudo guardar la etiqueta asociada a un agente recientemente admitido
-    add_tag_admitted_could_not_be_cleared: No se pudo desasignar la etiqueta para los agentes recientemente admitidos
-    add_tag_invalid: El id de la etiqueta no es válido
-    winget_configure_frequency_title: Frecuencia de aplicación de perfiles
-    winget_configure_frequency_description: Los agentes aplicarán los perfiles de equipo de acuerdo a la frecuencia fijada en minutos (valor mínimo 30)
-    winget_configure_frequency_success: Se ha comunicado la nueva frecuencia a los agentes
-    winget_configure_frequency_could_not_be_saved: La nueva frecuencia no ha podido guardarse en la base de datos
-    winget_configure_frequency_invalid: La frecuencia seleccionada no es válida
-    winget_configure_frequency_error: La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde
-    use_winget_title: Usar WinGet
-    use_winget_description: Usar WinGet para buscar e instalar nuevos paquetes Windows
-    use_winget_success: La configuración de WinGet se ha guardado
-    use_winget_invalid: El valor seleccionado para usar winget no es válido
-    use_winget_could_not_be_saved: No se pudo guardar el valor de uso de winget
-    use_flatpak_title: Usar Flatpak
-    use_flatpak_description: Usar Flatpak para buscar e instalar nuevos paquetes en Linux
-    use_flatpak_success: La configuración de Flatpak se ha guardado
-    use_flatpak_invalid: El valor seleccionado para usar flatpak no es válido
-    use_flatpak_could_not_be_saved: No se pudo guardar el valor de uso de flatpak
-    use_brew_title: Usar Brew
-    use_brew_description: Usar Brew para buscar e instalar nuevos paquetes en Linux
-    use_brew_success: La configuración de Brew se ha guardado
-    use_brew_invalid: El valor seleccionado para usar brew no es válido
-    use_brew_could_not_be_saved: No se pudo guardar el valor de uso de brew
-    disable_sftp_title: Inhabilitar SFTP
-    disable_sftp_description: SFTP está inhabilitado globalmente para cada agente
-    disable_sftp_success: La configuración de SFTP se ha guardado
-    disable_sftp_invalid: El valor seleccionado para el servicio SFTP no es válido
-    disable_sftp_could_not_be_saved: No se pudo guardar el valor del servicio SFTP
-    disable_sftp_error: La configuración del servicio SFTP no pudo comunicarse a los agentes, inténtelo más tarde
-    disable_sftp_to_all: No se pudo actualizar la configuración de SFTP para todos los agentes
-    could_not_get_sftp_general_setting: No se pudo consultar la configuración general de SFTP
-    disable_remote_assistance_title: Inhabilitar la Asistencia Remota
-    disable_remote_assistance_description: La Asistencia Remota está inhabilitado globalmente para cada agente
-    disable_remote_assistance_success: La configuración de Asistencia Remota se ha guardado
-    disable_remote_assistance_invalid: El valor seleccionado para la Asistencia Remota no es válido
-    disable_remote_assistance_could_not_be_saved: No se pudo guardar el valor de la Asistencia Remota
-    disable_remote_assistance_error: La configuración de la Asistencia Remota no pudo comunicarse a los agentes, inténtelo más tarde
-    disable_remote_assistance_to_all: No se pudo actualizar la configuración de asistencia remota para todos los agentes
-    detect_remote_agents_title: Detectar agentes remotos
-    detect_remote_agents_description: OpenUEM marcará como remotos a aquellos agentes para los que la dirección IP incluida en el informe no coincide con la IP resuelta por DNS
-    detect_remote_agents_success: La configuración de detección de agentes remotos se ha guardado
-    detect_remote_agents_invalid: El valor seleccionado para la detección de agentes remotos no es válido
-    detect_remote_agents_could_not_be_saved: La configuración de detección de agentes remotos no pudo guardarse
-    could_not_get_detect_remote_agents_setting: No se pudo consultar la configuración de detección de agentes remotos
-    auto_admit_agents_title: Admitir agentes automáticamente
-    auto_admit_agents_description: OpenUEM admitirá los agentes automáticamente sin esperar a que el administrador los admita. Tenga en cuenta que tendrá que solicitar la generación de los certificados del agente desde el menú de acciones del agente si quiere conectarse vía SFTP o VNC/RDP
-    auto_admit_agents_success: La configuración de admisión de agentes automáticamente se ha guardado
-    auto_admit_agents_invalid: El valor seleccionado para la admisión de agentes automáticamente no es válido
-    auto_admit_agents_could_not_be_saved: La configuración de admisión de agentes automáticamente no pudo guardarse
-    could_not_get_auto_admit_agents_setting: No se pudo consultar la configuración de admisión de agentes automáticamente
+    country_title: "País"
+    country_description: "País por defecto para el registro de usuarios"
+    nats_timeout_title: "NATS Timeout"
+    nats_timeout_description: "Timeout de petición NATS en segundos"
+    max_upload_title: "Tamaño máximo de subida"
+    max_upload_description: "Tamaño máximo de subida para ficheros expresado en GB (G), MB (M) o KB (K)"
+    user_cert_years_title: "Duración certificado Usuario"
+    user_cert_years_description: "La duración en años del certificado de usuario"
+    id_cannot_be_empty: "El ID de configuración no puede estar vacío"
+    id_invalid: "El ID de configuración no es válido"
+    country_invalid: "El ID de país no es válido"
+    cert_years_invalid: "Número de años para el certificado de usuario no es válido"
+    nats_timeout_invalid: "El timeout de NATS no es válido"
+    max_upload_size_invalid: "El tamaño máximo de subida no es válido"
+    saved: "La configuración general se ha guardado"
+    reload: "Esta configuración se ha guardado, pero el servicio de la consola debe reiniciarse manualmente para que surta efecto"
+    refresh_title: "Refresco automático"
+    refresh_description: "Algunas páginas se actualizan automáticamente. Configure el periodo de refresco en minutos"
+    refresh_invalid: "El tiempo de refresco no es válido"
+    session_lifetime_title: "Tiempo de vida de la sesión"
+    session_lifetime_description: "Tiempo de vida de la sesión en minutos pasado el cual se cerrará la sesión"
+    session_lifetime_invalid: "Tiempo de vida de sesión no válido"
+    update_channel_title: "Canal de actualizaciones"
+    update_channel_description: "Canal utilizado para la comprobación y descarga de actualizaciones de OpenUEM"
+    update_channel_invalid: "Canal no válido"
+    agent_frequency_title: "Frecuencia de informes de los agentes"
+    agent_frequency_description: "Los agentes enviarán periódicamente un informe con la frecuencia indicada en minutos"
+    agent_frequency_invalid: "La frecuencia de generación de informes del agente no es válida"
+    agent_frequency_success: "Se ha comunicado la nueva frecuencia a los agentes"
+    agent_frequency_could_not_be_saved: "La nueva frecuencia no ha podido guardarse en la base de datos"
+    agent_frequency_error: "La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde"
+    request_pin_title: "Solicitar PIN al usuario"
+    request_pin_description: "Cuando se realice una conexión VNC se pedirá al usuario el PIN que se muestra en su pantalla"
+    request_pin_invalid: "La opción seleccionada no es válida"
+    request_pin_could_not_be_saved: "La opción de petición de PIN no ha podido guardarse en la base de datos"
+    request_pin_could_not_be_read: "La opción de petición de PIN no ha podido leerse de la base de datos"
+    add_tag_admitted_title: "Añadir una etiqueta a los agentes admitidos"
+    add_tag_admitted_description: "Cuando se admite un agente añadir la siguiente etiqueta automáticamente. Usar la opción vacía para evitar el etiquetado"
+    add_tag_select: "Seleccione una etiqueta"
+    add_tag_admitted_could_not_be_saved: "No se pudo guardar la etiqueta asociada a un agente recientemente admitido"
+    add_tag_admitted_could_not_be_cleared: "No se pudo desasignar la etiqueta para los agentes recientemente admitidos"
+    add_tag_invalid: "El id de la etiqueta no es válido"
+    winget_configure_frequency_title: "Frecuencia de aplicación de perfiles"
+    winget_configure_frequency_description: "Los agentes aplicarán los perfiles de equipo de acuerdo a la frecuencia fijada en minutos (valor mínimo 30)"
+    winget_configure_frequency_success: "Se ha comunicado la nueva frecuencia a los agentes"
+    winget_configure_frequency_could_not_be_saved: "La nueva frecuencia no ha podido guardarse en la base de datos"
+    winget_configure_frequency_invalid: "La frecuencia seleccionada no es válida"
+    winget_configure_frequency_error: "La nueva frecuencia no puede comunicarse ahora a los agentes, inténtelo más tarde"
+    use_winget_title: "Usar WinGet"
+    use_winget_description: "Usar WinGet para buscar e instalar nuevos paquetes Windows"
+    use_winget_success: "La configuración de WinGet se ha guardado"
+    use_winget_invalid: "El valor seleccionado para usar winget no es válido"
+    use_winget_could_not_be_saved: "No se pudo guardar el valor de uso de winget"
+    use_flatpak_title: "Usar Flatpak"
+    use_flatpak_description: "Usar Flatpak para buscar e instalar nuevos paquetes en Linux"
+    use_flatpak_success: "La configuración de Flatpak se ha guardado"
+    use_flatpak_invalid: "El valor seleccionado para usar flatpak no es válido"
+    use_flatpak_could_not_be_saved: "No se pudo guardar el valor de uso de flatpak"
+    use_brew_title: "Usar Brew"
+    use_brew_description: "Usar Brew para buscar e instalar nuevos paquetes en Linux"
+    use_brew_success: "La configuración de Brew se ha guardado"
+    use_brew_invalid: "El valor seleccionado para usar brew no es válido"
+    use_brew_could_not_be_saved: "No se pudo guardar el valor de uso de brew"
+    disable_sftp_title: "Inhabilitar SFTP"
+    disable_sftp_description: "SFTP está inhabilitado globalmente para cada agente"
+    disable_sftp_success: "La configuración de SFTP se ha guardado"
+    disable_sftp_invalid: "El valor seleccionado para el servicio SFTP no es válido"
+    disable_sftp_could_not_be_saved: "No se pudo guardar el valor del servicio SFTP"
+    disable_sftp_error: "La configuración del servicio SFTP no pudo comunicarse a los agentes, inténtelo más tarde"
+    disable_sftp_to_all: "No se pudo actualizar la configuración de SFTP para todos los agentes"
+    could_not_get_sftp_general_setting: "No se pudo consultar la configuración general de SFTP"
+    disable_remote_assistance_title: "Inhabilitar la Asistencia Remota"
+    disable_remote_assistance_description: "La Asistencia Remota está inhabilitado globalmente para cada agente"
+    disable_remote_assistance_success: "La configuración de Asistencia Remota se ha guardado"
+    disable_remote_assistance_invalid: "El valor seleccionado para la Asistencia Remota no es válido"
+    disable_remote_assistance_could_not_be_saved: "No se pudo guardar el valor de la Asistencia Remota"
+    disable_remote_assistance_error: "La configuración de la Asistencia Remota no pudo comunicarse a los agentes, inténtelo más tarde"
+    disable_remote_assistance_to_all: "No se pudo actualizar la configuración de asistencia remota para todos los agentes"
+    detect_remote_agents_title: "Detectar agentes remotos"
+    detect_remote_agents_description: "OpenUEM marcará como remotos a aquellos agentes para los que la dirección IP incluida en el informe no coincide con la IP resuelta por DNS"
+    detect_remote_agents_success: "La configuración de detección de agentes remotos se ha guardado"
+    detect_remote_agents_invalid: "El valor seleccionado para la detección de agentes remotos no es válido"
+    detect_remote_agents_could_not_be_saved: "La configuración de detección de agentes remotos no pudo guardarse"
+    could_not_get_detect_remote_agents_setting: "No se pudo consultar la configuración de detección de agentes remotos"
+    auto_admit_agents_title: "Admitir agentes automáticamente"
+    auto_admit_agents_description: "OpenUEM admitirá los agentes automáticamente sin esperar a que el administrador los admita. Tenga en cuenta que tendrá que solicitar la generación de los certificados del agente desde el menú de acciones del agente si quiere conectarse vía SFTP o VNC/RDP"
+    auto_admit_agents_success: "La configuración de admisión de agentes automáticamente se ha guardado"
+    auto_admit_agents_invalid: "El valor seleccionado para la admisión de agentes automáticamente no es válido"
+    auto_admit_agents_could_not_be_saved: "La configuración de admisión de agentes automáticamente no pudo guardarse"
+    could_not_get_auto_admit_agents_setting: "No se pudo consultar la configuración de admisión de agentes automáticamente"
     apply_global: "Aplicar conf. global"
     could_not_apply_global_settings: "No se pudo aplicar la configuración global, razón: %s"
   restore:
-    title: Restaurar
-    description: Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal
-    agent_rollback_title: Restaurar agentes
-    agent_rollback_description: Si los agentes no informan correctamente tras aplicar una actualización bajo demanda y necesita volver a la versión previa a la actualización. Esta acción se aplicará a todos los agentes
-    messenger_rollback_title: Restaurar Messenger
-    messenger_rollback_description: Messenger se encarga de mostrar mensajes a los usuarios y se actualiza automáticamente tan pronto existe una actualización. Si se necesita se puede volver a la versión anterior
-    updater_rollback_title: Restaurar Actualizador
-    updater_rollback_description: El actualizador se encarga de actualizar los agentes (bajo demanda) y Messenger (automáticamente). Este servicio se actualiza automáticamente tan pronto existe una nueva versión. Si se necesita se puede volver a la versión anterior
-    database_title: Restaurar la base de datos
-    database_description: Si necesita eliminar de la base de datos todos los agentes y su información asociada, manteniendo los usuarios que acceden a la consola y la información de certificados
-    confirm_restore: ¿Está seguro de que desea realizar la restauración? Esta acción es irreversible
-    restore_requested: La petición de restauración se ha enviado a todos los agentes
-    confirm_delete_database: ¿Está seguro de que quiere borrar todas las tablas que contienen los agentes y su información?
-    delete_database_requested: Se ha procedido al borrado de la información
+    title: "Restaurar"
+    description: "Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal"
+    agent_rollback_title: "Restaurar agentes"
+    agent_rollback_description: "Si los agentes no informan correctamente tras aplicar una actualización bajo demanda y necesita volver a la versión previa a la actualización. Esta acción se aplicará a todos los agentes"
+    messenger_rollback_title: "Restaurar Messenger"
+    messenger_rollback_description: "Messenger se encarga de mostrar mensajes a los usuarios y se actualiza automáticamente tan pronto existe una actualización. Si se necesita se puede volver a la versión anterior"
+    updater_rollback_title: "Restaurar Actualizador"
+    updater_rollback_description: "El actualizador se encarga de actualizar los agentes (bajo demanda) y Messenger (automáticamente). Este servicio se actualiza automáticamente tan pronto existe una nueva versión. Si se necesita se puede volver a la versión anterior"
+    database_title: "Restaurar la base de datos"
+    database_description: "Si necesita eliminar de la base de datos todos los agentes y su información asociada, manteniendo los usuarios que acceden a la consola y la información de certificados"
+    confirm_restore: "¿Está seguro de que desea realizar la restauración? Esta acción es irreversible"
+    restore_requested: "La petición de restauración se ha enviado a todos los agentes"
+    confirm_delete_database: "¿Está seguro de que quiere borrar todas las tablas que contienen los agentes y su información?"
+    delete_database_requested: "Se ha procedido al borrado de la información"
   notes:
     updated: "Las notas han sido actualizadas"
     no_notes: "Añada una nota..."
-    error: "No se pudieron guardar las notas: %s"
+    error: "No se pudieron guardar las notas"
   success:
     session_delete: "La sesión ha sido borrada"
   charts:
@@ -874,9 +872,9 @@ es:
         task_status_error: "Error"
         task_status_pending: "Pendiente"
         task_status_success: "Éxito"
-        task_description: "Descr. Tarea"
-        task_last_execution: "Ult ejecución"
-        task_result: "Result. Tarea"
+        task_description: "Desc. tarea"
+        task_last_execution: "Últ. ejecución"
+        task_result: "Result. tarea"
         new_version_date: "Fecha disponibilidad: "
         select_release: "Seleccione una versión"
         show_outdated: "Actualizable"
@@ -887,7 +885,7 @@ es:
         filter_by_task_execution: "Filtrar por fecha de última ejecución"
       servers:
         title: "Actualizar servidores"
-        description: "Estos son los servidores de OpenUEM instalados, incluyendo dónde se encuentran y qué versión están ejecutando. Puede actualizar los servidores a la versión seleccionada. IMPORTANTE: al actualizar la versión, la consola se reiniciará por lo que puede perder la conexión por unos instantes hasta que el servicio se reinicie"
+        description: "Estos son los servidores OpenUEM instalados y qué versión están ejecutando. Puede actualizar los servidores a la versión seleccionada. IMPORTANTE: al actualizar una versión, la consola se reiniciará, por lo que puede perder la conexión durante unos instantes hasta que se reinicie el servicio"
         success: "Se ha enviado una petición para actualizar la versión del servidor de OpenUEM"
         some_errors_found: "Algunos servidores no pudieron recibir las peticiones de actualización"
         servers_cant_be_empty: "La variable servidores no puede contener una cadena vacía"
@@ -902,7 +900,7 @@ es:
         update_status: "Est. Actual."
         update_info: "Info Actual."
         update_when: "Última Actual."
-        get_version_error: "No pude obtener información del API del servicio de actualizaciones de OpenUEM"
+        get_version_error: "No se pudo obtener información del API del servicio de actualizaciones de OpenUEM"
         filter_by_hostname: "Filtrar por nombre de equipo"
         filter_by_component: "Filtrar por componente"
         filter_by_release: "Filtrar por versión"
@@ -924,30 +922,30 @@ es:
         could_not_parse_server_id: "No se pudo convertir el id del servidor"
         could_not_delete: "El servidor no pudo eliminarse, razón: %s"
   dashboard:
-    outdated_agents: Agentes ejecutando versiones anticuadas
-    no_auto_update: Equipos que no descargan/instalan actualizaciones automáticamente
-    pending_update_agents: Equipos con actualizaciones del sistema pendientes
-    disabled_antivirus: Equipos sin sistema de antivirus activo
-    outdated_antivirus: Equipos con bases de datos de virus desactualizadas
-    nats_server_status: Estado del servidor de NATS
-    openuem_updater_api_status: Estado del API de OpenUEM Updater
-    agent_worker_status: Estado del Procesador de Agentes
-    notification_worker_status: Estado del Procesador de Notificaciones
-    cert_manager_worker_status: Estado del Gestor de Certificados
-    vnc: Equipos que permiten conexión por VNC
-    num_vendor: Número de fabricantes de equipos encontrados
-    num_printers: Número de impresoras diferentes encontradas
-    num_applied_tags: Número de etiquetas aplicadas
-    num_disabled_agents: Agentes desactivados
-    num_waiting_for_admission: Agentes esperando admisión
-    num_apps_found: Número de aplicaciones encontradas
-    num_deployments: Despliegues de software realizados con OpenUEM
-    num_openuem_users: Número de usuarios de OpenUEM
-    num_sessions: Número de sesiones abiertas en la consola
-    num_os_users: Número de usuarios con un equipo asignado
-    no_reported_in_last_24h: Agentes que no han informado desde hace más de 24h
-    num_upgradable_agents: Agentes que pueden ser actualizados
-    certificates_to_expire: Certificados que caducan en dos meses
+    outdated_agents: "Agentes ejecutando versiones anticuadas"
+    no_auto_update: "Equipos que no descargan/instalan actualizaciones automáticamente"
+    pending_update_agents: "Equipos con actualizaciones del sistema pendientes"
+    disabled_antivirus: "Equipos sin sistema de antivirus activo"
+    outdated_antivirus: "Equipos con bases de datos de virus desactualizadas"
+    nats_server_status: "Estado del servidor de NATS"
+    openuem_updater_api_status: "Estado del API de OpenUEM Updater"
+    agent_worker_status: "Estado del Procesador de Agentes"
+    notification_worker_status: "Estado del Procesador de Notificaciones"
+    cert_manager_worker_status: "Estado del Gestor de Certificados"
+    vnc: "Equipos que permiten conexión por VNC"
+    num_vendor: "Número de fabricantes de equipos encontrados"
+    num_printers: "Número de impresoras diferentes encontradas"
+    num_applied_tags: "Número de etiquetas aplicadas"
+    num_disabled_agents: "Agentes desactivados"
+    num_waiting_for_admission: "Agentes esperando admisión"
+    num_apps_found: "Número de aplicaciones encontradas"
+    num_deployments: "Despliegues de software realizados con OpenUEM"
+    num_openuem_users: "Número de usuarios de OpenUEM"
+    num_sessions: "Número de sesiones abiertas en la consola"
+    num_os_users: "Número de usuarios con un equipo asignado"
+    no_reported_in_last_24h: "Agentes que no han informado desde hace más de 24h"
+    num_upgradable_agents: "Agentes que pueden ser actualizados"
+    certificates_to_expire: "Certificados que caducan en dos meses"
   nats:
     not_connected: "Esta acción no puede ejecutarse ahora, no estamos conectados con el servicio NATS, por favor inténtelo de nuevo en unos minutos"
     no_responder: "El agente no recibió la solicitud, puede que no se esté ejecutando o hay un problema de comunicaciones por favor inténtelo de nuevo en unos minutos"
@@ -1219,7 +1217,6 @@ es:
     apt_update: "Actualizar paquete"
     apt_update_all: "Actualizar todos los paquetes"
     apt_upgrade_os: "Subir de versión de S.O"
-
     new:
       title: "Nueva tarea"
       name: "Descripción de la tarea"
@@ -1254,7 +1251,6 @@ es:
   packages:
     required_params_missing: "Faltan parámetros requeridos"
     source_not_found: "No se ha podido encontrar el gestor de paquetes asociado"
-
   tenants:
     title: "Organizaciones"
     description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos. Una organización por defecto con un sitio por defecto es creada donde se agregan los equipos si no se configura ninguna organización y/o sitio en el agente"
@@ -1270,7 +1266,7 @@ es:
     edit_success: "La organización ha sido modificada"
     tenant_cannot_be_empty: "El ID de la organización no puede estar vacío"
     site_cannot_be_empty: "The ID del sitio no puede estar vacío"
-    could_not_convert_to_int: "El ID de la organización: %s no pudo convertirse en un valor entero"
+    could_not_convert_to_int: "El ID de la organización %s no pudo convertirse en un valor entero"
     tenant_not_found: "La organización no pudo encontrarse, razón: %s"
     name_cannot_be_empty: "El nombre de la organización no puede estar vacío"
     could_not_convert_to_bool: "El estado predeterminado de la organización no pudo convertise en un booleano, razón: %s"
@@ -1295,15 +1291,14 @@ es:
     import_wrong_tenants: "Hemos encontrado errores para las siguientes organizaciones: %s"
     confirm_delete: "¿Está seguro de quiere eliminar esta organización? Todos los agentes asociados, perfiles, etiquetas, metadatos y otras configuraciones serán eliminados de la base de datos"
     delete_error: "No se pudo eliminar la organización, razón: %s"
-    filter_by_name: Filtrar por nombre...
-    filter_by_creation: Filtar por fecha de creación
-    filter_by_modification: Filtrar por fecha de modificación
-    filter_by_default_status: Filtrar por estado predeterminado
-    no_tenants: No se han encontrado organizaciones para esta consulta
+    filter_by_name: "Filtrar por nombre..."
+    filter_by_creation: "Filtar por fecha de creación"
+    filter_by_modification: "Filtrar por fecha de modificación"
+    filter_by_default_status: "Filtrar por estado predeterminado"
+    no_tenants: "No se han encontrado organizaciones para esta consulta"
     could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
     could_not_get_rustdesk_settings: "No se pudo obtener la configuracón de RustDesk de esta organización"
-    could_not_get_global_rustdesk_settings: "No se pudo obtener la configuración global de RustDesk asociada con esta organización"    
-
+    could_not_get_global_rustdesk_settings: "No se pudo obtener la configuración global de RustDesk asociada con esta organización"
   sites:
     title: "Sitio"
     description: "OpenUEM permite gestionar diferentes organizaciones. Una organización puede tener uno o más sitios en los que se agrupan los equipos"
@@ -1320,7 +1315,7 @@ es:
     edit_success: "El sitio ha sido modificado"
     tenant_cannot_be_empty: "El ID de la organización no puede estar vacío"
     site_cannot_be_empty: "El ID del sitio no puede estar vacío"
-    could_not_convert_to_int: "El ID de la organización: %s no pudo convertirse en un valor entero"
+    could_not_convert_to_int: "El ID de la organización"
     site_not_found: "El sitio no pudo encontrarse, razón: %s"
     name_cannot_be_empty: "El nombre del sitio no puede estar vacío"
     domain_cannot_be_empty: "El dominio no puede estar vacío"
@@ -1347,19 +1342,18 @@ es:
     import_wrong_sites: "Hemos encontrado errores para los siguientes sitios: %s"
     confirm_delete: "¿Está seguro de quiere eliminar este sitio? Todos los agentes y perfiles sociados serán eliminados de la base de datos"
     delete_error: "No se pudo eliminar el sitio, razón: %s"
-    filter_by_name: Filtrar por nombre...
-    filter_by_creation: Filter by creation date
-    filter_by_modification: Filter by modification date
-    filter_by_default_status: Filtar por fecha de creación
-    no_tenants: No se han encontrado organizaciones para esta consulta
+    filter_by_name: "Filtrar por nombre..."
+    filter_by_creation: "Filter by creation date"
+    filter_by_modification: "Filter by modification date"
+    filter_by_default_status: "Filtar por fecha de creación"
+    no_tenants: "No se han encontrado organizaciones para esta consulta"
     could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
-    could_not_convert_site_to_int: "El ID del sitio: %s no pudo convertirse an un entero"
+    could_not_convert_site_to_int: "El ID del sitio %s no pudo convertirse an un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
     domain_optional: "Dominio (opcional)"
     could_not_find_site: "No se pudo encontrar el sitio"
     could_not_find_tenant: "No se pudo encontrar la organización"
-
   authentication:
     title: "Autenticación"
     description: "Configure cómo la consola OpenUEM autentica a sus usuarios y varios aspectos relacionados con las cuentas de usuario"
@@ -1412,7 +1406,6 @@ es:
     type: "Tipo de autenticación"
     could_not_get_user_id: "No se pudo obtener el ID de usuario de la sesión"
     could_not_get_user_info: "No se pudo obtener la información del usuario de la sesión, motivo: %s"
-
   rustdesk:
     settings_title: "RustDesk"
     settings_description: "OpenUEM puede usar RustDesk para abrir sesiones de asistencia remota. RustDesk se puede instalar en los endpoints mediante las opciones de implementación de OpenUEM. Si utiliza su propio servidor de ID o servidor de retransmisión, puede introducir aquí el nombre de host o la dirección IP, y la clave utilizada para cifrar las comunicaciones. Si utiliza RustDesk Pro, también puede introducir el servidor API. Si no se configura aquí, se utilizarán los servidores públicos de RustDesk."
@@ -1426,13 +1419,13 @@ es:
     settings_api_server_description: "La dirección IP o el nombre de host de su servidor API de RustDesk (RustDesk Pro)"
     settings_save: "Guardar configuración"
     key_must_be_set: "La clave debe configurarse si se ha definido un servidor"
-    settings_not_saved: "No se pudieron guardar las configuraciones de RustDesk, razón: %"
+    settings_not_saved: "No se pudieron guardar las configuraciones de RustDesk, razón: %s"
     settings_saved: "Se han guardado la configuración de RustDesk"
     remote_description: "Si RustDesk está instalado tanto en el equipo remoto como en el equipo desde el que se brinda soporte, y si el protocolo rustdesk se ha registrado en el equipo del técnico, se puede iniciar una sesión de RustDesk independientemente de la ubicación de ambos"
     could_not_prepare_request: "No se pudo preparar la solicitud para configurar e iniciar RustDesk en el equipo remoto, motivo: %v"
     could_not_send_request: "No se pudo enviar la solicitud a la configuración e iniciar RustDesk en el equipo remoto, motivo: %v"
     could_not_decode_response: "No se pudo interpretar la respuesta del equipo"
-    remote_error: "El agente tuvo un error al iniciar RustDesk en la máquina remota, motivo: %v"    
+    remote_error: "El agente tuvo un error al iniciar RustDesk en la máquina remota, motivo: %s"
     rustdesk_ready: "El cliente remoto de RustDesk está listo"
     remote_stop_error: "El agente no pudo detener RustDesk en el punto final remoto, motivo: %v"
     settings_direct_ip_access_title: "Acceso IP directo"
@@ -1452,16 +1445,15 @@ es:
     rustdesk_direct_ip: "Dirección IP (LAN): "
     rustdesk_server_pubkey: "Clave pública del servidor: "
     rustdesk_allowed_ip: "IPs permitidas: "
-    rustdesk_relay_server: "Relay Server:"
-    rustdesk_rendezvous_server: "IDs Server:"
+    rustdesk_relay_server: "Relay Server: "
+    rustdesk_rendezvous_server: "IDs Server: "
     rustdesk_connect: "Utilice los siguientes enlaces para abrir la aplicación RustDesk. Estos enlaces contienen toda la información para establecer la conexión, excepto el cliente web de RustDesk."
     rustdesk_settings: "Estas son las credenciales y configuraciones utilizadas para esta conexión, en caso de que necesite configurar su cliente RustDesk manualmente"
-    rustdesk_rollback: "OpenUEM reemplaza la configuración de RustDesk utilizada en su endpoint. Use el siguiente botón para cerrar la aplicación RustDesk en el equipo remoto y revertir la configuración."    
+    rustdesk_rollback: "OpenUEM reemplaza la configuración de RustDesk utilizada en su endpoint. Use el siguiente botón para cerrar la aplicación RustDesk en el equipo remoto y revertir la configuración."
     click_to_open_web_client: "Abra la aplicación web RustDesk"
     apply_global_settings: "Aplicar la configuración global de RustDesk"
     rustdesk_flatpak_wayland: "El equipo remoto tiene instalada la aplicación RustDesk con Flatpak en una pantalla Wayland. La aplicación no se puede abrir de forma remota, ya que el usuario debe especificar qué pantalla desea usar con Wayland. Por lo tanto, informe al usuario que primero debe abrir la aplicación RustDesk."
     rustdesk_check_warn: "Se recomienda que fuece al agente para que envíe un informe si algunas comprobaciones se muestran como fallidas o si se muestra un error de NATS"
-
   countries:
     Australia: "Australia"
     Austria: "Austria"
