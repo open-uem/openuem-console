@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alexedwards/argon2id"
+	validator "github.com/go-passwd/validator"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/account_views"
@@ -41,6 +42,34 @@ func (h *Handler) MyAccount(c echo.Context) error {
 	return RenderView(c, account_views.MyAccountIndex("| My Account", account_views.MyAccount(c, user, defaultCountry, commonInfo, ""), commonInfo))
 }
 
+func (h *Handler) UpdatePersonalInfo(c echo.Context) error {
+	username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
+	if username == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.username_empty"), true))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	defaultCountry, err := h.Model.GetDefaultCountry()
+	if err != nil {
+		return err
+	}
+
+	if err := h.Model.UpdateUser(username, c.FormValue("name"), c.FormValue("email"), c.FormValue("phone"), c.FormValue("country")); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_update_personal_info", err.Error()), true))
+	}
+
+	user, err := h.Model.GetUserById(username)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_find_user"), true))
+	}
+
+	return RenderView(c, account_views.MyAccountIndex("| My Account", account_views.MyAccount(c, user, defaultCountry, commonInfo, i18n.T(c.Request().Context(), "login.personal_info_updated")), commonInfo))
+}
+
 func (h *Handler) MyAccountPassword(c echo.Context) error {
 	username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
 	if username == "" {
@@ -71,6 +100,10 @@ func (h *Handler) MyAccountPassword(c echo.Context) error {
 
 	if newPassword != confirmNewPassword {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.passwords_dont_match"), true))
+	}
+
+	if err := ValidatePasswordComplexity(newPassword); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.password_complexity_invalid"), true))
 	}
 
 	// Check if current password is valid
@@ -116,6 +149,7 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
+	log.Println(user.Passwd, c.FormValue("current-password"))
 	if user.Passwd {
 		currentPassword := c.FormValue("current-password")
 		if currentPassword == "" {
@@ -221,13 +255,38 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.username_empty"), true))
 	}
 
-	// Save recovery codse
+	user, err := h.Model.GetUserHash(username)
+	if err != nil {
+		// error should go to auth log
+		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
+	}
+
+	if user.Passwd {
+		currentPassword := c.FormValue("current-password")
+		if currentPassword == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_empty"), true))
+		}
+
+		// Check if current password is valid
+		match, err := argon2id.ComparePasswordAndHash(currentPassword, user.Hash)
+		if err != nil {
+			// error should go to auth log
+			log.Printf("[ERROR]: could not compare password and hash for user %s, reason: %v", username, err)
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_not_valid"), true))
+		}
+		if !match {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_not_valid"), true))
+		}
+	}
+
+	// Remove 2FA from database
 	if err := h.Model.Disable2FA(username); err != nil {
 		log.Printf("[ERROR]: could not disable 2FA for %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_disable_2fa"), true))
 	}
 
-	user, err := h.Model.GetUserById(username)
+	user, err = h.Model.GetUserById(username)
 	if err != nil {
 		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
@@ -245,4 +304,17 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 	}
 
 	return RenderView(c, account_views.MyAccountIndex("| My Account", account_views.MyAccount(c, user, defaultCountry, commonInfo, i18n.T(c.Request().Context(), "login.disabled_2fa")), commonInfo))
+}
+
+func ValidatePasswordComplexity(password string) error {
+	passwordValidator := validator.New(
+		validator.MinLength(15, nil),
+		validator.MaxLength(64, nil),
+	)
+
+	if err := passwordValidator.Validate(password); err != nil {
+		return err
+	}
+
+	return nil
 }

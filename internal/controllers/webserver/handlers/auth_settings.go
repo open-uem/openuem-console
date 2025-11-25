@@ -41,6 +41,11 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_use_oidc"), true))
 		}
 
+		usePasswd, err := strconv.ParseBool(c.FormValue("authentication-use-passwords"))
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_parse_use_passwords"), true))
+		}
+
 		if !useCertificates && !useOIDC {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.at_least_one_auth_method"), true))
 		}
@@ -88,7 +93,7 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.role_required"), true))
 		}
 
-		if err := h.Model.SaveAuthenticationSettings(useCertificates, allowRegister, useOIDC, oidcProvider, oidcServer, oidcClientID, oidcRole, autoCreate, autoApprove); err != nil {
+		if err := h.Model.SaveAuthenticationSettings(useCertificates, allowRegister, useOIDC, oidcProvider, oidcServer, oidcClientID, oidcRole, autoCreate, autoApprove, usePasswd); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.settings_not_saved", err.Error()), true))
 		}
 

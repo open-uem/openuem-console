@@ -30,10 +30,10 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 						<div class="flex gap-8">
 							<form
 								class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/6 px-6 py-4"
-								hx-post={ string(templ.URL(fmt.Sprintf("/admin/users/%s/profile", user.ID))) }
+								hx-post="/myaccount/info"
 								hx-target="#main"
 								hx-swap="outerHTML"
-								hx-indicator="#update-profile-spinner"
+								autocomplete="off"
 							>
 								<div class="flex flex-col gap-4">
 									<h3 class="uk-card-title">{ i18n.T(ctx, "login.personal_info") }</h3>
@@ -124,6 +124,7 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 									hx-target="#main"
 									hx-swap="outerHTML"
 									class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/6 px-6 py-4"
+									autocomplete="off"
 								>
 									<div class="flex flex-col gap-4">
 										<h3 class="uk-card-title">{ i18n.T(ctx, "login.password_auth") }</h3>
@@ -142,21 +143,29 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 															type="password"
 															placeholder={ i18n.T(ctx, "login.password") }
 															required
+															_="on keyup
+																if my.value is not empty then
+																	remove @disabled from #btn2fa
+																else
+																	add @disabled to #btn2fa
+																end
+															end
+															"
 														/>
 														<button
 															class="uk-form-icon uk-form-icon-flip"
 															type="button"
 															_="
-                                                        on click 
-                                                            if #reveal-current-password@icon is 'eye' then
-                                                                set #reveal-current-password@icon to 'eye-off'
-                                                                set #current-password@type to 'text'
-                                                            else
-                                                                set #reveal-current-password@icon to 'eye'
-                                                                set #current-password@type to 'password'
-                                                            end
-                                                        end
-                                                    "
+																on click 
+																	if #reveal-current-password@icon is 'eye' then
+																		set #reveal-current-password@icon to 'eye-off'
+																		set #current-password@type to 'text'
+																	else
+																		set #reveal-current-password@icon to 'eye'
+																		set #current-password@type to 'password'
+																	end
+																end
+                                                    		"
 														>
 															<uk-icon id="reveal-current-password" icon="eye" class="uk-text-muted"></uk-icon>
 														</button>
@@ -231,6 +240,7 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 											</div>
 										</fieldset>
 									</div>
+									<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.password_complexity") }</span>
 									<div class="flex justify-between mt-2">
 										<button type="reset" class="uk-button uk-button-secondary">
 											{ i18n.T(ctx, "Reset") }
@@ -255,6 +265,7 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 									<div class="flex justify-end">
 										if user.Use2fa {
 											<button
+												id="btn2fa"
 												hx-post="/myaccount/disable2fa"
 												hx-include="#current-password"
 												hx-push-url="false"
@@ -262,15 +273,18 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 												hx-swap="outerHTML"
 												class="uk-button uk-button-danger mt-2"
 												type="submit"
+												disabled
 											>
 												{ i18n.T(ctx, "login.disable_2fa") }
 											</button>
 										} else {
 											<button
+												id="btn2fa"
 												hx-post="/myaccount/enable2fa"
 												hx-include="#current-password"
 												class="uk-button uk-button-primary mt-2"
 												type="submit"
+												disabled
 											>
 												{ i18n.T(ctx, "login.enable_2fa") }
 											</button>
@@ -299,7 +313,10 @@ templ Enable2FA(username string, qrCode string, secret string) {
 				</div>
 				<span class="uk-text uk-text-small uk-text-muted">
 					{ i18n.T(ctx, "login.topt_cant_use_qr") }
-					<span class="underline cursor-pointer" _={ fmt.Sprintf("on click navigator.clipboard.writeText('%s')", secret) }>
+					<span
+						class="underline cursor-pointer"
+						_={ fmt.Sprintf("on click navigator.clipboard.writeText('%s') then call UIkit.notification({message: '%s'})", secret, i18n.T(ctx, "Clipboard")) }
+					>
 						{ i18n.T(ctx, "login.totp_use_this_code_instead") }
 					</span>
 				</span>
@@ -355,7 +372,11 @@ templ Enabled2FA(codes string) {
 			</div>
 			<textarea id="codes" class="resize-none" rows="10" disabled>{ codes }</textarea>
 			<div class="flex gap-2 print:hidden">
-				<button class="flex gap-2 uk-button uk-button-default" type="button" _="on click navigator.clipboard.writeText(#codes.textContent)">
+				<button
+					class="flex gap-2 uk-button uk-button-default"
+					type="button"
+					_={ fmt.Sprintf("on click navigator.clipboard.writeText(#codes.textContent) then call UIkit.notification({message: '%s'})", i18n.T(ctx, "Clipboard")) }
+				>
 					<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
 					{ i18n.T(ctx, "Copy") }
 				</button>

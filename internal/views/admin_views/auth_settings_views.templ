@@ -43,6 +43,16 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 										</select>
 									</td>
 								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_passwords_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.use_passwords_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="authentication-use-passwords">
+											<option value="true" selected?={ settings.UsePasswd }>{ i18n.T(ctx, "Yes") }</option>
+											<option value="false" selected?={ !settings.UsePasswd }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
 								<tr id="allow-register-section" class={ templ.KV("hidden", !settings.UseCertificates) }>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.allow_register_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "authentication.allow_register_description") }</td>

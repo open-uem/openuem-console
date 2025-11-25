@@ -592,8 +592,8 @@ fr:
     import_wrong_email: "L'e-mail de la ligne %d doit être une adresse valide"
     import_wrong_users: "Nous avons rencontré des erreurs pour les utilisateurs suivants: %s"
     import_wrong_oidc: "La valeur OpenID Connect de la ligne %d doit être true ou false"
-    admin_cannot_be_removed: "L'utilisateur administrateur ne peut pas être supprimé"
-    new_confirmation_email_sent: "Un nouvel e-mail de confirmation a été envoyé à "
+    admin_cannot_be_removed: "L'utilisateur admin ou openuem ne peut pas être supprimé"
+    new_confirmation_email_sent: "Un nouvel e-mail de confirmation a été envoyé à %s"
     email_confirmed: "L'e-mail a été confirmé"
   updates:
     title: "Mises à jour de sécurité"

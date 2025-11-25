@@ -2,8 +2,11 @@ package models
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
+	"math/big"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -97,14 +100,29 @@ func (m *Model) EmailExists(email string) (bool, error) {
 	return m.Client.User.Query().Where(user.Email(email)).Exist(context.Background())
 }
 
-func (m *Model) AddUser(uid, name, email, phone, country string, oidc bool) error {
-	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetOpenid(oidc).SetCreated(time.Now())
+func (m *Model) AddUser(uid, name, email, phone, country string, authType string) (*ent.User, error) {
+	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now())
 
-	if oidc {
-		query.SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW)
+	switch authType {
+	case "oidc":
+		query.SetOpenid(true)
+		query.SetEmailVerified(true)
+		query.SetRegister(openuem_nats.REGISTER_OIDC_FIRST_LOGIN)
+	case "passwd":
+		// Check if email already assigned to a different user for the same auth type
+		exist, err := m.Client.User.Query().Where(user.Passwd(true), user.Email(email)).Exist(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		if exist {
+			return nil, errors.New("this email is already assigned to another account that authenticates with password")
+		}
+		query.SetRegister(openuem_nats.REGISTER_PASSWORD_LINK_SENT)
+		query.SetEmailVerified(true)
+		query.SetPasswd(true)
 	}
 
-	return query.Exec(context.Background())
+	return query.Save(context.Background())
 }
 
 func (m *Model) AddImportedUser(uid, name, email, phone, country string, oidc bool) error {
@@ -128,17 +146,55 @@ func (m *Model) AddOIDCUser(uid, name, email, phone string, emailVerified bool) 
 }
 
 func (m *Model) UpdateUser(uid, name, email, phone, country string) error {
-	query := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now())
-
-	return query.Exec(context.Background())
-}
-
-func (m *Model) RegisterUser(uid, name, email, phone, country, password string, oidc bool) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCertClearPassword(password).SetOpenid(oidc).SetCreated(time.Now()).Save(context.Background())
+	u, err := m.Client.User.Get(context.Background(), uid)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	if u.Passwd && email != u.Email {
+		// Check if email already assigned to a different user for the same auth type
+		exist, err := m.Client.User.Query().Where(user.Passwd(true), user.Email(email)).Exist(context.Background())
+		if err != nil {
+			return err
+		}
+		if exist {
+			return errors.New("this email is already assigned to another account that authenticates with password")
+		}
+	}
+
+	query := m.Client.User.UpdateOneID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetModified(time.Now())
+	return query.Exec(context.Background())
+}
+
+func (m *Model) RegisterUser(uid, name, email, phone, country, password string, authType string) error {
+	// Check if user exists
+	exists, err := m.UserExists(uid)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("username %s already exists", uid)
+	}
+
+	if authType == "passwd" {
+		userID := m.GetUserIDByEmail(email)
+		if userID != "" && userID != uid {
+			return fmt.Errorf("email %s already assigned to %s", email, userID)
+		}
+	}
+
+	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_IN_REVIEW)
+
+	if authType == "passwd" {
+		query.SetPasswd(true)
+	}
+
+	if authType == "oidc" {
+		query.SetOpenid(true)
+	}
+
+	return query.Exec(context.Background())
 }
 
 func (m *Model) GetUserById(uid string) (*ent.User, error) {
@@ -148,6 +204,7 @@ func (m *Model) GetUserById(uid string) (*ent.User, error) {
 func (m *Model) ConsumeRecoveryCode(uid string, code string) bool {
 	hashes, err := m.Client.RecoveryCode.Query().Where(recoverycode.HasUserWith(user.ID(uid))).All(context.Background())
 	if err != nil {
+		// auth log
 		log.Println("[ERROR]: could not find recovery codes for this user")
 		return false
 	}
@@ -155,11 +212,16 @@ func (m *Model) ConsumeRecoveryCode(uid string, code string) bool {
 	for _, hash := range hashes {
 		match, err := argon2id.ComparePasswordAndHash(code, hash.Code)
 		if err == nil && match {
-			if err := m.Client.RecoveryCode.Update().SetUsed(true).Where(recoverycode.ID(hash.ID)).Exec(context.Background()); err != nil {
-				log.Printf("[ERROR]: could not invalidate recovery code %s, reason: %v", code, err)
+			if hash.Used {
+				log.Println("[ERROR]: could not find recovery codes for this user")
 				return false
+			} else {
+				if err := m.Client.RecoveryCode.Update().SetUsed(true).Where(recoverycode.ID(hash.ID)).Exec(context.Background()); err != nil {
+					log.Printf("[ERROR]: could not invalidate recovery code %s, reason: %v", code, err)
+					return false
+				}
+				return true
 			}
-			return true
 		}
 	}
 
@@ -168,7 +230,7 @@ func (m *Model) ConsumeRecoveryCode(uid string, code string) bool {
 }
 
 func (m *Model) ConfirmEmail(uid string) error {
-	return m.Client.User.Update().SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_IN_REVIEW).Where(user.ID(uid)).Exec(context.Background())
+	return m.Client.User.Update().SetEmailVerified(true).SetRegister(openuem_nats.REGISTER_SEND_CERTIFICATE).Where(user.ID(uid)).Exec(context.Background())
 }
 
 func (m *Model) UserSetRevokedCertificate(uid string) error {
@@ -245,20 +307,65 @@ func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken s
 }
 
 func (m *Model) CreateDefaultAdminPassword() error {
+	password := ""
+
+	// Define character sets
+	lowercaseChars := "abcdefghijklmnopqrstuvwxyz"
+	uppercaseChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	numberChars := "0123456789"
+	symbolChars := "!@#$%^&*()-_=+[]{}|;:,.<>?'"
+
+	// Combine all character sets
+	allChars := lowercaseChars + uppercaseChars + numberChars + symbolChars
+
+	randNumber, err := rand.Int(rand.Reader, big.NewInt(int64(len(lowercaseChars))))
+	if err != nil {
+		return err
+	}
+	password += string(lowercaseChars[randNumber.Int64()])
+
+	randNumber, err = rand.Int(rand.Reader, big.NewInt(int64(len(uppercaseChars))))
+	if err != nil {
+		return err
+	}
+	password += string(uppercaseChars[randNumber.Int64()])
+
+	randNumber, err = rand.Int(rand.Reader, big.NewInt(int64(len(numberChars))))
+	if err != nil {
+		return err
+	}
+	password += string(numberChars[randNumber.Int64()])
+
+	randNumber, err = rand.Int(rand.Reader, big.NewInt(int64(len(symbolChars))))
+	if err != nil {
+		return err
+	}
+	password += string(symbolChars[randNumber.Int64()])
+
+	for range 12 {
+		randNumber, err = rand.Int(rand.Reader, big.NewInt(int64(len(allChars))))
+		if err != nil {
+			return err
+		}
+		password += string(allChars[randNumber.Int64()])
+	}
+
 	exist, err := m.Client.User.Query().Where(user.ID("openuem")).Exist(context.Background())
 	if err != nil {
 		return err
 	}
 
 	if !exist {
-		hash, err := argon2id.CreateHash("pa$$word", argon2id.DefaultParams)
+		hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 		if err != nil {
 			return err
 		}
 
+		log.Printf("[INFO]: the initial password for the openuem user account is: %s", password)
+
 		return m.Client.User.Create().
 			SetID("openuem").
-			SetRegister("users.force_change_password").
+			SetRegister(openuem_nats.REGISTER_FORCE_PASSWORD_CHANGE).
 			SetName("OpenUEM Administrator").
 			SetPasswd(true).
 			SetHash(hash).
@@ -339,11 +446,47 @@ func (m *Model) SaveRecoveryCodes(username string, codes []string) error {
 }
 
 func (m *Model) GetUserHash(username string) (*ent.User, error) {
-	return m.Client.User.Query().Select(user.FieldHash).Where(user.ID(username)).First(context.Background())
+	return m.Client.User.Query().Select(user.FieldHash, user.FieldPasswd).Where(user.ID(username)).First(context.Background())
 }
 
 func (m *Model) GetUserTOTPSecret(username string) (*ent.User, error) {
 	return m.Client.User.Query().Select(user.FieldTotpSecret).Where(user.ID(username)).First(context.Background())
+}
+
+func (m *Model) GetUserIDByEmail(email string) string {
+	user, err := m.Client.User.Query().Select(user.FieldTotpSecret).Where(user.Email(email)).First(context.Background())
+	if err != nil {
+		return ""
+	}
+
+	return user.ID
+}
+
+func (m *Model) SaveForgotCode(username string, code string) error {
+	expiresAt := time.Now().Add(3 * time.Hour)
+	if err := m.Client.User.UpdateOneID(username).SetForgotPasswordCode(code).SetForgotPasswordCodeExpiresAt(expiresAt).Exec(context.Background()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Model) IsForgotCodeValid(username string, code string) bool {
+	user, err := m.Client.User.Query().Where(user.ID(username), user.ForgotPasswordCodeExpiresAtGTE(time.Now())).First(context.Background())
+	if err != nil {
+		return false
+	}
+
+	match, err := argon2id.ComparePasswordAndHash(code, user.ForgotPasswordCode)
+	if err != nil {
+		log.Printf("[ERROR]: could not compare forgot code and hash for user %s, reason: %v", username, err)
+		return false
+	}
+
+	return match
+}
+
+func (m *Model) RemoveForgotCode(username string) error {
+	return m.Client.User.UpdateOneID(username).SetForgotPasswordCode("").SetForgotPasswordCodeExpiresAt(time.Now()).Exec(context.Background())
 }
 
 func (m *Model) Disable2FA(username string) error {
@@ -355,4 +498,12 @@ func (m *Model) Disable2FA(username string) error {
 
 	// Disable 2FA and remove TOTP secret
 	return m.Client.User.UpdateOneID(username).SetUse2fa(false).SetTotpSecret("").SetTotpSecretConfirmed(false).Exec(context.Background())
+}
+
+func (m *Model) SaveNewAccountToken(username string, token string) error {
+	return m.Client.User.UpdateOneID(username).SetNewUserToken(token).Exec(context.Background())
+}
+
+func (m *Model) DeleteNewAccountToken(username string) error {
+	return m.Client.User.UpdateOneID(username).SetNewUserToken("").Exec(context.Background())
 }

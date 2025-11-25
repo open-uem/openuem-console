@@ -14,6 +14,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.16.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
+	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/gohugoio/locales v0.14.0
@@ -29,8 +30,8 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20251115153746-6e40fa166b47
-	github.com/open-uem/nats v0.0.0-20250930102922-09c2a23b0598
+	github.com/open-uem/ent v0.0.0-20251124201052-160d0fc6d87b
+	github.com/open-uem/nats v0.0.0-20251124165929-6f5d37cf2f8d
 	github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9

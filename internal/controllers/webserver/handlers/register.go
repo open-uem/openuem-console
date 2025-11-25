@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -12,7 +11,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/register_views"
 )
@@ -24,7 +22,7 @@ type RegisterRequest struct {
 	Phone    string `form:"phone" validate:"required,e164"`
 	Country  string `form:"country" validate:"required,iso3166_1_alpha2"`
 	Password string `form:"password"`
-	OpenID   bool   `form:"oidc" validate:"required"`
+	AuthType string `form:"auth-type" validate:"required"`
 }
 
 func (h *Handler) SignIn(c echo.Context) error {
@@ -40,7 +38,12 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings)))
+	csrfToken, ok := c.Get("csrf").(string)
+	if !ok || csrfToken == "" {
+		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
+	}
+
+	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings), csrfToken))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
@@ -69,20 +72,11 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		values.Phone = r.Phone
 		values.Country = r.Country
 		values.Password = r.Password
-		values.OpenID = r.OpenID
+		values.AuthType = r.AuthType
 
 		errs := validate.Var(r.UID, "required")
 		if errs != nil {
 			validations.UIDRequired = true
-		}
-
-		exists, err := h.Model.UserExists(r.UID)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		if exists {
-			validations.UIDExists = true
 		}
 
 		errs = validate.Var(r.Name, "required")
@@ -98,14 +92,6 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		errs = validate.Var(r.Email, "email")
 		if errs != nil {
 			validations.EmailInvalid = true
-		}
-
-		exists, err = h.Model.EmailExists(r.Email)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-		if exists {
-			validations.EmailExists = true
 		}
 
 		errs = validate.Var(r.Country, "required")
@@ -128,16 +114,16 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			validations.PhoneInvalid = true
 		}
 
-		if !r.OpenID {
+		errs = validate.Var(r.AuthType, "required")
+		if errs != nil {
+			validations.AuthTypeRequired = true
+		}
+
+		if r.AuthType == "certificate" {
 			errs = validate.Var(r.Password, "required")
 			if errs != nil {
 				validations.PasswordRequired = true
 			}
-		}
-
-		errs = validate.Var(r.OpenID, "required")
-		if errs != nil {
-			validations.OpenIDRequired = true
 		}
 
 		settings, err := h.Model.GetAuthenticationSettings()
@@ -145,83 +131,33 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings)))
-	}
-
-	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password, r.OpenID); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	token, err := h.generateConfirmEmailToken(r.UID)
-	if err != nil {
-		// rollback register user
-		if err := h.Model.DeleteUser(r.UID); err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		csrfToken, ok := c.Get("csrf").(string)
+		if !ok || csrfToken == "" {
+			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 		}
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+
+		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings), csrfToken))
 	}
 
-	notification := openuem_nats.Notification{
-		To:               r.Email,
-		Subject:          "Please, confirm your email address",
-		MessageTitle:     "OpenUEM | Verify your email address",
-		MessageText:      "Please, confirm your email address so that it can be used to receive emails from OpenUEM",
-		MessageGreeting:  fmt.Sprintf("Hi %s", r.Name),
-		MessageAction:    "Confirm email",
-		MessageActionURL: c.Request().Header.Get("Origin") + "/auth/confirm/" + token,
+	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password, r.AuthType); err != nil {
+		log.Printf("[ERROR]: could not process the register request, reason: %v", err)
 	}
 
-	data, err := json.Marshal(notification)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	csrfToken, ok := c.Get("csrf").(string)
+	if !ok || csrfToken == "" {
+		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
-	}
-
-	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful()))
+	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful(), csrfToken))
 }
 
-func (h *Handler) UIDExists(c echo.Context) error {
-	uid := strings.TrimSpace(c.Param("uid"))
-	exists, err := h.Model.UserExists(uid)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "error")
-	}
-
-	if exists {
-		return c.String(http.StatusOK, "true")
-	} else {
-		return c.String(http.StatusOK, "false")
-	}
-}
-
-func (h *Handler) EmailExists(c echo.Context) error {
-	email := strings.TrimSpace(c.Param("email"))
-	exists, err := h.Model.EmailExists(email)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "error")
-	}
-
-	if exists {
-		return c.String(http.StatusOK, "true")
-	} else {
-		return c.String(http.StatusOK, "false")
-	}
-}
-
-func (h *Handler) generateConfirmEmailToken(uid string) (string, error) {
+func (h *Handler) generateEmailToken(uid string, subject string, hours int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(hours) * time.Hour)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		NotBefore: jwt.NewNumericDate(time.Now()),
 		Issuer:    "OpenUEM",
-		Subject:   "Email Confirmation",
+		Subject:   subject,
 		ID:        uid,
 	})
 

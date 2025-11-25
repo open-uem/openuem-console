@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
-	"github.com/open-uem/openuem-console/internal/views"
-	"github.com/open-uem/openuem-console/internal/views/register_views"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/views/register_views"
 )
 
 type MyCustomClaims struct {
@@ -21,7 +20,7 @@ func (h *Handler) Auth(c echo.Context) error {
 	if h.ReverseProxyAuthPort != "" {
 		u, err := url.Parse(c.Request().Referer())
 		if err != nil {
-			return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "could not parse url").Render(c.Request().Context(), c.Response().Writer)
+			return echo.NewHTTPError(http.StatusBadRequest, "could not parse url")
 		}
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", u.Hostname(), h.ReverseProxyAuthPort))
 	} else {
@@ -33,7 +32,7 @@ func (h *Handler) Auth(c echo.Context) error {
 func (h *Handler) ConfirmEmail(c echo.Context) error {
 	tokenString := c.Param("token")
 
-	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -41,30 +40,35 @@ func (h *Handler) ConfirmEmail(c echo.Context) error {
 	})
 
 	if err != nil {
-		return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), err.Error()).Render(c.Request().Context(), c.Response().Writer)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if claims, ok := token.Claims.(*MyCustomClaims); ok {
 		if time.Now().After(claims.ExpiresAt.Time) {
-			return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "token has expired, please contact your administrator to request a new confirmation email").Render(c.Request().Context(), c.Response().Writer)
+			return echo.NewHTTPError(http.StatusBadRequest, "token has expired, please contact your administrator to request a new confirmation email")
 		}
 
 		user, err := h.Model.GetUserById(claims.ID)
 		if err != nil {
-			return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), err.Error()).Render(c.Request().Context(), c.Response().Writer)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		if user.EmailVerified {
-			return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "you've already confirmed your email").Render(c.Request().Context(), c.Response().Writer)
+			return echo.NewHTTPError(http.StatusBadRequest, "you've already confirmed your email")
 		}
 
 		if err := h.Model.ConfirmEmail(user.ID); err != nil {
-			return views.ErrorPage(strconv.Itoa(http.StatusInternalServerError), err.Error()).Render(c.Request().Context(), c.Response().Writer)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed()))
+		csrfToken, ok := c.Get("csrf").(string)
+		if !ok || csrfToken == "" {
+			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
+		}
+
+		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed(), csrfToken))
 
 	} else {
-		return views.ErrorPage(strconv.Itoa(http.StatusBadRequest), "unknown claims type, cannot proceed").Render(c.Request().Context(), c.Response().Writer)
+		return echo.NewHTTPError(http.StatusBadRequest, "unknown claims type, cannot proceed")
 	}
 }

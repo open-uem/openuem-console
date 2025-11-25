@@ -592,8 +592,8 @@ ca:
     import_wrong_email: "El correu electrònic de la fila %d ha de ser una adreça vàlida"
     import_wrong_users: "Hem trobat errors per als usuaris següents: %s"
     import_wrong_oidc: "El valor d'OpenID Connect a la fila %d ha de ser vertader o fals"
-    admin_cannot_be_removed: "L'usuari administrador no es pot eliminar"
-    new_confirmation_email_sent: "S'ha enviat un correu electrònic de confirmació nou a"
+    admin_cannot_be_removed: "L'usuari admin no es pot eliminar"
+    new_confirmation_email_sent: "S'ha enviat un correu electrònic de confirmació nou a %s"
     email_confirmed: "S'ha confirmat el correu electrònic"
   updates:
     title: "Actualitzacions de seguretat"

@@ -9616,6 +9616,10 @@ th.uk-text-break, td.uk-text-break {
   height: 7rem;
 }
 
+.h-36 {
+  height: 9rem;
+}
+
 .h-4 {
   height: 1rem;
 }
@@ -9658,10 +9662,6 @@ th.uk-text-break, td.uk-text-break {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-36 {
-  height: 9rem;
 }
 
 .max-h-40 {
@@ -9744,6 +9744,10 @@ th.uk-text-break, td.uk-text-break {
   width: 75%;
 }
 
+.w-36 {
+  width: 9rem;
+}
+
 .w-4 {
   width: 1rem;
 }
@@ -9806,10 +9810,6 @@ th.uk-text-break, td.uk-text-break {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-36 {
-  width: 9rem;
 }
 
 .flex-1 {
@@ -9892,10 +9892,6 @@ th.uk-text-break, td.uk-text-break {
   gap: 2.5rem;
 }
 
-.gap-16 {
-  gap: 4rem;
-}
-
 .gap-2 {
   gap: 0.5rem;
 }
@@ -9910,6 +9906,10 @@ th.uk-text-break, td.uk-text-break {
 
 .gap-8 {
   gap: 2rem;
+}
+
+.gap-16 {
+  gap: 4rem;
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {

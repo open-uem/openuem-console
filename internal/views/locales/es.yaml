@@ -593,7 +593,7 @@ es:
     import_wrong_users: "Encontramos errores para los siguientes usuarios: %s"
     import_wrong_oidc: "El valor de OpenID Connect en la fila %d debe ser true o false"
     admin_cannot_be_removed: "El usuario admin no puede ser eliminado"
-    new_confirmation_email_sent: "Se ha enviado un nuevo email de confirmación a "
+    new_confirmation_email_sent: "Se ha enviado un nuevo email de confirmación a %s"
     email_confirmed: "La dirección de correo electrónico ha sido confirmada"    
   updates:
     title: "Actualizaciones de seguridad"

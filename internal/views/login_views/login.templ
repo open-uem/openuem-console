@@ -16,47 +16,51 @@ templ Login(authSettings *ent.Authentication) {
 					alt="OpenUEM Logo"
 					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
 				/>
-				<div id="login" class="flex flex-col gap-16">
+				<div id="login" class="flex flex-col gap-8">
 					<div class="grid gap-2 text-center">
-						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
+						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Welcome") }</h1>
 					</div>
-					@LoginUserPassword(authSettings)
-					<div id="other-logins" class="flex flex-col gap-4">
-						if authSettings.UseCertificates {
-							<a
-								href="/auth"
-								class="uk-button uk-button-primary text-white"
-								type="button"
-							>
-								<uk-icon hx-history="false" icon="file-key" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "login.button") }
-							</a>
+					<div class="flex flex-col gap-16">
+						if authSettings.UsePasswd {
+							@LoginUserPassword(authSettings)
 						}
-						if authSettings.UseOIDC {
-							<a
-								href="/oidc"
-								class="uk-button uk-button-primary text-white"
-								type="button"
-								_="on click remove .hidden from #oidc-spinner"
-							>
-								<div id="oidc-spinner" class="hidden">
-									<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
-								</div>
-								<i class="si si-openid si--color uk-cloak text-2xl mx-2"></i>{ i18n.T(ctx, "login.openid") }
-							</a>
-						}
-						if authSettings.AllowRegister {
-							<button
-								href="/register"
-								hx-get="/register"
-								hx-push-url="true"
-								hx-target="body"
-								hx-swap="outerHTML"
-								class="uk-button uk-button-default"
-								type="button"
-							>
-								<uk-icon hx-history="false" icon="user-plus" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.button") }
-							</button>
-						}
+						<div id="other-logins" class="flex flex-col gap-4">
+							if authSettings.UseCertificates {
+								<a
+									href="/auth"
+									class="uk-button uk-button-primary text-white"
+									type="button"
+								>
+									<uk-icon hx-history="false" icon="file-key" hx-history="false" custom-class="h-7 w-7 mx-2" uk-cloack></uk-icon>{ i18n.T(ctx, "login.button") }
+								</a>
+							}
+							if authSettings.UseOIDC {
+								<a
+									href="/oidc"
+									class="uk-button uk-button-primary text-white"
+									type="button"
+									_="on click remove .hidden from #oidc-spinner"
+								>
+									<div id="oidc-spinner" class="hidden">
+										<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									</div>
+									<i class="si si-openid si--color uk-cloak text-2xl mx-2"></i>{ i18n.T(ctx, "login.openid") }
+								</a>
+							}
+							if authSettings.AllowRegister {
+								<button
+									href="/register"
+									hx-get="/register"
+									hx-push-url="true"
+									hx-target="body"
+									hx-swap="outerHTML"
+									class="uk-button uk-button-default"
+									type="button"
+								>
+									<uk-icon hx-history="false" icon="user-plus" hx-history="false" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "register.button") }
+								</button>
+							}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -118,16 +122,12 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 		</div>
 		<a
 			class="flex gap-2 underline"
-			href="/login/forgotpass"
-			hx-get="/login/forgotpass"
+			href="/login/forgot"
+			hx-get="/login/forgot"
 			hx-push-url="true"
-			hx-target="#login"
+			hx-target="body"
 			hx-swap="outerHTML"
-			hx-indicator="#forgot-spinner"
 		>
-			<div id="forgot-spinner" class="htmx-indicator">
-				<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
-			</div>
 			{ i18n.T(ctx, "login.forgot") }
 		</a>
 		<button
@@ -147,46 +147,58 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 	</form>
 }
 
-templ ChangePassword(username string) {
-	<div id="login" class="grid gap-2">
-		<div class="grid gap-2 text-center">
-			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
-		</div>
-		<form class="flex flex-col gap-4" autocomplete="off">
-			<div id="error" class="hidden"></div>
-			<span class="text">{ i18n.T(ctx, "login.please_change_password") }</span>
-			<div class="uk-inline">
-				<span class="uk-form-icon">
-					<uk-icon icon="rectangle-ellipsis"></uk-icon>
-				</span>
-				<input id="password" class="uk-input" name="password" type="password" placeholder={ i18n.T(ctx, "login.password") } aria-label="Not clickable icon" required/>
-				<button
-					class="uk-form-icon uk-form-icon-flip"
-					type="button"
-					_="
-						on click 
-							if #reveal-password@icon is 'eye' then
-								set #reveal-password@icon to 'eye-off'
-								set #password@type to 'text'
-							else
-								set #reveal-password@icon to 'eye'
-								set #password@type to 'password'
-							end
-						end
-					"
-				>
-					<uk-icon id="reveal-password" icon="eye" class="uk-text-muted"></uk-icon>
-				</button>
-			</div>
-			<div class="uk-inline">
-				<span class="uk-form-icon">
-					<uk-icon icon="rectangle-ellipsis"></uk-icon>
-				</span>
-				<input id="confirm-password" name="confirm-password" class="uk-input" type="password" placeholder={ i18n.T(ctx, "login.password") } aria-label="Not clickable icon" required/>
-				<button
-					class="uk-form-icon uk-form-icon-flip"
-					type="button"
-					_="
+templ ChangePassword() {
+	<div class="flex flex-1 h-full w-full max-h-screen">
+		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
+			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
+				<img
+					src="/assets/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+				/>
+				<div id="login" class="grid gap-6">
+					<div class="flex flex-col gap-2">
+						<div class="grid gap-2 text-center">
+							<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.set_new_password") }</h1>
+						</div>
+						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.redirect_to_login") }</span>
+						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.password_complexity") }</span>
+					</div>
+					<form class="flex flex-col gap-4" autocomplete="off">
+						<div id="error" class="hidden"></div>
+						<span class="text">{ i18n.T(ctx, "login.please_change_password") }</span>
+						<div class="uk-inline">
+							<span class="uk-form-icon">
+								<uk-icon icon="rectangle-ellipsis"></uk-icon>
+							</span>
+							<input id="password" class="uk-input" name="password" type="password" placeholder={ i18n.T(ctx, "login.new_password_placeholder") } aria-label="Not clickable icon" required/>
+							<button
+								class="uk-form-icon uk-form-icon-flip"
+								type="button"
+								_="
+									on click 
+										if #reveal-password@icon is 'eye' then
+											set #reveal-password@icon to 'eye-off'
+											set #password@type to 'text'
+										else
+											set #reveal-password@icon to 'eye'
+											set #password@type to 'password'
+										end
+									end
+								"
+							>
+								<uk-icon id="reveal-password" icon="eye" class="uk-text-muted"></uk-icon>
+							</button>
+						</div>
+						<div class="uk-inline">
+							<span class="uk-form-icon">
+								<uk-icon icon="rectangle-ellipsis"></uk-icon>
+							</span>
+							<input id="confirm-password" name="confirm-password" class="uk-input" type="password" placeholder={ i18n.T(ctx, "login.confirm_password_placeholder") } aria-label="Not clickable icon" required/>
+							<button
+								class="uk-form-icon uk-form-icon-flip"
+								type="button"
+								_="
 						on click 
 							if #reveal-confirm-password@icon is 'eye' then
 								set #reveal-confirm-password@icon to 'eye-off'
@@ -197,56 +209,133 @@ templ ChangePassword(username string) {
 							end
 						end
 					"
-				>
-					<uk-icon id="reveal-confirm-password" icon="eye" class="uk-text-muted"></uk-icon>
-				</button>
-			</div>
-			<a
-				class="uk-button uk-button-primary text-white flex gap-2"
-				hx-post="/login/changepass"
-				hx-push-url="false"
-				hx-target="body"
-				hx-swap="outerHTML"
-				hx-indicator="#forgot-spinner"
-				type="button"
-			>
-				<div id="forgot-spinner" class="htmx-indicator">
-					<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+							>
+								<uk-icon id="reveal-confirm-password" icon="eye" class="uk-text-muted"></uk-icon>
+							</button>
+						</div>
+						<a
+							class="uk-button uk-button-primary text-white flex gap-2"
+							hx-post="/login/changepass"
+							hx-push-url="false"
+							hx-target="body"
+							hx-swap="outerHTML"
+							hx-indicator="#forgot-spinner"
+							type="button"
+						>
+							<div id="forgot-spinner" class="htmx-indicator">
+								<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+							</div>
+							{ i18n.T(ctx, "login.change_password") }
+						</a>
+					</form>
 				</div>
-				{ i18n.T(ctx, "login.change_password") }
-			</a>
-		</form>
+			</div>
+		</div>
+		<div class="flex-1 w-1/2 print:hidden">
+			<img
+				src="/assets/img/computers.jpg"
+				alt="Image"
+				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+			/>
+		</div>
 	</div>
 }
 
 templ LostPassword() {
+	<div class="flex flex-1 h-full w-full max-h-screen">
+		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
+			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
+				<img
+					src="/assets/img/openuem.png"
+					alt="OpenUEM Logo"
+					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+				/>
+				<div id="login" class="flex flex-col gap-8">
+					<div class="grid gap-2 text-center">
+						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
+					</div>
+					<form class="flex flex-col gap-4" autocomplete="off">
+						<div id="success" class="hidden"></div>
+						<div id="error" class="hidden"></div>
+						<span class="text">{ i18n.T(ctx, "login.forgot_email") }</span>
+						<div class="uk-inline">
+							<span class="uk-form-icon">
+								<uk-icon icon="mail"></uk-icon>
+							</span>
+							<input class="uk-input" name="email" type="text" placeholder={ i18n.T(ctx, "login.email") } aria-label="Not clickable icon" required/>
+						</div>
+						<a
+							class="uk-button uk-button-primary text-white flex gap-2"
+							hx-post="/login/forgot"
+							hx-push-url="false"
+							hx-target="body"
+							hx-swap="outerHTML"
+							hx-indicator="#forgot-spinner"
+							type="button"
+						>
+							<div id="forgot-spinner" class="htmx-indicator">
+								<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+							</div>
+							{ i18n.T(ctx, "login.send_email") }
+						</a>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="flex-1 w-1/2 print:hidden">
+			<img
+				src="/assets/img/computers.jpg"
+				alt="Image"
+				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+			/>
+		</div>
+	</div>
+}
+
+templ LostPasswordCode(email string) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
-			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
+			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
 		</div>
 		<form class="flex flex-col gap-4" autocomplete="off">
 			<div id="error" class="hidden"></div>
-			<span class="text">{ i18n.T(ctx, "login.forgot_email") }</span>
-			<div class="uk-inline">
-				<span class="uk-form-icon">
-					<uk-icon icon="mail"></uk-icon>
-				</span>
-				<input class="uk-input" name="email" type="text" placeholder={ i18n.T(ctx, "login.email") } aria-label="Not clickable icon" required/>
+			<span class="uk-text uk-text-bold uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter") }</span>
+			<span class="uk-text uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter_instructions", email) }</span>
+			<div class="flex gap-2 justify-center">
+				<uk-input-pin
+					name="confirm-code"
+					id="confirm-code"
+					uk-cloak
+				></uk-input-pin>
 			</div>
-			<a
-				class="uk-button uk-button-primary text-white flex gap-2"
-				hx-post="/login/userpass"
-				hx-push-url="false"
-				hx-target="body"
-				hx-swap="outerHTML"
-				hx-indicator="#forgot-spinner"
-				type="button"
-			>
-				<div id="forgot-spinner" class="htmx-indicator">
-					<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
-				</div>
-				{ i18n.T(ctx, "login.send_email") }
-			</a>
+			<div class="flex justify-between items-center">
+				<button
+					class="flex gap-2 uk-button uk-button-default"
+					type="button"
+					_="on click 
+						repeat in <input[maxlength='1']/>
+							set it.value to ''
+						end
+					end"
+				>
+					<uk-icon hx-history="false" icon="eraser" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Clean") }
+				</button>
+				<button
+					class="uk-button uk-button-primary text-white flex gap-2"
+					hx-post="/login/forgotverify"
+					hx-push-url="false"
+					hx-target="body"
+					hx-swap="outerHTML"
+					hx-indicator="#validate-spinner"
+					type="button"
+				>
+					<div id="validater-spinner" class="htmx-indicator">
+						<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					</div>
+					{ i18n.T(ctx, "Verify") }
+				</button>
+			</div>
 		</form>
 	</div>
 }
@@ -466,7 +555,7 @@ templ Enter2FA(username string) {
 					alt="OpenUEM Logo"
 					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
 				/>
-				<div id="login" class="flex flex-col gap-16">
+				<div id="login" class="flex flex-col gap-8">
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
 					</div>

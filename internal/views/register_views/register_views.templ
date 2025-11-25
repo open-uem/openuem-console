@@ -1,6 +1,7 @@
 package register_views
 
 import (
+	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
@@ -14,13 +15,11 @@ type RegisterValidations struct {
 	EmailRequired    bool
 	PhoneRequired    bool
 	PhoneInvalid     bool
-	UIDExists        bool
-	EmailExists      bool
 	EmailInvalid     bool
 	CountryRequired  bool
 	CountryInvalid   bool
 	PasswordRequired bool
-	OpenIDRequired   bool
+	AuthTypeRequired bool
 }
 
 type RegisterValues struct {
@@ -30,7 +29,7 @@ type RegisterValues struct {
 	Phone    string
 	Country  string
 	Password string
-	OpenID   bool
+	AuthType string
 }
 
 templ Register(c echo.Context, values RegisterValues, validations RegisterValidations, defaultCountry string, settings *ent.Authentication) {
@@ -64,26 +63,13 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 								required
 								autofocus
 								autocomplete="off"
-								if validations.UIDExists || validations.UIDRequired || values.UID == "" {
+								if validations.UIDRequired || values.UID == "" {
 									data-error="true"
 								}
 								_="on blur or keyup wait 1s
 									if uid's value is not empty										 
 										add .hidden to #uid-required
 										remove @data-error
-										fetch `/user/${uid's value}/exists` then
-										if result is 'true'
-											remove .hidden from #uid-exists
-											add @data-error='true'
-										else 
-											if result is 'error'
-												remove .hidden from #uid-exists
-												add @data-error='true'
-											else
-												add .hidden to #uid-exists
-												remove @data-error='true'
-											end
-										end
 									else
 										remove .hidden from #uid-required
 										add @data-error='true'
@@ -100,7 +86,6 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 							/>
 						</div>
 						<div id="uid-required" class={ "uk-form-help uk-text-danger", templ.KV("hidden",!validations.UIDRequired) }>{ i18n.T(ctx, "forms.required") }</div>
-						<div id="uid-exists" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.UIDExists) }>{ i18n.T(ctx, "register.uid_taken") }</div>
 					</div>
 					<div class="uk-margin">
 						<label class="uk-form-label" for="myname">{ i18n.T(ctx, "register.name") }</label>
@@ -153,7 +138,7 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 								value={ values.Email }
 								autofocus
 								autocomplete="off"
-								if validations.EmailExists || validations.EmailInvalid || validations.EmailRequired || values.Email == "" {
+								if validations.EmailInvalid || validations.EmailRequired || values.Email == "" {
 									data-error="true"
 								}
 								_="on blur or keyup wait 1s
@@ -161,20 +146,6 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 										add .hidden to #email-required
 										add .hidden to #email-invalid
 										remove @data-error
-
-										fetch `/email/${email's value}/exists` then
-										if result is 'true'
-											remove .hidden from #email-exists
-											add @data-error='true'
-										else 
-											if result is 'error'
-												remove .hidden from #email-exists
-												add @data-error='true'
-											else
-												add .hidden to #email-exists
-												remove @data-error='true'
-											end
-										end
 									else
 										remove .hidden from #email-required
 										add @data-error='true'
@@ -191,7 +162,6 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 							/>
 						</div>
 						<div id="email-required" class={ "uk-form-help uk-text-danger",  templ.KV("hidden",!validations.EmailRequired ) }>{ i18n.T(ctx, "forms.required") }</div>
-						<div id="email-exists" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.EmailExists ) }>{ i18n.T(ctx, "register.email_taken") }</div>
 						<div id="email-invalid" class={ "uk-form-help uk-text-danger",  templ.KV("hidden", !validations.EmailInvalid) }>{ i18n.T(ctx, "register.wrong_email") }</div>
 					</div>
 					<div class="uk-margin">
@@ -247,30 +217,31 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 						<div class="uk-form-controls">
 							<select
 								class="uk-select"
-								name="oidc"
-								_="on change
-									if me.value is 'yes' then
+								name="auth-type"
+								_={ fmt.Sprintf(`on change
+									if me.value is not 'certificate' then
 										add .hidden to #password-section
 										remove @required from #mypassword
 										remove @disabled from #SendRegister
-									else    
+										set #mypassword.value to ''
+									else
 										remove .hidden from #password-section
 										add @required to #mypassword
-										add @disabled to #SendRegister
+										add @disabled to #SendRegister										
+										set #mypassword@placeholder to '%s'										
 									end                                            
-								end"
+								end`, i18n.T(ctx, "register.cert_placeholder")) }
+								required
 							>
-								if settings.UseCertificates {
-									<option value="no" selected?={ !values.OpenID }>{ i18n.T(ctx, "authentication.certificate") }</option>
-								}
-								if settings.UseOIDC {
-									<option value="yes" selected?={ values.OpenID }>{ i18n.T(ctx, "authentication.oidc") }</option>
-								}
+								<option value="">{ i18n.T(ctx, "authentication.choose_authentication") }</option>
+								<option value="passwd">{ i18n.T(ctx, "authentication.passwd") }</option>
+								<option value="certificate">{ i18n.T(ctx, "authentication.certificate") }</option>
+								<option value="oidc">{ i18n.T(ctx, "authentication.oidc") }</option>
 							</select>
 						</div>
 					</div>
-					<div id="password-section" class={ "uk-margin",templ.KV("hidden", values.OpenID) }>
-						<label class="uk-form-label" for="password">{ i18n.T(ctx, "register.certificate_password") }</label>
+					<div id="password-section" class="uk-margin hidden">
+						<label class="uk-form-label" for="password">{ i18n.T(ctx, "login.password_auth") }</label>
 						<div class="uk-form-controls uk-flex items-center justify-center gap-4">
 							<input
 								class="uk-input"
@@ -388,8 +359,8 @@ templ EmailConfirmed() {
 	</main>
 }
 
-templ RegisterIndex(cmp templ.Component) {
-	@layout.Register() {
+templ RegisterIndex(cmp templ.Component, csrfToken string) {
+	@layout.Register(csrfToken) {
 		@cmp
 	}
 }

@@ -23,7 +23,7 @@ func (m *Model) GetAuthenticationSettings() (*openuem_ent.Authentication, error)
 }
 
 func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister bool, useOIDC bool, provider string,
-	server string, clientID string, role string, autoCreate bool, autoApprove bool) error {
+	server string, clientID string, role string, autoCreate bool, autoApprove bool, usePasswd bool) error {
 
 	s, err := m.Client.Authentication.Query().Only(context.Background())
 	if err != nil {
@@ -31,6 +31,7 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 	}
 
 	update := m.Client.Authentication.UpdateOneID(s.ID).
+		SetUsePasswd(usePasswd).
 		SetUseCertificates(useCertificates).
 		SetAllowRegister(allowRegister).
 		SetUseOIDC(useOIDC).
@@ -65,4 +66,13 @@ func (m *Model) ReEnableCertificatesAuth() error {
 	}
 
 	return m.Client.Authentication.UpdateOneID(s.ID).SetUseCertificates(true).Exec(context.Background())
+}
+
+func (m *Model) IsPasswdAuthEnabled() bool {
+	s, err := m.Client.Authentication.Query().Only(context.Background())
+	if err != nil {
+		return false
+	}
+
+	return s.UsePasswd
 }

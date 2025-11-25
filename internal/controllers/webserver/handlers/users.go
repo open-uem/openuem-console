@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strconv"
+	"slices"
 	"strings"
 
 	"github.com/go-playground/form/v4"
@@ -24,12 +24,12 @@ import (
 )
 
 type NewUser struct {
-	UID     string `form:"uid" validate:"required"`
-	Name    string `form:"name"`
-	Email   string `form:"email" validate:"required,email"`
-	Phone   string `form:"phone"`
-	Country string `form:"country"`
-	OpenID  bool   `form:"oidc"`
+	UID      string `form:"uid" validate:"required"`
+	Name     string `form:"name"`
+	Email    string `form:"email" validate:"required,email"`
+	Phone    string `form:"phone"`
+	Country  string `form:"country"`
+	AuthType string `form:"auth-type" validate:"required"`
 }
 
 func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) error {
@@ -120,7 +120,9 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, users, successMessage, errMessage, refreshTime, agentsExists, serversExists, commonInfo), commonInfo))
+	warnAboutSMTP := h.Model.IsPasswdAuthEnabled() && !h.Model.IsSMTPConfigured()
+
+	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.Users(c, p, f, users, successMessage, errMessage, refreshTime, agentsExists, serversExists, warnAboutSMTP, commonInfo), commonInfo))
 }
 
 func (h *Handler) NewUser(c echo.Context) error {
@@ -161,37 +163,52 @@ func (h *Handler) AddUser(c echo.Context) error {
 
 	decoder := form.NewDecoder()
 	if err := c.Request().ParseForm(); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 	err := decoder.Decode(&u, c.Request().Form)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(u); err != nil {
 		// TODO Try to translate and create a nice error message
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	err = h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country, u.OpenID)
+	exists, err := h.Model.UserExists(u.UID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if exists {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.user_id_exists"), true))
+	}
+
+	// TODO - use constants for certificate types
+	if !slices.Contains([]string{"certificate", "passwd", "oidc"}, u.AuthType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.invalid_type", u.AuthType), true))
+	}
+
+	addedUser, err := h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country, u.AuthType)
 	if err != nil {
 		// TODO manage duplicate key error
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	addedUser, err := h.Model.GetUserById(u.UID)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	if !u.OpenID {
-		if err := sendConfirmationEmail(h, c, addedUser); err != nil {
+	switch u.AuthType {
+	case "certificate":
+		if err := h.sendConfirmationEmail(c, addedUser); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		successMessage = i18n.T(c.Request().Context(), "new.user.success")
-	} else {
+	case "oidc":
 		successMessage = i18n.T(c.Request().Context(), "new.user.success_oidc")
+	case "passwd":
+		if err := h.sendLinkToGeneratePassword(c, addedUser); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_send_new_account_email"), false))
+		}
+		successMessage = i18n.T(c.Request().Context(), "new.user.success_passwd")
 	}
 
 	return h.ListUsers(c, successMessage, errMessage)
@@ -253,7 +270,7 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 func (h *Handler) DeleteUser(c echo.Context) error {
 	uid := c.Param("uid")
 
-	if uid == "admin" {
+	if uid == "admin" || uid == "openuem" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.admin_cannot_be_removed"), false))
 	}
 	_, err := h.Model.GetUserById(uid)
@@ -369,15 +386,34 @@ func (h *Handler) ApproveAccount(c echo.Context) error {
 	}
 
 	if !exists {
-		return RenderError(c, partials.ErrorMessage("user doesn't exist", false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.user_not_found"), true))
 	}
 
 	err = h.Model.Client.User.UpdateOneID(uid).SetRegister(openuem_nats.REGISTER_APPROVED).Exec(context.Background())
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.could_not_update_register", err.Error()), false))
 	}
 
 	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.approved"), "")
+}
+
+func (h *Handler) ResendPasswordLink(c echo.Context) error {
+	uid := c.Param("uid")
+	u, err := h.Model.GetUserById(uid)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.user_not_found"), true))
+	}
+
+	err = h.Model.Client.User.UpdateOneID(uid).SetRegister(openuem_nats.REGISTER_PASSWORD_LINK_SENT).Exec(context.Background())
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.could_not_update_register", err.Error()), true))
+	}
+
+	if err := h.sendLinkToGeneratePassword(c, u); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.could_not_update_register", err.Error()), true))
+	}
+
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_password_link_sent"), "")
 }
 
 func (h *Handler) AskForConfirmation(c echo.Context) error {
@@ -387,60 +423,15 @@ func (h *Handler) AskForConfirmation(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := sendConfirmationEmail(h, c, user); err != nil {
+	if err := h.sendConfirmationEmail(c, user); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_confirmation_email_sent")+user.Email, "")
+	return h.ListUsers(c, i18n.T(c.Request().Context(), "users.new_confirmation_email_sent", user.Email), "")
 }
 
-func (h *Handler) EditUser(c echo.Context) error {
-	var err error
-
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
-
-	settings, err := h.Model.GetAuthenticationSettings()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
-	}
-
-	uid := c.Param("uid")
-	user, err := h.Model.GetUserById(uid)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	if c.Request().Method == "POST" {
-		if err := h.Model.UpdateUser(uid, c.FormValue("name"), c.FormValue("email"), c.FormValue("phone"), c.FormValue("country")); err != nil {
-			return RenderError(c, partials.ErrorMessage(err.Error(), false))
-		}
-
-		return h.ListUsers(c, i18n.T(c.Request().Context(), "users.edit.success"), "")
-	}
-
-	defaultCountry, err := h.Model.GetDefaultCountry()
-	if err != nil {
-		return err
-	}
-
-	agentsExists, err := h.Model.AgentsExists(commonInfo)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	serversExists, err := h.Model.ServersExists()
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	return RenderView(c, admin_views.UsersIndex(" | Users", admin_views.EditUser(c, user, defaultCountry, agentsExists, serversExists, commonInfo, settings), commonInfo))
-}
-
-func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) error {
-	token, err := h.generateConfirmEmailToken(user.ID)
+func (h *Handler) sendConfirmationEmail(c echo.Context, user *openuem_ent.User) error {
+	token, err := h.generateEmailToken(user.ID, "Email Confirmation", 24)
 	if err != nil {
 		return err
 	}
@@ -453,6 +444,42 @@ func sendConfirmationEmail(h *Handler, c echo.Context, user *openuem_ent.User) e
 		MessageGreeting:  fmt.Sprintf("Hi %s", user.Name),
 		MessageAction:    "Confirm email",
 		MessageActionURL: c.Request().Header.Get("Origin") + "/auth/confirm/" + token,
+	}
+
+	data, err := json.Marshal(notification)
+	if err != nil {
+		return err
+	}
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return fmt.Errorf("%s", i18n.T(c.Request().Context(), "nats.not_connected"))
+	}
+
+	if err := h.NATSConnection.Publish("notification.confirm_email", data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *Handler) sendLinkToGeneratePassword(c echo.Context, user *openuem_ent.User) error {
+	token, err := h.generateEmailToken(user.ID, "New password", 1)
+	if err != nil {
+		return err
+	}
+
+	if err := h.Model.SaveNewAccountToken(user.ID, token); err != nil {
+		return err
+	}
+
+	notification := openuem_nats.Notification{
+		To:               user.Email,
+		Subject:          "A new account has been created",
+		MessageTitle:     "OpenUEM | A new account has been created",
+		MessageText:      "You must set a password to log into OpenUEM. Click the link below to set your initial password. NOTE: the following link will only be valid for one hour",
+		MessageGreeting:  fmt.Sprintf("Hi %s, a new OpenUEM account with username %s has been created for you", user.Name, user.ID),
+		MessageAction:    "Generate a password",
+		MessageActionURL: c.Request().Header.Get("Origin") + fmt.Sprintf("/login/new?token=%s", token),
 	}
 
 	data, err := json.Marshal(notification)
@@ -530,26 +557,31 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 		user.Country = strings.ToUpper(record[3])
 		user.Phone = record[4]
 
-		if record[5] != "" {
-			user.Openid, err = strconv.ParseBool(record[5])
-			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_oidc", index), false))
-			}
+		authType := record[5]
+
+		if !slices.Contains([]string{"certificate", "passwd", "oidc"}, authType) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_oidc"), false))
 		}
 
 		index++
 
-		user.CertClearPassword = pkcs12.DefaultPassword
-
-		err = h.Model.AddImportedUser(user.ID, user.Name, user.Email, user.Phone, user.Country, user.Openid)
+		u, err := h.Model.AddUser(user.ID, user.Name, user.Email, user.Phone, user.Country, authType)
 		if err != nil {
 			// TODO manage duplicate key error
 			errors = append(errors, err.Error())
 			continue
 		}
 
-		if err := h.SendCertificateRequestToNATS(c, &user); err != nil {
-			errors = append(errors, err.Error())
+		switch authType {
+		case "certificate":
+			u.CertClearPassword = pkcs12.DefaultPassword
+			if err := h.SendCertificateRequestToNATS(c, u); err != nil {
+				errors = append(errors, err.Error())
+			}
+		case "passwd":
+			if err := h.sendLinkToGeneratePassword(c, u); err != nil {
+				errors = append(errors, err.Error())
+			}
 		}
 
 	}

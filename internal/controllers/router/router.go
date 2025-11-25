@@ -157,7 +157,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 				c.Logger().Error(err)
 			}
 		default:
-			if err := views.ErrorPage(strconv.Itoa(he.Code), "Error found").Render(c.Request().Context(), c.Response().Writer); err != nil {
+			if err := views.ErrorPage(strconv.Itoa(he.Code), err.Error()).Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)
 			}
 		}
