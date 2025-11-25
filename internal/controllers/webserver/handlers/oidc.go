@@ -439,6 +439,10 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not save refresh token for user")
 		}
 
+		if h.AuthLogger != nil {
+			h.AuthLogger.Printf("user %s has logged in with OpenID (%s)", u.ID, settings.OIDCProvider)
+		}
+
 		myTenant, err := h.Model.GetDefaultTenant()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

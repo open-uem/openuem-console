@@ -177,6 +177,14 @@ github.com/open-uem/nats v0.0.0-20251124165929-6f5d37cf2f8d h1:ha9+A3ICvcXVjwmh9
 github.com/open-uem/nats v0.0.0-20251124165929-6f5d37cf2f8d/go.mod h1:JB6zAM56L+iD+BLn3o/vNdg9X5IFn52dSvltnIdiQAQ=
 github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744 h1:ybzOjwnzh6KxUtdtu/n71kZNLB208P5keBB0Me1i2nQ=
 github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
+github.com/open-uem/utils v0.0.0-20251125114025-e00f776568ae h1:PG8z9sbtD81FanWTCX2rvgyYfrcJDFd3hUF47tr8prA=
+github.com/open-uem/utils v0.0.0-20251125114025-e00f776568ae/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
+github.com/open-uem/utils v0.0.0-20251125114744-7db17d9d36d0 h1:Mz062lQuhioDbU19egi6mppUFsMevfXd8kcaNSn+2Jc=
+github.com/open-uem/utils v0.0.0-20251125114744-7db17d9d36d0/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
+github.com/open-uem/utils v0.0.0-20251125115351-2f24fc77b6ce h1:1Hwc75+Vxl4d7wwsf2kUi//P3CCt9/QIoczLK3uJLsc=
+github.com/open-uem/utils v0.0.0-20251125115351-2f24fc77b6ce/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
+github.com/open-uem/utils v0.0.0-20251125115711-e146735489df h1:773IEIrCRZWLK/fJ/vghgG0w3mkCqqdJS4ILeIEsEYI=
+github.com/open-uem/utils v0.0.0-20251125115711-e146735489df/go.mod h1:nPL4xlsiCPyUiF8ntnyrlyz+pVjizIC+N5+TOvj3TLc=
 github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5 h1:LQ6pwsgumUBcuw7cPy66jmLE/ZaIvbCZRGxcOFFkF24=
 github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5/go.mod h1:b2rmcb7kD/AODHdvHGZ8TpzhX4qrkdDPrEGM5FmOBxQ=
 github.com/pdfcpu/pdfcpu v0.11.0 h1:mL18Y3hSHzSezmnrzA21TqlayBOXuAx7BUzzZyroLGM=

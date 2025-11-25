@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -234,9 +235,15 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 								required
 							>
 								<option value="">{ i18n.T(ctx, "authentication.choose_authentication") }</option>
-								<option value="passwd">{ i18n.T(ctx, "authentication.passwd") }</option>
-								<option value="certificate">{ i18n.T(ctx, "authentication.certificate") }</option>
-								<option value="oidc">{ i18n.T(ctx, "authentication.oidc") }</option>
+								if settings.UsePasswd {
+									<option value={ admin_views.PASSWORD_AUTH }>{ i18n.T(ctx, "authentication.passwd") }</option>
+								}
+								if settings.UseCertificates {
+									<option value={ admin_views.CERTIFICATES_AUTH }>{ i18n.T(ctx, "authentication.certificate") }</option>
+								}
+								if settings.UseOIDC {
+									<option value={ admin_views.OIDC_AUTH }>{ i18n.T(ctx, "authentication.oidc") }</option>
+								}
 							</select>
 						</div>
 					</div>

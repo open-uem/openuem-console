@@ -32,7 +32,7 @@ require (
 	github.com/nats-io/nats.go v1.47.0
 	github.com/open-uem/ent v0.0.0-20251124201052-160d0fc6d87b
 	github.com/open-uem/nats v0.0.0-20251124165929-6f5d37cf2f8d
-	github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744
+	github.com/open-uem/utils v0.0.0-20251125115711-e146735489df
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9
 	github.com/pquerna/otp v1.5.0

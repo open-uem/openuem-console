@@ -12,6 +12,10 @@ import (
 	"strings"
 )
 
+const PASSWORD_AUTH = "passwd"
+const CERTIFICATES_AUTH = "certificate"
+const OIDC_AUTH = "oidc"
+
 templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, users []*ent.User, successMessage, errMessage string, refresh int, agentsExists bool, serversExists bool, warnAboutSTMP bool, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -292,7 +296,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 															</a>
 														</li>
 													}
-													if (!user.Passwd && !user.Openid) && user.EmailVerified && user.Register == openuem_nats.REGISTER_CERTIFICATE_SENT {
+													if (!user.Passwd && !user.Openid) && user.EmailVerified && (user.Register == openuem_nats.REGISTER_CERTIFICATE_SENT || user.Register == openuem_nats.REGISTER_REVOKED) {
 														<li>
 															<a
 																hx-target="#main"
@@ -406,12 +410,12 @@ templ NewUser(c echo.Context, defaultCountry string, agentsExists, serversExists
 													required
 												>
 													<option value="">{ i18n.T(ctx, "authentication.choose_authentication") }</option>
-													<option value="passwd">{ i18n.T(ctx, "authentication.passwd") }</option>
+													<option value={ PASSWORD_AUTH }>{ i18n.T(ctx, "authentication.passwd") }</option>
 													if settings.UseCertificates {
-														<option value="certificate">{ i18n.T(ctx, "authentication.certificate") }</option>
+														<option value={ CERTIFICATES_AUTH }>{ i18n.T(ctx, "authentication.certificate") }</option>
 													}
 													if settings.UseOIDC {
-														<option value="oidc">{ i18n.T(ctx, "authentication.oidc") }</option>
+														<option value={ OIDC_AUTH }>{ i18n.T(ctx, "authentication.oidc") }</option>
 													}
 												</select>
 											</div>

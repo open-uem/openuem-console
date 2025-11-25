@@ -31,6 +31,10 @@ func (h *Handler) Logout(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	if h.AuthLogger != nil {
+		h.AuthLogger.Printf("user %s has logged out from the console", u.ID)
+	}
+
 	if u.Openid {
 		logoutURL := ""
 		redirecURI := fmt.Sprintf("https://%s:%s", h.ServerName, h.ConsolePort)

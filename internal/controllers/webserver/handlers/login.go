@@ -64,13 +64,11 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.wrong_username_or_password"), true))
 	}
 
 	if user.Hash == "" {
-		// error should go to auth log
 		log.Println("[ERROR]: hash is empty, maybe there was an issue with migration!")
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.wrong_username_or_password"), true))
 	}
@@ -78,13 +76,11 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 	// Check if passwords match
 	match, err := argon2id.ComparePasswordAndHash(password, user.Hash)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not compare password and hash for user %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.wrong_username_or_password"), true))
 	}
 
 	if !match {
-		// error should go to auth log
 		log.Printf("[ERROR]: user %s entered a wrong password", username)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.wrong_username_or_password"), true))
 	}
@@ -98,7 +94,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 
 		// Create a session as we'll require the user to change the password
 		if err := h.CreateForgotPasswordSession(c, user); err != nil {
-			return err
+			log.Printf("[ERROR]: could not create a forgot password session for user %s, reason: %v", user.ID, err)
 		}
 
 		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
@@ -106,7 +102,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 
 	// Passwords match, create a new session
 	if err := h.NewSession(c, user); err != nil {
-		log.Printf("[ERROR]: could not create session, reason: %v", err)
+		log.Printf("[ERROR]: could not create a new session after passwords match, reason: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
 	}
 
@@ -171,7 +167,6 @@ func (h *Handler) Register2FA(c echo.Context) error {
 		AccountName: username,
 	})
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not generate totp key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_totp_key"), true))
 	}
@@ -180,12 +175,10 @@ func (h *Handler) Register2FA(c echo.Context) error {
 	var buf bytes.Buffer
 	img, err := key.Image(200, 200)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not generate QR, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_qr"), true))
 	}
 	if err := png.Encode(&buf, img); err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not encode image as PNG, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_qr"), true))
 	}
@@ -193,7 +186,6 @@ func (h *Handler) Register2FA(c echo.Context) error {
 	qrCode := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	if err := h.Model.SaveTOTPSecretKey(username, key.Secret()); err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not save TOTP secret key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_could_not_save_secret"), true))
 	}
@@ -214,14 +206,12 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)
 	if !valid {
-		// error should go to auth log
 		log.Println("[ERROR]: the TOTP code is not valid")
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -305,14 +295,12 @@ func (h *Handler) LoginTOTPValidate(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)
 	if !valid {
-		// error should go to auth log
 		log.Println("[ERROR]: the TOTP code is not valid")
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -333,7 +321,6 @@ func (h *Handler) LoginTOTPBackupCheck(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -394,7 +381,9 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 	h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 	h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 	h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
-	h.SessionManager.Manager.Put(c.Request().Context(), "twofa", true)
+	if user.Use2fa {
+		h.SessionManager.Manager.Put(c.Request().Context(), "twofa", true)
+	}
 	token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -422,6 +411,20 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 	if err != nil {
 		log.Printf("[ERROR]: could not get default site, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	if h.AuthLogger != nil {
+		if user.Passwd {
+			if user.Use2fa {
+				h.AuthLogger.Printf("user %s has logged in with a password and using 2FA", user.ID)
+			} else {
+				h.AuthLogger.Printf("user %s has logged in with a password", user.ID)
+			}
+		} else {
+			if user.Use2fa {
+				h.AuthLogger.Printf("user %s has logged in with a certificate and using 2FA", user.ID)
+			}
+		}
 	}
 
 	if h.ReverseProxyAuthPort != "" {
@@ -500,7 +503,6 @@ func (h *Handler) ForgotPasswordEmail(c echo.Context) error {
 
 		user, err := h.Model.GetUserById(username)
 		if err != nil {
-			// error should go to auth log
 			log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 			return err
 		}
@@ -623,8 +625,6 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 	}
 
 	if claims, ok := token.Claims.(*MyCustomClaims); ok {
-		log.Println(token)
-
 		// Is the token expired?
 		if time.Now().After(claims.ExpiresAt.Time) {
 			return echo.NewHTTPError(http.StatusForbidden, "token has expired, please contact your administrator to request a new email to set your initial password")

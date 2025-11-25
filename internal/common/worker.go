@@ -59,12 +59,14 @@ type Worker struct {
 	CommonSoftwareJobDuration         time.Duration
 	Version                           string
 	ReenableCertAuth                  bool
+	AuthLogger                        *log.Logger
 }
 
 func NewWorker(logName string) *Worker {
 	worker := Worker{}
 	if logName != "" {
 		worker.Logger = utils.NewLogger(logName)
+		worker.AuthLogger = utils.NewAuthLogger()
 	}
 
 	return &worker

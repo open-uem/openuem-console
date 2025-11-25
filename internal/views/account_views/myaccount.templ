@@ -273,7 +273,7 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 												hx-swap="outerHTML"
 												class="uk-button uk-button-danger mt-2"
 												type="submit"
-												disabled
+												disabled?={ user.Passwd }
 											>
 												{ i18n.T(ctx, "login.disable_2fa") }
 											</button>
@@ -284,7 +284,7 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 												hx-include="#current-password"
 												class="uk-button uk-button-primary mt-2"
 												type="submit"
-												disabled
+												disabled?={ user.Passwd }
 											>
 												{ i18n.T(ctx, "login.enable_2fa") }
 											</button>
@@ -388,8 +388,8 @@ templ Enabled2FA(codes string) {
 			<div class="flex justify-end">
 				<button
 					class="uk-button uk-button-primary"
-					href="/myaccount"
-					hx-get="/myaccount"
+					href="/logout"
+					hx-post="/logout"
 					hx-push-url="false"
 					hx-target="body"
 					hx-swap="outerHTML"

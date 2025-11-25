@@ -14,6 +14,7 @@ import (
 	"github.com/open-uem/ent/recoverycode"
 	"github.com/open-uem/ent/user"
 	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -101,21 +102,43 @@ func (m *Model) EmailExists(email string) (bool, error) {
 }
 
 func (m *Model) AddUser(uid, name, email, phone, country string, authType string) (*ent.User, error) {
+
+	existQuery := m.Client.User.Query().Where(user.ID(uid))
+
 	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now())
 
 	switch authType {
-	case "oidc":
+	case admin_views.CERTIFICATES_AUTH:
+		count, err := existQuery.Count(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		if count > 0 {
+			return nil, fmt.Errorf("a user with username %s already exists", uid)
+		}
+
+	case admin_views.OIDC_AUTH:
+		count, err := existQuery.Count(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		if count > 0 {
+			return nil, fmt.Errorf("a user with username %s already exists", uid)
+		}
+
 		query.SetOpenid(true)
 		query.SetEmailVerified(true)
 		query.SetRegister(openuem_nats.REGISTER_OIDC_FIRST_LOGIN)
-	case "passwd":
+	case admin_views.PASSWORD_AUTH:
 		// Check if email already assigned to a different user for the same auth type
 		exist, err := m.Client.User.Query().Where(user.Passwd(true), user.Email(email)).Exist(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		if exist {
-			return nil, errors.New("this email is already assigned to another account that authenticates with password")
+			return nil, fmt.Errorf("%s is already assigned to another account that authenticates with password", email)
 		}
 		query.SetRegister(openuem_nats.REGISTER_PASSWORD_LINK_SENT)
 		query.SetEmailVerified(true)
@@ -177,7 +200,7 @@ func (m *Model) RegisterUser(uid, name, email, phone, country, password string, 
 		return fmt.Errorf("username %s already exists", uid)
 	}
 
-	if authType == "passwd" {
+	if authType == admin_views.PASSWORD_AUTH {
 		userID := m.GetUserIDByEmail(email)
 		if userID != "" && userID != uid {
 			return fmt.Errorf("email %s already assigned to %s", email, userID)
@@ -186,11 +209,11 @@ func (m *Model) RegisterUser(uid, name, email, phone, country, password string, 
 
 	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetCountry(country).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_IN_REVIEW)
 
-	if authType == "passwd" {
+	if authType == admin_views.PASSWORD_AUTH {
 		query.SetPasswd(true)
 	}
 
-	if authType == "oidc" {
+	if authType == admin_views.OIDC_AUTH {
 		query.SetOpenid(true)
 	}
 
@@ -204,7 +227,6 @@ func (m *Model) GetUserById(uid string) (*ent.User, error) {
 func (m *Model) ConsumeRecoveryCode(uid string, code string) bool {
 	hashes, err := m.Client.RecoveryCode.Query().Where(recoverycode.HasUserWith(user.ID(uid))).All(context.Background())
 	if err != nil {
-		// auth log
 		log.Println("[ERROR]: could not find recovery codes for this user")
 		return false
 	}

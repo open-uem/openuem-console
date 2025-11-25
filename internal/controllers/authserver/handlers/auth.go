@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/utils"
 	"golang.org/x/crypto/ocsp"
 )
 
@@ -149,6 +150,11 @@ func (h *Handler) Auth(c echo.Context) error {
 
 	if user.Use2fa {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s", h.ServerName, h.ConsolePort))
+	}
+
+	authLogger := utils.NewAuthLogger()
+	if authLogger != nil {
+		authLogger.Printf("user %s has logged in with a digital certificate", user.ID)
 	}
 
 	myTenant, err := h.Model.GetDefaultTenant()

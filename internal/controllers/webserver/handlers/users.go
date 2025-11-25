@@ -185,26 +185,24 @@ func (h *Handler) AddUser(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.user_id_exists"), true))
 	}
 
-	// TODO - use constants for certificate types
-	if !slices.Contains([]string{"certificate", "passwd", "oidc"}, u.AuthType) {
+	if !slices.Contains([]string{admin_views.CERTIFICATES_AUTH, admin_views.PASSWORD_AUTH, admin_views.OIDC_AUTH}, u.AuthType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.invalid_type", u.AuthType), true))
 	}
 
 	addedUser, err := h.Model.AddUser(u.UID, u.Name, u.Email, u.Phone, u.Country, u.AuthType)
 	if err != nil {
-		// TODO manage duplicate key error
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	switch u.AuthType {
-	case "certificate":
+	case admin_views.CERTIFICATES_AUTH:
 		if err := h.sendConfirmationEmail(c, addedUser); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 		successMessage = i18n.T(c.Request().Context(), "new.user.success")
-	case "oidc":
+	case admin_views.OIDC_AUTH:
 		successMessage = i18n.T(c.Request().Context(), "new.user.success_oidc")
-	case "passwd":
+	case admin_views.PASSWORD_AUTH:
 		if err := h.sendLinkToGeneratePassword(c, addedUser); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_send_new_account_email"), false))
 		}
@@ -313,19 +311,19 @@ func (h *Handler) RenewUserCertificate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	// First revoke certificate
+	// Revoke certificate if exists
 	cert, err := h.Model.GetCertificateByUID(uid)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
+		log.Printf("[INFO]: could not revoke certificate, no certificate was found for user %s", uid)
+	} else {
+		if err := h.Model.RevokeCertificate(cert, "a new certificate has been requested", ocsp.CessationOfOperation); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 
-	if err := h.Model.RevokeCertificate(cert, "a new certificate has been requested", ocsp.CessationOfOperation); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
-	}
-
-	// Now delete certificate
-	if err := h.Model.DeleteCertificate(cert.ID); err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		// Now delete certificate
+		if err := h.Model.DeleteCertificate(cert.ID); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
 	}
 
 	// Now request a new certificate
@@ -559,26 +557,25 @@ func (h *Handler) ImportUsers(c echo.Context) error {
 
 		authType := record[5]
 
-		if !slices.Contains([]string{"certificate", "passwd", "oidc"}, authType) {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "users.import_wrong_oidc"), false))
+		if !slices.Contains([]string{admin_views.CERTIFICATES_AUTH, admin_views.PASSWORD_AUTH, admin_views.OIDC_AUTH}, authType) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.invalid_type"), false))
 		}
 
 		index++
 
 		u, err := h.Model.AddUser(user.ID, user.Name, user.Email, user.Phone, user.Country, authType)
 		if err != nil {
-			// TODO manage duplicate key error
 			errors = append(errors, err.Error())
 			continue
 		}
 
 		switch authType {
-		case "certificate":
+		case admin_views.CERTIFICATES_AUTH:
 			u.CertClearPassword = pkcs12.DefaultPassword
 			if err := h.SendCertificateRequestToNATS(c, u); err != nil {
 				errors = append(errors, err.Error())
 			}
-		case "passwd":
+		case admin_views.PASSWORD_AUTH:
 			if err := h.sendLinkToGeneratePassword(c, u); err != nil {
 				errors = append(errors, err.Error())
 			}

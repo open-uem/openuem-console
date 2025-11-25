@@ -53,9 +53,10 @@ type Handler struct {
 	CommonFolder         string
 	Version              string
 	ReenableCertAuth     bool
+	AuthLogger           *log.Logger
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth bool) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth bool, authLogger *log.Logger) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -98,6 +99,7 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		CommonFolder:         commonFolder,
 		Version:              version,
 		ReenableCertAuth:     reEnableCertAuth,
+		AuthLogger:           authLogger,
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect

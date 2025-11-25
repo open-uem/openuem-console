@@ -24,7 +24,6 @@ func (h *Handler) MyAccount(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -78,7 +77,6 @@ func (h *Handler) MyAccountPassword(c echo.Context) error {
 
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -109,7 +107,6 @@ func (h *Handler) MyAccountPassword(c echo.Context) error {
 	// Check if current password is valid
 	match, err := argon2id.ComparePasswordAndHash(currentPassword, user.Hash)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not compare password and hash for user %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_not_valid"), true))
 	}
@@ -123,17 +120,8 @@ func (h *Handler) MyAccountPassword(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_save_new_password"), true))
 	}
 
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
-
-	defaultCountry, err := h.Model.GetDefaultCountry()
-	if err != nil {
-		return err
-	}
-
-	return RenderView(c, account_views.MyAccountIndex("| My Account", account_views.MyAccount(c, user, defaultCountry, commonInfo, i18n.T(c.Request().Context(), "login.password_changed")), commonInfo))
+	// Password has been changed, log out
+	return h.Logout(c)
 }
 
 func (h *Handler) Enable2FA(c echo.Context) error {
@@ -144,12 +132,10 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 
 	user, err := h.Model.GetUserHash(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
-	log.Println(user.Passwd, c.FormValue("current-password"))
 	if user.Passwd {
 		currentPassword := c.FormValue("current-password")
 		if currentPassword == "" {
@@ -159,7 +145,6 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 		// Check if current password is valid
 		match, err := argon2id.ComparePasswordAndHash(currentPassword, user.Hash)
 		if err != nil {
-			// error should go to auth log
 			log.Printf("[ERROR]: could not compare password and hash for user %s, reason: %v", username, err)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_not_valid"), true))
 		}
@@ -174,7 +159,6 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 		AccountName: username,
 	})
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not generate totp key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_totp_key"), true))
 	}
@@ -183,12 +167,10 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 	var buf bytes.Buffer
 	img, err := key.Image(200, 200)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not generate QR, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_qr"), true))
 	}
 	if err := png.Encode(&buf, img); err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not encode image as PNG, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_generate_qr"), true))
 	}
@@ -196,7 +178,6 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 	qrCode := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	if err := h.Model.SaveTOTPSecretKey(username, key.Secret()); err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not save TOTP secret key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_could_not_save_secret"), true))
 	}
@@ -217,14 +198,12 @@ func (h *Handler) Enabled2FA(c echo.Context) error {
 
 	user, err := h.Model.GetUserTOTPSecret(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)
 	if !valid {
-		// error should go to auth log
 		log.Println("[ERROR]: the TOTP code is not valid")
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -240,7 +219,7 @@ func (h *Handler) Enabled2FA(c echo.Context) error {
 		codes = append(codes, code)
 	}
 
-	// Save recovery codse
+	// Save recovery codes
 	if err := h.Model.SaveRecoveryCodes(username, codes); err != nil {
 		log.Printf("[ERROR]: could not save recovery codes, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
@@ -257,7 +236,6 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 
 	user, err := h.Model.GetUserHash(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
@@ -271,7 +249,6 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 		// Check if current password is valid
 		match, err := argon2id.ComparePasswordAndHash(currentPassword, user.Hash)
 		if err != nil {
-			// error should go to auth log
 			log.Printf("[ERROR]: could not compare password and hash for user %s, reason: %v", username, err)
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.current_password_not_valid"), true))
 		}
@@ -288,22 +265,12 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 
 	user, err = h.Model.GetUserById(username)
 	if err != nil {
-		// error should go to auth log
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
-
-	defaultCountry, err := h.Model.GetDefaultCountry()
-	if err != nil {
-		return err
-	}
-
-	return RenderView(c, account_views.MyAccountIndex("| My Account", account_views.MyAccount(c, user, defaultCountry, commonInfo, i18n.T(c.Request().Context(), "login.disabled_2fa")), commonInfo))
+	// 2FA has been disabled, log out
+	return h.Logout(c)
 }
 
 func ValidatePasswordComplexity(password string) error {
