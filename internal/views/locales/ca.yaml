@@ -363,6 +363,7 @@ ca:
       username: "Nom d'usuari"
       installation: "Data d'instal·lació"
       last_bootup: "Última arrencada"
+      domain: "Domini"
     monitor:
       title: "Monitors"
       description: "Aquests són els monitors connectats a aquest ordinador segons informa l'agent OpenUEM"
