@@ -260,13 +260,14 @@ templ UnixLocalUserComponent(t *ent.Task) {
 						id="local-user-force"
 						name="local-user-force"
 						type="checkbox"
-						if t.Type == task.TypeAddUnixLocalUser {
+						if t.Type == task.TypeAddUnixLocalUser || t.Type == task.TypeRemoveUnixLocalUser {
 							checked?={ t.Name != "" && t.LocalUserForce }
 						}
 					/>
 					if t.Type == task.TypeAddUnixLocalUser {
 						{ i18n.T(ctx, "tasks.local_user_overwrite_ssh_key") }
-					} else {
+					}
+					if t.Type == task.TypeRemoveUnixLocalUser {
 						{ i18n.T(ctx, "tasks.local_user_remove_directories") }
 					}
 				</label>

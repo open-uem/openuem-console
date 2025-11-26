@@ -435,7 +435,7 @@ func IsWindowsLocalGroupTask(t *ent.Task) bool {
 }
 
 func IsUnixLocalGroupTask(t *ent.Task) bool {
-	tasks := []string{string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalUser)}
+	tasks := []string{string(task.TypeAddUnixLocalGroup), string(task.TypeRemoveUnixLocalGroup)}
 	return t != nil && slices.Contains(tasks, t.Type.String())
 }
 
