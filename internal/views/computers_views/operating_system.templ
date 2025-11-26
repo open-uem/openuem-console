@@ -47,6 +47,12 @@ templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 							<th>{ i18n.T(ctx, "agents.hostname") }</th>
 							<td>{ agent.Hostname }</td>
 						</tr>
+						if agent.Os == "windows" {
+							<tr>
+								<th>{ i18n.T(ctx, "inventory.os.domain") }</th>
+								<td>{ agent.Edges.Operatingsystem.Domain }</td>
+							</tr>
+						}
 						<tr>
 							<th>{ i18n.T(ctx, "inventory.os.username") }</th>
 							<td>{ agent.Edges.Operatingsystem.Username }</td>

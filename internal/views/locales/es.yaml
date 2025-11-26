@@ -363,6 +363,7 @@ es:
       username: "Usuario"
       installation: "Fecha de instalación"
       last_bootup: "Último arranque"
+      domain: "Dominio"
     monitor:
       title: "Monitores"
       description: "Estos son los monitores conectados a este equipo de acuerdo con lo informado por el agente de OpenUEM"
