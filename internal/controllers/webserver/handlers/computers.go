@@ -203,16 +203,34 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
+	currentPage := c.FormValue("page")
+	pageSize := c.FormValue("pageSize")
+	sortBy := c.FormValue("sortBy")
+	sortOrder := c.FormValue("sortOrder")
+	currentSortBy := c.FormValue("currentSortBy")
+
+	p := partials.NewPaginationAndSort()
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+
 	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
+	adapters, err := h.Model.NetworkAdaptersByPageInfo(agentId, commonInfo, p)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	p.NItems, err = h.Model.CountNetworkAdaptersByPageInfo(agentId, commonInfo)
+	if err != nil {
+		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
 	confirmDelete := c.QueryParam("delete") != ""
 
-	p := partials.PaginationAndSort{}
-
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, confirmDelete, commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, commonInfo), commonInfo))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
