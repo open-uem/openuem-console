@@ -213,7 +213,26 @@ templ Overview(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, h
 							</tr>
 							<tr>
 								<th>{ i18n.T(ctx, "IP Address") }</th>
-								<td class="!align-middle">{ agent.IP }</td>
+								if agent.Wan == "" || (agent.Wan != "" && agent.Wan == agent.IP) {
+									<td class="!align-middle">{ agent.IP }</td>
+								} else {
+									<td class="!align-middle flex items-center gap-4">
+										<span class="flex gap-2">
+											<span>{ "LAN: " }</span>
+											<span id="lan-address" class="flex gap-2">
+												{ strings.TrimSpace(agent.IP) }
+												<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _={ fmt.Sprintf("on click navigator.clipboard.writeText(#lan-address.textContent) then call UIkit.notification({message: '%s'})", i18n.T(ctx, "Copied")) }></uk-icon>
+											</span>
+										</span>
+										<span class="flex gap-2">
+											<span>{ "WAN: " }</span>
+											<span id="wan-address" class="flex gap-2">
+												{ strings.TrimSpace(agent.Wan) }
+												<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _={ fmt.Sprintf("on click navigator.clipboard.writeText(#wan-address.textContent) then call UIkit.notification({message: '%s'})", i18n.T(ctx, "Copied")) }></uk-icon>
+											</span>
+										</span>
+									</td>
+								}
 							</tr>
 							<tr>
 								<th>{ i18n.T(ctx, "antivirus.updated") }</th>
