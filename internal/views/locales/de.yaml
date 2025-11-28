@@ -128,10 +128,11 @@ de:
   Upload: "Hochladen"
   User:
     one: "Benutzer"
-    other: "Benutzer"
-  Value: "Wert"
+    other: "Benutzer"    
+  Value: "Wert"  
   Version: "Version"
   View: "Ansicht"
+  Virtual: "Virtuell"
   VM: "Virtuelle Maschine"
   WaitingForAdmission: "Wartet auf Zulassung"
   Search: "Suchen"
