@@ -10,13 +10,13 @@ import (
 	"strings"
 )
 
-templ SFTPHome(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, cwd, parent string, files []fs.FileInfo, commonInfo *partials.CommonInfo) {
+templ SFTPHome(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, cwd, parent string, files []fs.FileInfo, commonInfo *partials.CommonInfo, netbird bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo)
-				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false, commonInfo, agent.Os)
+				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false, commonInfo, agent.Os, netbird)
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.file_browser.title") }</h3>

@@ -6,7 +6,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo, agentOS string) {
+templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo, agentOS string, netbird bool) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "overview") }>
 			<a
@@ -232,6 +232,25 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				{ i18n.T(ctx, "agents.power_title") }
 			</a>
 		</li>
+		if netbird {
+			<li class={ templ.KV("uk-active", active == "netbird") }>
+				<a
+					if confirmDelete {
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird?delete=true", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/power?delete=true", id)))) }
+						hx-push-url="false"
+					} else {
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird", id)))) }
+						hx-push-url="true"
+					}
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					NetBird
+				</a>
+			</li>
+		}
 		<li class={ templ.KV("uk-active", active == "notes") }>
 			<a
 				if confirmDelete {
