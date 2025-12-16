@@ -1,0 +1,386 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strings"
+)
+
+templ Netbird(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, ng []nats.NetBirdGroups, higherReleaseApplied *ent.Release, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo, currentTenant *ent.Tenant, currentSite *ent.Site, allTenants []*ent.Tenant, allSites []*ent.Site, netbird bool) {
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@partials.ComputerHeader(p, agent, commonInfo)
+				@ComputersNavbar(agent.ID, "netbird", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				if confirmDelete {
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
+				}
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<img src="/assets/img/svg/netbird.svg" class="w-5"/>
+							<h3 class="uk-card-title">NetBird</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "netbird.description") }</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default p-6">
+					<div class="flex flex-col gap-4">
+						if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+							<div class="flex gap-4">
+								<button
+									type="button"
+									class="uk-button uk-button-default flex items-center gap-2 pr-6"
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/refresh", agent.ID)))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									hx-indicator="#refresh-netbird-spinner"
+								>
+									<uk-icon id="refresh-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "netbird.refresh_information") }
+								</button>
+								if agent.Edges.Netbird.ManagementConnected {
+									<button
+										id="netbird-disconnect"
+										title={ i18n.T(ctx, "netbird.disconnect") }
+										type="button"
+										class="uk-button uk-button-danger flex items-center gap-2 pr-6"
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/disconnect", agent.ID)))) }
+										hx-target="#main"
+										hx-swap="outerHTML"
+										hx-push-url="false"
+										hx-indicator="#netbird-disconnect-spinner"
+									>
+										<uk-icon id="netbird-disconnect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										{ i18n.T(ctx, "netbird.disconnect") }
+									</button>
+								} else {
+									<button
+										id="netbird-disconnect"
+										title={ i18n.T(ctx, "netbird.connect") }
+										type="button"
+										class="uk-button uk-button-primary flex items-center gap-2 pr-6"
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/connect", agent.ID)))) }
+										hx-target="#main"
+										hx-swap="outerHTML"
+										hx-push-url="false"
+										hx-indicator="#netbird-connect-spinner"
+									>
+										<uk-icon id="netbird-connect-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										{ i18n.T(ctx, "netbird.connect") }
+									</button>
+								}
+								if agent.Edges.Netbird.IP != "" {
+									<button
+										id="netbird-delete-peer"
+										title={ i18n.T(ctx, "netbird.delete_peer") }
+										type="button"
+										class="uk-button uk-button-danger flex items-center gap-2 pr-6"
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/deletepeer", agent.ID)))) }
+										hx-target="#main"
+										hx-swap="outerHTML"
+										hx-push-url="false"
+										hx-indicator="#delete-peer-netbird-spinner"
+									>
+										<uk-icon id="delete-peer-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										{ i18n.T(ctx, "netbird.delete_peer") }
+									</button>
+								}
+								<button
+									id="netbird-delete-peer"
+									title={ i18n.T(ctx, "netbird.uninstall") }
+									type="button"
+									class="uk-button uk-button-danger flex items-center gap-2 pr-6"
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/uninstall", agent.ID)))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									hx-indicator="#uninstall-netbird-spinner"
+								>
+									<uk-icon id="uninstall-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "netbird.uninstall") }
+								</button>
+							</div>
+						}
+						<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+							<tr>
+								<th>
+									if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+										{ i18n.T(ctx, "netbird.agent") }
+									} else {
+										<button
+											hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/install", agent.ID)))) }
+											hx-target="#main"
+											hx-swap="outerHTML"
+											hx-push-url="false"
+											type="button"
+											class="uk-button uk-button-primary flex gap-2"
+											hx-indicator="#install-netbird-spinner"
+										>
+											<uk-icon id="install-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											{ i18n.T(ctx, "netbird.install") }
+										</button>
+									}
+								</th>
+								<td class="!align-middle">
+									if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+										<div class="flex gap-4 items-center justify-between">
+											<div class="flex gap-2">
+												<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
+												{ fmt.Sprintf("%s - %s: %s", i18n.T(ctx,"netbird.agent_installed"), i18n.T(ctx,"netbird.version"), agent.Edges.Netbird.Version) }
+											</div>
+										</div>
+									}
+								</td>
+								<th>
+									if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+										{ i18n.T(ctx, "netbird.service") }
+									}
+								</th>
+								<td class="!align-middle">
+									if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+										if agent.Edges.Netbird.ServiceStatus == "netbird.service_running" {
+											<div class="flex items-center gap-2">
+												@partials.Status("up")
+												{ i18n.T(ctx, agent.Edges.Netbird.ServiceStatus) }
+											</div>
+										}
+										if agent.Edges.Netbird.ServiceStatus == "netbird.service_stopped" {
+											<div class="flex items-center gap-2">
+												@partials.Status("down")
+												{ i18n.T(ctx, agent.Edges.Netbird.ServiceStatus) }
+											</div>
+										}
+										if agent.Edges.Netbird.ServiceStatus == "netbird.service_not_installed" {
+											<div class="flex items-center gap-2">
+												@partials.Status("unknown")
+												{ i18n.T(ctx, agent.Edges.Netbird.ServiceStatus) }
+											</div>
+										}
+									}
+								</td>
+								if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed && agent.Edges.Netbird.IP != "" {
+									<th>{ i18n.T(ctx, "netbird.peers") }</th>
+									<td>
+										if agent.Edges.Netbird != nil {
+											<div class="flex gap-2 items-center">
+												<span>
+													{ fmt.Sprintf("%d / %d %s",agent.Edges.Netbird.PeersConnected, agent.Edges.Netbird.PeersTotal, i18n.T(ctx, "netbird.peers_connected")) }
+												</span>
+											</div>
+										} else {
+											<div class="flex gap-2 items-center">
+												<span>
+													-
+												</span>
+											</div>
+										}
+									</td>
+								} else {
+									<th></th>
+									<td></td>
+								}
+							</tr>
+							if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed && agent.Edges.Netbird.ServiceStatus == "netbird.service_running" {
+								<tr>
+									<th>{ i18n.T(ctx, "netbird.management_status") }</th>
+									<td>
+										if agent.Edges.Netbird != nil &&  agent.Edges.Netbird.ManagementConnected {
+											<div class="flex gap-2 items-center">
+												@partials.Status("up")
+												<span>
+													{ i18n.T(ctx, "netbird.connected") }
+												</span>
+												<span>{ fmt.Sprintf("( %s )", agent.Edges.Netbird.ManagementURL) }</span>
+											</div>
+										}
+										if  agent.Edges.Netbird != nil &&  !agent.Edges.Netbird.ManagementConnected {
+											<div class="flex gap-2 items-center">
+												@partials.Status("down")
+												<span>
+													{ 
+												i18n.T(ctx, "netbird.disconnected") }
+												</span>
+											</div>
+										}
+									</td>
+									<th>{ i18n.T(ctx, "netbird.signal_status") }</th>
+									<td>
+										if agent.Edges.Netbird != nil &&  agent.Edges.Netbird.SignalConnected {
+											<div class="flex gap-2 items-center">
+												@partials.Status("up")
+												<span>
+													{ i18n.T(ctx, "netbird.connected") }
+												</span>
+												<span>{ fmt.Sprintf("( %s )", agent.Edges.Netbird.SignalURL) }</span>
+											</div>
+										}
+										if  agent.Edges.Netbird != nil &&  !agent.Edges.Netbird.SignalConnected {
+											<div class="flex gap-2 items-center">
+												@partials.Status("down")
+												<span>
+													{ 
+												i18n.T(ctx, "netbird.disconnected") }
+												</span>
+											</div>
+										}
+									</td>
+									<th>{ i18n.T(ctx, "netbird.ssh_server") }</th>
+									<td>
+										if agent.Edges.Netbird != nil && agent.Edges.Netbird.SSHEnabled {
+											<div class="flex gap-2 items-center">
+												@partials.Status("up")
+												<span>
+													{ i18n.T(ctx, "netbird.enabled") }
+												</span>
+											</div>
+										} else {
+											<div class="flex gap-2 items-center">
+												@partials.Status("down")
+												<span>
+													{ 
+												i18n.T(ctx, "netbird.disabled") }
+												</span>
+											</div>
+										}
+									</td>
+								</tr>
+								<tr>
+									<th>{ i18n.T(ctx, "IP Address") }</th>
+									<td>
+										if agent.Edges.Netbird != nil && agent.Edges.Netbird.IP != "" {
+											<div class="flex gap-2 items-center">
+												<span>
+													{ agent.Edges.Netbird.IP }
+												</span>
+											</div>
+										} else {
+											<div class="flex gap-2 items-center">
+												<span>
+													-
+												</span>
+											</div>
+										}
+									</td>
+									<th>{ i18n.T(ctx, "Profile") }</th>
+									<td>
+										if agent.Edges.Netbird != nil && agent.Edges.Netbird.Profile != "" {
+											<div class="flex gap-2 items-center">
+												<span>
+													{ agent.Edges.Netbird.Profile }
+												</span>
+											</div>
+										} else {
+											<div class="flex gap-2 items-center">
+												<span>
+													-
+												</span>
+											</div>
+										}
+									</td>
+									<th>{ i18n.T(ctx, "netbird.dns_servers") }</th>
+									<td class="w-1/6">
+										if agent.Edges.Netbird != nil && agent.Edges.Netbird.DNSServer != "" {
+											<div class="flex gap-2 items-center">
+												<span>
+													{ agent.Edges.Netbird.DNSServer }
+												</span>
+											</div>
+										} else {
+											<div class="flex gap-2 items-center">
+												<span>
+													-
+												</span>
+											</div>
+										}
+									</td>
+								</tr>
+							}
+						</table>
+					</div>
+				</div>
+				if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+					<div class="uk-card uk-card-body uk-card-default p-6">
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col">
+								<div class="flex items-center gap-2">
+									<uk-icon hx-history="false" icon="plug-zap" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									<h3 class="uk-card-title">{ i18n.T(ctx, "netbird.register_title") }</h3>
+								</div>
+								<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "netbird.register_description") }</p>
+							</div>
+							<form class="flex gap-4 items-center">
+								<uk-select class="w-1/4" name="groups" multiple placeholder={ i18n.T(ctx, "netbird.select_groups") } searchable uk-cloak>
+									for _, g := range ng {
+										<option value={ fmt.Sprintf("%s-%s", g.Name, g.ID) }>{ fmt.Sprintf("%s (%d %s)", g.Name, g.PeersCount, i18n.T(ctx,"netbird.peers")) }</option>
+									}
+								</uk-select>
+								<label class="uk-text-small">{ i18n.T(ctx, "netbird.allow_extra_dns_labels") }<input name="allow-extra-dns-labels" class="uk-checkbox mx-2" type="checkbox"/> </label>
+								<button
+									id="netbird-register"
+									title={ i18n.T(ctx, "netbird.register") }
+									type="button"
+									class="uk-button uk-button-secondary flex items-center gap-2 pr-6"
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/register", agent.ID)))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									hx-indicator="#register-netbird-spinner"
+								>
+									<uk-icon id="register-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "netbird.register") }
+								</button>
+							</form>
+						</div>
+					</div>
+				}
+				if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed && len(agent.Edges.Netbird.ProfilesAvailable) > 0 {
+					<div class="uk-card uk-card-body uk-card-default p-6">
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col">
+								<div class="flex items-center gap-2">
+									<uk-icon hx-history="false" icon="folder-cog" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									<h3 class="uk-card-title">{ i18n.T(ctx, "netbird.profiles_title") }</h3>
+								</div>
+								<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "netbird.profiles_description") }</p>
+							</div>
+							<form class="flex gap-4 items-center">
+								<uk-select class="w-1/4" name="profile" placeholder={ i18n.T(ctx, "netbird.profile_select") } searchable uk-cloak>
+									for _, p := range strings.Split(agent.Edges.Netbird.ProfilesAvailable,",") {
+										<option value={ p }>{ p }</option>
+									}
+								</uk-select>
+								<button
+									id="netbird-register"
+									title={ i18n.T(ctx, "netbird.switch_profile") }
+									type="button"
+									class="uk-button uk-button-secondary flex items-center gap-2 pr-6"
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/netbird/switchprofile", agent.ID)))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									hx-indicator="#switch-profile-netbird-spinner"
+								>
+									<uk-icon id="switch-profile-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "netbird.switch_profile") }
+								</button>
+							</form>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</main>
+}

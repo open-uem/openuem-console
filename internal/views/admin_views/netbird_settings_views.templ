@@ -1,0 +1,76 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ NetbirdSettings(c echo.Context, settings *ent.NetbirdSettings, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "netbird.settings"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/netbird", commonInfo.TenantID)))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("netbird", agentsExists, serversExists, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="uk-card-title flex gap-2 items-center">
+							<img src="/assets/img/svg/netbird.svg" class="w-5"/>
+							{ i18n.T(ctx, "netbird.settings_title") }
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "netbird.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<form class="flex flex-col mt-6 gap-4">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_management_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_management_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="netbird-management-url" value={ settings.ManagementURL } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_token_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_token_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" name="netbird-access-token" value={ settings.AccessToken } spellcheck="false" autocomplete="off" autofocus/>
+									</td>
+								</tr>
+							</table>
+							<div class="flex flex-row-reverse">
+								<button
+									hx-post={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/netbird", commonInfo.TenantID))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="false"
+									type="submit"
+									class="uk-button uk-button-primary"
+								>
+									{ i18n.T(ctx, "netbird.settings_save") }
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ NetbirdSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}

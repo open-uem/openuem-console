@@ -28,9 +28,9 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20251128162900-080c638ad4b8
-	github.com/open-uem/nats v0.0.0-20250930102922-09c2a23b0598
-	github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744
+	github.com/open-uem/ent v0.0.0-20251212131234-a21276e12e5c
+	github.com/open-uem/nats v0.0.0-20251212140146-6dc3fb9e0d69
+	github.com/open-uem/utils v0.0.0-20251216155730-6ba25c99e4ef
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9
 	github.com/sethvargo/go-password v0.3.1
@@ -77,7 +77,7 @@ require (
 	github.com/johnfercher/go-tree v1.1.0 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -87,6 +87,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/open-uem/openuem-ansible-config v0.0.0-20250710075757-9ef6e3390073 // indirect
 	github.com/pdfcpu/pdfcpu v0.11.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

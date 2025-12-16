@@ -8,13 +8,13 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ OperatingSystem(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo, netbird bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo)
-				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
+				@ComputersNavbar(agent.ID, "os", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}

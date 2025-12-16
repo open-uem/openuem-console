@@ -212,6 +212,22 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				RustDesk
 			</a>
 		</li>
+		if commonInfo.TenantID != "-1" {
+			<li class={ templ.KV("uk-active", active == "netbird") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/netbird", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/netbird", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-netbird-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					NetBird
+				</a>
+			</li>
+		}
 		<li class={ templ.KV("uk-active", active == "settings") }>
 			<a
 				if commonInfo.TenantID != "-1" {

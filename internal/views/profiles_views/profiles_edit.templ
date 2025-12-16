@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
 )
@@ -134,53 +135,53 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 									<th class="w-1/12"></th>
 								</tr>
 							</thead>
-							for index, task := range tasks {
+							for index, t := range tasks {
 								<tr>
 									<td class="items-center !align-middle">
 										<div class="flex gap-4">
-											@TaskTypeIcon(task.Type.String())
-											@TaskAgentIcon(task.AgentType.String())
+											@TaskTypeIcon(t.Type.String())
+											@TaskAgentIcon(t.AgentType.String())
 										</div>
 									</td>
-									<td class="items-center !align-middle">{ task.Version }</td>
+									<td class="items-center !align-middle">{ t.Version }</td>
 									<td
 										class="items-center !align-middle underline hover:cursor-pointer"
 									>
 										<a
-											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID))) }
-											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", task.ID)))) }
+											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID))) }
+											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID)))) }
 											hx-push-url="true"
 											hx-target="#main"
 											hx-swap="outerHTML"
-										>{ task.Name }</a>
+										>{ t.Name }</a>
 									</td>
 									<td class="items-center !align-middle">
-										switch task.Type.String() {
-											case "winget_install", "winget_delete", "flatpak_install", "flatpak_uninstall", "brew_formula_install", "brew_formula_uninstall", "brew_formula_upgrade", "brew_cask_install", "brew_cask_uninstall", "brew_cask_upgrade":
-												<span>{ task.PackageName + " " + task.PackageVersion }</span>
-											case "add_registry_key", "remove_registry_key", "update_registry_key_default_value":
-												<span>{ task.RegistryKey }</span>
-											case "add_registry_key_value", "remove_registry_key_value":
-												<span>{ task.RegistryKey + " <- " + task.RegistryKeyValueName }</span>
-											case "add_local_user", "remove_local_user", "add_unix_local_user", "remove_unix_local_user":
-												<span>{ task.LocalUserUsername }</span>
-											case "add_local_group", "add_unix_local_group":
-												if task.LocalGroupMembers != "" {
-													<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembers }</span>
+										switch t.Type {
+											case task.TypeWingetInstall, task.TypeWingetDelete, task.TypeFlatpakInstall, task.TypeFlatpakUninstall, task.TypeBrewFormulaInstall, task.TypeBrewFormulaUninstall, task.TypeBrewFormulaUpgrade, task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
+												<span>{ t.PackageName + " " + t.PackageVersion }</span>
+											case task.TypeAddRegistryKey, task.TypeRemoveRegistryKey, task.TypeUpdateRegistryKeyDefaultValue:
+												<span>{ t.RegistryKey }</span>
+											case task.TypeAddRegistryKeyValue, task.TypeRemoveRegistryKeyValue:
+												<span>{ t.RegistryKey + " <- " + t.RegistryKeyValueName }</span>
+											case task.TypeAddLocalUser, task.TypeRemoveLocalUser, task.TypeAddUnixLocalUser, task.TypeRemoveUnixLocalUser:
+												<span>{ t.LocalUserUsername }</span>
+											case task.TypeAddLocalGroup, task.TypeAddUnixLocalGroup:
+												if t.LocalGroupMembers != "" {
+													<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembers }</span>
 												} else {
-													<span>{ task.LocalGroupName }</span>
+													<span>{ t.LocalGroupName }</span>
 												}
-											case "remove_local_group", "remove_unix_local_group":
-												<span>{ task.LocalGroupName }</span>
-											case "add_users_to_local_group":
-												<span>{ task.LocalGroupName + " <- " + task.LocalGroupMembersToInclude }</span>
-											case "remove_users_from_local_group":
-												<span>{ task.LocalGroupName + " - x - " + task.LocalGroupMembersToExclude }</span>
-											case "msi_install", "msi_uninstall":
-												<span>{ task.MsiProductid }</span>
-											case "powershell_script":
+											case task.TypeRemoveLocalGroup, task.TypeRemoveUnixLocalGroup:
+												<span>{ t.LocalGroupName }</span>
+											case task.TypeAddUsersToLocalGroup:
+												<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembersToInclude }</span>
+											case task.TypeRemoveUsersFromLocalGroup:
+												<span>{ t.LocalGroupName + " - x - " + t.LocalGroupMembersToExclude }</span>
+											case task.TypeMsiInstall, task.TypeMsiUninstall:
+												<span>{ t.MsiProductid }</span>
+											case task.TypePowershellScript:
 												<span>{ i18n.T(ctx, "tasks.powershell_subtype") }</span>
-											case "unix_script":
+											case task.TypeUnixScript:
 												<span>{ i18n.T(ctx, "tasks.unix_script_subtype") }</span>
 											default:
 												<span>-</span>
@@ -192,7 +193,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
 												<li>
 													<a
-														hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, task.ID)))) }
+														hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, t.ID)))) }
 														hx-target="#main"
 														hx-swap="outerHTML"
 													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
@@ -213,56 +214,58 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 
 templ TaskTypeIcon(taskType string) {
 	switch taskType {
-		case "winget_install":
+		case task.TypeWingetInstall.String():
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_install") } uk-cloack></uk-icon>
-		case "flatpak_install":
+		case task.TypeFlatpakInstall.String():
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.flatpak_install") } uk-cloack></uk-icon>
-		case "brew_formula_install":
+		case task.TypeBrewFormulaInstall.String():
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_install") } uk-cloack></uk-icon>
-		case "brew_cask_install":
+		case task.TypeBrewCaskInstall.String():
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_install") } uk-cloack></uk-icon>
-		case "brew_formula_upgrade":
+		case task.TypeBrewFormulaUpgrade.String():
 			<uk-icon hx-history="false" icon="package-check" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_upgrade") } uk-cloack></uk-icon>
-		case "brew_cask_upgrade":
+		case task.TypeBrewCaskUpgrade.String():
 			<uk-icon hx-history="false" icon="package-check" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_upgrade") } uk-cloack></uk-icon>
-		case "brew_formula_uninstall":
+		case task.TypeBrewFormulaUninstall.String():
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_formula_uninstall") } uk-cloack></uk-icon>
-		case "brew_cask_uninstall":
+		case task.TypeBrewCaskUninstall.String():
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.brew_cask_uninstall") } uk-cloack></uk-icon>
-		case "winget_delete":
+		case task.TypeWingetDelete.String():
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.winget_delete") } uk-cloack></uk-icon>
-		case "flatpak_uninstall":
+		case task.TypeFlatpakUninstall.String():
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.flatpak_uninstall") } uk-cloack></uk-icon>
 		case "execute_command":
 			<uk-icon hx-history="false" icon="play" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.execute_command") } uk-cloack></uk-icon>
-		case "add_registry_key", "add_registry_key_value":
+		case task.TypeAddRegistryKey.String(), task.TypeAddRegistryKeyValue.String():
 			<uk-icon hx-history="false" icon="book-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_registry_key") } uk-cloack></uk-icon>
-		case "remove_registry_key":
+		case task.TypeRemoveRegistryKey.String():
 			<uk-icon hx-history="false" icon="book-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_registry_key") } uk-cloack></uk-icon>
-		case "remove_registry_key_value":
+		case task.TypeRemoveRegistryKeyValue.String():
 			<uk-icon hx-history="false" icon="book-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_registry_key_value") } uk-cloack></uk-icon>
-		case "update_registry_key_default_value":
+		case task.TypeUpdateRegistryKeyDefaultValue.String():
 			<uk-icon hx-history="false" icon="book-up2" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.update_registry_key_default_value") } uk-cloack></uk-icon>
-		case "add_local_user", "add_unix_local_user":
+		case task.TypeAddLocalUser.String(), task.TypeAddUnixLocalUser.String():
 			<uk-icon hx-history="false" icon="user-round-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_add") } uk-cloack></uk-icon>
-		case "remove_local_user", "remove_unix_local_user":
+		case task.TypeRemoveLocalUser.String(), task.TypeRemoveUnixLocalUser.String():
 			<uk-icon hx-history="false" icon="user-round-x" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_remove") } uk-cloack></uk-icon>
-		case "add_local_group", "add_unix_local_group":
+		case task.TypeAddLocalGroup.String(), task.TypeAddUnixLocalGroup.String():
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_local_group") } uk-cloack></uk-icon>
-		case "remove_local_group", "remove_unix_local_group":
+		case task.TypeRemoveLocalGroup.String(),task.TypeRemoveUnixLocalGroup.String():
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_local_group") } uk-cloack></uk-icon>
-		case "add_users_to_local_group":
+		case task.TypeAddUsersToLocalGroup.String():
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.add_users_to_local_group") } uk-cloack></uk-icon>
-		case "remove_users_from_local_group":
+		case task.TypeRemoveUsersFromLocalGroup.String():
 			<uk-icon hx-history="false" icon="users-round" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.remove_users_from_local_group") } uk-cloack></uk-icon>
-		case "msi_install":
+		case task.TypeMsiInstall.String():
 			<uk-icon hx-history="false" icon="package-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_install") } uk-cloack></uk-icon>
-		case "msi_uninstall":
+		case task.TypeMsiUninstall.String():
 			<uk-icon hx-history="false" icon="package-minus" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.msi_uninstall") } uk-cloack></uk-icon>
-		case "powershell_script":
+		case task.TypePowershellScript.String():
 			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.powershell_script") } uk-cloack></uk-icon>
-		case "unix_script":
+		case task.TypeUnixScript.String():
 			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.unix_script") } uk-cloack></uk-icon>
+		case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String(), task.TypeNetbirdRegister.String():
+			<img src="/assets/img/svg/netbird.svg" class="w-5"/>
 	}
 }
 

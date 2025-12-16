@@ -8,6 +8,7 @@ import (
 	"github.com/open-uem/ent/profile"
 	"github.com/open-uem/ent/profileissue"
 	"github.com/open-uem/ent/site"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -124,7 +125,7 @@ func (m *Model) GetProfileById(profileId int, c *partials.CommonInfo) (*ent.Prof
 	return m.Client.Profile.Query().WithTags().WithTasks().WithIssues().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).First(context.Background())
 }
 
-func (m *Model) DeleteProfile(profileId int, c *partials.CommonInfo) error {
+func (m *Model) DeleteProfile(profileID int, c *partials.CommonInfo) error {
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return err
@@ -139,10 +140,16 @@ func (m *Model) DeleteProfile(profileId int, c *partials.CommonInfo) error {
 		return err
 	}
 
-	_, err = m.Client.Profile.Delete().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+	_, err = m.Client.Task.Delete().Where(task.HasProfileWith(profile.ID(profileID))).Exec(context.Background())
 	if err != nil {
 		return err
 	}
+
+	_, err = m.Client.Profile.Delete().Where(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

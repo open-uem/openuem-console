@@ -193,6 +193,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	disableRemoteAssistance := c.FormValue("disable-remote-assistance")
 	detectRemoteAgents := c.FormValue("detect-remote-agents")
 	autoAdmitAgents := c.FormValue("auto-admit-agents")
+	netbird := c.FormValue("netbird")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -351,6 +352,20 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		settings.AutoAdmitAgents, err = strconv.ParseBool(autoAdmitAgents)
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.auto_admit_agents_invalid"))
+		}
+	}
+
+	if autoAdmitAgents != "" {
+		settings.AutoAdmitAgents, err = strconv.ParseBool(autoAdmitAgents)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.auto_admit_agents_invalid"))
+		}
+	}
+
+	if netbird != "" {
+		settings.NetBird, err = strconv.ParseBool(netbird)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.netbird_invalid"))
 		}
 	}
 
