@@ -246,7 +246,10 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 					}
 					hx-target="#main"
 					hx-swap="outerHTML"
+					hx-indicator="#netbird-spinner"
+					class="flex items-center gap-1"
 				>
+					<uk-icon id="netbird-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 					NetBird
 				</a>
 			</li>

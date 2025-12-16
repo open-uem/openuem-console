@@ -122,7 +122,7 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 
 	taskID := c.Param("id")
 	agentsType := c.FormValue("task-agent-type")
-	if taskID == "" && (agentsType == "" || !slices.Contains([]string{"windows", "linux", "macos"}, agentsType)) {
+	if taskID == "" && (agentsType == "" || !slices.Contains([]string{task.AgentTypeAny.String(), task.AgentTypeWindows.String(), task.AgentTypeLinux.String(), task.AgentTypeMacos.String()}, agentsType)) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.wrong_agenttype"))
 	}
 
@@ -154,6 +154,8 @@ func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	case task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String(),
 		task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String():
 		return validateHomeBrew(c)
+	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String(), string(task.TypeNetbirdRegister):
+		return validateNetbird(c)
 	default:
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.wrong_type"))
 	}
@@ -788,6 +790,50 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 		greed := c.FormValue("brew-greed")
 		if greed == "on" {
 			taskConfig.HomeBrewGreedy = true
+		}
+	}
+
+	return &taskConfig, nil
+}
+
+func validateNetbird(c echo.Context) (*models.TaskConfig, error) {
+	taskType := c.FormValue("task-subtype")
+	if c.FormValue("selected-task-type") != "" {
+		taskType = c.FormValue("selected-task-type")
+	}
+
+	taskConfig := models.TaskConfig{
+		TaskType:   taskType,
+		AgentsType: c.FormValue("task-agent-type"),
+	}
+
+	taskConfig.Description = c.FormValue("task-description")
+	if taskConfig.Description == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.new.empty"))
+	}
+
+	if taskConfig.TaskType == task.TypeNetbirdRegister.String() {
+		p, err := c.FormParams()
+		if err != nil {
+			return nil, errors.New(i18n.T(c.Request().Context(), "netbird.could_not_parse_groups"))
+		}
+
+		groups := ""
+		if len(p["netbird-groups[]"]) > 0 {
+			groupIDs := []string{}
+			for _, g := range p["netbird-groups[]"] {
+				tmp := strings.Split(g, "-")
+				if len(tmp) > 1 {
+					groupIDs = append(groupIDs, fmt.Sprintf(`"%s"`, tmp[1]))
+				}
+			}
+			groups = strings.Join(groupIDs, ",")
+			taskConfig.NetbirdGroups = groups
+		}
+
+		greed := c.FormValue("netbird-allow-extra-dns-labels")
+		if greed == "on" {
+			taskConfig.NetbirdAllowExtraDNSLabels = true
 		}
 	}
 

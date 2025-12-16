@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,11 +17,8 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 )
-
-type NetBirdPeer struct {
-	ID string `json:"id"`
-}
 
 func (h *Handler) NetbirdSettings(c echo.Context) error {
 	var err error
@@ -91,13 +87,29 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 		return err
 	}
 
-	agentId := c.Param("uuid")
+	agentID := c.Param("uuid")
 
-	if agentId == "" {
+	if agentID == "" {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	agent, err := h.Model.GetAgentNetBirdById(agentId, commonInfo)
+	// Try to get info using NATS refresh
+	msg, err := h.NATSConnection.Request("agent.netbird.refresh."+agentID, nil, 10*time.Second)
+	if err == nil {
+		result := nats.Netbird{}
+		if err := json.Unmarshal(msg.Data, &result); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_decode_response", err.Error()), true))
+		}
+
+		if result.Error == "" {
+			if err := h.Model.SaveNetbirdInfo(agentID, result); err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_save_data", result.Error), true))
+			}
+		}
+	}
+
+	// Get data from database
+	agent, err := h.Model.GetAgentNetBirdById(agentID, commonInfo)
 	if err != nil || agent.Edges.Netbird == nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_doesnt_support_netbird"), true))
 	}
@@ -259,13 +271,13 @@ func (h *Handler) NetbirdRegister(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
 	}
 
-	setupKeyID, setupKey, err := createOneOffSetupKeyAPI(settings.ManagementURL, agentID, groups, allowExtraDNSLabels, settings.AccessToken)
+	setupKeyID, setupKey, err := utils.CreateNetBirdOneOffSetupKeyAPI(settings.ManagementURL, agentID, groups, allowExtraDNSLabels, settings.AccessToken)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
 
 	defer func() {
-		if err := deleteOneOffSetupKeyAPI(settings.ManagementURL, setupKeyID, settings.AccessToken); err != nil {
+		if err := utils.DeleteNetBirdOneOffSetupKeyAPI(settings.ManagementURL, setupKeyID, settings.AccessToken); err != nil {
 			log.Printf("[ERROR]: could not delete one-off key using Netbird API, reason: %v", err)
 		}
 	}()
@@ -375,7 +387,7 @@ func (h *Handler) NetbirdSwitchProfile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_create_request", err.Error()), true))
 	}
 
-	msg, err := h.NATSConnection.Request("agent.netbird.switchprofile."+agentID, data, 1*time.Minute)
+	msg, err := h.NATSConnection.Request("agent.netbird.switchprofile."+agentID, data, 2*time.Minute)
 	if err != nil {
 		if strings.Contains(err.Error(), "no responders") {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
@@ -449,7 +461,7 @@ func (h *Handler) NetbirdConnect(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	msg, err := h.NATSConnection.Request("agent.netbird.up."+agentID, nil, 5*time.Minute)
+	msg, err := h.NATSConnection.Request("agent.netbird.up."+agentID, nil, 30*time.Second)
 	if err != nil {
 		if strings.Contains(err.Error(), "no responders") {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
@@ -475,7 +487,7 @@ func (h *Handler) NetbirdConnect(c echo.Context) error {
 	return h.Netbird(c, successMessage)
 }
 
-func (h *Handler) NetbirdDisconnect(c echo.Context) error {
+func (h *Handler) NetbirdDisconnect(c echo.Context, successMessage string) error {
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
@@ -507,12 +519,14 @@ func (h *Handler) NetbirdDisconnect(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_save_data", result.Error), true))
 	}
 
-	successMessage := i18n.T(c.Request().Context(), "netbird.disconnect_success")
+	if successMessage == "" {
+		successMessage = i18n.T(c.Request().Context(), "netbird.disconnect_success")
+	}
 
 	return h.Netbird(c, successMessage)
 }
 
-func getGroupsFromNetbirdAPI(managementURL string, token string) ([]computers_views.NetBirdGroups, error) {
+func getGroupsFromNetbirdAPI(managementURL string, token string) ([]nats.NetBirdGroups, error) {
 
 	url := fmt.Sprintf("%s/api/groups", managementURL)
 	method := "GET"
@@ -539,85 +553,12 @@ func getGroupsFromNetbirdAPI(managementURL string, token string) ([]computers_vi
 		return nil, err
 	}
 
-	groups := []computers_views.NetBirdGroups{}
+	groups := []nats.NetBirdGroups{}
 	if err := json.Unmarshal(body, &groups); err != nil {
 		return nil, err
 	}
 
 	return groups, nil
-}
-
-func createOneOffSetupKeyAPI(managementURL string, agentID string, groups string, allowExtraDNSLabels bool, token string) (string, string, error) {
-
-	url := fmt.Sprintf("%s/api/setup-keys", managementURL)
-
-	method := "POST"
-
-	payload := strings.NewReader(fmt.Sprintf(`{
-		"name": "OpenUEM %s key",
-		"type": "one-off",
-		"expires_in": 86400,
-		"auto_groups": [ %s ],
-		"usage_limit": 1,
-		"ephemeral": false,
-		"allow_extra_dns_labels": %t
-	}`, agentID, groups, allowExtraDNSLabels))
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
-
-	if err != nil {
-		return "", "", err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Token %s", token))
-
-	res, err := client.Do(req)
-	if err != nil {
-		return "", "", err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return "", "", err
-	}
-
-	response := computers_views.NetBirdCreateSetupKeyResponse{}
-	if err := json.Unmarshal(body, &response); err != nil {
-		return "", "", err
-	}
-
-	if response.Valid {
-		return response.ID, response.Key, nil
-	}
-
-	return "", "", errors.New("couldn't parse JSON request")
-}
-
-func deleteOneOffSetupKeyAPI(managementURL string, key string, token string) error {
-	url := fmt.Sprintf("%s/api/setup-keys/%s", managementURL, key)
-
-	method := "DELETE"
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Token %s", token))
-
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	return nil
 }
 
 func (h *Handler) NetbirdDeletePeer(c echo.Context, comingFromUninstall bool) error {
@@ -661,88 +602,17 @@ func (h *Handler) NetbirdDeletePeer(c echo.Context, comingFromUninstall bool) er
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.wrong_ip_format"), true))
 	}
 
-	peerID, err := getMyPeerID(ipElements[0], settings.ManagementURL, settings.AccessToken)
+	peerID, err := utils.GetMyNetBirdPeerID(ipElements[0], settings.ManagementURL, settings.AccessToken)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_peer_id", err.Error()), true))
 	}
 
-	if err := deletePeer(peerID, settings.ManagementURL, settings.AccessToken); err != nil {
+	if err := utils.DeleteNetBirdPeer(peerID, settings.ManagementURL, settings.AccessToken); err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_delete_peer", err.Error()), true))
 	}
 
 	if comingFromUninstall {
 		return nil
 	}
-	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "netbird.peer_deleted")))
-}
-
-func getMyPeerID(ip string, managementURL string, token string) (string, error) {
-
-	url := fmt.Sprintf("%s/api/peers?ip=%s", managementURL, ip)
-
-	method := "GET"
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", fmt.Sprintf("Token %s", token))
-
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	peers := []NetBirdPeer{}
-	if err := json.Unmarshal(body, &peers); err != nil {
-		return "", err
-	}
-
-	if len(peers) == 0 {
-		return "", errors.New("the API didn't find a peer with this IP address")
-	}
-
-	if len(peers) > 2 {
-		return "", errors.New("the API found more than one peer with this IP address")
-	}
-
-	if peers[0].ID == "" {
-		return "", errors.New("could not get the peer ID from the API")
-	}
-
-	return peers[0].ID, nil
-}
-
-func deletePeer(peerID string, managementURL string, token string) error {
-
-	url := fmt.Sprintf("%s/api/peers/%s", managementURL, peerID)
-
-	method := "DELETE"
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Token %s", token))
-
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	return nil
+	return h.NetbirdDisconnect(c, i18n.T(c.Request().Context(), "netbird.peer_deleted"))
 }

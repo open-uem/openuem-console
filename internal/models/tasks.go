@@ -86,6 +86,8 @@ type TaskConfig struct {
 	HomeBrewInstallOptions                string
 	HomeBrewUpgradeOptions                string
 	HomeBrewGreedy                        bool
+	NetbirdGroups                         string
+	NetbirdAllowExtraDNSLabels            bool
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -239,6 +241,19 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
 			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
 			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
+	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String():
+		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).Exec(context.Background())
+	case task.TypeNetbirdRegister.String():
+		tenantID := c.Param("tenant")
+		if tenantID == "" {
+			return errors.New("tenant ID cannot be empty")
+		}
+		id, err := strconv.Atoi(tenantID)
+		if err != nil {
+			return errors.New("could not parse tenant ID as an int")
+		}
+
+		return m.Client.Task.Create().SetName(cfg.Description).SetTenant(id).SetNetbirdGroups(cfg.NetbirdGroups).SetNetbirdAllowExtraDNSLabels(cfg.NetbirdAllowExtraDNSLabels).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
@@ -380,7 +395,19 @@ func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) 
 		return query.SetPackageID(cfg.PackageID).
 			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
 			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
+	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String():
+		return query.Exec(context.Background())
+	case task.TypeNetbirdRegister.String():
+		tenantID := c.Param("tenant")
+		if tenantID == "" {
+			return errors.New("tenant ID cannot be empty")
+		}
+		id, err := strconv.Atoi(tenantID)
+		if err != nil {
+			return errors.New("could not parse tenant ID as an int")
+		}
 
+		return query.SetTenant(id).SetNetbirdGroups(cfg.NetbirdGroups).SetNetbirdAllowExtraDNSLabels(cfg.NetbirdAllowExtraDNSLabels).Exec(context.Background())
 	}
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }

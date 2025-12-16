@@ -5,35 +5,12 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
 
-type NetBirdGroups struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	PeersCount int    `json:"peers_count"`
-}
-
-type NetBirdCreateSetupKeyResponse struct {
-	ID                  string   `json:"id"`
-	Name                string   `json:"name"`
-	Expires             string   `json:"expires"`
-	Type                string   `json:"type"`
-	Valid               bool     `json:"valid"`
-	Revoked             bool     `json:"revoked"`
-	UsedTimes           int      `json:"used_times"`
-	LastUsed            string   `json:"last_used"`
-	State               string   `json:"state"`
-	AutoGroups          []string `json:"auto_groups"`
-	UpdateAt            string   `json:"updated_at"`
-	UsageLimit          int      `json:"usage_limit"`
-	Ephemeral           bool     `json:"ephemeral"`
-	AllowExtraDNSLabels bool     `json:"allow_extra_dns_labels"`
-	Key                 string   `json:"key"`
-}
-
-templ Netbird(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, ng []NetBirdGroups, higherReleaseApplied *ent.Release, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo, currentTenant *ent.Tenant, currentSite *ent.Site, allTenants []*ent.Tenant, allSites []*ent.Site, netbird bool) {
+templ Netbird(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, ng []nats.NetBirdGroups, higherReleaseApplied *ent.Release, confirmDelete bool, successMessage string, commonInfo *partials.CommonInfo, currentTenant *ent.Tenant, currentSite *ent.Site, allTenants []*ent.Tenant, allSites []*ent.Site, netbird bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -369,7 +346,7 @@ templ Netbird(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, ng
 						</div>
 					</div>
 				}
-				if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed {
+				if agent.Edges.Netbird != nil && agent.Edges.Netbird.Installed && len(agent.Edges.Netbird.ProfilesAvailable) > 0 {
 					<div class="uk-card uk-card-body uk-card-default p-6">
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col">
