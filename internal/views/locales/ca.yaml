@@ -340,6 +340,7 @@ ca:
     no_rdp_certs: "L'agent no ha informat que tingui un certificat digital per xifrar el trànsit RDP. Força un informe nou o regenera certificats des del menú d'accions"
     vnc_server_installed: "%s està instal·lat al punt final"
     vnc_host_resolved: "El nom d'amfitrió remot sembla que el DNS ha resolt"
+    sftp_connection_failed: "No s'ha pogut contactar amb el servei SFTP remot. Si us plau, comproveu les regles del tallafocs o si la connectivitat IP és possible entre el servidor de la consola i el punt final."
   inventory:
     hardware:
       title: "Maquinari"
