@@ -91,13 +91,19 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 				return nil, err
 			}
 			info.SiteID = strconv.Itoa(s.ID)
+			info.ProfileSiteID = info.SiteID
 		} else {
 			info.SiteID = siteID
+			info.ProfileSiteID = info.SiteID
 		}
 	} else {
-		if len(info.Sites) == 0 {
-			info.SiteID = strconv.Itoa(info.Sites[0].ID)
-		} else {
+		s, err := h.Model.GetDefaultSite(tenant)
+		if err != nil {
+			return nil, err
+		}
+		info.ProfileSiteID = strconv.Itoa(s.ID)
+
+		if len(info.Sites) != 0 {
 			info.SiteID = "-1"
 		}
 	}
