@@ -83,8 +83,8 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 
 	IPAddresses := []string{}
 	for _, n := range agent.Edges.Networkadapters {
-		addresses := strings.Split(n.Addresses, ",")
-		for _, a := range addresses {
+		addresses := strings.SplitSeq(n.Addresses, ",")
+		for a := range addresses {
 			IPAddresses = append(IPAddresses, a)
 		}
 	}
