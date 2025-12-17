@@ -353,15 +353,29 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 				<div class="flex flex-col gap-2 uk-text-small uk-text-muted uk-margin">
 					<div class="flex gap-2 uk-text-small">
 						if password != "" {
-							<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", rustDeskID, password)) }>
-								<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-								<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
-							</a>
+							if settings != nil && settings.CustomRendezvousServer != "" && settings.Key != "" {
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s@%s?password=%s&key=%s", rustDeskID, settings.CustomRendezvousServer, password, settings.Key)) }>
+									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
+								</a>
+							} else {
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", rustDeskID, password)) }>
+									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
+								</a>
+							}
 						} else {
-							<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", rustDeskID)) }>
-								<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-								<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
-							</a>
+							if settings != nil && settings.CustomRendezvousServer != "" && settings.Key != "" {
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s@%s?key=%s", rustDeskID, settings.CustomRendezvousServer, settings.Key)) }>
+									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
+								</a>
+							} else {
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", rustDeskID)) }>
+									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
+								</a>
+							}
 						}
 					</div>
 					if settings.DirectIPAccess {
