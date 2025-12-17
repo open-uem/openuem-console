@@ -1447,7 +1447,7 @@ ca:
     could_not_parse_permanent: "No s'ha pogut analitzar la contrasenya permanent"
     could_not_generate_random_password: "No s'ha pogut generar una contrasenya aleatòria"
     click_to_open: "Connecteu-vos amb RustDesk ID"
-    click_to_open_direct: "Connecteu-vos amb IP directa (LAN)"
+    click_to_open_direct: "Connecteu-vos amb IP (%s)"
     click_to_close: "Feu clic per tancar l'aplicació RustDesk remota i revertir la configuració"
     rustdesk_id: "ID de RustDesk: "
     rustdesk_password: "Contrasenya permanent: "
