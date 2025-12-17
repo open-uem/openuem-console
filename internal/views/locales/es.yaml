@@ -340,6 +340,7 @@ es:
     no_rdp_certs: "El agente ha informado que no tiene un certificado digital para cifrar el tráfico RDP. Fuerce un nuevo informe o regenere los certificados desde el menú de acciones."
     vnc_server_installed: "% s está instalado en el equipo"
     vnc_host_resolved: "El nombre de host remoto parece poder resolverse por DNS"
+    sftp_connection_failed: "No se pudo contactar con el servicio SFTP remoto. Compruebe las reglas de su firewall o si la conexión IP entre el servidor de consola y el endpoint es posible."
   inventory:
     hardware:
       title: "Hardware"

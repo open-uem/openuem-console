@@ -340,6 +340,7 @@ de:
     no_rdp_certs: "Der Agent hat kein digitales Zertifikat zur Verschlüsselung des RDP-Verkehrs gemeldet. Erzwingen Sie einen neuen Bericht oder generieren Sie Zertifikate über das Aktionsmenü neu."
     vnc_server_installed: "%s ist auf dem Endpunkt installiert"
     vnc_host_resolved: "Der Remote-Hostname scheint durch DNS aufgelöst zu werden"
+    sftp_connection_failed: "Der Remote-SFTP-Dienst konnte nicht erreicht werden. Bitte überprüfen Sie Ihre Firewall-Regeln bzw. ob eine IP-Verbindung zwischen dem Konsolenserver und dem Endpunkt möglich ist."
   inventory:
     hardware:
       title: "Hardware"

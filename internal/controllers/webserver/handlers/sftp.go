@@ -3,9 +3,11 @@ package handlers
 import (
 	"archive/zip"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,9 +16,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
@@ -61,7 +65,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -136,7 +140,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -190,7 +194,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -265,7 +269,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -356,7 +360,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -446,7 +450,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -541,7 +545,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -612,7 +616,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -690,7 +694,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -823,7 +827,7 @@ func sortFiles(files []fs.FileInfo) {
 
 }
 
-func connectWithSFTP(IPAddress string, key *rsa.PrivateKey, sftpPort, os string) (*sftp.Client, *ssh.Client, error) {
+func connectWithSFTP(c echo.Context, IPAddress string, key *rsa.PrivateKey, sftpPort, os string, nb *ent.Netbird) (*sftp.Client, *ssh.Client, error) {
 	signer, err := ssh.NewSignerFromKey(key)
 	if err != nil {
 		return nil, nil, err
@@ -844,7 +848,27 @@ func connectWithSFTP(IPAddress string, key *rsa.PrivateKey, sftpPort, os string)
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	conn, err := ssh.Dial("tcp", IPAddress+":"+sftpPort, config)
+	sftpAdress := net.JoinHostPort(IPAddress, sftpPort)
+
+	_, err = net.DialTimeout("tcp", sftpAdress, 2*time.Second)
+	if err != nil {
+		if nb != nil && nb.IP != "" {
+			nbIPComponents := strings.Split(nb.IP, "/")
+			if len(nbIPComponents) == 2 {
+				sftpAdress = net.JoinHostPort(nbIPComponents[0], sftpPort)
+				_, err = net.DialTimeout("tcp", sftpAdress, 2*time.Second)
+				if err != nil {
+					return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+				}
+			} else {
+				return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+			}
+		} else {
+			return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+		}
+	}
+
+	conn, err := ssh.Dial("tcp", sftpAdress, config)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -340,6 +340,7 @@ en:
     no_rdp_certs: "The agent hasn't reported that it has a digital certificate to encrypt RDP traffic. Force a new report or regenerate certificates from the actions menu"
     vnc_server_installed: "%s is installed on the endpoint"
     vnc_host_resolved: "The remote hostname seems to be resolved by DNS"
+    sftp_connection_failed: "The remote SFTP service could not be contacted. Please check your firewall rules or whether IP connectivity is possible between the console server and the endpoint"
   inventory:
     hardware:
       title: "Hardware"

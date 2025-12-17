@@ -340,6 +340,7 @@ fr:
     no_rdp_certs: "L'agent n'a pas signalé qu'il possède un certificat numérique pour chiffrer le trafic RDP. Forcez un nouveau rapport ou régénérez les certificats à partir du menu des actions"
     vnc_server_installed: "%s est installé sur le endpoint"
     vnc_host_resolved: "Le nom d'hôte distant semble être résolu par DNS"
+    sftp_connection_failed: "Impossible de contacter le service SFTP distant. Veuillez vérifier les règles de votre pare-feu ou la connectivité IP entre le serveur de console et le terminal."
   inventory:
     hardware:
       title: "Matériel"
