@@ -1447,7 +1447,7 @@ es:
     could_not_parse_permanent: "No se pudo analizar la contraseña permanente"
     could_not_generate_random_password: "No se pudo generar una contraseña aleatoria"
     click_to_open: "Conectarse con RustDesk ID"
-    click_to_open_direct: "Conectarse con IP directa (LAN)"
+    click_to_open_direct: "Conectarse con IP (%s)"
     click_to_close: "Haga clic para cerrar la aplicación remota RustDesk y revertir la configuración"
     rustdesk_id: "RustDesk ID: "
     rustdesk_password: "Contraseña permanente: "

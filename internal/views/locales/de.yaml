@@ -1447,7 +1447,7 @@ de:
     could_not_parse_permanent: "Permanentes Passwort konnte nicht analysiert werden"
     could_not_generate_random_password: "Es konnte kein zufälliges Passwort generiert werden"
     click_to_open: "Mit RustDesk-ID verbinden"
-    click_to_open_direct: "Verbindung mit direkter IP (LAN)"
+    click_to_open_direct: "Verbindung mit IP (%s)"
     click_to_close: "Klicken Sie hier, um die Remote-RustDesk-App zu schließen und die Konfiguration zurückzusetzen"
     rustdesk_id: "RustDesk-ID: "
     rustdesk_password: "Permanentes Passwort: "

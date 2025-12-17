@@ -371,12 +371,12 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 									if password != "" {
 										<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", IPAddress, password)) }>
 											<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct") }</span>
+											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
 										</a>
 									} else {
 										<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", IPAddress)) }>
 											<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct") }</span>
+											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
 										</a>
 									}
 								</div>

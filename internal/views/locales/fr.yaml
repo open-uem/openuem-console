@@ -1447,7 +1447,7 @@ fr:
     could_not_parse_permanent: "Impossible d'analyser le mot de passe permanent"
     could_not_generate_random_password: "Impossible de générer un mot de passe aléatoire"
     click_to_open: "Se connecter avec l'ID RustDesk"
-    click_to_open_direct: "Se connecter avec l'IP directe (LAN)"
+    click_to_open_direct: "Se connecter avec l'IP (%s)"
     click_to_close: "Cliquez pour fermer l'application RustDesk distante et rétablir la configuration"
     rustdesk_id: "ID RustDesk"
     rustdesk_password: "Mot de passe permanent : "
