@@ -103,10 +103,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		}
 		info.ProfileSiteID = strconv.Itoa(s.ID)
 
-		if len(info.Sites) == 1 {
-			info.SiteID = strconv.Itoa(info.Sites[0].ID)
-			info.ProfileSiteID = info.SiteID
-		} else {
+		if len(info.Sites) != 0 {
 			info.SiteID = "-1"
 		}
 	}
