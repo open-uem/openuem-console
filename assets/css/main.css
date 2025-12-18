@@ -9616,10 +9616,13 @@ th.uk-text-break, td.uk-text-break {
   height: 7rem;
 }
 
+<<<<<<< HEAD
 .h-36 {
   height: 9rem;
 }
 
+=======
+>>>>>>> main
 .h-4 {
   height: 1rem;
 }
@@ -9628,10 +9631,13 @@ th.uk-text-break, td.uk-text-break {
   height: 10rem;
 }
 
+<<<<<<< HEAD
 .h-48 {
   height: 12rem;
 }
 
+=======
+>>>>>>> main
 .h-5 {
   height: 1.25rem;
 }
@@ -9744,10 +9750,13 @@ th.uk-text-break, td.uk-text-break {
   width: 75%;
 }
 
+<<<<<<< HEAD
 .w-36 {
   width: 9rem;
 }
 
+=======
+>>>>>>> main
 .w-4 {
   width: 1rem;
 }
@@ -9840,10 +9849,13 @@ th.uk-text-break, td.uk-text-break {
           user-select: all;
 }
 
+<<<<<<< HEAD
 .resize-none {
   resize: none;
 }
 
+=======
+>>>>>>> main
 .flex-row-reverse {
   flex-direction: row-reverse;
 }
@@ -9908,10 +9920,13 @@ th.uk-text-break, td.uk-text-break {
   gap: 2rem;
 }
 
+<<<<<<< HEAD
 .gap-16 {
   gap: 4rem;
 }
 
+=======
+>>>>>>> main
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
@@ -9926,6 +9941,13 @@ th.uk-text-break, td.uk-text-break {
   scroll-behavior: auto;
 }
 
+<<<<<<< HEAD
+=======
+.text-balance {
+  text-wrap: balance;
+}
+
+>>>>>>> main
 .rounded-full {
   border-radius: 9999px;
 }
@@ -10166,11 +10188,14 @@ th.uk-text-break, td.uk-text-break {
   padding-right: 1.25rem;
 }
 
+<<<<<<< HEAD
 .px-6 {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
 }
 
+=======
+>>>>>>> main
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
@@ -10588,6 +10613,7 @@ th.uk-text-break, td.uk-text-break {
   .\32xl\:block {
     display: block;
   }
+<<<<<<< HEAD
 }
 
 @media print {
@@ -10598,4 +10624,6 @@ th.uk-text-break, td.uk-text-break {
   .print\:w-full {
     width: 100%;
   }
+=======
+>>>>>>> main
 }

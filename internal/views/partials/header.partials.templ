@@ -33,6 +33,7 @@ type CommonInfo struct {
 	ActionTenantID     string
 	IsComputer         bool
 	IsProfile          bool
+	ProfileSiteID      string
 	CSRFToken          string
 }
 
@@ -272,6 +273,10 @@ func GetNavigationUrl(commonInfo *CommonInfo, location string) string {
 	}
 
 	return fmt.Sprintf("/tenant/%s/site/%s%s", commonInfo.TenantID, commonInfo.SiteID, location)
+}
+
+func GetProfileNavigationUrl(commonInfo *CommonInfo) string {
+	return fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.ProfileSiteID)
 }
 
 func GetSiteSelectorUrl(c echo.Context, commonInfo *CommonInfo, siteID int) string {

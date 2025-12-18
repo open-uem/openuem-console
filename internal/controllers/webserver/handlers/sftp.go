@@ -3,19 +3,24 @@ package handlers
 import (
 	"archive/zip"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
@@ -60,7 +65,7 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -102,7 +107,20 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo), commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -126,7 +144,7 @@ func (h *Handler) NewFolder(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -180,7 +198,7 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -220,7 +238,19 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo), commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
@@ -246,7 +276,7 @@ func (h *Handler) RenameItem(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -294,7 +324,19 @@ func (h *Handler) RenameItem(c echo.Context) error {
 
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo), commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
@@ -327,7 +369,7 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -361,7 +403,19 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 	sortFiles(files)
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, removeForm.Parent, files, commonInfo), commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, removeForm.Parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -407,7 +461,7 @@ func (h *Handler) UploadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -456,7 +510,19 @@ func (h *Handler) UploadFile(c echo.Context) error {
 
 	p := partials.PaginationAndSort{}
 
-	return RenderView(c, computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {
@@ -492,7 +558,7 @@ func (h *Handler) DownloadFile(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -563,7 +629,7 @@ func (h *Handler) DownloadFolderAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -641,7 +707,7 @@ func (h *Handler) DownloadManyAsZIP(c echo.Context) error {
 		return err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -774,7 +840,7 @@ func sortFiles(files []fs.FileInfo) {
 
 }
 
-func connectWithSFTP(IPAddress string, key *rsa.PrivateKey, sftpPort, os string) (*sftp.Client, *ssh.Client, error) {
+func connectWithSFTP(c echo.Context, IPAddress string, key *rsa.PrivateKey, sftpPort, os string, nb *ent.Netbird) (*sftp.Client, *ssh.Client, error) {
 	signer, err := ssh.NewSignerFromKey(key)
 	if err != nil {
 		return nil, nil, err
@@ -795,7 +861,27 @@ func connectWithSFTP(IPAddress string, key *rsa.PrivateKey, sftpPort, os string)
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	conn, err := ssh.Dial("tcp", IPAddress+":"+sftpPort, config)
+	sftpAdress := net.JoinHostPort(IPAddress, sftpPort)
+
+	_, err = net.DialTimeout("tcp", sftpAdress, 2*time.Second)
+	if err != nil {
+		if nb != nil && nb.IP != "" {
+			nbIPComponents := strings.Split(nb.IP, "/")
+			if len(nbIPComponents) == 2 {
+				sftpAdress = net.JoinHostPort(nbIPComponents[0], sftpPort)
+				_, err = net.DialTimeout("tcp", sftpAdress, 2*time.Second)
+				if err != nil {
+					return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+				}
+			} else {
+				return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+			}
+		} else {
+			return nil, nil, errors.New(i18n.T(c.Request().Context(), "agents.sftp_connection_failed"))
+		}
+	}
+
+	conn, err := ssh.Dial("tcp", sftpAdress, config)
 	if err != nil {
 		return nil, nil, err
 	}

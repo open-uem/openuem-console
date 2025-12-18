@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/rustdesk"
 	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
@@ -46,12 +47,14 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 	}
 
 	rd := nats.RustDesk{
-		CustomRendezVousServer: rustdeskSettings.CustomRendezvousServer,
-		RelayServer:            rustdeskSettings.RelayServer,
-		Key:                    rustdeskSettings.Key,
-		APIServer:              rustdeskSettings.APIServer,
-		DirectIPAccess:         rustdeskSettings.DirectIPAccess,
-		Whitelist:              rustdeskSettings.Whitelist,
+		CustomRendezVousServer:  rustdeskSettings.CustomRendezvousServer,
+		RelayServer:             rustdeskSettings.RelayServer,
+		Key:                     rustdeskSettings.Key,
+		APIServer:               rustdeskSettings.APIServer,
+		DirectIPAccess:          rustdeskSettings.DirectIPAccess,
+		Whitelist:               rustdeskSettings.Whitelist,
+		VerificationMethod:      rustdeskSettings.VerificationMethod.String(),
+		TemporaryPasswordLength: rustdeskSettings.TemporaryPasswordLength,
 	}
 
 	randomPassword := ""
@@ -84,8 +87,8 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 
 	IPAddresses := []string{}
 	for _, n := range agent.Edges.Networkadapters {
-		addresses := strings.Split(n.Addresses, ",")
-		for _, a := range addresses {
+		addresses := strings.SplitSeq(n.Addresses, ",")
+		for a := range addresses {
 			IPAddresses = append(IPAddresses, a)
 		}
 	}
@@ -111,26 +114,35 @@ func (h *Handler) RustDeskStop(c echo.Context) error {
 	confirmDelete := c.QueryParam("delete") != ""
 	p := partials.PaginationAndSort{}
 
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, err.Error()), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, err.Error(), netbird, offline), commonInfo))
 	}
 
 	msg, err := h.NATSConnection.Request("agent.rustdesk.stop."+agentId, nil, time.Duration(h.NATSTimeout)*time.Second)
 	if err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, err.Error()), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, err.Error(), netbird, offline), commonInfo))
 	}
 
 	result := nats.RustDeskResult{}
 	if err := json.Unmarshal(msg.Data, &result); err != nil {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, result.Error), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, result.Error, netbird, offline), commonInfo))
 	}
 
 	if result.Error != "" {
-		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, result.Error), commonInfo))
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, result.Error, netbird, offline), commonInfo))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, ""), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, false, commonInfo, "", netbird, offline), commonInfo))
 }
 
 func (h *Handler) RustDeskSettings(c echo.Context) error {
@@ -175,11 +187,29 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 		}
 
 		if (rendezvousServer != "" || relayServer != "" || apiServer != "") && key == "" {
-			log.Println("key error")
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.key_must_be_set"), true))
 		}
 
-		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, useDirectAccess, usePassword); err != nil {
+		verificationMethod := c.FormValue("rustdesk-verification-method")
+		if verificationMethod != "" && !slices.Contains([]string{rustdesk.VerificationMethodUseBothPasswords.String(), rustdesk.VerificationMethodUsePermanentPassword.String(), rustdesk.VerificationMethodUseTemporaryPassword.String()}, verificationMethod) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_verification_method"), true))
+		}
+
+		if verificationMethod != "" && verificationMethod == rustdesk.VerificationMethodUsePermanentPassword.String() && !usePassword {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_verification_method_and_password_combo"), true))
+		}
+
+		temporaryPasswordLength := c.FormValue("rustdesk-temporary-password-length")
+		if temporaryPasswordLength != "" && !slices.Contains([]string{"6", "8", "10"}, temporaryPasswordLength) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_temporary_password_length"), true))
+		}
+
+		passwordLength, err := strconv.Atoi(temporaryPasswordLength)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.cannot_parse_temporary_passwordLength"), true))
+		}
+
+		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, verificationMethod, useDirectAccess, usePassword, passwordLength); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.settings_not_saved", err.Error()), true))
 		}
 

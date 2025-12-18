@@ -728,7 +728,7 @@ func (h *Handler) AgentLogs(c echo.Context) error {
 	}
 
 	// Get agents log using SFTP
-	data, err := h.GetAgentLogFile(a, logFile)
+	data, err := h.GetAgentLogFile(c, a, logFile)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_log", err.Error()), true))
 	}
@@ -742,7 +742,7 @@ func (h *Handler) AgentLogs(c echo.Context) error {
 	}
 
 	// Get updaters log using SFTP
-	data, err = h.GetAgentLogFile(a, logFile)
+	data, err = h.GetAgentLogFile(c, a, logFile)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_log", err.Error()), true))
 	}
@@ -758,13 +758,13 @@ func (h *Handler) AgentLogs(c echo.Context) error {
 	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.AgentsLog(c, a, agentLog, updaterLog, category, "", "", refreshTime, commonInfo), commonInfo))
 }
 
-func (h *Handler) GetAgentLogFile(agent *ent.Agent, path string) (string, error) {
+func (h *Handler) GetAgentLogFile(c echo.Context, agent *ent.Agent, path string) (string, error) {
 	key, err := utils.ReadPEMPrivateKey(h.SFTPKeyPath)
 	if err != nil {
 		return "", err
 	}
 
-	client, sshConn, err := connectWithSFTP(agent.IP, key, agent.SftpPort, agent.Os)
+	client, sshConn, err := connectWithSFTP(c, agent.IP, key, agent.SftpPort, agent.Os, agent.Edges.Netbird)
 	if err != nil {
 		return "", err
 	}

@@ -1,0 +1,27 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
+	"github.com/open-uem/nats"
+)
+
+templ NetbirdTaskComponent(t *ent.Task, ng []nats.NetBirdGroups) {
+	<div class="flex flex-col gap-4">
+		if t != nil && t.Type == task.TypeNetbirdRegister {
+			<div id="netbird-groups-section" class={ templ.KV("hidden", t.Type != task.TypeNetbirdRegister) }>
+				<label for="netbird-groups" class="uk-text-small uk-text-bold">{ i18n.T(ctx, "netbird.optional_groups") }</label>
+				<uk-select name="netbird-groups" multiple placeholder={ i18n.T(ctx, "netbird.select_groups") } searchable uk-cloak>
+					for _, g := range ng {
+						<option value={ fmt.Sprintf("%s-%s", g.Name, g.ID) }>{ fmt.Sprintf("%s (%d %s)", g.Name, g.PeersCount, i18n.T(ctx,"netbird.peers")) }</option>
+					}
+				</uk-select>
+			</div>
+			<div id="netbird-allow-extra-dns-labels-section" class={ templ.KV("hidden", t.Type != task.TypeNetbirdRegister) }>
+				<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="netbird-allow-extra-dns-labels" name="netbird-allow-extra-dns-labels" type="checkbox" checked?={ t != nil && t.NetbirdAllowExtraDNSLabels }/> { i18n.T(ctx, "netbird.allow_extra_dns_labels") }</label>
+			</div>
+		}
+	</div>
+}

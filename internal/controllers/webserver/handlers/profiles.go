@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/profiles_views"
 )
@@ -384,6 +385,8 @@ func (h *Handler) ProfileTaskSubTypes(c echo.Context) error {
 		return RenderView(c, partials.SelectHomeBrewFormulaTaskSubtype(nil))
 	case "brew_cask_type":
 		return RenderView(c, partials.SelectHomeBrewCaskTaskSubtype(nil))
+	case "netbird_type":
+		return RenderView(c, partials.SelectNetbirdTaskSubtype(nil))
 		// Future APT
 		// case "apt_type":
 		// 	return RenderView(c, partials.SelectAPTTaskSubtype(nil))
@@ -425,6 +428,42 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 	case task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String(), task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String():
 		t.Type = task.Type(taskType)
 		return RenderView(c, partials.HomeBrewPackageManagement(&t))
+	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String(), task.TypeNetbirdRegister.String():
+		t.Type = task.Type(taskType)
+
+		ng := []nats.NetBirdGroups{}
+		if taskType == task.TypeNetbirdRegister.String() {
+
+			commonInfo, err := h.GetCommonInfo(c)
+			if err != nil {
+				return err
+			}
+
+			tenantID, err := strconv.Atoi(commonInfo.TenantID)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+			}
+
+			settings, err := h.Model.GetNetbirdSettings(tenantID)
+			if err != nil {
+				if ent.IsNotFound(err) {
+					settings = &ent.NetbirdSettings{}
+				} else {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+				}
+			}
+
+			if settings.AccessToken == "" {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
+			}
+
+			ng, err = getGroupsFromNetbirdAPI(settings.ManagementURL, settings.AccessToken)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_groups", err.Error()), true))
+			}
+		}
+
+		return RenderView(c, partials.NetbirdTaskComponent(&t, ng))
 	}
 
 	return nil

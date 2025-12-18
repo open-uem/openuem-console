@@ -33,10 +33,14 @@ templ Brand(name, publisher string) {
 		<i class="si si-asus uk-text-default uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "beekeeper studio") {
 		<i class="si si-beekeeperstudio si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "bitwarden") {
+		<i class="si si-bitwarden si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "brave") {
 		<i class="si si-brave si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "bitdefender") {
 		<i class="si si-bitdefender si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "chromium") {
+		<i class="si si-googlechrome si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "cisco") || strings.Contains(publisher, "cisco") {
 		<i class="si si-cisco si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "citrix") || strings.Contains(publisher, "citrix") {
@@ -67,8 +71,6 @@ templ Brand(name, publisher string) {
 		<i class="si si-go si--color uk-cloak text-4xl"></i>
 	} else if strings.Contains(name, "gimp") {
 		<i class="si si-gimp si--color uk-cloak text-3xl"></i>
-	} else if strings.Contains(name, "gnome") || strings.Contains(name, "zenity") {
-		<i class="si si-gnome si--color uk-cloak text-3xl"></i>
 	} else if strings.Contains(name, "greenshot") {
 		<uk-icon hx-history="false" icon="brush" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	} else if strings.Contains(publisher, "hp") || strings.Contains(publisher, "hewlett-packard") {
@@ -113,6 +115,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-nodedotjs si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "notepad++") {
 		<i class="si si-notepadplusplus text-green-700 uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "obsidian") {
+		<i class="si si-obsidian si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "office") {
 		<i class="ri-microsoft-fill ri-2x text-blue-600"></i>
 	} else if strings.Contains(name, "opensuse") {
@@ -145,6 +149,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-rancher si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "rancher") {
 		<i class="si si-rancher si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "rocket.chat") {
+		<i class="si si-rocketdotchat si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "rustdesk") {
 		<i class="si si-rustdesk si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "samsung") {
@@ -187,6 +193,8 @@ templ Brand(name, publisher string) {
 		<i class="si si-opensuse si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "youtube") {
 		<i class="si si-youtube si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "zap") {
+		<i class="si si-zap si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "zettlr") {
 		<i class="si si-zettlr si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "zoom") {
@@ -209,6 +217,22 @@ templ Brand(name, publisher string) {
 		<i class="si si-msi si--color uk-cloak text-2xl"></i>
 	} else if strings.Contains(name, "kde") || strings.Contains(publisher, "kde") {
 		<i class="si si-kde si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "flatpak") || strings.Contains(publisher, "flatpak") {
+		<i class="si si-flatpak si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(name, "gnome") || strings.Contains(publisher, "gnome") || strings.Contains(name, "zenity") {
+		<i class="si si-gnome si--color uk-cloak text-3xl"></i>
+	} else if strings.Contains(publisher, "fedora") {
+		<i class="si si-fedora si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "debian") {
+		<i class="si si-debian si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "suse") {
+		<i class="si si-opensuse si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "neon ci") {
+		<i class="si si-kdeneon si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "ubuntu") {
+		<i class="si si-ubuntu si--color uk-cloak text-2xl"></i>
+	} else if strings.Contains(publisher, "snap") {
+		<i class="si si-snapcraft si--color uk-cloak text-2xl"></i>
 	} else {
 		<uk-icon hx-history="false" icon="app-window" custom-class="mx-auto h-6 w-6" uk-cloack></uk-icon>
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/app"
 	"github.com/open-uem/ent/computer"
+	"github.com/open-uem/ent/networkadapter"
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/printer"
@@ -344,7 +345,7 @@ func (m *Model) GetAgentComputerInfo(agentId string, c *partials.CommonInfo) (*e
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -353,7 +354,7 @@ func (m *Model) GetAgentComputerInfo(agentId string, c *partials.CommonInfo) (*e
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -375,7 +376,7 @@ func (m *Model) GetAgentOSInfo(agentId string, c *partials.CommonInfo) (*ent.Age
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -384,7 +385,7 @@ func (m *Model) GetAgentOSInfo(agentId string, c *partials.CommonInfo) (*ent.Age
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -406,7 +407,7 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonIn
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -415,7 +416,7 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonIn
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -423,6 +424,49 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonIn
 			return nil, err
 		}
 		return agent, nil
+	}
+}
+
+func (m *Model) NetworkAdaptersByPageInfo(agentId string, c *partials.CommonInfo, p partials.PaginationAndSort) ([]*ent.NetworkAdapter, error) {
+	// Info from agents waiting for admission won't be shown
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		return m.Client.NetworkAdapter.Query().
+			Where(networkadapter.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).
+			Limit(p.PageSize).
+			Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
+	} else {
+		return m.Client.NetworkAdapter.Query().
+			Where(networkadapter.HasOwnerWith(agent.ID(agentId), agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).
+			Limit(p.PageSize).
+			Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
+	}
+}
+
+func (m *Model) CountNetworkAdaptersByPageInfo(agentId string, c *partials.CommonInfo) (int, error) {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		return m.Client.NetworkAdapter.Query().
+			Where(networkadapter.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	} else {
+		return m.Client.NetworkAdapter.Query().
+			Where(networkadapter.HasOwnerWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
 	}
 }
 
@@ -458,7 +502,7 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo)
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -467,7 +511,7 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo)
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -489,7 +533,7 @@ func (m *Model) GetAgentPhysicalDisksInfo(agentId string, c *partials.CommonInfo
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -498,7 +542,7 @@ func (m *Model) GetAgentPhysicalDisksInfo(agentId string, c *partials.CommonInfo
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -520,7 +564,7 @@ func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+		agent, err := m.Client.Agent.Query().WithShares().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -529,7 +573,7 @@ func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+		agent, err := m.Client.Agent.Query().WithShares().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -551,7 +595,7 @@ func (m *Model) GetAgentMonitorsInfo(agentId string, c *partials.CommonInfo) (*e
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+		agent, err := m.Client.Agent.Query().WithMonitors().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -560,7 +604,7 @@ func (m *Model) GetAgentMonitorsInfo(agentId string, c *partials.CommonInfo) (*e
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+		agent, err := m.Client.Agent.Query().WithMonitors().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())

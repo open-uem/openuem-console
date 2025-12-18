@@ -69,19 +69,17 @@ templ NavBar(active string, commonInfo *CommonInfo) {
 				<uk-icon hx-history="false" icon="package" custom-class="h-5 w-5" uk-cloack></uk-icon>
 				<span class="sr-only">{ i18n.T(ctx, "Deploy") }</span>
 			</a>
-			if commonInfo.SiteID != "-1" {
-				<a
-					href={ templ.URL(GetNavigationUrl(commonInfo, "/profiles")) }
-					hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, "/profiles"))) }
-					hx-push-url="true"
-					hx-target="body"
-					uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Profile Management")) }
-					class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "profiles" || active == "tasks"), templ.KV("text-muted-foreground hover:text-foreground", active != "profiles" && active != "tasks") }
-				>
-					<uk-icon hx-history="false" icon="replace-all" custom-class="h-5 w-5" uk-cloack></uk-icon>
-					<span class="sr-only">{ i18n.T(ctx, "Profile Management") }</span>
-				</a>
-			}
+			<a
+				href={ templ.URL(GetProfileNavigationUrl(commonInfo)) }
+				hx-get={ string(templ.URL(GetProfileNavigationUrl(commonInfo))) }
+				hx-push-url="true"
+				hx-target="body"
+				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Profile Management")) }
+				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "profiles" || active == "tasks"), templ.KV("text-muted-foreground hover:text-foreground", active != "profiles" && active != "tasks") }
+			>
+				<uk-icon hx-history="false" icon="replace-all" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				<span class="sr-only">{ i18n.T(ctx, "Profile Management") }</span>
+			</a>
 			<a
 				href={ templ.URL(GetNavigationUrl(commonInfo, "/agents")) }
 				hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, "/agents"))) }

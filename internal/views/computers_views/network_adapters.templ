@@ -8,13 +8,13 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, adapters []*ent.NetworkAdapter, confirmDelete bool, commonInfo *partials.CommonInfo, netbird, offline bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				@partials.ComputerHeader(p, agent, commonInfo)
-				@ComputersNavbar(agent.ID, "network-adapters", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os)
+				@partials.ComputerHeader(p, agent, commonInfo, offline)
+				@ComputersNavbar(agent.ID, "network-adapters", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
@@ -30,11 +30,11 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 					</div>
 				</div>
 				<div class="uk-card uk-card-body uk-card-default">
-					if len(agent.Edges.Networkadapters) > 0 {
+					if len(adapters) > 0 {
 						<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 							<thead>
 								<tr>
-									<th>Name</th>
+									<th>{ i18n.T(ctx, "Name") }</th>
 									<th>{ i18n.T(ctx, "inventory.network_adapters.mac_address") }</th>
 									<th>{ i18n.T(ctx, "inventory.network_adapters.ip_address") }</th>
 									<th>{ i18n.T(ctx, "inventory.network_adapters.subnet") }</th>
@@ -42,9 +42,12 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 									<th>{ i18n.T(ctx, "inventory.network_adapters.dhcp") }</th>
 									<th>{ i18n.T(ctx, "inventory.network_adapters.dns") }</th>
 									<th>{ i18n.T(ctx, "inventory.network_adapters.speed") }</th>
+									if agent.Os != "windows" && agent.Os != "macOS" {
+										<th>{ i18n.T(ctx, "Virtual") }</th>
+									}
 								</tr>
 							</thead>
-							for _, adapter := range agent.Edges.Networkadapters {
+							for _, adapter := range adapters {
 								<tr>
 									<td>{ adapter.Name }</td>
 									<td>{ adapter.MACAddress }</td>
@@ -79,9 +82,17 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 										<td>-</td>
 									}
 									<td>{ adapter.Speed }</td>
+									if agent.Os != "windows" && agent.Os != "macOS" {
+										if adapter.Virtual {
+											@partials.Checkmark()
+										} else {
+											<td>-</td>
+										}
+									}
 								</tr>
 							}
 						</table>
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters", agent.ID)))))
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }

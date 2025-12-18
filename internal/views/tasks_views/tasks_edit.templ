@@ -80,6 +80,8 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 									@partials.SelectHomeBrewFormulaTaskSubtype(t)
 								case task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
 									@partials.SelectHomeBrewCaskTaskSubtype(t)
+								case task.TypeNetbirdInstall, task.TypeNetbirdUninstall, task.TypeNetbirdRegister:
+									@partials.SelectNetbirdTaskSubtype(t)
 									// Future APT subtype
 									// case task.TypeAptInstall, task.TypeAptRemove, task.TypeAptUpdate, task.TypeAptUpdateAll, task.TypeAptUpgradeOs:
 									// 	@partials.SelectAPTTaskSubtype(t)

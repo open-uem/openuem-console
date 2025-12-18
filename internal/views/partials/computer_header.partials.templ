@@ -5,14 +5,18 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"golang.org/x/mod/semver"
 )
 
-templ ComputerHeader(p PaginationAndSort, agent *ent.Agent, commonInfo *CommonInfo) {
+templ ComputerHeader(p PaginationAndSort, agent *ent.Agent, commonInfo *CommonInfo, offline bool) {
 	<div class="flex justify-between items-center">
 		<div class="flex gap-4 items-center">
 			<div class="flex items-center gap-4">
 				@OSBadge(agent.Os)
 				@EndpointName(agent.ID, agent.Nickname, commonInfo)
+				if agent.Edges.Release != nil && semver.Compare(fmt.Sprintf("v%s",agent.Edges.Release.Version), "v0.10.0") >= 0 {
+					@AgentStatus(commonInfo, fmt.Sprintf("/computers/%s/status", agent.ID), offline)
+				}
 			</div>
 			@ShowAppliedTags(agent.Edges.Tags, agent.ID, p, string(templ.URL(GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML")
 			if agent.IsRemote && commonInfo.DetectRemoteAgents {

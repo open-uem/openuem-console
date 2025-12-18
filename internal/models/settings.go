@@ -29,6 +29,7 @@ type GeneralSettings struct {
 	RemoteAssistanceDisabled bool
 	DetectRemoteAgents       bool
 	AutoAdmitAgents          bool
+	NetBird                  bool
 }
 
 func (m *Model) GetMaxUploadSize() (string, error) {
