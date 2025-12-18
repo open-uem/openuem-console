@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/rustdesk"
 	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
@@ -45,12 +47,14 @@ func (h *Handler) RustDeskStart(c echo.Context) error {
 	}
 
 	rd := nats.RustDesk{
-		CustomRendezVousServer: rustdeskSettings.CustomRendezvousServer,
-		RelayServer:            rustdeskSettings.RelayServer,
-		Key:                    rustdeskSettings.Key,
-		APIServer:              rustdeskSettings.APIServer,
-		DirectIPAccess:         rustdeskSettings.DirectIPAccess,
-		Whitelist:              rustdeskSettings.Whitelist,
+		CustomRendezVousServer:  rustdeskSettings.CustomRendezvousServer,
+		RelayServer:             rustdeskSettings.RelayServer,
+		Key:                     rustdeskSettings.Key,
+		APIServer:               rustdeskSettings.APIServer,
+		DirectIPAccess:          rustdeskSettings.DirectIPAccess,
+		Whitelist:               rustdeskSettings.Whitelist,
+		VerificationMethod:      rustdeskSettings.VerificationMethod.String(),
+		TemporaryPasswordLength: rustdeskSettings.TemporaryPasswordLength,
 	}
 
 	randomPassword := ""
@@ -183,7 +187,26 @@ func (h *Handler) RustDeskSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.key_must_be_set"), true))
 		}
 
-		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, useDirectAccess, usePassword); err != nil {
+		verificationMethod := c.FormValue("rustdesk-verification-method")
+		if verificationMethod != "" && !slices.Contains([]string{rustdesk.VerificationMethodUseBothPasswords.String(), rustdesk.VerificationMethodUsePermanentPassword.String(), rustdesk.VerificationMethodUseTemporaryPassword.String()}, verificationMethod) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_verification_method"), true))
+		}
+
+		if verificationMethod != "" && verificationMethod == rustdesk.VerificationMethodUsePermanentPassword.String() && !usePassword {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_verification_method_and_password_combo"), true))
+		}
+
+		temporaryPasswordLength := c.FormValue("rustdesk-temporary-password-length")
+		if temporaryPasswordLength != "" && !slices.Contains([]string{"6", "8", "10"}, temporaryPasswordLength) {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.wrong_temporary_password_length"), true))
+		}
+
+		passwordLength, err := strconv.Atoi(temporaryPasswordLength)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.cannot_parse_temporary_passwordLength"), true))
+		}
+
+		if err := h.Model.SaveRustDeskSettings(tenantID, rendezvousServer, relayServer, key, apiServer, whitelist, verificationMethod, useDirectAccess, usePassword, passwordLength); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "rustdesk.settings_not_saved", err.Error()), true))
 		}
 

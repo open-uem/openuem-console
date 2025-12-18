@@ -172,6 +172,8 @@ github.com/open-uem/ent v0.0.0-20251212080150-af7976b8a2a0 h1:sPC0i+JxgmMrpaxa04
 github.com/open-uem/ent v0.0.0-20251212080150-af7976b8a2a0/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
 github.com/open-uem/ent v0.0.0-20251212131234-a21276e12e5c h1:DGB1IG/FOElzNHmF073f1qrM0NGtCbDPSd/ROxskIDw=
 github.com/open-uem/ent v0.0.0-20251212131234-a21276e12e5c/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
+github.com/open-uem/ent v0.0.0-20251217171425-51f2f132d5dc h1:fdq4cGZZ4XGBvI7HEdTBDT/2MORHuQOwmB1RNhSZOPc=
+github.com/open-uem/ent v0.0.0-20251217171425-51f2f132d5dc/go.mod h1:TkCPQ+cFFwCdDflqc2/XKTZIN/ZJGJenbvUSIZOEzsk=
 github.com/open-uem/nats v0.0.0-20250930102922-09c2a23b0598 h1:ZoQPa5pxWDPr7uCgAKZ5M5phVc2zxAgfp7UppSroxMo=
 github.com/open-uem/nats v0.0.0-20250930102922-09c2a23b0598/go.mod h1:JB6zAM56L+iD+BLn3o/vNdg9X5IFn52dSvltnIdiQAQ=
 github.com/open-uem/nats v0.0.0-20251208121300-3bef314f96d6 h1:VVdS1gogZekQNsRpMrar7mJmtD1fgTrJqjT64PGvk1A=
@@ -186,6 +188,8 @@ github.com/open-uem/nats v0.0.0-20251212084933-8a52b4b88fd8 h1:yAuNJJWaTp7uhSdTM
 github.com/open-uem/nats v0.0.0-20251212084933-8a52b4b88fd8/go.mod h1:LTtUjLE9c6xh7lqtoYoP9FC2lZDK4LND8z2W0TriMeA=
 github.com/open-uem/nats v0.0.0-20251212140146-6dc3fb9e0d69 h1:/0f92R+z3sV3XKnDV8VqymoI0H77AhDSCzUXkmbBQpk=
 github.com/open-uem/nats v0.0.0-20251212140146-6dc3fb9e0d69/go.mod h1:qvxvASXqSB4sB0Jkk8xqCwpBgxZjqFJPulK87PqETic=
+github.com/open-uem/nats v0.0.0-20251217170906-165a934a7b09 h1:WtQe58LKsRbl74qSv9K20ADaCkqGyW4EmFbqpFnUsKo=
+github.com/open-uem/nats v0.0.0-20251217170906-165a934a7b09/go.mod h1:qvxvASXqSB4sB0Jkk8xqCwpBgxZjqFJPulK87PqETic=
 github.com/open-uem/openuem-ansible-config v0.0.0-20250710075757-9ef6e3390073 h1:CyRpBJD7i2oAvHh3d5ncFBh5UGepj2Yd0TEpbhR53Sw=
 github.com/open-uem/openuem-ansible-config v0.0.0-20250710075757-9ef6e3390073/go.mod h1:mCdYkT1RTq4V3Ai6TjIfy7QoX68lhpLoF63+YXpPXFI=
 github.com/open-uem/utils v0.0.0-20251014101747-824dc3574744 h1:ybzOjwnzh6KxUtdtu/n71kZNLB208P5keBB0Me1i2nQ=

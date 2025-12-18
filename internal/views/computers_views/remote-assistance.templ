@@ -5,7 +5,10 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/rustdesk"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+	"strings"
 )
 
 var connectVNCHandle = templ.NewOnceHandle()
@@ -381,19 +384,21 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 					if settings.DirectIPAccess {
 						<div class="flex flex-col gap-2 uk-text-small">
 							for _, IPAddress := range IPAddresses {
-								<div class="flex gap-2 uk-text-small">
-									if password != "" {
-										<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", IPAddress, password)) }>
-											<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
-										</a>
-									} else {
-										<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", IPAddress)) }>
-											<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-											<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
-										</a>
-									}
-								</div>
+								if IPAddress != "127.0.0.1" {
+									<div class="flex gap-2 uk-text-small">
+										if password != "" {
+											<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s?password=%s", IPAddress, password)) }>
+												<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+												<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
+											</a>
+										} else {
+											<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s", IPAddress)) }>
+												<uk-icon hx-history="false" icon="network" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+												<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open_direct", IPAddress) }</span>
+											</a>
+										}
+									</div>
+								}
 							}
 						</div>
 					}
@@ -416,12 +421,14 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 					</div>
 					if settings.DirectIPAccess {
 						for _, IPAddress := range IPAddresses {
-							<div class="flex gap-2 uk-text-small">
-								<uk-icon hx-history="false" icon="network" custom-class="h-5 w-5" uk-cloack></uk-icon>
-								<span>{  i18n.T(ctx, "rustdesk.rustdesk_direct_ip") } </span>
-								<span id="rustdesk-ip">{ IPAddress }</span>
-								<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-ip.textContent)"></uk-icon>
-							</div>
+							if IPAddress != "127.0.0.1" {
+								<div class="flex gap-2 uk-text-small">
+									<uk-icon hx-history="false" icon="network" custom-class="h-5 w-5" uk-cloack></uk-icon>
+									<span>{  i18n.T(ctx, "rustdesk.rustdesk_direct_ip") } </span>
+									<span id="rustdesk-ip">{ IPAddress }</span>
+									<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack _="on click navigator.clipboard.writeText(#rustdesk-ip.textContent)"></uk-icon>
+								</div>
+							}
 						}
 					}
 					if password != "" {
@@ -461,6 +468,20 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 							<uk-icon hx-history="false" icon="brick-wall" custom-class="h-5 w-5" uk-cloack></uk-icon>
 							<span>{  i18n.T(ctx, "rustdesk.rustdesk_allowed_ip") } </span>
 							<span>{ settings.Whitelist }</span>
+						</div>
+					}
+					if settings.VerificationMethod != "" {
+						<div class="flex gap-2 uk-text-small">
+							<uk-icon hx-history="false" icon="handshake" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<span>{ fmt.Sprintf("%s: ",i18n.T(ctx, "rustdesk.verification_method_title")) } </span>
+							<span>{ i18n.T(ctx, fmt.Sprintf("rustdesk.%s", strings.ReplaceAll(settings.VerificationMethod.String(), "-", "_"))) }</span>
+						</div>
+					}
+					if settings.VerificationMethod != rustdesk.VerificationMethodUsePermanentPassword {
+						<div class="flex gap-2 uk-text-small">
+							<uk-icon hx-history="false" icon="file-digit" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<span>{ fmt.Sprintf("%s: ", i18n.T(ctx, "rustdesk.temporary_password_length_title")) } </span>
+							<span>{ strconv.Itoa(settings.TemporaryPasswordLength) }</span>
 						</div>
 					}
 				</div>

@@ -35,7 +35,7 @@ func (m *Model) GetGlobalRustDeskSettings() ([]*ent.Rustdesk, error) {
 	return m.Client.Rustdesk.Query().Where(rustdesk.Not(rustdesk.HasTenant())).All(context.Background())
 }
 
-func (m *Model) SaveRustDeskSettings(tenantID int, rendezvousServer, relayServer, key, apiServer, whitelist string, useDirectIPAccess, usePermanentPassword bool) error {
+func (m *Model) SaveRustDeskSettings(tenantID int, rendezvousServer, relayServer, key, apiServer, whitelist, verificationMethod string, useDirectIPAccess, usePermanentPassword bool, temporaryPasswordLength int) error {
 	var rd *ent.Rustdesk
 	var err error
 
@@ -54,7 +54,9 @@ func (m *Model) SaveRustDeskSettings(tenantID int, rendezvousServer, relayServer
 				SetAPIServer(apiServer).
 				SetWhitelist(whitelist).
 				SetUsePermanentPassword(usePermanentPassword).
-				SetDirectIPAccess(useDirectIPAccess)
+				SetDirectIPAccess(useDirectIPAccess).
+				SetVerificationMethod(rustdesk.VerificationMethod(verificationMethod)).
+				SetTemporaryPasswordLength(temporaryPasswordLength)
 
 			if tenantID != -1 {
 				query.AddTenantIDs(tenantID)
@@ -73,6 +75,8 @@ func (m *Model) SaveRustDeskSettings(tenantID int, rendezvousServer, relayServer
 		SetWhitelist(whitelist).
 		SetUsePermanentPassword(usePermanentPassword).
 		SetDirectIPAccess(useDirectIPAccess).
+		SetVerificationMethod(rustdesk.VerificationMethod(verificationMethod)).
+		SetTemporaryPasswordLength(temporaryPasswordLength).
 		Exec(context.Background())
 }
 
