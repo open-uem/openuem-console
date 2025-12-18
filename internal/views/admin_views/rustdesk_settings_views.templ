@@ -5,8 +5,11 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/rustdesk"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+	"strings"
 )
 
 templ RustDeskSettings(c echo.Context, settings *ent.Rustdesk, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string, successMessage string) {
@@ -48,7 +51,7 @@ templ RustDeskSettings(c echo.Context, settings *ent.Rustdesk, agentsExists, ser
 						}
 					</div>
 					<div class="uk-card-body">
-						<form class="flex flex-col mt-6 gap-4 w-1/2">
+						<form class="flex flex-col mt-6 gap-4 w-2/3">
 							<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
 								<tr>
 									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.settings_rendezvous_server_title") }</td>
@@ -103,6 +106,28 @@ templ RustDeskSettings(c echo.Context, settings *ent.Rustdesk, agentsExists, ser
 										<select class="uk-select" name="rustdesk-password">
 											<option value="true" selected?={ settings.UsePermanentPassword }>{ i18n.T(ctx, "Yes") }</option>
 											<option value="false" selected?={ !settings.UsePermanentPassword }>{ i18n.T(ctx, "No") }</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.verification_method_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.verification_method_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="rustdesk-verification-method">
+											<option value={ rustdesk.VerificationMethodUseBothPasswords.String() } selected?={ settings.VerificationMethod == rustdesk.VerificationMethodUseBothPasswords }>{ i18n.T(ctx, fmt.Sprintf("rustdesk.%s",strings.ReplaceAll(rustdesk.VerificationMethodUseBothPasswords.String(), "-", "_"))) }</option>
+											<option value={ rustdesk.VerificationMethodUseTemporaryPassword.String() } selected?={ settings.VerificationMethod == rustdesk.VerificationMethodUseTemporaryPassword }>{ i18n.T(ctx, fmt.Sprintf("rustdesk.%s",strings.ReplaceAll(rustdesk.VerificationMethodUseTemporaryPassword.String(), "-", "_"))) }</option>
+											<option value={ rustdesk.VerificationMethodUsePermanentPassword.String() } selected?={ settings.VerificationMethod == rustdesk.VerificationMethodUsePermanentPassword }>{ i18n.T(ctx, fmt.Sprintf("rustdesk.%s",strings.ReplaceAll(rustdesk.VerificationMethodUsePermanentPassword.String(), "-", "_"))) }</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.temporary_password_length_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "rustdesk.temporary_password_length_description") }</td>
+									<td class="!align-middle">
+										<select class="uk-select" name="rustdesk-temporary-password-length">
+											<option value="6" selected?={ strconv.Itoa(settings.TemporaryPasswordLength) == "6" }>6</option>
+											<option value="8" selected?={ strconv.Itoa(settings.TemporaryPasswordLength) == "8" }>8</option>
+											<option value="10" selected?={ strconv.Itoa(settings.TemporaryPasswordLength) == "10" }>10</option>
 										</select>
 									</td>
 								</tr>
