@@ -144,7 +144,9 @@ func (h *Handler) Overview(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Overview(c, p, agent, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Computer(c echo.Context) error {
@@ -180,7 +182,8 @@ func (h *Handler) Computer(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computer(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) OperatingSystem(c echo.Context) error {
@@ -215,7 +218,10 @@ func (h *Handler) OperatingSystem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
 	netbird := settings.AccessToken != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.OperatingSystem(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) NetworkAdapters(c echo.Context) error {
@@ -269,7 +275,9 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -310,7 +318,9 @@ func (h *Handler) Printers(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, "", commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, "", commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) LogicalDisks(c echo.Context) error {
@@ -344,7 +354,10 @@ func (h *Handler) LogicalDisks(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
 	netbird := settings.AccessToken != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.LogicalDisks(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) PhysicalDisks(c echo.Context) error {
@@ -379,7 +392,9 @@ func (h *Handler) PhysicalDisks(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.PhysicalDisks(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.PhysicalDisks(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Shares(c echo.Context) error {
@@ -415,7 +430,9 @@ func (h *Handler) Shares(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Shares(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Monitors(c echo.Context) error {
@@ -450,7 +467,9 @@ func (h *Handler) Monitors(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Monitors(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Apps(c echo.Context) error {
@@ -511,7 +530,9 @@ func (h *Handler) Apps(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -557,7 +578,9 @@ func (h *Handler) RemoteAssistance(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, isHostResolvedByDNS, commonInfo, "", netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.RemoteAssistance(c, p, agent, confirmDelete, hasRustDeskSettings, isHostResolvedByDNS, commonInfo, "", netbird, offline), commonInfo))
 }
 
 func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFromDialog bool) error {
@@ -859,7 +882,9 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -1150,7 +1175,9 @@ func (h *Handler) PowerManagement(c echo.Context) error {
 		}
 		netbird := settings.AccessToken != ""
 
-		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, agent, confirmDelete, commonInfo, netbird), commonInfo))
+		offline := h.IsAgentOffline(c)
+
+		return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.PowerManagement(c, p, agent, confirmDelete, commonInfo, netbird, offline), commonInfo))
 	}
 
 	action := c.Param("action")
@@ -1332,7 +1359,9 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
@@ -1378,7 +1407,9 @@ func (h *Handler) Notes(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, agent, agent.Notes, renderedMarkdown, confirmDelete, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Notes(c, p, agent, agent.Notes, renderedMarkdown, confirmDelete, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
@@ -1634,7 +1665,9 @@ func (h *Handler) SetDefaultPrinter(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_set_as_default"), commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_set_as_default"), commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RemovePrinter(c echo.Context) error {
@@ -1695,8 +1728,12 @@ func (h *Handler) RemovePrinter(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
+
 	netbird := settings.AccessToken != ""
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"), commonInfo, netbird), commonInfo))
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Printers(c, p, agent, printers, confirmDelete, i18n.T(c.Request().Context(), "agents.printer_has_been_removed"), commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) GetDropdownSites(c echo.Context) error {
@@ -1726,4 +1763,34 @@ func (h *Handler) GetDropdownSites(c echo.Context) error {
 
 	return RenderView(c, computers_views.SitesDropdown(c, agentId, sites, commonInfo))
 
+}
+
+func (h *Handler) AgentStatus(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_common_info"), false))
+	}
+
+	offline := h.IsAgentOffline(c)
+	url := fmt.Sprintf("/computers/%s/status", agentId)
+
+	return RenderView(c, partials.AgentStatus(commonInfo, url, offline))
+}
+
+func (h *Handler) IsAgentOffline(c echo.Context) bool {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return true
+	}
+
+	if _, err := h.NATSConnection.Request(fmt.Sprintf("agent.ping.%s", agentId), nil, 1*time.Second); err != nil {
+		return true
+	}
+
+	return false
 }

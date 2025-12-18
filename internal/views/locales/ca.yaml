@@ -69,6 +69,8 @@ ca:
   None: "Cap"
   Notes: "Notes"
   Now: "Ara"
+  Online: "L'agent està en línia"
+  Offline: "L'agent està fora de línia"
   OperatingSystem: "Sistema operatiu"
   Organization: "Organització"
   Overview: "Visió general"

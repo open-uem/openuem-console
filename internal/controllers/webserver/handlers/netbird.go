@@ -180,7 +180,9 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Netbird(c, p, agent, ng, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Netbird(c, p, agent, ng, higherVersion, confirmDelete, successMessage, commonInfo, currentTenant, currentSite, allTenants, allSites, netbird, offline), commonInfo))
 }
 
 func (h *Handler) NetbirdInstall(c echo.Context) error {

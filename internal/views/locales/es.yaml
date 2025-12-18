@@ -69,6 +69,8 @@ es:
   None: "Ninguno"
   Notes: "Notas"
   Now: "Ahora"
+  Online: "El agente está en línea"
+  Offline: "El agente está fuera de línea"
   OperatingSystem: "Sistema Operativo"
   Organization: "Organización"
   Overview: "Resumen"

@@ -69,6 +69,8 @@ en:
   None: "None"
   Notes: "Notes"
   Now: "Now"
+  Online: "Agent is online"
+  Offline: "Agent is offline"
   OperatingSystem: "Operating System"
   Organization: "Organization"
   Overview: "Overview"
