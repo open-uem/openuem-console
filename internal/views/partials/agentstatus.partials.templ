@@ -1,0 +1,21 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ AgentStatus(commonInfo *CommonInfo, url string, offline bool) {
+	<div
+		id="agent-status"
+		class={ "flex gap-2 rounded-full px-4 py-1 text-white uk-text-normal", templ.KV("bg-red-600", offline), templ.KV("bg-green-600", !offline) }
+		hx-push-url="false"
+		hx-get={ GetNavigationUrl(commonInfo, url) }
+		hx-target="#agent-status"
+		hx-swap="outerHTML"
+		hx-trigger="every 1m"
+	>
+		if offline {
+			{ i18n.T(ctx, "Offline") }
+		} else {
+			{ i18n.T(ctx, "Online") }
+		}
+	</div>
+}

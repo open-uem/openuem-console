@@ -345,7 +345,7 @@ func (m *Model) GetAgentComputerInfo(agentId string, c *partials.CommonInfo) (*e
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -354,7 +354,7 @@ func (m *Model) GetAgentComputerInfo(agentId string, c *partials.CommonInfo) (*e
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().
+		agent, err := m.Client.Agent.Query().WithComputer().WithMemoryslots().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -376,7 +376,7 @@ func (m *Model) GetAgentOSInfo(agentId string, c *partials.CommonInfo) (*ent.Age
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -385,7 +385,7 @@ func (m *Model) GetAgentOSInfo(agentId string, c *partials.CommonInfo) (*ent.Age
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().
+		agent, err := m.Client.Agent.Query().WithOperatingsystem().WithTags().WithRelease().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -407,7 +407,7 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonIn
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -416,7 +416,7 @@ func (m *Model) GetAgentNetworkAdaptersInfo(agentId string, c *partials.CommonIn
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithTags().
+		agent, err := m.Client.Agent.Query().WithNetworkadapters().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -502,7 +502,7 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo)
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -511,7 +511,7 @@ func (m *Model) GetAgentLogicalDisksInfo(agentId string, c *partials.CommonInfo)
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithLogicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -533,7 +533,7 @@ func (m *Model) GetAgentPhysicalDisksInfo(agentId string, c *partials.CommonInfo
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -542,7 +542,7 @@ func (m *Model) GetAgentPhysicalDisksInfo(agentId string, c *partials.CommonInfo
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithTags().
+		agent, err := m.Client.Agent.Query().WithPhysicaldisks().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -564,7 +564,7 @@ func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+		agent, err := m.Client.Agent.Query().WithShares().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -573,7 +573,7 @@ func (m *Model) GetAgentSharesInfo(agentId string, c *partials.CommonInfo) (*ent
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithShares().WithTags().
+		agent, err := m.Client.Agent.Query().WithShares().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -595,7 +595,7 @@ func (m *Model) GetAgentMonitorsInfo(agentId string, c *partials.CommonInfo) (*e
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+		agent, err := m.Client.Agent.Query().WithMonitors().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())
@@ -604,7 +604,7 @@ func (m *Model) GetAgentMonitorsInfo(agentId string, c *partials.CommonInfo) (*e
 		}
 		return agent, nil
 	} else {
-		agent, err := m.Client.Agent.Query().WithMonitors().WithTags().
+		agent, err := m.Client.Agent.Query().WithMonitors().WithRelease().WithTags().
 			Where(agent.ID(agentId)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).
 			Only(context.Background())

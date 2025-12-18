@@ -154,13 +154,13 @@ func (m *Model) GetAgentById(agentId string, c *partials.CommonInfo) (*ent.Agent
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithNetbird().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithNetbird().WithSite().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		return agent, err
 	} else {
-		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithNetbird().WithSite().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithTags().WithComputer().WithNetworkadapters().WithOperatingsystem().WithNetbird().WithSite().WithRelease().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
@@ -924,13 +924,13 @@ func (m *Model) GetAgentNetBirdById(agentId string, c *partials.CommonInfo) (*en
 	}
 
 	if siteID == -1 {
-		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithNetbird().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithRelease().WithNetbird().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		return agent, err
 	} else {
-		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithNetbird().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
+		agent, err := m.Client.Agent.Query().WithSite().WithTags().WithRelease().WithNetbird().Where(agent.ID(agentId)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Only(context.Background())
 		if err != nil {
 			return nil, err
 		}

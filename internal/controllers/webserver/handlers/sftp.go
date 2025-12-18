@@ -115,8 +115,12 @@ func (h *Handler) BrowseLogicalDisk(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
+
 	netbird := settings.AccessToken != ""
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird), commonInfo))
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) NewFolder(c echo.Context) error {
@@ -243,7 +247,10 @@ func (h *Handler) DeleteItem(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
 	}
 	netbird := settings.AccessToken != ""
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird), commonInfo))
+
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RenameItem(c echo.Context) error {
@@ -327,7 +334,9 @@ func (h *Handler) RenameItem(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) DeleteMany(c echo.Context) error {
@@ -404,7 +413,9 @@ func (h *Handler) DeleteMany(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, removeForm.Parent, files, commonInfo, netbird), commonInfo))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.InventoryIndex(" | File Browser", computers_views.SFTPHome(c, p, agent, cwd, removeForm.Parent, files, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) UploadFile(c echo.Context) error {
@@ -509,7 +520,9 @@ func (h *Handler) UploadFile(c echo.Context) error {
 	}
 	netbird := settings.AccessToken != ""
 
-	return RenderView(c, computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird))
+	offline := h.IsAgentOffline(c)
+
+	return RenderView(c, computers_views.SFTPHome(c, p, agent, cwd, parent, files, commonInfo, netbird, offline))
 }
 
 func (h *Handler) DownloadFile(c echo.Context) error {
