@@ -282,7 +282,7 @@ func (h *Handler) NetbirdRegister(c echo.Context) error {
 		}
 	}()
 
-	request := nats.NetbirdRegister{
+	request := nats.NetbirdSettings{
 		ManagementURL: settings.ManagementURL,
 		OneOffKey:     setupKey,
 	}
@@ -379,8 +379,23 @@ func (h *Handler) NetbirdSwitchProfile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.profile_empty"), true))
 	}
 
-	data, err := json.Marshal(nats.NetbirdSwitchProfile{
-		Profile: profile,
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			settings = &ent.NetbirdSettings{}
+		} else {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+		}
+	}
+
+	data, err := json.Marshal(nats.NetbirdSettings{
+		Profile:       profile,
+		ManagementURL: settings.ManagementURL,
 	})
 
 	if err != nil {
@@ -461,7 +476,33 @@ func (h *Handler) NetbirdConnect(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	msg, err := h.NATSConnection.Request("agent.netbird.up."+agentID, nil, 30*time.Second)
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			settings = &ent.NetbirdSettings{}
+		} else {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+		}
+	}
+
+	request := nats.NetbirdSettings{
+		ManagementURL: settings.ManagementURL,
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		if strings.Contains(err.Error(), "no responders") {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
+		}
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_create_request", err.Error()), true))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.netbird.up."+agentID, data, 30*time.Second)
 	if err != nil {
 		if strings.Contains(err.Error(), "no responders") {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
@@ -498,7 +539,33 @@ func (h *Handler) NetbirdDisconnect(c echo.Context, successMessage string) error
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	msg, err := h.NATSConnection.Request("agent.netbird.down."+agentID, nil, 5*time.Minute)
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			settings = &ent.NetbirdSettings{}
+		} else {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+		}
+	}
+
+	request := nats.NetbirdSettings{
+		ManagementURL: settings.ManagementURL,
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		if strings.Contains(err.Error(), "no responders") {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
+		}
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_create_request", err.Error()), true))
+	}
+
+	msg, err := h.NATSConnection.Request("agent.netbird.down."+agentID, data, 5*time.Minute)
 	if err != nil {
 		if strings.Contains(err.Error(), "no responders") {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.agent_offline"), true))
