@@ -61,6 +61,8 @@ func (h *Handler) UpdatePersonalInfo(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_update_personal_info", err.Error()), true))
 	}
 
+	h.SessionManager.Manager.Put(c.Request().Context(), "email", c.FormValue("email"))
+
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_find_user"), true))

@@ -206,7 +206,16 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 											if user.Passwd {
 												<td class="!align-middle flex gap-2 items-center">
 													<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
-													{ i18n.T(ctx, "users.an_email_should_be_provided") }
+													<a
+														class="underline"
+														href="/myaccount"
+														hx-get="/myaccount"
+														hx-push-url="true"
+														hx-target="#main"
+														hx-swap="outerHTML"
+													>
+														{ i18n.T(ctx, "users.an_email_should_be_provided") }
+													</a>
 												</td>
 											} else {
 												<td class="!align-middle">-</td>

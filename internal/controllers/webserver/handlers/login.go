@@ -241,6 +241,8 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 	h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 	h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 	h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+	h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+	h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 	h.SessionManager.Manager.Put(c.Request().Context(), "twofa", true)
 	token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 	if err != nil {
@@ -360,6 +362,8 @@ func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		h.SessionManager.Manager.Put(c.Request().Context(), "twofa", false)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {
@@ -380,6 +384,8 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 	h.SessionManager.Manager.Put(c.Request().Context(), "uid", user.ID)
 	h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 	h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
+	h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+	h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 	h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
 	if user.Use2fa {
 		h.SessionManager.Manager.Put(c.Request().Context(), "twofa", true)
@@ -575,6 +581,8 @@ func (h *Handler) CreateForgotPasswordSession(c echo.Context, user *ent.User) er
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		h.SessionManager.Manager.Put(c.Request().Context(), "forgot", true)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {

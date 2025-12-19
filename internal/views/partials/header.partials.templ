@@ -233,6 +233,11 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 					</button>
 				</div>
 			</div>
+			if GetUserWarnings(ctx, commonInfo.SM) != "" {
+				<div class="!align-middle flex gap-2 items-center" uk-tooltip={ GetUserWarnings(ctx, commonInfo.SM) }>
+					<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-6 w-6 fill-yellow-500 text-black" uk-cloack></uk-icon>
+				</div>
+			}
 		</div>
 	</header>
 }
@@ -253,6 +258,30 @@ func GetUsername(ctx context.Context, sm *sessions.SessionManager) string {
 	}
 
 	return username
+}
+
+func GetUserWarnings(ctx context.Context, sm *sessions.SessionManager) string {
+
+	username, ok := sm.Manager.Get(ctx, "username").(string)
+	if !ok {
+		return ""
+	}
+
+	usePasswd, ok := sm.Manager.Get(ctx, "usepasswd").(bool)
+	if !ok {
+		return ""
+	}
+
+	email, ok := sm.Manager.Get(ctx, "email").(string)
+	if !ok {
+		return ""
+	}
+
+	if username != "" && usePasswd && email == "" {
+		return i18n.T(ctx, "users.an_email_should_be_provided")
+	}
+
+	return ""
 }
 
 func newVersionAvailable(currentVersion, latestVersion string) bool {

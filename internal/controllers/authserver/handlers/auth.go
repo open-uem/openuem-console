@@ -129,6 +129,8 @@ func (h *Handler) Auth(c echo.Context) error {
 
 		h.SessionManager.Manager.Put(c.Request().Context(), "uid", uid)
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())

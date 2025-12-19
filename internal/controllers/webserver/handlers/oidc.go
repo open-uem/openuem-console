@@ -369,6 +369,8 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
