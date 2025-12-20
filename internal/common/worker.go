@@ -66,8 +66,9 @@ func NewWorker(logName string) *Worker {
 	worker := Worker{}
 	if logName != "" {
 		worker.Logger = utils.NewLogger(logName)
-		worker.AuthLogger = utils.NewAuthLogger()
 	}
+
+	worker.AuthLogger = utils.NewAuthLogger()
 
 	return &worker
 }

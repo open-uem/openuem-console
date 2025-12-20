@@ -589,7 +589,6 @@ en:
     twofa_enabled: "2FA is enabled for your account"
     twofa_disabled: "2FA is disabled for your account"
     enable_2fa: "Enable 2FA" 
-    enabled_2fa: "The two-factor authentication has been enabled"
     disable_2fa: "Disable 2FA" 
     could_not_disable_2fa: "Could not disable 2FA"
     forgot_email_sent: "If the email is valid you will receive a code"

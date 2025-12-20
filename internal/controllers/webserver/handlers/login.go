@@ -81,7 +81,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 	}
 
 	if !match {
-		log.Printf("[ERROR]: user %s entered a wrong password", username)
+		h.AuthLogger.Printf("user %s entered a wrong password", username)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.wrong_username_or_password"), true))
 	}
 
@@ -151,6 +151,9 @@ func (h *Handler) LoginPasswordChange(c echo.Context) error {
 		log.Printf("[ERROR]: could not remove forgot code, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_remove_forgot_code"), true))
 	}
+
+	// Password has been changed
+	h.AuthLogger.Printf("user %s has changed the password", username)
 
 	// Redirect to login
 	return h.Login(c)
@@ -232,6 +235,9 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 		log.Printf("[ERROR]: could not save recovery codes, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
+
+	// 2FA has been enabled
+	h.AuthLogger.Printf("user %s has enabled 2FA", username)
 
 	if err := h.SessionManager.Manager.RenewToken(c.Request().Context()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

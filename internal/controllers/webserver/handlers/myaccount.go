@@ -122,6 +122,9 @@ func (h *Handler) MyAccountPassword(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_save_new_password"), true))
 	}
 
+	// Log this change
+	h.AuthLogger.Printf("user %s has changed the password", username)
+
 	// Password has been changed, log out
 	return h.Logout(c)
 }
@@ -227,6 +230,9 @@ func (h *Handler) Enabled2FA(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
 
+	// 2FA has been enabled
+	h.AuthLogger.Printf("user %s has enabled 2FA", username)
+
 	return RenderAccountPartial(c, account_views.Enabled2FA(strings.Join(codes, "\n")))
 }
 
@@ -270,6 +276,9 @@ func (h *Handler) Disable2FA(c echo.Context) error {
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
 	}
+
+	// 2FA has been disabled
+	h.AuthLogger.Printf("user %s has disabled 2FA", username)
 
 	// 2FA has been disabled, log out
 	return h.Logout(c)

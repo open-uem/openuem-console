@@ -395,6 +395,7 @@ templ Use2FA(username string) {
 					name="confirm-code"
 					id="confirm-code"
 					uk-cloak
+					autofocus="true"
 				></uk-input-pin>
 				<button
 					class="flex gap-2 uk-button uk-button-default"
@@ -509,7 +510,7 @@ templ EnterRecoveryCode() {
 				<span class="uk-form-icon">
 					<uk-icon icon="rectangle-ellipsis"></uk-icon>
 				</span>
-				<input class="uk-input" id="recovery-code" name="recovery-code" type="password" placeholder={ i18n.T(ctx, "login.totp_enter_recovery") } aria-label="Not clickable icon" required/>
+				<input class="uk-input" id="recovery-code" name="recovery-code" type="password" autofocus placeholder={ i18n.T(ctx, "login.totp_enter_recovery") } aria-label="Not clickable icon" required/>
 				<button
 					class="uk-form-icon uk-form-icon-flip"
 					type="button"
