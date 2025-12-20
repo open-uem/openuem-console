@@ -68,6 +68,16 @@ func (m *Model) ReEnableCertificatesAuth() error {
 	return m.Client.Authentication.UpdateOneID(s.ID).SetUseCertificates(true).Exec(context.Background())
 }
 
+func (m *Model) ReEnablePasswdAuth() error {
+
+	s, err := m.Client.Authentication.Query().Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return m.Client.Authentication.UpdateOneID(s.ID).SetUsePasswd(true).Exec(context.Background())
+}
+
 func (m *Model) IsPasswdAuthEnabled() bool {
 	s, err := m.Client.Authentication.Query().Only(context.Background())
 	if err != nil {

@@ -1504,6 +1504,7 @@ en:
     could_not_parse_oidc_auto_create: "Could not parse OIDC auto create"
     could_not_parse_oidc_auto_approve: "Could not parse OIDC auto approve"
     could_not_reenable_certs: "Could not re-enable the use of certificates to log in, reason: %s"
+    could_not_reenable_passwd_auth: "Could not re-enable the use of passwords to log in, reason: %s"
     provider_not_valid: "The selected provider is not valid"
     client_id_is_required: "The Client ID is required"
     oidc_url_is_required: "The OIDC URL is required"

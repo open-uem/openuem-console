@@ -59,6 +59,11 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			h.ReenableCertAuth = false
 		}
 
+		// if we explicitely don't want to use passwords, override reenablepasswdauth option
+		if !usePasswd {
+			h.ReenablePasswdAuth = false
+		}
+
 		if !useOIDC {
 			oidcProvider = ""
 			oidcServer = ""

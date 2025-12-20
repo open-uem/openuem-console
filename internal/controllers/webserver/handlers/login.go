@@ -33,6 +33,13 @@ func (h *Handler) Login(c echo.Context) error {
 		}
 	}
 
+	// if accidentally we disable the use of passwords this allows us to reenable it again
+	if h.ReenablePasswdAuth {
+		if err := h.Model.ReEnablePasswdAuth(); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_reenable_passwd_auth", err.Error()))
+		}
+	}
+
 	settings, err := h.Model.GetAuthenticationSettings()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))

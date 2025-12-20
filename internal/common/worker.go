@@ -59,6 +59,7 @@ type Worker struct {
 	CommonSoftwareJobDuration         time.Duration
 	Version                           string
 	ReenableCertAuth                  bool
+	ReenablePasswdAuth                bool
 	AuthLogger                        *log.Logger
 }
 
