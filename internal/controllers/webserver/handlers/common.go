@@ -17,12 +17,18 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 	var err error
 	var tenant *ent.Tenant
 
+	csrfToken, ok := c.Get("csrf").(string)
+	if c.Request().Method != "GET" && (!ok || csrfToken == "") {
+		return nil, errors.New("could not find CSRF token")
+	}
+
 	info := partials.CommonInfo{
 		SM:             h.SessionManager,
 		CurrentVersion: h.Version,
 		Translator:     views.GetTranslatorForDates(c),
 		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
 		IsProfile:      strings.Contains(c.Request().URL.String(), "profiles"),
+		CSRFToken:      csrfToken,
 	}
 
 	if strings.Contains(c.Request().URL.String(), "computers") && !strings.HasSuffix(c.Request().URL.String(), "computers") {

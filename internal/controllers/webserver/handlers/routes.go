@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"net/http"
+
+	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/views/login_views"
 )
 
 func (h *Handler) Register(e *echo.Echo) {
@@ -89,14 +93,13 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/admin/tenants", func(c echo.Context) error { return h.ListTenants(c, "", "", false) }, h.IsAuthenticated)
 	e.GET("/admin/users/new", h.NewUser, h.IsAuthenticated)
 	e.POST("/admin/users/import", h.ImportUsers, h.IsAuthenticated)
-	e.GET("/admin/users/:uid/profile", h.EditUser, h.IsAuthenticated)
-	e.POST("/admin/users/:uid/profile", h.EditUser, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/certificate", h.RequestUserCertificate, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/renewcertificate", h.RenewUserCertificate, h.IsAuthenticated)
 	e.POST("/admin/users/new", h.AddUser, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/askconfirm", h.AskForConfirmation, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/confirmemail", h.SetEmailConfirmed, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/approve", h.ApproveAccount, h.IsAuthenticated)
+	e.POST("/admin/users/:uid/resendpasslink", h.ResendPasswordLink, h.IsAuthenticated)
 	e.DELETE("/admin/users/:uid", h.DeleteUser, h.IsAuthenticated)
 
 	e.GET("/admin/tenants/new", h.NewTenant, h.IsAuthenticated)
@@ -419,8 +422,6 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/register", h.SignIn)
 	e.POST("/register", h.SendRegister)
-	e.GET("/user/:uid/exists", h.UIDExists)
-	e.GET("/email/:email/exists", h.EmailExists)
 
 	e.POST("/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
 	e.POST("/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)
@@ -503,6 +504,26 @@ func (h *Handler) Register(e *echo.Echo) {
 
 	e.GET("/oidc", h.OIDCLogIn)
 	e.GET("/oidc/callback", h.OIDCCallback)
+
+	e.POST("/login/userpass", h.LoginPasswordAuth)
+	e.POST("/login/changepass", h.LoginPasswordChange)
+	e.GET("/login/forgot", h.LoginForgotPass)
+	e.POST("/login/forgot", h.ForgotPasswordEmail)
+	e.GET("/login/forgotverify", h.VerifyForgotPasswordCode)
+	e.POST("/login/forgotverify", h.VerifyForgotPasswordCode)
+	e.POST("/login/totpregister", h.Register2FA)
+	e.POST("/login/totpconfirm", h.LoginTOTPConfirm)
+	e.POST("/login/totpvalidate", h.LoginTOTPValidate)
+	e.POST("/login/totpbackuprequested", h.LoginTOTPBackupRequest)
+	e.POST("/login/totpbackupcheck", h.LoginTOTPBackupCheck)
+	e.GET("/login/new", h.LoginNewUser)
+
+	e.GET("/myaccount", h.MyAccount, h.IsAuthenticated)
+	e.POST("/myaccount/info", h.UpdatePersonalInfo, h.IsAuthenticated)
+	e.POST("/myaccount/password", h.MyAccountPassword, h.IsAuthenticated)
+	e.POST("/myaccount/enable2fa", h.Enable2FA, h.IsAuthenticated)
+	e.POST("/myaccount/disable2fa", h.Disable2FA, h.IsAuthenticated)
+	e.POST("/myaccount/register2fa", h.Enabled2FA, h.IsAuthenticated)
 }
 
 func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
@@ -510,6 +531,41 @@ func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
 		// Redirect to Login if user has no session
 		if !h.SessionManager.Manager.Exists(c.Request().Context(), "uid") {
 			return h.Login(c)
+		}
+
+		// get uid from session
+		username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
+		if username == "" {
+			return h.Login(c)
+		}
+
+		// get user from database
+		user, err := h.Model.GetUserById(username)
+		if err != nil {
+			return h.Login(c)
+		}
+
+		// if sessions includes forgot
+		forgot := h.SessionManager.Manager.GetBool(c.Request().Context(), "forgot")
+		if forgot {
+			return h.Login(c)
+		}
+
+		// if use 2fa
+		if user.Use2fa {
+			// check if user has been 2FA authenticated
+			twofa := h.SessionManager.Manager.GetBool(c.Request().Context(), "twofa")
+			if !twofa {
+				if user.Passwd {
+					return h.Login(c)
+				}
+
+				csrfToken, ok := c.Get("csrf").(string)
+				if !ok || csrfToken == "" {
+					return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
+				}
+				return RenderLogin(c, login_views.LoginIndex(login_views.Enter2FA(username), csrfToken))
+			}
 		}
 
 		return next(c)

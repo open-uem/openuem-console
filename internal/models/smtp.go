@@ -86,6 +86,15 @@ func (m *Model) UpdateSMTPSettings(settings *SMTPSettings) error {
 	return mainQuery.Exec(context.Background())
 }
 
+func (m *Model) IsSMTPConfigured() bool {
+	s, err := m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).First(context.Background())
+	if err != nil {
+		return false
+	}
+
+	return s.SMTPServer != "" && s.SMTPPort != 0
+}
+
 type SMTPSettings struct {
 	ID       int
 	Server   string

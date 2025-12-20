@@ -9616,12 +9616,20 @@ th.uk-text-break, td.uk-text-break {
   height: 7rem;
 }
 
+.h-36 {
+  height: 9rem;
+}
+
 .h-4 {
   height: 1rem;
 }
 
 .h-40 {
   height: 10rem;
+}
+
+.h-48 {
+  height: 12rem;
 }
 
 .h-5 {
@@ -9736,6 +9744,10 @@ th.uk-text-break, td.uk-text-break {
   width: 75%;
 }
 
+.w-36 {
+  width: 9rem;
+}
+
 .w-4 {
   width: 1rem;
 }
@@ -9828,6 +9840,10 @@ th.uk-text-break, td.uk-text-break {
           user-select: all;
 }
 
+.resize-none {
+  resize: none;
+}
+
 .flex-row-reverse {
   flex-direction: row-reverse;
 }
@@ -9876,6 +9892,10 @@ th.uk-text-break, td.uk-text-break {
   gap: 2.5rem;
 }
 
+.gap-16 {
+  gap: 4rem;
+}
+
 .gap-2 {
   gap: 0.5rem;
 }
@@ -9904,10 +9924,6 @@ th.uk-text-break, td.uk-text-break {
 
 .scroll-auto {
   scroll-behavior: auto;
-}
-
-.text-balance {
-  text-wrap: balance;
 }
 
 .rounded-full {
@@ -10148,6 +10164,11 @@ th.uk-text-break, td.uk-text-break {
 .px-5 {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .py-1 {
@@ -10566,5 +10587,15 @@ th.uk-text-break, td.uk-text-break {
 @media (min-width: 1536px) {
   .\32xl\:block {
     display: block;
+  }
+}
+
+@media print {
+  .print\:hidden {
+    display: none;
+  }
+
+  .print\:w-full {
+    width: 100%;
   }
 }

@@ -50,6 +50,8 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.ReverseProxyAuthPort = cCtx.String("reverse-proxy-auth-port")
 	w.ReverseProxyServer = cCtx.String("reverse-proxy-server")
 	w.ReenableCertAuth = cCtx.Bool("re-enable-certificates-auth")
+	w.ReenablePasswdAuth = cCtx.Bool("re-enable-passwd-auth")
+	w.ResetOpenUEMUser = cCtx.Bool("reset-openuem-user")
 	w.Version = "0.10.0"
 
 	return nil

@@ -1,8 +1,11 @@
 package layout
 
-import "github.com/invopop/ctxi18n/i18n"
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
 
-templ Login() {
+templ Login(csrfToken string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -23,6 +26,7 @@ templ Login() {
 			<script src="/assets/js/core.iife.js" type="module"></script>
 			<script src="/assets/js/icon.iife.js" type="module"></script>
 			<script src="/assets/js/htmx.min.js"></script>
+			<script src="/assets/js/echarts.min.js"></script>
 			<script src="/assets/js/openuem.js" type="module"></script>
 			<script>
 				const htmlElement = document.documentElement;
@@ -42,7 +46,11 @@ templ Login() {
 				);
 			</script>
 		</head>
-		<body>
+		<body
+			if csrfToken != "" {
+				hx-headers={ fmt.Sprintf(`{"X-CSRF-TOKEN": "%s"}`, csrfToken) }
+			}
+		>
 			<div class="flex min-h-screen w-full flex-col bg-muted">
 				{ children... }
 			</div>

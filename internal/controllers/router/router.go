@@ -50,6 +50,9 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
+	// Add CSRF middleware
+	e.Use(mw.CSRF())
+
 	// Add sessions middleware
 	e.Use(session.LoadAndSave(s.Manager))
 
@@ -154,7 +157,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 				c.Logger().Error(err)
 			}
 		default:
-			if err := views.ErrorPage(strconv.Itoa(he.Code), "Error found").Render(c.Request().Context(), c.Response().Writer); err != nil {
+			if err := views.ErrorPage(strconv.Itoa(he.Code), err.Error()).Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)
 			}
 		}

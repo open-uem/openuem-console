@@ -112,5 +112,17 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars: []string{"RE_ENABLE_CERTIFICATES_AUTH"},
 			Value:   false,
 		},
+		&cli.BoolFlag{
+			Name:    "re-enable-passwd-auth",
+			Usage:   "if you disabled the use of passwords to log in you can re-enable it again",
+			EnvVars: []string{"RE_ENABLE_PASSWD_AUTH"},
+			Value:   false,
+		},
+		&cli.BoolFlag{
+			Name:    "reset-openuem-user",
+			Usage:   "this will set a new password for the openuem account and disable 2FA",
+			EnvVars: []string{"RESET_OPENUEM_USER"},
+			Value:   false,
+		},
 	}
 }

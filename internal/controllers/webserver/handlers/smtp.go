@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/invopop/ctxi18n/i18n"
@@ -83,7 +84,7 @@ func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {
 	settings := models.SMTPSettings{}
 
 	settingsId := c.FormValue("settingsId")
-	settings.Server = c.FormValue("server")
+	settings.Server = strings.TrimSpace(c.FormValue("server"))
 	port := c.FormValue("port")
 	settings.User = c.FormValue("user")
 	settings.Password = c.FormValue("password")

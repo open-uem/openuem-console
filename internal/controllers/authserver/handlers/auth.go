@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/utils"
 	"golang.org/x/crypto/ocsp"
 )
 
@@ -128,6 +129,8 @@ func (h *Handler) Auth(c echo.Context) error {
 
 		h.SessionManager.Manager.Put(c.Request().Context(), "uid", uid)
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
@@ -147,7 +150,15 @@ func (h *Handler) Auth(c echo.Context) error {
 		}
 	}
 
-	// TODO - Get user's default tenant and site
+	if user.Use2fa {
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s", h.ServerName, h.ConsolePort))
+	}
+
+	authLogger := utils.NewAuthLogger()
+	if authLogger != nil {
+		authLogger.Printf("user %s has logged in with a digital certificate", user.ID)
+	}
+
 	myTenant, err := h.Model.GetDefaultTenant()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

@@ -271,7 +271,7 @@ func (suite *UserTestSuite) TestEmailExists() {
 }
 
 func (suite *UserTestSuite) TestAddLocalUser() {
-	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", false)
+	_, err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", "certificate")
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
@@ -285,7 +285,7 @@ func (suite *UserTestSuite) TestAddLocalUser() {
 }
 
 func (suite *UserTestSuite) TestAddOIDCUser() {
-	err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", true)
+	_, err := suite.model.AddUser("user7", "User7", "user7@example.com", "", "ES", "certificate")
 	assert.NoError(suite.T(), err, "should add a new user")
 
 	user, err := suite.model.GetUserById("user7")
@@ -343,7 +343,7 @@ func (suite *UserTestSuite) TestUpdateUser() {
 }
 
 func (suite *UserTestSuite) TestRegisterUser() {
-	err := suite.model.RegisterUser("user7", "User7", "user7@example.com", "", "ES", "apassword", true)
+	err := suite.model.RegisterUser("user7", "User7", "user7@example.com", "", "ES", "apassword", "certificate")
 	assert.NoError(suite.T(), err, "should register a user")
 
 	user, err := suite.model.GetUserById("user7")

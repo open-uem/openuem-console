@@ -24,9 +24,7 @@ templ Countries(c echo.Context, code string) {
 			_="on change 
 				set flag to #country.value.toLowerCase() 
 				set #flag[@class] to `fi fi-$flag`  
-
-				
-		end"
+			end"
 		>
 			<option value="">{ i18n.T(ctx, "SelectCountry") }</option>
 			for _, country := range GetCountries(c) {

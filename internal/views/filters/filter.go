@@ -43,6 +43,7 @@ type UserFilter struct {
 	CreatedTo       string
 	ModifiedFrom    string
 	ModifiedTo      string
+	Use2FA          string
 	RegisterOptions []string
 }
 

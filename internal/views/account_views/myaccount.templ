@@ -1,0 +1,409 @@
+package account_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strings"
+)
+
+templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInfo *partials.CommonInfo, successMessage string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "login.my_account")}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "login.my_account") } </h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "login.manage_my_account_description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<div class="flex gap-8">
+							<form
+								class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/6 px-6 py-4"
+								hx-post="/myaccount/info"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								autocomplete="off"
+							>
+								<div class="flex flex-col gap-4">
+									<h3 class="uk-card-title">{ i18n.T(ctx, "login.personal_info") }</h3>
+									<fieldset class="uk-fieldset">
+										<div class="uk-margin">
+											<label class="uk-form-label" for="name">{ i18n.T(ctx, "users.name") }</label>
+											<div class="uk-form-controls">
+												<input
+													id="name"
+													name="name"
+													class="uk-input"
+													type="text"
+													spellcheck="false"
+													value={ user.Name }
+													placeholder={ i18n.T(ctx, "users.name") + "..." }
+													required
+												/>
+											</div>
+										</div>
+										<div class="uk-margin">
+											<label class="uk-form-label" for="email">{ i18n.T(ctx, "users.email") }</label>
+											<div class="uk-form-controls">
+												<input
+													id="email"
+													name="email"
+													class="uk-input"
+													type="email"
+													value={ user.Email }
+													placeholder={ i18n.T(ctx, "users.email") + "..." }
+													required
+												/>
+											</div>
+										</div>
+										<div class="uk-margin">
+											<label for="country" class="uk-margin uk-form-label">{ i18n.T(ctx, "register.country") }</label>
+											if user.Country != "" {
+												@partials.Countries(c, user.Country)
+											} else {
+												@partials.Countries(c, defaultCountry)
+											}
+										</div>
+										<div class="uk-margin">
+											<label class="uk-form-label" for="phone">{ i18n.T(ctx, "users.phone") }</label>
+											<div class="uk-form-controls">
+												<input
+													id="phone"
+													name="phone"
+													class="uk-input"
+													type="text"
+													spellcheck="false"
+													value={ user.Phone }
+													placeholder={ i18n.T(ctx, "users.phone") + "..." }
+													_="
+												on blur on keyup wait 0.5s
+													if phone's value is not empty										 
+														get toE164(#phone.value, #country.options[#country.selectedIndex].value) put it into #phone.value
+													end
+												end"
+												/>
+											</div>
+										</div>
+									</fieldset>
+								</div>
+								<div class="flex justify-between mt-2">
+									<button
+										type="reset"
+										class="uk-button uk-button-secondary"
+										if user.Country != "" {
+											_={ fmt.Sprintf(`on click set #flag[@class] to 'fi fi-%s'`, strings.ToLower(user.Country)) }
+										} else {
+											_={ fmt.Sprintf(`on click set #flag[@class] to 'fi fi-%s'`, strings.ToLower(defaultCountry)) }
+										}
+									>
+										{ i18n.T(ctx, "Reset") }
+									</button>
+									<button
+										id="new-user"
+										type="submit"
+										class="uk-button uk-button-primary flex items-center gap-2"
+									>
+										{ i18n.T(ctx, "Update") }
+									</button>
+								</div>
+							</form>
+							if user.Passwd {
+								<form
+									hx-post="/myaccount/password"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/6 px-6 py-4"
+									autocomplete="off"
+								>
+									<div class="flex flex-col gap-4">
+										<h3 class="uk-card-title">{ i18n.T(ctx, "login.password_auth") }</h3>
+										<fieldset class="uk-fieldset">
+											<div class="uk-margin">
+												<label class="uk-form-label" for="current-password">{ i18n.T(ctx, "login.current_password") }</label>
+												<div class="uk-form-controls">
+													<div class="flex uk-inline">
+														<span class="uk-form-icon">
+															<uk-icon icon="rectangle-ellipsis"></uk-icon>
+														</span>
+														<input
+															id="current-password"
+															class="uk-input"
+															name="current-password"
+															type="password"
+															placeholder={ i18n.T(ctx, "login.password") }
+															required
+															_="on keyup
+																if my.value is not empty then
+																	remove @disabled from #btn2fa
+																else
+																	add @disabled to #btn2fa
+																end
+															end
+															"
+														/>
+														<button
+															class="uk-form-icon uk-form-icon-flip"
+															type="button"
+															_="
+																on click 
+																	if #reveal-current-password@icon is 'eye' then
+																		set #reveal-current-password@icon to 'eye-off'
+																		set #current-password@type to 'text'
+																	else
+																		set #reveal-current-password@icon to 'eye'
+																		set #current-password@type to 'password'
+																	end
+																end
+                                                    		"
+														>
+															<uk-icon id="reveal-current-password" icon="eye" class="uk-text-muted"></uk-icon>
+														</button>
+													</div>
+												</div>
+											</div>
+											<div class="uk-margin">
+												<label class="uk-form-label" for="new-password">{ i18n.T(ctx, "login.new_password") }</label>
+												<div class="flex uk-inline">
+													<span class="uk-form-icon">
+														<uk-icon icon="rectangle-ellipsis"></uk-icon>
+													</span>
+													<input
+														id="new-password"
+														class="uk-input"
+														name="new-password"
+														type="password"
+														placeholder={ i18n.T(ctx, "login.password") }
+														required
+													/>
+													<button
+														class="uk-form-icon uk-form-icon-flip"
+														type="button"
+														_="
+                                                        on click 
+                                                            if #reveal-new-password@icon is 'eye' then
+                                                                set #reveal-new-password@icon to 'eye-off'
+                                                                set #new-password@type to 'text'
+                                                            else
+                                                                set #reveal-new-password@icon to 'eye'
+                                                                set #new-password@type to 'password'
+                                                            end
+                                                        end
+                                                    "
+													>
+														<uk-icon id="reveal-new-password" icon="eye" class="uk-text-muted"></uk-icon>
+													</button>
+												</div>
+											</div>
+											<div class="uk-margin">
+												<label class="uk-form-label" for="confirm-new-password">{ i18n.T(ctx, "login.confirm_new_password") }</label>
+												<div class="flex uk-inline">
+													<span class="uk-form-icon">
+														<uk-icon icon="rectangle-ellipsis"></uk-icon>
+													</span>
+													<input
+														id="confirm-new-password"
+														class="uk-input"
+														name="confirm-new-password"
+														type="password"
+														placeholder={ i18n.T(ctx, "login.password") }
+														required
+													/>
+													<button
+														class="uk-form-icon uk-form-icon-flip"
+														type="button"
+														_="
+                                                        on click 
+                                                            if #reveal-confirm-new-password@icon is 'eye' then
+                                                                set #reveal-confirm-new-password@icon to 'eye-off'
+                                                                set #confirm-new-password@type to 'text'
+                                                            else
+                                                                set #reveal-confirm-new-password@icon to 'eye'
+                                                                set #confirm-new-password@type to 'password'
+                                                            end
+                                                        end
+                                                    "
+													>
+														<uk-icon id="reveal-confirm-new-password" icon="eye" class="uk-text-muted"></uk-icon>
+													</button>
+												</div>
+											</div>
+										</fieldset>
+									</div>
+									<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.password_complexity") }</span>
+									<div class="flex justify-between mt-2">
+										<button type="reset" class="uk-button uk-button-secondary">
+											{ i18n.T(ctx, "Reset") }
+										</button>
+										<button class="uk-button uk-button-primary" type="submit">{ i18n.T(ctx, "login.change_password") }</button>
+									</div>
+								</form>
+							}
+							if !user.Openid {
+								<div id="account" class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/3 px-6 py-4">
+									<div class="flex flex-col gap-4">
+										<h3 class="uk-card-title">{ i18n.T(ctx, "login.twofa") }</h3>
+										if user.Use2fa {
+											<span class="uk-text uk-text-small">{ i18n.T(ctx, "login.twofa_enabled") }</span>
+										} else {
+											<span class="uk-text uk-text-small">{ i18n.T(ctx, "login.twofa_disabled") }</span>
+										}
+										if user.Passwd {
+											<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.introduce_current_password") }</span>
+										}
+									</div>
+									<div class="flex justify-end">
+										if user.Use2fa {
+											<button
+												id="btn2fa"
+												hx-post="/myaccount/disable2fa"
+												hx-include="#current-password"
+												hx-push-url="false"
+												hx-target="body"
+												hx-swap="outerHTML"
+												class="uk-button uk-button-danger mt-2"
+												type="submit"
+												disabled?={ user.Passwd }
+											>
+												{ i18n.T(ctx, "login.disable_2fa") }
+											</button>
+										} else {
+											<button
+												id="btn2fa"
+												hx-post="/myaccount/enable2fa"
+												hx-include="#current-password"
+												class="uk-button uk-button-primary mt-2"
+												type="submit"
+												disabled?={ user.Passwd }
+											>
+												{ i18n.T(ctx, "login.enable_2fa") }
+											</button>
+										}
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ Enable2FA(username string, qrCode string, secret string) {
+	<div id="account" class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/3 px-6 py-4">
+		<form class="flex flex-col gap-4" autocomplete="off">
+			<div class="flex flex-col gap-4">
+				<h3 class="uk-card-title">{ i18n.T(ctx, "login.twofa") }</h3>
+				<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.totp_instructions1") }</span>
+				<div class="flex justify-center">
+					<div class="w-36 h-36 border">
+						<img alt="Authenticator QR" src={ fmt.Sprintf("data:image/png;base64,%s", qrCode) }/>
+					</div>
+				</div>
+				<span class="uk-text uk-text-small uk-text-muted">
+					{ i18n.T(ctx, "login.topt_cant_use_qr") }
+					<span
+						class="underline cursor-pointer"
+						_={ fmt.Sprintf("on click navigator.clipboard.writeText('%s') then call UIkit.notification({message: '%s'})", secret, i18n.T(ctx, "Clipboard")) }
+					>
+						{ i18n.T(ctx, "login.totp_use_this_code_instead") }
+					</span>
+				</span>
+				<span class="uk-text uk-text-small uk-text-bold">{ i18n.T(ctx, "login.totp_instructions2") }</span>
+				<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.totp_instructions3") }</span>
+				<div class="flex justify-center gap-2">
+					<uk-input-pin
+						name="confirm-code"
+						id="confirm-code"
+						uk-cloak
+					></uk-input-pin>
+				</div>
+				<div class="flex justify-between">
+					<button
+						class="flex gap-2 uk-button uk-button-secondary"
+						type="button"
+						_="on click 
+						repeat in <input[maxlength='1']/>
+							set it.value to ''
+						end
+					end"
+					>
+						{ i18n.T(ctx, "Reset") }
+					</button>
+					<a
+						class="uk-button uk-button-primary text-white flex gap-2"
+						hx-post="/myaccount/register2fa"
+						hx-push-url="false"
+						hx-target="body"
+						hx-swap="outerHTML"
+						hx-indicator="#continue-2fa"
+						type="button"
+					>
+						<div id="continue-2fa" class="htmx-indicator">
+							<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
+						</div>
+						{ i18n.T(ctx, "Continue") }
+					</a>
+				</div>
+			</div>
+		</form>
+	</div>
+}
+
+templ Enabled2FA(codes string) {
+	<div id="account" class="flex flex-col justify-between mt-6 uk-card uk-card-body w-1/3 px-6 py-4">
+		<div class="flex flex-col gap-4">
+			<h3 class="uk-card-title">{ i18n.T(ctx, "login.twofa") }</h3>
+			<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.recovery_codes_instructions") }</span>
+			<div class="flex gap-2 items-center uk-padding uk-background-muted uk-panel text-muted-foreground">
+				<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+				<span class="uk-text-small">{ i18n.T(ctx, "login.recovery_warning") }</span>
+			</div>
+			<textarea id="codes" class="resize-none" rows="10" disabled>{ codes }</textarea>
+			<div class="flex gap-2 print:hidden">
+				<button
+					class="flex gap-2 uk-button uk-button-default"
+					type="button"
+					_={ fmt.Sprintf("on click navigator.clipboard.writeText(#codes.textContent) then call UIkit.notification({message: '%s'})", i18n.T(ctx, "Clipboard")) }
+				>
+					<uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Copy") }
+				</button>
+				<button class="flex gap-2 uk-button uk-button-default" type="button" _="on click call window.print()">
+					<uk-icon hx-history="false" icon="printer" custom-class="h-5 w-5 cursor-pointer" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "Print") }
+				</button>
+			</div>
+			<div class="flex justify-end">
+				<button
+					class="uk-button uk-button-primary"
+					href="/logout"
+					hx-post="/logout"
+					hx-push-url="false"
+					hx-target="body"
+					hx-swap="outerHTML"
+					type="button"
+				>
+					{ i18n.T(ctx, "Finish") }
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+templ MyAccountIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}

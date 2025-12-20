@@ -1,11 +1,12 @@
 module github.com/open-uem/openuem-console
 
-go 1.25.3
+go 1.25.5
 
 require (
 	entgo.io/ent v0.14.5
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.943
+	github.com/alexedwards/argon2id v1.0.0
 	github.com/alexedwards/scs/pgxstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/biter777/countries v1.7.5
@@ -13,6 +14,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.16.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
+	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/gohugoio/locales v0.14.0
@@ -28,11 +30,12 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20251217171425-51f2f132d5dc
+	github.com/open-uem/ent v0.0.0-20251220072124-b7c9bbc5c91f
 	github.com/open-uem/nats v0.0.0-20251218122429-c0c7c0785ec9
-	github.com/open-uem/utils v0.0.0-20251216155730-6ba25c99e4ef
+	github.com/open-uem/utils v0.0.0-20251218173646-7fd890bf26ba
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9
+	github.com/pquerna/otp v1.5.0
 	github.com/sethvargo/go-password v0.3.1
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.27.7

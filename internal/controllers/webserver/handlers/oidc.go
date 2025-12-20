@@ -369,6 +369,8 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		h.SessionManager.Manager.Put(c.Request().Context(), "username", user.Name)
 		h.SessionManager.Manager.Put(c.Request().Context(), "user-agent", c.Request().UserAgent())
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
+		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
+		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -380,7 +382,7 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		// if it's the first time let's confirm login and remove the cert password
+		// if it's the first time let's confirm login
 		if err := h.Model.ConfirmLogIn(user.ID); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -437,6 +439,10 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
 			log.Printf("[ERROR]: could not save refresh token, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not save refresh token for user")
+		}
+
+		if h.AuthLogger != nil {
+			h.AuthLogger.Printf("user %s has logged in with OpenID (%s)", u.ID, settings.OIDCProvider)
 		}
 
 		myTenant, err := h.Model.GetDefaultTenant()
