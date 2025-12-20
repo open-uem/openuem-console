@@ -52,7 +52,7 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.ReenableCertAuth = cCtx.Bool("re-enable-certificates-auth")
 	w.ReenablePasswdAuth = cCtx.Bool("re-enable-passwd-auth")
 	w.ResetOpenUEMUser = cCtx.Bool("reset-openuem-user")
-	w.Version = "0.10.0"
+	w.Version = "0.11.0"
 
 	return nil
 }
