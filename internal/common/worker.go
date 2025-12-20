@@ -60,6 +60,7 @@ type Worker struct {
 	Version                           string
 	ReenableCertAuth                  bool
 	ReenablePasswdAuth                bool
+	ResetOpenUEMUser                  bool
 	AuthLogger                        *log.Logger
 }
 

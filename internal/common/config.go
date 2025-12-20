@@ -166,6 +166,14 @@ func (w *Worker) GenerateConsoleConfig() error {
 		}
 	}
 
+	key, err = cfg.Section("Console").GetKey("resetopenuemuser")
+	if err == nil {
+		w.ResetOpenUEMUser, err = key.Bool()
+		if err != nil {
+			return err
+		}
+	}
+
 	key, err = cfg.Section("Server").GetKey("Version")
 	if err != nil {
 		return err

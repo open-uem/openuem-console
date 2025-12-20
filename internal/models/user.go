@@ -328,7 +328,7 @@ func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken s
 		Exec(context.Background())
 }
 
-func (m *Model) CreateDefaultAdminPassword() error {
+func (m *Model) CreateDefaultAdminPassword(reset bool) error {
 	password := ""
 
 	// Define character sets
@@ -372,11 +372,19 @@ func (m *Model) CreateDefaultAdminPassword() error {
 		password += string(allChars[randNumber.Int64()])
 	}
 
+	// if a reset of the openuem user has been requested, delete the openuem user
+	if reset {
+		if err := m.Client.User.DeleteOneID("openuem").Exec(context.Background()); err != nil {
+			return err
+		}
+	}
+
 	exist, err := m.Client.User.Query().Where(user.ID("openuem")).Exist(context.Background())
 	if err != nil {
 		return err
 	}
 
+	// if openuem user doesn't exist create it
 	if !exist {
 		hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 		if err != nil {
