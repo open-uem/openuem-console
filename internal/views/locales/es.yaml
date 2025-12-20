@@ -997,7 +997,7 @@ es:
         filter_by_task_execution: "Filtrar por fecha de última ejecución"
       servers:
         title: "Actualizar servidores"
-        description: "Estos son los servidores OpenUEM instalados y qué versión están ejecutando. Puede actualizar los servidores a la versión seleccionada. IMPORTANTE: al actualizar una versión, la consola se reiniciará, por lo que puede perder la conexión durante unos instantes hasta que se reinicie el servicio"
+        description: "Estos son los servidores OpenUEM instalados, incluyendo dónde están instalados y qué versión están ejecutando. Puede actualizar los servidores a la versión seleccionada. IMPORTANTE: al actualizar una versión, la consola se reiniciará, por lo que puede perder la conexión durante unos instantes hasta que se reinicie el servicio"
         success: "Se ha enviado una petición para actualizar la versión del servidor de OpenUEM"
         some_errors_found: "Algunos servidores no pudieron recibir las peticiones de actualización"
         servers_cant_be_empty: "La variable servidores no puede contener una cadena vacía"
@@ -1464,7 +1464,7 @@ es:
     filter_by_default_status: "Filtar por fecha de creación"
     no_tenants: "No se han encontrado organizaciones para esta consulta"
     could_not_get_agents: "No se pudo consultar los agentes asociados con esta organización"
-    could_not_convert_site_to_int: "El ID del sitio %s no pudo convertirse an un entero"
+    could_not_convert_site_to_int: "El ID del sitio %s no pudo convertirse en un entero"
     choose_site: "Elija un sitio..."
     domain: "Dominio"
     domain_optional: "Dominio (opcional)"
