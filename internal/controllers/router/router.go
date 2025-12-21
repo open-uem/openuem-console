@@ -51,7 +51,13 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 	}))
 
 	// Add CSRF middleware
-	e.Use(mw.CSRF())
+	e.Use(mw.CSRFWithConfig(mw.CSRFConfig{
+		TokenLookup:    "cookie:_csrf",
+		CookiePath:     "/",
+		CookieSecure:   true,
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteStrictMode,
+	}))
 
 	// Add sessions middleware
 	e.Use(session.LoadAndSave(s.Manager))
