@@ -55,6 +55,7 @@ type Handler struct {
 	ReenableCertAuth     bool
 	ReenablePasswdAuth   bool
 	AuthLogger           *log.Logger
+	OIDCRedirectURI      string
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {

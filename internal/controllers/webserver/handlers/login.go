@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -286,15 +287,19 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	url := ""
-	if h.ReverseProxyAuthPort != "" {
-		url := strings.TrimSuffix(c.Request().Referer(), "/")
-		url += fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID)
+	u := ""
+	if h.ReverseProxyServer != "" {
+		referer, err := url.Parse(c.Request().Referer())
+		if err != nil {
+			log.Printf("[ERROR]: could not parse referer, reason: %v", err)
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+		u = fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", referer.Hostname(), referer.Port(), myTenant.ID, mySite.ID)
 	} else {
-		url = fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID)
+		u = fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID)
 	}
 
-	return RenderLoginPartial(c, login_views.ShowRecoveryCodes(strings.Join(codes, "\n"), url))
+	return RenderLoginPartial(c, login_views.ShowRecoveryCodes(strings.Join(codes, "\n"), u))
 }
 
 func (h *Handler) LoginTOTPValidate(c echo.Context) error {
@@ -446,10 +451,13 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 		}
 	}
 
-	if h.ReverseProxyAuthPort != "" {
-		url := strings.TrimSuffix(c.Request().Referer(), "/")
-		url += fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID)
-		return c.Redirect(http.StatusFound, url)
+	if h.ReverseProxyServer != "" {
+		referer, err := url.Parse(c.Request().Referer())
+		if err != nil {
+			log.Printf("[ERROR]: could not parse referer, reason: %v", err)
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", referer.Hostname(), referer.Port(), myTenant.ID, mySite.ID))
 	} else {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID))
 	}

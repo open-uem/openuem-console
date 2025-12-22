@@ -232,7 +232,7 @@ func (h *Handler) WriteOIDCCookie(c echo.Context, name string, value string, sec
 	expiry := time.Now().Add(10 * time.Minute)
 
 	domain := h.ServerName
-	if h.ReverseProxyAuthPort != "" {
+	if h.ReverseProxyServer != "" {
 		domain = h.ReverseProxyServer
 	}
 
@@ -392,12 +392,17 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 }
 
 func (h *Handler) GetRedirectURI(c echo.Context) string {
-	url := fmt.Sprintf("https://%s:%s/oidc/callback", h.ServerName, h.ConsolePort)
-	if h.ReverseProxyAuthPort != "" {
-		url = fmt.Sprintf("https://%s/oidc/callback", strings.TrimSuffix(c.Request().Referer(), "/"))
+	u := fmt.Sprintf("https://%s:%s/oidc/callback", h.ServerName, h.ConsolePort)
+	if h.ReverseProxyServer != "" {
+		referer, err := url.Parse(c.Request().Referer())
+		if err != nil {
+			return u
+		}
+		u = fmt.Sprintf("https://%s:%s/oidc/callback", referer.Hostname(), referer.Port())
 	}
 
-	return url
+	h.OIDCRedirectURI = u
+	return u
 }
 
 func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
@@ -415,7 +420,7 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 	// If user doesn't exist create user in database if auto creation is enabled
 	if !userExists {
 		if settings.OIDCAutoCreateAccount {
-			if err := h.Model.AddOIDCUser(u.ID, u.Name, u.Email, u.Phone, u.EmailVerified); err != nil {
+			if err := h.Model.AddOIDCUser(u.ID, u.Name, u.Email, u.Phone, u.EmailVerified, settings.OIDCAutoApprove); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.cannot_create_oidc_user", err.Error()))
 			}
 		} else {
@@ -455,10 +460,8 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		if h.ReverseProxyAuthPort != "" {
-			url := strings.TrimSuffix(c.Request().Referer(), "/")
-			url += fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID)
-			return c.Redirect(http.StatusFound, url)
+		if h.ReverseProxyServer != "" {
+			return h.Dashboard(c)
 		} else {
 			return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID))
 		}
@@ -475,7 +478,7 @@ func (h *Handler) ExchangeCodeForAccessToken(c echo.Context, code string, verifi
 	url := endpoint
 	v.Set("grant_type", "authorization_code")
 	v.Set("code", code)
-	v.Set("redirect_uri", h.GetRedirectURI(c))
+	v.Set("redirect_uri", h.OIDCRedirectURI)
 	v.Set("client_id", clientID)
 	v.Set("code_verifier", verifier)
 

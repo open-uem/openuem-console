@@ -160,8 +160,16 @@ func (m *Model) AddImportedUser(uid, name, email, phone, country string, oidc bo
 	return query.Exec(context.Background())
 }
 
-func (m *Model) AddOIDCUser(uid, name, email, phone string, emailVerified bool) error {
-	_, err := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetEmailVerified(emailVerified).SetCreated(time.Now()).SetRegister(openuem_nats.REGISTER_APPROVED).SetOpenid(true).Save(context.Background())
+func (m *Model) AddOIDCUser(uid, name, email, phone string, emailVerified bool, autoApprove bool) error {
+	query := m.Client.User.Create().SetID(uid).SetName(name).SetEmail(email).SetPhone(phone).SetEmailVerified(emailVerified).SetCreated(time.Now()).SetOpenid(true)
+
+	if autoApprove {
+		query.SetRegister(openuem_nats.REGISTER_APPROVED)
+	} else {
+		query.SetRegister(openuem_nats.REGISTER_IN_REVIEW)
+	}
+
+	_, err := query.Save(context.Background())
 	if err != nil {
 		return err
 	}

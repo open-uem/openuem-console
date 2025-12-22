@@ -170,9 +170,11 @@ func (h *Handler) Auth(c echo.Context) error {
 	}
 
 	if h.ReverseProxyAuthPort != "" {
-		url := strings.TrimSuffix(c.Request().Referer(), "/")
-		url += fmt.Sprintf("/tenant/%d/site/%d/dashboard", myTenant.ID, mySite.ID)
-		return c.Redirect(http.StatusFound, url)
+		u, err := url.Parse(c.Request().Referer())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", u.Hostname(), u.Port(), myTenant.ID, mySite.ID))
 	} else {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID))
 	}

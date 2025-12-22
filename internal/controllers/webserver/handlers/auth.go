@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,12 +16,8 @@ type MyCustomClaims struct {
 }
 
 func (h *Handler) Auth(c echo.Context) error {
-	if h.ReverseProxyAuthPort != "" {
-		u, err := url.Parse(c.Request().Referer())
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "could not parse url")
-		}
-		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", u.Hostname(), h.ReverseProxyAuthPort))
+	if h.ReverseProxyServer != "" && h.ReverseProxyAuthPort != "" {
+		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ReverseProxyServer, h.ReverseProxyAuthPort))
 	} else {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ServerName, h.AuthPort))
 	}
