@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -38,8 +38,12 @@ func (h *Handler) Logout(c echo.Context) error {
 	if u.Openid {
 		logoutURL := ""
 		redirecURI := fmt.Sprintf("https://%s:%s", h.ServerName, h.ConsolePort)
-		if h.ReverseProxyAuthPort != "" {
-			redirecURI = fmt.Sprintf("https://%s", strings.TrimSuffix(c.Request().Referer(), "/"))
+		if h.ReverseProxyServer != "" {
+			u, err := url.Parse(c.Request().Referer())
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			redirecURI = fmt.Sprintf("https://%s:%s", u.Hostname(), u.Port())
 		}
 
 		switch settings.OIDCProvider {
