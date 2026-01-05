@@ -72,8 +72,14 @@ func (h *Handler) ListSites(c echo.Context, successMessage, errMessage string, c
 	}
 	f.DefaultOptions = filteredDefaultStatus
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.NItems, err = h.Model.CountAllSites(f, commonInfo.TenantID)
 	if err != nil {
@@ -103,7 +109,7 @@ func (h *Handler) ListSites(c echo.Context, successMessage, errMessage string, c
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.SitesIndex(" | Sites", admin_views.Sites(c, p, f, sites, successMessage, errMessage, refreshTime, agentsExists, serversExists, confirmDelete, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
+	return RenderView(c, admin_views.SitesIndex(" | Sites", admin_views.Sites(c, p, f, sites, successMessage, errMessage, refreshTime, itemsPerPage, agentsExists, serversExists, confirmDelete, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }
 
 func (h *Handler) NewSite(c echo.Context) error {

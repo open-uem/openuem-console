@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, commonInfo *partials.CommonInfo) {
+templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -149,7 +149,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									}
 								</tbody>
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted">
 								{ i18n.T(ctx, "updates.no_updates_info") }

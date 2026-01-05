@@ -23,8 +23,14 @@ func (h *Handler) Profiles(c echo.Context, successMessage string) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.NItems, err = h.Model.CountAllProfiles(commonInfo)
 	if err != nil {
@@ -45,7 +51,7 @@ func (h *Handler) Profiles(c echo.Context, successMessage string) error {
 	confirmDelete := false
 	profileId := ""
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) NewProfile(c echo.Context) error {
@@ -90,8 +96,14 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if id == "" {
 		id = c.Param("uuid")
@@ -158,10 +170,10 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
-		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, commonInfo), commonInfo), u)
+		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo), u)
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileTags(c echo.Context) error {
@@ -215,8 +227,14 @@ func (h *Handler) ConfirmDeleteProfile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.empty_id"), true))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.NItems, err = h.Model.CountAllProfiles(commonInfo)
 	if err != nil {
@@ -237,7 +255,7 @@ func (h *Handler) ConfirmDeleteProfile(c echo.Context) error {
 	confirmDelete := true
 	successMessage := ""
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.Profiles(c, p, profiles, refreshTime, profileId, confirmDelete, successMessage, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
@@ -248,8 +266,14 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	id := c.Param("profile")
 	if id == "" {
@@ -299,7 +323,7 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 	successMessage := ""
 	confirmDelete := true
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, taskId, successMessage, confirmDelete, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, taskId, successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileIssues(c echo.Context) error {
@@ -315,8 +339,14 @@ func (h *Handler) ProfileIssues(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	pID, err := strconv.Atoi(profileID)
 	if err != nil {
@@ -338,7 +368,7 @@ func (h *Handler) ProfileIssues(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, issues, profile, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.ProfilesIssues(c, p, issues, profile, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileTaskTypes(c echo.Context) error {

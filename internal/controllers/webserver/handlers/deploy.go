@@ -99,8 +99,14 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 	f := filters.DeployPackageFilter{}
 	f.Sources = filteredSources
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Default sort
 	if p.SortBy == "" {
@@ -118,7 +124,7 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources, commonInfo))
+	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources, itemsPerPage, commonInfo))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
@@ -163,8 +169,14 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	}
 	f.SelectedAllAgents = "[" + strings.Join(tmpAllAgents, ",") + "]"
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.SortBy = "nickname"
 	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
@@ -188,7 +200,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, agents, install, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {

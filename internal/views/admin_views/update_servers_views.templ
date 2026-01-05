@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, servers []*ent.Server, allServers []string, higherRelease *ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.UpdateServersFilter, servers []*ent.Server, allServers []string, higherRelease *ent.Server, latestServerRelease *openuem_nats.OpenUEMRelease, appliedReleases []string, allReleases []string, allStatus []string, refresh int, itemsPerPage int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "admin.update.servers.title"), Url: "admin/update-servers"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -408,7 +408,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/update-servers")
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/update-servers", itemsPerPage)
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">

@@ -30,7 +30,7 @@ type LatestRelease struct {
 	IsCritical      bool       `json:"is_critical,omitempty"`
 }
 
-templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, agents []*ent.Agent, settings *ent.Settings, latestRelease *ent.Release, higherReleaseApplied *ent.Release, allReleases []string, availableReleases, availableTaskStatus []string, tags []*ent.Tag, refresh int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.UpdateAgentsFilter, agents []*ent.Agent, settings *ent.Settings, latestRelease *ent.Release, higherReleaseApplied *ent.Release, allReleases []string, availableReleases, availableTaskStatus []string, tags []*ent.Tag, refresh int, itemsPerPage int, successMessage, errorMessage string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "admin.update.agents.title"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -410,7 +410,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 										}
 									</table>
 								</div>
-								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))))
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), itemsPerPage)
 							</div>
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">

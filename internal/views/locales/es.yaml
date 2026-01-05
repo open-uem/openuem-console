@@ -913,6 +913,9 @@ es:
     netbird_description: "Instala y gestiona los clientes de NetBird desde OpenUEM"
     netbird_could_not_be_saved: "La configuración de integración de NetBird no pudo ser guardada"
     netbird_invalid: "El valor seleccionado para la configuración de NetBird no es válido"
+    items_per_page_title: "Elementos por página"
+    items_per_page_description: "El número de elementos por página para los controles de paginación"
+    items_per_page_invalid: "Los elementos por página no son válidos"
   restore:
     title: "Restaurar"
     description: "Aquí puede restaurar algunos elementos críticos de OpenUEM en caso de que algo vaya terriblemente mal"

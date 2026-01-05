@@ -8,7 +8,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update, commonInfo *partials.CommonInfo) {
+templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "updates_history.title") } </title>
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -67,7 +67,7 @@ templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Age
 									}
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", agent.ID)))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", agent.ID)))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "updates_history.no_info") }

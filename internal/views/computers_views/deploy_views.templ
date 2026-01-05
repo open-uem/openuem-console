@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, deployments []*ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, commonInfo *partials.CommonInfo, netbird, offline bool) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, deployments []*ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -96,7 +96,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 								<div>
 									if p.NItems > 0 {
 										<div id="deployments-results">
-											@DeploymentsTable(c, p, agent.ID, deployments, commonInfo)
+											@DeploymentsTable(c, p, agent.ID, deployments, itemsPerPage, commonInfo)
 										</div>
 									}
 								</div>
@@ -115,7 +115,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort, commonInfo *partials.CommonInfo) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 			<thead>
@@ -156,7 +156,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 				}
 			</tbody>
 		</table>
-		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId)))))
+		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/searchinstall", agentId)))), itemsPerPage)
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
 			{ i18n.T(ctx, "install.no_packages") }
@@ -164,7 +164,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 	}
 }
 
-templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*ent.Deployment, commonInfo *partials.CommonInfo) {
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*ent.Deployment, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 		<thead>
 			<tr>
@@ -272,5 +272,5 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 			}
 		</tbody>
 	</table>
-	@partials.Pagination(c, p, "post", "#deployments-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agentId)))))
+	@partials.Pagination(c, p, "post", "#deployments-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agentId)))), itemsPerPage)
 }

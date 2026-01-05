@@ -37,7 +37,13 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
@@ -50,7 +56,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	// Get filters values
 	f := filters.AgentFilter{}
@@ -245,12 +251,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, itemsPerPage, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {

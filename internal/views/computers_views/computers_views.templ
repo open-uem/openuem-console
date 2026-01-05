@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*ent.Tag, availableOSes []string, refreshTime int, successMessage string, commonInfo *partials.CommonInfo) {
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*ent.Tag, availableOSes []string, refreshTime int, itemsPerPage int, successMessage string, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -61,7 +61,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							@ComputersBody(p, agents, availableTags, commonInfo)
 						</tbody>
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), itemsPerPage)
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_endpoints") }

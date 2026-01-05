@@ -8,9 +8,6 @@ import (
 	"strings"
 )
 
-const PAGE_SIZE = 5
-const MAX_PAGE_SIZE = 25
-
 type PaginationAndSort struct {
 	CurrentPage   int
 	PageSize      int
@@ -26,7 +23,7 @@ type page struct {
 	Disabled bool
 }
 
-templ Pagination(c echo.Context, p PaginationAndSort, method, target, swap, url string) {
+templ Pagination(c echo.Context, p PaginationAndSort, method, target, swap, url string, itemsPerPage int) {
 	<nav aria-label="Pagination" class="py-4 px-2 uk-flex uk-flex-between items-center">
 		<div class="uk-flex uk-width-1-4 gap-2 items-center">
 			<span class="uk-text-small uk-text-muted text-center">{ i18n.T(ctx, "pagination.title") }</span>
@@ -57,11 +54,11 @@ templ Pagination(c echo.Context, p PaginationAndSort, method, target, swap, url 
 					class="uk-select"
 					aria-label="Select items per page"
 				>
-					<option value="5" selected?={ 5 == p.PageSize }>5</option>
-					<option value="10" selected?={ 10 == p.PageSize }>10</option>
-					<option value="15" selected?={ 15 == p.PageSize }>15</option>
-					<option value="20" selected?={ 20 == p.PageSize }>20</option>
-					<option value="25" selected?={ 25 == p.PageSize }>25</option>
+					<option value={ strconv.Itoa(itemsPerPage) } selected?={ itemsPerPage == p.PageSize }>{ strconv.Itoa(itemsPerPage) }</option>
+					<option value={ strconv.Itoa(itemsPerPage * 2) } selected?={ itemsPerPage * 2 == p.PageSize }>{ strconv.Itoa(itemsPerPage * 2) }</option>
+					<option value={ strconv.Itoa(itemsPerPage * 3) } selected?={ itemsPerPage * 3 == p.PageSize }>{ strconv.Itoa(itemsPerPage * 3) }</option>
+					<option value={ strconv.Itoa(itemsPerPage * 4) } selected?={ itemsPerPage * 4 == p.PageSize }>{ strconv.Itoa(itemsPerPage * 4 ) }</option>
+					<option value={ strconv.Itoa(itemsPerPage * 5) } selected?={ itemsPerPage * 5 == p.PageSize }>{ strconv.Itoa(itemsPerPage * 5) }</option>
 				</select>
 			</form>
 		</div>
@@ -205,14 +202,14 @@ templ Pagination(c echo.Context, p PaginationAndSort, method, target, swap, url 
 	</nav>
 }
 
-func NewPaginationAndSort() PaginationAndSort {
+func NewPaginationAndSort(itemsPerPage int) PaginationAndSort {
 	return PaginationAndSort{
 		CurrentPage: 1,
-		PageSize:    PAGE_SIZE,
+		PageSize:    itemsPerPage,
 	}
 }
 
-func (p *PaginationAndSort) GetPaginationAndSortParams(page, pageSize, sortBy, sortOrder, currentSortBy string) {
+func (p *PaginationAndSort) GetPaginationAndSortParams(page, pageSize, sortBy, sortOrder, currentSortBy string, itemsPerPage int) {
 	var err error
 
 	if p.CurrentPage, err = strconv.Atoi(page); err != nil {
@@ -224,9 +221,10 @@ func (p *PaginationAndSort) GetPaginationAndSortParams(page, pageSize, sortBy, s
 	}
 
 	if p.PageSize, err = strconv.Atoi(pageSize); err != nil {
-		p.PageSize = PAGE_SIZE
+		p.PageSize = itemsPerPage
 	}
-	p.PageSize = min(p.PageSize, MAX_PAGE_SIZE)
+
+	p.PageSize = min(p.PageSize, itemsPerPage*5)
 	p.SortBy = sortBy
 	p.SortOrder = sortOrder
 	p.CurrentSortBy = currentSortBy
