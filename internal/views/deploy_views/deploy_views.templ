@@ -181,6 +181,7 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 							>
 								<input type="hidden" name="filterByPackageId" value={ p.ID }/>
 								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
+								<input type="hidden" name="filterBySource" value={ p.Source }/>
 								if install {
 									<input type="hidden" name="filterByInstallationType" value="true"/>
 								} else {
@@ -219,7 +220,7 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*ent.Agent, install bool, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName, packageSource string, agents []*ent.Agent, install bool, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
 		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Install", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")))}, {Title: packageName, Url: ""}}, commonInfo)
@@ -272,6 +273,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							<input type="hidden" name="filterByInstallationType" value={ strconv.FormatBool(install) }/>
 							<input type="hidden" name="filterByPackageId" value={ packageId }/>
 							<input type="hidden" name="filterByPackageName" value={ packageName }/>
+							<input type="hidden" name="filterBySource" value={ packageSource }/>
 							<input id="filterBySelectedItems" type="hidden" name="filterBySelectedItems" value={ strconv.Itoa(f.SelectedItems) }/>
 							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 							<button
