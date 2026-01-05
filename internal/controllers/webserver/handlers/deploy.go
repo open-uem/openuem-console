@@ -179,7 +179,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.SortBy = "nickname"
-	p.NItems, err = h.Model.CountAllAgents(filters.AgentFilter{}, true, commonInfo)
+	p.NItems, err = h.Model.CountAllAgents(f, true, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -200,7 +200,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, source, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
