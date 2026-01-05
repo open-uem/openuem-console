@@ -244,8 +244,14 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
 	if err != nil {
@@ -277,7 +283,7 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -480,8 +486,14 @@ func (h *Handler) Apps(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Default sort
 	if p.SortBy == "" {
@@ -532,7 +544,7 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -597,7 +609,13 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
@@ -610,7 +628,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		}
 	}
 
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	// Get filters values
 	f := filters.AgentFilter{}
@@ -820,12 +838,12 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo), u)
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
@@ -842,8 +860,14 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
@@ -863,7 +887,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, commonInfo))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, itemsPerPage, commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -884,7 +908,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -896,8 +920,14 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -964,7 +994,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
 
-	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, commonInfo))
+	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, itemsPerPage, commonInfo))
 
 }
 
@@ -1286,8 +1316,14 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -1361,7 +1397,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Notes(c echo.Context) error {

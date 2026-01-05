@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, sites []*ent.Site, successMessage, errMessage string, refresh int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo, tenantName string) {
+templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, sites []*ent.Site, successMessage, errMessage string, refresh int, itemsPerPage int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Site.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -215,7 +215,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "sites.no_tenants") }

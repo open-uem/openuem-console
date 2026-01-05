@@ -30,6 +30,7 @@ type GeneralSettings struct {
 	DetectRemoteAgents       bool
 	AutoAdmitAgents          bool
 	NetBird                  bool
+	ItemsPerPage             int
 }
 
 func (m *Model) GetMaxUploadSize() (string, error) {
@@ -345,6 +346,7 @@ func (m *Model) GetGeneralSettings(tenantID string) (*openuem_ent.Settings, erro
 			settings.FieldUserCertYearsValid,
 			settings.FieldNatsRequestTimeoutSeconds,
 			settings.FieldRefreshTimeInMinutes,
+			settings.FieldDefaultItemsPerPage,
 			settings.FieldSessionLifetimeInMinutes,
 			settings.FieldUpdateChannel,
 			settings.FieldAgentReportFrequenceInMinutes,
@@ -512,6 +514,21 @@ func (m *Model) GetDefaultUseBrew(tenantID string) (bool, error) {
 	return s.UseBrew, nil
 }
 
+func (m *Model) GetDefaultItemsPerPage() (int, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Where(settings.Not(settings.HasTenant())).Select(settings.FieldDefaultItemsPerPage).Only(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	return settings.DefaultItemsPerPage, nil
+}
+
+func (m *Model) UpdateDefaultItemsPerPageSetting(settingsId, itemsPerPage int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetDefaultItemsPerPage(itemsPerPage).Exec(context.Background())
+}
+
 func (m *Model) CloneGlobalSettings(tenantID int) error {
 	s, err := m.Client.Settings.Query().WithTag().Where(settings.Not(settings.HasTenant())).Only(context.Background())
 	if err != nil {
@@ -530,6 +547,7 @@ func (m *Model) CloneGlobalSettings(tenantID int) error {
 		SetMessageFrom(s.MessageFrom).
 		SetProfilesApplicationFrequenceInMinutes(s.ProfilesApplicationFrequenceInMinutes).
 		SetRefreshTimeInMinutes(s.RefreshTimeInMinutes).
+		SetDefaultItemsPerPage(s.DefaultItemsPerPage).
 		SetRequestVncPin(s.RequestVncPin).
 		SetSMTPAuth(s.SMTPAuth).
 		SetSMTPPassword(s.SMTPPassword).
@@ -571,6 +589,7 @@ func (m *Model) ApplyGlobalSettings(tenantID int) error {
 		SetMessageFrom(s.MessageFrom).
 		SetProfilesApplicationFrequenceInMinutes(s.ProfilesApplicationFrequenceInMinutes).
 		SetRefreshTimeInMinutes(s.RefreshTimeInMinutes).
+		SetDefaultItemsPerPage(s.DefaultItemsPerPage).
 		SetRequestVncPin(s.RequestVncPin).
 		SetSMTPAuth(s.SMTPAuth).
 		SetSMTPPassword(s.SMTPPassword).

@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilter, tenants []*ent.Tenant, successMessage, errMessage string, refresh int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilter, tenants []*ent.Tenant, successMessage, errMessage string, refresh int, itemsPerPage int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/tenants"}, {Title: i18n.T(ctx, "Tenant.other"), Url: "/admin/tenants"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -214,7 +214,7 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/tenants")
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", "/admin/tenants", itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "tenants.no_tenants") }

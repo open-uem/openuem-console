@@ -20,8 +20,14 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Get filters values
 	f, availableOSes, detectedAntiviri, err := h.GetAntiviriFilters(c)
@@ -45,7 +51,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, antiviri, detectedAntiviri, availableOSes, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, antiviri, detectedAntiviri, availableOSes, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
@@ -56,8 +62,14 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Get filters values
 	f, availableOSes, availableUpdateStatus, err := h.GetSystemUpdatesFilters(c)
@@ -81,7 +93,7 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, systemUpdates, availableOSes, availableUpdateStatus, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, systemUpdates, availableOSes, availableUpdateStatus, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
@@ -102,8 +114,14 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -121,10 +139,10 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, commonInfo))
+		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, commonInfo), commonInfo))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {

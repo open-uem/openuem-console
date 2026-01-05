@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, successMessage string, confirmDelete bool, commonInfo *partials.CommonInfo) {
+templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, successMessage string, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))}, {Title: profile.Name}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -204,7 +204,7 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 								</tr>
 							}
 						</table>
-						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))))
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))), itemsPerPage)
 					}
 				</div>
 			</div>

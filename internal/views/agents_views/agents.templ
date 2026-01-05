@@ -14,7 +14,7 @@ import (
 
 var AgentStatus = []string{"WaitingForAdmission", "Enabled", "Disabled", "No Contact"}
 
-templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled bool, successMessage, errMessage string, refresh int, commonInfo *partials.CommonInfo) {
+templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []*ent.Agent, availableTags, appliedTags []*ent.Tag, availableOSes []string, sftpDisabled bool, successMessage, errMessage string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Agents", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -166,7 +166,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 						@AgentsTableHead(c, p, f, appliedTags, availableOSes)
 						@AgentsTableBody(p, agents, availableTags, sftpDisabled, commonInfo)
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/agents"))), itemsPerPage)
 				} else {
 					<p class="uk-text-small uk-text-muted">
 						{ i18n.T(ctx, "agents.no_agents") }

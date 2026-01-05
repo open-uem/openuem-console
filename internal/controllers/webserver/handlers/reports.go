@@ -89,8 +89,14 @@ func (h *Handler) GenerateAgentsCSVReport(c echo.Context, w *csv.Writer, fileNam
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allAgents, err := h.Model.GetAgentsByPage(p, *f, true, commonInfo)
 	if err != nil {
@@ -130,8 +136,14 @@ func (h *Handler) GenerateComputersCSVReport(c echo.Context, w *csv.Writer, file
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allComputers, err := h.Model.GetComputersByPage(p, *f, commonInfo)
 	if err != nil {
@@ -171,8 +183,14 @@ func (h *Handler) GenerateSoftwareCSVReport(c echo.Context, w *csv.Writer, fileN
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allSoftware, err := h.Model.GetAppsByPage(p, *f, commonInfo)
 	if err != nil {
@@ -212,8 +230,14 @@ func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, file
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f, commonInfo)
 	if err != nil {
@@ -253,8 +277,14 @@ func (h *Handler) GenerateUpdatesCSVReport(c echo.Context, w *csv.Writer, fileNa
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f, commonInfo)
 	if err != nil {
@@ -307,8 +337,14 @@ func (h *Handler) GenerateAgentsReport(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allAgents, err := h.Model.GetAgentsByPage(p, *f, true, commonInfo)
 	if err != nil {
@@ -485,8 +521,14 @@ func (h *Handler) GenerateComputersReport(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allComputers, err := h.Model.GetComputersByPage(p, *f, commonInfo)
 	if err != nil {
@@ -673,8 +715,14 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allAntiviri, err := h.Model.GetAntiviriByPage(p, *f, commonInfo)
 	if err != nil {
@@ -786,8 +834,14 @@ func (h *Handler) GenerateUpdatesReport(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allSystemUpdates, err := h.Model.GetSystemUpdatesByPage(p, *f, commonInfo)
 	if err != nil {
@@ -908,8 +962,14 @@ func (h *Handler) GenerateSoftwareReport(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
 
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
 	p := partials.PaginationAndSort{}
-	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "")
+	p.GetPaginationAndSortParams("0", "0", c.FormValue("sortBy"), c.FormValue("sortOrder"), "", itemsPerPage)
 
 	allSoftware, err := h.Model.GetAppsByPage(p, *f, commonInfo)
 	if err != nil {

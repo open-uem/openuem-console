@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agentsExists, serversExists bool, itemsPerPage int, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Tag.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -114,7 +114,7 @@ templ Tags(c echo.Context, p partials.PaginationAndSort, tags []*ent.Tag, agents
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "tags.no_tags") }

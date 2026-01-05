@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent.ProfileIssue, profile *ent.Profile, commonInfo *partials.CommonInfo) {
+templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent.ProfileIssue, profile *ent.Profile, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))}, {Title: profile.Name, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID))))}, {Title: i18n.T(ctx, "profiles.issues.title")}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div id="error" class="hidden"></div>
@@ -48,7 +48,7 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 							}
 						}
 					</table>
-					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID)))))
+					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID)))), itemsPerPage)
 				} else {
 					<p class="uk-text-small uk-text-muted mt-6">
 						{ i18n.T(ctx, "profiles.issues.no_issues") }

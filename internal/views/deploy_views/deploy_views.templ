@@ -138,7 +138,7 @@ templ DeployIndex(title string, cmp templ.Component, commonInfo *partials.Common
 	}
 }
 
-templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string, commonInfo *partials.CommonInfo) {
+templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped  mt-6">
 			<thead>
@@ -208,9 +208,9 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 			</tbody>
 		</table>
 		if install {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchinstall"))))
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchinstall"))), itemsPerPage)
 		} else {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchuninstall"))))
+			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchuninstall"))), itemsPerPage)
 		}
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
@@ -219,7 +219,7 @@ templ SearchPacketResult(install bool, packages []nats.SoftwarePackage, c echo.C
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*ent.Agent, install bool, refresh int, commonInfo *partials.CommonInfo) {
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName string, agents []*ent.Agent, install bool, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if install {
 		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
 		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Install", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")))}, {Title: packageName, Url: ""}}, commonInfo)
@@ -476,7 +476,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									}
 								</table>
 							</div>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/selectpackagedeployment"))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/selectpackagedeployment"))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "agents.no_agents") }
