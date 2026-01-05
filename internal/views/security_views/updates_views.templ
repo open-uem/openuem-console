@@ -41,7 +41,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 									f.LastInstallFrom == "" && f.LastInstallTo == "" &&
 									len(f.PendingUpdateOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates"))), "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
 						</div>
 						if len(systemUpdates) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
