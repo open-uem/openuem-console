@@ -2,27 +2,74 @@ package models
 
 import (
 	"context"
+	"sort"
 
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/release"
 	openuem_nats "github.com/open-uem/nats"
+	"golang.org/x/mod/semver"
 )
 
 func (m *Model) GetLatestServerRelease(channel string) (*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
+	data, err := m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeServer)).All(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return semver.Compare("v"+data[i].Version, "v"+data[j].Version) > 0
+	})
+
+	return data[0], nil
 }
 
 func (m *Model) GetServerReleases() ([]string, error) {
-	return m.Client.Release.Query().Unique(true).Order(openuem_ent.Desc(release.FieldVersion)).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
+	data, err := m.Client.Release.Query().Unique(true).Order(openuem_ent.Desc(release.FieldVersion)).Where(release.ReleaseTypeEQ(release.ReleaseTypeServer)).Select(release.FieldVersion).Strings(context.Background())
+	if err != nil {
+		return []string{}, err
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return semver.Compare("v"+data[i], "v"+data[j]) > 0
+	})
+
+	return data, nil
 }
 
 func (m *Model) GetLatestAgentRelease(channel string) (*openuem_ent.Release, error) {
-	return m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
+	data, err := m.Client.Release.Query().Where(release.Channel(channel), release.ReleaseTypeEQ(release.ReleaseTypeAgent)).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return semver.Compare("v"+data[i].Version, "v"+data[j].Version) > 0
+	})
+
+	return data[0], nil
 }
 
 func (m *Model) GetAgentsReleases() ([]string, error) {
-	return m.Client.Release.Query().Unique(true).Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Order(openuem_ent.Desc(release.FieldVersion)).Select(release.FieldVersion).Strings(context.Background())
+	data, err := m.Client.Release.Query().Unique(true).Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent)).Select(release.FieldVersion).Strings(context.Background())
+	if err != nil {
+		return []string{}, err
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return semver.Compare("v"+data[i], "v"+data[j]) > 0
+	})
+
+	return data, nil
 }
 
 func (m *Model) GetAgentsReleaseByType(release_type release.ReleaseType, channel, os, arch, version string) (*openuem_ent.Release, error) {
@@ -34,14 +81,20 @@ func (m *Model) GetServersReleaseByType(release_type release.ReleaseType, channe
 }
 
 func (m *Model) GetHigherAgentReleaseInstalled() (*openuem_ent.Release, error) {
-	data, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent), release.HasAgentsWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).Order(openuem_ent.Desc(release.FieldVersion)).First(context.Background())
+	data, err := m.Client.Release.Query().Where(release.ReleaseTypeEQ(release.ReleaseTypeAgent), release.HasAgentsWith(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission))).All(context.Background())
 	if err != nil {
-		if openuem_ent.IsNotFound(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
-	return data, nil
+
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return semver.Compare("v"+data[i].Version, "v"+data[j].Version) > 0
+	})
+
+	return data[0], nil
 }
 
 func (m *Model) CountOutdatedAgents() (int, error) {
@@ -54,11 +107,19 @@ func (m *Model) CountOutdatedAgents() (int, error) {
 }
 
 func (m *Model) CountUpgradableAgents(version string) (int, error) {
-	return m.Client.Agent.Query().
-		Where(
-			agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission),
-			agent.HasReleaseWith(release.VersionLT(version)),
-		).Count(context.Background())
+	count := 0
+	data, err := m.Client.Agent.Query().WithRelease().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).All(context.Background())
+	if err != nil {
+		return count, err
+	}
+
+	for _, item := range data {
+		if item.Edges.Release != nil && semver.Compare("v"+item.Edges.Release.Version, "v"+version) < 0 {
+			count += 1
+		}
+	}
+
+	return count, nil
 }
 
 func (m *Model) SaveNewReleaseAvailable(releaseType release.ReleaseType, newRelease openuem_nats.OpenUEMRelease) error {
