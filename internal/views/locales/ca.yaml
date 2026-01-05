@@ -914,7 +914,7 @@ ca:
     netbird_could_not_be_saved: "No s'ha pogut desar la configuració d'integració de NetBird"
     netbird_invalid: "El valor seleccionat per a la configuració de NetBird no és vàlid"
     items_per_page_title: "Elements per pàgina"
-    items_per_page_description: "El nombre d'elements per pàgina per a controls de paginació"
+    items_per_page_description: "El nombre mínim d'ítems per pàgina per als controls de paginació"
     items_per_page_invalid: "Els elements per pàgina no són vàlids"
   restore:
     title: "Restaurar"

@@ -914,7 +914,7 @@ en:
     netbird_could_not_be_saved: "The NetBird integration setting could not be saved"
     netbird_invalid: "Selected value for NetBird setting is not valid"
     items_per_page_title: "Items per page"
-    items_per_page_description: "The number of items per page for pagination controls"
+    items_per_page_description: "The minimum number of items per page for pagination controls"
     items_per_page_invalid: "Items per page is not valid"
   restore:
     title: "Restore"

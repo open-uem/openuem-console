@@ -914,7 +914,7 @@ fr:
     netbird_could_not_be_saved: "Le paramètre d'intégration NetBird n'a pas pu être sauvegardé"
     netbird_invalid: "La valeur sélectionnée pour le paramètre NetBird n'est pas valide"
     items_per_page_title: "Éléments par page"
-    items_per_page_description: "Le nombre d'éléments par page pour les contrôles de pagination"
+    items_per_page_description: "Le nombre minimum d'éléments par page pour les contrôles de pagination"
     items_per_page_invalid: "Les éléments par page ne sont pas valides"
   restore:
     title: "Restaurer"

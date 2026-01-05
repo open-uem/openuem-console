@@ -914,7 +914,7 @@ de:
     netbird_could_not_be_saved: "Die NetBird-Integrations-Einstellung konnte nicht gespeichert werden"
     netbird_invalid: "Der ausgewählte Wert für die NetBird-Einstellung ist ungültig"
     items_per_page_title: "Elemente pro Seite"
-    items_per_page_description: "Die Anzahl der Elemente pro Seite für die Seitensteuerung"
+    items_per_page_description: "Die minimale Anzahl von Elementen pro Seite für die Paginierungssteuerung"
     items_per_page_invalid: "Elemente pro Seite sind ungültig"
   restore:
     title: "Wiederherstellen"
