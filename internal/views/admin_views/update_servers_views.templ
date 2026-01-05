@@ -77,7 +77,7 @@ templ UpdateServers(c echo.Context, p partials.PaginationAndSort, f filters.Upda
 								<hr class="uk-divider-icon"/>
 								<div class="flex justify-between">
 									<div class="flex items-center gap-4">
-										@partials.RefreshPage(commonInfo.Translator, "/admin/update-servers", "#main", "outerHTML", "get", refresh, false)
+										@partials.RefreshPage(c, commonInfo.Translator, refresh, false)
 										@filters.ClearFilters("/admin/update-servers", "#main", "outerHTML", func() bool {
 											return f.Hostname == "" && len(f.Releases) == 0 &&
 												len(f.UpdateStatus) == 0 && f.UpdateMessage == "" &&

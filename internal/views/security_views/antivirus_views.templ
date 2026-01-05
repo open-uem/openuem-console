@@ -39,7 +39,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.Antiviru
 									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
 							
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security"))), "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
 						</div>
 						if len(antiviri) > 0 {
 							<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">

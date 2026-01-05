@@ -91,7 +91,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 											{ i18n.T(ctx, "agents.no_deployments") }
 										}
 									</p>
-									@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agent.ID)))), "#main", "outerHTML", "get", refreshTime, true)
+									@partials.RefreshPage(c, commonInfo.Translator, refreshTime, true)
 								</div>
 								<div>
 									if p.NItems > 0 {

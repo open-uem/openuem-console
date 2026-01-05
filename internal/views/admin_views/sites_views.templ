@@ -44,7 +44,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.DefaultOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), "#main", "outerHTML", "get", refresh, true)
+							@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button

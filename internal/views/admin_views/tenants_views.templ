@@ -45,7 +45,7 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.DefaultOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, "/admin/tenants", "#main", "outerHTML", "post", refresh, true)
+							@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button

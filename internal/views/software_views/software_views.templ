@@ -34,7 +34,7 @@ templ Software(c echo.Context, p partials.PaginationAndSort, f filters.Applicati
 					@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/software"))), "#main", "outerHTML", func() bool {
 						return f.AppName == "" && f.Vendor == ""
 					})
-					@partials.RefreshPage(commonInfo.Translator, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/software"))), "#main", "outerHTML", "get", refresh, true)
+					@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
 				</div>
 				if len(apps) > 0 {
 					<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
