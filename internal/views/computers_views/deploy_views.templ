@@ -91,7 +91,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 											{ i18n.T(ctx, "agents.no_deployments") }
 										}
 									</p>
-									@partials.RefreshPage(c, commonInfo.Translator, refreshTime, true)
+									@partials.RefreshPage(commonInfo.Translator, refreshTime, true)
 								</div>
 								<div>
 									if p.NItems > 0 {

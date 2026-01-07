@@ -47,7 +47,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
 							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0
 					})
-					@partials.RefreshPage(c, commonInfo.Translator, refreshTime, true)
+					@partials.RefreshPage(commonInfo.Translator, refreshTime, true)
 				</div>
 				if len(agents) > 0 {
 					<form class="mt-5 mb-2">

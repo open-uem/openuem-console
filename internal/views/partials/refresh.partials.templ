@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"github.com/gohugoio/locales"
 	"github.com/invopop/ctxi18n/i18n"
-	"github.com/labstack/echo/v4"
 	"time"
 )
 
-templ RefreshPage(c echo.Context, l locales.Translator, refreshTime int, showTime bool) {
+templ RefreshPage(l locales.Translator, refreshTime int, showTime bool) {
 	<div class="flex gap-4 items-center">
 		if showTime {
 			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", l.FmtTimeMedium(time.Now())) }</span>
@@ -16,8 +15,8 @@ templ RefreshPage(c echo.Context, l locales.Translator, refreshTime int, showTim
 		<button
 			type="button"
 			class="uk-button uk-button-default"
+			hx-get=""
 			hx-push-url="false"
-			hx-get={ c.Request().URL.RequestURI() }
 			hx-target="#main"
 			hx-swap="outerHTML"
 			hx-trigger={ fmt.Sprintf("click, every %dm", refreshTime) }
