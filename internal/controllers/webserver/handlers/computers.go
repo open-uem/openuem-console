@@ -1456,11 +1456,11 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error occurred getting uuid param", false)
+		return h.ListAgents(c, "", "an error occurred getting uuid param", true)
 	}
 
 	if err := h.Model.DeleteAgent(agentId, commonInfo); err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"), true)

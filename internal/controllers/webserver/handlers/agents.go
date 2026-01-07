@@ -274,7 +274,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, agent, commonInfo), commonInfo))
@@ -308,7 +308,7 @@ func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 	if deleteAction == "delete-and-uninstall" || deleteAction == "delete-and-keep" {
 		err := h.Model.DeleteAgent(agentId, commonInfo)
 		if err != nil {
-			return h.ListAgents(c, "", err.Error(), false)
+			return h.ListAgents(c, "", err.Error(), true)
 		}
 	}
 
@@ -355,7 +355,7 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, agent, commonInfo), commonInfo))
@@ -573,7 +573,7 @@ func (h *Handler) AgentAdmit(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, agent, commonInfo), commonInfo))
@@ -594,7 +594,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", true)
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
@@ -684,7 +684,7 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	}
 
 	if regenerate {
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", false)
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", true)
 	}
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "", true)
 }
@@ -702,7 +702,7 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 		}
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", true)
 }
 
 func (h *Handler) AgentLogs(c echo.Context) error {
