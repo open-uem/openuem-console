@@ -93,7 +93,7 @@ templ UpdateAgents(c echo.Context, p partials.PaginationAndSort, f filters.Updat
 								<hr class="uk-divider-icon"/>
 								<div class="flex justify-between">
 									<div class="flex items-center gap-4">
-										@partials.RefreshPage(c, commonInfo.Translator, refresh, false)
+										@partials.RefreshPage(commonInfo.Translator, refresh, false)
 										@filters.ClearFilters(string(templ.URL(fmt.Sprintf("/tenant/%s/admin/update-agents", commonInfo.TenantID))), "#main", "outerHTML", func() bool {
 											return f.Nickname == "" && len(f.Releases) == 0 && len(f.Tags) == 0 &&
 												len(f.TaskStatus) == 0 && len(f.TaskResult) == 0 &&

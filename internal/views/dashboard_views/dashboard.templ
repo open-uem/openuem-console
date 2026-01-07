@@ -60,7 +60,7 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 				@Chart("Agents By OS Version", "Agent distribution by operating system version", data.Charts.AgentByOsVersion)
 			</div>
 			<div class="flex justify-end">
-				@partials.RefreshPage(c, commonInfo.Translator, data.RefreshTime, true)
+				@partials.RefreshPage(commonInfo.Translator, data.RefreshTime, true)
 			</div>
 			<div class="flex gap-2 justify-start">
 				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">

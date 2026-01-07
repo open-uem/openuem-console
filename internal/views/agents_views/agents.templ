@@ -151,7 +151,7 @@ templ Agents(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter
 							</button>
 						</form>
 					</div>
-					@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
+					@partials.RefreshPage(commonInfo.Translator, refresh, true)
 				</div>
 				if len(agents) > 0 {
 					<table
@@ -668,7 +668,7 @@ templ AgentsLog(c echo.Context, agent *ent.Agent, agentLog, updaterLog []LogEntr
 									{ i18n.T(ctx, "Filter") }
 								</button>
 							</form>
-							@partials.RefreshPage(c, commonInfo.Translator, refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, refresh, true)
 						</div>
 						<div class="flex flex-col gap-4">
 							<div class="flex flex-col gap-4">
