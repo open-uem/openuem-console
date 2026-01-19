@@ -80,7 +80,7 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agen
 									<td class="!align-middle">{ disk.RemainingSpaceInUnits }</td>
 									<td class="!align-middle">{ disk.SizeInUnits }</td>
 									<td class="!align-middle">
-										@partials.BitlockerStatus(disk.BitlockerStatus)
+										@partials.BitlockerStatus(commonInfo, agent.ID, disk)
 									</td>
 									if agent.SftpPort != "" && agent.SftpService && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) {
 										<td class="!align-middle">

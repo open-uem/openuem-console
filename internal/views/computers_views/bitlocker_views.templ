@@ -1,0 +1,568 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// Volume Type
+// https://docs.microsoft.com/en-us/windows/win32/secprov/getencryptionmethod-win32-encryptablevolume
+const (
+	VolumeTypeSystem uint32 = iota
+	VolumeTypeFixedDisk
+	VolumeTypeRemovable
+)
+
+templ BitLockerInfo(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, logicalDisk *ent.LogicalDisk, successMessage string, commonInfo *partials.CommonInfo, refresh int, netbird, offline bool) {
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@partials.ComputerHeader(p, agent, commonInfo, offline)
+				@ComputersNavbar(agent.ID, "logical-disks", agent.VncProxyPort, false, commonInfo, agent.Os, netbird)
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "inventory.bitlocker.title") }</h3>
+						<div class="flex items-center gap-4">
+							<img
+								src="/assets/img/bitlocker.jpeg"
+								alt="BitLocker"
+								class="mt-4 h-20 w-20 dark:brightness-[0.5] dark:grayscale"
+							/>
+							<p class="text-justify align-middle uk-text-small">
+								{ i18n.T(ctx, "inventory.bitlocker.description") }
+							</p>
+						</div>
+					</div>
+					<div id="bitlocker-section" class="uk-card-body flex flex-col gap-4">
+						<div class="w-2/3 mt-6">
+							<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.bitlocker.volume") }</th>
+									<td>
+										<div class="flex items-center justify-between">
+											{ logicalDisk.Label } @RefreshBitLockerInfo(commonInfo, agent.ID, logicalDisk.Label, refresh, true)
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.bitlocker.volume_type") }</th>
+									<td>{ i18n.T(ctx, getVolumeTypeDescription(logicalDisk.VolumeType)) }</td>
+								</tr>
+								<tr>
+									<th>{ i18n.T(ctx, "inventory.bitlocker.status") }</th>
+									<td>
+										<div class="flex justify-between items-center">
+											if logicalDisk.BitlockerStatus == "Locked" {
+												<div class="flex items-center gap-4">
+													{ i18n.T(ctx, "inventory.bitlocker.locked") }
+													if logicalDisk.BitlockerPassphrase != "" {
+														@UnlockWithPassphrase(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerStatus != "Locked" || logicalDisk.BitlockerPassphrase == "")
+													}
+												</div>
+											} else {
+												<div class="flex items-center">{ i18n.T(ctx,getConversionStatusDescription(logicalDisk.BitlockerConversionStatus)) }</div>
+												<div class="flex items-center gap-4">
+													if logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyDecrypted {
+														@EncryptDisk(agent, logicalDisk.Label, commonInfo, logicalDisk.VolumeType, logicalDisk.BitlockerOperationInProgress != "")
+													}
+													if logicalDisk.VolumeType == nats.VOLUME_TYPE_FIXED_DISK && logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted && !logicalDisk.BitlockerIsAutoUnlockEnabled {
+														@EnableAutoUnlock(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+													if logicalDisk.VolumeType == nats.VOLUME_TYPE_FIXED_DISK && logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted && logicalDisk.BitlockerIsAutoUnlockEnabled {
+														@DisableAutoUnlock(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+													if logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted {
+														@DecryptDisk(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+													if logicalDisk.VolumeType == nats.VOLUME_TYPE_SYSTEM && logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted && logicalDisk.BitlockerStatus == "Encrypted" {
+														@PauseProtection(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+													if logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted && logicalDisk.BitlockerStatus == "Unencrypted" {
+														@ResumeProtection(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+												</div>
+											}
+										</div>
+									</td>
+								</tr>
+								if logicalDisk.BitlockerConversionStatus == nats.BitLockerDecryptionInProgress || logicalDisk.BitlockerConversionStatus == nats.BitLockerEncryptionInProgress {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.encryption_percentage") }</th>
+										<td>
+											<div class="flex items-center">
+												<progress class="uk-progress !mb-0 mt-1" value={ logicalDisk.BitlockerEncryptionPercentage } max="100"></progress>
+											</div>
+										</td>
+									</tr>
+								}
+								if logicalDisk.BitlockerConversionStatus == nats.BitLockerFullyEncrypted && logicalDisk.BitlockerKeyProtectorsTypes != "" {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.key_protectors") }</th>
+										<td>
+											<ul class="uk-list uk-list-square -ml-2">
+												for item := range strings.SplitSeq(logicalDisk.BitlockerKeyProtectorsTypes, ",") {
+													<li>{ i18n.T(ctx, getKeyProtectorTypeDescription(item)) }</li>
+												}
+											</ul>
+										</td>
+									</tr>
+								}
+								if logicalDisk.BitlockerRecoveryKey != "" {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.recovery_key") }</th>
+										if logicalDisk.BitlockerRecoveryKey == "" {
+											<td>{ i18n.T(ctx, "inventory.bitlocker.recovery_key_not_found") }</td>
+										} else {
+											<input id="bitlocker-recovery-key" type="hidden" value={ logicalDisk.BitlockerRecoveryKey }/>
+											<td class="flex gap-4">
+												{ logicalDisk.BitlockerRecoveryKey }
+												<uk-icon
+													hx-history="false"
+													icon="copy"
+													custom-class="h-5 w-5 cursor-pointer"
+													uk-cloack
+													_={ fmt.Sprintf("on click navigator.clipboard.writeText('%s') then call UIkit.notification({message: '%s'})", logicalDisk.BitlockerRecoveryKey, i18n.T(ctx, "Clipboard")) }
+												></uk-icon>
+											</td>
+										}
+									</tr>
+								}
+								if logicalDisk.VolumeType == nats.VOLUME_TYPE_FIXED_DISK && logicalDisk.BitlockerStatus == "Encrypted" && 
+								((logicalDisk.BitlockerPassphrase != "" && logicalDisk.BitlockerPassphraseVolumeKeyProtectorID != "" ) || (logicalDisk.BitlockerPassphrase == "" && !IsPassphraseVolumeKeyProtectorIDSet(logicalDisk.BitlockerKeyProtectorsTypes))) {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.passphrase") }</th>
+										<td>
+											<div class="flex justify-between">
+												<form class="flex gap-4" autocomplete="off">
+													@RandomPassphrase()
+													@CopyPassphrase()
+													<div class="uk-inline w-2/3">
+														<button
+															class="uk-form-icon"
+															type="button"
+															_="on click set #passphrase.value to ''"
+														>
+															<uk-icon
+																hx-history="false"
+																icon="eraser"
+																uk-cloack
+															></uk-icon>
+														</button>
+														<button
+															class="uk-form-icon uk-form-icon-flip"
+															type="button"
+															_="
+															on click 
+																if #reveal-passphrase@icon is 'eye' then
+																	set #reveal-passphrase@icon to 'eye-off'
+																	set #passphrase@type to 'text'
+																else
+																	set #reveal-passphrase@icon to 'eye'
+																	set #passphrase@type to 'password'
+																end
+															end
+														"
+														>
+															<uk-icon id="reveal-passphrase" hx-history="false" icon="eye"></uk-icon>
+														</button>
+														<input class="uk-input" id="passphrase" name="passphrase" type="password" placeholder={ i18n.T(ctx, "inventory.bitlocker.insert_passphrase") } value={ logicalDisk.BitlockerPassphrase }/>
+													</div>
+													if logicalDisk.BitlockerPassphrase == "" {
+														@AddPassphrase(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													} else {
+														@ChangePassphrase(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+														@DeletePassphrase(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress != "")
+													}
+												</form>
+											</div>
+										</td>
+									</tr>
+								}
+								if logicalDisk.BitlockerOperationInProgress != "" {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.operation_in_progress") }</th>
+										<td>
+											<div class="flex items-center gap-4">
+												{ i18n.T(ctx, getOperationInProgressDescription(logicalDisk.BitlockerOperationInProgress)) }
+												@DeleteStalledOperation(agent, logicalDisk.Label, commonInfo, logicalDisk.BitlockerOperationInProgress == "")
+											</div>
+										</td>
+									</tr>
+								}
+								if logicalDisk.BitlockerOperationResult != "" {
+									<tr>
+										<th>{ i18n.T(ctx, "inventory.bitlocker.error") }</th>
+										<td class="uk-text-danger">{ logicalDisk.BitlockerOperationResult }</td>
+									</tr>
+								}
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ EncryptDisk(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, volumeType uint32, disabled bool) {
+	<form class="flex gap-4">
+		if volumeType == nats.VOLUME_TYPE_SYSTEM {
+			<input type="password" class="uk-input" id="bitlocker-passphrase" name="bitlocker-passphrase" placeholder={ i18n.T(ctx, "inventory.bitlocker.optional_PIN") }/>
+		} else {
+			<input type="password" class="uk-input" id="bitlocker-passphrase" name="bitlocker-passphrase" placeholder={ i18n.T(ctx, "inventory.bitlocker.optional_passphrase") }/>
+		}
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/encrypt", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="lock-keyhole" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.encrypt") }</span>
+		</button>
+	</form>
+}
+
+templ DecryptDisk(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/decrypt", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="lock-keyhole-open" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.decrypt") }</span>
+		</button>
+	</form>
+}
+
+templ PauseProtection(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/suspend", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="pause" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.pause") }</span>
+		</button>
+	</form>
+}
+
+templ ResumeProtection(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/resume", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="play" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.resume") }</span>
+		</button>
+	</form>
+}
+
+templ EnableAutoUnlock(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/enableautounlock", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="plug-zap" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.enable_autounlock") }</span>
+		</button>
+	</form>
+}
+
+templ DisableAutoUnlock(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/disableautounlock", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="unplug" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.disable_autounlock") }</span>
+		</button>
+	</form>
+}
+
+templ DeletePassphrase(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<form>
+		<button
+			type="button"
+			hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/passphrase", agent.ID, volume)))) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			class="flex items-center gap-2 uk-button uk-button-default"
+			disabled?={ disabled }
+		>
+			<uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6" uk-cloack></uk-icon>
+			<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.remove_passphrase") }</span>
+		</button>
+	</form>
+}
+
+templ DeleteStalledOperation(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<button
+		type="button"
+		hx-delete={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/operation", agent.ID, volume)))) }
+		hx-push-url="false"
+		hx-target="#main"
+		hx-swap="outerHTML"
+		class="flex items-center gap-2 uk-button uk-button-danger"
+		disabled?={ disabled }
+	>
+		<uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6" uk-cloack></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.delete_stalled_operation") }</span>
+	</button>
+}
+
+templ AddPassphrase(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<button
+		type="button"
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/addpassphrase", agent.ID, volume)))) }
+		hx-push-url="false"
+		hx-target="#main"
+		hx-swap="outerHTML"
+		class="flex items-center gap-2 uk-button uk-button-default"
+		disabled?={ disabled }
+	>
+		<uk-icon hx-history="false" icon="key" custom-class="h-6 w-6" uk-cloack></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.add_passphrase") }</span>
+	</button>
+}
+
+templ ChangePassphrase(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<button
+		type="button"
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/passphrase", agent.ID, volume)))) }
+		hx-push-url="false"
+		hx-target="#main"
+		hx-swap="outerHTML"
+		class="flex items-center gap-2 uk-button uk-button-default"
+		disabled?={ disabled }
+	>
+		<uk-icon hx-history="false" icon="rotate-ccw" custom-class="h-6 w-6" uk-cloack></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.change_passphrase") }</span>
+	</button>
+}
+
+templ CopyPassphrase() {
+	<button
+		class="flex items-center gap-2 uk-button uk-button-default"
+		type="button"
+		_={ fmt.Sprintf("on click navigator.clipboard.writeText(#passphrase.value) then call UIkit.notification({message: '%s'})", i18n.T(ctx, "Clipboard")) }
+	>
+		<uk-icon
+			hx-history="false"
+			icon="copy"
+			custom-class="h-6 w-6"
+			uk-cloack
+		></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.copy_passphrase") }</span>
+	</button>
+}
+
+templ RandomPassphrase() {
+	<button
+		class="flex items-center gap-2 uk-button uk-button-default"
+		type="button"
+		_="on click get generateRandomPassword(12) put it into #passphrase.value"
+	>
+		<uk-icon
+			hx-history="false"
+			icon="dice-5"
+			custom-class="h-6 w-6"
+			uk-cloack
+		></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.get_random_passphrase") }</span>
+	</button>
+}
+
+templ UnlockWithPassphrase(agent *ent.Agent, volume string, commonInfo *partials.CommonInfo, disabled bool) {
+	<button
+		type="button"
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/unlockwithpass", agent.ID, volume)))) }
+		hx-push-url="false"
+		hx-target="#main"
+		hx-swap="outerHTML"
+		class="flex items-center gap-2 uk-button uk-button-default"
+		disabled?={ disabled }
+	>
+		<uk-icon
+			hx-history="false"
+			icon="key"
+			custom-class="h-6 w-6"
+			uk-cloack
+		></uk-icon>
+		<span class="text-nowrap">{ i18n.T(ctx, "inventory.bitlocker.unlock_with_passphrase") }</span>
+	</button>
+}
+
+templ RefreshBitLockerInfo(commonInfo *partials.CommonInfo, agentID string, volume string, refreshTime int, showTime bool) {
+	<div class="flex gap-4 items-center">
+		if showTime {
+			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", commonInfo.Translator.FmtTimeMedium(time.Now())) }</span>
+		}
+		<button
+			type="button"
+			class="uk-button uk-button-default"
+			hx-get={ partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker/info", agentID, volume)) }
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-trigger={ fmt.Sprintf("click, every %ds", refreshTime) }
+			_="
+				on click 
+				  add .animate-spin to #refresh-icon
+				end
+			
+				on htmx:afterRequest	
+					remove .animate-spin from #refresh-icon
+				end
+			"
+		>
+			{ i18n.T(ctx, "Refresh") }
+			<span id="refresh-icon" class="ml-3"><uk-icon hx-history="false" icon="refresh-cw" custom-class="h-5 w-5" uk-cloack></uk-icon></span>
+		</button>
+	</div>
+}
+
+func getConversionStatusDescription(status int32) string {
+	switch status {
+	case nats.BitLockerFullyDecrypted:
+		return "inventory.bitlocker.fullydecrypted"
+	case nats.BitLockerFullyEncrypted:
+		return "inventory.bitlocker.fullyencrypted"
+	case nats.BitLockerEncryptionInProgress:
+		return "inventory.bitlocker.encryptioninprogress"
+	case nats.BitLockerDecryptionInProgress:
+		return "inventory.bitlocker.decryptioninprogress"
+	case nats.BitLockerEncryptionPaused:
+		return "inventory.bitlocker.encryptionpaused"
+	case nats.BitLockerDecryptionPaused:
+		return "inventory.bitlocker.decryptionpaused"
+	default:
+		return ""
+	}
+}
+
+func getKeyProtectorTypeDescription(t string) string {
+	switch t {
+	case strconv.Itoa(nats.BitLockerProtectorUnknown):
+		return "inventory.bitlocker.protector_type_unknown"
+	case strconv.Itoa(nats.BitLockerProtectorTPM):
+		return "inventory.bitlocker.protector_tpm"
+	case strconv.Itoa(nats.BitLockerProtectorExternalKey):
+		return "inventory.bitlocker.protector_external_key"
+	case strconv.Itoa(nats.BitLockerProtectorNumericalPassword):
+		return "inventory.bitlocker.protector_numerical_password"
+	case strconv.Itoa(nats.BitLockerProtectorTPMAndPIN):
+		return "inventory.bitlocker.protector_tpm_and_pin"
+	case strconv.Itoa(nats.BitLockerProtectorTPMAndStartupKey):
+		return "inventory.bitlocker.protector_tpm_and_startup_key"
+	case strconv.Itoa(nats.BitLockerProtectorTPMAndPINAndStartupKey):
+		return "inventory.bitlocker.protector_tpm_and_pin_and_startup_key"
+	case strconv.Itoa(nats.BitLockerProtectorPublicKey):
+		return "inventory.bitlocker.protector_public_key"
+	case strconv.Itoa(nats.BitLockerProtectorPassphrase):
+		return "inventory.bitlocker.protector_passphrase"
+	case strconv.Itoa(nats.BitLockerProtectorTPMCertificate):
+		return "inventory.bitlocker.protector_tpm_certificate"
+	case strconv.Itoa(nats.BitLockerProtectorCryptoAPINextGeneration):
+		return "inventory.bitlocker.protector_cryptoapi"
+	default:
+		return "inventory.bitlocker.protector_type_unknown"
+	}
+}
+
+func getVolumeTypeDescription(t uint32) string {
+	switch t {
+	case VolumeTypeSystem:
+		return "inventory.bitlocker.volume_type_system"
+	case VolumeTypeFixedDisk:
+		return "inventory.bitlocker.volume_type_fixed"
+	case VolumeTypeRemovable:
+		return "inventory.bitlocker.volume_type_removable"
+	default:
+		return "inventory.bitlocker.volume_type_unknown"
+	}
+}
+
+func getOperationInProgressDescription(op string) string {
+	switch op {
+	case nats.BitLockerEncryptAction:
+		return "inventory.bitlocker.encryption_in_progress"
+	case nats.BitLockerDecryptAction:
+		return "inventory.bitlocker.decryption_in_progress"
+	case nats.BitLockerResumeAction:
+		return "inventory.bitlocker.resume_in_progress"
+	case nats.BitLockerSuspendAction:
+		return "inventory.bitlocker.suspend_in_progress"
+	case nats.BitLockerEnableAutoUnlockAction:
+		return "inventory.bitlocker.enable_auto_unlock_in_progress"
+	case nats.BitLockerDisableAutoUnlockAction:
+		return "inventory.bitlocker.disable_auto_unlock_in_progress"
+	case nats.BitLockerChangePassphraseAction:
+		return "inventory.bitlocker.change_passphrase_in_progress"
+	case nats.BitLockerUnlockWithPassphraseAction:
+		return "inventory.bitlocker.unlock_with_passphrase_in_progress"
+	case nats.BitLockerAddPassphraseAction:
+		return "inventory.bitlocker.add_passphrase_in_progress"
+	case nats.BitLockerDeletePassphraseAction:
+		return "inventory.bitlocker.delete_passphrase_in_progress"
+	default:
+		return ""
+	}
+}
+
+func IsPassphraseVolumeKeyProtectorIDSet(p string) bool {
+	for i := range strings.SplitSeq(p, ",") {
+		if i == strconv.Itoa(nats.BitLockerProtectorPassphrase) {
+			return true
+		}
+	}
+
+	return false
+
+}

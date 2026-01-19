@@ -3,21 +3,48 @@ package partials
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
 )
 
-templ BitlockerStatus(status string) {
-	switch status {
+templ BitlockerStatus(commonInfo *CommonInfo, agentID string, disk *ent.LogicalDisk) {
+	switch disk.BitlockerStatus {
 		case "Unencrypted":
 			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unencrypted")) }>
-				<span class="text-orange-500">
+				<a
+					class="text-orange-500"
+					href={ templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label))) }
+					hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label)))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
 					<uk-icon hx-history="false" icon="lock-open" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				</span>
+				</a>
 			</div>
 		case "Encrypted":
 			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_encrypted")) }>
-				<span class="text-green-600">
+				<a
+					class="text-green-600"
+					href={ templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label))) }
+					hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label)))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
 					<uk-icon hx-history="false" icon="lock" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				</span>
+				</a>
+			</div>
+		case "Locked":
+			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_encrypted")) }>
+				<a
+					href={ templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label))) }
+					hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/logical-disks/%s/bitlocker", agentID, disk.Label)))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					<uk-icon hx-history="false" icon="shield-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+				</a>
 			</div>
 		case "Unsupported":
 			<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_unsupported")) }>

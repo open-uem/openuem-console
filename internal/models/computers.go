@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -10,6 +12,7 @@ import (
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/app"
 	"github.com/open-uem/ent/computer"
+	"github.com/open-uem/ent/logicaldisk"
 	"github.com/open-uem/ent/networkadapter"
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
@@ -17,6 +20,7 @@ import (
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/tag"
 	"github.com/open-uem/ent/tenant"
+	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -773,4 +777,82 @@ func (m *Model) GetAgentAppsInfo(agentId string, c *partials.CommonInfo) ([]*ent
 		}
 		return apps, nil
 	}
+}
+
+func (m *Model) GetLogicalDiskByLabel(agentID string, volume string) (*ent.LogicalDisk, error) {
+	return m.Client.LogicalDisk.Query().Where(logicaldisk.HasOwnerWith(agent.ID(agentID)), logicaldisk.LabelContains(volume)).Only(context.Background())
+}
+
+func (m *Model) SaveBitLockerOperationInProgress(agentID string, volume string, operation string) error {
+	return m.Client.LogicalDisk.
+		Update().
+		Where(logicaldisk.HasOwnerWith(agent.ID(agentID)), logicaldisk.LabelContains(volume)).
+		SetBitlockerOperationInProgress(operation).
+		SetBitlockerOperationResult("").
+		Exec(context.Background())
+}
+
+func (m *Model) DeleteBitLockerStalledOp(agentID string, volume string) error {
+	return m.SaveBitLockerOperationInProgress(agentID, volume, "")
+}
+
+func (m *Model) SaveBitLockerInfo(agentID string, volume string, bl nats.BitLockerOp) error {
+	query := m.Client.LogicalDisk.Update().
+		Where(logicaldisk.HasOwnerWith(agent.ID(agentID)), logicaldisk.LabelContains(volume)).
+		SetBitlockerStatus(bl.Status).
+		SetBitlockerConversionStatus(bl.ConversionStatus).
+		SetBitlockerEncryptionPercentage(bl.EncryptionPercentage).
+		SetBitlockerRecoveryKey(bl.RecoveryKey).
+		SetBitlockerIsAutoUnlockEnabled(bl.IsAutoUnlockEnabled).
+		SetBitlockerExternalKeyVolumeKeyProtectorID(bl.ExternalKeyVolumeKeyProtectorID).
+		SetBitlockerKeyProtectorsTypes(bl.KeyProtectorsTypes).
+		SetVolumeType(bl.VolumeType)
+
+	if bl.Operation != "" {
+		query = query.SetBitlockerOperationInProgress(bl.Operation)
+	}
+
+	if bl.Passphrase != "" {
+		query = query.SetBitlockerPassphrase(bl.Passphrase)
+	}
+
+	if bl.ExternalKeyVolumeKeyProtectorID != "" {
+		query = query.SetBitlockerExternalKeyVolumeKeyProtectorID(bl.ExternalKeyVolumeKeyProtectorID)
+	}
+
+	if bl.PassphraseVolumeKeyProtectorID != "" {
+		query = query.SetBitlockerPassphraseVolumeKeyProtectorID(bl.PassphraseVolumeKeyProtectorID)
+	}
+
+	if bl.Status == "Unencrypted" {
+		query = query.SetBitlockerPassphrase("").SetBitlockerPassphraseVolumeKeyProtectorID("").SetBitlockerExternalKeyVolumeKeyProtectorID("")
+	}
+
+	// Consistency between information gathered by the agent and OpenUEM's current knowledge
+	protectors := strings.Split(bl.KeyProtectorsTypes, ",")
+
+	// 1. If BitLocker has no passphrase protector we must remove any trace from that
+	if !slices.Contains(protectors, strconv.Itoa(nats.BitLockerProtectorPassphrase)) {
+		query = query.SetBitlockerPassphrase("").SetBitlockerPassphraseVolumeKeyProtectorID("")
+	}
+
+	// 2. If BitLocker has no external key protector we must remove any trace from that
+	if !slices.Contains(protectors, strconv.Itoa(nats.BitLockerProtectorExternalKey)) {
+		query = query.SetBitlockerExternalKeyVolumeKeyProtectorID("")
+	}
+
+	// 3. If BitLocker has no numerical password protector we must remove any trace from that
+	if !slices.Contains(protectors, strconv.Itoa(nats.BitLockerProtectorNumericalPassword)) {
+		query = query.SetBitlockerNumericPasswordVolumeKeyProtectorID("")
+	}
+
+	return query.Exec(context.Background())
+}
+
+func (m *Model) SaveBitLockerPassphrase(agentID string, volume string, passphrase string) error {
+	return m.Client.LogicalDisk.
+		Update().
+		Where(logicaldisk.HasOwnerWith(agent.ID(agentID)), logicaldisk.LabelContains(volume)).
+		SetBitlockerPassphrase(passphrase).
+		Exec(context.Background())
 }
