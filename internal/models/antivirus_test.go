@@ -202,7 +202,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 func (suite *AntivirusTestSuite) TestGetDetectedAntiviri() {
 	antiviri := []string{"antivirus0", "antivirus1", "antivirus2", "antivirus3", "antivirus4", "antivirus5", "antivirus6"}
-	av, err := suite.model.GetDetectedAntiviri(suite.commonInfo)
+	av, err := suite.model.GetDetectedAntiviri(suite.commonInfo, filters.AgentFilter{})
 	assert.NoError(suite.T(), err, "should detect antiviri")
 	assert.Equal(suite.T(), antiviri, av, "should get detected antiviri")
 }

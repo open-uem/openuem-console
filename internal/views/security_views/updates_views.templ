@@ -22,7 +22,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 					<div class="uk-card-header">
 						<div class="flex justify-between items-center">
 							<div class="flex flex-col">
-								<h3 class="uk-card-title">{ i18n.T(ctx, "updates.title") }</h3>
+								<h3 class="flex gap-2 items-center uk-card-title"><uk-icon hx-history="false" icon="shield-check" custom-class="h-6 w-6" uk-cloack></uk-icon><span>{ i18n.T(ctx, "updates.title") }</span></h3>
 								<p class="uk-margin-small-top uk-text-small">
 									{ i18n.T(ctx, "updates.description") }
 								</p>

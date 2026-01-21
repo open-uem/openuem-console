@@ -338,7 +338,7 @@ func (suite *AgentsTestSuite) TestCountAgentsByOS() {
 }
 
 func (suite *AgentsTestSuite) TestGetAgentsUsedOSes() {
-	items, err := suite.model.GetAgentsUsedOSes(suite.commonInfo, filters.AgentFilter{})
+	items, err := suite.model.GetAgentsUsedOSes(suite.commonInfo, filters.AgentFilter{}, false)
 	assert.NoError(suite.T(), err, "should get agents oses")
 	assert.Equal(suite.T(), []string{"windows"}, items, "should get windows")
 }

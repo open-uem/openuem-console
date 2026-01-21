@@ -662,7 +662,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.Username = c.FormValue("filterByUsername")
 	}
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}
@@ -859,7 +859,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	}
 
 	// Use filters to get lists of values for the filter dialogs
-	availableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}

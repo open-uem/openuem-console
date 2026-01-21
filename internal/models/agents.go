@@ -258,7 +258,7 @@ func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmission
 	return count, err
 }
 
-func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo, f filters.AgentFilter) ([]string, error) {
+func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo, f filters.AgentFilter, dontShowIfUnsupportedEDR bool) ([]string, error) {
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
@@ -339,6 +339,10 @@ func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo, f filters.AgentFilter)
 			agent.HasComputerWith(computer.ManufacturerContainsFold(f.Search)),
 			agent.HasComputerWith(computer.ModelContainsFold(f.Search)),
 		))
+	}
+
+	if dontShowIfUnsupportedEDR {
+		query.Where(agent.HasAntivirusWith(antivirus.NameNEQ("")))
 	}
 
 	return query.Select(agent.FieldOs).Strings(context.Background())

@@ -9,8 +9,15 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, antiviri []models.Antivirus, detectedAntiviri, availableOSes []string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
-	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}, {Title: "Antivirus", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus")))}}, commonInfo)
+type FilterOptions struct {
+	AvailableOSes             []string
+	AvailableEDRNames         []string
+	AvailableEDREnabledStatus []string
+	AvailableEDRUpdatedStatus []string
+}
+
+templ EDR(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, antiviri []models.Antivirus, options *FilterOptions, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Security"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}, {Title: "EDR", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/antivirus")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
@@ -21,7 +28,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 					<div class="uk-card-header">
 						<div class="flex justify-between items-center">
 							<div class="flex flex-col">
-								<h3 class="uk-card-title">{ i18n.T(ctx, "antivirus.title") }</h3>
+								<h3 class="flex gap-2 items-center uk-card-title"><i class="ri-virus-fill ri-xl uk-cloak"></i><span>{ i18n.T(ctx, "antivirus.title") }</span></h3>
 								<p class="uk-margin-small-top uk-text-small">
 									{ i18n.T(ctx, "antivirus.description") }
 								</p>
@@ -34,11 +41,14 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 					</div>
 					<div class="uk-card-body flex flex-col gap-4">
 						<div class="flex justify-between mt-8">
-							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security"))), "#main", "outerHTML", func() bool {
-								return len(f.Nickname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
-									len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0
-							
-							})
+							<div class="flex gap-4 w-1/3">
+								@filters.Search(c, p, f.Search, "#main", "outerHTML")
+								@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security"))), "#main", "outerHTML", func() bool {
+									return len(f.Nickname) == 0 && len(f.AgentOSVersions) == 0 && len(f.AntivirusNameOptions) == 0 &&
+										len(f.AntivirusEnabledOptions) == 0 && len(f.AntivirusUpdatedOptions) == 0 && len(f.Search) == 0
+								
+								})
+							</div>
 							@partials.RefreshPage(commonInfo.Translator, refresh, true)
 						</div>
 						if len(antiviri) > 0 {
@@ -56,7 +66,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "antivirus.os") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.os"), "agentOS", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", availableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
+												@filters.FilterByOptions(c, p, "AgentOS", "agents.filter_by_agent_os", options.AvailableOSes, f.AgentOSVersions, "#main", "outerHTML", false, func() bool {
 													return len(f.AgentOSVersions) == 0
 												})
 											</div>
@@ -65,7 +75,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 											<div class="flex gap-1 items-center">
 												<span>{ i18n.T(ctx, "antivirus.title") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.title"), "antivirusName", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByOptions(c, p, "AntivirusName", "antivirus.filter_by_name", detectedAntiviri, f.AntivirusNameOptions, "#main", "outerHTML", false, func() bool {
+												@filters.FilterByOptions(c, p, "AntivirusName", "antivirus.filter_by_name", options.AvailableEDRNames, f.AntivirusNameOptions, "#main", "outerHTML", false, func() bool {
 													return len(f.AntivirusNameOptions) == 0
 												})
 											</div>
@@ -74,7 +84,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 											<div class="flex gap-2 items-center justify-center">
 												<span>{ i18n.T(ctx,"antivirus.enabled") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.enabled"), "antivirusEnabled", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByOptions(c, p, "AntivirusEnabled", "antivirus.filter_by_enabled", []string{"Enabled", "Disabled"}, f.AntivirusEnabledOptions, "#main", "outerHTML", true, func() bool {
+												@filters.FilterByOptions(c, p, "AntivirusEnabled", "antivirus.filter_by_enabled", options.AvailableEDREnabledStatus, f.AntivirusEnabledOptions, "#main", "outerHTML", true, func() bool {
 													return len(f.AntivirusEnabledOptions) == 0
 												})
 											</div>
@@ -83,7 +93,7 @@ templ Antivirus(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 											<div class="flex gap-2 items-center justify-center">
 												<span>{ i18n.T(ctx,"antivirus.updated") }</span>
 												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "antivirus.updated"), "antivirusUpdated", "alpha", "#main", "outerHTML", "get")
-												@filters.FilterByOptions(c, p, "AntivirusUpdated", "antivirus.filter_by_updated", []string{"UpdatedYes", "UpdatedNo"}, f.AntivirusUpdatedOptions, "#main", "outerHTML", true, func() bool {
+												@filters.FilterByOptions(c, p, "AntivirusUpdated", "antivirus.filter_by_updated", options.AvailableEDRUpdatedStatus, f.AntivirusUpdatedOptions, "#main", "outerHTML", true, func() bool {
 													return len(f.AntivirusUpdatedOptions) == 0
 												})
 											</div>

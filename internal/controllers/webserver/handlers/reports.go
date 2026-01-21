@@ -225,7 +225,7 @@ func (h *Handler) GenerateAntivirusCSVReport(c echo.Context, w *csv.Writer, file
 		return err
 	}
 
-	f, _, _, err := h.GetAntiviriFilters(c)
+	f, err := h.GetEDRFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}
@@ -460,7 +460,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return nil, err
 	}
@@ -636,7 +636,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	f.Username = c.FormValue("filterByUsername")
 	f.Search = c.FormValue("filterBySearch")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return nil, err
 	}
@@ -711,7 +711,7 @@ func (h *Handler) GenerateAntivirusReport(c echo.Context) error {
 	fileName := uuid.NewString() + ".pdf"
 	dstPath := filepath.Join(h.DownloadDir, fileName)
 
-	f, _, _, err := h.GetAntiviriFilters(c)
+	f, err := h.GetEDRFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "reports.could_not_apply_filters"), false))
 	}

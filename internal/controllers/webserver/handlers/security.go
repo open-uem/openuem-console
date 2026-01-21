@@ -30,7 +30,7 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Get filters values
-	f, availableOSes, detectedAntiviri, err := h.GetAntiviriFilters(c)
+	f, err := h.GetEDRFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -51,7 +51,30 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, antiviri, detectedAntiviri, availableOSes, refreshTime, itemsPerPage, commonInfo), commonInfo))
+	// get options
+	options := security_views.FilterOptions{}
+
+	options.AvailableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, *f, true)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDRNames, err = h.Model.GetEDRNamesOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDREnabledStatus, err = h.Model.GetEDREnabledStatusOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDRUpdatedStatus, err = h.Model.GetEDRUpdateStatusOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.EDR(c, p, *f, antiviri, &options, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
@@ -145,20 +168,22 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo), commonInfo))
 }
 
-func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AgentFilter, []string, []string, error) {
+func (h *Handler) GetEDRFilters(c echo.Context) (*filters.AgentFilter, error) {
 	// Get filters values
 	f := filters.AgentFilter{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
+	// Get the filters
 	f.Nickname = c.FormValue("filterByNickname")
+	f.Search = c.FormValue("filterBySearch")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, true)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
@@ -169,9 +194,9 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AgentFilter, []st
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	detectedAntiviri, err := h.Model.GetDetectedAntiviri(commonInfo)
+	detectedAntiviri, err := h.Model.GetDetectedAntiviri(commonInfo, f)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	filteredAntiviri := []string{}
 	for index := range detectedAntiviri {
@@ -200,7 +225,7 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AgentFilter, []st
 	}
 	f.AntivirusUpdatedOptions = filteredUpdateStatus
 
-	return &f, availableOSes, detectedAntiviri, nil
+	return &f, nil
 }
 
 func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.AgentFilter, []string, []string, error) {
@@ -214,7 +239,7 @@ func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.AgentFilter,
 
 	f.Nickname = c.FormValue("filterByNickname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return nil, nil, nil, err
 	}
