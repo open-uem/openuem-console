@@ -408,6 +408,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/profiles/task-types", h.ProfileTaskTypes)
 	e.GET("/profiles/task-subtypes", h.ProfileTaskSubTypes)
 	e.GET("/profiles/task-definition", h.ProfileTaskDefinition)
+	e.POST("/profiles/:uuid/enable", func(c echo.Context) error { return h.EnableProfile(c, true) }, h.IsAuthenticated)
+	e.POST("/profiles/:uuid/disable", func(c echo.Context) error { return h.EnableProfile(c, false) }, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/site/:site/profiles", func(c echo.Context) error { return h.Profiles(c, "") }, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/profiles/new", h.NewProfile, h.IsAuthenticated)
@@ -419,6 +421,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.DELETE("/tenant/:tenant/site/:site/profiles/:uuid/tags", h.ProfileTags, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/profiles/:uuid/confirm-delete", h.ConfirmDeleteProfile, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/profiles/:uuid/issues", h.ProfileIssues, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/profiles/:uuid/enable", func(c echo.Context) error { return h.EnableProfile(c, true) }, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/profiles/:uuid/disable", func(c echo.Context) error { return h.EnableProfile(c, false) }, h.IsAuthenticated)
 
 	e.GET("/register", h.SignIn)
 	e.POST("/register", h.SendRegister)

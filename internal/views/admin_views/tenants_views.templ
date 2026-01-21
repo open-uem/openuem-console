@@ -159,11 +159,13 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 												}
 											</a>
 										</td>
-										if tenant.IsDefault {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
+										<td>
+											if tenant.IsDefault {
+												@partials.Checkmark()
+											} else {
+												{ "-" }
+											}
+										</td>
 										if tenant.Created.IsZero() {
 											<td>-</td>
 										} else {

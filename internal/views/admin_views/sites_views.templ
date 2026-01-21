@@ -165,11 +165,13 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 												}
 											</a>
 										</td>
-										if s.IsDefault {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
+										<td>
+											if s.IsDefault {
+												@partials.Checkmark()
+											} else {
+												{ "-" }
+											}
+										</td>
 										if s.Domain == "" {
 											<td>-</td>
 										} else {

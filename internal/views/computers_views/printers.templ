@@ -54,21 +54,27 @@ templ Printers(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, p
 								<tr>
 									<td>{ printer.Name }</td>
 									<td>{ printer.Port }</td>
-									if printer.IsDefault {
-										@partials.Checkmark()
-									} else {
-										<td>-</td>
-									}
-									if printer.IsNetwork {
-										@partials.Checkmark()
-									} else {
-										<td>-</td>
-									}
-									if printer.IsShared {
-										@partials.Checkmark()
-									} else {
-										<td>-</td>
-									}
+									<td>
+										if  printer.IsDefault {
+											@partials.Checkmark()
+										} else {
+											{ "-" }
+										}
+									</td>
+									<td>
+										if  printer.IsNetwork {
+											@partials.Checkmark()
+										} else {
+											{ "-" }
+										}
+									</td>
+									<td>
+										if  printer.IsShared {
+											@partials.Checkmark()
+										} else {
+											{ "-" }
+										}
+									</td>
 									<td>
 										@partials.MoreButton(index)
 										<div class="uk-drop uk-dropdown w-52" uk-dropdown="mode: click">
