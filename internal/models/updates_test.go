@@ -73,48 +73,48 @@ func (suite *UpdatesTestSuite) SetupTest() {
 }
 
 func (suite *UpdatesTestSuite) TestUpdatesTestSuite() {
-	count, err := suite.model.CountAllSystemUpdates(filters.SystemUpdatesFilter{}, suite.commonInfo)
+	count, err := suite.model.CountAllSystemUpdates(filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 7, count, "should get 7 updates")
 
-	f := filters.SystemUpdatesFilter{Nickname: "agent"}
+	f := filters.AgentFilter{Nickname: "agent"}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 7, count, "should get 7 updates")
 
-	f = filters.SystemUpdatesFilter{AgentOSVersions: []string{"windows"}}
+	f = filters.AgentFilter{AgentOSVersions: []string{"windows"}}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 7, count, "should get 7 updates")
 
-	f = filters.SystemUpdatesFilter{LastSearchFrom: "2024-01-01", LastSearchTo: "2034-01-01"}
+	f = filters.AgentFilter{LastSearchFrom: "2024-01-01", LastSearchTo: "2034-01-01"}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 7, count, "should get 7 updates")
 
-	f = filters.SystemUpdatesFilter{LastInstallFrom: "2024-01-01", LastInstallTo: "2034-01-01"}
+	f = filters.AgentFilter{LastInstallFrom: "2024-01-01", LastInstallTo: "2034-01-01"}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 7, count, "should get 7 updates")
 
-	f = filters.SystemUpdatesFilter{PendingUpdateOptions: []string{"Yes"}}
+	f = filters.AgentFilter{PendingUpdateOptions: []string{"Yes"}}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 4, count, "should get 4 updates")
 
-	f = filters.SystemUpdatesFilter{PendingUpdateOptions: []string{"No"}}
+	f = filters.AgentFilter{PendingUpdateOptions: []string{"No"}}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 3, count, "should get 3 updates")
 
-	f = filters.SystemUpdatesFilter{UpdateStatus: []string{openuem_nats.NOTIFY_SCHEDULED_INSTALLATION}}
+	f = filters.AgentFilter{UpdateStatus: []string{openuem_nats.NOTIFY_SCHEDULED_INSTALLATION}}
 	count, err = suite.model.CountAllSystemUpdates(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all system updates")
 	assert.Equal(suite.T(), 4, count, "should get 4 updates")
 }
 
 func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
-	items, err := suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err := suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -122,7 +122,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -130,7 +130,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -138,7 +138,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "agentOS"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -146,7 +146,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "agentOS"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -154,7 +154,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "updateStatus"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 0), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 3), items[1].Nickname)
@@ -164,7 +164,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "updateStatus"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 1), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 2), items[1].Nickname)
@@ -174,7 +174,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "lastSearch"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -182,7 +182,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "lastSearch"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -190,7 +190,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "lastInstall"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -198,7 +198,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "lastInstall"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -206,7 +206,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "pendingUpdates"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 1), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 3), items[1].Nickname)
@@ -216,7 +216,7 @@ func (suite *UpdatesTestSuite) TestGetSystemUpdatesByPage() {
 
 	suite.p.SortBy = "pendingUpdates"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.SystemUpdatesFilter{}, suite.commonInfo)
+	items, err = suite.model.GetSystemUpdatesByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get system updates by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 0), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 2), items[1].Nickname)

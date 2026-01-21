@@ -145,9 +145,9 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo), commonInfo))
 }
 
-func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {
+func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AgentFilter, []string, []string, error) {
 	// Get filters values
-	f := filters.AntivirusFilter{}
+	f := filters.AgentFilter{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -156,7 +156,7 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 
 	f.Nickname = c.FormValue("filterByNickname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -203,9 +203,9 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 	return &f, availableOSes, detectedAntiviri, nil
 }
 
-func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdatesFilter, []string, []string, error) {
+func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.AgentFilter, []string, []string, error) {
 	// Get filters values
-	f := filters.SystemUpdatesFilter{}
+	f := filters.AgentFilter{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -214,7 +214,7 @@ func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdate
 
 	f.Nickname = c.FormValue("filterByNickname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
 	if err != nil {
 		return nil, nil, nil, err
 	}

@@ -13,6 +13,7 @@ import (
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -167,7 +168,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags(commonInfo)
+	allTags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -713,7 +714,7 @@ func (h *Handler) ApplyGlobalSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags(commonInfo)
+	allTags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
 	"github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/profiles_views"
 )
@@ -132,7 +133,7 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.no_tags"), true))
 	}
@@ -300,7 +301,7 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.no_tags"), true))
 	}

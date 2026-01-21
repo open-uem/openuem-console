@@ -36,7 +36,7 @@ func mainAntivirusQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	}
 }
 
-func (m *Model) CountAllAntiviri(f filters.AntivirusFilter, c *partials.CommonInfo) (int, error) {
+func (m *Model) CountAllAntiviri(f filters.AgentFilter, c *partials.CommonInfo) (int, error) {
 	var query *ent.AgentQuery
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
@@ -65,7 +65,7 @@ func (m *Model) CountAllAntiviri(f filters.AntivirusFilter, c *partials.CommonIn
 	return query.Count(context.Background())
 }
 
-func (m *Model) GetAntiviriByPage(p partials.PaginationAndSort, f filters.AntivirusFilter, c *partials.CommonInfo) ([]Antivirus, error) {
+func (m *Model) GetAntiviriByPage(p partials.PaginationAndSort, f filters.AgentFilter, c *partials.CommonInfo) ([]Antivirus, error) {
 	var query *ent.AgentQuery
 	var antiviri []Antivirus
 	var err error
@@ -212,7 +212,7 @@ func (m *Model) GetDetectedAntiviri(c *partials.CommonInfo) ([]string, error) {
 	}
 }
 
-func applyAntiviriFilters(query *ent.AgentQuery, f filters.AntivirusFilter) {
+func applyAntiviriFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Nickname) > 0 {
 		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}

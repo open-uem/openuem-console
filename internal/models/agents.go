@@ -9,6 +9,9 @@ import (
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
 	"github.com/open-uem/ent/antivirus"
+	"github.com/open-uem/ent/app"
+	"github.com/open-uem/ent/computer"
+	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/release"
 	"github.com/open-uem/ent/site"
@@ -255,7 +258,7 @@ func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmission
 	return count, err
 }
 
-func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo) ([]string, error) {
+func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo, f filters.AgentFilter) ([]string, error) {
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
 		return nil, err
@@ -265,11 +268,73 @@ func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo) ([]string, error) {
 		return nil, err
 	}
 
+	query := m.Client.Agent.Query()
+
 	if siteID == -1 {
-		return m.Client.Agent.Query().Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Unique(true).Select(agent.FieldOs).Strings(context.Background())
+		query.Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))).Unique(true)
 	} else {
-		return m.Client.Agent.Query().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Unique(true).Select(agent.FieldOs).Strings(context.Background())
+		query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Unique(true)
 	}
+
+	if len(f.AgentOSVersions) > 0 {
+		query.Where(agent.HasOperatingsystemWith(operatingsystem.TypeIn(f.AgentOSVersions...)))
+	}
+
+	if len(f.Nickname) > 0 {
+		query.Where(agent.NicknameContainsFold(f.Nickname))
+	}
+
+	if len(f.Username) > 0 {
+		query.Where(agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Username)))
+	}
+
+	if len(f.OSVersions) > 0 {
+		query.Where(agent.HasOperatingsystemWith(operatingsystem.VersionIn(f.OSVersions...)))
+	}
+
+	if len(f.ComputerManufacturers) > 0 {
+		query.Where(agent.HasComputerWith(computer.ManufacturerIn(f.ComputerManufacturers...)))
+	}
+
+	if len(f.ComputerModels) > 0 {
+		query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
+	}
+
+	if len(f.WithApplication) > 0 {
+		query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication)))))
+	}
+
+	if len(f.IsRemote) > 0 {
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Remote" {
+			query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.IsRemote(true))))
+		}
+
+		if len(f.IsRemote) == 1 && f.IsRemote[0] == "Local" {
+			query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.IsRemote(false))))
+		}
+	}
+
+	if len(f.Tags) > 0 {
+		predicates := []predicate.Agent{}
+		for _, id := range f.Tags {
+			predicates = append(predicates, agent.HasTagsWith(tag.ID(id)))
+		}
+		if len(predicates) > 0 {
+			query.Where(agent.And(predicates...))
+		}
+	}
+
+	if len(f.Search) > 0 {
+		query.Where(agent.Or(
+			agent.NicknameContainsFold(f.Search),
+			agent.OsIn(f.Search),
+			agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Search)),
+			agent.HasComputerWith(computer.ManufacturerContainsFold(f.Search)),
+			agent.HasComputerWith(computer.ModelContainsFold(f.Search)),
+		))
+	}
+
+	return query.Select(agent.FieldOs).Strings(context.Background())
 }
 
 func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
@@ -331,6 +396,16 @@ func applyAgentFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		if len(predicates) > 0 {
 			query.Where(agent.And(predicates...))
 		}
+	}
+
+	if len(f.Search) > 0 {
+		query.Where(agent.Or(
+			agent.NicknameContainsFold(f.Search),
+			agent.OsIn(f.Search),
+			agent.HasOperatingsystemWith(operatingsystem.UsernameContainsFold(f.Search)),
+			agent.HasComputerWith(computer.ManufacturerContainsFold(f.Search)),
+			agent.HasComputerWith(computer.ModelContainsFold(f.Search)),
+		))
 	}
 
 	if f.NoContact {

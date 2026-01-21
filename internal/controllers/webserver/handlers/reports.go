@@ -460,7 +460,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
 	if err != nil {
 		return nil, err
 	}
@@ -493,7 +493,7 @@ func (h *Handler) GetAgentFilters(c echo.Context) (*filters.AgentFilter, error) 
 		f.ContactTo = contactTo
 	}
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		return nil, err
 	}
@@ -634,8 +634,9 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 
 	f.Nickname = c.FormValue("filterByNickname")
 	f.Username = c.FormValue("filterByUsername")
+	f.Search = c.FormValue("filterBySearch")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f)
 	if err != nil {
 		return nil, err
 	}
@@ -662,7 +663,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo, f)
 	if err != nil {
 		return nil, err
 	}
@@ -687,7 +688,7 @@ func (h *Handler) GetComputerFilters(c echo.Context) (*filters.AgentFilter, erro
 	}
 	f.ComputerModels = filteredComputerModels
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		return nil, err
 	}
