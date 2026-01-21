@@ -68,48 +68,48 @@ func (suite *AntivirusTestSuite) SetupTest() {
 }
 
 func (suite *AntivirusTestSuite) TestCountAllAntiviri() {
-	count, err := suite.model.CountAllAntiviri(filters.AntivirusFilter{}, suite.commonInfo)
+	count, err := suite.model.CountAllAntiviri(filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 7, count, "should count 7 antiviri")
 
-	f := filters.AntivirusFilter{Nickname: "agent5"}
+	f := filters.AgentFilter{Nickname: "agent5"}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 1, count, "should count 1 antiviri")
 
-	f = filters.AntivirusFilter{AgentOSVersions: []string{"windows"}}
+	f = filters.AgentFilter{AgentOSVersions: []string{"windows"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 7, count, "should count 7 antiviri")
 
-	f = filters.AntivirusFilter{AntivirusNameOptions: []string{"antivirus1", "antivirus2", "antivirus3"}}
+	f = filters.AgentFilter{AntivirusNameOptions: []string{"antivirus1", "antivirus2", "antivirus3"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 3, count, "should count 3 antiviri")
 
-	f = filters.AntivirusFilter{AntivirusEnabledOptions: []string{"Enabled"}}
+	f = filters.AgentFilter{AntivirusEnabledOptions: []string{"Enabled"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 7, count, "should count 7 antiviri")
 
-	f = filters.AntivirusFilter{AntivirusEnabledOptions: []string{"Disabled"}}
+	f = filters.AgentFilter{AntivirusEnabledOptions: []string{"Disabled"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 0, count, "should count 0 antiviri")
 
-	f = filters.AntivirusFilter{AntivirusUpdatedOptions: []string{"UpdatedYes"}}
+	f = filters.AgentFilter{AntivirusUpdatedOptions: []string{"UpdatedYes"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 4, count, "should count 4 antiviri")
 
-	f = filters.AntivirusFilter{AntivirusUpdatedOptions: []string{"UpdatedNo"}}
+	f = filters.AgentFilter{AntivirusUpdatedOptions: []string{"UpdatedNo"}}
 	count, err = suite.model.CountAllAntiviri(f, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should count all antiviri")
 	assert.Equal(suite.T(), 3, count, "should count 3 antiviri")
 }
 
 func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
-	items, err := suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err := suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -117,7 +117,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -125,7 +125,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "nickname"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -133,7 +133,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "agentOS"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -141,7 +141,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "agentOS"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -149,7 +149,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusName"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -157,7 +157,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusName"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", 6-i), item.Nickname)
@@ -165,7 +165,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusEnabled"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -173,7 +173,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusEnabled"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	for i, item := range items {
 		assert.Equal(suite.T(), fmt.Sprintf("agent%d", i), item.Nickname)
@@ -181,7 +181,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusUpdated"
 	suite.p.SortOrder = "asc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 1), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 3), items[1].Nickname)
@@ -191,7 +191,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 	suite.p.SortBy = "antivirusUpdated"
 	suite.p.SortOrder = "desc"
-	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AntivirusFilter{}, suite.commonInfo)
+	items, err = suite.model.GetAntiviriByPage(suite.p, filters.AgentFilter{}, suite.commonInfo)
 	assert.NoError(suite.T(), err, "should get antiviri by page")
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 0), items[0].Nickname)
 	assert.Equal(suite.T(), fmt.Sprintf("agent%d", 2), items[1].Nickname)
@@ -202,7 +202,7 @@ func (suite *AntivirusTestSuite) TestGetAntiviriByPage() {
 
 func (suite *AntivirusTestSuite) TestGetDetectedAntiviri() {
 	antiviri := []string{"antivirus0", "antivirus1", "antivirus2", "antivirus3", "antivirus4", "antivirus5", "antivirus6"}
-	av, err := suite.model.GetDetectedAntiviri(suite.commonInfo)
+	av, err := suite.model.GetDetectedAntiviri(suite.commonInfo, filters.AgentFilter{})
 	assert.NoError(suite.T(), err, "should detect antiviri")
 	assert.Equal(suite.T(), antiviri, av, "should get detected antiviri")
 }

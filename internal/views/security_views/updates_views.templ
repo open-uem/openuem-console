@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.SystemUpdatesFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, systemUpdates []models.SystemUpdate, availableOSes, availableUpdateStatus []string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -22,7 +22,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Sy
 					<div class="uk-card-header">
 						<div class="flex justify-between items-center">
 							<div class="flex flex-col">
-								<h3 class="uk-card-title">{ i18n.T(ctx, "updates.title") }</h3>
+								<h3 class="flex gap-2 items-center uk-card-title"><uk-icon hx-history="false" icon="shield-check" custom-class="h-6 w-6" uk-cloack></uk-icon><span>{ i18n.T(ctx, "updates.title") }</span></h3>
 								<p class="uk-margin-small-top uk-text-small">
 									{ i18n.T(ctx, "updates.description") }
 								</p>

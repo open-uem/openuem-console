@@ -95,7 +95,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	availableTags, err := h.Model.GetAllTags(commonInfo)
+	availableTags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()

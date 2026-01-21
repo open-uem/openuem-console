@@ -636,6 +636,17 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
+			f.Search = u.Query().Get("filterBySearch")
+		}
+	} else {
+		if c.FormValue("filterBySearch") != "" {
+			f.Search = c.FormValue("filterBySearch")
+		}
+	}
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
 			f.Nickname = u.Query().Get("filterByNickname")
 		}
 	} else {
@@ -651,7 +662,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.Username = c.FormValue("filterByUsername")
 	}
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}
@@ -699,7 +710,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -767,6 +778,10 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.WithApplication = c.FormValue("selectedApp")
 	}
 
+	if c.FormValue("selectedPublisher") != "" {
+		f.WithApplicationPublisher = c.FormValue("selectedPublisher")
+	}
+
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
@@ -778,7 +793,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		}
 	}
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -841,6 +856,22 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo), u)
 			}
 		}
+	}
+
+	// Use filters to get lists of values for the filter dialogs
+	availableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, f, false)
+	if err != nil {
+		return err
+	}
+
+	tags, err = h.Model.GetAllTags(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	versions, err = h.Model.GetOSVersions(f, commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo))

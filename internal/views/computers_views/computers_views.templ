@@ -42,11 +42,16 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				<div class="flex justify-between mt-8">
-					@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML", func() bool {
-						return f.Nickname == "" && len(f.AgentOSVersions) == 0 &&
-							len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
-							len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0
-					})
+					<div class="flex gap-4 w-1/3">
+						@filters.Search(c, p, f.Search, "#main", "outerHTML")
+						@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), "#main", "outerHTML", func() bool {
+							return f.Nickname == "" && len(f.AgentOSVersions) == 0 &&
+								len(f.OSVersions) == 0 && f.Username == "" && len(f.ComputerManufacturers) == 0 &&
+								len(f.ComputerModels) == 0 && len(f.Tags) == 0 && len(f.WithApplication) == 0 && len(f.IsRemote) == 0 &&
+								len(f.Search) == 0
+						
+						})
+					</div>
 					@partials.RefreshPage(commonInfo.Translator, refreshTime, true)
 				</div>
 				if len(agents) > 0 {
