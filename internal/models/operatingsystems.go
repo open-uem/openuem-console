@@ -85,8 +85,15 @@ func (m *Model) GetOSVersions(f filters.AgentFilter, c *partials.CommonInfo) ([]
 		query.Where(operatingsystem.HasOwnerWith(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...))))
 	}
 
-	if len(f.WithApplication) > 0 {
-		query.Where(operatingsystem.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))
+	if len(f.WithApplication) > 0 && len(f.WithApplicationPublisher) > 0 {
+		query.Where(operatingsystem.HasOwnerWith(agent.HasAppsWith(app.And(app.Name(f.WithApplication), app.Publisher(f.WithApplicationPublisher)))))
+	} else {
+		if len(f.WithApplication) > 0 {
+			query.Where(operatingsystem.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))
+		}
+		if len(f.WithApplicationPublisher) > 0 {
+			query.Where(operatingsystem.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplicationPublisher))))
+		}
 	}
 
 	if len(f.IsRemote) > 0 {

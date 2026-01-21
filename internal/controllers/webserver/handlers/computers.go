@@ -778,6 +778,10 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.WithApplication = c.FormValue("selectedApp")
 	}
 
+	if c.FormValue("selectedPublisher") != "" {
+		f.WithApplicationPublisher = c.FormValue("selectedPublisher")
+	}
+
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {

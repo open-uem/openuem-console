@@ -309,8 +309,15 @@ func applyComputerFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 		query.Where(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...)))
 	}
 
-	if len(f.WithApplication) > 0 {
-		query.Where(agent.HasAppsWith(app.Name(f.WithApplication)))
+	if len(f.WithApplication) > 0 && len(f.WithApplicationPublisher) > 0 {
+		query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.And(app.Name(f.WithApplication), app.Publisher(f.WithApplicationPublisher))))))
+	} else {
+		if len(f.WithApplication) > 0 {
+			query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication)))))
+		}
+		if len(f.WithApplicationPublisher) > 0 {
+			query.Where(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplicationPublisher)))))
+		}
 	}
 
 	if len(f.IsRemote) > 0 {
@@ -688,8 +695,15 @@ func (m *Model) GetComputerManufacturers(c *partials.CommonInfo, f filters.Agent
 		query.Where(computer.ModelIn(f.ComputerModels...))
 	}
 
-	if len(f.WithApplication) > 0 {
-		query.Where(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))
+	if len(f.WithApplication) > 0 && len(f.WithApplicationPublisher) > 0 {
+		query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.And(app.Name(f.WithApplication), app.Publisher(f.WithApplicationPublisher)))))))
+	} else {
+		if len(f.WithApplication) > 0 {
+			query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))))
+		}
+		if len(f.WithApplicationPublisher) > 0 {
+			query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplicationPublisher))))))
+		}
 	}
 
 	if len(f.IsRemote) > 0 {
@@ -774,8 +788,15 @@ func (m *Model) GetComputerModels(f filters.AgentFilter, c *partials.CommonInfo)
 		query.Where(computer.ModelIn(f.ComputerModels...))
 	}
 
-	if len(f.WithApplication) > 0 {
-		query.Where(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))
+	if len(f.WithApplication) > 0 && len(f.WithApplicationPublisher) > 0 {
+		query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.And(app.Name(f.WithApplication), app.Publisher(f.WithApplicationPublisher)))))))
+	} else {
+		if len(f.WithApplication) > 0 {
+			query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))))
+		}
+		if len(f.WithApplicationPublisher) > 0 {
+			query.Where(computer.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplicationPublisher))))))
+		}
 	}
 
 	if len(f.IsRemote) > 0 {

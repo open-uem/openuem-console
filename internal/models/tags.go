@@ -49,8 +49,15 @@ func (m *Model) GetAllTags(c *partials.CommonInfo, f filters.AgentFilter) ([]*en
 		query.Where(tag.HasOwnerWith(agent.HasComputerWith(computer.ModelIn(f.ComputerModels...))))
 	}
 
-	if len(f.WithApplication) > 0 {
-		query.Where(tag.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))))
+	if len(f.WithApplication) > 0 && len(f.WithApplicationPublisher) > 0 {
+		query.Where(tag.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.And(app.Name(f.WithApplication), app.Publisher(f.WithApplicationPublisher)))))))
+	} else {
+		if len(f.WithApplication) > 0 {
+			query.Where(tag.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplication))))))
+		}
+		if len(f.WithApplicationPublisher) > 0 {
+			query.Where(tag.HasOwnerWith(agent.HasComputerWith(computer.HasOwnerWith(agent.HasAppsWith(app.Name(f.WithApplicationPublisher))))))
+		}
 	}
 
 	if len(f.IsRemote) > 0 {
