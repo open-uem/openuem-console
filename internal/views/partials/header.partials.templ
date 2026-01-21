@@ -35,6 +35,7 @@ type CommonInfo struct {
 	IsProfile          bool
 	ProfileSiteID      string
 	CSRFToken          string
+	IsDocker           bool
 }
 
 templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
@@ -191,16 +192,22 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 			<div class="flex items-center gap-4">
 				<p class="text-sm uk-text-muted">OpenUEM { commonInfo.CurrentVersion }</p>
 				if newVersionAvailable(commonInfo.CurrentVersion, commonInfo.LatestVersion) {
-					<a
-						href="/admin/update-servers"
-						hx-get="/admin/update-servers"
-						hx-push-url="true"
-						hx-target="#main"
-						hx-swap="outerHTML"
-						uk-tooltip={ fmt.Sprintf("title: %s %s; pos: right", i18n.T(ctx, "admin.update.servers.new_version_available"), commonInfo.LatestVersion) }
-					>
-						<uk-icon hx-history="false" icon="cloud-download" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
-					</a>
+					if commonInfo.IsDocker {
+						<div uk-tooltip={ fmt.Sprintf("title: %s %s; pos: right", i18n.T(ctx, "admin.update.servers.new_version_available"), commonInfo.LatestVersion) }>
+							<uk-icon hx-history="false" icon="cloud-download" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</div>
+					} else {
+						<a
+							href="/admin/update-servers"
+							hx-get="/admin/update-servers"
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							uk-tooltip={ fmt.Sprintf("title: %s %s; pos: right", i18n.T(ctx, "admin.update.servers.new_version_available"), commonInfo.LatestVersion) }
+						>
+							<uk-icon hx-history="false" icon="cloud-download" custom-class="h-6 w-6 text-blue-600" uk-cloack></uk-icon>
+						</a>
+					}
 				}
 			</div>
 			<button title={ i18n.T(ctx, "Profile") } type="button" class="rounded-full uk-text-muted"><uk-icon hx-history="false" icon="user-circle" hx-history="false" custom-class="h-6 w-6" uk-cloack></uk-icon></button>
