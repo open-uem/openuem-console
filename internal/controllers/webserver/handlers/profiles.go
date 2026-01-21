@@ -499,3 +499,31 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 
 	return nil
 }
+
+func (h *Handler) EnableProfile(c echo.Context, enable bool) error {
+	var err error
+
+	id := c.Param("uuid")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
+	}
+
+	profileId, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.new.invalid_profile"), true))
+	}
+
+	if err := h.Model.EnableProfile(profileId, enable); err != nil {
+		if enable {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_enable"), true))
+		} else {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_disable"), true))
+		}
+	}
+
+	if enable {
+		return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.profile_enabled"))
+	} else {
+		return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.profile_disabled"))
+	}
+}

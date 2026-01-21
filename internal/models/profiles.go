@@ -188,3 +188,7 @@ func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID i
 
 	return m.Client.ProfileIssue.Query().WithAgents().Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }
+
+func (m *Model) EnableProfile(profiledID int, enabled bool) error {
+	return m.Client.Profile.Update().SetDisabled(!enabled).Where(profile.ID(profiledID)).Exec(context.Background())
+}

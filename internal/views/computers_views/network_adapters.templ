@@ -66,11 +66,13 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 									} else {
 										<td>{ adapter.DefaultGateway }</td>
 									}
-									if adapter.DhcpEnabled {
-										@partials.Checkmark()
-									} else {
-										<td>-</td>
-									}
+									<td>
+										if adapter.DhcpEnabled {
+											@partials.Checkmark()
+										} else {
+											{ "-" }
+										}
+									</td>
 									if adapter.DNSServers != "" {
 										// TODO escape content from the database for tooltip
 										<td
@@ -83,11 +85,13 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 									}
 									<td>{ adapter.Speed }</td>
 									if agent.Os != "windows" && agent.Os != "macOS" {
-										if adapter.Virtual {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
+										<td>
+											if adapter.Virtual {
+												@partials.Checkmark()
+											} else {
+												{ "-" }
+											}
+										</td>
 									}
 								</tr>
 							}
