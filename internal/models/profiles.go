@@ -39,7 +39,7 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort, c *partials.Comm
 	var err error
 	var profiles []*ent.Profile
 
-	query := m.Client.Profile.Query().WithTasks().WithTags().WithIssues().Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
+	query := m.Client.Profile.Query().WithTasks().WithTags().WithIssues(func(q *ent.ProfileIssueQuery) { q.WithTasksreports().All(context.Background()) }).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	siteID, err := strconv.Atoi(c.SiteID)
 	if err != nil {
@@ -186,7 +186,7 @@ func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID i
 		return nil, err
 	}
 
-	return m.Client.ProfileIssue.Query().WithAgents().Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
+	return m.Client.ProfileIssue.Query().WithAgents().WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().All(context.Background()) }).Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }
 
 func (m *Model) EnableProfile(profiledID int, enabled bool) error {

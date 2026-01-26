@@ -104,13 +104,18 @@ templ EDR(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, a
 									for _, antivirus := range antiviri {
 										<tr>
 											<td
-												class="!align-middle underline cursor-pointer"
-												hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, antivirus.SiteID, antivirus.ID))) }
-												hx-push-url="true"
-												hx-target="#main"
-												hx-swap="outerHTML"
+												class="!align-middle"
 											>
-												{ antivirus.Nickname }
+												<a
+													href={ templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, antivirus.SiteID, antivirus.ID)) }
+													hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/computers/%s", commonInfo.TenantID, antivirus.SiteID, antivirus.ID))) }
+													hx-push-url="true"
+													hx-target="#main"
+													hx-swap="outerHTML"
+													class="underline cursor-pointer"
+												>
+													{ antivirus.Nickname }
+												</a>
 											</td>
 											<td class="!align-middle">
 												@partials.OSBadge(antivirus.OS)

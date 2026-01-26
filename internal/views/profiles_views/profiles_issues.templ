@@ -7,6 +7,7 @@ import (
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
+	"time"
 )
 
 templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent.ProfileIssue, profile *ent.Profile, itemsPerPage int, commonInfo *partials.CommonInfo) {
@@ -26,22 +27,71 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				if len(issues) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
 						<thead>
 							<tr>
 								<th class="w-1/4"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
-								<th class="w-3/4"><span>{ i18n.T(ctx, "profiles.issues.errors_found") }</span></th>
+								<th class="w-3/4"><span>{ i18n.T(ctx, "profiles.issues.tasks_report") }</span></th>
 							</tr>
 						</thead>
 						for _, issue := range issues {
 							if issue.Edges.Agents != nil {
 								<tr>
 									<td class="!align-middle">
-										{ issue.Edges.Agents.Nickname }
+										<a
+											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", issue.Edges.Agents.ID))) }
+											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", issue.Edges.Agents.ID)))) }
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											class="underline cursor-pointer"
+										>
+											{ issue.Edges.Agents.Nickname }
+										</a>
 									</td>
-									<td class="!align-middle">
-										for line := range strings.SplitSeq(issue.Error, ", ") {
-											<p>{ line }</p>
+									<td class="flex flex-col gap-4 !align-middle">
+										if issue.Error != "" {
+											for line := range strings.SplitSeq(issue.Error, ", ") {
+												<p>{ line }</p>
+											}
+										} else {
+											if len(issue.Edges.Tasksreports) > 0 {
+												<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+													for _, t := range issue.Edges.Tasksreports {
+														<tr>
+															<th class="align-middle" rowspan="4">
+																<div class="flex gap-2">
+																	if t.Failed {
+																		@partials.Crossmark()
+																	} else {
+																		@partials.Checkmark()
+																	}
+																	<span>{ t.Edges.Task.Name }</span>
+																</div>
+															</th>
+														</tr>
+														<tr>
+															<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
+															<td>{ t.StdError }</td>
+														</tr>
+														<tr>
+															<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
+															<td>{ t.StdOutput }</td>
+														</tr>
+														<tr>
+															<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
+															if when, err := parseTime(t.End); err == nil {
+																<td>{ commonInfo.Translator.FmtDateMedium(when.Local()) + " " + commonInfo.Translator.FmtTimeMedium(when.Local()) }</td>
+															}
+															if _, err := parseTime(t.End); err != nil {
+																<td>{ t.End }</td>
+															}
+														</tr>
+													}
+												</table>
+											} else {
+												{ "-" }
+											}
 										}
 									</td>
 								</tr>
@@ -57,4 +107,8 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 			</div>
 		</div>
 	</main>
+}
+
+func parseTime(when string) (time.Time, error) {
+	return time.ParseInLocation(time.RFC3339Nano, when, time.Local)
 }

@@ -1068,11 +1068,15 @@ en:
     request_error: "The request could not be sent to the agent, reason: %s"
   profiles:
     title: "Profile management"
-    description: "The endpoint profiles allow you to define a series of tasks that will be applied to several endpoints. The tasks include software installation, local users and groups management, registry management... Click on the profile's description to edit its definition and click on the warning sign to see which endpoints had problems to apply the profile"
+    description: "The endpoint profiles allow you to define a series of tasks that will be applied to several endpoints. The tasks include software installation, local users and groups management, registry management... Click on the profile description to edit its definition and click on the icon in the Status column to see more information about the endpoints and the outcome of task execution"
     no_profiles: "No profiles have been found for this query"
     add: "Add profile"
     confirm_delete: "Confirm that you want to remove this endpoint profile"
     issues_found: "Issues"
+    status: "Status"
+    standard_error: "Standard error"
+    standard_output: "Standard output"
+    execution_time: "Execution time"
     issues:
       title: "Issues"
       description: "The following endpoints found a problem trying to apply this profile"
@@ -1080,6 +1084,7 @@ en:
       errors_found: "Errors found"
       no_issues: "No issues found for this profile"
       empty_id: "The profile ID cannot be empty"
+      tasks_report: "Tasks report"
     new:
       title: "New profile"
       description: "Give the profile a description that helps to identify its target"

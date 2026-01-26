@@ -56,7 +56,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 									</div>
 								</th>
 								<th><span>{ i18n.T(ctx, "profiles.is_enabled") }</span></th>
-								<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.issues_found") }</span></th>
+								<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.status") }</span></th>
 								<th><span>{ i18n.T(ctx, "profiles.new.applied_to") }</span></th>
 								<th><span>{ i18n.T(ctx, "profiles.new.num_tasks") }</span></th>
 								<th></th>
@@ -75,7 +75,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 										hx-swap="outerHTML"
 									>{ profile.Name }</a>
 								</td>
-								<td>
+								<td class="!align-middle">
 									if  profile.Disabled {
 										@partials.Crossmark()
 									} else {
@@ -83,17 +83,19 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 									}
 								</td>
 								<td class="!align-middle underline">
-									if len(profile.Edges.Issues) > 0 {
-										<a
-											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID))) }
-											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID)))) }
-											hx-push-url="true"
-											hx-target="#main"
-											hx-swap="outerHTML"
-										>
+									<a
+										href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID))) }
+										hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/issues", profile.ID)))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>
+										if profileHasErrors(profile.Edges.Issues) {
 											<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-8 w-8 pr-2 fill-yellow-500 text-black" uk-cloack></uk-icon>
-										</a>
-									}
+										} else {
+											@partials.Checkmark()
+										}
+									</a>
 								</td>
 								<td>
 									if profile.ApplyToAll {
@@ -178,4 +180,22 @@ templ ShowAppliedToNone() {
 			{ i18n.T(ctx, "profiles.no_endpoints") }
 		</span>
 	</div>
+}
+
+func profileHasErrors(issues []*ent.ProfileIssue) bool {
+	for _, issue := range issues {
+		if issue.Error != "" {
+			return true
+		}
+
+		if issue.Edges.Tasksreports != nil {
+			for _, report := range issue.Edges.Tasksreports {
+				if report.Failed {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
