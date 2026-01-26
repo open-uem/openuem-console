@@ -1380,6 +1380,7 @@ en:
       selected_package: "Selected package"
     enable: "Enable the task"
     disable: "Disable the task"
+    ignore_errors: "Ignore errors. If this task fails, the rest of the tasks in the profile won't execute by default, unless this option is checked"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"

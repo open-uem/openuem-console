@@ -1380,6 +1380,7 @@ ca:
       selected_package: "Paquet seleccionat"
     enable: "Activa la tasca"
     disable: "Desactiva la tasca"
+    ignore_errors: "Ignora els errors. Si aquesta tasca falla, la resta de tasques del perfil no s’executaran per defecte, tret que aquesta opció estigui marcada"
   pagination:
     title: "Elements per pàgina"
     showing: "Mostrant %{firstItem} - %{lastItem} de %{totalItems}"

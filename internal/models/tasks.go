@@ -88,6 +88,7 @@ type TaskConfig struct {
 	HomeBrewGreedy                        bool
 	NetbirdGroups                         string
 	NetbirdAllowExtraDNSLabels            bool
+	IgnoreErrors                          bool
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -110,19 +111,28 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 }
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
+
+	// common query
+	query := m.Client.Task.Create().
+		SetName(cfg.Description).
+		SetType(task.Type(cfg.TaskType)).
+		SetAgentType(task.AgentType(cfg.AgentsType)).
+		SetProfileID(profileID).
+		SetIgnoreErrors(cfg.IgnoreErrors)
+
 	switch cfg.TaskType {
 	case task.TypeWingetInstall.String(), task.TypeWingetDelete.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case task.TypeAddRegistryKey.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
+		return query.SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case task.TypeRemoveRegistryKey.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
+		return query.SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeUpdateRegistryKeyDefaultValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).SetRegistryKeyValueType(task.RegistryKeyValueTypeString).
 			SetRegistryKeyValueData(cfg.RegistryKeyValueData).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeAddRegistryKeyValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).
 			SetRegistryKeyValueType(task.RegistryKeyValueType(cfg.RegistryKeyValueType)).
@@ -130,11 +140,11 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetRegistryHex(cfg.RegistryHex).
 			SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeRemoveRegistryKeyValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).Exec(context.Background())
 	case task.TypeAddLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
 			SetLocalUserFullname(cfg.LocalUserFullName).
@@ -145,7 +155,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
 			Exec(context.Background())
 	case task.TypeAddUnixLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
 			SetLocalUserGroup(cfg.LocalUserPrimaryGroup).
@@ -176,49 +186,49 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserAppend(cfg.LocalUserAppend).
 			Exec(context.Background())
 	case task.TypeRemoveUnixLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserForce(cfg.LocalUserForce).
 			Exec(context.Background())
 	case task.TypeRemoveLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
 	case task.TypeAddLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembers(cfg.LocalGroupMembers).
 			Exec(context.Background())
 	case task.TypeRemoveLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			Exec(context.Background())
 	case task.TypeAddUnixLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupID(cfg.LocalGroupID).
 			SetLocalGroupSystem(cfg.LocalGroupSystem).
 			Exec(context.Background())
 	case task.TypeRemoveUnixLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupForce(cfg.LocalGroupForce).
 			Exec(context.Background())
 	case task.TypeAddUsersToLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToInclude(cfg.LocalGroupMembersToInclude).
 			Exec(context.Background())
 	case task.TypeRemoveUsersFromLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
 	case task.TypeMsiInstall.String(), task.TypeMsiUninstall.String():
-		query := m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		query := query.
 			SetMsiProductid(cfg.MsiProductID).
 			SetMsiPath(cfg.MsiPath).
 			SetMsiArguments(cfg.MsiArguments).
@@ -229,20 +239,20 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		}
 		return query.Exec(context.Background())
 	case task.TypePowershellScript.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
 	case task.TypeUnixScript.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String(),
 		task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
 			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
 	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).Exec(context.Background())
+		return query.Exec(context.Background())
 	case task.TypeNetbirdRegister.String():
 		tenantID := c.Param("tenant")
 		if tenantID == "" {
@@ -258,9 +268,10 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
-func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) error {
+func (m *Model) UpdateProfileTask(c echo.Context, taskID int, cfg TaskConfig) error {
 
-	query := m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description)
+	// common query
+	query := m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetIgnoreErrors(cfg.IgnoreErrors)
 
 	// Update version
 	query.AddVersion(1)

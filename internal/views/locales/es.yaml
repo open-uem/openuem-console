@@ -1380,6 +1380,7 @@ es:
       selected_package: "Paquete seleccionado"
     enable: "Activar la tarea"
     disable: "Desactivar la tarea"
+    ignore_errors: "Ignorar errores. Si esta tarea falla, el resto de las tareas del perfil no se ejecutarán de forma predeterminada, a menos que esta opción esté marcada"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

@@ -11,6 +11,7 @@ import (
 
 templ HomeBrewPackageManagement(t *ent.Task) {
 	<div class="flex flex-col gap-4">
+		@IgnoreErrors(t.IgnoreErrors)
 		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="brew-search-section">
 			<label class="uk-form-label" for="brew-search">
 				{ i18n.T(ctx, "tasks.edit.select_package") }

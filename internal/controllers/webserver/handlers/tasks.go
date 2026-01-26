@@ -84,7 +84,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%v", err), true))
 		}
 
-		if err := h.Model.UpdateTaskToProfile(c, taskId, *t); err != nil {
+		if err := h.Model.UpdateProfileTask(c, taskId, *t); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_save"), err), true))
 		}
 
@@ -442,6 +442,11 @@ func validateAddUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.LocalUserForce = true
 	}
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -469,6 +474,11 @@ func validateRemoveUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	removeDirectories := c.FormValue("local-user-force")
 	if removeDirectories == "on" {
 		taskConfig.LocalUserForce = true
+	}
+
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
 	}
 
 	return &taskConfig, nil
@@ -555,6 +565,11 @@ func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 	localGroupForce := c.FormValue("local-group-force")
 	if localGroupForce == "on" {
 		taskConfig.LocalGroupForce = true
+	}
+
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
 	}
 
 	return &taskConfig, nil
@@ -664,6 +679,11 @@ func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.ShellExecute = c.FormValue("unix-script-executable")
 	taskConfig.ShellCreates = c.FormValue("unix-script-creates")
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -734,6 +754,11 @@ func validateFlatpakPackage(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.PackageLatest = true
 	}
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -791,6 +816,11 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 		if greed == "on" {
 			taskConfig.HomeBrewGreedy = true
 		}
+	}
+
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
 	}
 
 	return &taskConfig, nil

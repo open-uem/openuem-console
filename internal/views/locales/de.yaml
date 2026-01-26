@@ -1380,6 +1380,7 @@ de:
       selected_package: "Ausgewähltes Paket"
     enable: "Aufgabe aktivieren"
     disable: "Aufgabe deaktivieren"
+    ignore_errors: "Fehler ignorieren. Wenn diese Aufgabe fehlschlägt, werden die übrigen Aufgaben im Profil standardmäßig nicht ausgeführt, es sei denn, diese Option ist aktiviert"
   pagination:
     title: "Einträge pro Seite"
     showing: "Zeige %{firstItem} - %{lastItem} von %{totalItems}"

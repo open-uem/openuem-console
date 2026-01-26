@@ -1380,6 +1380,7 @@ fr:
       selected_package: "Paquet sélectionné"
     enable: "Activer la tâche"
     disable: "Désactiver la tâche"
+    ignore_errors: "Ignorer les erreurs. Si cette tâche échoue, le reste des tâches du profil ne s’exécutera pas par défaut, sauf si cette option est cochée"
   pagination:
     title: "Éléments par page"
     showing: "Affichage de %{firstItem} - %{lastItem} sur %{totalItems}"
