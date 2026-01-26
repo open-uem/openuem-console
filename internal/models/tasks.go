@@ -432,10 +432,14 @@ func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID
 	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByID()).All(context.Background())
 }
 
-func (m *Model) GetTasksById(taskId int) (*ent.Task, error) {
-	return m.Client.Task.Query().WithProfile().Where(task.ID(taskId)).First(context.Background())
+func (m *Model) GetTasksById(taskID int) (*ent.Task, error) {
+	return m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).First(context.Background())
 }
 
-func (m *Model) DeleteTask(taskId int) error {
-	return m.Client.Task.DeleteOneID(taskId).Exec(context.Background())
+func (m *Model) DeleteTask(taskID int) error {
+	return m.Client.Task.DeleteOneID(taskID).Exec(context.Background())
+}
+
+func (m *Model) EnableTask(taskID int, disabled bool) error {
+	return m.Client.Task.UpdateOneID(taskID).SetDisabled(disabled).Exec(context.Background())
 }

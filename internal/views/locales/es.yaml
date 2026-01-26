@@ -1378,6 +1378,8 @@ es:
       introduce_package_name: "Escriba el nombre del paquete a buscar..."
       no_package_found: "No se han encontrado paquetes"
       selected_package: "Paquete seleccionado"
+    enable: "Activar la tarea"
+    disable: "Desactivar la tarea"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

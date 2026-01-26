@@ -126,7 +126,8 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 								<tr>
 									<th class="w-1/12"></th>
 									<th class="w-1/12">{ i18n.T(ctx, "Version") }</th>
-									<th class="w-5/12">
+									<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.is_enabled") }</span></th>
+									<th class="w-4/12">
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "profiles.edit.task_description") }</span>
 										</div>
@@ -145,6 +146,13 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 											</div>
 										</td>
 										<td class="items-center !align-middle">{ t.Version }</td>
+										<td class="items-center !align-middle">
+											if  t.Disabled {
+												@partials.Crossmark()
+											} else {
+												@partials.Checkmark()
+											}
+										</td>
 										<td
 											class="items-center !align-middle underline hover:cursor-pointer"
 										>
@@ -192,6 +200,23 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 											@partials.MoreButton(index)
 											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
 												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+													if t.Disabled {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/enable", t.ID)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+															><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.enable") }</a>
+														</li>
+													} else {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/disable", t.ID)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+															><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.disable") }</a>
+														</li>
+													}
 													<li>
 														<a
 															hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, t.ID)))) }

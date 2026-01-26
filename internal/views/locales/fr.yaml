@@ -1378,6 +1378,8 @@ fr:
       introduce_package_name: "Entrez le nom du paquet à rechercher..."
       no_package_found: "Aucun paquet trouvé"
       selected_package: "Paquet sélectionné"
+    enable: "Activer la tâche"
+    disable: "Désactiver la tâche"
   pagination:
     title: "Éléments par page"
     showing: "Affichage de %{firstItem} - %{lastItem} sur %{totalItems}"

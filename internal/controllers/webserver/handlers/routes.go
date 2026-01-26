@@ -503,6 +503,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/tasks/:id", h.EditTask, h.IsAuthenticated)
 	e.DELETE("/tenant/:tenant/site/:site/tasks/:id", h.EditTask, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/tasks/:profile/confirm-delete/:task", h.ConfirmDeleteTask, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/tasks/:id/enable", func(c echo.Context) error { return h.EnableTask(c, true) }, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/tasks/:id/disable", func(c echo.Context) error { return h.EnableTask(c, false) }, h.IsAuthenticated)
 
 	e.POST("/render-markdown", h.RenderMarkdown, h.IsAuthenticated)
 

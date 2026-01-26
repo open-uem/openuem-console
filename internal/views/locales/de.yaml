@@ -1378,6 +1378,8 @@ de:
       introduce_package_name: "Paketnamen für die Suche eingeben..."
       no_package_found: "Keine Pakete gefunden"
       selected_package: "Ausgewähltes Paket"
+    enable: "Aufgabe aktivieren"
+    disable: "Aufgabe deaktivieren"
   pagination:
     title: "Einträge pro Seite"
     showing: "Zeige %{firstItem} - %{lastItem} von %{totalItems}"

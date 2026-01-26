@@ -58,35 +58,37 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 											if len(issue.Edges.Tasksreports) > 0 {
 												<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
 													for _, t := range issue.Edges.Tasksreports {
-														<tr>
-															<th class="align-middle" rowspan="4">
-																<div class="flex gap-2">
-																	if t.Failed {
-																		@partials.Crossmark()
-																	} else {
-																		@partials.Checkmark()
-																	}
-																	<span>{ t.Edges.Task.Name }</span>
-																</div>
-															</th>
-														</tr>
-														<tr>
-															<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
-															<td>{ t.StdError }</td>
-														</tr>
-														<tr>
-															<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
-															<td>{ t.StdOutput }</td>
-														</tr>
-														<tr>
-															<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
-															if when, err := parseTime(t.End); err == nil {
-																<td>{ commonInfo.Translator.FmtDateMedium(when.Local()) + " " + commonInfo.Translator.FmtTimeMedium(when.Local()) }</td>
-															}
-															if _, err := parseTime(t.End); err != nil {
-																<td>{ t.End }</td>
-															}
-														</tr>
+														if t.Edges.Task != nil && !t.Edges.Task.Disabled {
+															<tr>
+																<th class="align-middle" rowspan="4">
+																	<div class="flex gap-2">
+																		if t.Failed {
+																			@partials.Crossmark()
+																		} else {
+																			@partials.Checkmark()
+																		}
+																		<span>{ t.Edges.Task.Name }</span>
+																	</div>
+																</th>
+															</tr>
+															<tr>
+																<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
+																<td>{ t.StdError }</td>
+															</tr>
+															<tr>
+																<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
+																<td>{ t.StdOutput }</td>
+															</tr>
+															<tr>
+																<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
+																if when, err := parseTime(t.End); err == nil {
+																	<td>{ commonInfo.Translator.FmtDateMedium(when.Local()) + " " + commonInfo.Translator.FmtTimeMedium(when.Local()) }</td>
+																}
+																if _, err := parseTime(t.End); err != nil {
+																	<td>{ t.End }</td>
+																}
+															</tr>
+														}
 													}
 												</table>
 											} else {

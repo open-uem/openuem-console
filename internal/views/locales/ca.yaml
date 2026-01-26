@@ -1378,6 +1378,8 @@ ca:
       introduce_package_name: "Introdueix el nom del paquet per cercar..."
       no_package_found: "No s'han trobat paquets"
       selected_package: "Paquet seleccionat"
+    enable: "Activa la tasca"
+    disable: "Desactiva la tasca"
   pagination:
     title: "Elements per pàgina"
     showing: "Mostrant %{firstItem} - %{lastItem} de %{totalItems}"

@@ -190,7 +190,7 @@ func profileHasErrors(issues []*ent.ProfileIssue) bool {
 
 		if issue.Edges.Tasksreports != nil {
 			for _, report := range issue.Edges.Tasksreports {
-				if report.Failed {
+				if report.Failed && report.Edges.Task != nil && !report.Edges.Task.Disabled {
 					return true
 				}
 			}

@@ -1378,6 +1378,8 @@ en:
       introduce_package_name: "Introduce the package name to search..."
       no_package_found: "No packages found"
       selected_package: "Selected package"
+    enable: "Enable the task"
+    disable: "Disable the task"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"
