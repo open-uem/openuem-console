@@ -92,7 +92,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 	}
 
 	if c.Request().Method == "DELETE" {
-		if err := h.Model.DeleteTask(taskId); err != nil {
+		if err := h.Model.DeleteTask(task.Edges.Profile.ID, taskId); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_delete"), err), true))
 		}
 		return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.deleted"))
@@ -898,4 +898,101 @@ func (h *Handler) EnableTask(c echo.Context, enable bool) error {
 
 	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
 
+}
+
+func (h *Handler) MoveTask(c echo.Context, up bool) error {
+	var err error
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid"), true))
+	}
+
+	if c.Param("order") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_empty"), true))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	order, err := strconv.Atoi(c.Param("order"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.not_valid"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	if up {
+		if err := h.Model.MoveTask(commonInfo, taskID, order, order-1); err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+		}
+	} else {
+		if err := h.Model.MoveTask(commonInfo, taskID, order, order+1); err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+		}
+	}
+
+	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
+}
+
+func (h *Handler) MoveTaskFromTo(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid"), true))
+	}
+
+	if c.Param("from") == "" || c.Param("to") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_empty"), true))
+	}
+
+	from, err := strconv.Atoi(c.Param("from"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	to, err := strconv.Atoi(c.Param("to"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.not_valid"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	if err := h.Model.MoveTask(commonInfo, taskID, from, to); err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+	}
+
+	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
 }

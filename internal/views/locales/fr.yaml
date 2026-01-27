@@ -1381,6 +1381,12 @@ fr:
     enable: "Activer la tâche"
     disable: "Désactiver la tâche"
     ignore_errors: "Ignorer les erreurs. Si cette tâche échoue, le reste des tâches du profil ne s’exécutera pas par défaut, sauf si cette option est cochée"
+    move_up: "Déplacer la tâche vers le haut"
+    move_down: "Déplacer la tâche vers le bas"
+    order_empty: "L'ordre ne peut pas être vide"
+    order_invalid: "L'ordre n'est pas valide"
+    task_not_valid: "La tâche n'est pas valide"
+    could_not_change_task_order: "Impossible de modifier l'ordre de la tâche, raison : %v"
   pagination:
     title: "Éléments par page"
     showing: "Affichage de %{firstItem} - %{lastItem} sur %{totalItems}"

@@ -125,7 +125,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 														hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/enable", profile.ID)))) }
 														hx-target="#main"
 														hx-swap="outerHTML"
-													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "profiles.enable") }</a>
+													><uk-icon hx-history="false" icon="check" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "profiles.enable") }</a>
 												</li>
 											} else {
 												<li>
@@ -133,7 +133,7 @@ templ Profiles(c echo.Context, p partials.PaginationAndSort, profiles []*ent.Pro
 														hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/disable", profile.ID)))) }
 														hx-target="#main"
 														hx-swap="outerHTML"
-													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "profiles.disable") }</a>
+													><uk-icon hx-history="false" icon="x" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "profiles.disable") }</a>
 												</li>
 											}
 											<li>

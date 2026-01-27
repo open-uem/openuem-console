@@ -1381,6 +1381,12 @@ de:
     enable: "Aufgabe aktivieren"
     disable: "Aufgabe deaktivieren"
     ignore_errors: "Fehler ignorieren. Wenn diese Aufgabe fehlschlägt, werden die übrigen Aufgaben im Profil standardmäßig nicht ausgeführt, es sei denn, diese Option ist aktiviert"
+    move_up: "Aufgabe nach oben verschieben"
+    move_down: "Aufgabe nach unten verschieben"
+    order_empty: "Die Reihenfolge darf nicht leer sein"
+    order_invalid: "Die Reihenfolge ist ungültig"
+    task_not_valid: "Die Aufgabe ist ungültig"
+    could_not_change_task_order: "Die Aufgabenreihenfolge konnte nicht geändert werden, Grund: %v"
   pagination:
     title: "Einträge pro Seite"
     showing: "Zeige %{firstItem} - %{lastItem} von %{totalItems}"

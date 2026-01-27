@@ -1,5 +1,7 @@
 package partials
 
+import "github.com/dimmerz92/go-lucide-icons/templicons/icons"
+
 templ Crossmark() {
-	<uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
+	@icons.X(templ.Attributes{"class": "h-5 w-5 text-red-600"})
 }

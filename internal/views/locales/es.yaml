@@ -1381,6 +1381,12 @@ es:
     enable: "Activar la tarea"
     disable: "Desactivar la tarea"
     ignore_errors: "Ignorar errores. Si esta tarea falla, el resto de las tareas del perfil no se ejecutarán de forma predeterminada, a menos que esta opción esté marcada"
+    move_up: "Mover la tarea hacia arriba"
+    move_down: "Mover la tarea hacia abajo"
+    order_empty: "El orden no puede estar vacío"
+    order_invalid: "El orden no es válido"
+    task_not_valid: "La tarea no es válida"
+    could_not_change_task_order: "No se pudo cambiar el orden de la tarea, motivo: %v"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

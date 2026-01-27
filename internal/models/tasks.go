@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
@@ -112,13 +113,20 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
 
+	// let's see which is the highest order for tasks in profile
+	t, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(task.ByOrder(sql.OrderDesc())).First(context.Background())
+	if err != nil {
+		return err
+	}
+
 	// common query
 	query := m.Client.Task.Create().
 		SetName(cfg.Description).
 		SetType(task.Type(cfg.TaskType)).
 		SetAgentType(task.AgentType(cfg.AgentsType)).
 		SetProfileID(profileID).
-		SetIgnoreErrors(cfg.IgnoreErrors)
+		SetIgnoreErrors(cfg.IgnoreErrors).
+		SetOrder(t.Order + 1)
 
 	switch cfg.TaskType {
 	case task.TypeWingetInstall.String(), task.TypeWingetDelete.String():
@@ -438,19 +446,97 @@ func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID
 		return nil, err
 	}
 
+	// Check if we've values in the order column
+	countWithOrder, err := m.Client.Task.Query().Where(task.OrderGT(0), task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// If we don't have the order column filled with values let's add them
+	if countWithOrder == 0 {
+		// let's get all tasks we have
+		tasks, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Order(task.ByID()).All(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		// We must fill the order column as we're using it to order the results
+		for i, t := range tasks {
+			if err := m.Client.Task.UpdateOneID(t.ID).SetOrder(i + 1).Exec(context.Background()); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Now, we have the ordered values, and we can use the order colum
 	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
 
-	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByID()).All(context.Background())
+	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByOrder()).All(context.Background())
 }
 
 func (m *Model) GetTasksById(taskID int) (*ent.Task, error) {
 	return m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).First(context.Background())
 }
 
-func (m *Model) DeleteTask(taskID int) error {
-	return m.Client.Task.DeleteOneID(taskID).Exec(context.Background())
+func (m *Model) DeleteTask(profileID int, taskID int) error {
+	// get the curren task
+	currentTask, err := m.Client.Task.Get(context.Background(), taskID)
+	if err != nil {
+		return err
+	}
+
+	// we must delete the task
+	if err := m.Client.Task.DeleteOneID(taskID).Exec(context.Background()); err != nil {
+		return err
+	}
+
+	//...but we must then update the order column from that column onwards
+	return m.Client.Task.Update().Where(task.OrderGT(currentTask.Order)).AddOrder(-1).Exec(context.Background())
 }
 
 func (m *Model) EnableTask(taskID int, disabled bool) error {
 	return m.Client.Task.UpdateOneID(taskID).SetDisabled(disabled).Exec(context.Background())
+}
+
+func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, newOrder int) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		return err
+	}
+
+	t, err := m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if currentOrder < newOrder {
+		if err := m.Client.Task.Update().Where(
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.OrderGTE(currentOrder),
+			task.OrderLTE(newOrder),
+		).AddOrder(-1).Exec(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	if currentOrder > newOrder {
+		if err := m.Client.Task.Update().Where(
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.OrderGTE(newOrder),
+			task.OrderLTE(currentOrder),
+		).AddOrder(+1).Exec(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	return m.Client.Task.Update().Where(task.ID(taskID)).SetOrder(newOrder).Exec(context.Background())
 }

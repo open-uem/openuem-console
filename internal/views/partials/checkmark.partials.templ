@@ -1,5 +1,7 @@
 package partials
 
+import "github.com/dimmerz92/go-lucide-icons/templicons/icons"
+
 templ Checkmark() {
-	<uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 text-green-600" uk-cloack></uk-icon>
+	@icons.Check(templ.Attributes{"class": "h-5 w-5 text-green-600"})
 }

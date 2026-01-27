@@ -1381,6 +1381,12 @@ en:
     enable: "Enable the task"
     disable: "Disable the task"
     ignore_errors: "Ignore errors. If this task fails, the rest of the tasks in the profile won't execute by default, unless this option is checked"
+    move_up: "Move up the task"
+    move_down: "Move down the task"
+    order_empty: "The order cannot be empty"
+    order_invalid: "The order is not valid"
+    task_not_valid: "The task is not valid"
+    could_not_change_task_order: "Could not change the task order, reason: %v"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"

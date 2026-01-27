@@ -12,6 +12,7 @@ require (
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
 	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/dimmerz92/go-lucide-icons v1.8.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
 	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
@@ -30,7 +31,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20260126091606-8dbf6d4146ec
+	github.com/open-uem/ent v0.0.0-20260126124708-55363a1d2dcc
 	github.com/open-uem/nats v0.11.1-0.20260122085347-4ed1ca116275
 	github.com/open-uem/utils v0.0.0-20251221104611-c55d64529212
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5

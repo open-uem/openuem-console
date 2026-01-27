@@ -1381,6 +1381,12 @@ ca:
     enable: "Activa la tasca"
     disable: "Desactiva la tasca"
     ignore_errors: "Ignora els errors. Si aquesta tasca falla, la resta de tasques del perfil no s’executaran per defecte, tret que aquesta opció estigui marcada"
+    move_up: "Mou la tasca cap amunt"
+    move_down: "Mou la tasca cap avall"
+    order_empty: "L'ordre no pot estar buit"
+    order_invalid: "L'ordre no és vàlid"
+    task_not_valid: "La tasca no és vàlida"
+    could_not_change_task_order: "No s'ha pogut canviar l'ordre de la tasca, motiu: %v"
   pagination:
     title: "Elements per pàgina"
     showing: "Mostrant %{firstItem} - %{lastItem} de %{totalItems}"
