@@ -303,6 +303,7 @@ en:
     remote_assistance_rdp_found: "Gnome Remote Desktop (grdctl) is installed on the endpoint"
     remote_assistance_rdp_not_found: "Gnome Remote Desktop (grdctl) is not installed on the endpoint"
     remote_assistance_no_logged_user: "No user found connected to the system"
+    rustdesk_no_logged_user: "No user found connected to the system, connection is only possible if permanent password is set"
     remote_assistance_has_logged_user: "User %s is logged into the system"
     remote_assistance_ip: "The agent has reported an IP address to connect to in LAN"
     remote_assistance_no_ip: "The agent has NOT reported an IP address to connect to in LAN"
