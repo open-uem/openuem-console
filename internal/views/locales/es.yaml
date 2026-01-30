@@ -353,6 +353,11 @@ es:
     vnc_server_installed: "% s está instalado en el equipo"
     vnc_host_resolved: "El nombre de host remoto parece poder resolverse por DNS"
     sftp_connection_failed: "No se pudo contactar con el servicio SFTP remoto. Compruebe las reglas de su firewall o si la conexión IP entre el servidor de consola y el equipo es posible."
+    tasks_title: "Tareas"
+    tasks_description: "Aquí está el informe de las tareas que se han aplicado a este equipo mediante perfiles de OpenUEM. Puede solicitar que el equipo ejecute una de las tareas disponibles para este agente haciendo clic en el botón de ejecutar"
+    could_not_get_available_tasks: "No se pudieron obtener las tareas disponibles para este agente, motivo: %v"
+    select_task: "Seleccione una tarea..."
+    execute_task: "Ejecutar tarea"
   inventory:
     hardware:
       title: "Hardware"
@@ -1085,6 +1090,10 @@ es:
       no_issues: "No se han encontrado problemas para este perfil"
       empty_id: "El ID del perfil no puede estar vacío"
       tasks_report: "Informe de tareas"
+      tasks_report_for: "Informe de tareas para %s"
+      tasks_report_successful_summary: "%d tareas se completaron correctamente"
+      tasks_report_failed_summary: "%d tareas fallaron"
+      tasks_report_more_info: "Abrir la vista detallada de este informe"
     new:
       title: "Nuevo perfil"
       description: "Da al perfil una descripción que ayude a identificar su objetivo"
@@ -1387,6 +1396,14 @@ es:
     order_invalid: "El orden no es válido"
     task_not_valid: "La tarea no es válida"
     could_not_change_task_order: "No se pudo cambiar el orden de la tarea, motivo: %v"
+    could_not_create_ansible_playbook: "No se pudo crear el playbook de Ansible, motivo: %v"
+    could_not_marshal_playbook: "No se pudo serializar el playbook de Ansible, motivo: %v"
+    could_not_send_ansible_playbook_request: "No se pudo enviar la solicitud para ejecutar el playbook de Ansible, motivo: %v"
+    task_was_run_successfully: "El endpoint ha recibido la solicitud para ejecutar esta tarea; por favor, revise el informe en la tabla en unos minutos"
+    could_not_unmarhall_task_result: "No se pudo deserializar el resultado de la tarea, motivo: %v"
+    could_not_execute_the_task: "No se pudo ejecutar la tarea, motivo: %s"
+    task_found_errors: "La tarea encontró algunos errores; por favor, revise el informe en la tabla"
+    no_reports_found: "No se recibió ningún informe del agente para esta tarea"
   pagination:
     title: "Elem. por página"
     showing: "Mostrando %{firstItem} - %{lastItem} de %{totalItems}"

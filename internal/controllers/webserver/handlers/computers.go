@@ -21,12 +21,15 @@ import (
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	openuem_nats "github.com/open-uem/nats"
+	ansiblecfg "github.com/open-uem/openuem-ansible-config/ansible"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
+	"gopkg.in/yaml.v3"
 )
 
 func (h *Handler) Overview(c echo.Context) error {
@@ -1860,4 +1863,322 @@ func (h *Handler) IsAgentOffline(c echo.Context) bool {
 	}
 
 	return false
+}
+
+func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+
+	if agentId == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	currentPage := c.FormValue("page")
+	pageSize := c.FormValue("pageSize")
+	sortBy := c.FormValue("sortBy")
+	sortOrder := c.FormValue("sortOrder")
+	currentSortBy := c.FormValue("currentSortBy")
+
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
+
+	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	reports, err := h.Model.TaskReportsByPageInfo(agentId, commonInfo, p)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	p.NItems, err = h.Model.CountTaskReportsByPageInfo(agentId, commonInfo)
+	if err != nil {
+		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	availableTasks, err := h.Model.GetAvailableTasksForAgent(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_available_tasks", err), true))
+	}
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, confirmDelete, itemsPerPage, commonInfo, netbird, offline, successMessage, refreshTime), commonInfo))
+}
+
+func (h *Handler) RunTask(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if c.FormValue("task") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskSplitted := strings.Split(c.FormValue("task"), "-")
+	taskID, err := strconv.Atoi(taskSplitted[len(taskSplitted)-1])
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), true))
+	}
+
+	if _, err := h.Model.GetAgentById(agentID, commonInfo); err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	t, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid", err), true))
+	}
+
+	if t.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.no_profile", err), true))
+	}
+
+	if t.AgentType == task.AgentTypeLinux || t.AgentType == task.AgentTypeMacos {
+		// prepare playbook
+		pb, err := createAnsiblePlaybook(t)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
+		}
+
+		// prepare request
+		config := openuem_nats.ProfileConfig{
+			ProfileID:     t.Edges.Profile.ID,
+			AnsibleConfig: []*ansiblecfg.AnsiblePlaybook{pb},
+		}
+
+		data, err := yaml.Marshal(config)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_playbook", err), true))
+		}
+
+		// send request to agent
+		if _, err = h.NATSConnection.Request("agent.ansible."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_ansible_playbook_request", err), true))
+		}
+	}
+
+	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "tasks.task_was_run_successfully"))
+}
+
+func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, error) {
+	var err error
+
+	pb := ansiblecfg.NewAnsiblePlaybook()
+	pb.Name = t.Edges.Profile.Name
+
+	switch t.Type {
+	case task.TypeAddUnixLocalGroup:
+		var gid int
+
+		if t.LocalGroupID != "" {
+			gid, err = strconv.Atoi(t.LocalGroupID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		addLocalGroup, err := ansiblecfg.AddLocalGroup(fmt.Sprintf("task_%d", t.ID), t.LocalGroupName, gid, t.LocalGroupSystem, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(addLocalGroup)
+
+	case task.TypeAddUnixLocalUser:
+		var expires float64
+		var password_expire_account_disable int
+		var password_expire_max int
+		var password_expire_min int
+		var password_expire_warn int
+		var ssh_key_bits int
+		var uid int
+		var uid_max int
+		var uid_min int
+
+		if t.LocalUserExpires != "" {
+			expires, err = strconv.ParseFloat(t.LocalUserExpires, 64)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireAccountDisable != "" {
+			password_expire_account_disable, err = strconv.Atoi(t.LocalUserPasswordExpireAccountDisable)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireMax != "" {
+			password_expire_max, err = strconv.Atoi(t.LocalUserPasswordExpireMax)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireMin != "" {
+			password_expire_min, err = strconv.Atoi(t.LocalUserPasswordExpireMin)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireWarn != "" {
+			password_expire_warn, err = strconv.Atoi(t.LocalUserPasswordExpireWarn)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserSSHKeyBits != "" {
+			ssh_key_bits, err = strconv.Atoi(t.LocalUserSSHKeyBits)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserID != "" {
+			uid, err = strconv.Atoi(t.LocalUserID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserIDMax != "" {
+			uid_max, err = strconv.Atoi(t.LocalUserIDMax)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserIDMin != "" {
+			uid_min, err = strconv.Atoi(t.LocalUserIDMin)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		addLinuxUser, err := ansiblecfg.AddLocalUser(fmt.Sprintf("task_%d", t.ID), t.LocalUserAppend, t.LocalUserDescription,
+			t.LocalUserCreateHome, expires, t.LocalUserForce, t.LocalUserGenerateSSHKey, t.LocalUserGroup, t.LocalUserGroups,
+			t.LocalUserHome, t.LocalUserUsername, t.LocalUserNonunique, t.LocalUserPassword, password_expire_account_disable, password_expire_max,
+			password_expire_min, password_expire_warn, t.LocalUserPasswordLock, t.LocalUserShell, t.LocalUserSkeleton, ssh_key_bits,
+			t.LocalUserSSHKeyComment, t.LocalUserSSHKeyFile, t.LocalUserSSHKeyPassphrase, t.LocalUserSSHKeyType,
+			t.LocalUserSystem, t.LocalUserUmask, uid, uid_max, uid_min, t.AgentType.String(), t.IgnoreErrors)
+
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(addLinuxUser)
+
+	case task.TypeRemoveLocalUser:
+		removeLinux, err := ansiblecfg.RemoveLocalUser(fmt.Sprintf("task_%d", t.ID), t.LocalUserForce, t.LocalUserUsername, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(removeLinux)
+
+	case task.TypeRemoveUnixLocalGroup:
+		removeLocalGroup, err := ansiblecfg.RemoveLocalGroup(fmt.Sprintf("task_%d", t.ID), t.LocalGroupName, t.LocalGroupForce, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(removeLocalGroup)
+
+	case task.TypeUnixScript:
+		executeScript, err := ansiblecfg.ExecuteScript(fmt.Sprintf("task_%d", t.ID), t.Script, t.ScriptExecutable, t.ScriptCreates, t.AgentType.String(), t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(executeScript)
+	case task.TypeFlatpakInstall:
+		install, err := ansiblecfg.InstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.PackageLatest, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeFlatpakUninstall:
+		uninstall, err := ansiblecfg.UninstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	case task.TypeBrewFormulaInstall:
+		install, err := ansiblecfg.InstallHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewInstallOptions, t.BrewUpdate, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeBrewFormulaUpgrade:
+		upgrade, err := ansiblecfg.UpgradeHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewUpdate, t.BrewUpgradeAll, t.BrewUpgradeOptions, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(upgrade)
+	case task.TypeBrewFormulaUninstall:
+		uninstall, err := ansiblecfg.UninstallHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	case task.TypeBrewCaskInstall:
+		install, err := ansiblecfg.InstallHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewInstallOptions, t.BrewUpdate, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeBrewCaskUpgrade:
+		upgrade, err := ansiblecfg.UpgradeHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewGreedy, t.BrewUpdate, t.BrewUpgradeAll, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(upgrade)
+	case task.TypeBrewCaskUninstall:
+		uninstall, err := ansiblecfg.UninstallHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	}
+
+	return pb, nil
 }

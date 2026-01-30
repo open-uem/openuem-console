@@ -14,8 +14,11 @@ import (
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/printer"
+	"github.com/open-uem/ent/profileissue"
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/tag"
+	"github.com/open-uem/ent/task"
+	"github.com/open-uem/ent/taskreport"
 	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -922,5 +925,68 @@ func (m *Model) GetAgentAppsInfo(agentId string, c *partials.CommonInfo) ([]*ent
 			return nil, err
 		}
 		return apps, nil
+	}
+}
+
+func (m *Model) TaskReportsByPageInfo(agentId string, c *partials.CommonInfo, p partials.PaginationAndSort) ([]*ent.TaskReport, error) {
+	var query *ent.TaskReportQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	query = m.Client.TaskReport.Query().WithTask().WithProfileissue(func(q *ent.ProfileIssueQuery) { q.WithProfile().All(context.Background()) })
+
+	if siteID == -1 {
+		query.Where(taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))))
+
+	} else {
+		query.Where(taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))))
+	}
+
+	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(taskreport.ByEnd(sql.OrderDesc())).All(context.Background())
+}
+
+func (m *Model) CountTaskReportsByPageInfo(agentId string, c *partials.CommonInfo) (int, error) {
+	var query *ent.TaskReportQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return 0, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return 0, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.TaskReport.Query().Where(taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))))
+
+	} else {
+		query = m.Client.TaskReport.Query().Where(taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.ID(agentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))))
+	}
+
+	return query.Count(context.Background())
+}
+
+func (m *Model) GetAvailableTasksForAgent(agentID string) ([]*ent.Task, error) {
+
+	a, err := m.Client.Agent.Get(context.Background(), agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch a.Os {
+	case "windows":
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny)).All(context.Background())
+	case "macos", "macOS":
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeMacos, task.AgentTypeAny)).All(context.Background())
+	default:
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeLinux, task.AgentTypeAny)).All(context.Background())
 	}
 }

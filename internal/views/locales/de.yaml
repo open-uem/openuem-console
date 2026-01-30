@@ -353,6 +353,11 @@ de:
     vnc_server_installed: "%s ist auf dem Endpunkt installiert"
     vnc_host_resolved: "Der Remote-Hostname scheint durch DNS aufgelöst zu werden"
     sftp_connection_failed: "Der Remote-SFTP-Dienst konnte nicht erreicht werden. Bitte überprüfen Sie Ihre Firewall-Regeln bzw. ob eine IP-Verbindung zwischen dem Konsolenserver und dem Endpunkt möglich ist."
+    tasks_title: "Aufgaben"
+    tasks_description: "Hier ist der Bericht über die Aufgaben, die mithilfe von OpenUEM-Profilen auf diesen Endpoint angewendet wurden. Sie können den Endpoint auffordern, eine der verfügbaren Aufgaben für diesen Agenten auszuführen, indem Sie auf die Schaltfläche „Ausführen“ klicken"
+    could_not_get_available_tasks: "Verfügbare Aufgaben für diesen Agenten konnten nicht abgerufen werden, Grund: %v"
+    select_task: "Aufgabe auswählen..."
+    execute_task: "Aufgabe ausführen"
   inventory:
     hardware:
       title: "Hardware"
@@ -1085,6 +1090,10 @@ de:
       no_issues: "Für dieses Profil wurden keine Probleme gefunden"
       empty_id: "Die Profil-ID darf nicht leer sein"
       tasks_report: "Aufgabenbericht"
+      tasks_report_for: "Aufgabenbericht für %s"
+      tasks_report_successful_summary: "%d Aufgaben waren erfolgreich"
+      tasks_report_failed_summary: "%d Aufgaben sind fehlgeschlagen"
+      tasks_report_more_info: "Öffnen Sie die Detailansicht dieses Berichts"
     new:
       title: "Neues Profil"
       description: "Geben Sie dem Profil eine Beschreibung, die hilft, sein Ziel zu identifizieren"
@@ -1387,6 +1396,14 @@ de:
     order_invalid: "Die Reihenfolge ist ungültig"
     task_not_valid: "Die Aufgabe ist ungültig"
     could_not_change_task_order: "Die Aufgabenreihenfolge konnte nicht geändert werden, Grund: %v"
+    could_not_create_ansible_playbook: "Ansible-Playbook konnte nicht erstellt werden, Grund: %v"
+    could_not_marshal_playbook: "Ansible-Playbook konnte nicht serialisiert werden, Grund: %v"
+    could_not_send_ansible_playbook_request: "Anfrage zum Ausführen des Ansible-Playbooks konnte nicht gesendet werden, Grund: %v"
+    task_was_run_successfully: "Der Endpoint hat die Anfrage zum Ausführen dieser Aufgabe erhalten. Bitte überprüfen Sie den Bericht in der Tabelle in einigen Minuten"
+    could_not_unmarhall_task_result: "Das Ergebnis der Aufgabe konnte nicht deserialisiert werden, Grund: %v"
+    could_not_execute_the_task: "Die Aufgabe konnte nicht ausgeführt werden, Grund: %s"
+    task_found_errors: "Bei der Aufgabe sind einige Fehler aufgetreten. Bitte überprüfen Sie den Bericht in der Tabelle"
+    no_reports_found: "Für diese Aufgabe wurde kein Bericht vom Agenten gesendet"
   pagination:
     title: "Einträge pro Seite"
     showing: "Zeige %{firstItem} - %{lastItem} von %{totalItems}"

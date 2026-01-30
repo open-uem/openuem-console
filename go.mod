@@ -33,6 +33,7 @@ require (
 	github.com/nats-io/nats.go v1.47.0
 	github.com/open-uem/ent v0.0.0-20260126124708-55363a1d2dcc
 	github.com/open-uem/nats v0.11.1-0.20260122085347-4ed1ca116275
+	github.com/open-uem/openuem-ansible-config v0.0.0-20260127123556-80a04b5821c5
 	github.com/open-uem/utils v0.0.0-20251221104611-c55d64529212
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9
@@ -47,6 +48,7 @@ require (
 	golang.org/x/oauth2 v0.32.0
 	golang.org/x/sys v0.37.0
 	gopkg.in/ini.v1 v1.67.0
+	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
@@ -91,7 +93,6 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/open-uem/openuem-ansible-config v0.0.0-20250710075757-9ef6e3390073 // indirect
 	github.com/pdfcpu/pdfcpu v0.11.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -115,5 +116,4 @@ require (
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

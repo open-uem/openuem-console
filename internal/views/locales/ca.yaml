@@ -353,6 +353,11 @@ ca:
     vnc_server_installed: "%s està instal·lat al punt final"
     vnc_host_resolved: "El nom d'amfitrió remot sembla que el DNS ha resolt"
     sftp_connection_failed: "No s'ha pogut contactar amb el servei SFTP remot. Si us plau, comproveu les regles del tallafocs o si la connectivitat IP és possible entre el servidor de la consola i el punt final."
+    tasks_title: "Tasques"
+    tasks_description: "Aquí hi ha l'informe de les tasques que s'han aplicat a aquest punt final mitjançant perfils d'OpenUEM. Podeu sol·licitar que el punt final executi una de les tasques disponibles per a aquest agent fent clic al botó d'execució"
+    could_not_get_available_tasks: "No s'han pogut obtenir les tasques disponibles per a aquest agent, motiu: %v"
+    select_task: "Seleccioneu una tasca..."
+    execute_task: "Executa la tasca"
   inventory:
     hardware:
       title: "Maquinari"
@@ -1085,6 +1090,10 @@ ca:
       no_issues: "No s'han trobat problemes per a aquest perfil"
       empty_id: "L'identificador del perfil no pot estar buit"
       tasks_report: "Informe de tasques"
+      tasks_report_for: "Informe de tasques per a %s"
+      tasks_report_successful_summary: "%d tasques s'han completat correctament"
+      tasks_report_failed_summary: "%d tasques han fallat"
+      tasks_report_more_info: "Obriu la vista detallada d'aquest informe"
     new:
       title: "Nou perfil"
       description: "Doneu al perfil una descripció que ajudi a identificar el seu objectiu"
@@ -1387,6 +1396,14 @@ ca:
     order_invalid: "L'ordre no és vàlid"
     task_not_valid: "La tasca no és vàlida"
     could_not_change_task_order: "No s'ha pogut canviar l'ordre de la tasca, motiu: %v"
+    could_not_create_ansible_playbook: "No s'ha pogut crear el playbook d'Ansible, motiu: %v"
+    could_not_marshal_playbook: "No s'ha pogut serialitzar el playbook d'Ansible, motiu: %v"
+    could_not_send_ansible_playbook_request: "No s'ha pogut enviar la sol·licitud per executar el playbook d'Ansible, motiu: %v"
+    task_was_run_successfully: "L'endpoint ha rebut la sol·licitud per executar aquesta tasca; si us plau, comproveu l'informe a la taula d'aquí a uns minuts"
+    could_not_unmarhall_task_result: "No s'ha pogut desserialitzar el resultat de la tasca, motiu: %v"
+    could_not_execute_the_task: "No s'ha pogut executar la tasca, motiu: %s"
+    task_found_errors: "La tasca ha trobat alguns errors; si us plau, comproveu l'informe a la taula"
+    no_reports_found: "No s'ha rebut cap informe de l'agent per a aquesta tasca"
   pagination:
     title: "Elements per pàgina"
     showing: "Mostrant %{firstItem} - %{lastItem} de %{totalItems}"

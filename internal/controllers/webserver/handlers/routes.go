@@ -260,6 +260,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/computers/:uuid/netbird/deletepeer", func(c echo.Context) error { return h.NetbirdDeletePeer(c, false) }, h.IsAuthenticated)
 	e.POST("/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
+	e.GET("/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -321,6 +322,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/deletepeer", func(c echo.Context) error { return h.NetbirdDeletePeer(c, false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
+	e.GET("/tenant/:tenant/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -383,6 +385,8 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/computers/:uuid/status", h.AgentStatus, h.IsAuthenticated)
+	e.GET("/tenant/:tenant/site/:site/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/computers/:uuid/runtask", h.RunTask, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

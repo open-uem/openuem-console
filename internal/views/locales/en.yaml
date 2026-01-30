@@ -353,6 +353,11 @@ en:
     vnc_server_installed: "%s is installed on the endpoint"
     vnc_host_resolved: "The remote hostname seems to be resolved by DNS"
     sftp_connection_failed: "The remote SFTP service could not be contacted. Please check your firewall rules or whether IP connectivity is possible between the console server and the endpoint"
+    tasks_title: "Tasks"
+    tasks_description: "Here is the report of the tasks that have been applied to this endpoint using OpenUEM profiles. You can request the endpoint to run one of the available tasks for this agent by clicking on the run button"
+    could_not_get_available_tasks: "Could not get available tasks for this agent, reason: %v"
+    select_task: "Select a task..."
+    execute_task: "Execute task"
   inventory:
     hardware:
       title: "Hardware"
@@ -1076,7 +1081,7 @@ en:
     status: "Status"
     standard_error: "Standard error"
     standard_output: "Standard output"
-    execution_time: "Execution time"
+    execution_time: "Last execution time"
     issues:
       title: "Issues"
       description: "The following endpoints found a problem trying to apply this profile"
@@ -1085,6 +1090,10 @@ en:
       no_issues: "No issues found for this profile"
       empty_id: "The profile ID cannot be empty"
       tasks_report: "Tasks report"
+      tasks_report_for: "Tasks report for %s"
+      tasks_report_successful_summary: "%d tasks were successful"
+      tasks_report_failed_summary: "%d tasks failed"
+      tasks_report_more_info: "Open the detailed view of this report"
     new:
       title: "New profile"
       description: "Give the profile a description that helps to identify its target"
@@ -1387,6 +1396,14 @@ en:
     order_invalid: "The order is not valid"
     task_not_valid: "The task is not valid"
     could_not_change_task_order: "Could not change the task order, reason: %v"
+    could_not_create_ansible_playbook: "Could not create Ansible playbook, reason: %v"
+    could_not_marshal_playbook: "Could not marshal Ansible playbook, reason: %v"
+    could_not_send_ansible_playbook_request: "Could not send request to run Ansible playbook, reason: %v"
+    task_was_run_successfully: "The endpoint has received the request to run this task, please check the report in the table in a few minutes"
+    could_not_unmarhall_task_result: "Could not unmarshall the task result, reason: %v"
+    could_not_execute_the_task: "The task could not be executed, reason: %s"
+    task_found_errors: "The task found some errors, please check the report in the table"
+    no_reports_found: "No report was sent from the agent for this task"
   pagination:
     title: "Items per page"
     showing: "Showing %{firstItem} - %{lastItem} of %{totalItems}"

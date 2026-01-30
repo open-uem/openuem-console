@@ -1,0 +1,147 @@
+package computers_views
+
+import (
+	"fmt"
+	"github.com/dimmerz92/go-lucide-icons/templicons/icons"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"time"
+)
+
+templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, reports []*ent.TaskReport, availableTasks []*ent.Task, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, successMessage string, refresh int) {
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@partials.ComputerHeader(p, agent, commonInfo, offline)
+				@ComputersNavbar(agent.ID, "tasks", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				if confirmDelete {
+					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
+				}
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex items-center gap-2">
+							<uk-icon hx-history="false" icon="list-todo" custom-class="h-5 w-5" uk-cloack></uk-icon>
+							<h3 class="uk-card-title">{ i18n.T(ctx, "agents.tasks_title") }</h3>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "agents.tasks_description") }
+						</p>
+					</div>
+				</div>
+				<div class="uk-card uk-card-body uk-card-default">
+					<div class="flex flex-col gap-10">
+						<div class="flex justify-between">
+							<form class="flex gap-2 w-1/2">
+								<uk-select class="w-1/2" name="task" placeholder={ i18n.T(ctx, "agents.select_task") } searchable uk-cloak>
+									for _, t := range availableTasks {
+										<option value={ fmt.Sprintf("%s-%d", t.Name, t.ID) }>{ t.Name }</option>
+									}
+								</uk-select>
+								<button
+									class="flex gap-2 uk-button uk-button-primary"
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
+									hx-push-url="false"
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-indicator="#run-task-spinner"
+								>
+									@icons.Play(templ.Attributes{"class": "h-5 w-5"})
+									{ i18n.T(ctx, "agents.execute_task") }
+									<uk-icon id="run-task-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+								</button>
+							</form>
+							<div class="flex">
+								@partials.RefreshPage(commonInfo.Translator, refresh, true)
+							</div>
+						</div>
+						<div>
+							if len(reports) > 0 {
+								@ReportDetail(reports, commonInfo)
+								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", agent.ID)))), itemsPerPage)
+							} else {
+								<p class="uk-text-small uk-text-muted">
+									{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }
+								</p>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ ReportDetail(reports []*ent.TaskReport, commonInfo *partials.CommonInfo) {
+	<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
+		<thead>
+			<tr>
+				<th>{ i18n.T(ctx, "Name") }</th>
+				<th>{ i18n.T(ctx, "Status") }</th>
+				<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
+				<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
+				<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
+				<th>{ i18n.T(ctx, "Profile") }</th>
+			</tr>
+		</thead>
+		for _, report := range reports {
+			<tr>
+				<td class="items-center !align-middle">
+					if report.Edges.Task != nil {
+						<a
+							href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", report.Edges.Task.ID))) }
+							hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", report.Edges.Task.ID)))) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							class="underline hover:cursor-pointer"
+						><span class="text-nowrap">{ report.Edges.Task.Name }</span></a>
+					} else {
+						{ "-" }
+					}
+				</td>
+				<td class="items-center !align-middle">
+					if report.Failed {
+						@partials.Crossmark()
+					} else {
+						@partials.Checkmark()
+					}
+				</td>
+				if when, err := parseTime(report.End); err == nil {
+					<td class="items-center !align-middle"><span class="text-nowrap">{ commonInfo.Translator.FmtDateMedium(when.Local()) + " " + commonInfo.Translator.FmtTimeMedium(when.Local()) }</span></td>
+				}
+				if _, err := parseTime(report.End); err != nil {
+					<td class="items-center !align-middle">{ report.End }</td>
+				}
+				<td class="items-center !align-middle font-mono">{ report.StdOutput }</td>
+				<td class="items-center !align-middle font-mono">{ report.StdError }</td>
+				<td class="items-center !align-middle">
+					if report.Edges.Profileissue != nil && report.Edges.Profileissue.Edges.Profile != nil {
+						<a
+							href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", report.Edges.Profileissue.Edges.Profile.ID))) }
+							hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", report.Edges.Profileissue.Edges.Profile.ID)))) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							class="underline hover:cursor-pointer"
+						><span class="text-nowrap">{ report.Edges.Profileissue.Edges.Profile.Name }</span></a>
+					} else {
+						{ "-" }
+					}
+				</td>
+			</tr>
+		}
+	</table>
+}
+
+func parseTime(when string) (time.Time, error) {
+	return time.ParseInLocation(time.RFC3339Nano, when, time.Local)
+}
