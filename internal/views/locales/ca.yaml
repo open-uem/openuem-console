@@ -303,6 +303,7 @@ ca:
     remote_assistance_rdp_found: "L'escriptori remot de Gnome (grdctl) està instal·lat al punt final"
     remote_assistance_rdp_not_found: "L'escriptori remot del Gnome (grdctl) no està instal·lat al punt final"
     remote_assistance_no_logged_user: "No s'ha trobat cap usuari connectat al sistema"
+    rustdesk_no_logged_user: "No s'ha trobat cap usuari connectat al sistema, la connexió només és possible si s'ha establert una contrasenya permanent."
     remote_assistance_has_logged_user: "L'usuari %s ha iniciat sessió al sistema"
     remote_assistance_ip: "L'agent ha informat d'una adreça IP per connectar-se a la LAN"
     remote_assistance_no_ip: "L'agent NO ha informat d'una adreça IP per connectar-se a la LAN"

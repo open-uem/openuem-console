@@ -303,6 +303,7 @@ fr:
     remote_assistance_rdp_found: "Gnome Remote Desktop (grdctl) est installé sur le point de terminaison"
     remote_assistance_rdp_not_found: "Gnome Remote Desktop (grdctl) n'est pas installé sur le point de terminaison"
     remote_assistance_no_logged_user: "Aucun utilisateur connecté au système n'a été trouvé"
+    rustdesk_no_logged_user: "Aucun utilisateur connecté au système. La connexion n'est possible que si un mot de passe permanent est défini."
     remote_assistance_has_logged_user: "L'utilisateur %s est connecté au système"
     remote_assistance_ip: "L'agent a signalé une adresse IP à laquelle se connecter en LAN"
     remote_assistance_no_ip: "L'agent n'a PAS signalé d'adresse IP à laquelle se connecter en LAN"
