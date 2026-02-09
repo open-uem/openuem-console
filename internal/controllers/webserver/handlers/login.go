@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/invopop/ctxi18n/i18n"
@@ -56,7 +57,8 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings), csrfToken))
+	branding, _ := h.Model.GetOrCreateBranding()
+	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings, branding), csrfToken, branding))
 }
 
 func (h *Handler) LoginPasswordAuth(c echo.Context) error {
@@ -105,7 +107,8 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 			log.Printf("[ERROR]: could not create a forgot password session for user %s, reason: %v", user.ID, err)
 		}
 
-		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+		branding, _ := h.Model.GetOrCreateBranding()
+		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(branding), csrfToken, branding))
 	}
 
 	// Passwords match, create a new session
@@ -299,7 +302,7 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 		u = fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID)
 	}
 
-	return RenderLoginPartial(c, login_views.ShowRecoveryCodes(strings.Join(codes, "\n"), u))
+	return RenderLoginPartial(c, login_views.ShowRecoveryCodes(strings.Join(codes, "\n"), templ.SafeURL(u)))
 }
 
 func (h *Handler) LoginTOTPValidate(c echo.Context) error {
@@ -365,7 +368,8 @@ func (h *Handler) LoginForgotPass(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(), csrfToken))
+	branding, _ := h.Model.GetOrCreateBranding()
+	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(branding), csrfToken, branding))
 }
 
 func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
@@ -587,7 +591,8 @@ func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+	branding, _ := h.Model.GetOrCreateBranding()
+	return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(branding), csrfToken, branding))
 }
 
 func (h *Handler) CreateForgotPasswordSession(c echo.Context, user *ent.User) error {
@@ -684,7 +689,8 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 		if err := h.CreateForgotPasswordSession(c, user); err != nil {
 			return err
 		}
-		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+		branding, _ := h.Model.GetOrCreateBranding()
+		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(branding), csrfToken, branding))
 
 	} else {
 		return echo.NewHTTPError(http.StatusBadRequest, "unknown claims type, cannot proceed")

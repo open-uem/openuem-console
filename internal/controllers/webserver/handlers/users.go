@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/form/v4"
@@ -98,13 +99,19 @@ func (h *Handler) ListUsers(c echo.Context, successMessage, errMessage string) e
 	p := partials.NewPaginationAndSort(itemsPerPage)
 	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
-	p.NItems, err = h.Model.CountAllUsers(f)
+	// Get tenant ID for filtering (0 = show all users for global admin)
+	tenantID, _ := strconv.Atoi(commonInfo.TenantID)
+	if tenantID == -1 {
+		tenantID = 0
+	}
+
+	p.NItems, err = h.Model.CountAllUsers(f, tenantID)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
 	}
 
-	users, err := h.Model.GetUsersByPage(p, f)
+	users, err := h.Model.GetUsersByPage(p, f, tenantID)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()

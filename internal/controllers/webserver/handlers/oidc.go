@@ -14,7 +14,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"time"
 
@@ -24,6 +23,7 @@ import (
 	"github.com/open-uem/ent"
 	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/auth"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"golang.org/x/oauth2"
 )
@@ -48,12 +48,18 @@ type UserInfoResponse struct {
 	Email             string   `json:"email,omitempty"`
 	EmailVerified     bool     `json:"email_verified,omitempty"`
 	Phone             string   `json:"phone_number,omitempty"`
+	Picture           string   `json:"picture,omitempty"`
 	Error             string   `json:"error,omitempty"`
 	ErrorDescription  string   `json:"error_description,omitempty"`
-	Groups            []string `json:"groups"`
+	Groups []string `json:"groups"`
+	// OIDC provider organization info (provider-specific claim names)
+	// Zitadel uses: urn:zitadel:iam:user:resourceowner:id/name
+	// Other providers may use: org_id, organization, tenant_id, etc.
+	OIDCOrgID   string `json:"urn:zitadel:iam:user:resourceowner:id,omitempty"`
+	OIDCOrgName string `json:"urn:zitadel:iam:user:resourceowner:name,omitempty"`
 }
 
-type ZitadelRolesResponse struct {
+type OIDCRolesResponse struct {
 	Roles   []string `json:"result"`
 	Message string   `json:"message"`
 }
@@ -85,7 +91,11 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 	case auth.AUTHELIA:
 		oauth2Config.Scopes = append(oauth2Config.Scopes, "groups")
 	case auth.ZITADEL:
-		oauth2Config.Scopes = append(oauth2Config.Scopes, "phone", "urn:zitadel:iam:org:project:id:zitadel:aud")
+		oauth2Config.Scopes = append(oauth2Config.Scopes,
+			"phone",
+			"urn:zitadel:iam:org:project:id:zitadel:aud",  // Get project roles
+			"urn:zitadel:iam:user:resourceowner",          // Get org ID and name
+		)
 	}
 
 	state, err := randomBytestoHex(32)
@@ -177,9 +187,14 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not get user info from OIDC endpoint")
 	}
 
-	// Get user information
+	// Validate email is present (required for user ID)
+	if u.Email == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "OIDC provider did not return an email address")
+	}
+
+	// Get user information - use email as unique identifier
 	oidcUser := ent.User{
-		ID:            u.PreferredUsername,
+		ID:            u.Email,
 		Name:          u.Name,
 		Email:         u.Email,
 		EmailVerified: u.EmailVerified,
@@ -191,30 +206,51 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 		IDToken:       oAuth2TokenResponse.IDToken,
 	}
 
+	// Collect roles for tenant assignment
+	var oidcRoles []string
+
 	// Check if user is member of specified group or role
 	if authProvider == auth.ZITADEL {
-		if settings.OIDCRole != "" {
-			// Get roles info from remote endpoint
-			data, err := h.ZitadelGetUserRoles(oAuth2TokenResponse.AccessToken, settings)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "could not get roles from permissions endpoint")
-			}
+		// Get roles info from remote endpoint
+		data, err := h.GetOIDCUserRoles(oAuth2TokenResponse.AccessToken, settings)
+		if err != nil {
+			log.Printf("[WARN]: could not get roles from permissions endpoint: %v", err)
+		} else {
+			oidcRoles = data.Roles
+		}
 
-			if !slices.Contains(data.Roles, settings.OIDCRole) {
-				return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
-			}
+		// Check if any of the configured roles are present
+		if !h.userHasAllowedOIDCRole(oidcRoles, settings) {
+			return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
 		}
 	} else {
+		// Check if any of the configured groups are present
+		if !h.userHasAllowedOIDCRole(u.Groups, settings) {
+			return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
+		}
+	}
 
-		if settings.OIDCRole != "" {
-			if !slices.Contains(u.Groups, settings.OIDCRole) {
-				return echo.NewHTTPError(http.StatusUnauthorized, "user has no permission to log in to OpenUEM")
+	// Try to get org ID from userinfo first, fallback to ID token
+	orgID := u.OIDCOrgID
+	if orgID == "" && oAuth2TokenResponse.IDToken != "" {
+		// Parse ID token to extract org ID (Zitadel may not include it in userinfo)
+		if claims, err := parseIDTokenClaims(oAuth2TokenResponse.IDToken); err == nil {
+			if oid, ok := claims["urn:zitadel:iam:user:resourceowner:id"].(string); ok {
+				orgID = oid
 			}
 		}
 	}
 
-	// Manage session
-	return h.ManageOIDCSession(c, &oidcUser)
+	// Build OIDC info for tenant assignment
+	oidcInfo := OIDCTenantInfo{
+		OrgID:      orgID,
+		Roles:      oidcRoles,
+		Groups:     u.Groups,
+		PictureURL: u.Picture,
+	}
+
+	// Manage session and assign tenant
+	return h.ManageOIDCSession(c, &oidcUser, oidcInfo)
 }
 
 // Reference: https://chrisguitarguy.com/2022/12/07/oauth-pkce-with-go/
@@ -405,7 +441,15 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 	return u
 }
 
-func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
+// OIDCTenantInfo contains information from the OIDC provider for tenant assignment
+type OIDCTenantInfo struct {
+	OrgID      string   // Organization ID from OIDC provider (e.g. Zitadel resource owner)
+	Roles      []string // Project roles from OIDC provider (e.g. "openuem_admin")
+	Groups     []string // OIDC groups (e.g. Authelia groups)
+	PictureURL string   // Profile picture URL from OIDC provider
+}
+
+func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User, oidcInfo OIDCTenantInfo) error {
 	settings, err := h.Model.GetAuthenticationSettings()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
@@ -428,6 +472,11 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		}
 	}
 
+	// Assign tenant based on OIDC org info (every login)
+	if err := h.AssignTenantFromOIDC(u.ID, oidcInfo, settings); err != nil {
+		log.Printf("[WARN]: could not assign tenant from OIDC for user %s: %v", u.ID, err)
+	}
+
 	// If user exists, check if account is in a valid state
 	account, err := h.Model.GetUserById(u.ID)
 	if err != nil {
@@ -439,6 +488,10 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		if err := h.CreateSession(c, account); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
+		}
+
+		if oidcInfo.PictureURL != "" {
+			h.SessionManager.Manager.Put(c.Request().Context(), "picture", oidcInfo.PictureURL)
 		}
 
 		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
@@ -537,9 +590,6 @@ func GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error)
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	// Debug
-	// log.Println(string([]byte(body)))
-
 	if err := json.Unmarshal(body, &user); err != nil {
 		log.Printf("[ERROR]: could not decode response from user info endpoint, reason: %v", err)
 		return nil, err
@@ -553,9 +603,31 @@ func GetUserInfo(accessToken string, endpoint string) (*UserInfoResponse, error)
 	return &user, nil
 }
 
-func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authentication) (*ZitadelRolesResponse, error) {
+// parseIDTokenClaims parses a JWT ID token and returns the claims without signature verification
+// (signature was already verified by the OIDC provider exchange)
+func parseIDTokenClaims(idToken string) (map[string]interface{}, error) {
+	parts := strings.Split(idToken, ".")
+	if len(parts) != 3 {
+		return nil, errors.New("invalid JWT format")
+	}
+
+	// Decode the payload (second part)
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, fmt.Errorf("could not decode JWT payload: %w", err)
+	}
+
+	var claims map[string]interface{}
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return nil, fmt.Errorf("could not parse JWT claims: %w", err)
+	}
+
+	return claims, nil
+}
+
+func (h *Handler) GetOIDCUserRoles(accessToken string, settings *ent.Authentication) (*OIDCRolesResponse, error) {
 	u := fmt.Sprintf("%s/auth/v1/permissions/me/_search", settings.OIDCIssuerURL)
-	roles := ZitadelRolesResponse{}
+	roles := OIDCRolesResponse{}
 
 	// create request
 	req, err := http.NewRequest("POST", u, nil)
@@ -597,4 +669,179 @@ func (h *Handler) ZitadelGetUserRoles(accessToken string, settings *ent.Authenti
 	}
 
 	return &roles, nil
+}
+
+// AssignTenantFromOIDC assigns a user to a tenant based on OIDC provider information.
+// Strategy 1: Uses the org ID to find the matching tenant (e.g. Zitadel resource owner ID).
+// Strategy 2: Uses groups in format "openuem:<org>:<role>" (e.g. Authelia).
+func (h *Handler) AssignTenantFromOIDC(userID string, info OIDCTenantInfo, settings *ent.Authentication) error {
+	// Strategy 1: Org ID mapping (preferred)
+	if info.OrgID != "" {
+		return h.assignTenantByOrgID(userID, info.OrgID, info.Roles, settings)
+	}
+
+	// Strategy 2: Generic OIDC groups (fallback for Authelia etc.)
+	if len(info.Groups) > 0 {
+		return h.assignTenantByGroups(userID, info.Groups, settings)
+	}
+
+	// No org ID or groups found - user may be manually assigned to tenants
+	return nil
+}
+
+// assignTenantByOrgID maps OIDC org ID to a tenant and assigns the user with the correct role
+func (h *Handler) assignTenantByOrgID(userID, orgID string, roles []string, settings *ent.Authentication) error {
+	t, err := h.Model.GetTenantByOIDCOrgID(orgID)
+	if err != nil {
+		log.Printf("[WARN]: no tenant found for OIDC org ID '%s', skipping assignment", orgID)
+		return nil
+	}
+
+	// Determine role from OIDC roles using configured role names from settings
+	role := h.resolveOIDCRoleFromSettings(roles, settings)
+
+	// Check if user is already assigned
+	hasAccess, _ := h.Model.UserHasAccessToTenant(userID, t.ID)
+	if hasAccess {
+		// Update role if changed
+		currentRole, err := h.Model.GetUserRoleInTenant(userID, t.ID)
+		if err == nil && currentRole != role {
+			if err := h.Model.UpdateUserTenantRole(userID, t.ID, role); err != nil {
+				log.Printf("[ERROR]: could not update role for user %s in tenant %d: %v", userID, t.ID, err)
+			} else {
+				log.Printf("[INFO]: updated user %s role to %s in tenant '%s' via OIDC org mapping", userID, role, t.Description)
+			}
+		}
+	} else {
+		// New assignment
+		if err := h.Model.AssignUserToTenant(userID, t.ID, role, true); err != nil {
+			log.Printf("[ERROR]: could not assign user %s to tenant '%s': %v", userID, t.Description, err)
+			return err
+		}
+		log.Printf("[INFO]: assigned user %s as %s to tenant '%s' via OIDC org ID '%s'", userID, role, t.Description, orgID)
+	}
+	return nil
+}
+
+// userHasAllowedOIDCRole checks if the user has any of the configured OIDC roles/groups
+// Returns true if no roles are configured (allow all), or if user has at least one matching role
+func (h *Handler) userHasAllowedOIDCRole(userRoles []string, settings *ent.Authentication) bool {
+	// If no roles are configured, allow all users
+	if settings.OIDCRoleAdmin == "" && settings.OIDCRoleOperator == "" && settings.OIDCRoleUser == "" {
+		return true
+	}
+
+	// Check if user has any of the configured roles
+	for _, role := range userRoles {
+		if settings.OIDCRoleAdmin != "" && role == settings.OIDCRoleAdmin {
+			return true
+		}
+		if settings.OIDCRoleOperator != "" && role == settings.OIDCRoleOperator {
+			return true
+		}
+		if settings.OIDCRoleUser != "" && role == settings.OIDCRoleUser {
+			return true
+		}
+	}
+
+	return false
+}
+
+// resolveOIDCRoleFromSettings maps user's OIDC roles to OpenUEM role based on authentication settings
+// Returns the highest privilege role the user has (admin > operator > user)
+func (h *Handler) resolveOIDCRoleFromSettings(userRoles []string, settings *ent.Authentication) models.UserTenantRole {
+	hasAdmin := false
+	hasOperator := false
+	hasUser := false
+
+	for _, role := range userRoles {
+		if settings.OIDCRoleAdmin != "" && role == settings.OIDCRoleAdmin {
+			hasAdmin = true
+		}
+		if settings.OIDCRoleOperator != "" && role == settings.OIDCRoleOperator {
+			hasOperator = true
+		}
+		if settings.OIDCRoleUser != "" && role == settings.OIDCRoleUser {
+			hasUser = true
+		}
+	}
+
+	// Return highest privilege role
+	if hasAdmin {
+		return models.UserTenantRoleAdmin
+	}
+	if hasOperator {
+		return models.UserTenantRoleOperator
+	}
+	if hasUser {
+		return models.UserTenantRoleUser
+	}
+
+	// Default to user role
+	return models.UserTenantRoleUser
+}
+
+// assignTenantByGroups handles generic OIDC group-based tenant assignment (Authelia etc.)
+// Expected group format: openuem:<organization>:<role>
+func (h *Handler) assignTenantByGroups(userID string, groups []string, settings *ent.Authentication) error {
+	for _, group := range groups {
+		parts := strings.Split(group, ":")
+		if len(parts) != 3 || parts[0] != "openuem" {
+			continue
+		}
+
+		orgName := parts[1]
+		roleName := parts[2]
+
+		// Resolve role using configured settings or fallback to standard names
+		var role models.UserTenantRole
+		var roleFound bool
+		if settings.OIDCRoleAdmin != "" && roleName == settings.OIDCRoleAdmin {
+			role = models.UserTenantRoleAdmin
+			roleFound = true
+		} else if settings.OIDCRoleOperator != "" && roleName == settings.OIDCRoleOperator {
+			role = models.UserTenantRoleOperator
+			roleFound = true
+		} else if settings.OIDCRoleUser != "" && roleName == settings.OIDCRoleUser {
+			role = models.UserTenantRoleUser
+			roleFound = true
+		}
+
+		// Fallback to standard role names if no settings match
+		if !roleFound {
+			switch roleName {
+			case "admin":
+				role = models.UserTenantRoleAdmin
+			case "operator":
+				role = models.UserTenantRoleOperator
+			case "user":
+				role = models.UserTenantRoleUser
+			default:
+				continue
+			}
+		}
+
+		t, err := h.Model.GetTenantByName(orgName)
+		if err != nil {
+			log.Printf("[WARN]: organization '%s' from OIDC group not found, skipping", orgName)
+			continue
+		}
+
+		hasAccess, _ := h.Model.UserHasAccessToTenant(userID, t.ID)
+		if hasAccess {
+			currentRole, err := h.Model.GetUserRoleInTenant(userID, t.ID)
+			if err == nil && currentRole != role {
+				if err := h.Model.UpdateUserTenantRole(userID, t.ID, role); err != nil {
+					log.Printf("[ERROR]: could not update role for user %s in tenant %d: %v", userID, t.ID, err)
+				}
+			}
+		} else {
+			if err := h.Model.AssignUserToTenant(userID, t.ID, role, true); err != nil {
+				log.Printf("[ERROR]: could not assign user %s to org '%s': %v", userID, orgName, err)
+				continue
+			}
+			log.Printf("[INFO]: assigned user %s as %s to '%s' from OIDC group", userID, role, orgName)
+		}
+	}
+	return nil
 }

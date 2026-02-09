@@ -3,9 +3,11 @@ package layout
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/helpers"
 )
 
-templ Login(csrfToken string) {
+templ Login(csrfToken string, branding *ent.Branding) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -18,10 +20,18 @@ templ Login(csrfToken string) {
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
 			<title>OpenUEM | { i18n.T(ctx, "Login") }</title>
+			if branding != nil && branding.LogoSmall != "" {
+				<link rel="icon" type="image/png" href={ templ.SafeURL(branding.LogoSmall) }/>
+			} else {
+				<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+			}
 			<link rel="stylesheet" href="/assets/css/remixicon.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/simple-icons.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/main.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/flag-icons.min.css" type="text/css"/>
+			if branding != nil && branding.PrimaryColor != "" {
+				@templ.Raw(helpers.GenerateBrandingCSS(branding.PrimaryColor))
+			}
 			<script src="/assets/js/_hyperscript.min.js"></script>
 			<script src="/assets/js/core.iife.js" type="module"></script>
 			<script src="/assets/js/icon.iife.js" type="module"></script>

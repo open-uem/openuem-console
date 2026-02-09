@@ -125,7 +125,13 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 
 	currentSite := sites[0]
 
-	s, err := h.Model.GetSite(currentSite.ID)
+	var tenantID int
+	tenantID, err = strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.invalid_tenant_id"), true))
+	}
+
+	s, err := h.Model.GetSite(currentSite.ID, tenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_site_info"), true))
 	}
@@ -136,7 +142,8 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 
 	currentTenant := s.Edges.Tenant
 
-	allTenants, err := h.Model.GetTenants()
+	username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
+	allTenants, err := h.Model.GetTenantsForUser(username)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
 	}
@@ -155,7 +162,7 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	tenantID, err = strconv.Atoi(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
 	}

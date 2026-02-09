@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -113,7 +114,21 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data.NOpenUEMUsers, err = h.Model.CountAllUsers(filters.UserFilter{})
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if tenantID == -1 {
+		// Global admin view - use main tenant
+		mainTenant, err := h.Model.GetMainTenant()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		tenantID = mainTenant.ID
+	}
+
+	data.NOpenUEMUsers, err = h.Model.CountAllUsers(filters.UserFilter{}, tenantID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

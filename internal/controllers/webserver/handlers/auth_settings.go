@@ -24,7 +24,9 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 		oidcProvider := c.FormValue("authentication-oidc-provider")
 		oidcServer := c.FormValue("authentication-oidc-server")
 		oidcClientID := c.FormValue("authentication-oidc-client-id")
-		oidcRole := c.FormValue("authentication-oidc-role")
+		oidcRoleAdmin := c.FormValue("authentication-oidc-role-admin")
+		oidcRoleOperator := c.FormValue("authentication-oidc-role-operator")
+		oidcRoleUser := c.FormValue("authentication-oidc-role-user")
 
 		useCertificates, err := strconv.ParseBool(c.FormValue("authentication-use-certificates"))
 		if err != nil {
@@ -68,7 +70,9 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			oidcProvider = ""
 			oidcServer = ""
 			oidcClientID = ""
-			oidcRole = ""
+			oidcRoleAdmin = ""
+			oidcRoleOperator = ""
+			oidcRoleUser = ""
 		}
 
 		autoCreate, err := strconv.ParseBool(c.FormValue("authentication-oidc-auto-create"))
@@ -94,11 +98,11 @@ func (h *Handler) AuthenticationSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.client_id_is_required"), true))
 		}
 
-		if useOIDC && (autoCreate || autoApprove) && oidcRole == "" {
+		if useOIDC && (autoCreate || autoApprove) && oidcRoleAdmin == "" && oidcRoleOperator == "" && oidcRoleUser == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.role_required"), true))
 		}
 
-		if err := h.Model.SaveAuthenticationSettings(useCertificates, allowRegister, useOIDC, oidcProvider, oidcServer, oidcClientID, oidcRole, autoCreate, autoApprove, usePasswd); err != nil {
+		if err := h.Model.SaveAuthenticationSettings(useCertificates, allowRegister, useOIDC, oidcProvider, oidcServer, oidcClientID, oidcRoleAdmin, oidcRoleOperator, oidcRoleUser, autoCreate, autoApprove, usePasswd); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.settings_not_saved", err.Error()), true))
 		}
 

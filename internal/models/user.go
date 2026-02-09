@@ -13,14 +13,20 @@ import (
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/recoverycode"
 	"github.com/open-uem/ent/user"
+	"github.com/open-uem/ent/usertenant"
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-func (m *Model) CountAllUsers(f filters.UserFilter) (int, error) {
+func (m *Model) CountAllUsers(f filters.UserFilter, tenantID int) (int, error) {
 	query := m.Client.User.Query()
+
+	// Filter by tenant if specified, otherwise show all users (global admin)
+	if tenantID > 0 {
+		query.Where(user.HasUserTenantsWith(usertenant.TenantID(tenantID)))
+	}
 
 	applyUsersFilter(query, f)
 
@@ -31,8 +37,17 @@ func (m *Model) CountAllUsers(f filters.UserFilter) (int, error) {
 	return count, nil
 }
 
-func (m *Model) GetUsersByPage(p partials.PaginationAndSort, f filters.UserFilter) ([]*ent.User, error) {
+func (m *Model) GetAllUsers() ([]*ent.User, error) {
+	return m.Client.User.Query().All(context.Background())
+}
+
+func (m *Model) GetUsersByPage(p partials.PaginationAndSort, f filters.UserFilter, tenantID int) ([]*ent.User, error) {
 	query := m.Client.User.Query()
+
+	// Filter by tenant if specified, otherwise show all users (global admin)
+	if tenantID > 0 {
+		query.Where(user.HasUserTenantsWith(usertenant.TenantID(tenantID)))
+	}
 
 	applyUsersFilter(query, f)
 

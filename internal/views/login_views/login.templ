@@ -7,18 +7,32 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 )
 
-templ Login(authSettings *ent.Authentication) {
+templ Login(authSettings *ent.Authentication, branding *ent.Branding) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
-				<img
-					src="/assets/img/openuem.png"
-					alt="OpenUEM Logo"
-					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
-				/>
+				if branding != nil && branding.LogoLight != "" {
+					<img
+						src={ branding.LogoLight }
+						alt="Logo"
+						class="w-1/2 object-cover mx-auto print:hidden"
+					/>
+				} else {
+					<img
+						src="/assets/img/openuem.png"
+						alt="OpenUEM Logo"
+						class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+					/>
+				}
 				<div id="login" class="flex flex-col gap-8">
 					<div class="grid gap-2 text-center">
-						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Welcome") }</h1>
+						<h1 class="text-2xl font-bold">
+							if branding != nil && branding.LoginWelcomeText != "" {
+								{ branding.LoginWelcomeText }
+							} else {
+								{ i18n.T(ctx, "Welcome") }
+							}
+						</h1>
 					</div>
 					<div class="flex flex-col gap-16">
 						if authSettings.UsePasswd {
@@ -66,11 +80,19 @@ templ Login(authSettings *ent.Authentication) {
 			</div>
 		</div>
 		<div class="flex-1 w-1/2 print:hidden">
-			<img
-				src="/assets/img/computers.jpg"
-				alt="Image"
-				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
-			/>
+			if branding != nil && branding.LoginBackgroundImage != "" {
+				<img
+					src={ branding.LoginBackgroundImage }
+					alt="Background"
+					class="h-full w-full object-cover"
+				/>
+			} else {
+				<img
+					src="/assets/img/computers.jpg"
+					alt="Image"
+					class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+				/>
+			}
 		</div>
 	</div>
 }
@@ -147,15 +169,23 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 	</form>
 }
 
-templ ChangePassword() {
+templ ChangePassword(branding *ent.Branding) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
-				<img
-					src="/assets/img/openuem.png"
-					alt="OpenUEM Logo"
-					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
-				/>
+				if branding != nil && branding.LogoLight != "" {
+					<img
+						src={ branding.LogoLight }
+						alt="Logo"
+						class="w-1/2 object-cover mx-auto print:hidden"
+					/>
+				} else {
+					<img
+						src="/assets/img/openuem.png"
+						alt="OpenUEM Logo"
+						class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+					/>
+				}
 				<div id="login" class="grid gap-6">
 					<div class="flex flex-col gap-2">
 						<div class="grid gap-2 text-center">
@@ -232,24 +262,40 @@ templ ChangePassword() {
 			</div>
 		</div>
 		<div class="flex-1 w-1/2 print:hidden">
-			<img
-				src="/assets/img/computers.jpg"
-				alt="Image"
-				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
-			/>
+			if branding != nil && branding.LoginBackgroundImage != "" {
+				<img
+					src={ branding.LoginBackgroundImage }
+					alt="Background"
+					class="h-full w-full object-cover"
+				/>
+			} else {
+				<img
+					src="/assets/img/computers.jpg"
+					alt="Image"
+					class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+				/>
+			}
 		</div>
 	</div>
 }
 
-templ LostPassword() {
+templ LostPassword(branding *ent.Branding) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
-				<img
-					src="/assets/img/openuem.png"
-					alt="OpenUEM Logo"
-					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
-				/>
+				if branding != nil && branding.LogoLight != "" {
+					<img
+						src={ branding.LogoLight }
+						alt="Logo"
+						class="w-1/2 object-cover mx-auto print:hidden"
+					/>
+				} else {
+					<img
+						src="/assets/img/openuem.png"
+						alt="OpenUEM Logo"
+						class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+					/>
+				}
 				<div id="login" class="flex flex-col gap-8">
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
@@ -283,11 +329,19 @@ templ LostPassword() {
 			</div>
 		</div>
 		<div class="flex-1 w-1/2 print:hidden">
-			<img
-				src="/assets/img/computers.jpg"
-				alt="Image"
-				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
-			/>
+			if branding != nil && branding.LoginBackgroundImage != "" {
+				<img
+					src={ branding.LoginBackgroundImage }
+					alt="Background"
+					class="h-full w-full object-cover"
+				/>
+			} else {
+				<img
+					src="/assets/img/computers.jpg"
+					alt="Image"
+					class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+				/>
+			}
 		</div>
 	</div>
 }
@@ -340,7 +394,7 @@ templ LostPasswordCode(email string) {
 	</div>
 }
 
-templ ShowRecoveryCodes(codes string, url string) {
+templ ShowRecoveryCodes(codes string, url templ.SafeURL) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.recovery_codes_title") }</h1>
@@ -366,7 +420,7 @@ templ ShowRecoveryCodes(codes string, url string) {
 			<a
 				class="uk-button uk-button-primary text-white flex gap-2 print:hidden"
 				href={ url }
-				hx-get={ url }
+				hx-get={ string(url) }
 				hx-push-url="false"
 				hx-target="body"
 				hx-swap="outerHTML"
@@ -547,15 +601,23 @@ templ EnterRecoveryCode() {
 	</div>
 }
 
-templ Enter2FA(username string) {
+templ Enter2FA(username string, branding *ent.Branding) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
-				<img
-					src="/assets/img/openuem.png"
-					alt="OpenUEM Logo"
-					class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
-				/>
+				if branding != nil && branding.LogoLight != "" {
+					<img
+						src={ branding.LogoLight }
+						alt="Logo"
+						class="w-1/2 object-cover mx-auto print:hidden"
+					/>
+				} else {
+					<img
+						src="/assets/img/openuem.png"
+						alt="OpenUEM Logo"
+						class="w-1/2 object-cover dark:brightness-[0.8] dark:grayscale mx-auto print:hidden"
+					/>
+				}
 				<div id="login" class="flex flex-col gap-8">
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
@@ -565,17 +627,25 @@ templ Enter2FA(username string) {
 			</div>
 		</div>
 		<div class="flex-1 w-1/2 print:hidden">
-			<img
-				src="/assets/img/computers.jpg"
-				alt="Image"
-				class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
-			/>
+			if branding != nil && branding.LoginBackgroundImage != "" {
+				<img
+					src={ branding.LoginBackgroundImage }
+					alt="Background"
+					class="h-full w-full object-cover"
+				/>
+			} else {
+				<img
+					src="/assets/img/computers.jpg"
+					alt="Image"
+					class="h-full w-full object-cover dark:brightness-[0.5] dark:grayscale"
+				/>
+			}
 		</div>
 	</div>
 }
 
-templ LoginIndex(cmp templ.Component, csrfToken string) {
-	@layout.Login(csrfToken) {
+templ LoginIndex(cmp templ.Component, csrfToken string, branding *ent.Branding) {
+	@layout.Login(csrfToken, branding) {
 		@cmp
 	}
 }
