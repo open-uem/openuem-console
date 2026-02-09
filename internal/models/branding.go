@@ -162,3 +162,41 @@ func (m *Model) DeleteLoginBackgroundImage() error {
 		ClearLoginBackgroundImage().
 		Exec(context.Background())
 }
+
+func (m *Model) UpdateShowVersion(show bool) error {
+	b, err := m.GetOrCreateBranding()
+	if err != nil {
+		return err
+	}
+	return m.Client.Branding.UpdateOneID(b.ID).
+		SetShowVersion(show).
+		Exec(context.Background())
+}
+
+func (m *Model) UpdateBugReportLink(link string) error {
+	b, err := m.GetOrCreateBranding()
+	if err != nil {
+		return err
+	}
+	update := m.Client.Branding.UpdateOneID(b.ID)
+	if link == "" {
+		update = update.ClearBugReportLink()
+	} else {
+		update = update.SetBugReportLink(link)
+	}
+	return update.Exec(context.Background())
+}
+
+func (m *Model) UpdateHelpLink(link string) error {
+	b, err := m.GetOrCreateBranding()
+	if err != nil {
+		return err
+	}
+	update := m.Client.Branding.UpdateOneID(b.ID)
+	if link == "" {
+		update = update.ClearHelpLink()
+	} else {
+		update = update.SetHelpLink(link)
+	}
+	return update.Exec(context.Background())
+}

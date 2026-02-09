@@ -248,6 +248,53 @@ func (h *Handler) renderBrandingWithSuccess(c echo.Context, message string) erro
 	return RenderView(c, admin_views.BrandingSettingsIndex(" | Branding", admin_views.BrandingSettings(c, branding, commonInfo, message), commonInfo))
 }
 
+// PostBrandingShowVersion handles POST /admin/branding/show-version
+func (h *Handler) PostBrandingShowVersion(c echo.Context) error {
+	showVersion := c.FormValue("show_version") == "on"
+	if err := h.Model.UpdateShowVersion(showVersion); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+	c.Response().Header().Set("HX-Redirect", "/admin/branding")
+	return c.NoContent(http.StatusOK)
+}
+
+// PostBrandingBugReportLink handles POST /admin/branding/bug-report-link
+func (h *Handler) PostBrandingBugReportLink(c echo.Context) error {
+	link := strings.TrimSpace(c.FormValue("bug_report_link"))
+	if link != "" && !isValidLinkOrEmail(link) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "branding.invalid_link"), true))
+	}
+	if err := h.Model.UpdateBugReportLink(link); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+	return h.renderBrandingWithSuccess(c, i18n.T(c.Request().Context(), "branding.saved"))
+}
+
+// PostBrandingHelpLink handles POST /admin/branding/help-link
+func (h *Handler) PostBrandingHelpLink(c echo.Context) error {
+	link := strings.TrimSpace(c.FormValue("help_link"))
+	if link != "" && !isValidLinkOrEmail(link) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "branding.invalid_link"), true))
+	}
+	if err := h.Model.UpdateHelpLink(link); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+	return h.renderBrandingWithSuccess(c, i18n.T(c.Request().Context(), "branding.saved"))
+}
+
+func isValidLinkOrEmail(link string) bool {
+	if strings.HasPrefix(link, "https://") || strings.HasPrefix(link, "http://") {
+		return true
+	}
+	if strings.HasPrefix(link, "mailto:") {
+		return true
+	}
+	if strings.Contains(link, "@") && strings.Contains(link, ".") {
+		return true
+	}
+	return false
+}
+
 // GetBrandingForViews returns branding data for use in views
 func (h *Handler) GetBrandingForViews() (*ent.Branding, error) {
 	return h.Model.GetOrCreateBranding()

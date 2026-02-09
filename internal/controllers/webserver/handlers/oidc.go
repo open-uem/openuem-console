@@ -48,6 +48,7 @@ type UserInfoResponse struct {
 	Email             string   `json:"email,omitempty"`
 	EmailVerified     bool     `json:"email_verified,omitempty"`
 	Phone             string   `json:"phone_number,omitempty"`
+	Picture           string   `json:"picture,omitempty"`
 	Error             string   `json:"error,omitempty"`
 	ErrorDescription  string   `json:"error_description,omitempty"`
 	Groups []string `json:"groups"`
@@ -242,9 +243,10 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	// Build OIDC info for tenant assignment
 	oidcInfo := OIDCTenantInfo{
-		OrgID:  orgID,
-		Roles:  oidcRoles,
-		Groups: u.Groups,
+		OrgID:      orgID,
+		Roles:      oidcRoles,
+		Groups:     u.Groups,
+		PictureURL: u.Picture,
 	}
 
 	// Manage session and assign tenant
@@ -441,9 +443,10 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 
 // OIDCTenantInfo contains information from the OIDC provider for tenant assignment
 type OIDCTenantInfo struct {
-	OrgID  string   // Organization ID from OIDC provider (e.g. Zitadel resource owner)
-	Roles  []string // Project roles from OIDC provider (e.g. "openuem_admin")
-	Groups []string // OIDC groups (e.g. Authelia groups)
+	OrgID      string   // Organization ID from OIDC provider (e.g. Zitadel resource owner)
+	Roles      []string // Project roles from OIDC provider (e.g. "openuem_admin")
+	Groups     []string // OIDC groups (e.g. Authelia groups)
+	PictureURL string   // Profile picture URL from OIDC provider
 }
 
 func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User, oidcInfo OIDCTenantInfo) error {
@@ -485,6 +488,10 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User, oidcInfo OIDCTe
 		if err := h.CreateSession(c, account); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
+		}
+
+		if oidcInfo.PictureURL != "" {
+			h.SessionManager.Manager.Put(c.Request().Context(), "picture", oidcInfo.PictureURL)
 		}
 
 		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {

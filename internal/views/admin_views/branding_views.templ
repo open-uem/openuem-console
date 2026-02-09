@@ -239,6 +239,84 @@ templ BrandingSettings(c echo.Context, branding *ent.Branding, commonInfo *parti
 									</div>
 								</td>
 							</tr>
+							// Show Version
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.show_version") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.show_version_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2 items-center">
+										<label class="flex items-center gap-2 cursor-pointer">
+											<input
+												type="checkbox"
+												name="show_version"
+												class="uk-checkbox"
+												checked?={ branding != nil && branding.ShowVersion }
+												hx-post="/admin/branding/show-version"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												hx-include="this"
+											/>
+										</label>
+									</form>
+								</td>
+							</tr>
+							// Bug Report Link
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.bug_report_link") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.bug_report_link_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="bug_report_link"
+											value={ getBrandingValue(branding, "bug_report_link", "") }
+											class="uk-input"
+											placeholder="https://... or email@..."
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/bug-report-link"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-4"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							// Help Link
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.help_link") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.help_link_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="help_link"
+											value={ getBrandingValue(branding, "help_link", "") }
+											class="uk-input"
+											placeholder="https://... or email@..."
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/help-link"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-5"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-5" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -264,6 +342,14 @@ func getBrandingValue(b *ent.Branding, field string, defaultValue string) string
 	case "login_welcome_text":
 		if b.LoginWelcomeText != "" {
 			return b.LoginWelcomeText
+		}
+	case "bug_report_link":
+		if b.BugReportLink != "" {
+			return b.BugReportLink
+		}
+	case "help_link":
+		if b.HelpLink != "" {
+			return b.HelpLink
 		}
 	}
 	return defaultValue

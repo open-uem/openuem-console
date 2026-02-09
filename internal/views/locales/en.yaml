@@ -812,6 +812,13 @@ en:
     no_file_selected: "Please select a file to upload"
     invalid_image: "Invalid image file. Please upload a PNG, JPEG, or SVG file."
     file_too_large: "File is too large. Maximum size is 2MB for logos and 5MB for background images."
+    show_version: "Show Version"
+    show_version_description: "Display the application version in the header."
+    bug_report_link: "Bug Report Link"
+    bug_report_link_description: "URL or email address for bug reports. Leave empty to hide the button."
+    help_link: "Help Link"
+    help_link_description: "URL or email address for help/documentation. Leave empty to hide the button."
+    invalid_link: "Invalid link. Please enter a valid URL (https://...) or email address."
   smtp:
     title: "SMTP"
     description: "Configure your SMTP provider in order to send email notifications."

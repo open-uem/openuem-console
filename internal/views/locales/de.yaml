@@ -812,6 +812,13 @@ de:
     no_file_selected: "Bitte wählen Sie eine Datei zum Hochladen"
     invalid_image: "Ungültige Bilddatei. Bitte laden Sie eine PNG-, JPEG- oder SVG-Datei hoch."
     file_too_large: "Datei zu groß. Maximale Größe: 2MB für Logos, 5MB für Hintergrundbilder."
+    show_version: "Version anzeigen"
+    show_version_description: "Zeigt die Anwendungsversion im Header an."
+    bug_report_link: "Fehlerbericht-Link"
+    bug_report_link_description: "URL oder E-Mail-Adresse für Fehlerberichte. Leer lassen, um den Button auszublenden."
+    help_link: "Hilfe-Link"
+    help_link_description: "URL oder E-Mail-Adresse für Hilfe/Dokumentation. Leer lassen, um den Button auszublenden."
+    invalid_link: "Ungültiger Link. Bitte geben Sie eine gültige URL (https://...) oder E-Mail-Adresse ein."
   smtp:
     title: "SMTP"
     description: "Konfigurieren Sie Ihren SMTP-Anbieter, um E-Mail-Benachrichtigungen zu senden."

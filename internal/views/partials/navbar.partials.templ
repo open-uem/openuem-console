@@ -2,8 +2,33 @@ package partials
 
 import (
 	"fmt"
+	"strings"
 	"github.com/invopop/ctxi18n/i18n"
 )
+
+func getBugReportLink(commonInfo *CommonInfo) string {
+	if commonInfo != nil && commonInfo.Branding != nil {
+		return commonInfo.Branding.BugReportLink
+	}
+	return "https://github.com/open-uem/openuem-console/issues/new/choose"
+}
+
+func getHelpLink(commonInfo *CommonInfo) string {
+	if commonInfo != nil && commonInfo.Branding != nil {
+		return commonInfo.Branding.HelpLink
+	}
+	return "https://openuem.eu/docs/intro"
+}
+
+func formatLink(link string) string {
+	if strings.HasPrefix(link, "http://") || strings.HasPrefix(link, "https://") || strings.HasPrefix(link, "mailto:") {
+		return link
+	}
+	if strings.Contains(link, "@") {
+		return "mailto:" + link
+	}
+	return link
+}
 
 templ NavBar(active string, commonInfo *CommonInfo) {
 	<nav id="navbar" hx-history="false" class="uk-flex uk-flex-between@s h-full flex-col items-center px-2 sm:py-5">
@@ -115,24 +140,28 @@ templ NavBar(active string, commonInfo *CommonInfo) {
 					<span class="sr-only">{ i18n.T(ctx, "Settings") }</span>
 				</a>
 			}
-			<a
-				href="https://github.com/open-uem/openuem-console/issues/new/choose"
-				target="_blank"
-				rel="noopener"
-				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Bugs")) }
-				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
-			>
-				<uk-icon hx-history="false" icon="bug" custom-class="h-5 w-5" uk-cloack></uk-icon>
-			</a>
-			<a
-				href="https://openuem.eu/docs/intro"
-				target="_blank"
-				rel="noopener"
-				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Help")) }
-				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
-			>
-				<uk-icon hx-history="false" icon="circle-help" custom-class="h-5 w-5" uk-cloack></uk-icon>
-			</a>
+			if getBugReportLink(commonInfo) != "" {
+				<a
+					href={ templ.URL(formatLink(getBugReportLink(commonInfo))) }
+					target="_blank"
+					rel="noopener"
+					uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Bugs")) }
+					class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
+				>
+					<uk-icon hx-history="false" icon="bug" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</a>
+			}
+			if getHelpLink(commonInfo) != "" {
+				<a
+					href={ templ.URL(formatLink(getHelpLink(commonInfo))) }
+					target="_blank"
+					rel="noopener"
+					uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Help")) }
+					class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
+				>
+					<uk-icon hx-history="false" icon="circle-help" custom-class="h-5 w-5" uk-cloack></uk-icon>
+				</a>
+			}
 			<a
 				href="/logout"
 				hx-post="/logout"
