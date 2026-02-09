@@ -29,6 +29,24 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars: []string{"SFTP_KEY_FILENAME"},
 		},
 		&cli.StringFlag{
+			Name:    "agent-cert",
+			Value:   "certificates/agent.cer",
+			Usage:   "the path to the generic agent certificate file in PEM format",
+			EnvVars: []string{"AGENT_CERT_FILENAME"},
+		},
+		&cli.StringFlag{
+			Name:    "agent-key",
+			Value:   "certificates/agent.key",
+			Usage:   "the path to the generic agent private key file in PEM format",
+			EnvVars: []string{"AGENT_KEY_FILENAME"},
+		},
+		&cli.StringFlag{
+			Name:    "sftp-cert",
+			Value:   "certificates/sftp.cer",
+			Usage:   "the path to the SFTP client certificate file in PEM format",
+			EnvVars: []string{"SFTP_CERT_FILENAME"},
+		},
+		&cli.StringFlag{
 			Name:     "nats-servers",
 			Usage:    "comma-separated list of NATS servers urls e.g (tls://localhost:4433)",
 			EnvVars:  []string{"NATS_SERVERS"},

@@ -93,17 +93,28 @@ templ NavBar(active string, commonInfo *CommonInfo) {
 			</a>
 		</div>
 		<div class="flex flex-col gap-4">
-			<a
-				href="/admin"
-				hx-get="/admin"
-				hx-push-url="true"
-				hx-target="body"
-				uk-tooltip="title: Admin; pos: right"
-				class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "admin"), templ.KV("text-muted-foreground hover:text-foreground", active != "admin") }
-			>
-				<uk-icon hx-history="false" icon="settings" custom-class="h-5 w-5" uk-cloack></uk-icon>
-				<span class="sr-only">Admin</span>
-			</a>
+			// Settings icon - visible for:
+			// - Main tenant admins (always)
+			// - Users on global config (TenantID == "-1" or empty) - they must be authorized to be here
+			// - Tenant admins and operators
+			if commonInfo.IsMainTenantAdmin || commonInfo.TenantID == "-1" || commonInfo.TenantID == "" || commonInfo.UserRole == "admin" || commonInfo.UserRole == "operator" {
+				<a
+					if commonInfo.TenantID != "" && commonInfo.TenantID != "-1" {
+						href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)) }
+						hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID))) }
+					} else {
+						href="/admin"
+						hx-get="/admin"
+					}
+					hx-push-url="true"
+					hx-target="body"
+					uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Settings")) }
+					class={ "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8", templ.KV("bg-primary text-primary-foreground", active == "admin"), templ.KV("text-muted-foreground hover:text-foreground", active != "admin") }
+				>
+					<uk-icon hx-history="false" icon="settings" custom-class="h-5 w-5" uk-cloack></uk-icon>
+					<span class="sr-only">{ i18n.T(ctx, "Settings") }</span>
+				</a>
+			}
 			<a
 				href="https://github.com/open-uem/openuem-console/issues/new/choose"
 				target="_blank"

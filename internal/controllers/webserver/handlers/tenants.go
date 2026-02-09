@@ -12,6 +12,8 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -138,7 +140,13 @@ func (h *Handler) NewTenant(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.TenantsIndex(" | Tenants", admin_views.NewTenant(c, defaultCountry, agentsExists, serversExists, commonInfo), commonInfo))
+	// Get all users for admin selection
+	users, err := h.Model.GetAllUsers()
+	if err != nil {
+		users = []*ent.User{} // Fallback to empty list
+	}
+
+	return RenderView(c, admin_views.TenantsIndex(" | Tenants", admin_views.NewTenant(c, defaultCountry, agentsExists, serversExists, users, commonInfo), commonInfo))
 }
 
 func (h *Handler) AddTenant(c echo.Context) error {
@@ -172,6 +180,31 @@ func (h *Handler) AddTenant(c echo.Context) error {
 	err = h.Model.AddTenant(name, isDefault, siteName)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.new_error"), true))
+	}
+
+	// Get the newly created tenant
+	newTenant, err := h.Model.GetTenantByName(name)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_get_tenant"), true))
+	}
+
+	// ALWAYS assign the creator as admin to the new tenant
+	currentUsername := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
+	if currentUsername != "" {
+		err = h.Model.AssignUserToTenant(currentUsername, newTenant.ID, models.UserTenantRoleAdmin, true)
+		if err != nil {
+			log.Printf("[WARN]: could not assign creator as admin to new tenant: %v", err)
+		}
+	}
+
+	// Also assign admin user if specified (different from creator)
+	adminUserID := c.FormValue("admin-user")
+	if adminUserID != "" && adminUserID != currentUsername {
+		isDefault := currentUsername == "" // Only set as default if creator wasn't assigned
+		err = h.Model.AssignUserToTenant(adminUserID, newTenant.ID, models.UserTenantRoleAdmin, isDefault)
+		if err != nil {
+			log.Printf("[WARN]: could not assign specified admin to new tenant: %v", err)
+		}
 	}
 
 	successMessage = i18n.T(c.Request().Context(), "tenants.new_success")
@@ -228,6 +261,13 @@ func (h *Handler) EditTenant(c echo.Context) error {
 		}
 
 		if err := h.Model.UpdateTenant(t.ID, name, isDefault); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), false))
+		}
+
+		// Update OIDC settings
+		oidcOrgID := c.FormValue("oidc-org-id")
+		oidcDefaultRole := c.FormValue("oidc-default-role")
+		if err := h.Model.UpdateTenantOIDC(t.ID, oidcOrgID, oidcDefaultRole); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 

@@ -2,6 +2,7 @@ package layout
 
 import (
 	"fmt"
+	"github.com/open-uem/openuem-console/internal/views/helpers"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
 )
@@ -19,11 +20,19 @@ templ Base(section string, commonInfo *partials.CommonInfo) {
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
 			<title>OpenUEM | { strings.Title(section) }</title>
+			if commonInfo.Branding != nil && commonInfo.Branding.LogoSmall != "" {
+				<link rel="icon" type="image/png" href={ templ.SafeURL(commonInfo.Branding.LogoSmall) }/>
+			} else {
+				<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+			}
 			<link rel="stylesheet" href="/assets/css/remixicon.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/simple-icons.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/markdown.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/main.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/flag-icons.min.css" type="text/css"/>
+			if commonInfo.Branding != nil && commonInfo.Branding.PrimaryColor != "" {
+				@templ.Raw(helpers.GenerateBrandingCSS(commonInfo.Branding.PrimaryColor))
+			}
 			<script src="/assets/js/_hyperscript.min.js"></script>
 			<script src="/assets/js/core.iife.js" type="module"></script>
 			<script src="/assets/js/icon.iife.js" type="module"></script>

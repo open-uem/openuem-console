@@ -17,14 +17,23 @@ import (
 
 type UserTestSuite struct {
 	suite.Suite
-	t     enttest.TestingT
-	model Model
-	p     partials.PaginationAndSort
+	t        enttest.TestingT
+	model    Model
+	p        partials.PaginationAndSort
+	tenantID int
 }
 
 func (suite *UserTestSuite) SetupTest() {
 	client := enttest.Open(suite.t, "sqlite3", "file:ent?mode=memory&_fk=1")
 	suite.model = Model{Client: client}
+
+	// Create a tenant for testing
+	tenant, err := client.Tenant.Create().
+		SetDescription("TestTenant").
+		SetIsDefault(true).
+		Save(context.Background())
+	assert.NoError(suite.T(), err)
+	suite.tenantID = tenant.ID
 
 	for i := 0; i <= 6; i++ {
 		err := client.User.Create().
@@ -37,6 +46,15 @@ func (suite *UserTestSuite) SetupTest() {
 			SetCreated(time.Now()).
 			Exec(context.Background())
 		assert.NoError(suite.T(), err)
+
+		// Assign user to tenant
+		err = client.UserTenant.Create().
+			SetUserID(fmt.Sprintf("user%d", i)).
+			SetTenantID(tenant.ID).
+			SetRole("user").
+			SetIsDefault(true).
+			Exec(context.Background())
+		assert.NoError(suite.T(), err)
 	}
 
 	suite.p = partials.PaginationAndSort{CurrentPage: 1, PageSize: 5}
@@ -44,54 +62,54 @@ func (suite *UserTestSuite) SetupTest() {
 
 func (suite *UserTestSuite) TestCountAllUsers() {
 	f := filters.UserFilter{}
-	count, err := suite.model.CountAllUsers(f)
+	count, err := suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 7, count, "should count 7 users")
 
 	f = filters.UserFilter{Username: "user6"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 1, count, "should count 1 users")
 
 	f = filters.UserFilter{Name: "User"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 7, count, "should count 7 users")
 
 	f = filters.UserFilter{Email: "user1@example.com"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 1, count, "should count 1 users")
 
 	f = filters.UserFilter{Phone: "111 111 111"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 1, count, "should count 1 users")
 
 	f = filters.UserFilter{CreatedFrom: "2024-01-01", CreatedTo: "2030-01-01"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 7, count, "should count 7 users")
 
 	f = filters.UserFilter{ModifiedFrom: "2024-01-01", ModifiedTo: "2030-01-01"}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 7, count, "should count 7 users")
 
 	f = filters.UserFilter{RegisterOptions: []string{"Register0", "Register1", "Register6"}}
-	count, err = suite.model.CountAllUsers(f)
+	count, err = suite.model.CountAllUsers(f, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 3, count, "should count 3 users")
 }
 
 func (suite *UserTestSuite) TestGetUsersByPage() {
-	users, err := suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err := suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), 5, len(users), "five users should be retrieved")
 
 	suite.p.SortBy = "uid"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0", users[0].ID, "user id should be user0")
 	assert.Equal(suite.T(), "user1", users[1].ID, "user id should be user1")
@@ -101,7 +119,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "uid"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6", users[0].ID, "user id should be user6")
 	assert.Equal(suite.T(), "user5", users[1].ID, "user id should be user5")
@@ -111,7 +129,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "User 0", users[0].Name, "user name should be User 0")
 	assert.Equal(suite.T(), "User 1", users[1].Name, "user name should be User 1")
@@ -121,7 +139,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "name"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "User 6", users[0].Name, "user name should be User 6")
 	assert.Equal(suite.T(), "User 5", users[1].Name, "user name should be User 5")
@@ -131,7 +149,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "email"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0@example.com", users[0].Email, "user email should be user0@example.com")
 	assert.Equal(suite.T(), "user1@example.com", users[1].Email, "user email should be user1@example.com")
@@ -141,7 +159,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "email"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6@example.com", users[0].Email, "user email should be user6@example.com")
 	assert.Equal(suite.T(), "user5@example.com", users[1].Email, "user email should be user5@example.com")
@@ -151,7 +169,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "phone"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "000 000 000", users[0].Phone, "user phone should be 000 000 000")
 	assert.Equal(suite.T(), "111 111 111", users[1].Phone, "user phone should be 111 111 111")
@@ -161,7 +179,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "phone"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "666 666 666", users[0].Phone, "user phone should be 666 666 666")
 	assert.Equal(suite.T(), "555 555 555", users[1].Phone, "user phone should be 555 555 555")
@@ -171,7 +189,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "country"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0", users[0].ID, "user id should be user0")
 	assert.Equal(suite.T(), "user1", users[1].ID, "user id should be user1")
@@ -181,7 +199,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "country"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6", users[0].ID, "user id should be user6")
 	assert.Equal(suite.T(), "user5", users[1].ID, "user id should be user5")
@@ -191,7 +209,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "register"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0", users[0].ID, "user id should be user0")
 	assert.Equal(suite.T(), "user1", users[1].ID, "user id should be user1")
@@ -201,7 +219,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "register"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6", users[0].ID, "user id should be user6")
 	assert.Equal(suite.T(), "user5", users[1].ID, "user id should be user5")
@@ -211,7 +229,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "created"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0", users[0].ID, "user id should be user0")
 	assert.Equal(suite.T(), "user1", users[1].ID, "user id should be user1")
@@ -221,7 +239,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "created"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6", users[0].ID, "user id should be user6")
 	assert.Equal(suite.T(), "user5", users[1].ID, "user id should be user5")
@@ -231,7 +249,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "modified"
 	suite.p.SortOrder = "asc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user0", users[0].ID, "user id should be user0")
 	assert.Equal(suite.T(), "user1", users[1].ID, "user id should be user1")
@@ -241,7 +259,7 @@ func (suite *UserTestSuite) TestGetUsersByPage() {
 
 	suite.p.SortBy = "modified"
 	suite.p.SortOrder = "desc"
-	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{})
+	users, err = suite.model.GetUsersByPage(suite.p, filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should get all users by page")
 	assert.Equal(suite.T(), "user6", users[0].ID, "user id should be user6")
 	assert.Equal(suite.T(), "user5", users[1].ID, "user id should be user5")
@@ -406,7 +424,7 @@ func (suite *UserTestSuite) TestDeleteUser() {
 	err := suite.model.DeleteUser("user6")
 	assert.NoError(suite.T(), err, "should delete user")
 
-	count, err := suite.model.CountAllUsers(filters.UserFilter{})
+	count, err := suite.model.CountAllUsers(filters.UserFilter{}, suite.tenantID)
 	assert.NoError(suite.T(), err, "should count all users")
 	assert.Equal(suite.T(), 6, count, "should count 6 users")
 }

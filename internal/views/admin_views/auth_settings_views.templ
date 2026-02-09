@@ -91,10 +91,12 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 											class="uk-select"
 											name="authentication-oidc-provider"
 											_="on change
-												set #authentication-oidc-server.value to ''   
-												set #authentication-oidc-client-id.value to ''   
-												set #authentication-oidc-role.value to ''   
-												set #authentication-oidc-keycloak-public-key.value to ''                                          
+												set #authentication-oidc-server.value to ''
+												set #authentication-oidc-client-id.value to ''
+												set #authentication-oidc-role-admin.value to ''
+												set #authentication-oidc-role-operator.value to ''
+												set #authentication-oidc-role-user.value to ''
+												set #authentication-oidc-keycloak-public-key.value to ''
                                             end"
 										>
 											<option value="" selected?={ settings.OIDCProvider == "" }>{ i18n.T(ctx, "authentication.oidc_provide_choose") }</option>
@@ -119,11 +121,25 @@ templ AuthenticationSettings(c echo.Context, settings *ent.Authentication, agent
 										<input class="uk-input" type="text" id="authentication-oidc-client-id" name="authentication-oidc-client-id" value={ settings.OIDCClientID } spellcheck="false" autocomplete="off" autofocus/>
 									</td>
 								</tr>
-								<tr id="oidc-section-role" class={ templ.KV("hidden", !settings.UseOIDC) }>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_title") }</td>
-									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_or_group_description") }</td>
+								<tr id="oidc-section-role-admin" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_admin_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_admin_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" id="authentication-oidc-role" name="authentication-oidc-role" value={ settings.OIDCRole } spellcheck="false" autocomplete="off" autofocus/>
+										<input class="uk-input" type="text" id="authentication-oidc-role-admin" name="authentication-oidc-role-admin" value={ settings.OIDCRoleAdmin } spellcheck="false" autocomplete="off"/>
+									</td>
+								</tr>
+								<tr id="oidc-section-role-operator" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_operator_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_operator_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-role-operator" name="authentication-oidc-role-operator" value={ settings.OIDCRoleOperator } spellcheck="false" autocomplete="off"/>
+									</td>
+								</tr>
+								<tr id="oidc-section-role-user" class={ templ.KV("hidden", !settings.UseOIDC) }>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_user_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "authentication.oidc_role_user_description") }</td>
+									<td class="!align-middle">
+										<input class="uk-input" type="text" id="authentication-oidc-role-user" name="authentication-oidc-role-user" value={ settings.OIDCRoleUser } spellcheck="false" autocomplete="off"/>
 									</td>
 								</tr>
 								<tr id="oidc-section-auto-create" class={ templ.KV("hidden", !settings.UseOIDC) }>

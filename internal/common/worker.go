@@ -23,6 +23,9 @@ type Worker struct {
 	ConsoleCertPath                   string
 	ConsolePrivateKeyPath             string
 	SFTPPrivateKeyPath                string
+	AgentCertPath                     string
+	AgentKeyPath                      string
+	SFTPCertPath                      string
 	JWTKey                            string
 	SessionManager                    *sessions.SessionManager
 	WebServer                         *webserver.WebServer

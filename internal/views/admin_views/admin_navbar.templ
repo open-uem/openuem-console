@@ -88,6 +88,38 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				</a>
 			</li>
 		}
+		if commonInfo.TenantID != "-1" && commonInfo.UserRole == "admin" {
+			<li class={ templ.KV("uk-active", active == "members") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/members", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/members", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-members-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-members-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "members.title") }
+				</a>
+			</li>
+		}
+		if commonInfo.TenantID != "-1" && commonInfo.UserRole == "admin" {
+			<li class={ templ.KV("uk-active", active == "enrollment") }>
+				<a
+					href={ templ.URL(fmt.Sprintf("/tenant/%s/admin/enrollment", commonInfo.TenantID)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%s/admin/enrollment", commonInfo.TenantID))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-enrollment-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-enrollment-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "enrollment.title") }
+				</a>
+			</li>
+		}
 		if commonInfo.TenantID == "-1" {
 			<li class={ templ.KV("uk-active", active == "smtp") }>
 				<a
@@ -247,5 +279,21 @@ templ ConfigNavbar(active string, agentsExists, serversExists bool, commonInfo *
 				{ i18n.T(ctx, "General Settings") }
 			</a>
 		</li>
+		if commonInfo.TenantID == "-1" {
+			<li class={ templ.KV("uk-active", active == "branding") }>
+				<a
+					href="/admin/branding"
+					hx-get="/admin/branding"
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-indicator="#admin-branding-spinner"
+					class="flex items-center gap-1"
+				>
+					<uk-icon id="admin-branding-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "branding.title") }
+				</a>
+			</li>
+		}
 	</ul>
 }
