@@ -237,7 +237,8 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 			</div>
 			<button title={ i18n.T(ctx, "Profile") } type="button" class="rounded-full uk-text-muted">
 				if GetUserPicture(ctx, commonInfo.SM) != "" {
-					<img src={ GetUserPicture(ctx, commonInfo.SM) } alt="Profile" class="h-6 w-6 rounded-full object-cover" referrerpolicy="no-referrer"/>
+					<img src={ GetUserPicture(ctx, commonInfo.SM) } alt="Profile" class="h-6 w-6 rounded-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display=''"/>
+					<uk-icon hx-history="false" icon="user-circle" custom-class="h-6 w-6" uk-cloack style="display:none"></uk-icon>
 				} else {
 					<uk-icon hx-history="false" icon="user-circle" custom-class="h-6 w-6" uk-cloack></uk-icon>
 				}
@@ -246,7 +247,8 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 				<div class="flex flex-col gap-4 px-6">
 					<div class="flex justify-center mt-4 mb-1">
 						if GetUserPicture(ctx, commonInfo.SM) != "" {
-						<img src={ GetUserPicture(ctx, commonInfo.SM) } alt="Profile" class="h-14 w-14 rounded-full object-cover" referrerpolicy="no-referrer"/>
+						<img src={ GetUserPicture(ctx, commonInfo.SM) } alt="Profile" class="h-14 w-14 rounded-full object-cover" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display=''"/>
+						<uk-icon hx-history="false" icon="circle-user" custom-class="h-14 w-14 text-green-800" uk-cloack style="display:none"></uk-icon>
 					} else {
 						<uk-icon hx-history="false" icon="circle-user" custom-class="h-14 w-14 text-green-800" uk-cloack></uk-icon>
 					}

@@ -393,7 +393,7 @@ func ReadOIDCCookie(c echo.Context, name string, secretKey string) (string, erro
 	return value, nil
 }
 
-func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
+func (h *Handler) CreateSession(c echo.Context, user *ent.User, pictureURL string) error {
 	msg := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
 	if msg != user.ID {
 		err := h.SessionManager.Manager.RenewToken(c.Request().Context())
@@ -407,6 +407,9 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		h.SessionManager.Manager.Put(c.Request().Context(), "ip-address", c.Request().RemoteAddr)
 		h.SessionManager.Manager.Put(c.Request().Context(), "usepasswd", user.Passwd)
 		h.SessionManager.Manager.Put(c.Request().Context(), "email", user.Email)
+		if pictureURL != "" {
+			h.SessionManager.Manager.Put(c.Request().Context(), "picture", pictureURL)
+		}
 		token, expiry, err := h.SessionManager.Manager.Commit(c.Request().Context())
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -422,6 +425,8 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		if err := h.Model.ConfirmLogIn(user.ID); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+	} else if pictureURL != "" {
+		h.SessionManager.Manager.Put(c.Request().Context(), "picture", pictureURL)
 	}
 
 	return nil
@@ -485,13 +490,9 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User, oidcInfo OIDCTe
 
 	// If user has been approved by admin, auto approve is on or user already logged in (register completed)
 	if account.Register == nats.REGISTER_APPROVED || settings.OIDCAutoApprove || account.Register == nats.REGISTER_COMPLETE {
-		if err := h.CreateSession(c, account); err != nil {
+		if err := h.CreateSession(c, account, oidcInfo.PictureURL); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
-		}
-
-		if oidcInfo.PictureURL != "" {
-			h.SessionManager.Manager.Put(c.Request().Context(), "picture", oidcInfo.PictureURL)
 		}
 
 		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
