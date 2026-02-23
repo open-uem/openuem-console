@@ -30,7 +30,7 @@ func (suite *SessionsTestSuite) SetupTest() {
 	}
 
 	for i := 0; i <= 6; i++ {
-		err := client.Sessions.Create().SetData([]byte(fmt.Sprintf("session%d", i))).SetExpiry(time.Now()).SetID(fmt.Sprintf("token%d", i)).SetOwnerID(fmt.Sprintf("user%d", i)).Exec(context.Background())
+		err := client.Sessions.Create().SetData(fmt.Appendf(nil, "session%d", i)).SetExpiry(time.Now()).SetID(fmt.Sprintf("token%d", i)).SetOwnerID(fmt.Sprintf("user%d", i)).Exec(context.Background())
 		assert.NoError(suite.T(), err)
 	}
 
