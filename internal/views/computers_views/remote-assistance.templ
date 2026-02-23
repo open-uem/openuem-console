@@ -286,14 +286,14 @@ templ RustDeskChecks(agent *ent.Agent, hasRustDeskSettings bool, commonInfo *par
 			</div>
 			<div class="flex gap-2">
 				if agent.Edges.Operatingsystem.Username == "" {
-					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
-					{ i18n.T(ctx, "agents.remote_assistance_no_logged_user") }
+					<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.rustdesk_no_logged_user") }
 				} else {
 					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
 					{ i18n.T(ctx, "agents.remote_assistance_has_logged_user", agent.Edges.Operatingsystem.Username ) }
 				}
 			</div>
-			if agent.RemoteAssistance && agent.HasRustdesk && agent.Edges.Operatingsystem.Username != "" {
+			if agent.RemoteAssistance && agent.HasRustdesk {
 				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
 					<a
 						class="flex gap-2 items-center uk-text-small"
