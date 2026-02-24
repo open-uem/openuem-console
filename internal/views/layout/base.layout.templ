@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+func getProductName(commonInfo *partials.CommonInfo) string {
+	if commonInfo != nil && commonInfo.Branding != nil && commonInfo.Branding.ProductName != "" {
+		return commonInfo.Branding.ProductName
+	}
+	return "OpenUEM"
+}
+
 templ Base(section string, commonInfo *partials.CommonInfo) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -19,7 +26,7 @@ templ Base(section string, commonInfo *partials.CommonInfo) {
 			/>
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
-			<title>OpenUEM | { strings.Title(section) }</title>
+			<title>{ getProductName(commonInfo) } | { strings.Title(section) }</title>
 			if commonInfo.Branding != nil && commonInfo.Branding.LogoSmall != "" {
 				<link rel="icon" type="image/png" href={ templ.SafeURL(commonInfo.Branding.LogoSmall) }/>
 			} else {

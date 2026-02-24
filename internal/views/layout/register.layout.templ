@@ -3,9 +3,17 @@ package layout
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/ent"
 )
 
-templ Register(csrfToken string) {
+func getRegisterProductName(branding *ent.Branding) string {
+	if branding != nil && branding.ProductName != "" {
+		return branding.ProductName
+	}
+	return "OpenUEM"
+}
+
+templ Register(csrfToken string, branding *ent.Branding) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -17,8 +25,12 @@ templ Register(csrfToken string) {
 			/>
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
-			<title>OpenUEM | { i18n.T(ctx, "register.button") }</title>
-			<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+			<title>{ getRegisterProductName(branding) } | { i18n.T(ctx, "register.button") }</title>
+			if branding != nil && branding.LogoSmall != "" {
+				<link rel="icon" type="image/png" href={ templ.SafeURL(branding.LogoSmall) }/>
+			} else {
+				<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+			}
 			<link rel="stylesheet" href="/assets/css/remixicon.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/simple-icons.min.css" type="text/css"/>
 			<link rel="stylesheet" href="/assets/css/main.css" type="text/css"/>

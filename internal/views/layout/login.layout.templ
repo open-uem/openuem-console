@@ -7,6 +7,13 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/helpers"
 )
 
+func getLoginProductName(branding *ent.Branding) string {
+	if branding != nil && branding.ProductName != "" {
+		return branding.ProductName
+	}
+	return "OpenUEM"
+}
+
 templ Login(csrfToken string, branding *ent.Branding) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -19,7 +26,7 @@ templ Login(csrfToken string, branding *ent.Branding) {
 			/>
 			<meta name="google" content="notranslate"/>
 			<meta name="htmx-config" content='{"selfRequestsOnly": false}'/>
-			<title>OpenUEM | { i18n.T(ctx, "Login") }</title>
+			<title>{ getLoginProductName(branding) } | { i18n.T(ctx, "Login") }</title>
 			if branding != nil && branding.LogoSmall != "" {
 				<link rel="icon" type="image/png" href={ templ.SafeURL(branding.LogoSmall) }/>
 			} else {
