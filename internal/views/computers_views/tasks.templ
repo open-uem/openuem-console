@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, reports []*ent.TaskReport, availableTasks []*ent.Task, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, successMessage string, refresh int) {
+templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, reports []*ent.TaskReport, availableTasks []*ent.Task, availableProfiles []*ent.Profile, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, successMessage string, refresh int) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -40,36 +40,57 @@ templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, repo
 				<div class="uk-card uk-card-body uk-card-default">
 					<div class="flex flex-col gap-10">
 						<div class="flex justify-between">
-							<form class="flex gap-2 w-1/2">
-								<uk-select class="w-1/2" name="task" placeholder={ i18n.T(ctx, "agents.select_task") } searchable uk-cloak>
-									for _, t := range availableTasks {
-										<option value={ fmt.Sprintf("%s-%d", t.Name, t.ID) }>{ t.Name }</option>
-									}
-								</uk-select>
-								<button
-									class="flex gap-2 uk-button uk-button-primary"
-									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
-									hx-push-url="false"
-									hx-target="#main"
-									hx-swap="outerHTML"
-									hx-indicator="#run-task-spinner"
-								>
-									@icons.Play(templ.Attributes{"class": "h-5 w-5"})
-									{ i18n.T(ctx, "agents.execute_task") }
-									<uk-icon id="run-task-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
-								</button>
-							</form>
+							<div class="flex gap-4 w-2/3">
+								<form class="flex gap-2 w-1/2">
+									<uk-select class="w-2/3" name="task" placeholder={ i18n.T(ctx, "agents.select_task") } searchable uk-cloak>
+										for _, t := range availableTasks {
+											<option value={ fmt.Sprintf("%s-%d", t.Name, t.ID) }>{ t.Name }</option>
+										}
+									</uk-select>
+									<button
+										class="flex gap-2 uk-button uk-button-primary"
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+										hx-indicator="#run-profile-spinner"
+									>
+										@icons.Play(templ.Attributes{"class": "h-5 w-5"})
+										{ i18n.T(ctx, "agents.execute_task") }
+										<uk-icon id="run-profile-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									</button>
+								</form>
+								<form class="flex gap-2 w-1/2">
+									<uk-select class="w-2/3" name="profile" placeholder={ i18n.T(ctx, "agents.select_profile") } searchable uk-cloak>
+										for _, t := range availableProfiles {
+											<option value={ fmt.Sprintf("%s-%d", t.Name, t.ID) }>{ t.Name }</option>
+										}
+									</uk-select>
+									<button
+										class="flex gap-2 uk-button uk-button-primary"
+										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runprofile", agent.ID)))) }
+										hx-push-url="false"
+										hx-target="#main"
+										hx-swap="outerHTML"
+										hx-indicator="#run-task-spinner"
+									>
+										@icons.Play(templ.Attributes{"class": "h-5 w-5"})
+										{ i18n.T(ctx, "agents.execute_profile") }
+										<uk-icon id="run-task-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+									</button>
+								</form>
+							</div>
 							<div class="flex">
 								@partials.RefreshPage(commonInfo.Translator, refresh, true)
 							</div>
 						</div>
 						<div>
 							if len(reports) > 0 {
-								@ReportDetail(reports, commonInfo)
+								@ReportDetail(agent, reports, commonInfo)
 								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", agent.ID)))), itemsPerPage)
 							} else {
 								<p class="uk-text-small uk-text-muted">
-									{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }
+									{ i18n.T(ctx, "tasks.no_task_reports_found") }
 								</p>
 							}
 						</div>
@@ -80,20 +101,36 @@ templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, repo
 	</main>
 }
 
-templ ReportDetail(reports []*ent.TaskReport, commonInfo *partials.CommonInfo) {
+templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, commonInfo *partials.CommonInfo) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 		<thead>
 			<tr>
+				<th></th>
 				<th>{ i18n.T(ctx, "Name") }</th>
 				<th>{ i18n.T(ctx, "Status") }</th>
 				<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
-				<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
-				<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
-				<th>{ i18n.T(ctx, "Profile") }</th>
+				<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
+				<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
+				<th><span class="text-nowrap">{ i18n.T(ctx, "Profile") }</span></th>
 			</tr>
 		</thead>
 		for _, report := range reports {
 			<tr>
+				<td class="items-center !align-middle">
+					<form>
+						<input type="hidden" name="task" value={ report.Edges.Task.ID }/>
+						<button
+							class="flex gap-2"
+							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
+							hx-push-url="false"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							uk-tooltip={ i18n.T(ctx, "tasks.run_task_now") }
+						>
+							<uk-icon hx-history="false" icon="square-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+						</button>
+					</form>
+				</td>
 				<td class="items-center !align-middle">
 					if report.Edges.Task != nil {
 						<a

@@ -387,6 +387,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.GET("/tenant/:tenant/site/:site/computers/:uuid/status", h.AgentStatus, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/runtask", h.RunTask, h.IsAuthenticated)
+	e.POST("/tenant/:tenant/site/:site/computers/:uuid/runprofile", h.RunProfile, h.IsAuthenticated)
 
 	e.GET("/download/:filename", h.Download, h.IsAuthenticated)
 

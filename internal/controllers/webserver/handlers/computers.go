@@ -29,6 +29,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
+	"github.com/open-uem/wingetcfg/wingetcfg"
 	"gopkg.in/yaml.v3"
 )
 
@@ -1929,13 +1930,18 @@ func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_available_tasks", err), true))
 	}
 
+	availableProfiles, err := h.Model.GetAvailableProfilesForAgent(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_available_profiles", err), true))
+	}
+
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, confirmDelete, itemsPerPage, commonInfo, netbird, offline, successMessage, refreshTime), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, availableProfiles, confirmDelete, itemsPerPage, commonInfo, netbird, offline, successMessage, refreshTime), commonInfo))
 }
 
 func (h *Handler) RunTask(c echo.Context) error {
@@ -1998,7 +2004,81 @@ func (h *Handler) RunTask(c echo.Context) error {
 		}
 	}
 
+	if t.AgentType == task.AgentTypeWindows {
+		// prepare config
+		cfg, err := createWindowsTaskConfig(t)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
+		}
+
+		// prepare request
+		config := openuem_nats.ProfileConfig{
+			ProfileID:    t.Edges.Profile.ID,
+			WinGetConfig: cfg,
+		}
+
+		data, err := yaml.Marshal(config)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_playbook", err), true))
+		}
+
+		// send request to agent
+		if _, err = h.NATSConnection.Request("agent.windowstask."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_ansible_playbook_request", err), true))
+		}
+	}
+
 	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "tasks.task_was_run_successfully"))
+}
+
+func (h *Handler) RunProfile(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if c.FormValue("profile") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.empty"), true))
+	}
+
+	pfSplitted := strings.Split(c.FormValue("profile"), "-")
+	profileID, err := strconv.Atoi(pfSplitted[len(pfSplitted)-1])
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.invalid"), true))
+	}
+
+	if _, err := h.Model.GetAgentById(agentID, commonInfo); err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if _, err := h.Model.GetProfileById(profileID, commonInfo); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.not_found", err), true))
+	}
+
+	// prepare request
+	config := openuem_nats.CfgProfiles{
+		AgentID:   agentID,
+		ProfileID: profileID,
+	}
+
+	data, err := json.Marshal(config)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_marshal_config", err), true))
+	}
+
+	// send request to agent
+	if _, err = h.NATSConnection.Request("agent.runprofile."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_send_profile_request", err), true))
+	}
+
+	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "profiles.profile_run_request_sent"))
 }
 
 func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, error) {
@@ -2181,4 +2261,110 @@ func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, er
 	}
 
 	return pb, nil
+}
+
+func createWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGetCfg, error) {
+	cfg := wingetcfg.NewWingetCfg()
+
+	taskID := fmt.Sprintf("task_%d_%d", t.ID, t.Version)
+
+	switch t.Type {
+	case task.TypeWingetInstall:
+		installPackage, err := wingetcfg.InstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(installPackage)
+	case task.TypeWingetDelete:
+		uninstallPackage, err := wingetcfg.UninstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(uninstallPackage)
+	case task.TypeAddRegistryKey:
+		registryKey, err := wingetcfg.AddRegistryKey(taskID, t.Name, t.RegistryKey)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeRemoveRegistryKey:
+		registryKey, err := wingetcfg.RemoveRegistryKey(taskID, t.Name, t.RegistryKey, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeUpdateRegistryKeyDefaultValue:
+		registryKey, err := wingetcfg.UpdateRegistryKeyDefaultValue(taskID, t.Name, t.RegistryKey, string(t.RegistryKeyValueType), t.RegistryKeyValueData, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeAddRegistryKeyValue:
+		registryKey, err := wingetcfg.AddRegistryValue(taskID, t.Name, t.RegistryKey, t.RegistryKeyValueName, string(t.RegistryKeyValueType), t.RegistryKeyValueData, t.RegistryHex, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeRemoveRegistryKeyValue:
+		registryKey, err := wingetcfg.RemoveRegistryValue(taskID, t.Name, t.RegistryKey, t.RegistryKeyValueName)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeAddLocalUser:
+		localUser, err := wingetcfg.AddOrModifyLocalUser(taskID, t.LocalUserUsername, t.LocalUserDescription, t.LocalUserDisable, t.LocalUserFullname, t.LocalUserPassword, t.LocalUserPasswordChangeNotAllowed, t.LocalUserPasswordChangeRequired, t.LocalUserPasswordNeverExpires)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localUser)
+	case task.TypeRemoveLocalUser:
+		localUser, err := wingetcfg.RemoveLocalUser(taskID, t.LocalUserUsername)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localUser)
+	case task.TypeAddLocalGroup:
+		localGroup, err := wingetcfg.AddOrModifyLocalGroup(taskID, t.LocalGroupName, t.LocalGroupDescription, t.LocalGroupMembers)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeRemoveLocalGroup:
+		localGroup, err := wingetcfg.RemoveLocalGroup(taskID, t.LocalGroupName)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeAddUsersToLocalGroup:
+		localGroup, err := wingetcfg.IncludeMembersToGroup(taskID, t.LocalGroupName, t.LocalGroupMembersToInclude)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeRemoveUsersFromLocalGroup:
+		localGroup, err := wingetcfg.ExcludeMembersFromGroup(taskID, t.LocalGroupName, t.LocalGroupMembersToExclude)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeMsiInstall:
+		msiInstall, err := wingetcfg.InstallMSIPackage(taskID, fmt.Sprintf("Install %s", t.MsiProductid), t.MsiProductid, t.MsiPath, t.MsiArguments, t.MsiLogPath, t.MsiFileHash, string(t.MsiFileHashAlg))
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiInstall)
+	case task.TypeMsiUninstall:
+		msiUninstall, err := wingetcfg.UninstallMSIPackage(taskID, fmt.Sprintf("Uninstall %s", t.MsiProductid), t.MsiProductid, t.MsiPath, t.MsiArguments, t.MsiLogPath, t.MsiFileHash, string(t.MsiFileHashAlg))
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiUninstall)
+	case task.TypePowershellScript:
+		msiUninstall, err := wingetcfg.ExecutePowershellScript(taskID, t.Name, t.Script, t.ScriptRun.String())
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiUninstall)
+	}
+	return cfg, nil
 }

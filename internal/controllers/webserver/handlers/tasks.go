@@ -178,8 +178,12 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
-	if (taskConfig.TaskType == task.TypeAddRegistryKey.String() || taskConfig.TaskType == task.TypeRemoveRegistryKey.String()) && taskConfig.RegistryKey == "" {
+	if taskConfig.RegistryKey == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_not_empty"))
+	}
+
+	if !validateRegistryKey(taskConfig.RegistryKey) {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_no_valid_root"))
 	}
 
 	taskConfig.RegistryKeyValue = c.FormValue("registry-value-name")
@@ -218,6 +222,34 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	return &taskConfig, nil
+}
+
+func validateRegistryKey(path string) bool {
+	if strings.Contains(path, "HKEY_CLASSES_ROOT") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_CURRENT_USER") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_LOCAL_MACHINE") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_USERS") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_CURRENT_CONFIG") {
+		return true
+	}
+
+	if strings.Contains(path, "HKCR:") || strings.Contains(path, "HKCU:") || strings.Contains(path, "HKLM:") || strings.Contains(path, "HKU:") || strings.Contains(path, "HKCC:") {
+		return true
+	}
+
+	return false
 }
 
 func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {

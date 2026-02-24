@@ -30,11 +30,12 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
 						<thead>
 							<tr>
-								<th class="w-1/4"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
-								<th class="w-3/4"><span>{ i18n.T(ctx, "profiles.issues.tasks_report") }</span></th>
+								<th class="w-1/6"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
+								<th class="w-1/6"><span>{ i18n.T(ctx, "profiles.issues.last_report") }</span></th>
+								<th class="w-2/3"><span>{ i18n.T(ctx, "profiles.issues.tasks_report") }</span></th>
 							</tr>
 						</thead>
-						for _, issue := range issues {
+						for index, issue := range issues {
 							if issue.Edges.Agents != nil {
 								<tr>
 									<td class="!align-middle">
@@ -48,6 +49,9 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 										>
 											{ issue.Edges.Agents.Nickname }
 										</a>
+									</td>
+									<td class="!align-middle">
+										{ issue.When.Local().String() }
 									</td>
 									<td class="flex flex-col gap-4 !align-middle">
 										if issue.Error != "" {
@@ -63,9 +67,9 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 													if getFailedTasks(issue.Edges.Tasksreports) > 0 {
 														<span class="uk-text-danger">{ i18n.T(ctx, "profiles.issues.tasks_report_failed_summary", getFailedTasks(issue.Edges.Tasksreports)) }</span>
 													}
-													<a class="underline cursor-pointer" href="#modal-overflow" uk-toggle>{ i18n.T(ctx, "profiles.issues.tasks_report_more_info") }</a>
+													<a class="underline cursor-pointer" href={ fmt.Sprintf("#modal-overflow-%d", index) } uk-toggle>{ i18n.T(ctx, "profiles.issues.tasks_report_more_info") }</a>
 												</div>
-												<div id="modal-overflow" uk-modal>
+												<div id={ fmt.Sprintf("modal-overflow-%d", index) } uk-modal>
 													<div class="uk-margin-auto-vertical uk-modal-dialog w-2/3">
 														<button class="uk-modal-close-default" type="button" uk-close></button>
 														<div class="flex flex-col gap-4 uk-modal-body" uk-overflow-auto>
@@ -111,11 +115,11 @@ templ ReportDetail(issue *ent.ProfileIssue, commonInfo *partials.CommonInfo) {
 					</th>
 				</tr>
 				<tr>
-					<th>{ i18n.T(ctx, "profiles.standard_error") }</th>
+					<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
 					<td>{ t.StdError }</td>
 				</tr>
 				<tr>
-					<th>{ i18n.T(ctx, "profiles.standard_output") }</th>
+					<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
 					<td>{ t.StdOutput }</td>
 				</tr>
 				<tr>

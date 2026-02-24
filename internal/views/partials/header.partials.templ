@@ -45,15 +45,19 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 				<li class="uk-text-muted uk-text-bold">OpenUEM</li>
 				for _,bc := range breadcrumbs {
 					<li>
-						<a
-							href={ templ.URL(bc.Url) }
-							hx-get={ string(templ.URL(bc.Url)) }
-							hx-target="#main"
-							hx-swap="outerHTML"
-							hx-push-url="true"
-						>
+						if bc.Url != "" {
+							<a
+								href={ templ.URL(bc.Url) }
+								hx-get={ string(templ.URL(bc.Url)) }
+								hx-target="#main"
+								hx-swap="outerHTML"
+								hx-push-url="true"
+							>
+								{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }
+							</a>
+						} else {
 							{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }
-						</a>
+						}
 					</li>
 				}
 			</ul>

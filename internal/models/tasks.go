@@ -113,10 +113,12 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
 
+	order := 0
+
 	// let's see which is the highest order for tasks in profile
 	t, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(task.ByOrder(sql.OrderDesc())).First(context.Background())
-	if err != nil {
-		return err
+	if err == nil {
+		order = t.Order
 	}
 
 	// common query
@@ -126,7 +128,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		SetAgentType(task.AgentType(cfg.AgentsType)).
 		SetProfileID(profileID).
 		SetIgnoreErrors(cfg.IgnoreErrors).
-		SetOrder(t.Order + 1)
+		SetOrder(order + 1)
 
 	switch cfg.TaskType {
 	case task.TypeWingetInstall.String(), task.TypeWingetDelete.String():

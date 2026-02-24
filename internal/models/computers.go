@@ -14,6 +14,7 @@ import (
 	"github.com/open-uem/ent/operatingsystem"
 	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/printer"
+	"github.com/open-uem/ent/profile"
 	"github.com/open-uem/ent/profileissue"
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/tag"
@@ -989,4 +990,22 @@ func (m *Model) GetAvailableTasksForAgent(agentID string) ([]*ent.Task, error) {
 	default:
 		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeLinux, task.AgentTypeAny)).All(context.Background())
 	}
+}
+
+func (m *Model) GetAvailableProfilesForAgent(agentID string) ([]*ent.Profile, error) {
+
+	a, err := m.Client.Agent.Get(context.Background(), agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch a.Os {
+	case "windows":
+		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
+	case "macos", "macOS":
+		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
+	default:
+		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
+	}
+
 }
