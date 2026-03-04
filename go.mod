@@ -12,7 +12,6 @@ require (
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
 	github.com/coreos/go-oidc/v3 v3.16.0
-	github.com/dimmerz92/go-lucide-icons v1.8.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
 	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
