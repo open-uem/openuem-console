@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"time"
 )
@@ -16,7 +17,7 @@ templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, repo
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo, offline)
-				@ComputersNavbar(agent.ID, "tasks", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				@ComputersNavbar(agent.ID, "tasks", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird, agent.Edges.Release.Version)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
@@ -106,30 +107,32 @@ templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, commonInfo *part
 		<thead>
 			<tr>
 				<th></th>
-				<th>{ i18n.T(ctx, "Name") }</th>
-				<th>{ i18n.T(ctx, "Status") }</th>
-				<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
-				<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
-				<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
-				<th><span class="text-nowrap">{ i18n.T(ctx, "Profile") }</span></th>
+				<th class="dark:text-white">{ i18n.T(ctx, "Name") }</th>
+				<th class="dark:text-white">{ i18n.T(ctx, "Status") }</th>
+				<th class="dark:text-white">{ i18n.T(ctx, "profiles.execution_time") }</th>
+				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
+				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
+				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "Profile") }</span></th>
 			</tr>
 		</thead>
 		for _, report := range reports {
 			<tr>
 				<td class="items-center !align-middle">
-					<form>
-						<input type="hidden" name="task" value={ report.Edges.Task.ID }/>
-						<button
-							class="flex gap-2"
-							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
-							hx-push-url="false"
-							hx-target="#main"
-							hx-swap="outerHTML"
-							uk-tooltip={ i18n.T(ctx, "tasks.run_task_now") }
-						>
-							<uk-icon hx-history="false" icon="square-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
-						</button>
-					</form>
+					if report.Edges.Task.AgentType != task.AgentTypeAny {
+						<form>
+							<input type="hidden" name="task" value={ report.Edges.Task.ID }/>
+							<button
+								class="flex gap-2"
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/runtask", agent.ID)))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								uk-tooltip={ i18n.T(ctx, "tasks.run_task_now") }
+							>
+								<uk-icon hx-history="false" icon="square-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+							</button>
+						</form>
+					}
 				</td>
 				<td class="items-center !align-middle">
 					if report.Edges.Task != nil {

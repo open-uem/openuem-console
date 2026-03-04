@@ -1088,7 +1088,7 @@ en:
     execution_time: "Last execution time"
     issues:
       title: "Reports"
-      description: "These endpoints have applied this profile. Examine the reports to identify potential causes of error"
+      description: "These endpoints have applied this profile. Examine the reports to identify potential causes of error. If the agent version is lower than 0.11.0, the report will not provide complete information"
       endpoint: "Endpoint"
       errors_found: "Errors found"
       no_issues: "No issues found for this profile"

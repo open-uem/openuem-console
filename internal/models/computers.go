@@ -984,11 +984,11 @@ func (m *Model) GetAvailableTasksForAgent(agentID string) ([]*ent.Task, error) {
 
 	switch a.Os {
 	case "windows":
-		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny)).All(context.Background())
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeWindows)).All(context.Background())
 	case "macos", "macOS":
-		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeMacos, task.AgentTypeAny)).All(context.Background())
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeMacos)).All(context.Background())
 	default:
-		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeLinux, task.AgentTypeAny)).All(context.Background())
+		return m.Client.Task.Query().Where(task.AgentTypeIn(task.AgentTypeLinux)).All(context.Background())
 	}
 }
 

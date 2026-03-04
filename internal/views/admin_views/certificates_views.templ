@@ -91,7 +91,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 												-
 											} else {
 												<div class="flex gap-2 items-center">
-													<span class={ templ.KV("uk-text-danger", IsCertificateAboutToExpire(certificate.Expiry)) }>{ commonInfo.Translator.FmtDateLong(certificate.Expiry.Local()) }</span>
+													<span class={ templ.KV("text-red-600", IsCertificateAboutToExpire(certificate.Expiry)) }>{ commonInfo.Translator.FmtDateLong(certificate.Expiry.Local()) }</span>
 													if IsCertificateAboutToExpire(certificate.Expiry) {
 														@partials.AlertIcon(i18n.T(ctx, "certificates.about_to_expiry"))
 													}
@@ -119,7 +119,7 @@ templ Certificates(c echo.Context, p partials.PaginationAndSort, f filters.Certi
 															hx-push-url="false"
 														>
 															<input type="hidden" name="serial" value={ fmt.Sprintf("%d", certificate.ID) }/>
-															<button class="flex items-center gap-2 p-2"><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 uk-text-danger" uk-cloack></uk-icon>{ i18n.T(ctx, "Revoke") }</button>
+															<button class="flex items-center gap-2 p-2"><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Revoke") }</button>
 														</form>
 													</li>
 												</ul>

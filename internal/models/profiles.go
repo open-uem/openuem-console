@@ -188,7 +188,13 @@ func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID i
 		return nil, err
 	}
 
-	return m.Client.ProfileIssue.Query().WithAgents().WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().All(context.Background()) }).Where(profileissue.HasProfileWith(profile.ID(profileID))).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
+	return m.Client.ProfileIssue.Query().
+		WithAgents().
+		WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().All(context.Background()) }).
+		Where(profileissue.HasProfileWith(profile.ID(profileID))).
+		Order(ent.Desc(profileissue.FieldWhen)).
+		Limit(p.PageSize).
+		Offset((p.CurrentPage - 1) * p.PageSize).All(context.Background())
 }
 
 func (m *Model) EnableProfile(profiledID int, enabled bool) error {
