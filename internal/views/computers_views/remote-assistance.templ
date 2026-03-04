@@ -313,12 +313,12 @@ templ RustDeskChecks(agent *ent.Agent, hasRustDeskSettings bool, commonInfo *par
 	</div>
 }
 
-templ RustDeskInit(agent *ent.Agent) {
+templ RustDeskInit(agent *ent.Agent, commonInfo *partials.CommonInfo) {
 	<div id="rustdesk">
 		<button
 			class="flex items-center gap-2 uk-text-small uk-button uk-button-default"
 			type="submit"
-			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/startrustdesk", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startrustdesk", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#rustdesk"
 			hx-swap="outerHTML"
@@ -492,7 +492,7 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 					<button
 						class="flex items-center gap-2 uk-text-small"
 						type="submit"
-						hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/stoprustdesk", agentID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/stoprustdesk", agentID)))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"
