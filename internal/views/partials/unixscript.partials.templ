@@ -7,6 +7,11 @@ import (
 
 templ UnixScriptComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
+		if t != nil {
+			@IgnoreErrors(t.IgnoreErrors)
+		} else {
+			@IgnoreErrors(false)
+		}
 		<div id="unix-script-section">
 			<label class="uk-form-label" for="unix-script">
 				{ i18n.T(ctx, "tasks.shell_script") }

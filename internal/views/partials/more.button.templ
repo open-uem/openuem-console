@@ -2,9 +2,16 @@ package partials
 
 import (
 	"fmt"
+	"github.com/dimmerz92/go-lucide-icons/templicons/icons"
 	"github.com/invopop/ctxi18n/i18n"
 )
 
 templ MoreButton(id int) {
-	<button id={ fmt.Sprintf("moreButton%d", id) } type="button" title={ i18n.T(ctx, "More") }><uk-icon hx-history="false" icon="ellipsis" custom-class="h-5 w-5" uk-cloack></uk-icon></button>
+	<button
+		id={ fmt.Sprintf("moreButton%d", id) }
+		type="button"
+		title={ i18n.T(ctx, "More") }
+	>
+		@icons.Ellipsis(templ.Attributes{"class": "h-5 w-5"})
+	</button>
 }

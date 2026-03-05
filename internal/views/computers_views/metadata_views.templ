@@ -15,7 +15,7 @@ templ ComputerMetadata(c echo.Context, p partials.PaginationAndSort, agent *ent.
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo, offline)
-				@ComputersNavbar(agent.ID, "metadata", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				@ComputersNavbar(agent.ID, "metadata", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird, agent.Edges.Release.Version)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}

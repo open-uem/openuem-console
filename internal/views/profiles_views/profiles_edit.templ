@@ -2,6 +2,7 @@ package profiles_views
 
 import (
 	"fmt"
+	"github.com/dimmerz92/go-lucide-icons/templicons/icons"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
@@ -12,7 +13,7 @@ import (
 
 templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, successMessage string, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))}, {Title: profile.Name}}, commonInfo)
-	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8" hx-history="false">
 		if successMessage != "" {
 			@partials.SuccessMessage(successMessage)
 		}
@@ -64,12 +65,12 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 										id="profile-assignment"
 										name="profile-assignment"
 										_="
-                                    on change
-                                        if my.value is 'dontApplyToAll' then hide #profile-tags with visibility end
-                                        if my.value is 'applyToAll' then hide #profile-tags with visibility end
-                                        if my.value is 'useTags' then show #profile-tags with visibility end
-                                    end
-                                "
+											on change
+												if my.value is 'dontApplyToAll' then hide #profile-tags with visibility end
+												if my.value is 'applyToAll' then hide #profile-tags with visibility end
+												if my.value is 'useTags' then show #profile-tags with visibility end
+											end
+										"
 									>
 										<option value={ "dontApplyToAll" } selected?={ !profile.ApplyToAll && len(profile.Edges.Tags) == 0 }>{ i18n.T(ctx, "profiles.dont_assign") }</option>
 										<option value={ "applyToAll" } selected?={ profile.ApplyToAll }>{ i18n.T(ctx, "profiles.assign_all") }</option>
@@ -121,12 +122,13 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							{ i18n.T(ctx, "profiles.edit.no_tasks") }
 						</p>
 					} else {
-						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped ">
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped" hx-history="false">
 							<thead>
 								<tr>
 									<th class="w-1/12"></th>
 									<th class="w-1/12">{ i18n.T(ctx, "Version") }</th>
-									<th class="w-5/12">
+									<th class="w-1/12"><span>{ i18n.T(ctx, "profiles.is_enabled") }</span></th>
+									<th class="w-4/12">
 										<div class="flex gap-1 items-center">
 											<span>{ i18n.T(ctx, "profiles.edit.task_description") }</span>
 										</div>
@@ -135,74 +137,168 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 									<th class="w-1/12"></th>
 								</tr>
 							</thead>
-							for index, t := range tasks {
-								<tr>
-									<td class="items-center !align-middle">
-										<div class="flex gap-4">
-											@TaskTypeIcon(t.Type.String())
-											@TaskAgentIcon(t.AgentType.String())
-										</div>
-									</td>
-									<td class="items-center !align-middle">{ t.Version }</td>
-									<td
-										class="items-center !align-middle underline hover:cursor-pointer"
-									>
-										<a
-											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID))) }
-											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID)))) }
-											hx-push-url="true"
-											hx-target="#main"
-											hx-swap="outerHTML"
-										>{ t.Name }</a>
-									</td>
-									<td class="items-center !align-middle">
-										switch t.Type {
-											case task.TypeWingetInstall, task.TypeWingetDelete, task.TypeFlatpakInstall, task.TypeFlatpakUninstall, task.TypeBrewFormulaInstall, task.TypeBrewFormulaUninstall, task.TypeBrewFormulaUpgrade, task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
-												<span>{ t.PackageName + " " + t.PackageVersion }</span>
-											case task.TypeAddRegistryKey, task.TypeRemoveRegistryKey, task.TypeUpdateRegistryKeyDefaultValue:
-												<span>{ t.RegistryKey }</span>
-											case task.TypeAddRegistryKeyValue, task.TypeRemoveRegistryKeyValue:
-												<span>{ t.RegistryKey + " <- " + t.RegistryKeyValueName }</span>
-											case task.TypeAddLocalUser, task.TypeRemoveLocalUser, task.TypeAddUnixLocalUser, task.TypeRemoveUnixLocalUser:
-												<span>{ t.LocalUserUsername }</span>
-											case task.TypeAddLocalGroup, task.TypeAddUnixLocalGroup:
-												if t.LocalGroupMembers != "" {
-													<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembers }</span>
-												} else {
+							<tbody
+								id="tasks-sortable"
+								uk-sortable="handle: .uk-sortable-handle"
+								hx-trigger="taskMoved"
+								hx-post=""
+								hx-push-url="false"
+								hx-target="body"
+								hx-swap="outerHTML"
+								hx-history="false"
+								_={ fmt.Sprintf(`
+									init
+										htmx.process(me)
+										set :taskOrders to [] as Array
+									end
+									on start
+										repeat for el in <tr[data-sortable]/>
+											append el@data-order to :taskOrders	
+										end
+									end	
+									on moved
+										set taskID to event.detail[1]@data-task-id
+										set currentOrder to event.detail[1]@data-order
+										for x in <tr[data-sortable]/> index i
+											if x@data-task-id is taskID
+												set newOrder to :taskOrders[i]
+												break
+											end
+										end
+										set url to '%s' + '/tasks/' + taskID + '/movefrom/' + currentOrder + '/to/' + newOrder
+										set @hx-post to url
+										htmx.process(me)
+										send taskMoved to me
+								    end
+									on stop
+										set :taskOrders to [] as Array										
+									end									
+								`,string(templ.URL(partials.GetNavigationUrl(commonInfo,"")))) }
+							>
+								for index, t := range tasks {
+									<tr class="uk-sortable-handle" data-sortable data-task-id={ t.ID } data-order={ t.Order } hx-history="false">
+										<td class="items-center !align-middle my-10">
+											<div class="flex gap-4 items-center !align-middle">
+												@icons.Move(templ.Attributes{"class": "h-5 w-5"})
+												@TaskTypeIcon(t.Type.String())
+												@TaskAgentIcon(t.AgentType.String())
+											</div>
+										</td>
+										<td class="items-center !align-middle">{ t.Version }</td>
+										<td class="items-center !align-middle">
+											if  t.Disabled {
+												@partials.Crossmark()
+											} else {
+												@partials.Checkmark()
+											}
+										</td>
+										<td
+											class="items-center !align-middle"
+										>
+											<a
+												href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID))) }
+												hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.ID)))) }
+												hx-push-url="true"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												class="underline hover:cursor-pointer"
+											>{ t.Name }</a>
+										</td>
+										<td class="items-center !align-middle">
+											switch t.Type {
+												case task.TypeWingetInstall, task.TypeWingetDelete, task.TypeFlatpakInstall, task.TypeFlatpakUninstall, task.TypeBrewFormulaInstall, task.TypeBrewFormulaUninstall, task.TypeBrewFormulaUpgrade, task.TypeBrewCaskInstall, task.TypeBrewCaskUninstall, task.TypeBrewCaskUpgrade:
+													<span>{ t.PackageName + " " + t.PackageVersion }</span>
+												case task.TypeAddRegistryKey, task.TypeRemoveRegistryKey, task.TypeUpdateRegistryKeyDefaultValue:
+													<span>{ t.RegistryKey }</span>
+												case task.TypeAddRegistryKeyValue, task.TypeRemoveRegistryKeyValue:
+													<span>{ t.RegistryKey + " <- " + t.RegistryKeyValueName }</span>
+												case task.TypeAddLocalUser, task.TypeRemoveLocalUser, task.TypeAddUnixLocalUser, task.TypeRemoveUnixLocalUser:
+													<span>{ t.LocalUserUsername }</span>
+												case task.TypeAddLocalGroup, task.TypeAddUnixLocalGroup:
+													if t.LocalGroupMembers != "" {
+														<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembers }</span>
+													} else {
+														<span>{ t.LocalGroupName }</span>
+													}
+												case task.TypeRemoveLocalGroup, task.TypeRemoveUnixLocalGroup:
 													<span>{ t.LocalGroupName }</span>
-												}
-											case task.TypeRemoveLocalGroup, task.TypeRemoveUnixLocalGroup:
-												<span>{ t.LocalGroupName }</span>
-											case task.TypeAddUsersToLocalGroup:
-												<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembersToInclude }</span>
-											case task.TypeRemoveUsersFromLocalGroup:
-												<span>{ t.LocalGroupName + " - x - " + t.LocalGroupMembersToExclude }</span>
-											case task.TypeMsiInstall, task.TypeMsiUninstall:
-												<span>{ t.MsiProductid }</span>
-											case task.TypePowershellScript:
-												<span>{ i18n.T(ctx, "tasks.powershell_subtype") }</span>
-											case task.TypeUnixScript:
-												<span>{ i18n.T(ctx, "tasks.unix_script_subtype") }</span>
-											default:
-												<span>-</span>
-										}
-									</td>
-									<td class="items-center !align-middle">
-										@partials.MoreButton(index)
-										<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
-											<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
-												<li>
-													<a
-														hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, t.ID)))) }
-														hx-target="#main"
-														hx-swap="outerHTML"
-													><uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
-												</li>
-											</ul>
-										</div>
-									</td>
-								</tr>
-							}
+												case task.TypeAddUsersToLocalGroup:
+													<span>{ t.LocalGroupName + " <- " + t.LocalGroupMembersToInclude }</span>
+												case task.TypeRemoveUsersFromLocalGroup:
+													<span>{ t.LocalGroupName + " - x - " + t.LocalGroupMembersToExclude }</span>
+												case task.TypeMsiInstall, task.TypeMsiUninstall:
+													<span>{ t.MsiProductid }</span>
+												case task.TypePowershellScript:
+													<span>{ i18n.T(ctx, "tasks.powershell_subtype") }</span>
+												case task.TypeUnixScript:
+													<span>{ i18n.T(ctx, "tasks.unix_script_subtype") }</span>
+												default:
+													<span>-</span>
+											}
+										</td>
+										<td class="items-center !align-middle">
+											@partials.MoreButton(index)
+											<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+												<ul class="uk-dropdown-nav uk-nav" _={ fmt.Sprintf("on click call #moreButton%d.click()", index) }>
+													if t.Order != 1 {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/moveup/%d", t.ID, t.Order)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+																hx-push-url="false"
+																class="flex items-center gap-2 py-2 px-4"
+															><uk-icon hx-history="false" icon="chevron-up" custom-class="h-6 w-6 -ml-1" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.move_up") }</a>
+														</li>
+													}
+													if t.Order != p.NItems {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/movedown/%d", t.ID, t.Order)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+																hx-push-url="false"
+																class="flex items-center gap-2 py-2 px-4"
+																type="button"
+															><uk-icon hx-history="false" icon="chevron-down" custom-class="h-6 w-6 -ml-1" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.move_down") }</a>
+														</li>
+													}
+													if t.Disabled {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/enable", t.ID)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+																hx-push-url="false"
+																class="flex items-center gap-2 py-2 px-4"
+															><uk-icon hx-history="false" icon="check" custom-class="h-5 w-5 mx-auto" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.enable") }</a>
+														</li>
+													} else {
+														<li>
+															<a
+																hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/disable", t.ID)))) }
+																hx-target="#main"
+																hx-swap="outerHTML"
+																hx-push-url="false"
+																class="flex items-center gap-2 py-2 px-4"
+															><uk-icon hx-history="false" icon="x" custom-class="h-5 w-5 mx-auto" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.disable") }</a>
+														</li>
+													}
+													<li>
+														<a
+															hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, t.ID)))) }
+															hx-target="#main"
+															hx-swap="outerHTML"
+															hx-push-url="false"
+															class="flex items-center gap-2 py-2 px-4"
+														><uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5 mx-auto text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }</a>
+													</li>
+												</ul>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
 						</table>
 						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))), itemsPerPage)
 					}
@@ -245,7 +341,7 @@ templ TaskTypeIcon(taskType string) {
 		case task.TypeUpdateRegistryKeyDefaultValue.String():
 			<uk-icon hx-history="false" icon="book-up2" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.update_registry_key_default_value") } uk-cloack></uk-icon>
 		case task.TypeAddLocalUser.String(), task.TypeAddUnixLocalUser.String():
-			<uk-icon hx-history="false" icon="user-round-plus" custom-class="mx-auto h-6 w-6 text-green-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_add") } uk-cloack></uk-icon>
+			@icons.UserRoundPlus(templ.Attributes{"class": "h-6 w-6 text-green-600", "uk-tooltip": i18n.T(ctx, "tasks.local_user_add")})
 		case task.TypeRemoveLocalUser.String(), task.TypeRemoveUnixLocalUser.String():
 			<uk-icon hx-history="false" icon="user-round-x" custom-class="mx-auto h-6 w-6 text-red-600" uk-tooltip={ i18n.T(ctx, "tasks.local_user_remove") } uk-cloack></uk-icon>
 		case task.TypeAddLocalGroup.String(), task.TypeAddUnixLocalGroup.String():
@@ -263,7 +359,7 @@ templ TaskTypeIcon(taskType string) {
 		case task.TypePowershellScript.String():
 			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.powershell_script") } uk-cloack></uk-icon>
 		case task.TypeUnixScript.String():
-			<uk-icon hx-history="false" icon="scroll-text" custom-class="mx-auto h-6 w-6 text-blue-600" uk-tooltip={ i18n.T(ctx, "tasks.unix_script") } uk-cloack></uk-icon>
+			@icons.ScrollText(templ.Attributes{"class": "h-6 w-6 text-blue-600", "uk-tooltip": i18n.T(ctx, "tasks.unix_script_subtype")})
 		case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String(), task.TypeNetbirdRegister.String():
 			<img src="/assets/img/svg/netbird.svg" class="w-5"/>
 	}

@@ -1,0 +1,20 @@
+package partials
+
+import "github.com/invopop/ctxi18n/i18n"
+
+templ IgnoreErrors(ignore bool) {
+	<div class="flex gap-2">
+		<div id="local-user-force" class="w-full">
+			<label class="uk-text-small uk-text-bold">
+				<input
+					class="uk-checkbox"
+					id="ignore-errors"
+					name="ignore-errors"
+					type="checkbox"
+					checked?={ ignore }
+				/>
+				{ i18n.T(ctx, "tasks.ignore_errors") }
+			</label>
+		</div>
+	</div>
+}

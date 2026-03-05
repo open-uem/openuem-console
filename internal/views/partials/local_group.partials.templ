@@ -105,6 +105,7 @@ templ WindowsLocalGroupComponent(t *ent.Task) {
 
 templ UnixLocalGroupComponent(t *ent.Task) {
 	<div class="flex flex-col gap-4">
+		@IgnoreErrors(t.IgnoreErrors)
 		<div id="local-unix-group-name-section">
 			<label class="uk-form-label" for="local-unix-group-name">
 				{ i18n.T(ctx, "tasks.local_group_name") }

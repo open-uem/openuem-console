@@ -129,7 +129,7 @@ templ SecurityUpdates(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 												<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(systemUpdate.LastInstall.Local()) + " " + commonInfo.Translator.FmtTimeShort(systemUpdate.LastInstall.Local()) }</td>
 											}
 											if systemUpdate.PendingUpdates {
-												<td class="!align-middle"><span class="uk-text-danger">{ i18n.T(ctx, "Yes") }</span></td>
+												<td class="!align-middle"><span class="text-red-600">{ i18n.T(ctx, "Yes") }</span></td>
 											} else {
 												<td class="!align-middle">{ i18n.T(ctx, "No") }</td>
 											}

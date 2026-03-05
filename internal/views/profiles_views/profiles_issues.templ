@@ -7,6 +7,7 @@ import (
 	"github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strings"
+	"time"
 )
 
 templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent.ProfileIssue, profile *ent.Profile, itemsPerPage int, commonInfo *partials.CommonInfo) {
@@ -26,22 +27,60 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 			</div>
 			<div class="uk-card-body flex flex-col gap-4">
 				if len(issues) > 0 {
-					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped  mt-6">
+					<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
 						<thead>
 							<tr>
-								<th class="w-1/4"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
-								<th class="w-3/4"><span>{ i18n.T(ctx, "profiles.issues.errors_found") }</span></th>
+								<th class="w-1/6"><span>{ i18n.T(ctx, "profiles.issues.endpoint") }</span></th>
+								<th class="w-1/6"><span>{ i18n.T(ctx, "profiles.issues.last_report") }</span></th>
+								<th class="w-2/3"><span>{ i18n.T(ctx, "profiles.issues.tasks_report") }</span></th>
 							</tr>
 						</thead>
-						for _, issue := range issues {
+						for index, issue := range issues {
 							if issue.Edges.Agents != nil {
 								<tr>
 									<td class="!align-middle">
-										{ issue.Edges.Agents.Nickname }
+										<a
+											href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", issue.Edges.Agents.ID))) }
+											hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", issue.Edges.Agents.ID)))) }
+											hx-push-url="true"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											class="underline cursor-pointer"
+										>
+											{ issue.Edges.Agents.Nickname }
+										</a>
 									</td>
 									<td class="!align-middle">
-										for line := range strings.SplitSeq(issue.Error, ", ") {
-											<p>{ line }</p>
+										{ issue.When.Local().String() }
+									</td>
+									<td class="flex flex-col gap-4 !align-middle">
+										if issue.Error != "" {
+											for line := range strings.SplitSeq(issue.Error, ", ") {
+												<p>{ line }</p>
+											}
+										} else {
+											if len(issue.Edges.Tasksreports) > 0 {
+												<div class="flex gap-2">
+													if getSuccessfulTasks(issue.Edges.Tasksreports) > 0 {
+														<span>{ i18n.T(ctx, "profiles.issues.tasks_report_successful_summary", getSuccessfulTasks(issue.Edges.Tasksreports)) }</span>
+													}
+													if getFailedTasks(issue.Edges.Tasksreports) > 0 {
+														<span class="text-red-600">{ i18n.T(ctx, "profiles.issues.tasks_report_failed_summary", getFailedTasks(issue.Edges.Tasksreports)) }</span>
+													}
+													<a class="underline cursor-pointer" href={ fmt.Sprintf("#modal-overflow-%d", index) } uk-toggle>{ i18n.T(ctx, "profiles.issues.tasks_report_more_info") }</a>
+												</div>
+												<div id={ fmt.Sprintf("modal-overflow-%d", index) } uk-modal>
+													<div id="profile-report-modal" class="uk-margin-auto-vertical uk-modal-dialog  w-2/3">
+														<button id={ fmt.Sprintf("profile-report-modal-close-%d", index) } class="uk-modal-close-default dark:text-white" type="button" uk-close></button>
+														<div class="flex flex-col gap-4 uk-modal-body" uk-overflow-auto>
+															<h2 class="uk-modal-title dark:text-white">{ i18n.T(ctx, "profiles.issues.tasks_report_for", issue.Edges.Agents.Nickname) }</h2>
+															@ReportDetail(issue, commonInfo, index)
+														</div>
+													</div>
+												</div>
+											} else {
+												{ "-" }
+											}
 										}
 									</td>
 								</tr>
@@ -57,4 +96,78 @@ templ ProfilesIssues(c echo.Context, p partials.PaginationAndSort, issues []*ent
 			</div>
 		</div>
 	</main>
+}
+
+templ ReportDetail(issue *ent.ProfileIssue, commonInfo *partials.CommonInfo, index int) {
+	<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped uk-overflow-auto">
+		for _, t := range issue.Edges.Tasksreports {
+			if t.Edges.Task != nil && !t.Edges.Task.Disabled {
+				<tr>
+					<th class="align-middle" rowspan="4">
+						<div class="flex gap-2">
+							if t.Failed {
+								@partials.Crossmark()
+							} else {
+								@partials.Checkmark()
+							}
+							<a
+								href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.Edges.Task.ID))) }
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d", t.Edges.Task.ID)))) }
+								hx-push-url="true"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								class="underline hover:cursor-pointer"
+								_={ fmt.Sprintf("on click call #profile-report-modal-close-%d.click()", index) }
+							>{ t.Edges.Task.Name }</a>
+						</div>
+					</th>
+				</tr>
+				<tr>
+					<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
+					<td class="dark:text-white">{ t.StdError }</td>
+				</tr>
+				<tr>
+					<th><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
+					<td class="dark:text-white">{ t.StdOutput }</td>
+				</tr>
+				<tr>
+					<th>{ i18n.T(ctx, "profiles.execution_time") }</th>
+					if when, err := parseTime(t.End); err == nil {
+						<td class="dark:text-white">{ commonInfo.Translator.FmtDateMedium(when.Local()) + " " + commonInfo.Translator.FmtTimeMedium(when.Local()) }</td>
+					}
+					if _, err := parseTime(t.End); err != nil {
+						<td class="dark:text-white">{ t.End }</td>
+					}
+				</tr>
+			}
+		}
+	</table>
+}
+
+func getFailedTasks(taskReports []*ent.TaskReport) int {
+	failed := 0
+
+	for _, t := range taskReports {
+		if t.Failed && !t.Edges.Task.Disabled {
+			failed++
+		}
+	}
+
+	return failed
+}
+
+func getSuccessfulTasks(taskReports []*ent.TaskReport) int {
+	successful := 0
+
+	for _, t := range taskReports {
+		if !t.Failed && !t.Edges.Task.Disabled {
+			successful++
+		}
+	}
+
+	return successful
+}
+
+func parseTime(when string) (time.Time, error) {
+	return time.ParseInLocation(time.RFC3339Nano, when, time.Local)
 }
