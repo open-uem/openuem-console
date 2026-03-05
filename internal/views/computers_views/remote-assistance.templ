@@ -7,6 +7,7 @@ import (
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/rustdesk"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -357,7 +358,7 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 					<div class="flex gap-2 uk-text-small">
 						if password != "" {
 							if settings != nil && settings.CustomRendezvousServer != "" && settings.Key != "" {
-								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s@%s?password=%s&key=%s", rustDeskID, settings.CustomRendezvousServer, password, settings.Key)) }>
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://connection/new/%s@%s?password=%s&key=%s", rustDeskID, settings.CustomRendezvousServer, password, url.QueryEscape(settings.Key))) }>
 									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
 									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
 								</a>
@@ -369,7 +370,7 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 							}
 						} else {
 							if settings != nil && settings.CustomRendezvousServer != "" && settings.Key != "" {
-								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s@%s?key=%s", rustDeskID, settings.CustomRendezvousServer, settings.Key)) }>
+								<a class="flex gap-2" href={ templ.SafeURL(fmt.Sprintf("rustdesk://%s@%s?key=%s", rustDeskID, settings.CustomRendezvousServer, url.QueryEscape(settings.Key))) }>
 									<uk-icon hx-history="false" icon="monitor-play" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
 									<span class="underline">{ i18n.T(ctx, "rustdesk.click_to_open") }</span>
 								</a>
