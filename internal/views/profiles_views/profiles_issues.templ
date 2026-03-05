@@ -148,7 +148,7 @@ func getFailedTasks(taskReports []*ent.TaskReport) int {
 	failed := 0
 
 	for _, t := range taskReports {
-		if t.Failed {
+		if t.Failed && !t.Edges.Task.Disabled {
 			failed++
 		}
 	}
@@ -160,7 +160,7 @@ func getSuccessfulTasks(taskReports []*ent.TaskReport) int {
 	successful := 0
 
 	for _, t := range taskReports {
-		if !t.Failed {
+		if !t.Failed && !t.Edges.Task.Disabled {
 			successful++
 		}
 	}
