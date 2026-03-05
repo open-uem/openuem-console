@@ -12,6 +12,7 @@ require (
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
 	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/dimmerz92/go-lucide-icons v1.14.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
 	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
@@ -63,7 +64,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dimmerz92/go-lucide-icons v1.14.0 // indirect
 	github.com/f-amaral/go-async v0.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
