@@ -1,0 +1,153 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ TenantMembers(c echo.Context, members []*ent.UserTenant, identifier string, errMessage string, agentsExists bool, serversExists bool, commonInfo *partials.CommonInfo, currentUsername string) {
+	@partials.Header(c, []partials.Breadcrumb{
+		{Title: i18n.T(ctx, "Settings"), Url: fmt.Sprintf("/tenant/%s/admin", commonInfo.TenantID)},
+		{Title: i18n.T(ctx, "members.title"), Url: fmt.Sprintf("/tenant/%s/admin/members", commonInfo.TenantID)},
+	}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("members", agentsExists, serversExists, commonInfo)
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "members.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "members.description") }
+						</p>
+					</div>
+					<div class="uk-card-body flex flex-col gap-4">
+					<!-- Current Members Table -->
+					if len(members) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+							<thead>
+								<tr>
+									<th>{ i18n.T(ctx, "users.username") }</th>
+									<th>{ i18n.T(ctx, "users.name") }</th>
+									<th>{ i18n.T(ctx, "users.email") }</th>
+									<th>{ i18n.T(ctx, "tenants.role") }</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, ut := range members {
+									<tr>
+										<td class="uk-table-shrink">
+											if ut.Edges.User != nil {
+												{ ut.Edges.User.ID }
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if ut.Edges.User != nil {
+												{ ut.Edges.User.Name }
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if ut.Edges.User != nil {
+												{ ut.Edges.User.Email }
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if ut.Edges.User != nil {
+												if ut.Edges.User.ID == currentUsername {
+													<!-- Current user cannot change their own role -->
+													<span class="uk-badge">{ i18n.T(ctx, "tenants.role_" + ut.Role.String()) }</span>
+												} else {
+													<form>
+														<select
+															name="role"
+															class="uk-select uk-form-small uk-form-width-small"
+															hx-post={ fmt.Sprintf("/tenant/%s/admin/members/%s/role", commonInfo.TenantID, ut.Edges.User.ID) }
+															hx-target="#main"
+															hx-swap="outerHTML"
+														>
+															<option value="admin" selected?={ ut.Role.String() == "admin" }>{ i18n.T(ctx, "tenants.role_admin") }</option>
+															<option value="operator" selected?={ ut.Role.String() == "operator" }>{ i18n.T(ctx, "tenants.role_operator") }</option>
+															<option value="user" selected?={ ut.Role.String() == "user" }>{ i18n.T(ctx, "tenants.role_user") }</option>
+														</select>
+													</form>
+												}
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if ut.Edges.User != nil && len(members) > 1 && ut.Edges.User.ID != currentUsername {
+												<button
+													class="uk-button uk-button-danger uk-button-small"
+													hx-delete={ fmt.Sprintf("/tenant/%s/admin/members/%s", commonInfo.TenantID, ut.Edges.User.ID) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-confirm={ i18n.T(ctx, "members.confirm_remove") }
+												>
+													<uk-icon icon="x" class="h-4 w-4"></uk-icon>
+												</button>
+											}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					} else {
+						<p class="uk-text-muted">{ i18n.T(ctx, "members.no_members") }</p>
+					}
+					<!-- Add Member Form -->
+					<div class="uk-card uk-card-default uk-card-body uk-margin-top">
+						<h4>{ i18n.T(ctx, "members.add_member") }</h4>
+						if errMessage != "" {
+							<div class="uk-alert uk-alert-danger uk-margin-small-bottom">
+								{ errMessage }
+							</div>
+						}
+						<form
+							class="flex items-end gap-4"
+							hx-post={ fmt.Sprintf("/tenant/%s/admin/members", commonInfo.TenantID) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "members.identifier_label") }</label>
+								<input
+									type="text"
+									name="identifier"
+									value={ identifier }
+									placeholder={ i18n.T(ctx, "members.identifier_placeholder") }
+									class="uk-input uk-form-width-medium"
+									required
+								/>
+							</div>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "tenants.role") }</label>
+								<select name="role" class="uk-select uk-form-width-small">
+									<option value="user">{ i18n.T(ctx, "tenants.role_user") }</option>
+									<option value="operator">{ i18n.T(ctx, "tenants.role_operator") }</option>
+									<option value="admin">{ i18n.T(ctx, "tenants.role_admin") }</option>
+								</select>
+							</div>
+							<button type="submit" class="uk-button uk-button-primary uk-button-small">
+								<uk-icon icon="plus" class="h-4 w-4 mr-1"></uk-icon>
+								{ i18n.T(ctx, "members.add_member") }
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+}
+
+templ TenantMembersIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}

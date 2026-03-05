@@ -1,0 +1,305 @@
+package admin_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+	"time"
+)
+
+templ EnrollmentTokens(c echo.Context, tokens []*ent.EnrollmentToken, sites []*ent.Site, errMessage string, agentsExists bool, serversExists bool, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{
+		{Title: i18n.T(ctx, "Settings"), Url: fmt.Sprintf("/tenant/%s/admin", commonInfo.TenantID)},
+		{Title: i18n.T(ctx, "enrollment.title"), Url: fmt.Sprintf("/tenant/%s/admin/enrollment", commonInfo.TenantID)},
+	}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("enrollment", agentsExists, serversExists, commonInfo)
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<!-- Agent Downloads -->
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "enrollment.agent_downloads_title") }</h3>
+						<p class="uk-margin-small-top uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "enrollment.agent_downloads_description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<div class="flex gap-2 flex-wrap">
+							<a
+								class="uk-button uk-button-default uk-button-small"
+								href="https://github.com/open-uem/openuem-agent/releases/latest/download/openuem-agent-linux-amd64.deb"
+								target="_blank"
+							>
+								<svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587.26 1.237.379 1.929.357a3.312 3.312 0 001.88-.575c.062.025.129.052.199.075.16.467.676.709 1.043.775.598.108 1.228-.043 1.854-.26 1.334-.454 2.19-.966 2.417-1.363.12-.122.135-.4.12-.677a3.137 3.137 0 00-.012-.334 8.148 8.148 0 00-.354-1.364c-.136-.466-.305-.873-.305-.873-.14-.226-.28-.354-.395-.427a5.357 5.357 0 00.485-1.514c.107-.675.08-1.304.049-1.907-.034-.9-.1-1.347.059-2.186.04-.21-.037-.489-.131-.742-.094-.253-.233-.468-.292-.582-.106-.199-.195-.307-.283-.415-.176-.22-.278-.305-.478-.726-.174-.39-.323-.958-.425-1.544-.102-.59-.156-1.2-.17-1.78a5.22 5.22 0 01-.055-1.47c.093-.52.173-.864.179-1.202a1.153 1.153 0 00-.124-.67c-.027-.04-.035-.092-.089-.14-.075-.1-.217-.157-.351-.167zM12.2 24h-.1z"></path></svg>
+								{ i18n.T(ctx, "enrollment.download_linux") }
+							</a>
+							<a
+								class="uk-button uk-button-default uk-button-small"
+								href="https://github.com/open-uem/openuem-agent/releases/latest/download/openuem-agent-darwin-amd64.pkg"
+								target="_blank"
+							>
+								<svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"></path></svg>
+								{ i18n.T(ctx, "enrollment.download_macos_intel") }
+							</a>
+							<a
+								class="uk-button uk-button-default uk-button-small"
+								href="https://github.com/open-uem/openuem-agent/releases/latest/download/openuem-agent-darwin-arm64.pkg"
+								target="_blank"
+							>
+								<svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"></path></svg>
+								{ i18n.T(ctx, "enrollment.download_macos_arm") }
+							</a>
+							<a
+								class="uk-button uk-button-default uk-button-small"
+								href="https://github.com/open-uem/openuem-agent/releases/latest/download/openuem-agent-windows-amd64.msi"
+								target="_blank"
+							>
+								<svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801z"></path></svg>
+								{ i18n.T(ctx, "enrollment.download_windows") }
+							</a>
+						</div>
+					</div>
+				</div>
+				<!-- Enrollment Tokens -->
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "enrollment.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "enrollment.description") }
+						</p>
+					</div>
+					<div class="uk-card-body flex flex-col gap-4">
+					if errMessage != "" {
+						<div class="uk-alert uk-alert-danger uk-margin-small-bottom">
+							{ errMessage }
+						</div>
+					}
+					<!-- Tokens Table -->
+					if len(tokens) > 0 {
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped">
+							<thead>
+								<tr>
+									<th>{ i18n.T(ctx, "enrollment.description_label") }</th>
+									<th>{ i18n.T(ctx, "enrollment.token") }</th>
+									<th>{ i18n.T(ctx, "enrollment.site_label") }</th>
+									<th>{ i18n.T(ctx, "enrollment.max_uses") }</th>
+									<th>{ i18n.T(ctx, "enrollment.current_uses") }</th>
+									<th>{ i18n.T(ctx, "enrollment.expires_at") }</th>
+									<th>{ i18n.T(ctx, "enrollment.status") }</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, t := range tokens {
+									<tr>
+										<td class="uk-table-shrink">{ t.Description }</td>
+										<td class="uk-table-shrink">
+											<code class="uk-text-small">{ t.Token[:8] }...</code>
+										</td>
+										<td class="uk-table-shrink">
+											if t.Edges.Site != nil {
+												{ t.Edges.Site.Description }
+											} else {
+												<span class="uk-text-muted">{ i18n.T(ctx, "enrollment.site_default") }</span>
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if t.MaxUses == 0 {
+												{ i18n.T(ctx, "enrollment.unlimited") }
+											} else {
+												{ strconv.Itoa(t.MaxUses) }
+											}
+										</td>
+										<td class="uk-table-shrink">{ strconv.Itoa(t.CurrentUses) }</td>
+										<td class="uk-table-shrink">
+											if t.ExpiresAt != nil {
+												{ t.ExpiresAt.Format("2006-01-02") }
+											} else {
+												<span class="uk-text-muted">-</span>
+											}
+										</td>
+										<td class="uk-table-shrink">
+											if t.Active && (t.ExpiresAt == nil || t.ExpiresAt.After(time.Now())) {
+												<span class="uk-label uk-label-success">{ i18n.T(ctx, "enrollment.active") }</span>
+											} else if !t.Active {
+												<span class="uk-label uk-label-warning">{ i18n.T(ctx, "enrollment.inactive") }</span>
+											} else {
+												<span class="uk-label uk-label-danger">{ i18n.T(ctx, "enrollment.expired") }</span>
+											}
+										</td>
+										<td class="uk-table-shrink">
+											<div class="flex gap-1">
+												<!-- Toggle -->
+												<button
+													class={ "uk-button uk-button-small", templ.KV("uk-button-default", t.Active), templ.KV("uk-button-primary", !t.Active) }
+													hx-post={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d/toggle", commonInfo.TenantID, t.ID) }
+													hx-vals={ fmt.Sprintf(`{"active": "%s"}`, boolToString(!t.Active)) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													if t.Active {
+														<uk-icon icon="pause" class="h-4 w-4"></uk-icon>
+													} else {
+														<uk-icon icon="play" class="h-4 w-4"></uk-icon>
+													}
+												</button>
+												<!-- Install Command Dropdown -->
+												<div>
+													<button class="uk-button uk-button-default uk-button-small">
+														<uk-icon icon="terminal" class="h-4 w-4"></uk-icon>
+													</button>
+													<div uk-dropdown="mode: click; pos: bottom-right">
+														<ul class="uk-nav uk-dropdown-nav">
+															<li class="uk-nav-header">{ i18n.T(ctx, "enrollment.install_command") }</li>
+															<li>
+																<a
+																	hx-get={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d/command?platform=linux", commonInfo.TenantID, t.ID) }
+																	hx-target="#install-command"
+																	hx-swap="innerHTML"
+																>
+																	Linux
+																</a>
+															</li>
+															<li>
+																<a
+																	hx-get={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d/command?platform=macos-amd64", commonInfo.TenantID, t.ID) }
+																	hx-target="#install-command"
+																	hx-swap="innerHTML"
+																>
+																	macOS Intel
+																</a>
+															</li>
+															<li>
+																<a
+																	hx-get={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d/command?platform=macos-arm64", commonInfo.TenantID, t.ID) }
+																	hx-target="#install-command"
+																	hx-swap="innerHTML"
+																>
+																	macOS ARM
+																</a>
+															</li>
+															<li>
+																<a
+																	hx-get={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d/command?platform=windows", commonInfo.TenantID, t.ID) }
+																	hx-target="#install-command"
+																	hx-swap="innerHTML"
+																>
+																	Windows
+																</a>
+															</li>
+														</ul>
+													</div>
+												</div>
+												<!-- Delete -->
+												<button
+													class="uk-button uk-button-danger uk-button-small"
+													hx-delete={ fmt.Sprintf("/tenant/%s/admin/enrollment/%d", commonInfo.TenantID, t.ID) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-confirm={ i18n.T(ctx, "enrollment.confirm_delete") }
+												>
+													<uk-icon icon="x" class="h-4 w-4"></uk-icon>
+												</button>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					} else {
+						<p class="uk-text-muted">{ i18n.T(ctx, "enrollment.no_tokens") }</p>
+					}
+					<!-- Install Command Display -->
+					<div id="install-command"></div>
+					<!-- Create Token Form -->
+					<div class="uk-card uk-card-default uk-card-body uk-margin-top">
+						<h4>{ i18n.T(ctx, "enrollment.create_token") }</h4>
+						<form
+							class="flex items-end gap-4 flex-wrap"
+							hx-post={ fmt.Sprintf("/tenant/%s/admin/enrollment", commonInfo.TenantID) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "enrollment.description_label") }</label>
+								<input
+									type="text"
+									name="description"
+									placeholder={ i18n.T(ctx, "enrollment.description_placeholder") }
+									class="uk-input uk-form-width-medium"
+								/>
+							</div>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "enrollment.site_label") }</label>
+								<select name="site_id" class="uk-select uk-form-width-small">
+									<option value="">{ i18n.T(ctx, "enrollment.site_default") }</option>
+									for _, s := range sites {
+										<option value={ strconv.Itoa(s.ID) }>{ s.Description }</option>
+									}
+								</select>
+							</div>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "enrollment.max_uses") }</label>
+								<input
+									type="number"
+									name="max_uses"
+									value="0"
+									min="0"
+									class="uk-input uk-form-width-xsmall"
+								/>
+							</div>
+							<div>
+								<label class="uk-form-label">{ i18n.T(ctx, "enrollment.expires_at") }</label>
+								<input
+									type="date"
+									name="expires_at"
+									class="uk-input uk-form-width-small"
+								/>
+							</div>
+							<button type="submit" class="uk-button uk-button-primary uk-button-small">
+								<uk-icon icon="plus" class="h-4 w-4 mr-1"></uk-icon>
+								{ i18n.T(ctx, "enrollment.create_token") }
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</main>
+}
+
+templ EnrollmentTokensIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}
+
+templ InstallCommand(command string, platformLabel string) {
+	<div class="uk-card uk-card-default uk-card-body uk-margin-small-top">
+		<div class="flex justify-between items-center uk-margin-small-bottom">
+			<span class="uk-text-bold uk-text-small">{ platformLabel }</span>
+			<button
+				class="uk-button uk-button-default uk-button-small"
+				onclick="navigator.clipboard.writeText(document.getElementById('install-cmd').textContent).then(()=>{this.innerHTML='<uk-icon icon=&quot;check&quot; class=&quot;h-4 w-4&quot;></uk-icon>';setTimeout(()=>{this.innerHTML='<uk-icon icon=&quot;copy&quot; class=&quot;h-4 w-4&quot;></uk-icon>'},2000)})"
+			>
+				<uk-icon icon="copy" class="h-4 w-4"></uk-icon>
+			</button>
+		</div>
+		<pre id="install-cmd" class="uk-background-muted uk-padding-small" style="overflow-x: auto; white-space: pre-wrap; word-break: break-all; font-size: 0.75rem; max-height: 200px;">{ command }</pre>
+	</div>
+}
+
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}

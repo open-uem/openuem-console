@@ -1,0 +1,362 @@
+package admin_views
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/layout"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ BrandingSettings(c echo.Context, branding *ent.Branding, commonInfo *partials.CommonInfo, successMessage string) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "branding.title"), Url: "/admin/branding"}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("branding", false, false, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div id="error" class="hidden"></div>
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "branding.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "branding.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6">
+							// Product Name
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.product_name") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.product_name_description") }</td>
+								<td class="w-1/4 !align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="product_name"
+											value={ getBrandingValue(branding, "product_name", "OpenUEM") }
+											class="uk-input"
+											placeholder="OpenUEM"
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/product-name"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-1"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-1" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							// Primary Color
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.primary_color") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.primary_color_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2 items-center">
+										<input
+											type="color"
+											id="primary-color"
+											name="primary_color"
+											value={ getBrandingValue(branding, "primary_color", "#16a34a") }
+											class="h-9 w-14 cursor-pointer rounded"
+											onchange="document.querySelector('[name=primary_color_text]').value = this.value"
+										/>
+										<input
+											type="text"
+											name="primary_color_text"
+											value={ getBrandingValue(branding, "primary_color", "#16a34a") }
+											class="uk-input w-24"
+											pattern="^#[0-9A-Fa-f]{6}$"
+											_="on input set #primary-color.value to my value"
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/colors"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-2"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-2" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							// Logo
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.logo") }</td>
+								<td class="!align-middle">
+									{ i18n.T(ctx, "branding.logo_description") }
+									<div class="mt-2 border rounded p-1 flex items-center justify-center bg-white overflow-hidden" style="width: 80px; height: 48px;">
+										if branding != nil && branding.LogoLight != "" {
+											<img src={ branding.LogoLight } alt="Logo" style="max-width: 72px; max-height: 40px; object-fit: contain;"/>
+										} else {
+											<img src="/assets/img/openuem.png" alt="Default Logo" style="max-width: 72px; max-height: 40px; object-fit: contain;"/>
+										}
+									</div>
+								</td>
+								<td class="!align-middle">
+									<div class="flex flex-col gap-2">
+										<form
+											hx-post="/admin/branding/logo"
+											hx-encoding="multipart/form-data"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											hx-trigger="change from:find input[type=file]"
+										>
+											<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml" class="uk-input"/>
+										</form>
+										if branding != nil && branding.LogoLight != "" {
+											<button
+												type="button"
+												hx-delete="/admin/branding/logo"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												class="uk-button uk-button-danger uk-button-small"
+											>
+												<uk-icon icon="trash" custom-class="h-4 w-4 mr-1"></uk-icon>
+												{ i18n.T(ctx, "Delete") }
+											</button>
+										}
+									</div>
+								</td>
+							</tr>
+							// Favicon
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.favicon") }</td>
+								<td class="!align-middle">
+									{ i18n.T(ctx, "branding.favicon_description") }
+									<div class="mt-2 border rounded p-1 flex items-center justify-center bg-white overflow-hidden" style="width: 40px; height: 40px;">
+										if branding != nil && branding.LogoSmall != "" {
+											<img src={ branding.LogoSmall } alt="Favicon" style="max-width: 32px; max-height: 32px; object-fit: contain;"/>
+										} else {
+											<img src="/assets/img/openuem-icon.png" alt="Default Favicon" style="max-width: 32px; max-height: 32px; object-fit: contain;"/>
+										}
+									</div>
+								</td>
+								<td class="!align-middle">
+									<div class="flex flex-col gap-2">
+										<form
+											hx-post="/admin/branding/favicon"
+											hx-encoding="multipart/form-data"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											hx-trigger="change from:find input[type=file]"
+										>
+											<input type="file" name="favicon" accept="image/png,image/x-icon,image/svg+xml" class="uk-input"/>
+										</form>
+										if branding != nil && branding.LogoSmall != "" {
+											<button
+												type="button"
+												hx-delete="/admin/branding/favicon"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												class="uk-button uk-button-danger uk-button-small"
+											>
+												<uk-icon icon="trash" custom-class="h-4 w-4 mr-1"></uk-icon>
+												{ i18n.T(ctx, "Delete") }
+											</button>
+										}
+									</div>
+								</td>
+							</tr>
+							// Login Welcome Text
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.login_welcome") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.login_welcome_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="login_welcome_text"
+											value={ getBrandingValue(branding, "login_welcome_text", "") }
+											class="uk-input"
+											placeholder="Welcome to our platform"
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/login"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-3"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-3" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							// Login Background Image
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.login_background") }</td>
+								<td class="!align-middle">
+									{ i18n.T(ctx, "branding.login_background_description") }
+									<div class="mt-2 border rounded p-1 flex items-center justify-center bg-gray-100 overflow-hidden" style="width: 80px; height: 48px;">
+										if branding != nil && branding.LoginBackgroundImage != "" {
+											<img src={ branding.LoginBackgroundImage } alt="Login Background" style="max-width: 72px; max-height: 40px; object-fit: cover;"/>
+										} else {
+											<uk-icon icon="image" custom-class="h-6 w-6 text-gray-400"></uk-icon>
+										}
+									</div>
+								</td>
+								<td class="!align-middle">
+									<div class="flex flex-col gap-2">
+										<form
+											hx-post="/admin/branding/login-background"
+											hx-encoding="multipart/form-data"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											hx-trigger="change from:find input[type=file]"
+										>
+											<input type="file" name="login_background" accept="image/png,image/jpeg" class="uk-input"/>
+										</form>
+										if branding != nil && branding.LoginBackgroundImage != "" {
+											<button
+												type="button"
+												hx-delete="/admin/branding/login-background"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												class="uk-button uk-button-danger uk-button-small"
+											>
+												<uk-icon icon="trash" custom-class="h-4 w-4 mr-1"></uk-icon>
+												{ i18n.T(ctx, "Delete") }
+											</button>
+										}
+									</div>
+								</td>
+							</tr>
+							// Show Version
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.show_version") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.show_version_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2 items-center">
+										<label class="flex items-center gap-2 cursor-pointer">
+											<input
+												type="checkbox"
+												name="show_version"
+												class="uk-checkbox"
+												checked?={ branding != nil && branding.ShowVersion }
+												hx-post="/admin/branding/show-version"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												hx-include="this"
+											/>
+										</label>
+									</form>
+								</td>
+							</tr>
+							// Bug Report Link
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.bug_report_link") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.bug_report_link_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="bug_report_link"
+											value={ getBrandingValue(branding, "bug_report_link", "") }
+											class="uk-input"
+											placeholder="https://... or email@..."
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/bug-report-link"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-4"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+							// Help Link
+							<tr>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.help_link") }</td>
+								<td class="!align-middle">{ i18n.T(ctx, "branding.help_link_description") }</td>
+								<td class="!align-middle">
+									<form class="flex gap-2">
+										<input
+											type="text"
+											name="help_link"
+											value={ getBrandingValue(branding, "help_link", "") }
+											class="uk-input"
+											placeholder="https://... or email@..."
+										/>
+										<button
+											class="flex items-center gap-2"
+											type="submit"
+											hx-post="/admin/branding/help-link"
+											hx-push-url="false"
+											hx-target="#main"
+											hx-swap="outerHTML"
+											htmx-indicator="#save-branding-5"
+										>
+											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+											<uk-icon id="save-branding-5" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+										</button>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+// Helper function to get branding value with default
+func getBrandingValue(b *ent.Branding, field string, defaultValue string) string {
+	if b == nil {
+		return defaultValue
+	}
+	switch field {
+	case "primary_color":
+		if b.PrimaryColor != "" {
+			return b.PrimaryColor
+		}
+	case "product_name":
+		if b.ProductName != "" {
+			return b.ProductName
+		}
+	case "login_welcome_text":
+		if b.LoginWelcomeText != "" {
+			return b.LoginWelcomeText
+		}
+	case "bug_report_link":
+		if b.BugReportLink != "" {
+			return b.BugReportLink
+		}
+	case "help_link":
+		if b.HelpLink != "" {
+			return b.HelpLink
+		}
+	}
+	return defaultValue
+}
+
+templ BrandingSettingsIndex(title string, cmp templ.Component, commonInfo *partials.CommonInfo) {
+	@layout.Base("admin", commonInfo) {
+		@cmp
+	}
+}
