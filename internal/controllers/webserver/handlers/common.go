@@ -10,6 +10,7 @@ import (
 	"github.com/open-uem/ent"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -34,6 +35,13 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 	if strings.Contains(c.Request().URL.String(), "computers") && !strings.HasSuffix(c.Request().URL.String(), "computers") {
 		info.IsComputer = true
 	}
+
+	// check if we're running in Docker or no server updater info is stored
+	allUpdateServers, err := h.Model.GetAllUpdateServers(filters.UpdateServersFilter{})
+	if err != nil {
+		return nil, err
+	}
+	info.IsDocker = len(allUpdateServers) == 0
 
 	latestRelease, err := model.GetLatestServerReleaseFromAPI(h.ServerReleasesFolder)
 	if err != nil {

@@ -413,7 +413,7 @@ func (suite *ComputersTestSuite) TestSaveNotes() {
 
 func (suite *ComputersTestSuite) TestGetComputerManufacturers() {
 	allManufacturers := []string{"manufacturer0", "manufacturer1", "manufacturer2", "manufacturer3", "manufacturer4", "manufacturer5", "manufacturer6"}
-	items, err := suite.model.GetComputerManufacturers(suite.commonInfo)
+	items, err := suite.model.GetComputerManufacturers(suite.commonInfo, filters.AgentFilter{})
 	assert.NoError(suite.T(), err, "should get computer manufacturers")
 	assert.Equal(suite.T(), 7, len(allManufacturers), "should get 7 manufacturers")
 	assert.Equal(suite.T(), allManufacturers, items, "should get 7 manufacturers")

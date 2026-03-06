@@ -1,0 +1,39 @@
+package filters
+
+import (
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
+)
+
+templ Search(c echo.Context, p partials.PaginationAndSort, search string, target string, swap string) {
+	<form class="flex gap-4 uk-search uk-search-default w-3/4">
+		<input type="hidden" name="page" value="1"/>
+		<input type="hidden" name="pageSize" value={ strconv.Itoa(p.PageSize) }/>
+		<input type="hidden" name="sortBy" value={ p.SortBy }/>
+		<input type="hidden" name="sortOrder" value={ p.SortOrder }/>
+		<span uk-search-icon></span>
+		<input
+			id="filterBySearch"
+			name="filterBySearch"
+			class="flex uk-search-input"
+			type="search"
+			placeholder={ i18n.T(ctx, "Search_Placeholder") }
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			spellcheck="false"
+			aria-label=""
+			value={ search }
+		/>
+		<button
+			class="uk-button uk-button-default"
+			hx-get={ GetPaginationUrl(c) }
+			hx-push-url="true"
+			hx-target={ target }
+			hx-swap={ swap }
+			hx-include="input[name^='filterBy']"
+		>{ i18n.T(ctx, "Search") }<uk-icon hx-history="false" icon="search" custom-class="h-5 w-5 ml-3" uk-cloack></uk-icon></button>
+	</form>
+}

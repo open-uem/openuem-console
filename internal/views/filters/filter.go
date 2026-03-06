@@ -7,29 +7,41 @@ import (
 )
 
 type AgentFilter struct {
-	Nickname              string
-	Versions              []string
-	AgentStatusOptions    []string
-	AgentOSVersions       []string
-	Tags                  []int
-	OSVersions            []string
-	ComputerManufacturers []string
-	ComputerModels        []string
-	Username              string
-	ContactFrom           string
-	ContactTo             string
-	WithApplication       string
-	SelectedItems         int
-	SelectedAllAgents     string
-	SelectedRelease       string
-	IsRemote              []string
-	NoContact             bool
+	Nickname                 string
+	Versions                 []string
+	AgentStatusOptions       []string
+	AgentOSVersions          []string
+	Tags                     []int
+	OSVersions               []string
+	ComputerManufacturers    []string
+	ComputerModels           []string
+	Username                 string
+	ContactFrom              string
+	ContactTo                string
+	WithApplication          string
+	WithApplicationPublisher string
+	SelectedItems            int
+	SelectedAllAgents        string
+	SelectedRelease          string
+	IsRemote                 []string
+	NoContact                bool
+	Search                   string
+	AntivirusNameOptions     []string
+	AntivirusUpdatedOptions  []string
+	AntivirusEnabledOptions  []string
+	UpdateStatus             []string
+	LastSearchFrom           string
+	LastSearchTo             string
+	LastInstallFrom          string
+	LastInstallTo            string
+	PendingUpdateOptions     []string
 }
 
 type ApplicationsFilter struct {
 	AppName string
 	Vendor  string
 	Version string
+	Search  string
 }
 
 type UserFilter struct {

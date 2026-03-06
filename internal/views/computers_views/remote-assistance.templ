@@ -19,7 +19,7 @@ templ RemoteAssistance(c echo.Context, p partials.PaginationAndSort, agent *ent.
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo, offline)
-				@ComputersNavbar(agent.ID, "remote-assistance", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				@ComputersNavbar(agent.ID, "remote-assistance", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird, agent.Edges.Release.Version)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
@@ -286,14 +286,14 @@ templ RustDeskChecks(agent *ent.Agent, hasRustDeskSettings bool, commonInfo *par
 			</div>
 			<div class="flex gap-2">
 				if agent.Edges.Operatingsystem.Username == "" {
-					<uk-icon icon="x" hx-history="false" custom-class="h-5 w-5 text-red-600" uk-cloak></uk-icon>
-					{ i18n.T(ctx, "agents.remote_assistance_no_logged_user") }
+					<uk-icon hx-history="false" icon="triangle-alert" custom-class="h-5 w-5 fill-yellow-500 text-black" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "agents.rustdesk_no_logged_user") }
 				} else {
 					<uk-icon icon="check" hx-history="false" custom-class="h-5 w-5 text-green-600" uk-cloak></uk-icon>
 					{ i18n.T(ctx, "agents.remote_assistance_has_logged_user", agent.Edges.Operatingsystem.Username ) }
 				}
 			</div>
-			if agent.RemoteAssistance && agent.HasRustdesk && agent.Edges.Operatingsystem.Username != "" {
+			if agent.RemoteAssistance && agent.HasRustdesk {
 				<div class="flex gap-2 items-center uk-text-small uk-text-muted uk-margin">
 					<a
 						class="flex gap-2 items-center uk-text-small"
@@ -313,12 +313,12 @@ templ RustDeskChecks(agent *ent.Agent, hasRustDeskSettings bool, commonInfo *par
 	</div>
 }
 
-templ RustDeskInit(agent *ent.Agent) {
+templ RustDeskInit(agent *ent.Agent, commonInfo *partials.CommonInfo) {
 	<div id="rustdesk">
 		<button
 			class="flex items-center gap-2 uk-text-small uk-button uk-button-default"
 			type="submit"
-			hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/startrustdesk", agent.ID))) }
+			hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/startrustdesk", agent.ID)))) }
 			hx-push-url="false"
 			hx-target="#rustdesk"
 			hx-swap="outerHTML"
@@ -492,7 +492,7 @@ templ RustDeskControl(agentID string, rustDeskID string, settings *ent.Rustdesk,
 					<button
 						class="flex items-center gap-2 uk-text-small"
 						type="submit"
-						hx-post={ string(templ.SafeURL(fmt.Sprintf("/computers/%s/stoprustdesk", agentID))) }
+						hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/stoprustdesk", agentID)))) }
 						hx-push-url="false"
 						hx-target="#main"
 						hx-swap="outerHTML"

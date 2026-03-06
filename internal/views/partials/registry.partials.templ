@@ -21,6 +21,7 @@ templ RegistryComponent(t *ent.Task) {
 				name="registry-key"
 				placeholder={ i18n.T(ctx, "tasks.introduce_registry_key", `HKEY_USERS\.DEFAULT\Control Panel\Keyboard`) }
 				spellcheck="false"
+				autocomplete="off"
 				aria-label={ i18n.T(ctx, "tasks.introduce_registry_key") }
 				if t != nil {
 					value={ t.RegistryKey }
@@ -41,6 +42,7 @@ templ RegistryComponent(t *ent.Task) {
 				name="registry-value-name"
 				placeholder={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
 				spellcheck="false"
+				autocomplete="off"
 				aria-label={ i18n.T(ctx, "tasks.introduce_registry_value_name") }
 				if t != nil {
 					value={ t.RegistryKeyValueName }

@@ -20,11 +20,17 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Get filters values
-	f, availableOSes, detectedAntiviri, err := h.GetAntiviriFilters(c)
+	f, err := h.GetEDRFilters(c)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -45,7 +51,30 @@ func (h *Handler) ListAntivirusStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.Antivirus(c, p, *f, antiviri, detectedAntiviri, availableOSes, refreshTime, commonInfo), commonInfo))
+	// get options
+	options := security_views.FilterOptions{}
+
+	options.AvailableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, *f, true)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDRNames, err = h.Model.GetEDRNamesOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDREnabledStatus, err = h.Model.GetEDREnabledStatusOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	options.AvailableEDRUpdatedStatus, err = h.Model.GetEDRUpdateStatusOptions(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.EDR(c, p, *f, antiviri, &options, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
@@ -56,8 +85,14 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Get filters values
 	f, availableOSes, availableUpdateStatus, err := h.GetSystemUpdatesFilters(c)
@@ -81,7 +116,7 @@ func (h *Handler) ListSecurityUpdatesStatus(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, systemUpdates, availableOSes, availableUpdateStatus, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.SecurityUpdates(c, p, *f, systemUpdates, availableOSes, availableUpdateStatus, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ListLatestUpdates(c echo.Context) error {
@@ -102,8 +137,14 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_agent"), false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -121,26 +162,28 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, commonInfo))
+		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, commonInfo), commonInfo))
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo), commonInfo))
 }
 
-func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, []string, []string, error) {
+func (h *Handler) GetEDRFilters(c echo.Context) (*filters.AgentFilter, error) {
 	// Get filters values
-	f := filters.AntivirusFilter{}
+	f := filters.AgentFilter{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
+	// Get the filters
 	f.Nickname = c.FormValue("filterByNickname")
+	f.Search = c.FormValue("filterBySearch")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, true)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	filteredAgentOSes := []string{}
 	for index := range availableOSes {
@@ -151,9 +194,9 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 	}
 	f.AgentOSVersions = filteredAgentOSes
 
-	detectedAntiviri, err := h.Model.GetDetectedAntiviri(commonInfo)
+	detectedAntiviri, err := h.Model.GetDetectedAntiviri(commonInfo, f)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	filteredAntiviri := []string{}
 	for index := range detectedAntiviri {
@@ -182,12 +225,12 @@ func (h *Handler) GetAntiviriFilters(c echo.Context) (*filters.AntivirusFilter, 
 	}
 	f.AntivirusUpdatedOptions = filteredUpdateStatus
 
-	return &f, availableOSes, detectedAntiviri, nil
+	return &f, nil
 }
 
-func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdatesFilter, []string, []string, error) {
+func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.AgentFilter, []string, []string, error) {
 	// Get filters values
-	f := filters.SystemUpdatesFilter{}
+	f := filters.AgentFilter{}
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -196,7 +239,7 @@ func (h *Handler) GetSystemUpdatesFilters(c echo.Context) (*filters.SystemUpdate
 
 	f.Nickname = c.FormValue("filterByNickname")
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return nil, nil, nil, err
 	}

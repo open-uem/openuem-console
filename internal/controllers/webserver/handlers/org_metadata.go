@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -16,8 +17,14 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if c.Request().Method == "POST" {
 		orgMetadataId := c.FormValue("orgMetadataId")
@@ -77,5 +84,5 @@ func (h *Handler) OrgMetadataManager(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, data, agentsExists, serversExists, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
+	return RenderView(c, admin_views.OrgMetadataIndex(" | Tags", admin_views.OrgMetadata(c, p, data, agentsExists, serversExists, itemsPerPage, commonInfo, h.GetAdminTenantName(commonInfo)), commonInfo))
 }

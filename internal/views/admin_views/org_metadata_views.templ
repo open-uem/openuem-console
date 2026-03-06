@@ -9,7 +9,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgMetadata, agentsExists, serversExists bool, commonInfo *partials.CommonInfo, tenantName string) {
+templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgMetadata, agentsExists, serversExists bool, itemsPerPage int, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: "Metadata", Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/metadata", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -87,7 +87,7 @@ templ OrgMetadata(c echo.Context, p partials.PaginationAndSort, data []*ent.OrgM
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/metadata", commonInfo.TenantID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/metadata", commonInfo.TenantID))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-4">
 								{ i18n.T(ctx, "metadata.no_metadata") }

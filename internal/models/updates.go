@@ -37,7 +37,7 @@ func mainUpdatesQuery(s *sql.Selector, p partials.PaginationAndSort) {
 	}
 }
 
-func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter, c *partials.CommonInfo) (int, error) {
+func (m *Model) CountAllSystemUpdates(f filters.AgentFilter, c *partials.CommonInfo) (int, error) {
 	var query *ent.AgentQuery
 
 	siteID, err := strconv.Atoi(c.SiteID)
@@ -64,7 +64,7 @@ func (m *Model) CountAllSystemUpdates(f filters.SystemUpdatesFilter, c *partials
 	return query.Count(context.Background())
 }
 
-func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.SystemUpdatesFilter, c *partials.CommonInfo) ([]SystemUpdate, error) {
+func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.AgentFilter, c *partials.CommonInfo) ([]SystemUpdate, error) {
 	var query *ent.AgentQuery
 	var systemUpdates []SystemUpdate
 	var err error
@@ -198,7 +198,7 @@ func (m *Model) GetSystemUpdatesByPage(p partials.PaginationAndSort, f filters.S
 	return systemUpdates, nil
 }
 
-func applySystemUpdatesFilters(query *ent.AgentQuery, f filters.SystemUpdatesFilter) {
+func applySystemUpdatesFilters(query *ent.AgentQuery, f filters.AgentFilter) {
 	if len(f.Nickname) > 0 {
 		query.Where(agent.NicknameContainsFold(f.Nickname))
 	}

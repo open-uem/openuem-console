@@ -37,7 +37,13 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
@@ -50,7 +56,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	// Get filters values
 	f := filters.AgentFilter{}
@@ -89,7 +95,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 	}
 	f.AgentStatusOptions = filteredAgentStatusOptions
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}
@@ -144,7 +150,7 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 		}
 	}
 
-	availableTags, err := h.Model.GetAllTags(commonInfo)
+	availableTags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		successMessage = ""
 		errMessage = err.Error()
@@ -245,12 +251,12 @@ func (h *Handler) ListAgents(c echo.Context, successMessage, errMessage string, 
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo), u)
+				return RenderViewWithReplaceUrl(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, itemsPerPage, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, agents_views.AgentsIndex("| Agents", agents_views.Agents(c, p, f, agents, availableTags, appliedTags, availableOSes, sftpDisabled, successMessage, errMessage, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) AgentDelete(c echo.Context) error {
@@ -268,7 +274,7 @@ func (h *Handler) AgentDelete(c echo.Context) error {
 
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDelete(c, agent, commonInfo), commonInfo))
@@ -302,7 +308,7 @@ func (h *Handler) AgentConfirmDelete(c echo.Context) error {
 	if deleteAction == "delete-and-uninstall" || deleteAction == "delete-and-keep" {
 		err := h.Model.DeleteAgent(agentId, commonInfo)
 		if err != nil {
-			return h.ListAgents(c, "", err.Error(), false)
+			return h.ListAgents(c, "", err.Error(), true)
 		}
 	}
 
@@ -349,7 +355,7 @@ func (h *Handler) AgentDisable(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentsConfirmDisable(c, agent, commonInfo), commonInfo))
@@ -567,7 +573,7 @@ func (h *Handler) AgentAdmit(c echo.Context) error {
 	agentId := c.Param("uuid")
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return RenderView(c, agents_views.AgentsIndex(" | Agents", agents_views.AgentConfirmAdmission(c, agent, commonInfo), commonInfo))
@@ -588,7 +594,7 @@ func (h *Handler) AgentForceRun(c echo.Context) error {
 		}
 	}()
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.force_run_success"), "", true)
 }
 
 func (h *Handler) AgentConfirmDisable(c echo.Context) error {
@@ -678,7 +684,7 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	}
 
 	if regenerate {
-		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", false)
+		return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.certs_regenerated"), "", true)
 	}
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_admitted"), "", true)
 }
@@ -696,7 +702,7 @@ func (h *Handler) AgentForceRestart(c echo.Context) error {
 		}
 	}
 
-	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", false)
+	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_restarted"), "", true)
 }
 
 func (h *Handler) AgentLogs(c echo.Context) error {

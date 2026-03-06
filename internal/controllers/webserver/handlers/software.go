@@ -18,8 +18,14 @@ func (h *Handler) Software(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Default sort
 	if p.SortBy == "" {
@@ -49,7 +55,7 @@ func (h *Handler) Software(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, *f, apps, refreshTime, commonInfo), commonInfo))
+	return RenderView(c, software_views.SoftwareIndex(" | Software", software_views.Software(c, p, *f, apps, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilter, error) {
@@ -57,6 +63,7 @@ func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilte
 	filterByName := c.FormValue("filterByAppName")
 	filterByPublisher := c.FormValue("filterByAppPublisher")
 	filterByVersion := c.FormValue("filterByAppVersion")
+	filterBySearch := c.FormValue("filterBySearch")
 
 	f := filters.ApplicationsFilter{}
 	if filterByName != "" {
@@ -68,6 +75,10 @@ func (h *Handler) GetSoftwareFilters(c echo.Context) (*filters.ApplicationsFilte
 
 	if filterByVersion != "" {
 		f.Version = filterByVersion
+	}
+
+	if filterBySearch != "" {
+		f.Search = filterBySearch
 	}
 
 	return &f, nil

@@ -50,11 +50,12 @@ templ SelectTaskType(t *ent.Task, agentType string) {
 			hx-target="#select-task-subtype"
 			hx-swap="innerHTML"
 			_="on change      
-                remove .hidden from #select-task-subtype
                 if my.value == 'powershell_type' or my.value == 'unix_script_type' then
                     remove .hidden from #task-definition
+					add .hidden to #select-task-subtype
                 else
                     add .hidden to #task-definition
+               		remove .hidden from #select-task-subtype
                 end
             end"
 		>

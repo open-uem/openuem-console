@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
@@ -88,6 +89,7 @@ type TaskConfig struct {
 	HomeBrewGreedy                        bool
 	NetbirdGroups                         string
 	NetbirdAllowExtraDNSLabels            bool
+	IgnoreErrors                          bool
 }
 
 func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
@@ -110,19 +112,37 @@ func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (
 }
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
+
+	order := 0
+
+	// let's see which is the highest order for tasks in profile
+	t, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(task.ByOrder(sql.OrderDesc())).First(context.Background())
+	if err == nil {
+		order = t.Order
+	}
+
+	// common query
+	query := m.Client.Task.Create().
+		SetName(cfg.Description).
+		SetType(task.Type(cfg.TaskType)).
+		SetAgentType(task.AgentType(cfg.AgentsType)).
+		SetProfileID(profileID).
+		SetIgnoreErrors(cfg.IgnoreErrors).
+		SetOrder(order + 1)
+
 	switch cfg.TaskType {
 	case task.TypeWingetInstall.String(), task.TypeWingetDelete.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageVersion(cfg.PackageVersion).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case task.TypeAddRegistryKey.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
+		return query.SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).Exec(context.Background())
 	case task.TypeRemoveRegistryKey.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
+		return query.SetRegistryKey(cfg.RegistryKey).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeUpdateRegistryKeyDefaultValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).SetRegistryKeyValueType(task.RegistryKeyValueTypeString).
 			SetRegistryKeyValueData(cfg.RegistryKeyValueData).SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeAddRegistryKeyValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).
 			SetRegistryKeyValueType(task.RegistryKeyValueType(cfg.RegistryKeyValueType)).
@@ -130,11 +150,11 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetRegistryHex(cfg.RegistryHex).
 			SetRegistryForce(cfg.RegistryForce).Exec(context.Background())
 	case task.TypeRemoveRegistryKeyValue.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetRegistryKey(cfg.RegistryKey).
 			SetRegistryKeyValueName(cfg.RegistryKeyValue).Exec(context.Background())
 	case task.TypeAddLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
 			SetLocalUserFullname(cfg.LocalUserFullName).
@@ -145,7 +165,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserPasswordNeverExpires(cfg.LocalUserNeverExpires).
 			Exec(context.Background())
 	case task.TypeAddUnixLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserDescription(cfg.LocalUserDescription).
 			SetLocalUserGroup(cfg.LocalUserPrimaryGroup).
@@ -176,49 +196,49 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 			SetLocalUserAppend(cfg.LocalUserAppend).
 			Exec(context.Background())
 	case task.TypeRemoveUnixLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			SetLocalUserForce(cfg.LocalUserForce).
 			Exec(context.Background())
 	case task.TypeRemoveLocalUser.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalUserUsername(cfg.LocalUserUsername).
 			Exec(context.Background())
 	case task.TypeAddLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembers(cfg.LocalGroupMembers).
 			Exec(context.Background())
 	case task.TypeRemoveLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			Exec(context.Background())
 	case task.TypeAddUnixLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupID(cfg.LocalGroupID).
 			SetLocalGroupSystem(cfg.LocalGroupSystem).
 			Exec(context.Background())
 	case task.TypeRemoveUnixLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupForce(cfg.LocalGroupForce).
 			Exec(context.Background())
 	case task.TypeAddUsersToLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToInclude(cfg.LocalGroupMembersToInclude).
 			Exec(context.Background())
 	case task.TypeRemoveUsersFromLocalGroup.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetLocalGroupName(cfg.LocalGroupName).
 			SetLocalGroupDescription(cfg.LocalGroupDescription).
 			SetLocalGroupMembersToExclude(cfg.LocalGroupMembersToExclude).
 			Exec(context.Background())
 	case task.TypeMsiInstall.String(), task.TypeMsiUninstall.String():
-		query := m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		query := query.
 			SetMsiProductid(cfg.MsiProductID).
 			SetMsiPath(cfg.MsiPath).
 			SetMsiArguments(cfg.MsiArguments).
@@ -229,20 +249,20 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		}
 		return query.Exec(context.Background())
 	case task.TypePowershellScript.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
 	case task.TypeUnixScript.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
 	case task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String(),
 		task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).
+		return query.
 			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
 			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
 	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String():
-		return m.Client.Task.Create().SetName(cfg.Description).SetType(task.Type(cfg.TaskType)).SetAgentType(task.AgentType(cfg.AgentsType)).SetProfileID(profileID).Exec(context.Background())
+		return query.Exec(context.Background())
 	case task.TypeNetbirdRegister.String():
 		tenantID := c.Param("tenant")
 		if tenantID == "" {
@@ -258,9 +278,10 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
-func (m *Model) UpdateTaskToProfile(c echo.Context, taskID int, cfg TaskConfig) error {
+func (m *Model) UpdateProfileTask(c echo.Context, taskID int, cfg TaskConfig) error {
 
-	query := m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description)
+	// common query
+	query := m.Client.Task.UpdateOneID(taskID).SetName(cfg.Description).SetIgnoreErrors(cfg.IgnoreErrors)
 
 	// Update version
 	query.AddVersion(1)
@@ -427,15 +448,97 @@ func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID
 		return nil, err
 	}
 
+	// Check if we've values in the order column
+	countWithOrder, err := m.Client.Task.Query().Where(task.OrderGT(0), task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// If we don't have the order column filled with values let's add them
+	if countWithOrder == 0 {
+		// let's get all tasks we have
+		tasks, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Order(task.ByID()).All(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		// We must fill the order column as we're using it to order the results
+		for i, t := range tasks {
+			if err := m.Client.Task.UpdateOneID(t.ID).SetOrder(i + 1).Exec(context.Background()); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Now, we have the ordered values, and we can use the order colum
 	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
 
-	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByID()).All(context.Background())
+	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByOrder()).All(context.Background())
 }
 
-func (m *Model) GetTasksById(taskId int) (*ent.Task, error) {
-	return m.Client.Task.Query().WithProfile().Where(task.ID(taskId)).First(context.Background())
+func (m *Model) GetTasksById(taskID int) (*ent.Task, error) {
+	return m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).First(context.Background())
 }
 
-func (m *Model) DeleteTask(taskId int) error {
-	return m.Client.Task.DeleteOneID(taskId).Exec(context.Background())
+func (m *Model) DeleteTask(profileID int, taskID int) error {
+	// get the curren task
+	currentTask, err := m.Client.Task.Get(context.Background(), taskID)
+	if err != nil {
+		return err
+	}
+
+	// we must delete the task
+	if err := m.Client.Task.DeleteOneID(taskID).Exec(context.Background()); err != nil {
+		return err
+	}
+
+	//...but we must then update the order column from that column onwards
+	return m.Client.Task.Update().Where(task.OrderGT(currentTask.Order)).AddOrder(-1).Exec(context.Background())
+}
+
+func (m *Model) EnableTask(taskID int, disabled bool) error {
+	return m.Client.Task.UpdateOneID(taskID).SetDisabled(disabled).Exec(context.Background())
+}
+
+func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, newOrder int) error {
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		return err
+	}
+
+	t, err := m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if currentOrder < newOrder {
+		if err := m.Client.Task.Update().Where(
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.OrderGTE(currentOrder),
+			task.OrderLTE(newOrder),
+		).AddOrder(-1).Exec(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	if currentOrder > newOrder {
+		if err := m.Client.Task.Update().Where(
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.OrderGTE(newOrder),
+			task.OrderLTE(currentOrder),
+		).AddOrder(+1).Exec(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	return m.Client.Task.Update().Where(task.ID(taskID)).SetOrder(newOrder).Exec(context.Background())
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/open-uem/ent/enttest"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -50,7 +51,7 @@ func (suite *TagsTestSuite) SetupTest() {
 }
 
 func (suite *TagsTestSuite) TestGetAllTags() {
-	tags, err := suite.model.GetAllTags(suite.commonInfo)
+	tags, err := suite.model.GetAllTags(suite.commonInfo, filters.AgentFilter{})
 
 	assert.NoError(suite.T(), err, "should get all tags")
 
@@ -161,7 +162,7 @@ func (suite *TagsTestSuite) TestNewTag() {
 	assert.NoError(suite.T(), err, "should count all tags")
 	assert.Equal(suite.T(), 8, count, "tags count should be 8")
 
-	tags, err := suite.model.GetAllTags(suite.commonInfo)
+	tags, err := suite.model.GetAllTags(suite.commonInfo, filters.AgentFilter{})
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")
@@ -173,7 +174,7 @@ func (suite *TagsTestSuite) TestUpdateTag() {
 	err := suite.model.UpdateTag(suite.tagId, "Tag8", "My tag 8", "#f8f8f8", suite.commonInfo)
 	assert.NoError(suite.T(), err, "should update a tag")
 
-	tags, err := suite.model.GetAllTags(suite.commonInfo)
+	tags, err := suite.model.GetAllTags(suite.commonInfo, filters.AgentFilter{})
 	assert.NoError(suite.T(), err, "should get all tags")
 
 	assert.Equal(suite.T(), "Tag8", tags[len(tags)-1].Tag, "tag should be Tag8")

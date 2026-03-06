@@ -21,12 +21,16 @@ import (
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/task"
 	openuem_nats "github.com/open-uem/nats"
+	ansiblecfg "github.com/open-uem/openuem-ansible-config/ansible"
 	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/utils"
+	"github.com/open-uem/wingetcfg/wingetcfg"
+	"gopkg.in/yaml.v3"
 )
 
 func (h *Handler) Overview(c echo.Context) error {
@@ -244,8 +248,14 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
 	if err != nil {
@@ -277,7 +287,7 @@ func (h *Handler) NetworkAdapters(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.NetworkAdapters(c, p, agent, adapters, confirmDelete, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Printers(c echo.Context) error {
@@ -480,8 +490,14 @@ func (h *Handler) Apps(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	// Default sort
 	if p.SortBy == "" {
@@ -532,7 +548,7 @@ func (h *Handler) Apps(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Apps(c, p, *f, a, apps, confirmDelete, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) RemoteAssistance(c echo.Context) error {
@@ -597,7 +613,13 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	sortOrder := c.FormValue("sortOrder")
 	currentSortBy := c.FormValue("currentSortBy")
 
-	p := partials.NewPaginationAndSort()
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
@@ -610,10 +632,21 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		}
 	}
 
-	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
 
 	// Get filters values
 	f := filters.AgentFilter{}
+
+	if comesFromDialog {
+		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
+		if err == nil {
+			f.Search = u.Query().Get("filterBySearch")
+		}
+	} else {
+		if c.FormValue("filterBySearch") != "" {
+			f.Search = c.FormValue("filterBySearch")
+		}
+	}
 
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
@@ -633,7 +666,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.Username = c.FormValue("filterByUsername")
 	}
 
-	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo)
+	availableOSes, err := h.Model.GetAgentsUsedOSes(commonInfo, f, false)
 	if err != nil {
 		return err
 	}
@@ -681,7 +714,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 	f.OSVersions = filteredVersions
 
 	filteredComputerManufacturers := []string{}
-	vendors, err := h.Model.GetComputerManufacturers(commonInfo)
+	vendors, err := h.Model.GetComputerManufacturers(commonInfo, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -749,6 +782,10 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		f.WithApplication = c.FormValue("selectedApp")
 	}
 
+	if c.FormValue("selectedPublisher") != "" {
+		f.WithApplicationPublisher = c.FormValue("selectedPublisher")
+	}
+
 	if comesFromDialog {
 		u, err := url.Parse(c.Request().Header.Get("Hx-Current-Url"))
 		if err == nil {
@@ -760,7 +797,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		}
 	}
 
-	tags, err := h.Model.GetAllTags(commonInfo)
+	tags, err := h.Model.GetAllTags(commonInfo, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
@@ -820,12 +857,28 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo), u)
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo), u)
 			}
 		}
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, successMessage, commonInfo), commonInfo))
+	// Use filters to get lists of values for the filter dialogs
+	availableOSes, err = h.Model.GetAgentsUsedOSes(commonInfo, f, false)
+	if err != nil {
+		return err
+	}
+
+	tags, err = h.Model.GetAllTags(commonInfo, f)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	versions, err = h.Model.GetOSVersions(f, commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
@@ -842,8 +895,14 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	agent, err := h.Model.GetAgentById(agentId, commonInfo)
 	if err != nil {
@@ -863,7 +922,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, commonInfo))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, itemsPerPage, commonInfo))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -884,7 +943,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -896,8 +955,14 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return err
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
@@ -964,7 +1029,7 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
 
-	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, commonInfo))
+	return RenderView(c, computers_views.SearchPacketResult(c, agentId, packages, p, itemsPerPage, commonInfo))
 
 }
 
@@ -1286,8 +1351,14 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage("an error occurred getting uuid param", false))
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	if p.SortBy == "" {
 		p.SortBy = "name"
@@ -1361,7 +1432,7 @@ func (h *Handler) ComputerMetadata(c echo.Context) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerMetadata(c, p, agent, data, orgMetadata, confirmDelete, successMessage, itemsPerPage, commonInfo, netbird, offline), commonInfo))
 }
 
 func (h *Handler) Notes(c echo.Context) error {
@@ -1420,11 +1491,11 @@ func (h *Handler) ComputerConfirmDelete(c echo.Context) error {
 
 	agentId := c.Param("uuid")
 	if agentId == "" {
-		return h.ListAgents(c, "", "an error occurred getting uuid param", false)
+		return h.ListAgents(c, "", "an error occurred getting uuid param", true)
 	}
 
 	if err := h.Model.DeleteAgent(agentId, commonInfo); err != nil {
-		return h.ListAgents(c, "", err.Error(), false)
+		return h.ListAgents(c, "", err.Error(), true)
 	}
 
 	return h.ComputersList(c, i18n.T(c.Request().Context(), "computers.deleted"), true)
@@ -1793,4 +1864,507 @@ func (h *Handler) IsAgentOffline(c echo.Context) bool {
 	}
 
 	return false
+}
+
+func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentId := c.Param("uuid")
+
+	if agentId == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	currentPage := c.FormValue("page")
+	pageSize := c.FormValue("pageSize")
+	sortBy := c.FormValue("sortBy")
+	sortOrder := c.FormValue("sortOrder")
+	currentSortBy := c.FormValue("currentSortBy")
+
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(currentPage, pageSize, sortBy, sortOrder, currentSortBy, itemsPerPage)
+
+	agent, err := h.Model.GetAgentNetworkAdaptersInfo(agentId, commonInfo)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	reports, err := h.Model.TaskReportsByPageInfo(agentId, commonInfo, p)
+	if err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	p.NItems, err = h.Model.CountTaskReportsByPageInfo(agentId, commonInfo)
+	if err != nil {
+		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	confirmDelete := c.QueryParam("delete") != ""
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+	settings, err := h.Model.GetNetbirdSettings(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+	netbird := settings.AccessToken != ""
+
+	offline := h.IsAgentOffline(c)
+
+	availableTasks, err := h.Model.GetAvailableTasksForAgent(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_available_tasks", err), true))
+	}
+
+	availableProfiles, err := h.Model.GetAvailableProfilesForAgent(agentId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_available_profiles", err), true))
+	}
+
+	refreshTime, err := h.Model.GetDefaultRefreshTime()
+	if err != nil {
+		log.Println("[ERROR]: could not get refresh time from database")
+		refreshTime = 5
+	}
+
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, availableProfiles, confirmDelete, itemsPerPage, commonInfo, netbird, offline, successMessage, refreshTime), commonInfo))
+}
+
+func (h *Handler) RunTask(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if c.FormValue("task") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskSplitted := strings.Split(c.FormValue("task"), "-")
+	taskID, err := strconv.Atoi(taskSplitted[len(taskSplitted)-1])
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), true))
+	}
+
+	if _, err := h.Model.GetAgentById(agentID, commonInfo); err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	t, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid", err), true))
+	}
+
+	if t.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.no_profile", err), true))
+	}
+
+	if t.AgentType == task.AgentTypeLinux || t.AgentType == task.AgentTypeMacos {
+		// prepare playbook
+		pb, err := createAnsiblePlaybook(t)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
+		}
+
+		// prepare request
+		config := openuem_nats.ProfileConfig{
+			ProfileID:     t.Edges.Profile.ID,
+			AnsibleConfig: []*ansiblecfg.AnsiblePlaybook{pb},
+		}
+
+		data, err := yaml.Marshal(config)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_playbook", err), true))
+		}
+
+		// send request to agent
+		if _, err = h.NATSConnection.Request("agent.ansible."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_ansible_playbook_request", err), true))
+		}
+	}
+
+	if t.AgentType == task.AgentTypeWindows {
+		// prepare config
+		cfg, err := createWindowsTaskConfig(t)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
+		}
+
+		// prepare request
+		config := openuem_nats.ProfileConfig{
+			ProfileID:    t.Edges.Profile.ID,
+			WinGetConfig: cfg,
+		}
+
+		data, err := yaml.Marshal(config)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_playbook", err), true))
+		}
+
+		// send request to agent
+		if _, err = h.NATSConnection.Request("agent.windowstask."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_ansible_playbook_request", err), true))
+		}
+	}
+
+	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "tasks.task_was_run_successfully"))
+}
+
+func (h *Handler) RunProfile(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if c.FormValue("profile") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.empty"), true))
+	}
+
+	pfSplitted := strings.Split(c.FormValue("profile"), "-")
+	profileID, err := strconv.Atoi(pfSplitted[len(pfSplitted)-1])
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.invalid"), true))
+	}
+
+	if _, err := h.Model.GetAgentById(agentID, commonInfo); err != nil {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	if _, err := h.Model.GetProfileById(profileID, commonInfo); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.not_found", err), true))
+	}
+
+	// prepare request
+	config := openuem_nats.CfgProfiles{
+		AgentID:   agentID,
+		ProfileID: profileID,
+	}
+
+	data, err := json.Marshal(config)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_marshal_config", err), true))
+	}
+
+	// send request to agent
+	if _, err = h.NATSConnection.Request("agent.runprofile."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_send_profile_request", err), true))
+	}
+
+	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "profiles.profile_run_request_sent"))
+}
+
+func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, error) {
+	var err error
+
+	pb := ansiblecfg.NewAnsiblePlaybook()
+	pb.Name = t.Edges.Profile.Name
+
+	switch t.Type {
+	case task.TypeAddUnixLocalGroup:
+		var gid int
+
+		if t.LocalGroupID != "" {
+			gid, err = strconv.Atoi(t.LocalGroupID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		addLocalGroup, err := ansiblecfg.AddLocalGroup(fmt.Sprintf("task_%d", t.ID), t.LocalGroupName, gid, t.LocalGroupSystem, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(addLocalGroup)
+
+	case task.TypeAddUnixLocalUser:
+		var expires float64
+		var password_expire_account_disable int
+		var password_expire_max int
+		var password_expire_min int
+		var password_expire_warn int
+		var ssh_key_bits int
+		var uid int
+		var uid_max int
+		var uid_min int
+
+		if t.LocalUserExpires != "" {
+			expires, err = strconv.ParseFloat(t.LocalUserExpires, 64)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireAccountDisable != "" {
+			password_expire_account_disable, err = strconv.Atoi(t.LocalUserPasswordExpireAccountDisable)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireMax != "" {
+			password_expire_max, err = strconv.Atoi(t.LocalUserPasswordExpireMax)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireMin != "" {
+			password_expire_min, err = strconv.Atoi(t.LocalUserPasswordExpireMin)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserPasswordExpireWarn != "" {
+			password_expire_warn, err = strconv.Atoi(t.LocalUserPasswordExpireWarn)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserSSHKeyBits != "" {
+			ssh_key_bits, err = strconv.Atoi(t.LocalUserSSHKeyBits)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserID != "" {
+			uid, err = strconv.Atoi(t.LocalUserID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserIDMax != "" {
+			uid_max, err = strconv.Atoi(t.LocalUserIDMax)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if t.LocalUserIDMin != "" {
+			uid_min, err = strconv.Atoi(t.LocalUserIDMin)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		addLinuxUser, err := ansiblecfg.AddLocalUser(fmt.Sprintf("task_%d", t.ID), t.LocalUserAppend, t.LocalUserDescription,
+			t.LocalUserCreateHome, expires, t.LocalUserForce, t.LocalUserGenerateSSHKey, t.LocalUserGroup, t.LocalUserGroups,
+			t.LocalUserHome, t.LocalUserUsername, t.LocalUserNonunique, t.LocalUserPassword, password_expire_account_disable, password_expire_max,
+			password_expire_min, password_expire_warn, t.LocalUserPasswordLock, t.LocalUserShell, t.LocalUserSkeleton, ssh_key_bits,
+			t.LocalUserSSHKeyComment, t.LocalUserSSHKeyFile, t.LocalUserSSHKeyPassphrase, t.LocalUserSSHKeyType,
+			t.LocalUserSystem, t.LocalUserUmask, uid, uid_max, uid_min, t.AgentType.String(), t.IgnoreErrors)
+
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(addLinuxUser)
+
+	case task.TypeRemoveLocalUser:
+		removeLinux, err := ansiblecfg.RemoveLocalUser(fmt.Sprintf("task_%d", t.ID), t.LocalUserForce, t.LocalUserUsername, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(removeLinux)
+
+	case task.TypeRemoveUnixLocalGroup:
+		removeLocalGroup, err := ansiblecfg.RemoveLocalGroup(fmt.Sprintf("task_%d", t.ID), t.LocalGroupName, t.LocalGroupForce, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(removeLocalGroup)
+
+	case task.TypeUnixScript:
+		executeScript, err := ansiblecfg.ExecuteScript(fmt.Sprintf("task_%d", t.ID), t.Script, t.ScriptExecutable, t.ScriptCreates, t.AgentType.String(), t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(executeScript)
+	case task.TypeFlatpakInstall:
+		install, err := ansiblecfg.InstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.PackageLatest, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeFlatpakUninstall:
+		uninstall, err := ansiblecfg.UninstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	case task.TypeBrewFormulaInstall:
+		install, err := ansiblecfg.InstallHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewInstallOptions, t.BrewUpdate, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeBrewFormulaUpgrade:
+		upgrade, err := ansiblecfg.UpgradeHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewUpdate, t.BrewUpgradeAll, t.BrewUpgradeOptions, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(upgrade)
+	case task.TypeBrewFormulaUninstall:
+		uninstall, err := ansiblecfg.UninstallHomeBrewFormula(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	case task.TypeBrewCaskInstall:
+		install, err := ansiblecfg.InstallHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewInstallOptions, t.BrewUpdate, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(install)
+	case task.TypeBrewCaskUpgrade:
+		upgrade, err := ansiblecfg.UpgradeHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.BrewGreedy, t.BrewUpdate, t.BrewUpgradeAll, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(upgrade)
+	case task.TypeBrewCaskUninstall:
+		uninstall, err := ansiblecfg.UninstallHomeBrewCask(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		if err != nil {
+			return nil, err
+		}
+		pb.AddAnsibleTask(uninstall)
+	}
+
+	return pb, nil
+}
+
+func createWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGetCfg, error) {
+	cfg := wingetcfg.NewWingetCfg()
+
+	taskID := fmt.Sprintf("task_%d_%d", t.ID, t.Version)
+
+	switch t.Type {
+	case task.TypeWingetInstall:
+		installPackage, err := wingetcfg.InstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(installPackage)
+	case task.TypeWingetDelete:
+		uninstallPackage, err := wingetcfg.UninstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(uninstallPackage)
+	case task.TypeAddRegistryKey:
+		registryKey, err := wingetcfg.AddRegistryKey(taskID, t.Name, t.RegistryKey)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeRemoveRegistryKey:
+		registryKey, err := wingetcfg.RemoveRegistryKey(taskID, t.Name, t.RegistryKey, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeUpdateRegistryKeyDefaultValue:
+		registryKey, err := wingetcfg.UpdateRegistryKeyDefaultValue(taskID, t.Name, t.RegistryKey, string(t.RegistryKeyValueType), t.RegistryKeyValueData, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeAddRegistryKeyValue:
+		registryKey, err := wingetcfg.AddRegistryValue(taskID, t.Name, t.RegistryKey, t.RegistryKeyValueName, string(t.RegistryKeyValueType), t.RegistryKeyValueData, t.RegistryHex, t.RegistryForce)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeRemoveRegistryKeyValue:
+		registryKey, err := wingetcfg.RemoveRegistryValue(taskID, t.Name, t.RegistryKey, t.RegistryKeyValueName)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(registryKey)
+	case task.TypeAddLocalUser:
+		localUser, err := wingetcfg.AddOrModifyLocalUser(taskID, t.LocalUserUsername, t.LocalUserDescription, t.LocalUserDisable, t.LocalUserFullname, t.LocalUserPassword, t.LocalUserPasswordChangeNotAllowed, t.LocalUserPasswordChangeRequired, t.LocalUserPasswordNeverExpires)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localUser)
+	case task.TypeRemoveLocalUser:
+		localUser, err := wingetcfg.RemoveLocalUser(taskID, t.LocalUserUsername)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localUser)
+	case task.TypeAddLocalGroup:
+		localGroup, err := wingetcfg.AddOrModifyLocalGroup(taskID, t.LocalGroupName, t.LocalGroupDescription, t.LocalGroupMembers)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeRemoveLocalGroup:
+		localGroup, err := wingetcfg.RemoveLocalGroup(taskID, t.LocalGroupName)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeAddUsersToLocalGroup:
+		localGroup, err := wingetcfg.IncludeMembersToGroup(taskID, t.LocalGroupName, t.LocalGroupMembersToInclude)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeRemoveUsersFromLocalGroup:
+		localGroup, err := wingetcfg.ExcludeMembersFromGroup(taskID, t.LocalGroupName, t.LocalGroupMembersToExclude)
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(localGroup)
+	case task.TypeMsiInstall:
+		msiInstall, err := wingetcfg.InstallMSIPackage(taskID, fmt.Sprintf("Install %s", t.MsiProductid), t.MsiProductid, t.MsiPath, t.MsiArguments, t.MsiLogPath, t.MsiFileHash, string(t.MsiFileHashAlg))
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiInstall)
+	case task.TypeMsiUninstall:
+		msiUninstall, err := wingetcfg.UninstallMSIPackage(taskID, fmt.Sprintf("Uninstall %s", t.MsiProductid), t.MsiProductid, t.MsiPath, t.MsiArguments, t.MsiLogPath, t.MsiFileHash, string(t.MsiFileHashAlg))
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiUninstall)
+	case task.TypePowershellScript:
+		msiUninstall, err := wingetcfg.ExecutePowershellScript(taskID, t.Name, t.Script, t.ScriptRun.String())
+		if err != nil {
+			return nil, err
+		}
+		cfg.AddResource(msiUninstall)
+	}
+	return cfg, nil
 }

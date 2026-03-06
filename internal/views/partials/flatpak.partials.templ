@@ -11,6 +11,7 @@ import (
 
 templ FlatpakPackageManagement(t *ent.Task) {
 	<div class="flex flex-col gap-4">
+		@IgnoreErrors(t.IgnoreErrors)
 		<div class={ templ.KV("hidden", t != nil && t.PackageID != "") } id="flatpak-search-section">
 			<label class="uk-form-label" for="flatpak-search">
 				{ i18n.T(ctx, "tasks.edit.select_package") }

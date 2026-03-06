@@ -8,13 +8,13 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, adapters []*ent.NetworkAdapter, confirmDelete bool, commonInfo *partials.CommonInfo, netbird, offline bool) {
+templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, adapters []*ent.NetworkAdapter, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@partials.ComputerHeader(p, agent, commonInfo, offline)
-				@ComputersNavbar(agent.ID, "network-adapters", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird)
+				@ComputersNavbar(agent.ID, "network-adapters", agent.VncProxyPort, confirmDelete, commonInfo, agent.Os, netbird, agent.Edges.Release.Version)
 				if confirmDelete {
 					@partials.ConfirmDeleteAgent(c, i18n.T(ctx, "agents.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s", agent.ID)))))
 				}
@@ -66,11 +66,13 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 									} else {
 										<td>{ adapter.DefaultGateway }</td>
 									}
-									if adapter.DhcpEnabled {
-										@partials.Checkmark()
-									} else {
-										<td>-</td>
-									}
+									<td>
+										if adapter.DhcpEnabled {
+											@partials.Checkmark()
+										} else {
+											{ "-" }
+										}
+									</td>
 									if adapter.DNSServers != "" {
 										// TODO escape content from the database for tooltip
 										<td
@@ -83,16 +85,18 @@ templ NetworkAdapters(c echo.Context, p partials.PaginationAndSort, agent *ent.A
 									}
 									<td>{ adapter.Speed }</td>
 									if agent.Os != "windows" && agent.Os != "macOS" {
-										if adapter.Virtual {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
+										<td>
+											if adapter.Virtual {
+												@partials.Checkmark()
+											} else {
+												{ "-" }
+											}
+										</td>
 									}
 								</tr>
 							}
 						</table>
-						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters", agent.ID)))))
+						@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/network-adapters", agent.ID)))), itemsPerPage)
 					} else {
 						<p class="uk-text-small uk-text-muted">
 							{ i18n.T(ctx, "inventory.network_adapters.no_network_adapters") }

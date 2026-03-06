@@ -10,7 +10,7 @@ import (
 )
 
 templ FilterByOptions(c echo.Context, p partials.PaginationAndSort, field, title string, options, filtered []string, target, swap string, translate bool, disableFunc func() bool) {
-	<button class="flex items-center" title={ i18n.T(ctx, title) } type="button">
+	<button class="flex items-center" title={ i18n.T(ctx, title) } type="button" disabled?={ len(options)== 0 }>
 		if len(filtered) > 0 {
 			<uk-icon icon="filter" hx-history="false" custom-class="mr-2 h-5 w-5 fill-red-500 text-red-500" uk-cloak></uk-icon>
 		} else {

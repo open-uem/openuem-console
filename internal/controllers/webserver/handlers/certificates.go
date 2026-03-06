@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -51,8 +52,14 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		f.ExpiryTo = expiryTo
 	}
 
-	p := partials.NewPaginationAndSort()
-	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"))
+	itemsPerPage, err := h.Model.GetDefaultItemsPerPage()
+	if err != nil {
+		log.Println("[ERROR]: could not get items per page from database")
+		itemsPerPage = 5
+	}
+
+	p := partials.NewPaginationAndSort(itemsPerPage)
+	p.GetPaginationAndSortParams(c.FormValue("page"), c.FormValue("pageSize"), c.FormValue("sortBy"), c.FormValue("sortOrder"), c.FormValue("currentSortBy"), itemsPerPage)
 
 	p.NItems, err = h.Model.CountAllCertificates(f)
 	if err != nil {
@@ -74,7 +81,7 @@ func (h *Handler) GetCertificates(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, certTypes, certificates, successMessage, agentsExists, serversExists, commonInfo), commonInfo))
+	return RenderView(c, admin_views.CertificatesIndex(" | Certificates", admin_views.Certificates(c, p, f, certTypes, certificates, successMessage, agentsExists, serversExists, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) CertificateConfirmRevocation(c echo.Context) error {

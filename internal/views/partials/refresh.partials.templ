@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-templ RefreshPage(l locales.Translator, url, target, swap, method string, refreshTime int, showTime bool) {
+templ RefreshPage(l locales.Translator, refreshTime int, showTime bool) {
 	<div class="flex gap-4 items-center">
 		if showTime {
 			<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "Updated at", l.FmtTimeMedium(time.Now())) }</span>
@@ -15,14 +15,10 @@ templ RefreshPage(l locales.Translator, url, target, swap, method string, refres
 		<button
 			type="button"
 			class="uk-button uk-button-default"
+			hx-get=""
 			hx-push-url="false"
-			if method == "post" {
-				hx-post={ url }
-			} else {
-				hx-get={ url }
-			}
-			hx-target={ target }
-			hx-swap={ swap }
+			hx-target="#main"
+			hx-swap="outerHTML"
 			hx-trigger={ fmt.Sprintf("click, every %dm", refreshTime) }
 			_="on click add .animate-spin to #refresh-icon"
 		>

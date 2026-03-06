@@ -705,7 +705,7 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 
 func generateForgotCode() (string, error) {
 	var charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	var randomCode string
+	var randomCode strings.Builder
 
 	length := 6
 	randomBytes := make([]byte, length)
@@ -716,8 +716,8 @@ func generateForgotCode() (string, error) {
 			return "", fmt.Errorf("failed to generate forgot password code: %v", err)
 		}
 		randomIndex := int(randomBytes[i] % byte(len(charset)))
-		randomCode += string(charset[randomIndex])
+		randomCode.WriteString(string(charset[randomIndex]))
 	}
 
-	return fmt.Sprintf("%s", randomCode[0:6]), nil
+	return fmt.Sprintf("%s", randomCode.String()[0:6]), nil
 }

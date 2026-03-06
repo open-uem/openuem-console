@@ -233,4 +233,8 @@ func applyAppsFilters(query *ent.AppQuery, f filters.ApplicationsFilter) {
 	if len(f.Version) > 0 {
 		query.Where(app.VersionContainsFold(f.Version))
 	}
+
+	if len(f.Search) > 0 {
+		query.Where(app.Or(app.NameContainsFold(f.Search), app.PublisherContainsFold(f.Search), app.VersionContainsFold(f.Search)))
+	}
 }

@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, sites []*ent.Site, successMessage, errMessage string, refresh int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo, tenantName string) {
+templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, sites []*ent.Site, successMessage, errMessage string, refresh int, itemsPerPage int, agentsExists, serversExists, confirmDelete bool, commonInfo *partials.CommonInfo, tenantName string) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: tenantName, Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/tags", commonInfo.TenantID)))}, {Title: i18n.T(ctx, "Site.other"), Url: string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID)))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -44,7 +44,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 									f.CreatedFrom == "" && f.CreatedTo == "" && f.ModifiedFrom == "" && f.ModifiedTo == "" &&
 									len(f.DefaultOptions) == 0
 							})
-							@partials.RefreshPage(commonInfo.Translator, string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), "#main", "outerHTML", "get", refresh, true)
+							@partials.RefreshPage(commonInfo.Translator, refresh, true)
 						</div>
 						<div class="uk-flex uk-flex-right@s uk-width-1-1@s gap-4 my-4">
 							<button
@@ -165,11 +165,13 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 												}
 											</a>
 										</td>
-										if s.IsDefault {
-											@partials.Checkmark()
-										} else {
-											<td>-</td>
-										}
+										<td>
+											if s.IsDefault {
+												@partials.Checkmark()
+											} else {
+												{ "-" }
+											}
+										</td>
 										if s.Domain == "" {
 											<td>-</td>
 										} else {
@@ -215,7 +217,7 @@ templ Sites(c echo.Context, p partials.PaginationAndSort, f filters.SiteFilter, 
 									</tr>
 								}
 							</table>
-							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))))
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(fmt.Sprintf("/tenant/%s/admin/sites", commonInfo.TenantID))), itemsPerPage)
 						} else {
 							<p class="uk-text-small uk-text-muted mt-6">
 								{ i18n.T(ctx, "sites.no_tenants") }

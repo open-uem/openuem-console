@@ -84,7 +84,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%v", err), true))
 		}
 
-		if err := h.Model.UpdateTaskToProfile(c, taskId, *t); err != nil {
+		if err := h.Model.UpdateProfileTask(c, taskId, *t); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_save"), err), true))
 		}
 
@@ -92,7 +92,7 @@ func (h *Handler) EditTask(c echo.Context) error {
 	}
 
 	if c.Request().Method == "DELETE" {
-		if err := h.Model.DeleteTask(taskId); err != nil {
+		if err := h.Model.DeleteTask(task.Edges.Profile.ID, taskId); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_delete"), err), true))
 		}
 		return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.deleted"))
@@ -178,8 +178,12 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	taskConfig.RegistryKey = c.FormValue("registry-key")
-	if (taskConfig.TaskType == task.TypeAddRegistryKey.String() || taskConfig.TaskType == task.TypeRemoveRegistryKey.String()) && taskConfig.RegistryKey == "" {
+	if taskConfig.RegistryKey == "" {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_not_empty"))
+	}
+
+	if !validateRegistryKey(taskConfig.RegistryKey) {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.registry_key_no_valid_root"))
 	}
 
 	taskConfig.RegistryKeyValue = c.FormValue("registry-value-name")
@@ -218,6 +222,34 @@ func validateWindowsRegistry(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	return &taskConfig, nil
+}
+
+func validateRegistryKey(path string) bool {
+	if strings.Contains(path, "HKEY_CLASSES_ROOT") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_CURRENT_USER") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_LOCAL_MACHINE") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_USERS") {
+		return true
+	}
+
+	if strings.Contains(path, "HKEY_CURRENT_CONFIG") {
+		return true
+	}
+
+	if strings.Contains(path, "HKCR:") || strings.Contains(path, "HKCU:") || strings.Contains(path, "HKLM:") || strings.Contains(path, "HKU:") || strings.Contains(path, "HKCC:") {
+		return true
+	}
+
+	return false
 }
 
 func validateWindowsLocalUser(c echo.Context) (*models.TaskConfig, error) {
@@ -442,6 +474,11 @@ func validateAddUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.LocalUserForce = true
 	}
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -469,6 +506,11 @@ func validateRemoveUnixLocalUser(c echo.Context) (*models.TaskConfig, error) {
 	removeDirectories := c.FormValue("local-user-force")
 	if removeDirectories == "on" {
 		taskConfig.LocalUserForce = true
+	}
+
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
 	}
 
 	return &taskConfig, nil
@@ -555,6 +597,11 @@ func validateUnixLocalGroup(c echo.Context) (*models.TaskConfig, error) {
 	localGroupForce := c.FormValue("local-group-force")
 	if localGroupForce == "on" {
 		taskConfig.LocalGroupForce = true
+	}
+
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
 	}
 
 	return &taskConfig, nil
@@ -664,6 +711,11 @@ func validateUnixScript(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.ShellExecute = c.FormValue("unix-script-executable")
 	taskConfig.ShellCreates = c.FormValue("unix-script-creates")
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -734,6 +786,11 @@ func validateFlatpakPackage(c echo.Context) (*models.TaskConfig, error) {
 		taskConfig.PackageLatest = true
 	}
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -793,6 +850,11 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 		}
 	}
 
+	ignoreErrors := c.FormValue("ignore-errors")
+	if ignoreErrors == "on" {
+		taskConfig.IgnoreErrors = true
+	}
+
 	return &taskConfig, nil
 }
 
@@ -838,4 +900,131 @@ func validateNetbird(c echo.Context) (*models.TaskConfig, error) {
 	}
 
 	return &taskConfig, nil
+}
+
+func (h *Handler) EnableTask(c echo.Context, enable bool) error {
+	var err error
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskId, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskId)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_save"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	if err := h.Model.EnableTask(taskId, !enable); err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_save"), err), true))
+	}
+
+	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
+
+}
+
+func (h *Handler) MoveTask(c echo.Context, up bool) error {
+	var err error
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid"), true))
+	}
+
+	if c.Param("order") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_empty"), true))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	order, err := strconv.Atoi(c.Param("order"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.not_valid"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	if up {
+		if err := h.Model.MoveTask(commonInfo, taskID, order, order-1); err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+		}
+	} else {
+		if err := h.Model.MoveTask(commonInfo, taskID, order, order+1); err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+		}
+	}
+
+	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
+}
+
+func (h *Handler) MoveTaskFromTo(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.not_valid"), true))
+	}
+
+	if c.Param("from") == "" || c.Param("to") == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_empty"), true))
+	}
+
+	from, err := strconv.Atoi(c.Param("from"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	to, err := strconv.Atoi(c.Param("to"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.not_valid"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	if err := h.Model.MoveTask(commonInfo, taskID, from, to); err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
+	}
+
+	return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.saved"))
 }

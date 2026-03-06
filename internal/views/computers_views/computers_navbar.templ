@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"golang.org/x/mod/semver"
 )
 
-templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo, agentOS string, netbird bool) {
+templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDelete bool, commonInfo *partials.CommonInfo, agentOS string, netbird bool, version string) {
 	<ul class="uk-tab">
 		<li class={ templ.KV("uk-active", active == "overview") }>
 			<a
@@ -288,5 +289,24 @@ templ ComputersNavbar(id string, active string, vncProxyPort string, confirmDele
 				{ i18n.T(ctx, "Metadata") }
 			</a>
 		</li>
+		if semver.Compare("v"+version, "v0.10.0") > 0 {
+			<li class={ templ.KV("uk-active", active == "tasks") }>
+				<a
+					if confirmDelete {
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks?delete=true", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks?delete=true", id)))) }
+						hx-push-url="false"
+					} else {
+						href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", id))) }
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", id)))) }
+						hx-push-url="true"
+					}
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					{ i18n.T(ctx, "agents.tasks_title") }
+				</a>
+			</li>
+		}
 	</ul>
 }

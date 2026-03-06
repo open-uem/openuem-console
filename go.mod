@@ -1,6 +1,6 @@
 module github.com/open-uem/openuem-console
 
-go 1.25.5
+go 1.26.0
 
 require (
 	entgo.io/ent v0.14.5
@@ -12,6 +12,7 @@ require (
 	github.com/biter777/countries v1.7.5
 	github.com/canidam/echo-scs-session v1.0.0
 	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/dimmerz92/go-lucide-icons v1.14.0
 	github.com/go-co-op/gocron/v2 v2.17.0
 	github.com/go-echarts/go-echarts/v2 v2.6.4
 	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
@@ -30,8 +31,9 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.47.0
-	github.com/open-uem/ent v0.0.0-20251220072124-b7c9bbc5c91f
-	github.com/open-uem/nats v0.0.0-20251220104614-efae26e98557
+	github.com/open-uem/ent v0.0.0-20260304100854-1f5ce2882f30
+	github.com/open-uem/nats v0.11.1-0.20260224085933-dc823e7ff19f
+	github.com/open-uem/openuem-ansible-config v0.0.0-20260127123556-80a04b5821c5
 	github.com/open-uem/utils v0.0.0-20251221104611-c55d64529212
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.9
@@ -46,6 +48,7 @@ require (
 	golang.org/x/oauth2 v0.32.0
 	golang.org/x/sys v0.37.0
 	gopkg.in/ini.v1 v1.67.0
+	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
@@ -90,7 +93,6 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/open-uem/openuem-ansible-config v0.0.0-20250710075757-9ef6e3390073 // indirect
 	github.com/pdfcpu/pdfcpu v0.11.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -114,5 +116,4 @@ require (
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

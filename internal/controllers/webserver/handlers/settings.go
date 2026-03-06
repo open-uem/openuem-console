@@ -13,6 +13,7 @@ import (
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
+	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -20,6 +21,7 @@ var UpdateChannels = []string{"stable", "devel", "testing"}
 
 func (h *Handler) GeneralSettings(c echo.Context) error {
 	var err error
+	successMessage := ""
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -61,6 +63,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 
 		if settings.Refresh != 0 {
 			if err := h.Model.UpdateRefreshTimeSetting(settings.ID, settings.Refresh); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+
+		if settings.ItemsPerPage != 0 {
+			if err := h.Model.UpdateDefaultItemsPerPageSetting(settings.ID, settings.ItemsPerPage); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
 			}
 		}
@@ -142,7 +150,7 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
-		return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "settings.saved")))
+		successMessage = i18n.T(c.Request().Context(), "settings.saved")
 	}
 
 	settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID)
@@ -160,12 +168,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags(commonInfo)
+	allTags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), ""), commonInfo))
+	return RenderView(c, admin_views.GeneralSettingsIndex(" | General Settings", admin_views.GeneralSettings(c, settings, agentsExists, serversExists, allTags, commonInfo, h.GetAdminTenantName(commonInfo), successMessage), commonInfo))
 }
 
 func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
@@ -194,6 +202,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	detectRemoteAgents := c.FormValue("detect-remote-agents")
 	autoAdmitAgents := c.FormValue("auto-admit-agents")
 	netbird := c.FormValue("netbird")
+	itemsPerPage := c.FormValue("items-per-page")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -251,14 +260,25 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		}
 	}
 
+	if itemsPerPage != "" {
+		settings.ItemsPerPage, err = strconv.Atoi(itemsPerPage)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.items_per_page_invalid"))
+		}
+
+		if settings.ItemsPerPage <= 0 {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.items_per_page_invalid"))
+		}
+	}
+
 	if sessionLifetime != "" {
 		settings.SessionLifetime, err = strconv.Atoi(sessionLifetime)
 		if err != nil {
-			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.session_lifetime_invalid"))
 		}
 
 		if settings.SessionLifetime <= 0 {
-			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.refresh_invalid"))
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.session_lifetime_invalid"))
 		}
 	}
 
@@ -694,7 +714,7 @@ func (h *Handler) ApplyGlobalSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	allTags, err := h.Model.GetAllTags(commonInfo)
+	allTags, err := h.Model.GetAllTags(commonInfo, filters.AgentFilter{})
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
