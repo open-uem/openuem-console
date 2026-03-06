@@ -174,7 +174,13 @@ func (h *Handler) Auth(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", u.Hostname(), u.Port(), myTenant.ID, mySite.ID))
+
+		if u.Port() == "" {
+			return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s/tenant/%d/site/%d/dashboard", u.Hostname(), myTenant.ID, mySite.ID))
+		} else {
+			return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", u.Hostname(), u.Port(), myTenant.ID, mySite.ID))
+		}
+
 	} else {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/tenant/%d/site/%d/dashboard", h.ServerName, h.ConsolePort, myTenant.ID, mySite.ID))
 	}

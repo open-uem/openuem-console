@@ -43,7 +43,12 @@ func (h *Handler) Logout(c echo.Context) error {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
-			redirecURI = fmt.Sprintf("https://%s:%s", u.Hostname(), u.Port())
+
+			if u.Port() == "" {
+				redirecURI = fmt.Sprintf("https://%s", u.Hostname())
+			} else {
+				redirecURI = fmt.Sprintf("https://%s:%s", u.Hostname(), u.Port())
+			}
 		}
 
 		switch settings.OIDCProvider {

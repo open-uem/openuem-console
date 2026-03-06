@@ -398,7 +398,11 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 		if err != nil {
 			return u
 		}
-		u = fmt.Sprintf("https://%s:%s/oidc/callback", referer.Hostname(), referer.Port())
+		if referer.Port() == "" {
+			u = fmt.Sprintf("https://%s/oidc/callback", referer.Hostname())
+		} else {
+			u = fmt.Sprintf("https://%s:%s/oidc/callback", referer.Hostname(), referer.Port())
+		}
 	}
 
 	h.OIDCRedirectURI = u
