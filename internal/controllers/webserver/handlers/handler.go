@@ -117,7 +117,7 @@ func (h *Handler) StartNATSConnectJob() error {
 	var err error
 	var ctx context.Context
 
-	h.NATSConnection, err = openuem_nats.ConnectWithNATS(h.NATSServers, h.CertPath, h.KeyPath, h.CACertPath)
+	h.NATSConnection, err = openuem_nats.ConnectWithNATS(h.NATSServers, h.CertPath, h.KeyPath, h.CACertPath, "")
 	if err == nil {
 		h.JetStream, err = jetstream.New(h.NATSConnection)
 		if err == nil {
@@ -169,7 +169,7 @@ func (h *Handler) StartNATSConnectJob() error {
 		gocron.NewTask(
 			func() {
 				if h.NATSConnection == nil {
-					h.NATSConnection, err = openuem_nats.ConnectWithNATS(h.NATSServers, h.CertPath, h.KeyPath, h.CACertPath)
+					h.NATSConnection, err = openuem_nats.ConnectWithNATS(h.NATSServers, h.CertPath, h.KeyPath, h.CACertPath, "")
 					if err != nil {
 						log.Printf("[ERROR]: could not connect to NATS %v", err)
 						return
