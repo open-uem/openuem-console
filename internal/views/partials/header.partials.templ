@@ -56,7 +56,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 								{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }
 							</a>
 						} else {
-							{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }
+							<span class="dark:text-white">{ i18n.T(ctx, bc.Title, i18n.Default(bc.Title)) }</span>
 						}
 					</li>
 				}
