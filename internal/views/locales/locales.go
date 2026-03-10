@@ -8,5 +8,6 @@ import "embed"
 //go:embed ca.yaml
 //go:embed fr.yaml
 //go:embed no.yaml
+//go:embed pt.yaml
 
 var Content embed.FS
