@@ -43,7 +43,9 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings), csrfToken))
+	branding, _ := h.Model.GetOrCreateBranding()
+
+	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings), csrfToken, branding))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
@@ -136,7 +138,9 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings), csrfToken))
+		branding, _ := h.Model.GetOrCreateBranding()
+
+		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings), csrfToken, branding))
 	}
 
 	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password, r.AuthType); err != nil {
@@ -148,7 +152,9 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful(), csrfToken))
+	branding, _ := h.Model.GetOrCreateBranding()
+
+	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful(), csrfToken, branding))
 }
 
 func (h *Handler) generateEmailToken(uid string, subject string, hours int) (string, error) {

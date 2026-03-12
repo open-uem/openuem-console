@@ -200,16 +200,6 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 															<uk-icon hx-history="false" icon="trash-2" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }
 														</a>
 													</li>
-													<li>
-														<a
-															hx-get={ string(templ.URL(fmt.Sprintf("/tenant/%d/admin/sites", tenant.ID))) }
-															hx-target="#main"
-															hx-push-url="true"
-															hx-swap="outerHTML"
-														>
-															<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>{ i18n.T(ctx, "Site.other") }
-														</a>
-													</li>
 												</ul>
 											</div>
 										</td>
@@ -229,7 +219,7 @@ templ Tenants(c echo.Context, p partials.PaginationAndSort, f filters.TenantFilt
 	</main>
 }
 
-templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExists bool, commonInfo *partials.CommonInfo) {
+templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExists bool, users []*ent.User, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/tenants"}, {Title: i18n.T(ctx, "Tenant.other"), Url: "/admin/tenants"}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -272,6 +262,17 @@ templ NewTenant(c echo.Context, defaultCountry string, agentsExists, serversExis
 											<select name="is-default" class="uk-select">
 												<option value="true">{ i18n.T(ctx, "Yes") }</option>
 												<option value="false">{ i18n.T(ctx, "No") }</option>
+											</select>
+										</div>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="admin-user">{ i18n.T(ctx, "tenants.first_admin") }</label>
+										<div class="uk-form-controls">
+											<select id="admin-user" name="admin-user" class="uk-select">
+												<option value="">{ i18n.T(ctx, "tenants.no_admin") }</option>
+												for _, user := range users {
+													<option value={ user.ID }>{ user.Name } ({ user.Email })</option>
+												}
 											</select>
 										</div>
 									</div>
@@ -356,6 +357,39 @@ templ EditTenant(c echo.Context, t *openuem_ent.Tenant, defaultCountry string, a
 												<option value="false" selected?={ !t.IsDefault }>{ i18n.T(ctx, "No") }</option>
 											</select>
 										</div>
+									</div>
+									<!-- OIDC Settings -->
+									<div class="uk-margin mt-6">
+										<h4 class="uk-text-bold">{ i18n.T(ctx, "tenants.oidc_settings") }</h4>
+										<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "tenants.oidc_description") }</p>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="oidc-org-id">{ i18n.T(ctx, "tenants.oidc_org_id") }</label>
+										<div class="uk-form-controls">
+											<input
+												id="oidc-org-id"
+												name="oidc-org-id"
+												class="uk-input"
+												type="text"
+												spellcheck="false"
+												if t.OidcOrgID != "" {
+													value={ t.OidcOrgID }
+												}
+												placeholder={ i18n.T(ctx, "tenants.oidc_org_id_placeholder") }
+											/>
+										</div>
+										<p class="uk-text-small uk-text-muted mt-1">{ i18n.T(ctx, "tenants.oidc_org_id_help") }</p>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="oidc-default-role">{ i18n.T(ctx, "tenants.oidc_default_role") }</label>
+										<div class="uk-form-controls">
+											<select id="oidc-default-role" name="oidc-default-role" class="uk-select">
+												<option value="user" selected?={ t.OidcDefaultRole.String() == "user" || t.OidcDefaultRole.String() == "" }>{ i18n.T(ctx, "User.one") }</option>
+												<option value="operator" selected?={ t.OidcDefaultRole.String() == "operator" }>{ i18n.T(ctx, "Operator") }</option>
+												<option value="admin" selected?={ t.OidcDefaultRole.String() == "admin" }>{ i18n.T(ctx, "Admin") }</option>
+											</select>
+										</div>
+										<p class="uk-text-small uk-text-muted mt-1">{ i18n.T(ctx, "tenants.oidc_default_role_help") }</p>
 									</div>
 								</fieldset>
 							</div>

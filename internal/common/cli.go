@@ -34,6 +34,10 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 		return err
 	}
 
+	w.AgentCertPath = cCtx.String("agent-cert")
+	w.AgentKeyPath = cCtx.String("agent-key")
+	w.SFTPCertPath = cCtx.String("sftp-cert")
+
 	w.NATSServers = cCtx.String("nats-servers")
 
 	w.JWTKey = cCtx.String("jwt-key")

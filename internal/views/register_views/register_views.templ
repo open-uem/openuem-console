@@ -366,8 +366,8 @@ templ EmailConfirmed() {
 	</main>
 }
 
-templ RegisterIndex(cmp templ.Component, csrfToken string) {
-	@layout.Register(csrfToken) {
+templ RegisterIndex(cmp templ.Component, csrfToken string, branding *ent.Branding) {
+	@layout.Register(csrfToken, branding) {
 		@cmp
 	}
 }

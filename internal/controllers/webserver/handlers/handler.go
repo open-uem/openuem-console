@@ -23,6 +23,9 @@ type Handler struct {
 	KeyPath              string
 	SFTPKeyPath          string
 	CACertPath           string
+	AgentCertPath        string
+	AgentKeyPath         string
+	SFTPCertPath         string
 	DownloadDir          string
 	ServerName           string
 	AuthPort             string
@@ -58,7 +61,7 @@ type Handler struct {
 	OIDCRedirectURI      string
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, agentCertPath, agentKeyPath, sftpCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -78,6 +81,9 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		KeyPath:              keyPath,
 		SFTPKeyPath:          sftpKeyPath,
 		CACertPath:           caCertPath,
+		AgentCertPath:        agentCertPath,
+		AgentKeyPath:         agentKeyPath,
+		SFTPCertPath:         sftpCertPath,
 		DownloadDir:          tmpDownloadDir,
 		ServerName:           server,
 		ConsolePort:          consolePort,
