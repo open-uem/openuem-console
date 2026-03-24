@@ -61,7 +61,9 @@ func (h *Handler) ConfirmEmail(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed(), csrfToken))
+		branding, _ := h.Model.GetOrCreateBranding()
+
+		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed(), csrfToken, branding))
 
 	} else {
 		return echo.NewHTTPError(http.StatusBadRequest, "unknown claims type, cannot proceed")
