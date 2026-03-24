@@ -1003,9 +1003,9 @@ func (m *Model) GetAvailableProfilesForAgent(agentID string) ([]*ent.Profile, er
 	case "windows":
 		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
 	case "macos", "macOS":
-		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
+		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeMacos, task.AgentTypeAny))).All(context.Background())
 	default:
-		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeWindows, task.AgentTypeAny))).All(context.Background())
+		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeLinux, task.AgentTypeAny))).All(context.Background())
 	}
 
 }
