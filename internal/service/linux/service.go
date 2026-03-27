@@ -39,24 +39,6 @@ func main() {
 		log.Fatalf("[FATAL]: could not create download temp dir: %v", err)
 	}
 
-	// Create winget directory for index.db
-	w.WinGetDBFolder = "/tmp/winget"
-	if err := w.CreateWingetDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
-	}
-
-	// Create flatpak directory for flatpak.db
-	w.FlatpakDBFolder = "/tmp/flatpak"
-	if err := w.CreateFlatpakDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create flatpak temp dir: %v", err)
-	}
-
-	// Create brew directory for brew.db
-	w.BrewDBFolder = "/tmp/brew"
-	if err := w.CreateBrewDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create brew temp dir: %v", err)
-	}
-
 	// Create common software directory for common.db
 	w.CommonSoftwareDBFolder = "/tmp/commondb"
 	if err := w.CreateCommonSoftwareDBDir(); err != nil {

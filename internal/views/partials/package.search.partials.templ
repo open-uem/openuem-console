@@ -5,7 +5,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
-	"github.com/open-uem/nats"
 	"strings"
 )
 
@@ -129,7 +128,7 @@ templ WingetPackageSearch(t *ent.Task) {
 	</div>
 }
 
-templ SearchPacketResult(wingetPackages []nats.SoftwarePackage) {
+templ SearchPacketResult(wingetPackages []*ent.SoftwarePackage) {
 	<div id="select-package-dropdown" class="uk-drop uk-dropdown uk-open mt-2">
 		<div class="uk-dropdown-nav uk-nav">
 			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">
@@ -146,12 +145,17 @@ templ SearchPacketResult(wingetPackages []nats.SoftwarePackage) {
                                     set #package-search.value to ''
                                     remove .hidden from #package-selected-section
                                     add .hidden to #package-search-section
-                                end`, item.ID, item.Name) }
+                                end`, item.PackageID, item.Name) }
 						>
 							<button type="button">
 								<div class="flex items-center gap-4 text-left p-2">
 									@Brand(strings.ToLower(item.Name), "")
-									{ item.Name }
+									<div>
+										<p>
+											{ item.Name }
+										</p>
+										<p class="uk-text-muted uk-text-italic">{ item.PackageID }</p>
+									</div>
 								</div>
 							</button>
 						</div>

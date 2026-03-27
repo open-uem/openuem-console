@@ -161,61 +161,106 @@ func (m *Model) SaveDeployInfo(data *openuem_nats.DeployAction, deploymentFailed
 
 	if data.Action == "install" {
 		if deploymentFailed {
+			query := m.Client.Deployment.Update().SetInstalled(timeZero).SetUpdated(timeZero).SetFailed(false)
+
+			if data.PackageBranch != "" {
+				query.SetBranch(data.PackageBranch)
+			}
+
+			if data.PackageBrewType != "" {
+				query.SetBrewType(data.PackageBrewType)
+			}
+
+			if data.PackageVerified {
+				query.SetVerified(true)
+			}
+
 			if siteID == -1 {
-				return m.Client.Deployment.Update().
-					SetInstalled(timeZero).
-					SetUpdated(timeZero).
-					SetFailed(false).
+				return query.
 					Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))).
 					Exec(context.Background())
 			} else {
-				return m.Client.Deployment.Update().
-					SetInstalled(timeZero).
-					SetUpdated(timeZero).
-					SetFailed(false).
+				return query.
 					Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))).
 					Exec(context.Background())
 			}
 		} else {
-			return m.Client.Deployment.Create().
+			query := m.Client.Deployment.Create().
 				SetInstalled(timeZero).
 				SetFailed(false).
 				SetUpdated(timeZero).
 				SetPackageID(data.PackageId).
 				SetName(data.PackageName).
 				SetVersion(data.PackageVersion).
-				SetOwnerID(data.AgentId).
-				Exec(context.Background())
+				SetOwnerID(data.AgentId)
+
+			if data.PackageBranch != "" {
+				query.SetBranch(data.PackageBranch)
+			}
+
+			if data.PackageBrewType != "" {
+				query.SetBrewType(data.PackageBrewType)
+			}
+
+			if data.PackageVerified {
+				query.SetVerified(true)
+			}
+
+			return query.Exec(context.Background())
 		}
 	}
 
 	if data.Action == "update" {
+		query := m.Client.Deployment.Update().
+			SetUpdated(timeZero).
+			SetFailed(false)
+
+		if data.PackageBranch != "" {
+			query.SetBranch(data.PackageBranch)
+		}
+
+		if data.PackageBrewType != "" {
+			query.SetBrewType(data.PackageBrewType)
+		}
+
+		if data.PackageVerified {
+			query.SetVerified(true)
+		}
+
 		if siteID == -1 {
-			return m.Client.Deployment.Update().
-				SetUpdated(timeZero).
-				SetFailed(false).
+			return query.
 				Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))).
 				Exec(context.Background())
 		} else {
-			return m.Client.Deployment.Update().
-				SetUpdated(timeZero).
-				SetFailed(false).
+			return query.
 				Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))).
 				Exec(context.Background())
 		}
 	}
 
 	if data.Action == "uninstall" {
+		query := m.Client.Deployment.Update().
+			SetInstalled(timeZero).
+			SetFailed(false)
+
+		if data.PackageBranch != "" {
+			query.SetBranch(data.PackageBranch)
+		}
+
+		if data.PackageBrewType != "" {
+			query.SetBrewType(data.PackageBrewType)
+		}
+
+		if data.PackageVerified {
+			query.SetVerified(true)
+		}
+
 		if siteID == -1 {
-			return m.Client.Deployment.Update().
-				SetInstalled(timeZero).
-				SetFailed(false).
+			return query.
 				Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID)))))).
 				Exec(context.Background())
 		} else {
-			return m.Client.Deployment.Update().
-				SetInstalled(timeZero).
-				SetFailed(false).
+			return query.
 				Where(deployment.And(deployment.PackageID(data.PackageId), deployment.HasOwnerWith(agent.ID(data.AgentId), agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))).
 				Exec(context.Background())
 		}

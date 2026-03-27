@@ -55,33 +55,6 @@ func startConsole(cCtx *cli.Context) error {
 		log.Fatalf("[FATAL]: could not create server releases temp dir: %v", err)
 	}
 
-	// Create winget directory
-	worker.WinGetDBFolder = filepath.Join(cwd, "tmp", "winget")
-	if strings.HasSuffix(cwd, "tmp") {
-		worker.WinGetDBFolder = filepath.Join(cwd, "winget")
-	}
-	if err := worker.CreateWingetDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create winget temp dir: %v", err)
-	}
-
-	// Create flatpak directory
-	worker.FlatpakDBFolder = filepath.Join(cwd, "tmp", "flatpak")
-	if strings.HasSuffix(cwd, "tmp") {
-		worker.FlatpakDBFolder = filepath.Join(cwd, "flatpak")
-	}
-	if err := worker.CreateFlatpakDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create flatpak temp dir: %v", err)
-	}
-
-	// Create brew directory
-	worker.BrewDBFolder = filepath.Join(cwd, "tmp", "brew")
-	if strings.HasSuffix(cwd, "tmp") {
-		worker.BrewDBFolder = filepath.Join(cwd, "brew")
-	}
-	if err := worker.CreateBrewDBDir(); err != nil {
-		log.Fatalf("[FATAL]: could not create brew temp dir: %v", err)
-	}
-
 	// Create common software directory
 	worker.CommonSoftwareDBFolder = filepath.Join(cwd, "tmp", "commondb")
 	if strings.HasSuffix(cwd, "tmp") {

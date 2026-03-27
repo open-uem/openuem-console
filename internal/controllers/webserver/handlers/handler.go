@@ -2,10 +2,15 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
+	"github.com/ali-assar/NATS-Leader-Election/leader"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -47,18 +52,15 @@ type Handler struct {
 	LatestServerRelease  openuem_nats.OpenUEMRelease
 	Replicas             int
 	ServerReleasesFolder string
-	WingetFolder         string
-	FlatpakFolder        string
-	BrewFolder           string
-	CommonFolder         string
 	Version              string
 	ReenableCertAuth     bool
 	ReenablePasswdAuth   bool
 	AuthLogger           *log.Logger
 	OIDCRedirectURI      string
+	CommonAppsJob        gocron.Job
 }
 
-func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, wingetFolder, flatpakFolder, brewFolder, commonFolder, version string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
+func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, commonFolder, version string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
 
 	// Get NATS request timeout seconds
 	timeout, err := model.GetNATSTimeout()
@@ -95,10 +97,6 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 		ReverseProxyServer:   reverseProxyServer,
 		Replicas:             len(replicas),
 		ServerReleasesFolder: serverReleasesFolder,
-		WingetFolder:         wingetFolder,
-		FlatpakFolder:        flatpakFolder,
-		BrewFolder:           brewFolder,
-		CommonFolder:         commonFolder,
 		Version:              version,
 		ReenableCertAuth:     reEnableCertAuth,
 		ReenablePasswdAuth:   reEnablePasswdAuth,
@@ -140,6 +138,12 @@ func (h *Handler) StartNATSConnectJob() error {
 				h.ServerStream, err = h.JetStream.Stream(ctx, "SERVERS_STREAM")
 				if err == nil {
 					log.Println("[INFO]: server stream could be instantiated")
+
+					// Election
+					go func() {
+						h.StartAppsDBElection(ctx)
+					}()
+
 					return nil
 				} else {
 					serversExists, err := h.Model.ServersExists()
@@ -225,6 +229,11 @@ func (h *Handler) StartNATSConnectJob() error {
 				if err := h.TaskScheduler.RemoveJob(h.NATSConnectJob.ID()); err != nil {
 					return
 				}
+
+				// Election
+				go func() {
+					h.StartAppsDBElection(ctx)
+				}()
 			},
 		),
 	)
@@ -234,4 +243,113 @@ func (h *Handler) StartNATSConnectJob() error {
 	}
 	log.Printf("[INFO]: new NATS connect job has been scheduled every %d minutes", 2)
 	return nil
+}
+
+func (h *Handler) StartAppsDBElection(ctx context.Context) {
+	// Reference: https://github.com/ali-assar/NATS-Leader-Election/blob/main/cmd/demo/main.go
+	// Step 1: Create or get KV bucket
+	bucketName := "leaders"
+	_, err := h.JetStream.CreateKeyValue(ctx, jetstream.KeyValueConfig{
+		Bucket:  bucketName,
+		TTL:     10 * time.Second,
+		Storage: jetstream.FileStorage,
+	})
+	if err != nil {
+		// Check if bucket already exists (that's OK, we can use it)
+		_, getErr := h.JetStream.KeyValue(ctx, bucketName)
+		if getErr != nil {
+			log.Fatalf("[FATAL]:Failed to create or get KV bucket for Apps Database election: %v", err)
+		}
+	}
+	log.Printf("[INFO]: key-value bucket %s is ready\n", bucketName)
+
+	// Step 2: Create election configuration
+	hostname, _ := os.Hostname()
+	cfg := leader.ElectionConfig{
+		Bucket:             bucketName,
+		Group:              "openuem",
+		InstanceID:         fmt.Sprintf("%s-%d", hostname, os.Getpid()),
+		TTL:                10 * time.Second,
+		HeartbeatInterval:  1 * time.Second,
+		ValidationInterval: 5 * time.Second,
+	}
+
+	// Step 3: Create election instance
+	election, err := leader.NewElectionWithConn(h.NATSConnection, cfg)
+	if err != nil {
+		log.Fatalf("[FATAL]: Failed to create election: %v", err)
+	}
+	log.Printf("[INFO]: leader election instance created")
+
+	// Step 4: Register OnPromote callback. This is called when THIS instance becomes leader
+	election.OnPromote(func(ctx context.Context, token string) {
+		log.Println("[INFO]: this console instance has been promoted to leader")
+
+		// Start a job to create sofwate package table from flatpak, brew, and winget databases
+		if err := h.StartCommonPackagesDBJob(); err != nil {
+			log.Printf("[ERROR]: could not start job to create common packages db, reason: %s", err.Error())
+			return
+		}
+	})
+
+	// Step 5: Register OnDemote callback. This is called when THIS instance loses leadership
+	election.OnDemote(func() {
+		log.Println("[INFO]: this console instance has been demoted from leader")
+
+		if err := h.TaskScheduler.RemoveJob(h.CommonAppsJob.ID()); err != nil {
+			log.Printf("[ERROR]: could not remove the job that updates the software packages table, reason: %v", err)
+			return
+		}
+	})
+
+	// Step 6: Start the election
+	// electionContext := context.Background()
+	if err := election.Start(ctx); err != nil {
+		log.Fatalf("[FATAL]: Failed to start election for Apps Database: %v", err)
+	}
+	log.Printf("[INFO]: leader election started")
+
+	// // Step 7: DEBUG: Print status periodically
+	// statusTicker := time.NewTicker(3 * time.Second)
+	// defer statusTicker.Stop()
+
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case <-statusTicker.C:
+	// 			status := election.Status()
+	// 			if status.IsLeader {
+	// 				log.Printf("[INFO]: Status: LEADER | ID: %s | Token: %s | State: %s\n",
+	// 					status.LeaderID, status.Token, status.State)
+	// 			} else {
+	// 				log.Printf("[INFO]: Status: FOLLOWER | Current Leader: %s | State: %s\n",
+	// 					status.LeaderID, status.State)
+	// 			}
+	// 		case <-electionContext.Done():
+	// 			return
+	// 		}
+	// 	}
+	// }()
+
+	// Step 8: Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// Wait for shutdown signal
+	<-sigChan
+	log.Printf("[INFO]: Apps DB elector process received a shutdown signal, stopping gracefully...")
+
+	// Step 9: Graceful shutdown
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err = election.StopWithContext(shutdownCtx, leader.StopOptions{
+		DeleteKey:     true, // Delete key for fast failover
+		WaitForDemote: true, // Wait for OnDemote callback to complete
+	})
+	if err != nil {
+		log.Printf("[ERROR]: Apps DB elector process shutdown err: %v", err)
+	} else {
+		log.Printf("[INFO]: Apps DB elector process shutdown complete")
+	}
 }

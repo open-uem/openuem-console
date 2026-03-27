@@ -23,6 +23,8 @@ type TaskConfig struct {
 	PackageName                           string
 	PackageLatest                         bool
 	PackageVersion                        string
+	PackageBranch                         string
+	PackageBrewType                       string
 	Description                           string
 	RegistryKey                           string
 	RegistryKeyValue                      string
@@ -255,11 +257,11 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return query.
 			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():
-		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).Exec(context.Background())
+		return query.SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetPackageLatest(cfg.PackageLatest).SetPackageBranch(cfg.PackageBranch).Exec(context.Background())
 	case task.TypeBrewCaskInstall.String(), task.TypeBrewCaskUninstall.String(), task.TypeBrewCaskUpgrade.String(),
 		task.TypeBrewFormulaInstall.String(), task.TypeBrewFormulaUninstall.String(), task.TypeBrewFormulaUpgrade.String():
 		return query.
-			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).
+			SetPackageID(cfg.PackageID).SetPackageName(cfg.PackageName).SetBrewUpdate(cfg.HomeBrewUpdate).SetBrewGreedy(cfg.HomeBrewGreedy).SetPackageBrewType(cfg.PackageBrewType).
 			SetBrewInstallOptions(cfg.HomeBrewInstallOptions).SetBrewUpgradeOptions(cfg.HomeBrewUpgradeOptions).SetBrewUpgradeAll(cfg.HomeBrewUpgradeAll).Exec(context.Background())
 	case task.TypeNetbirdInstall.String(), task.TypeNetbirdUninstall.String():
 		return query.Exec(context.Background())

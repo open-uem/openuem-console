@@ -5,8 +5,8 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
-	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
 	"strings"
 )
 
@@ -115,7 +115,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 	</main>
 }
 
-templ SearchPacketResult(c echo.Context, agentId string, packages []nats.SoftwarePackage, p partials.PaginationAndSort, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ SearchPacketResult(c echo.Context, agentId string, packages []*ent.SoftwarePackage, p partials.PaginationAndSort, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 			<thead>
@@ -136,11 +136,18 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []nats.Softwar
 						<td class="text-center !align-middle">
 							@partials.Brand(strings.ToLower(p.Name), "")
 						</td>
-						<td class="!align-middle">{ p.Name }</td>
+						<td class="!align-middle">
+							<div class="flex items-center gap-4 text-left">
+								@partials.SoftwarePackageDescription(p.PackageID, p.Name, p.Branch, p.Verified)
+							</div>
+						</td>
 						<td class="!align-middle">
 							<form>
-								<input type="hidden" name="filterByPackageId" value={ p.ID }/>
+								<input type="hidden" name="filterByPackageId" value={ p.PackageID }/>
 								<input type="hidden" name="filterByPackageName" value={ p.Name }/>
+								<input type="hidden" name="filterByPackageBranch" value={ p.Branch }/>
+								<input type="hidden" name="filterByPackageBrewType" value={ p.BrewType }/>
+								<input type="hidden" name="filterByPackageVerified" value={ strconv.FormatBool(p.Verified) }/>
 								<button
 									type="submit"
 									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/install", agentId)))) }
@@ -200,7 +207,9 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 					<td class="text-center !align-middle">
 						@partials.Brand(strings.ToLower(item.Name), "")
 					</td>
-					<td class="!align-middle">{ item.Name }</td>
+					<td class="!align-middle">
+						@partials.SoftwarePackageDescription(item.PackageID, item.Name, item.Branch, item.Verified)
+					</td>
 					<td class="!align-middle">
 						if item.Failed {
 							<span class="text-red-600">
@@ -233,6 +242,9 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 								<form>
 									<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
 									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+									<input type="hidden" name="filterByPackageBranch" value={ item.Branch }/>
+									<input type="hidden" name="filterByPackageBrewType" value={ item.BrewType }/>
+									<input type="hidden" name="filterByPackageVerified" value={ strconv.FormatBool(item.Verified) }/>
 									<button
 										type="submit"
 										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/install", agentId)))) }
@@ -248,6 +260,9 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 								<form>
 									<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
 									<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+									<input type="hidden" name="filterByPackageBranch" value={ item.Branch }/>
+									<input type="hidden" name="filterByPackageBrewType" value={ item.BrewType }/>
+									<input type="hidden" name="filterByPackageVerified" value={ strconv.FormatBool(item.Verified) }/>
 									<button
 										type="submit"
 										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/update", agentId)))) }
@@ -262,6 +277,9 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 							<form>
 								<input type="hidden" name="filterByPackageId" value={ item.PackageID }/>
 								<input type="hidden" name="filterByPackageName" value={ item.Name }/>
+								<input type="hidden" name="filterByPackageBranch" value={ item.Branch }/>
+								<input type="hidden" name="filterByPackageBrewType" value={ item.BrewType }/>
+								<input type="hidden" name="filterByPackageVerified" value={ strconv.FormatBool(item.Verified) }/>
 								<button
 									type="submit"
 									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/uninstall", agentId)))) }
