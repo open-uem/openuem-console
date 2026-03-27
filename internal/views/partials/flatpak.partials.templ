@@ -5,7 +5,6 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
-	"github.com/open-uem/nats"
 	"strings"
 )
 
@@ -60,12 +59,22 @@ templ FlatpakPackageManagement(t *ent.Task) {
 						value={ t.PackageID }
 					}
 				/>
+				<input
+					type="hidden"
+					id="flatpak-branch"
+					name="flatpak-branch"
+					if t != nil {
+						value={ t.PackageBranch }
+					}
+				/>
 				<div class="uk-inline w-full">
 					<button
 						type="button"
 						title={ i18n.T(ctx, "Remove") }
 						_="on click 
-                                set #flatpak-name.value to ''
+                                set #flatpak-id.value to ''
+								set #flatpak-name.value to ''
+								set #flatpak-branch.value to ''
                                 add .hidden to #flatpak-selected-section
                                 remove .hidden from #flatpak-search-section
                             end"
@@ -95,7 +104,7 @@ templ FlatpakPackageManagement(t *ent.Task) {
 	</div>
 }
 
-templ SearchFlatpakPacketResult(packages []nats.SoftwarePackage) {
+templ SearchFlatpakPacketResult(packages []*ent.SoftwarePackage) {
 	<div id="select-flatpak-dropdown" class="uk-drop uk-dropdown uk-open mt-2">
 		<div class="uk-dropdown-nav uk-nav">
 			<div class="flex flex-col gap-1 overflow-y-auto max-h-40">
@@ -109,16 +118,31 @@ templ SearchFlatpakPacketResult(packages []nats.SoftwarePackage) {
                                     remove .uk-open from #select-flatpak-dropdown
                                     set #flatpak-id.value to '%s'
                                     set #flatpak-name.value to '%s'
+									set #flatpak-branch.value to '%s'
                                     set #flatpak-search.value to ''
                                     remove .hidden from #flatpak-selected-section
                                     add .hidden to #flatpak-search-section
-                                end`, item.ID, item.Name) }
+                                end`, item.PackageID, item.Name, item.Branch) }
 						>
-							<button type="button">
+							<button type="button" class="flex items-center w-full justify-between">
 								<div class="flex items-center gap-4 text-left p-2">
 									@Brand(strings.ToLower(item.Name), "")
-									{ item.Name }
+									<div>
+										<p>
+											if item.Branch != "" {
+												{ fmt.Sprintf("%s (%s)", item.Name, item.Branch) }
+											} else {
+												{ item.Name }
+											}
+										</p>
+										<p class="uk-text-muted uk-text-italic">{ item.PackageID }</p>
+									</div>
 								</div>
+								if item.Verified {
+									<div class="flex items-center">
+										<uk-icon uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "Verified")) } hx-history="false" icon="badge-check" custom-class="h-7 w-7 mr-2 text-green-600" uk-cloack></uk-icon>
+									</div>
+								}
 							</button>
 						</div>
 					}

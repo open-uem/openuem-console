@@ -33,9 +33,6 @@ type Worker struct {
 	ServerName                        string
 	Domain                            string
 	NATSServers                       string
-	WinGetDBFolder                    string
-	FlatpakDBFolder                   string
-	BrewDBFolder                      string
 	CommonSoftwareDBFolder            string
 	OrgName                           string
 	OrgProvince                       string
@@ -85,30 +82,6 @@ func (w *Worker) StartWorker() {
 	// Start a job to clean tmp download directory
 	if err := w.StartDownloadCleanJob(); err != nil {
 		log.Printf("[ERROR]: could not start Dowload dir clean job, reason: %s", err.Error())
-		return
-	}
-
-	// Start a job to download Microsoft Winget database
-	if err := w.StartWinGetDBDownloadJob(); err != nil {
-		log.Printf("[ERROR]: could not start index.db download job, reason: %s", err.Error())
-		return
-	}
-
-	// Start a job to download Flatpak database
-	if err := w.StartFlatpakDBDownloadJob(); err != nil {
-		log.Printf("[ERROR]: could not start flatpak.db download job, reason: %s", err.Error())
-		return
-	}
-
-	// Start a job to download Brew database
-	if err := w.StartBrewDBDownloadJob(); err != nil {
-		log.Printf("[ERROR]: could not start brew.db download job, reason: %s", err.Error())
-		return
-	}
-
-	// Start a job to create sofwate package table from flatpak, brew, and winget databases
-	if err := w.StartCommonPackagesDBJob(); err != nil {
-		log.Printf("[ERROR]: could not start job to create common packages db, reason: %s", err.Error())
 		return
 	}
 }

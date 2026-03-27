@@ -133,6 +133,7 @@ type UpdateServersFilter struct {
 
 type DeployPackageFilter struct {
 	Sources []string
+	Arch    string
 }
 
 func GetPaginationUrl(c echo.Context) string {

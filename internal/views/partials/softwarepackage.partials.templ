@@ -1,0 +1,33 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"strings"
+)
+
+templ SoftwarePackageDescription(packageID string, packageName string, packageBranch string, packageVerified bool) {
+	<div class="flex items-center gap-4 text-left">
+		<div>
+			<p>
+				if packageBranch != "" {
+					{ fmt.Sprintf("%s (%s)", packageName, packageBranch) }
+				} else {
+					{ packageName }
+				}
+			</p>
+			<p class="uk-text-muted uk-text-italic">
+				if strings.HasPrefix(packageID, "cask-") {
+					{ strings.TrimPrefix(packageID, "cask-") }
+				} else {
+					{ packageID }
+				}
+			</p>
+		</div>
+		if packageVerified {
+			<div class="flex items-center">
+				<uk-icon uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "Verified")) } hx-history="false" icon="badge-check" custom-class="h-7 w-7 mr-2 text-green-600" uk-cloack></uk-icon>
+			</div>
+		}
+	</div>
+}

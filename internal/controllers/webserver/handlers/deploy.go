@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -114,12 +114,12 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchPackages(search, p, h.CommonFolder, f)
+	packages, err := h.Model.SearchPackages(search, p, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
+	p.NItems, err = h.Model.CountPackages(search, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -135,11 +135,26 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
+	packageBranch := c.FormValue("filterByPackageBranch")
+	packageBrewType := c.FormValue("filterByPackageBrewType")
+	packageVerified := c.FormValue("filterByPackageVerified")
 	installParam := c.FormValue("filterByInstallationType")
 	source := c.FormValue("filterBySource")
 
 	if packageId == "" || packageName == "" || installParam == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), false))
+	}
+
+	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
+	}
+
+	isPackageVerified := false
+	if packageVerified != "" {
+		isPackageVerified, err = strconv.ParseBool(packageVerified)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.invalid_verified"), false))
+		}
 	}
 
 	f := filters.AgentFilter{}
@@ -200,7 +215,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, source, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, source, packageBranch, packageBrewType, isPackageVerified, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
@@ -214,7 +229,22 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 	checkedItems := c.FormValue("selectedAgents")
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
+	packageBranch := c.FormValue("filterByPackageBranch")
+	packageBrewType := c.FormValue("filterByPackageBrewType")
+	packageVerified := c.FormValue("filterByPackageVerified")
 	installParam := c.FormValue("filterByInstallationType")
+
+	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
+	}
+
+	isPackageVerified := false
+	if packageVerified != "" {
+		isPackageVerified, err = strconv.ParseBool(packageVerified)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.invalid_verified"), false))
+		}
+	}
 
 	agents := strings.Split(checkedItems, ",")
 	if len(agents) == 0 {
@@ -228,9 +258,12 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 
 	for _, agent := range agents {
 		action := openuem_nats.DeployAction{
-			AgentId:     agent,
-			PackageId:   packageId,
-			PackageName: packageName,
+			AgentId:         agent,
+			PackageId:       packageId,
+			PackageName:     packageName,
+			PackageBranch:   packageBranch,
+			PackageBrewType: packageBrewType,
+			PackageVerified: isPackageVerified,
 			// Repository:  "winget",
 		}
 

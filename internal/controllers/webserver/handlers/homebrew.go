@@ -5,7 +5,6 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -32,7 +31,7 @@ func (h *Handler) SearchHomeBrewFormulaePackages(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchAllHomeBrewFormulaePackages(search, h.BrewFolder)
+	packages, err := h.Model.SearchAllHomeBrewFormulaePackages(search)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
@@ -63,7 +62,7 @@ func (h *Handler) SearchHomeBrewCasksPackages(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchAllHomeBrewCasksPackages(search, h.BrewFolder)
+	packages, err := h.Model.SearchAllHomeBrewCasksPackages(search)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}

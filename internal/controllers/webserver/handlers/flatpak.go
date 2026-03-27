@@ -5,7 +5,6 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -32,7 +31,7 @@ func (h *Handler) SearchFlatpakPackages(c echo.Context) error {
 		p.SortOrder = "asc"
 	}
 
-	packages, err := models.SearchAllFlatpakPackages(search, h.FlatpakFolder)
+	packages, err := h.Model.SearchAllFlatpakPackages(search)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}

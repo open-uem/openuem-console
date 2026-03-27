@@ -781,6 +781,11 @@ func validateFlatpakPackage(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
 	}
 
+	taskConfig.PackageBranch = c.FormValue("flatpak-branch")
+	if (taskConfig.TaskType == task.TypeFlatpakInstall.String() || taskConfig.TaskType == task.TypeFlatpakUninstall.String()) && taskConfig.PackageName == "" {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+	}
+
 	latest := c.FormValue("flatpak-latest")
 	if latest == "on" {
 		taskConfig.PackageLatest = true
@@ -823,6 +828,11 @@ func validateHomeBrew(c echo.Context) (*models.TaskConfig, error) {
 	taskConfig.PackageName = c.FormValue("brew-name")
 	if taskConfig.PackageName == "" && !taskConfig.HomeBrewUpgradeAll {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_name_not_empty"))
+	}
+
+	taskConfig.PackageBrewType = c.FormValue("brew-type")
+	if taskConfig.PackageBrewType == "" && !taskConfig.HomeBrewUpgradeAll {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.package_brew_type_name_not_empty"))
 	}
 
 	installOptions := c.FormValue("brew-install-options")

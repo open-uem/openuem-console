@@ -20,11 +20,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/linde12/gowol"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/open-uem/ent"
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
 	openuem_nats "github.com/open-uem/nats"
 	ansiblecfg "github.com/open-uem/openuem-ansible-config/ansible"
-	models "github.com/open-uem/openuem-console/internal/models/winget"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -948,7 +948,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 	var f filters.DeployPackageFilter
-	var packages []openuem_nats.SoftwarePackage
+	var packages []*ent.SoftwarePackage
 
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
@@ -1019,12 +1019,12 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		}
 	}
 
-	packages, err = models.SearchPackages(search, p, h.CommonFolder, f)
+	packages, err = h.Model.SearchPackages(search, p, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_search_packages", err.Error()), true))
 	}
 
-	p.NItems, err = models.CountPackages(search, h.CommonFolder, f)
+	p.NItems, err = h.Model.CountPackages(search, f)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_count_packages", err.Error()), true))
 	}
@@ -1046,9 +1046,24 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
+	packageBranch := c.FormValue("filterByPackageBranch")
+	packageBrewType := c.FormValue("filterByPackageBrewType")
+	packageVerified := c.FormValue("filterByPackageVerified")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
+	}
+
+	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
+	}
+
+	isPackageVerified := false
+	if packageVerified != "" {
+		isPackageVerified, err = strconv.ParseBool(packageVerified)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.invalid_verified"), false))
+		}
 	}
 
 	alreadyInstalled, err := h.Model.DeploymentAlreadyInstalled(agentId, packageId, commonInfo)
@@ -1069,6 +1084,9 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
+	action.PackageBranch = packageBranch
+	action.PackageBrewType = packageBrewType
+	action.PackageVerified = isPackageVerified
 	// action.Repository = "winget"
 	action.Action = "install"
 
@@ -1107,15 +1125,33 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
+	packageBranch := c.FormValue("filterByPackageBranch")
+	packageBrewType := c.FormValue("filterByPackageBrewType")
+	packageVerified := c.FormValue("filterByPackageVerified")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
+	}
+
+	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
+	}
+
+	isPackageVerified := false
+	if packageVerified != "" {
+		isPackageVerified, err = strconv.ParseBool(packageVerified)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.invalid_verified"), false))
+		}
 	}
 
 	action := openuem_nats.DeployAction{}
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
+	action.PackageBranch = packageBranch
+	action.PackageBrewType = packageBrewType
+	action.PackageVerified = isPackageVerified
 	// action.Repository = "winget"
 	action.Action = "update"
 
@@ -1159,9 +1195,24 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 
 	packageId := c.FormValue("filterByPackageId")
 	packageName := c.FormValue("filterByPackageName")
+	packageBranch := c.FormValue("filterByPackageBranch")
+	packageBrewType := c.FormValue("filterByPackageBrewType")
+	packageVerified := c.FormValue("filterByPackageVerified")
 
 	if packageId == "" || packageName == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
+	}
+
+	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
+	}
+
+	isPackageVerified := false
+	if packageVerified != "" {
+		isPackageVerified, err = strconv.ParseBool(packageVerified)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.invalid_verified"), false))
+		}
 	}
 
 	// If the package hasn't been installed and the previous action was a failure
@@ -1178,6 +1229,9 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 	action.AgentId = agentId
 	action.PackageId = packageId
 	action.PackageName = packageName
+	action.PackageBranch = packageBranch
+	action.PackageBrewType = packageBrewType
+	action.PackageVerified = isPackageVerified
 	// action.Repository = "winget"
 	action.Action = "uninstall"
 
@@ -2008,7 +2062,7 @@ func (h *Handler) RunTask(c echo.Context) error {
 		// prepare config
 		cfg, err := createWindowsTaskConfig(t)
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_windows_task"), err), true))
 		}
 
 		// prepare request
@@ -2019,12 +2073,12 @@ func (h *Handler) RunTask(c echo.Context) error {
 
 		data, err := yaml.Marshal(config)
 		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_playbook", err), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_marshal_windows_task", err), true))
 		}
 
 		// send request to agent
 		if _, err = h.NATSConnection.Request("agent.windowstask."+agentID, data, time.Duration(h.NATSTimeout)*time.Second); err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_ansible_playbook_request", err), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.could_not_send_windows_task_request", err), true))
 		}
 	}
 
@@ -2211,13 +2265,13 @@ func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, er
 		}
 		pb.AddAnsibleTask(executeScript)
 	case task.TypeFlatpakInstall:
-		install, err := ansiblecfg.InstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.PackageLatest, t.IgnoreErrors)
+		install, err := ansiblecfg.InstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.PackageBranch, t.PackageLatest, t.IgnoreErrors)
 		if err != nil {
 			return nil, err
 		}
 		pb.AddAnsibleTask(install)
 	case task.TypeFlatpakUninstall:
-		uninstall, err := ansiblecfg.UninstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.IgnoreErrors)
+		uninstall, err := ansiblecfg.UninstallFlatpakPackage(fmt.Sprintf("task_%d", t.ID), t.PackageID, t.PackageBranch, t.IgnoreErrors)
 		if err != nil {
 			return nil, err
 		}
