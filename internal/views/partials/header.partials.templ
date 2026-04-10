@@ -33,6 +33,7 @@ type CommonInfo struct {
 	ActionTenantID     string
 	IsComputer         bool
 	IsProfile          bool
+	IsTask             bool
 	ProfileSiteID      string
 	CSRFToken          string
 	IsDocker           bool
@@ -86,13 +87,26 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 							{ i18n.T(ctx,"Global Config") }
 						</option>
 					}
+					if commonInfo.IsProfile || commonInfo.IsTask {
+						<option
+							class="!align-middle"
+							value="/profiles"
+							selected?={ commonInfo.TenantID ==  "-1" && commonInfo.SiteID == "-1" }
+						>
+							{ i18n.T(ctx,"Global Config") }
+						</option>
+					}
 					for _, t := range commonInfo.Tenants {
 						<option
 							class="!align-middle"
 							if commonInfo.IsAdmin {
 								value={ string(templ.URL(fmt.Sprintf("/tenant/%d/admin", t.ID))) }
 							} else {
-								value={ string(templ.URL(fmt.Sprintf("/tenant/%d", t.ID))) }
+								if commonInfo.IsProfile {
+									value={ string(templ.URL(fmt.Sprintf("/tenant/%d/profiles", t.ID))) }
+								} else {
+									value={ string(templ.URL(fmt.Sprintf("/tenant/%d", t.ID))) }
+								}
 							}
 							selected?={ commonInfo.TenantID ==  strconv.Itoa(t.ID) }
 						>
@@ -105,24 +119,30 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 					}
 				</select>
 			</form>
-			if !commonInfo.IsAdmin {
-				if len(commonInfo.Sites) > 1 && !commonInfo.IsComputer {
+			if !commonInfo.IsAdmin && !(commonInfo.TenantID == "-1" && commonInfo.SiteID == "-1") {
+				if (len(commonInfo.Sites) > 1 && !commonInfo.IsComputer) || commonInfo.IsProfile || commonInfo.IsTask {
 					<form class="flex items-center gap-2">
 						<span class="uk-text-muted">
 							<uk-icon hx-history="false" icon="building" custom-class="h-6 w-6" uk-cloack></uk-icon>
 						</span>
 						<select class="w-48 uk-select border-green-700" title={ i18n.T(ctx, "Site.one") } name="site" _="on change set window.location to my.value">
-							if !commonInfo.IsProfile {
-								<option
+							<option
+								if commonInfo.IsProfile {
+									value={ string(templ.URL(fmt.Sprintf("/tenant/%s/profiles", commonInfo.TenantID))) }
+								} else {
 									value={ GetSiteSelectorUrl(c, commonInfo, -1) }
-									selected?={ commonInfo.SiteID ==  "-1" }
-								>
-									{ i18n.T(ctx,"AllSites") }
-								</option>
-							}
+								}
+								selected?={ commonInfo.SiteID ==  "-1" }
+							>
+								{ i18n.T(ctx,"AllSites") }
+							</option>
 							for _, s := range commonInfo.Sites {
 								<option
-									value={ GetSiteSelectorUrl(c, commonInfo, s.ID) }
+									if commonInfo.IsProfile {
+										value={ string(templ.URL(fmt.Sprintf("/tenant/%s/site/%d/profiles", commonInfo.TenantID, s.ID))) }
+									} else {
+										value={ GetSiteSelectorUrl(c, commonInfo, s.ID) }
+									}
 									selected?={ commonInfo.SiteID ==  strconv.Itoa(s.ID) }
 								>
 									if s.Description == "DefaultSite" {
@@ -313,10 +333,6 @@ func GetNavigationUrl(commonInfo *CommonInfo, location string) string {
 	}
 
 	return fmt.Sprintf("/tenant/%s/site/%s%s", commonInfo.TenantID, commonInfo.SiteID, location)
-}
-
-func GetProfileNavigationUrl(commonInfo *CommonInfo) string {
-	return fmt.Sprintf("/tenant/%s/site/%s/profiles", commonInfo.TenantID, commonInfo.ProfileSiteID)
 }
 
 func GetSiteSelectorUrl(c echo.Context, commonInfo *CommonInfo, siteID int) string {

@@ -2,7 +2,7 @@ package partials
 
 templ SuccessMessage(message string) {
 	if message != "" {
-		<div id="success">
+		<div id="success" class="mt-6">
 			<div _="init wait 8s call UIkit.alert('#success-message').close() then toggle .hidden on #success" id="success-message" class="uk-alert uk-animation-fade border-green-700 uk-background-primary text-white " uk-alert="animation:true">
 				<a href class="uk-alert-close" uk-close></a>
 				<div class="flex gap-2 items-center uk-alert-description">
@@ -16,7 +16,7 @@ templ SuccessMessage(message string) {
 
 templ ErrorMessage(message string, autoClose bool) {
 	if message != "" {
-		<div id="error">
+		<div id="error" class="mt-6">
 			<div
 				if autoClose {
 					_="init wait 8s call UIkit.alert('#error-message').close() then toggle .hidden on #error"

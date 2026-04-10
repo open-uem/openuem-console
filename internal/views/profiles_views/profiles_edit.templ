@@ -11,16 +11,9 @@ import (
 	"strconv"
 )
 
-templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, taskId string, successMessage string, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Profile, tasks []*ent.Task, availableTags []*ent.Tag, allProfiles []*ent.Profile, taskId string, successMessage string, confirmDelete bool, confirmClone bool, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Profile Management"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))}, {Title: profile.Name}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8" hx-history="false">
-		if successMessage != "" {
-			@partials.SuccessMessage(successMessage)
-		}
-		<div id="error" class="hidden"></div>
-		if confirmDelete {
-			@partials.ConfirmDelete(c, i18n.T(ctx, "tasks.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%s", taskId)))))
-		}
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-header">
 				<div class="flex justify-between items-center">
@@ -29,6 +22,10 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 						<p class="uk-margin-small-top uk-text-small">
 							{ i18n.T(ctx, "profiles.edit.description") }
 						</p>
+						if successMessage != "" {
+							@partials.SuccessMessage(successMessage)
+						}
+						<div id="error" class="hidden mt-6"></div>
 					</div>
 				</div>
 			</div>
@@ -122,6 +119,12 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 							{ i18n.T(ctx, "profiles.edit.no_tasks") }
 						</p>
 					} else {
+						if confirmDelete {
+							@partials.ConfirmDelete(c, i18n.T(ctx, "tasks.confirm_delete"), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profile.ID)))), string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%s", taskId)))))
+						}
+						if confirmClone {
+							@ConfirmClone(c, commonInfo, allProfiles)
+						}
 						<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped" hx-history="false">
 							<thead>
 								<tr>
@@ -286,6 +289,15 @@ templ EditProfile(c echo.Context, p partials.PaginationAndSort, profile *ent.Pro
 													}
 													<li>
 														<a
+															hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/clone", t.ID)))) }
+															hx-target="#main"
+															hx-swap="outerHTML"
+															hx-push-url="true"
+															class="flex items-center gap-2 py-2 px-4"
+														><uk-icon hx-history="false" icon="copy" custom-class="h-5 w-5 mx-auto" uk-cloack></uk-icon>{ i18n.T(ctx, "tasks.clone.title") }</a>
+													</li>
+													<li>
+														<a
 															hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/confirm-delete/%d", profile.ID, t.ID)))) }
 															hx-target="#main"
 															hx-swap="outerHTML"
@@ -374,4 +386,25 @@ templ TaskAgentIcon(agent string) {
 		case "macos":
 			<i class="si si-apple uk-cloak text-2xl"></i>
 	}
+}
+
+templ ConfirmClone(c echo.Context, commonInfo *partials.CommonInfo, allProfiles []*ent.Profile) {
+	<form class="flex gap-2 w-1/2">
+		<uk-select class="w-2/3" name="task" placeholder={ i18n.T(ctx, "agents.select_task") } searchable uk-cloak>
+			for _, t := range allProfiles {
+				<option value={ fmt.Sprintf("%s-%d", t.Name, t.ID) }>{ t.Name }</option>
+			}
+		</uk-select>
+		<button
+			class="flex gap-2 uk-button uk-button-primary"
+			hx-push-url="false"
+			hx-target="#main"
+			hx-swap="outerHTML"
+			hx-indicator="#run-profile-spinner"
+		>
+			@icons.Play(templ.Attributes{"class": "h-5 w-5"})
+			{ i18n.T(ctx, "agents.execute_task") }
+			<uk-icon id="run-profile-spinner" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+		</button>
+	</form>
 }

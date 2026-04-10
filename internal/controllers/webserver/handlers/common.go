@@ -29,6 +29,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		Translator:     views.GetTranslatorForDates(c),
 		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
 		IsProfile:      strings.Contains(c.Request().URL.String(), "profiles"),
+		IsTask:         strings.Contains(c.Request().URL.String(), "tasks"),
 		CSRFToken:      csrfToken,
 	}
 
@@ -59,7 +60,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 	}
 
 	if tenantID == "" {
-		if info.IsAdmin {
+		if info.IsAdmin || info.IsProfile || info.IsTask {
 			info.TenantID = "-1"
 			info.SiteID = "-1"
 			return &info, nil
