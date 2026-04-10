@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/open-uem/ent"
@@ -26,11 +27,15 @@ func (m *Model) CountAllProfiles(c *partials.CommonInfo) (int, error) {
 		return -1, err
 	}
 
-	if siteID == -1 {
-		return -1, err
+	if tenantID == -1 {
+		query = query.Where(profile.And(profile.Not(profile.HasSite()), profile.Not(profile.HasTenant())))
+	} else {
+		if siteID == -1 {
+			query = query.Where(profile.HasTenantWith(tenant.ID(tenantID)), profile.Not(profile.HasSite()))
+		} else {
+			query = query.Where(profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+		}
 	}
-
-	query = query.Where(profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 
 	return query.Count(context.Background())
 }
@@ -53,11 +58,15 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort, c *partials.Comm
 		return nil, err
 	}
 
-	if siteID == -1 {
-		return nil, err
+	if tenantID == -1 {
+		query = query.Where(profile.And(profile.Not(profile.HasSite()), profile.Not(profile.HasTenant())))
+	} else {
+		if siteID == -1 {
+			query = query.Where(profile.HasTenantWith(tenant.ID(tenantID)), profile.Not(profile.HasSite()))
+		} else {
+			query = query.Where(profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+		}
 	}
-
-	query = query.Where(profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 
 	switch p.SortBy {
 	case "name":
@@ -76,78 +85,46 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort, c *partials.Comm
 	return profiles, nil
 }
 
-func (m *Model) AddProfile(siteID int, description string) (*ent.Profile, error) {
-	profile, err := m.Client.Profile.Create().SetName(description).SetSiteID(siteID).Save(context.Background())
+func (m *Model) AddProfile(siteID int, tenantID int, description string) (*ent.Profile, error) {
+	query := m.Client.Profile.Create().SetName(description)
+
+	if tenantID != -1 {
+		query.AddTenantIDs(tenantID)
+		if siteID != -1 {
+			query.AddSiteIDs(siteID)
+		}
+	}
+
+	profile, err := query.Save(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	return profile, nil
 }
 
-func (m *Model) UpdateProfile(profileId int, description string, apply string, c *partials.CommonInfo) error {
-	siteID, err := strconv.Atoi(c.SiteID)
-	if err != nil {
-		return err
-	}
-
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return err
-	}
-
-	if siteID == -1 {
-		return err
-	}
+func (m *Model) UpdateProfile(profileID int, description string, apply string, c *partials.CommonInfo) error {
 
 	switch apply {
 	case "applyToAll":
-		return m.Client.Profile.Update().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetName(description).ClearTags().SetApplyToAll(true).Exec(context.Background())
+		return m.Client.Profile.Update().Where(profile.ID(profileID)).SetName(description).ClearTags().SetApplyToAll(true).Exec(context.Background())
 	case "useTags":
-		return m.Client.Profile.Update().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetName(description).SetApplyToAll(false).Exec(context.Background())
+		return m.Client.Profile.Update().Where(profile.ID(profileID)).SetName(description).SetApplyToAll(false).Exec(context.Background())
 	}
-	return m.Client.Profile.Update().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).SetName(description).ClearTags().SetApplyToAll(false).Exec(context.Background())
+	return m.Client.Profile.Update().Where(profile.ID(profileID)).SetName(description).ClearTags().SetApplyToAll(false).Exec(context.Background())
 }
 
 func (m *Model) GetProfileById(profileId int, c *partials.CommonInfo) (*ent.Profile, error) {
 
-	siteID, err := strconv.Atoi(c.SiteID)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return nil, err
-	}
-
-	if siteID == -1 {
-		return nil, err
-	}
-
-	return m.Client.Profile.Query().WithTags().WithTasks().WithIssues().Where(profile.ID(profileId), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).First(context.Background())
+	return m.Client.Profile.Query().WithTags().WithTasks().WithIssues().Where(profile.ID(profileId)).First(context.Background())
 }
 
 func (m *Model) DeleteProfile(profileID int, c *partials.CommonInfo) error {
-	siteID, err := strconv.Atoi(c.SiteID)
+	_, err := m.Client.Task.Delete().Where(task.HasProfileWith(profile.ID(profileID))).Exec(context.Background())
 	if err != nil {
 		return err
 	}
 
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return err
-	}
-
-	if siteID == -1 {
-		return err
-	}
-
-	_, err = m.Client.Task.Delete().Where(task.HasProfileWith(profile.ID(profileID))).Exec(context.Background())
-	if err != nil {
-		return err
-	}
-
-	_, err = m.Client.Profile.Delete().Where(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Exec(context.Background())
+	_, err = m.Client.Profile.Delete().Where(profile.ID(profileID)).Exec(context.Background())
 	if err != nil {
 		return err
 	}
@@ -199,4 +176,63 @@ func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID i
 
 func (m *Model) EnableProfile(profiledID int, enabled bool) error {
 	return m.Client.Profile.Update().SetDisabled(!enabled).Where(profile.ID(profiledID)).Exec(context.Background())
+}
+
+func (m *Model) SetProfileAsGlobal(profiledID int) error {
+	return m.Client.Profile.Update().ClearSite().ClearTenant().Where(profile.ID(profiledID)).Exec(context.Background())
+}
+
+func (m *Model) SetProfileAsTenantProfile(profiledID int, tenantID int) error {
+	return m.Client.Profile.Update().AddTenantIDs(tenantID).ClearSite().Where(profile.ID(profiledID)).Exec(context.Background())
+}
+
+// TODO-Steve we should check which profiles can be listed based on user's role
+func (m *Model) GetAllProfiles() ([]*ent.Profile, error) {
+	return m.Client.Profile.Query().All(context.Background())
+}
+
+func (m *Model) CloneProfile(profileID int, description string, tenantID int, siteID int) error {
+	// 1. Get the profile and its tasks
+	profile, err := m.Client.Profile.Query().WithTasks().Where(profile.ID(profileID)).Only(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// 2. Initiate transaction
+	tx, err := m.Client.Tx(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// 3. Create the new profile
+	query := tx.Profile.Create().SetName(description)
+	if tenantID != -1 {
+		query.AddTenantIDs(tenantID)
+
+		if siteID != -1 {
+			query.AddSiteIDs(siteID)
+		}
+	}
+
+	newProfile, err := query.Save(context.Background())
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	// 4. Clone the tasks to the profile
+	for index, t := range profile.Edges.Tasks {
+		if err := m.CloneTaskInProfileTransaction(tx, t.ID, t.Name, newProfile.ID, index+1); err != nil {
+			return rollback(tx, err)
+		}
+	}
+
+	// 5. Commit the transaction.
+	return tx.Commit()
+}
+
+func rollback(tx *ent.Tx, err error) error {
+	if rerr := tx.Rollback(); rerr != nil {
+		err = fmt.Errorf("%w: %v", err, rerr)
+	}
+	return err
 }

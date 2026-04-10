@@ -10,9 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/profile"
-	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/task"
-	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
@@ -94,23 +92,8 @@ type TaskConfig struct {
 	IgnoreErrors                          bool
 }
 
-func (m *Model) CountAllTasksForProfile(profileID int, c *partials.CommonInfo) (int, error) {
-
-	siteID, err := strconv.Atoi(c.SiteID)
-	if err != nil {
-		return -1, err
-	}
-
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return -1, err
-	}
-
-	if siteID == -1 {
-		return -1, err
-	}
-
-	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+func (m *Model) CountAllTasksForProfile(profileID int) (int, error) {
+	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Count(context.Background())
 }
 
 func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) error {
@@ -435,23 +418,9 @@ func (m *Model) UpdateProfileTask(c echo.Context, taskID int, cfg TaskConfig) er
 	return errors.New(i18n.T(c.Request().Context(), "tasks.unexpected_task_type"))
 }
 
-func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID int, c *partials.CommonInfo) ([]*ent.Task, error) {
-	siteID, err := strconv.Atoi(c.SiteID)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return nil, err
-	}
-
-	if siteID == -1 {
-		return nil, err
-	}
-
+func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID int) ([]*ent.Task, error) {
 	// Check if we've values in the order column
-	countWithOrder, err := m.Client.Task.Query().Where(task.OrderGT(0), task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Count(context.Background())
+	countWithOrder, err := m.Client.Task.Query().Where(task.OrderGT(0), task.HasProfileWith(profile.ID(profileID))).Count(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -459,7 +428,7 @@ func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID
 	// If we don't have the order column filled with values let's add them
 	if countWithOrder == 0 {
 		// let's get all tasks we have
-		tasks, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))).Order(task.ByID()).All(context.Background())
+		tasks, err := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(task.ByID()).All(context.Background())
 		if err != nil {
 			return nil, err
 		}
@@ -473,7 +442,7 @@ func (m *Model) GetTasksForProfileByPage(p partials.PaginationAndSort, profileID
 	}
 
 	// Now, we have the ordered values, and we can use the order colum
-	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))))
+	query := m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID)))
 
 	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(task.ByOrder()).All(context.Background())
 }
@@ -502,21 +471,7 @@ func (m *Model) EnableTask(taskID int, disabled bool) error {
 	return m.Client.Task.UpdateOneID(taskID).SetDisabled(disabled).Exec(context.Background())
 }
 
-func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, newOrder int) error {
-	siteID, err := strconv.Atoi(c.SiteID)
-	if err != nil {
-		return err
-	}
-
-	tenantID, err := strconv.Atoi(c.TenantID)
-	if err != nil {
-		return err
-	}
-
-	if siteID == -1 {
-		return err
-	}
-
+func (m *Model) MoveTask(taskID int, currentOrder int, newOrder int) error {
 	t, err := m.Client.Task.Query().WithProfile().Where(task.ID(taskID)).Only(context.Background())
 	if err != nil {
 		return err
@@ -524,7 +479,7 @@ func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, n
 
 	if currentOrder < newOrder {
 		if err := m.Client.Task.Update().Where(
-			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID)),
 			task.OrderGTE(currentOrder),
 			task.OrderLTE(newOrder),
 		).AddOrder(-1).Exec(context.Background()); err != nil {
@@ -534,7 +489,7 @@ func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, n
 
 	if currentOrder > newOrder {
 		if err := m.Client.Task.Update().Where(
-			task.HasProfileWith(profile.ID(t.Edges.Profile.ID), profile.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))),
+			task.HasProfileWith(profile.ID(t.Edges.Profile.ID)),
 			task.OrderGTE(newOrder),
 			task.OrderLTE(currentOrder),
 		).AddOrder(+1).Exec(context.Background()); err != nil {
@@ -543,4 +498,139 @@ func (m *Model) MoveTask(c *partials.CommonInfo, taskID int, currentOrder int, n
 	}
 
 	return m.Client.Task.Update().Where(task.ID(taskID)).SetOrder(newOrder).Exec(context.Background())
+}
+
+func (m *Model) CloneTask(taskID int, taskName string, profileID int, order int) error {
+	t, err := m.Client.Task.Get(context.Background(), taskID)
+	if err != nil {
+		return err
+	}
+
+	query := m.Client.Task.Create()
+
+	return CloneTask(query, t, taskName, profileID, order)
+}
+
+func (m *Model) CloneTaskInProfileTransaction(tx *ent.Tx, taskID int, taskName string, profileID int, order int) error {
+	t, err := tx.Task.Get(context.Background(), taskID)
+	if err != nil {
+		return err
+	}
+
+	query := tx.Task.Create()
+
+	return CloneTask(query, t, taskName, profileID, order)
+}
+
+func CloneTask(query *ent.TaskCreate, t *ent.Task, taskName string, profileID int, order int) error {
+	query.SetAgentType(t.AgentType)
+	query.SetAptAllowDowngrade(t.AptAllowDowngrade)
+	query.SetAptDeb(t.AptDeb)
+	query.SetAptDpkgOptions(t.AptDpkgOptions)
+	query.SetAptFailOnAutoremove(t.AptFailOnAutoremove)
+	query.SetAptForce(t.AptForce)
+	query.SetAptInstallRecommends(t.AptInstallRecommends)
+	query.SetAptName(taskName)
+	query.SetAptOnlyUpgrade(t.AptOnlyUpgrade)
+	query.SetAptPurge(t.AptPurge)
+	query.SetAptUpdateCache(t.AptUpdateCache)
+	query.SetAptUpgradeType(t.AptUpgradeType)
+	query.SetBrewGreedy(t.BrewGreedy)
+	query.SetBrewInstallOptions(t.BrewInstallOptions)
+	query.SetBrewUpdate(t.BrewUpdate)
+	query.SetBrewUpgradeAll(t.BrewUpgradeAll)
+	query.SetBrewUpgradeOptions(t.BrewUpgradeOptions)
+	query.SetDisabled(t.Disabled)
+	query.SetIgnoreErrors(t.IgnoreErrors)
+	query.SetLocalGroupDescription(t.LocalGroupDescription)
+	query.SetLocalGroupForce(t.LocalGroupForce)
+	query.SetLocalGroupID(t.LocalGroupID)
+	query.SetLocalGroupMembers(t.LocalGroupMembers)
+	query.SetLocalGroupMembersToExclude(t.LocalGroupMembersToExclude)
+	query.SetLocalGroupMembersToInclude(t.LocalGroupMembersToInclude)
+	query.SetLocalGroupName(t.LocalGroupName)
+	query.SetLocalGroupSystem(t.LocalGroupSystem)
+	query.SetLocalUserAppend(t.LocalUserAppend)
+	query.SetLocalUserCreateHome(t.LocalUserCreateHome)
+	query.SetLocalUserDescription(t.LocalUserDescription)
+	query.SetLocalUserDisable(t.LocalUserDisable)
+	query.SetLocalUserExpires(t.LocalUserExpires)
+	query.SetLocalUserForce(t.LocalUserForce)
+	query.SetLocalUserFullname(t.LocalUserFullname)
+	query.SetLocalUserGenerateSSHKey(t.LocalUserGenerateSSHKey)
+	query.SetLocalUserGroup(t.LocalUserGroup)
+	query.SetLocalUserGroups(t.LocalUserGroups)
+	query.SetLocalUserHome(t.LocalUserHome)
+	query.SetLocalUserID(t.LocalUserID)
+	query.SetLocalUserIDMax(t.LocalUserIDMax)
+	query.SetLocalUserIDMin(t.LocalUserIDMin)
+	query.SetLocalUserMoveHome(t.LocalUserMoveHome)
+	query.SetLocalUserNonunique(t.LocalUserNonunique)
+	query.SetLocalUserPassword(t.LocalUserPassword)
+	query.SetLocalUserPasswordChangeNotAllowed(t.LocalUserPasswordChangeNotAllowed)
+	query.SetLocalUserPasswordChangeRequired(t.LocalUserPasswordChangeRequired)
+	query.SetLocalUserPasswordExpireAccountDisable(t.LocalUserPasswordExpireAccountDisable)
+	query.SetLocalUserPasswordExpireMax(t.LocalUserPasswordExpireMax)
+	query.SetLocalUserPasswordExpireMin(t.LocalUserPasswordExpireMin)
+	query.SetLocalUserPasswordExpireWarn(t.LocalUserPasswordExpireWarn)
+	query.SetLocalUserPasswordLock(t.LocalUserPasswordLock)
+	query.SetLocalUserPasswordNeverExpires(t.LocalUserPasswordNeverExpires)
+	query.SetLocalUserSSHKeyBits(t.LocalUserSSHKeyBits)
+	query.SetLocalUserSSHKeyComment(t.LocalUserSSHKeyComment)
+	query.SetLocalUserSSHKeyFile(t.LocalUserSSHKeyFile)
+	query.SetLocalUserSSHKeyPassphrase(t.LocalUserSSHKeyPassphrase)
+	query.SetLocalUserSSHKeyType(t.LocalUserSSHKeyType)
+	query.SetLocalUserSeuser(t.LocalUserSeuser)
+	query.SetLocalUserShell(t.LocalUserShell)
+	query.SetLocalUserSkeleton(t.LocalUserSkeleton)
+	query.SetLocalUserSystem(t.LocalUserSystem)
+	query.SetLocalUserUmask(t.LocalUserUmask)
+	query.SetLocalUserUsername(t.LocalUserUsername)
+	query.SetMsiArguments(t.MsiArguments)
+	query.SetMsiFileHash(t.MsiFileHash)
+
+	if string(t.MsiFileHashAlg) != "" {
+		query.SetMsiFileHashAlg(t.MsiFileHashAlg)
+	}
+
+	query.SetMsiLogPath(t.MsiLogPath)
+	query.SetMsiPath(t.MsiPath)
+	query.SetMsiProductid(t.MsiProductid)
+	query.SetName(taskName).SetOrder(t.Order)
+	query.SetPackageArch(t.PackageArch)
+	query.SetPackageBranch(t.PackageBranch)
+	query.SetPackageBrewType(t.PackageBrewType)
+	query.SetPackageID(t.PackageID)
+	query.SetPackageLatest(t.PackageLatest)
+	query.SetPackageName(t.PackageName)
+	query.SetPackageVersion(t.PackageVersion)
+	query.SetProfileID(profileID)
+	query.SetRegistryForce(t.RegistryForce)
+	query.SetRegistryHex(t.RegistryHex)
+	query.SetRegistryKey(t.RegistryKey)
+	query.SetRegistryKeyValueData(t.RegistryKeyValueData)
+	query.SetRegistryKeyValueName(t.RegistryKeyValueName)
+
+	if string(t.RegistryKeyValueType) != "" {
+		query.SetRegistryKeyValueType(t.RegistryKeyValueType)
+	}
+
+	query.SetScript(t.Script)
+	query.SetScriptCreates(t.ScriptCreates)
+	query.SetScriptExecutable(t.ScriptExecutable)
+
+	if string(t.ScriptRun) != "" {
+		query.SetScriptRun(t.ScriptRun)
+	}
+
+	query.SetType(t.Type)
+	query.SetVersion(1)
+
+	query.SetOrder(order)
+
+	return query.Exec(context.Background())
+}
+
+func (m *Model) GetLasTaskOrderInProfile(profileID int) (*ent.Task, error) {
+	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(ent.Desc(task.FieldOrder)).First(context.Background())
 }

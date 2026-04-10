@@ -129,7 +129,7 @@ func (m *Model) AssociateProfilesToDefaultTenantAndSite() error {
 		return fmt.Errorf("coulf not find default site")
 	}
 
-	return m.Client.Profile.Update().Where(profile.Not(profile.HasSite())).SetSiteID(s.ID).Exec(context.Background())
+	return m.Client.Profile.Update().Where(profile.Not(profile.HasSite())).AddSiteIDs(s.ID).Exec(context.Background())
 }
 
 func (m *Model) AssociateMetadataToDefaultTenant() error {

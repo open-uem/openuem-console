@@ -70,8 +70,8 @@ templ NavBar(active string, commonInfo *CommonInfo) {
 				<span class="sr-only">{ i18n.T(ctx, "Deploy") }</span>
 			</a>
 			<a
-				href={ templ.URL(GetProfileNavigationUrl(commonInfo)) }
-				hx-get={ string(templ.URL(GetProfileNavigationUrl(commonInfo))) }
+				href={ templ.URL(GetNavigationUrl(commonInfo, "/profiles")) }
+				hx-get={ string(templ.URL(GetNavigationUrl(commonInfo, "/profiles"))) }
 				hx-push-url="true"
 				hx-target="body"
 				uk-tooltip={ fmt.Sprintf("title: %s; pos: right", i18n.T(ctx, "Profile Management")) }

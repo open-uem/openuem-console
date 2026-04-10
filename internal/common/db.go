@@ -10,6 +10,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
+	"golang.org/x/mod/semver"
 )
 
 func (w *Worker) StartDBConnectJob() error {
@@ -43,9 +44,11 @@ func (w *Worker) StartDBConnectJob() error {
 			log.Println("[WARN]: could not associate metadata to default tenant")
 		}
 
-		// Associate profiles without tenant to default tenant #feat-119
-		if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
-			log.Println("[WARN]: could not associate profiles to default tenant and site")
+		// Associate profiles without tenant to default tenant #feat-119 and if version < 0.13.0
+		if semver.Compare("v"+w.Version, "v0.13.0") < 0 {
+			if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
+				log.Println("[WARN]: could not associate profiles to default tenant and site")
+			}
 		}
 
 		// Associate domain to default site #feat-119
@@ -127,9 +130,11 @@ func (w *Worker) StartDBConnectJob() error {
 					log.Println("[WARN]: could not associate metadata to default tenant")
 				}
 
-				// Associate profiles without tenant to default tenant #feat-119
-				if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
-					log.Println("[WARN]: could not associate profiles to default tenant and site")
+				// Associate profiles without tenant to default tenant #feat-119 and if version < 0.13.0
+				if semver.Compare("v"+w.Version, "v0.13.0") < 0 {
+					if err := w.Model.AssociateProfilesToDefaultTenantAndSite(); err != nil {
+						log.Println("[WARN]: could not associate profiles to default tenant and site")
+					}
 				}
 
 				// Associate domain to default site #feat-119

@@ -68,8 +68,9 @@ func (h *Handler) NewProfile(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_site_to_int", commonInfo.SiteID), true))
 	}
 
-	if siteID == -1 {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.profile_empty_site", commonInfo.SiteID), true))
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
 	}
 
 	if c.Request().Method == "POST" {
@@ -78,7 +79,7 @@ func (h *Handler) NewProfile(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.empty"), true))
 		}
 
-		profile, err := h.Model.AddProfile(siteID, description)
+		profile, err := h.Model.AddProfile(siteID, tenantID, description)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.new.could_not_save"), true))
 		}
@@ -123,12 +124,12 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
 	}
 
-	p.NItems, err = h.Model.CountAllTasksForProfile(profileId, commonInfo)
+	p.NItems, err = h.Model.CountAllTasksForProfile(profileId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId, commonInfo)
+	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
@@ -166,15 +167,20 @@ func (h *Handler) EditProfile(c echo.Context, method string, id string, successM
 
 	confirmDelete := false
 
+	allProfiles, err := h.Model.GetAllProfiles()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.all_profiles_error", err), true))
+	}
+
 	if successMessage != "" {
 		u, err := url.Parse(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%s", id)))
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
-		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo), u)
+		return RenderViewWithReplaceUrl(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, allProfiles, "", successMessage, confirmDelete, false, itemsPerPage, commonInfo), commonInfo), u)
 	}
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, "", successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo))
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, allProfiles, "", successMessage, confirmDelete, false, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileTags(c echo.Context) error {
@@ -291,12 +297,12 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_err"), true))
 	}
 
-	p.NItems, err = h.Model.CountAllTasksForProfile(profileId, commonInfo)
+	p.NItems, err = h.Model.CountAllTasksForProfile(profileId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
 
-	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId, commonInfo)
+	tasks, err := h.Model.GetTasksForProfileByPage(p, profileId)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.edit.retrieve_tasks_err"), true))
 	}
@@ -323,8 +329,14 @@ func (h *Handler) ConfirmDeleteTask(c echo.Context) error {
 
 	successMessage := ""
 	confirmDelete := true
+	confirmClone := false
 
-	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, taskId, successMessage, confirmDelete, itemsPerPage, commonInfo), commonInfo))
+	allProfiles, err := h.Model.GetAllProfiles()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.all_profiles_error", err), true))
+	}
+
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.EditProfile(c, p, profile, tasks, tags, allProfiles, taskId, successMessage, confirmDelete, confirmClone, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ProfileIssues(c echo.Context) error {
@@ -508,12 +520,12 @@ func (h *Handler) EnableProfile(c echo.Context, enable bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
 	}
 
-	profileId, err := strconv.Atoi(id)
+	profileID, err := strconv.Atoi(id)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.new.invalid_profile"), true))
 	}
 
-	if err := h.Model.EnableProfile(profileId, enable); err != nil {
+	if err := h.Model.EnableProfile(profileID, enable); err != nil {
 		if enable {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.could_not_enable"), true))
 		} else {
@@ -526,4 +538,119 @@ func (h *Handler) EnableProfile(c echo.Context, enable bool) error {
 	} else {
 		return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.profile_disabled"))
 	}
+}
+
+func (h *Handler) SetProfileAsGlobal(c echo.Context) error {
+	var err error
+
+	id := c.Param("uuid")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
+	}
+
+	profileId, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.new.invalid_profile"), true))
+	}
+
+	if err := h.Model.SetProfileAsGlobal(profileId); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.set_global_error", err), true))
+	}
+
+	return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.set_global_success"))
+}
+
+func (h *Handler) SetProfileAsTenantProfile(c echo.Context) error {
+	var err error
+
+	id := c.Param("uuid")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
+	}
+
+	profileID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.new.invalid_profile"), true))
+	}
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	tenantID, err := strconv.Atoi(commonInfo.TenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+	}
+
+	if err := h.Model.SetProfileAsTenantProfile(profileID, tenantID); err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.set_tenant_error", err), true))
+	}
+
+	return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.set_tenant_success"))
+}
+
+func (h *Handler) CloneProfile(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	id := c.Param("uuid")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.issues.empty_id"), true))
+	}
+
+	profileID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.invalid"), true))
+	}
+
+	profile, err := h.Model.GetProfileById(profileID, commonInfo)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "profiles.clone.profile_is_not_valid"), err), true))
+	}
+
+	// TODO-Steve we must filter which tenants are available for a role
+	allTenants, err := h.Model.GetTenants()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "profiles.clone.all_profiles_error"), err), true))
+	}
+
+	if c.Request().Method == "POST" {
+		profileDescription := c.FormValue("profile-description")
+		if profileDescription == "" {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "profiles.new.empty"), err), true))
+		}
+
+		tenantID := -1
+		tenant := c.FormValue("tenant-id")
+		if tenant != "" {
+			tenantID, err = strconv.Atoi(tenant)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
+			}
+
+		}
+
+		siteID := -1
+		site := c.FormValue("site-id")
+		if site != "" {
+			siteID, err = strconv.Atoi(site)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "sites.could_not_convert_to_int", err.Error()), true))
+			}
+
+		}
+
+		if err := h.Model.CloneProfile(profileID, profileDescription, tenantID, siteID); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "profiles.clone.could_not_clone", err), true))
+		}
+
+		return h.Profiles(c, i18n.T(c.Request().Context(), "profiles.profile_cloned"))
+	}
+
+	return RenderView(c, profiles_views.ProfilesIndex("| Profiles", profiles_views.CloneProfile(c, profile, allTenants, commonInfo), commonInfo))
 }

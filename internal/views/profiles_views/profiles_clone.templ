@@ -1,0 +1,109 @@
+package profiles_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ CloneProfile(c echo.Context, profile *ent.Profile, allTenants []*ent.Tenant, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "profile.clone.title")}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "profiles.clone.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "profiles.clone.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body">
+				<form
+					class="flex flex-col gap-4 my-6 w-1/2"
+					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d/clone", profile.ID)))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-push-url="false"
+				>
+					<div class="w-2/3">
+						<label class="uk-form-label" for="profile-description">
+							{ i18n.T(ctx, "profiles.clone.profile_description") }
+						</label>
+						<div class="uk-form-controls">
+							<textarea
+								id="profile-description"
+								name="profile-description"
+								class="uk-textarea"
+								rows="2"
+								placeholder={ i18n.T(ctx, "profiles.clone.profile_description_placeholder") }
+								aria-label="Profile description"
+								autocomplete="off"
+								autocorrect="off"
+								autocapitalize="off"
+								spellcheck="false"
+							>
+								{ profile.Name }
+							</textarea>
+						</div>
+					</div>
+					<select
+						id="tenant-id"
+						class="uk-select w-2/3"
+						name="tenant-id"
+						hx-post="/tenant/sites"
+						hx-target="#site-selector"
+						hx-push-url="false"
+						hx-trigger="change"
+						hx-swap="outerHTML"
+					>
+						<option value="" selected>{ i18n.T(ctx, "profiles.clone.select_tenant") }</option>
+						for _, t := range allTenants {
+							<option value={ t.ID }>{ t.Description } </option>
+						}
+					</select>
+					<div id="site-selector" class="hidden"></div>
+					<div class="flex gap-4 my-4">
+						<button type="submit" class="uk-button uk-button-primary">
+							{ i18n.T(ctx, "tasks.clone.execute") }
+						</button>
+						<button
+							type="button"
+							class="uk-button uk-button-default"
+							hx-get={ partials.GetCurrentUrl(c, string(templ.URL(partials.GetNavigationUrl(commonInfo, "/profiles")))) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+}
+
+templ SitesSelect(allSites []*ent.Site) {
+	<div id="site-selector">
+		<select
+			id=""
+			class="uk-select w-2/3"
+			name="site-id"
+		>
+			<option value="">{ i18n.T(ctx, "AllSites") }</option>
+			for _, s := range allSites {
+				<option value={ s.ID }>{ s.Description }</option>
+			}
+		</select>
+	</div>
+}
+
+templ EmptySitesSelect() {
+	<div id="site-selector" class="hidden"></div>
+}

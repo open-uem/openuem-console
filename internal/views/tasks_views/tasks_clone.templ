@@ -1,0 +1,79 @@
+package tasks_views
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ CloneTask(c echo.Context, profileID int, t *ent.Task, allProfiles []*ent.Profile, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Tasks")}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div id="error" class="hidden"></div>
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-header">
+				<div class="flex justify-between items-center">
+					<div class="flex flex-col my-4 mx-1">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "tasks.clone.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "tasks.clone.description") }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="uk-card-body">
+				<form
+					class="flex flex-col gap-4 my-6 w-1/2"
+					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/tasks/%d/clone", t.ID)))) }
+					hx-target="#main"
+					hx-swap="outerHTML"
+					hx-push-url="false"
+				>
+					<div class="w-2/3">
+						<label class="uk-form-label" for="task-description">
+							{ i18n.T(ctx, "tasks.new.name") }
+						</label>
+						<div class="uk-form-controls">
+							<textarea
+								id="task-description"
+								name="task-description"
+								class="uk-textarea"
+								rows="2"
+								placeholder={ i18n.T(ctx, "tasks.new.text") }
+								aria-label="Task description"
+								autocomplete="off"
+								autocorrect="off"
+								autocapitalize="off"
+								spellcheck="false"
+							>
+								{ t.Name }
+							</textarea>
+						</div>
+					</div>
+					<uk-select id="profile-search" class="w-2/3" name="profile" placeholder={ i18n.T(ctx, "agents.select_profile") } searchable uk-cloak>
+						for _, p := range allProfiles {
+							<option value={ fmt.Sprintf("%s***%d", p.Name, p.ID) }>{ p.Name }</option>
+						}
+					</uk-select>
+					<div class="flex gap-4 my-4">
+						<button type="submit" class="uk-button uk-button-primary">
+							{ i18n.T(ctx, "tasks.clone.execute") }
+						</button>
+						<button
+							type="button"
+							class="uk-button uk-button-default"
+							hx-get={ partials.GetCurrentUrl(c, string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/profiles/%d", profileID))))) }
+							hx-push-url="true"
+							hx-target="#main"
+							hx-swap="outerHTML"
+						>
+							{ i18n.T(ctx, "Cancel") }
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</main>
+}

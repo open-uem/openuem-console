@@ -143,7 +143,7 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 
 	allSites, err := h.Model.GetSites(currentTenant.ID)
 	if err != nil {
-		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_tenants"), true))
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_sites"), true))
 	}
 
 	confirmDelete := c.QueryParam("delete") != ""

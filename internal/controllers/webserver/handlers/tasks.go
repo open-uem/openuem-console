@@ -101,6 +101,76 @@ func (h *Handler) EditTask(c echo.Context) error {
 	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.EditTask(c, task.Edges.Profile.ID, task, commonInfo), commonInfo))
 }
 
+func (h *Handler) CloneTask(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.empty_task"), true))
+	}
+
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), true))
+	}
+
+	task, err := h.Model.GetTasksById(taskID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), err), true))
+	}
+
+	if task.Edges.Profile == nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
+	}
+
+	// TODO-Steve we must filter which profiles are available for a role
+	allProfiles, err := h.Model.GetAllProfiles()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.clone.all_profiles_error"), err), true))
+	}
+
+	if c.Request().Method == "POST" {
+		taskDescription := c.FormValue("task-description")
+		if taskDescription == "" {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.new.empty"), err), true))
+		}
+
+		profile := c.FormValue("profile")
+		if profile == "" {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.invalid_profile"), err), true))
+		}
+
+		profileSubstrings := strings.Split(profile, "***")
+		if len(profileSubstrings) < 2 {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.invalid_profile"), err), true))
+		}
+
+		profileID, err := strconv.Atoi(profileSubstrings[1])
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.invalid_profile"), err), true))
+		}
+
+		lastTask, err := h.Model.GetLasTaskOrderInProfile(profileID)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.invalid_profile"), err), true))
+		}
+
+		taskOrder := lastTask.Order + 1
+		if err := h.Model.CloneTask(taskID, taskDescription, profileID, taskOrder); err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.clone.could_not_clone", err), true))
+		}
+
+		return h.EditProfile(c, "GET", profileSubstrings[1], i18n.T(c.Request().Context(), "tasks.clone.success"))
+	}
+
+	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.CloneTask(c, task.Edges.Profile.ID, task, allProfiles, commonInfo), commonInfo))
+}
+
 func validateTaskForm(c echo.Context) (*models.TaskConfig, error) {
 	taskType := ""
 
@@ -959,11 +1029,6 @@ func (h *Handler) MoveTask(c echo.Context, up bool) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_empty"), true))
 	}
 
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
-
 	order, err := strconv.Atoi(c.Param("order"))
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.order_invalid"), true))
@@ -979,11 +1044,11 @@ func (h *Handler) MoveTask(c echo.Context, up bool) error {
 	}
 
 	if up {
-		if err := h.Model.MoveTask(commonInfo, taskID, order, order-1); err != nil {
+		if err := h.Model.MoveTask(taskID, order, order-1); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
 		}
 	} else {
-		if err := h.Model.MoveTask(commonInfo, taskID, order, order+1); err != nil {
+		if err := h.Model.MoveTask(taskID, order, order+1); err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
 		}
 	}
@@ -993,11 +1058,6 @@ func (h *Handler) MoveTask(c echo.Context, up bool) error {
 
 func (h *Handler) MoveTaskFromTo(c echo.Context) error {
 	var err error
-
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
 
 	id := c.Param("id")
 	if id == "" {
@@ -1032,7 +1092,7 @@ func (h *Handler) MoveTaskFromTo(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.no_profile"), err), true))
 	}
 
-	if err := h.Model.MoveTask(commonInfo, taskID, from, to); err != nil {
+	if err := h.Model.MoveTask(taskID, from, to); err != nil {
 		return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_change_task_order"), err), true))
 	}
 
