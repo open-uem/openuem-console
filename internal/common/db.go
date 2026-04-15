@@ -302,5 +302,33 @@ func (w *Worker) EncryptSensitiveFields() error {
 		}
 	}
 
+	// 4. Get OIDC keys, check if encrypted and encrypt if needed
+	oidcKeys, err := w.Model.GetOIDCKeys()
+	if err != nil {
+		return err
+	}
+
+	for _, k := range oidcKeys {
+		if k.OIDCCookieEncriptionKey != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(k.OIDCCookieEncriptionKey, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encryptedKey, err := utils.EncryptSensitiveField(k.OIDCCookieEncriptionKey, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt OIDC Cookie encryption key, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateOIDCCookieEncriptionKey(k.ID, encryptedKey); err != nil {
+					log.Printf("[ERROR]: could not encrypt OIDC Cookie encryption key, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
 	return nil
 }

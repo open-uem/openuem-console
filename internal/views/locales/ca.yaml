@@ -1582,8 +1582,6 @@ ca:
     oidc_client_id_description: "L'identificador de client de la vostra aplicació OIDC"
     oidc_role_or_group_title: "OIDC Rol o grup"
     oidc_role_or_group_description: "Una funció o grup del qual l'usuari ha de ser membre per iniciar sessió (openuem, per exemple)"
-    oidc_keycloak_public_key_title: "Clau pública OIDC Keycloak"
-    oidc_keycloak_public_key_description: "Si el rol/grup està seleccionat, necessitem la clau pública que es pot recuperar des de Configuració del regne - Clau"
     oidc_autocreate_account_title: "OIDC crea un compte (automàtic)"
     oidc_autocreate_account_description: "Si un usuari és membre del rol o grup definit, es crea automàticament un compte; en cas contrari, primer s'ha de crear el compte a OpenUEM"
     oidc_autoapprove_account_title: "Compte d'aprovació de l'OIDC (automàtic)"

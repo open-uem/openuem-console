@@ -150,9 +150,16 @@ func (h *Handler) SendEmailTest(settings *models.SMTPSettings, to string) error 
 		// if not empty check if we have the ley to decrypt it
 		if settings.Password != "" {
 			if h.EncryptionMasterKey != "" {
-				smtpPassword, err = utils.DecryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+				isSMTPPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.Password, h.EncryptionMasterKey)
 				if err != nil {
 					return err
+				}
+
+				if isSMTPPasswordEncrypted {
+					smtpPassword, err = utils.DecryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+					if err != nil {
+						return err
+					}
 				}
 			} else {
 				smtpPassword = settings.Password

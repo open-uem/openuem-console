@@ -1582,8 +1582,6 @@ de:
     oidc_client_id_description: "Die Client-ID für Ihre OIDC-Anwendung"
     oidc_role_or_group_title: "OIDC-Rolle oder -Gruppe"
     oidc_role_or_group_description: "Eine Rolle oder Gruppe, der der Benutzer angehören muss, um sich anmelden zu können (z. B. openuem)"
-    oidc_keycloak_public_key_title: "Öffentlicher OIDC Keycloak-Schlüssel"
-    oidc_keycloak_public_key_description: "Wenn die Rolle/Gruppe ausgewählt ist, benötigen wir den öffentlichen Schlüssel, der aus den Realm-Einstellungen - Schlüssel abgerufen werden kann"
     oidc_autocreate_account_title: "OIDC-Konto erstellen (automatisch)"
     oidc_autocreate_account_description: "Wenn ein Benutzer Mitglied der definierten Rolle oder Gruppe ist, wird automatisch ein Konto erstellt. Andernfalls muss das Konto zuerst in OpenUEM erstellt werden."
     oidc_autoapprove_account_title: "OIDC-Genehmigungskonto (automatisch)"

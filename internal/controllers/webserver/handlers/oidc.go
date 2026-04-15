@@ -25,6 +25,7 @@ import (
 	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/auth"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"golang.org/x/oauth2"
 )
 
@@ -79,6 +80,20 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 	authProvider := settings.OIDCProvider
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
+
+	if h.EncryptionMasterKey != "" {
+		isKeyEncrypted, err := utils.IsSensitiveFieldEncrypted(cookieEncryptionKey, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
+
+		if isKeyEncrypted {
+			cookieEncryptionKey, err = utils.DecryptSensitiveField(cookieEncryptionKey, h.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	oauth2Config.Scopes = []string{"openid", "profile", "email"}
 	switch authProvider {
@@ -143,6 +158,20 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 	}
 
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
+
+	if h.EncryptionMasterKey != "" {
+		isKeyEncrypted, err := utils.IsSensitiveFieldEncrypted(cookieEncryptionKey, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
+
+		if isKeyEncrypted {
+			cookieEncryptionKey, err = utils.DecryptSensitiveField(cookieEncryptionKey, h.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	// Get state from cookie
 	stateFromCookie, err := ReadOIDCCookie(c, "state", cookieEncryptionKey)

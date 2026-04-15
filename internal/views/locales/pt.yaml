@@ -1582,8 +1582,6 @@ pt:
     oidc_client_id_description: "O ID do Cliente para sua aplicação OIDC"
     oidc_role_or_group_title: "Função ou grupo OIDC"
     oidc_role_or_group_description: "Uma função ou grupo do qual o usuário deve ser membro para fazer login (openuem, por exemplo)"
-    oidc_keycloak_public_key_title: "Chave Pública OIDC Keycloak"
-    oidc_keycloak_public_key_description: "Se a função/grupo for selecionado, precisamos da chave pública que pode ser obtida em Configurações do Realm - Chave"
     oidc_autocreate_account_title: "Criar conta OIDC (automático)"
     oidc_autocreate_account_description: "Se um usuário for membro da função ou grupo definido, uma conta é criada automaticamente; caso contrário, a conta deve ser criada primeiro no OpenUEM"
     oidc_autoapprove_account_title: "Aprovar conta OIDC (automático)"

@@ -501,15 +501,17 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
 			}
 
-			isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
-			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
-			}
-
-			if h.EncryptionMasterKey != "" && isAccessTokenEncrypted {
-				settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+			if h.EncryptionMasterKey != "" {
+				isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
 				if err != nil {
 					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+				}
+
+				if isAccessTokenEncrypted {
+					settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+					if err != nil {
+						return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+					}
 				}
 			}
 

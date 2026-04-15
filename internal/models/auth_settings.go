@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	openuem_ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/authentication"
 	"github.com/sethvargo/go-password/password"
 )
 
@@ -85,4 +86,12 @@ func (m *Model) IsPasswdAuthEnabled() bool {
 	}
 
 	return s.UsePasswd
+}
+
+func (m *Model) GetOIDCKeys() ([]*openuem_ent.Authentication, error) {
+	return m.Client.Authentication.Query().Select(authentication.FieldID, authentication.FieldOIDCCookieEncriptionKey).All(context.Background())
+}
+
+func (m *Model) UpdateOIDCCookieEncriptionKey(authID int, key string) error {
+	return m.Client.Authentication.UpdateOneID(authID).SetOIDCCookieEncriptionKey(key).Exec(context.Background())
 }
