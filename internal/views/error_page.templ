@@ -47,7 +47,7 @@ templ ErrorPage(code, message string) {
 							<uk-icon hx-history="false" icon="circle-alert" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "401":
 							<uk-icon hx-history="false" icon="ticket-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "405":
+						case "429", "405":
 							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
 						case "413":
 							<uk-icon hx-history="false" icon="weight" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>

@@ -8,6 +8,7 @@ import (
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"math"
 	"strconv"
 )
 
@@ -69,6 +70,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-1"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-1" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -93,6 +95,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-2"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-2" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -117,6 +120,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-3"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-3" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -141,6 +145,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-4"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-4" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -165,6 +170,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-5"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-5" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -189,6 +195,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-6"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-6" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -217,6 +224,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-7"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-7" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -244,6 +252,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-8"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-8" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -273,6 +282,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-9"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-9" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -308,6 +318,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-10"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-10" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -334,6 +345,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-11"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-11" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -363,6 +375,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-12"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-12" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -392,6 +405,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-13"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-13" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -421,6 +435,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-14"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-14" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -450,6 +465,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-15"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-15" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -479,6 +495,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-16"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-16" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -508,6 +525,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-17"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-17" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -537,6 +555,7 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 											hx-target="#main"
 											hx-swap="outerHTML"
 											htmx-indicator="#save-settings-18"
+											_="on click scroll to the top of main"
 										>
 											<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 											<uk-icon id="save-settings-18" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -560,9 +579,35 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 												hx-target="#main"
 												hx-swap="outerHTML"
 												htmx-indicator="#save-settings-19"
+												_="on click scroll to the top of main"
 											>
 												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
 												<uk-icon id="save-settings-19" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.register_rate_limit_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.register_rate_limit_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="number" name="register-rate-limit" value={ strconv.Itoa(int(math.Ceil(settings.RegisterRateLimit * 3600))) }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-20"
+												_="on click scroll to the top of main"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-20" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
 											</button>
 										</form>
 									</td>

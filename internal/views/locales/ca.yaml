@@ -927,6 +927,9 @@ ca:
     items_per_page_title: "Elements per pàgina"
     items_per_page_description: "El nombre mínim d'ítems per pàgina per als controls de paginació"
     items_per_page_invalid: "Els elements per pàgina no són vàlids"
+    register_rate_limit_title: "Límit de registre"
+    register_rate_limit_description: "Límit del nombre de sol·licituds de registre d'usuaris per adreça IP i hora. Cal reiniciar els serveis de la consola per aplicar un nou límit"
+    register_rate_limit_invalid: "El límit de registre no és vàlid"
   restore:
     title: "Restaurar"
     description: "Aquí podeu restaurar alguns elements crítics d'OpenUEM en cas que alguna cosa surti malament"

@@ -31,6 +31,7 @@ type GeneralSettings struct {
 	AutoAdmitAgents          bool
 	NetBird                  bool
 	ItemsPerPage             int
+	RegisterRateLimit        int
 }
 
 func (m *Model) GetMaxUploadSize() (string, error) {
@@ -46,6 +47,21 @@ func (m *Model) GetMaxUploadSize() (string, error) {
 
 func (m *Model) UpdateMaxUploadSizeSetting(settingsId int, size string) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetMaxUploadSize(size).Exec(context.Background())
+}
+
+func (m *Model) GetRegisterRateLimit() (float64, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldRegisterRateLimit).Where(settings.Not(settings.HasTenant())).Only(context.Background())
+	if err != nil {
+		return -1, err
+	}
+
+	return settings.RegisterRateLimit, nil
+}
+
+func (m *Model) UpdateRegisterRateLimitSetting(settingsId int, rate int) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetRegisterRateLimit(float64(rate) / 3600).Exec(context.Background())
 }
 
 func (m *Model) GetNATSTimeout() (int, error) {
@@ -360,6 +376,7 @@ func (m *Model) GetGeneralSettings(tenantID string) (*openuem_ent.Settings, erro
 			settings.FieldDetectRemoteAgents,
 			settings.FieldAutoAdmitAgents,
 			settings.TagColumn,
+			settings.FieldRegisterRateLimit,
 		).Where(settings.Not(settings.HasTenantWith()))
 	} else {
 		id, err := strconv.Atoi(tenantID)

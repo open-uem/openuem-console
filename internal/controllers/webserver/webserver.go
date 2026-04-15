@@ -30,12 +30,19 @@ func New(m *models.Model, natsServers string, s *sessions.SessionManager, ts goc
 		log.Println("[ERROR]: could not get max upload size from database")
 	}
 
+	// Get register rate limit setting
+	registerRateLimit, err := m.GetRegisterRateLimit()
+	if err != nil {
+		registerRateLimit = 0.000833333
+		log.Println("[ERROR]: could not get register rate limit from database")
+	}
+
 	// Router
 	w.Router = router.New(s, server, consolePort, maxUploadSize)
 
 	// Create Handler and register its router
 	w.Handler = handlers.NewHandler(m, natsServers, s, ts, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, commonFolder, version, reEnableCertAuth, reEnablePasswdAuth, authLogger)
-	w.Handler.Register(w.Router)
+	w.Handler.Register(w.Router, registerRateLimit)
 
 	// Add the session manager
 	w.SessionManager = s

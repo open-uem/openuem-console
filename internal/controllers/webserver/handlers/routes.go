@@ -5,10 +5,12 @@ import (
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/open-uem/openuem-console/internal/views/login_views"
+	"golang.org/x/time/rate"
 )
 
-func (h *Handler) Register(e *echo.Echo) {
+func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.GET("/", h.Dashboard, h.IsAuthenticated)
 	e.GET("/tenant/:tenant", h.Dashboard, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site", h.Dashboard, h.IsAuthenticated)
@@ -462,7 +464,7 @@ func (h *Handler) Register(e *echo.Echo) {
 	e.POST("/tenant/:tenant/site/:site/profiles/:uuid/clone", h.CloneProfile, h.IsAuthenticated)
 
 	e.GET("/register", h.SignIn)
-	e.POST("/register", h.SendRegister)
+	e.POST("/register", h.SendRegister, middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(registerRateLimit))))
 
 	e.POST("/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
 	e.POST("/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)

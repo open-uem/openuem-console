@@ -32,7 +32,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.49.0
-	github.com/open-uem/ent v0.0.0-20260327140242-010b4ac56438
+	github.com/open-uem/ent v0.0.0-20260415085708-1eb18deefcd0
 	github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf
 	github.com/open-uem/openuem-ansible-config v0.0.0-20260327072817-2d801600b177
 	github.com/open-uem/utils v0.0.0-20260306074720-edefb16dda84
@@ -44,10 +44,11 @@ require (
 	github.com/urfave/cli/v2 v2.27.7
 	github.com/wneessen/go-mail v0.7.2
 	github.com/xuri/excelize/v2 v2.10.1
-	golang.org/x/crypto v0.48.0
-	golang.org/x/mod v0.33.0
+	golang.org/x/crypto v0.49.0
+	golang.org/x/mod v0.34.0
 	golang.org/x/oauth2 v0.35.0
-	golang.org/x/sys v0.41.0
+	golang.org/x/sys v0.42.0
+	golang.org/x/time v0.14.0
 	gopkg.in/ini.v1 v1.67.1
 	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.7.0
@@ -124,12 +125,11 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/image v0.36.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.42.0 // indirect
+	golang.org/x/image v0.39.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/tools v0.43.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

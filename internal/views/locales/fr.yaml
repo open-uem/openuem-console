@@ -927,6 +927,9 @@ fr:
     items_per_page_title: "Éléments par page"
     items_per_page_description: "Le nombre minimum d'éléments par page pour les contrôles de pagination"
     items_per_page_invalid: "Les éléments par page ne sont pas valides"
+    register_rate_limit_title: "Limite de taux d'inscription"
+    register_rate_limit_description: "Limite du nombre de demandes d'inscription d'utilisateurs par adresse IP et par heure. Vous devez redémarrer les services de la console pour appliquer une nouvelle limite"
+    register_rate_limit_invalid: "La limite de taux d'inscription n'est pas valide"
   restore:
     title: "Restaurer"
     description: "Ici, vous pouvez restaurer certains éléments critiques d'OpenUEM au cas où quelque chose tournerait mal"

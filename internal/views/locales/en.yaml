@@ -927,6 +927,9 @@ en:
     items_per_page_title: "Items per page"
     items_per_page_description: "The minimum number of items per page for pagination controls"
     items_per_page_invalid: "Items per page is not valid"
+    register_rate_limit_title: "Register rate limit"
+    register_rate_limit_description: "Limit for the number of user registration requests per IP address and hour. You must restart the console services to apply a new limit"
+    register_rate_limit_invalid: "Register rate limit is not valid"
   restore:
     title: "Restore"
     description: "Here you can restore some critical elements of OpenUEM in case that something goes terribly wrong"

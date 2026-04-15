@@ -73,6 +73,12 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			}
 		}
 
+		if settings.RegisterRateLimit != 0 {
+			if err := h.Model.UpdateRegisterRateLimitSetting(settings.ID, settings.RegisterRateLimit); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+
 		if settings.SessionLifetime != 0 {
 			if err := h.Model.UpdateSessionLifetime(settings.ID, settings.SessionLifetime); err != nil {
 				return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -203,6 +209,7 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	autoAdmitAgents := c.FormValue("auto-admit-agents")
 	netbird := c.FormValue("netbird")
 	itemsPerPage := c.FormValue("items-per-page")
+	registerRateLimit := c.FormValue("register-rate-limit")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -268,6 +275,17 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 
 		if settings.ItemsPerPage <= 0 {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.items_per_page_invalid"))
+		}
+	}
+
+	if registerRateLimit != "" {
+		settings.RegisterRateLimit, err = strconv.Atoi(registerRateLimit)
+		if err != nil {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.register_rate_limit_invalid"))
+		}
+
+		if settings.RegisterRateLimit <= 0 {
+			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.register_rate_limit_invalid"))
 		}
 	}
 
