@@ -10,9 +10,11 @@ import (
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/utils"
 	"golang.org/x/mod/semver"
 )
 
+// StartDBConnectJob initializes the connection with the database and so some initial tasks and migrations
 func (w *Worker) StartDBConnectJob() error {
 	var err error
 
@@ -64,6 +66,11 @@ func (w *Worker) StartDBConnectJob() error {
 		// Create argon2 default password for openuem admin if not exist
 		if err := w.Model.CreateDefaultAdminPassword(w.ResetOpenUEMUser); err != nil {
 			log.Println("[WARN]: could not create default openuem password")
+		}
+
+		// Encrypt sensitive fields if they're set in clear and we have a master key
+		if err := w.EncryptSensitiveFields(); err != nil {
+			log.Printf("[WARN]: could not encrypt sensitive fields, reason: %v", err)
 		}
 
 		w.StartConsoleService()
@@ -142,9 +149,19 @@ func (w *Worker) StartDBConnectJob() error {
 					log.Println("[WARN]: could not associate domain to default site")
 				}
 
-				// Create argon2 default password for openuem admin if not exist or if a reset is required
+				// Nickname uses the hostname as the default value
+				if err := w.Model.SetDefaultNickname(); err != nil {
+					log.Println("[WARN]: could not default nickname to default site")
+				}
+
+				// Create argon2 default password for openuem admin if not exist
 				if err := w.Model.CreateDefaultAdminPassword(w.ResetOpenUEMUser); err != nil {
 					log.Println("[WARN]: could not create default openuem password")
+				}
+
+				// Encrypt sensitive fields if they're set in clear and we have a master key
+				if err := w.EncryptSensitiveFields(); err != nil {
+					log.Printf("[WARN]: could not encrypt sensitive fields, reason: %v", err)
 				}
 
 				w.StartConsoleService()
@@ -205,7 +222,7 @@ func (w *Worker) StartConsoleService() {
 	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes)
 
 	// HTTPS web server
-	w.WebServer = webserver.New(w.Model, w.NATSServers, w.SessionManager, w.TaskScheduler, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.SFTPPrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain, w.OrgName, w.OrgProvince, w.OrgLocality, w.OrgAddress, w.Country, w.ReverseProxyAuthPort, w.ReverseProxyServer, w.ServerReleasesFolder, w.CommonSoftwareDBFolder, w.Version, w.ReenableCertAuth, w.ReenablePasswdAuth, w.ResetOpenUEMUser, w.AuthLogger)
+	w.WebServer = webserver.New(w.Model, w.NATSServers, w.SessionManager, w.TaskScheduler, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.SFTPPrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain, w.OrgName, w.OrgProvince, w.OrgLocality, w.OrgAddress, w.Country, w.ReverseProxyAuthPort, w.ReverseProxyServer, w.ServerReleasesFolder, w.CommonSoftwareDBFolder, w.Version, w.EncryptionMasterKey, w.ReenableCertAuth, w.ReenablePasswdAuth, w.ResetOpenUEMUser, w.AuthLogger)
 	go func() {
 		if err := w.WebServer.Serve(":"+consolePort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
@@ -221,4 +238,41 @@ func (w *Worker) StartConsoleService() {
 		}
 	}()
 	log.Println("[INFO]: auth server is running")
+}
+
+func (w *Worker) EncryptSensitiveFields() error {
+	// 1. Check if we have the ENCRYPTION_MASTER_KEY env variable
+	if w.EncryptionMasterKey == "" {
+		return nil
+	}
+
+	// 2. Get SMTP password, check if encrypted and encrypt if needed
+	credentials, err := w.Model.GetSMTPPasswords()
+	if err != nil {
+		return err
+	}
+
+	for _, c := range credentials {
+		if c.SMTPPassword != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(c.SMTPPassword, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encryptedPassword, err := utils.EncryptSensitiveField(c.SMTPPassword, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt SMTP password, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateSMTPPassword(c.ID, encryptedPassword); err != nil {
+					log.Printf("[ERROR]: could not save encrypted SMTP password, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
+	return nil
 }

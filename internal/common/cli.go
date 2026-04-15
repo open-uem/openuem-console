@@ -53,6 +53,7 @@ func (w *Worker) GenerateConsoleConfigFromCLI(cCtx *cli.Context) error {
 	w.ReenablePasswdAuth = cCtx.Bool("re-enable-passwd-auth")
 	w.ResetOpenUEMUser = cCtx.Bool("reset-openuem-user")
 	w.Version = "0.12.0"
+	w.EncryptionMasterKey = cCtx.String("encryption-master-key")
 
 	return nil
 }

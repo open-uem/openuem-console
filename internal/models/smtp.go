@@ -9,6 +9,16 @@ import (
 	"github.com/open-uem/ent/tenant"
 )
 
+type SMTPSettings struct {
+	ID       int
+	Server   string
+	Port     int
+	User     string
+	Password string
+	Auth     string
+	MailFrom string
+}
+
 func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) {
 	var err error
 	var s *openuem_ent.Settings
@@ -95,12 +105,10 @@ func (m *Model) IsSMTPConfigured() bool {
 	return s.SMTPServer != "" && s.SMTPPort != 0
 }
 
-type SMTPSettings struct {
-	ID       int
-	Server   string
-	Port     int
-	User     string
-	Password string
-	Auth     string
-	MailFrom string
+func (m *Model) GetSMTPPasswords() ([]*openuem_ent.Settings, error) {
+	return m.Client.Settings.Query().Select(settings.FieldID, settings.FieldSMTPPassword).All(context.Background())
+}
+
+func (m *Model) UpdateSMTPPassword(settingID int, password string) error {
+	return m.Client.Settings.UpdateOneID(settingID).SetSMTPPassword(password).Exec(context.Background())
 }
