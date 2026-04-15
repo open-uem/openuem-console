@@ -1716,6 +1716,8 @@ de:
     settings_token_description: "OpenUEM benötigt ein Token, das zum Lesen von Gruppen und zum Erstellen von einmaligen Setup-Schlüsseln verwendet wird."
     settings_empty_tenant: "Die Mandanten-ID darf nicht leer sein"
     token_must_be_set: "Das Zugriffstoken ist erforderlich"
+    token_cannot_be_encrypted: "Das Zugriffstoken kann nicht verschlüsselt werden, Grund: %v"
+    token_cannot_be_decrypted: "Das Zugriffstoken kann nicht entschlüsselt werden, Grund: %v"
     settings_not_saved: "Die NetBird-Einstellungen konnten nicht gespeichert werden, Grund: %s"
     settings_saved: "Die NetBird-Einstellungen wurden gespeichert"
     could_not_get_settings: "Die NetBird-Einstellungen konnten nicht abgerufen werden, Grund: %s"

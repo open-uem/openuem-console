@@ -1716,6 +1716,8 @@ fr:
     settings_token_description: "OpenUEM nécessite un jeton qui sera utilisé pour lire les groupes, créer des clés de configuration ponctuelles."
     settings_empty_tenant: "L'ID de locataire ne peut pas être vide"
     token_must_be_set: "Le jeton d'accès est requis"
+    token_cannot_be_encrypted: "Le jeton d'accès ne peut pas être chiffré, raison : %v"
+    token_cannot_be_decrypted: "Le jeton d'accès ne peut pas être déchiffré, raison : %v"
     settings_not_saved: "Impossible d'enregistrer les paramètres NetBird, raison : %s"
     settings_saved: "Les paramètres NetBird ont été enregistrés"
     could_not_get_settings: "Impossible d'obtenir les paramètres NetBird, raison : %s"

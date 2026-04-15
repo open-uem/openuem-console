@@ -54,6 +54,14 @@ func (h *Handler) NetbirdSettings(c echo.Context) error {
 			managementURL = "https://api.netbird.io"
 		}
 
+		// encrypt the access token if we have the encryption master key
+		if h.EncryptionMasterKey != "" {
+			accessToken, err = utils.EncryptSensitiveField(accessToken, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_encrypted"), true))
+			}
+		}
+
 		if err := h.Model.SaveNetbirdSettings(tenantID, managementURL, accessToken); err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.settings_not_saved", err.Error()), true))
 		}
@@ -173,6 +181,18 @@ func (h *Handler) Netbird(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
 	}
 
+	isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+	}
+
+	if h.EncryptionMasterKey != "" && isAccessTokenEncrypted {
+		settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+		}
+	}
+
 	ng, err := getGroupsFromNetbirdAPI(settings.ManagementURL, settings.AccessToken)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_groups", err.Error()), true))
@@ -271,6 +291,18 @@ func (h *Handler) NetbirdRegister(c echo.Context) error {
 
 	if settings.AccessToken == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
+	}
+
+	isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+	}
+
+	if h.EncryptionMasterKey != "" && isAccessTokenEncrypted {
+		settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+		}
 	}
 
 	setupKeyID, setupKey, err := utils.CreateNetBirdOneOffSetupKeyAPI(settings.ManagementURL, agentID, groups, allowExtraDNSLabels, settings.AccessToken)
@@ -659,6 +691,18 @@ func (h *Handler) NetbirdDeletePeer(c echo.Context, comingFromUninstall bool) er
 
 	if settings.AccessToken == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
+	}
+
+	isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+	}
+
+	if h.EncryptionMasterKey != "" && isAccessTokenEncrypted {
+		settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+		}
 	}
 
 	ip := agent.Edges.Netbird.IP

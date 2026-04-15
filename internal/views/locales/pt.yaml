@@ -1716,6 +1716,8 @@ pt:
     settings_token_description: "O OpenUEM requer um token que será usado para ler grupos, criar chaves de configuração únicas"
     settings_empty_tenant: "O ID do locatário não pode estar vazio"
     token_must_be_set: "O token de acesso é obrigatório"
+    token_cannot_be_encrypted: "O token de acesso não pode ser encriptado, motivo: %v"
+    token_cannot_be_decrypted: "O token de acesso não pode ser desencriptado, motivo: %v"
     settings_not_saved: "Não foi possível salvar as configurações do NetBird, motivo: %s"
     settings_saved: "As configurações do NetBird foram salvas"
     could_not_get_settings: "Não foi possível obter as configurações do NetBird, motivo: %s"

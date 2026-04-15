@@ -274,5 +274,33 @@ func (w *Worker) EncryptSensitiveFields() error {
 		}
 	}
 
+	// 3. Get NetBird access tokens, check if encrypted and encrypt if needed
+	tokens, err := w.Model.GetNetbirdAccessTokens()
+	if err != nil {
+		return err
+	}
+
+	for _, t := range tokens {
+		if t.AccessToken != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(t.AccessToken, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encryptedToken, err := utils.EncryptSensitiveField(t.AccessToken, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt NetBird access token, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateNetbirdAccessToken(t.ID, encryptedToken); err != nil {
+					log.Printf("[ERROR]: could not save encrypted NetBird access token, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
 	return nil
 }

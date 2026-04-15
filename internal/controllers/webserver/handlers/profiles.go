@@ -14,6 +14,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/profiles_views"
+	"github.com/open-uem/utils"
 )
 
 func (h *Handler) Profiles(c echo.Context, successMessage string) error {
@@ -498,6 +499,18 @@ func (h *Handler) ProfileTaskDefinition(c echo.Context) error {
 
 			if settings.AccessToken == "" {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_empty"), true))
+			}
+
+			isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+			}
+
+			if h.EncryptionMasterKey != "" && isAccessTokenEncrypted {
+				settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err), true))
+				}
 			}
 
 			ng, err = getGroupsFromNetbirdAPI(settings.ManagementURL, settings.AccessToken)

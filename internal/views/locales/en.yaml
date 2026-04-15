@@ -1716,6 +1716,8 @@ en:
     settings_token_description: "OpenUEM requires a token that will be used to read groups, create one-off setup keys" 
     settings_empty_tenant: "The tenant ID cannot be empty"
     token_must_be_set: "The access token is required"
+    token_cannot_be_encrypted: "The access token cannot be encrypted, reason: %v"
+    token_cannot_be_decrypted: "The access token cannot be decrypted, reason: %v"
     settings_not_saved: "Could not save NetBird settings, reason: %s"
     settings_saved: "NetBird settings have been saved"
     could_not_get_settings: "Could not get NetBird settings, reason: %s"

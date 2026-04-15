@@ -1716,6 +1716,8 @@ no:
     settings_token_description: "OpenUEM krever en token som skal brukes til å lese grupper, opprette engangsnøkler for oppsett" 
     settings_empty_tenant: "Organisasjons-IDen kan ikke være tom"
     token_must_be_set: "Tilgangstokenet er påkrevd"
+    token_cannot_be_encrypted: "Tilgangstokenet kan ikke krypteres, årsak: %v"
+    token_cannot_be_decrypted: "Tilgangstokenet kan ikke dekrypteres, årsak: %v"
     settings_not_saved: "Kunne ikke lagre NetBird-innstillinger, årsak: %s"
     settings_saved: "NetBird-innstillinger er lagret"
     could_not_get_settings: "Kunne ikke hente NetBird-innstillinger, årsak: %s"
