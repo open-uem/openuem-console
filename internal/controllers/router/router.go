@@ -145,6 +145,11 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			if err := views.ErrorPage("401", message).Render(c.Request().Context(), c.Response().Writer); err != nil {
 				c.Logger().Error(err)
 			}
+		case http.StatusTooManyRequests:
+			message := "Too many requests, try again later"
+			if err := views.ErrorPage("429", message).Render(c.Request().Context(), c.Response().Writer); err != nil {
+				c.Logger().Error(err)
+			}
 		case http.StatusForbidden:
 			message := "Forbidden"
 			if he.Message != nil {

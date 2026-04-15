@@ -927,6 +927,9 @@ de:
     items_per_page_title: "Elemente pro Seite"
     items_per_page_description: "Die minimale Anzahl von Elementen pro Seite für die Paginierungssteuerung"
     items_per_page_invalid: "Elemente pro Seite sind ungültig"
+    register_rate_limit_title: "Registrierungsratebegrenzung"
+    register_rate_limit_description: "Limit für die Anzahl der Benutzerregistrierungsanfragen pro IP-Adresse und Stunde. Sie müssen die Konsolendienste neu starten, um ein neues Limit anzuwenden"
+    register_rate_limit_invalid: "Die Registrierungsratebegrenzung ist ungültig"
   restore:
     title: "Wiederherstellen"
     description: "Hier können Sie einige kritische Elemente von OpenUEM wiederherstellen, falls etwas schrecklich schief geht"

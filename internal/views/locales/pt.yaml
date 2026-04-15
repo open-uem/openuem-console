@@ -927,6 +927,9 @@ pt:
     items_per_page_title: "Itens por página"
     items_per_page_description: "O número mínimo de itens por página para os controles de paginação"
     items_per_page_invalid: "Itens por página não é válido"
+    register_rate_limit_title: "Limite de registo"
+    register_rate_limit_description: "Limite do número de pedidos de registo de utilizadores por endereço IP e por hora. É necessário reiniciar os serviços da consola para aplicar um novo limite"
+    register_rate_limit_invalid: "O limite de registo não é válido"
   restore:
     title: "Restaurar"
     description: "Aqui você pode restaurar alguns elementos críticos do OpenUEM caso algo dê terrivelmente errado"

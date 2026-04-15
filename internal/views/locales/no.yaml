@@ -927,6 +927,9 @@ no:
     items_per_page_title: "Elementer per side"
     items_per_page_description: "Minimum antall elementer per side for pagineringskontroller"
     items_per_page_invalid: "Elementer per side er ugyldig"
+    register_rate_limit_title: "Registreringsgrense"
+    register_rate_limit_description: "Grense for antall forespørsler om brukerregistrering per IP-adresse og time. Du må starte konsolltjenestene på nytt for å bruke en ny grense"
+    register_rate_limit_invalid: "Registreringsgrensen er ikke gyldig"
   restore:
     title: "Gjenopprett"
     description: "Her kan du gjenopprette noen kritiske elementer av OpenUEM i tilfelle noe går fryktelig galt"
