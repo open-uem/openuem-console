@@ -566,6 +566,8 @@ en:
     totp_enter_code: "Two-factor authentication (2FA) is enabled for your account. Please enter six-digit code"
     totp_empty_code: "TOTP code cannot be empty"
     totp_wrong_setup: "Could not validate the TOTP code"
+    totp_secret_cannot_be_decrypted: "Could not decrypt TOTP secret"
+    totp_secret_cannot_be_encrypted: "Could not encrypt TOTP secret"
     totp_could_not_save_secret: "Could not save TOTP secret key"
     totp_could_not_generate_codes: "Could not generate recovery codes"
     totp_could_not_save_codes: "Could not save recovery codes"
@@ -619,6 +621,10 @@ en:
     could_not_find_user: "Could not find the user account"
     personal_info_updated: "The personal info has been updated"
     token_invalid: "The token is not valid"
+    cannot_encrypt_new_user_token: "Cannot encrypt the new user token"
+    cannot_decrypt_new_user_token: "Cannot decrypt the new user token"
+    cannot_encrypt_forgot_code: "Cannot encrypt forgot code"
+    cannot_decrypt_forgot_code: "Cannot decrypt forgot code"
   register:
     description: "Fill the form to register in the application. An OpenUEM admin will review your request"
     button: "Register"
@@ -823,6 +829,7 @@ en:
     saved: "SMTP Settings saved!"
     test: "Test settings"
     test_success: "Email test was sent successfully to %s!"
+    cannot_be_encrypted: "Could not encrypt the SMTP password"
   settings:
     title: "General Settings"
     description: "OpenUEM has some settings that configure its behavior."

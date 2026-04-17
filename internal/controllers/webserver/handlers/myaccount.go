@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/account_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"github.com/pquerna/otp/totp"
 )
 
@@ -182,7 +183,16 @@ func (h *Handler) Enable2FA(c echo.Context) error {
 
 	qrCode := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	if err := h.Model.SaveTOTPSecretKey(username, key.Secret()); err != nil {
+	totpSecret := key.Secret()
+	// encrypt the TOTP secret if we have the encryption master key
+	if h.EncryptionMasterKey != "" {
+		totpSecret, err = utils.EncryptSensitiveField(key.Secret(), h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_encrypted"), true))
+		}
+	}
+
+	if err := h.Model.SaveTOTPSecretKey(username, totpSecret); err != nil {
 		log.Printf("[ERROR]: could not save TOTP secret key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_could_not_save_secret"), true))
 	}
@@ -205,6 +215,20 @@ func (h *Handler) Enabled2FA(c echo.Context) error {
 	if err != nil {
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
+	}
+
+	if h.EncryptionMasterKey != "" {
+		isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(user.TotpSecret, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+		}
+
+		if isAccessTokenEncrypted {
+			user.TotpSecret, err = utils.DecryptSensitiveField(user.TotpSecret, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+			}
+		}
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)

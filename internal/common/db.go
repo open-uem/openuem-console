@@ -246,7 +246,30 @@ func (w *Worker) EncryptSensitiveFields() error {
 		return nil
 	}
 
-	// 2. Get SMTP password, check if encrypted and encrypt if needed
+	// 2. Encrypt SMTP password if needed
+	if err := w.EncryptSMTPCredentials(); err != nil {
+		return err
+	}
+
+	// 3. Encrypt NetBird access tokens if needed
+	if err := w.EncryptNetBirdCredentials(); err != nil {
+		return err
+	}
+
+	// 4. Encrypt OIDC key if needed
+	if err := w.EncryptOIDCCredentials(); err != nil {
+		return err
+	}
+
+	// 5. Encrypt Sensitive User information if needed
+	if err := w.EncryptSentitiveUserInformation(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *Worker) EncryptSMTPCredentials() error {
 	credentials, err := w.Model.GetSMTPPasswords()
 	if err != nil {
 		return err
@@ -274,7 +297,10 @@ func (w *Worker) EncryptSensitiveFields() error {
 		}
 	}
 
-	// 3. Get NetBird access tokens, check if encrypted and encrypt if needed
+	return nil
+}
+
+func (w *Worker) EncryptNetBirdCredentials() error {
 	tokens, err := w.Model.GetNetbirdAccessTokens()
 	if err != nil {
 		return err
@@ -302,7 +328,10 @@ func (w *Worker) EncryptSensitiveFields() error {
 		}
 	}
 
-	// 4. Get OIDC keys, check if encrypted and encrypt if needed
+	return nil
+}
+
+func (w *Worker) EncryptOIDCCredentials() error {
 	oidcKeys, err := w.Model.GetOIDCKeys()
 	if err != nil {
 		return err
@@ -324,6 +353,103 @@ func (w *Worker) EncryptSensitiveFields() error {
 
 				if err := w.Model.UpdateOIDCCookieEncriptionKey(k.ID, encryptedKey); err != nil {
 					log.Printf("[ERROR]: could not encrypt OIDC Cookie encryption key, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (w *Worker) EncryptSentitiveUserInformation() error {
+
+	users, err := w.Model.GetUserSensitiveInformation()
+	if err != nil {
+		return err
+	}
+
+	for _, u := range users {
+
+		// totp_secret
+		if u.TotpSecret != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.TotpSecret, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encrypted, err := utils.EncryptSensitiveField(u.TotpSecret, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt TOTP secret, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateUserTOTPSecret(u.ID, encrypted); err != nil {
+					log.Printf("[ERROR]: could not encrypt TOTP secret, reason: %v", err)
+					continue
+				}
+			}
+		}
+
+		// cert_clear_password
+		if u.CertClearPassword != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.CertClearPassword, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encrypted, err := utils.EncryptSensitiveField(u.CertClearPassword, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt CertClearPassword, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateUserCertClearPassword(u.ID, encrypted); err != nil {
+					log.Printf("[ERROR]: could not encrypt CertClearPassword, reason: %v", err)
+					continue
+				}
+			}
+		}
+
+		// forgot_password_code
+		if u.ForgotPasswordCode != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.ForgotPasswordCode, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encrypted, err := utils.EncryptSensitiveField(u.ForgotPasswordCode, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt ForgotPasswordCode, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateUserForgotPasswordCode(u.ID, encrypted); err != nil {
+					log.Printf("[ERROR]: could not encrypt ForgotPasswordCode, reason: %v", err)
+					continue
+				}
+			}
+		}
+
+		// new_user_token
+		if u.NewUserToken != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.NewUserToken, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encrypted, err := utils.EncryptSensitiveField(u.NewUserToken, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt New User Token, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateUserNewUserToken(u.ID, encrypted); err != nil {
+					log.Printf("[ERROR]: could not encrypt New User Token, reason: %v", err)
 					continue
 				}
 			}

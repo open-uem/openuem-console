@@ -30,6 +30,15 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+
+		// encrypt the SMTP Password if we have the encryption master key
+		if h.EncryptionMasterKey != "" {
+			settings.Password, err = utils.EncryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_encrypted"), true))
+			}
+		}
+
 		if err := h.Model.UpdateSMTPSettings(settings); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
@@ -145,9 +154,9 @@ func (h *Handler) SendEmailTest(settings *models.SMTPSettings, to string) error 
 	} else {
 
 		// We need the SMTP password in clear
-		smtpPassword := ""
+		smtpPassword := settings.Password
 
-		// if not empty check if we have the ley to decrypt it
+		// if not empty check if we have the key to decrypt it
 		if settings.Password != "" {
 			if h.EncryptionMasterKey != "" {
 				isSMTPPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.Password, h.EncryptionMasterKey)
@@ -161,8 +170,6 @@ func (h *Handler) SendEmailTest(settings *models.SMTPSettings, to string) error 
 						return err
 					}
 				}
-			} else {
-				smtpPassword = settings.Password
 			}
 		}
 		c, err = mail.NewClient(settings.Server, mail.WithPort(settings.Port), mail.WithSMTPAuth(mail.SMTPAuthType(settings.Auth)),

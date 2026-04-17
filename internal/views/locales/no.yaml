@@ -566,6 +566,8 @@ no:
     totp_enter_code: "Tofaktorautentisering (2FA) er aktivert for kontoen din. Vennligst skriv inn sekssifret kode"
     totp_empty_code: "TOTP-kode kan ikke være tom"
     totp_wrong_setup: "Kunne ikke validere TOTP-koden"
+    totp_secret_cannot_be_decrypted: "Kunne ikke dekryptere TOTP-hemmeligheten"
+    totp_secret_cannot_be_encrypted: "Kunne ikke kryptere TOTP-hemmeligheten"
     totp_could_not_save_secret: "Kunne ikke lagre TOTP-hemmelig nøkkel"
     totp_could_not_generate_codes: "Kunne ikke generere gjenopprettingskoder"
     totp_could_not_save_codes: "Kunne ikke lagre gjenopprettingskoder"
@@ -619,6 +621,10 @@ no:
     could_not_find_user: "Kunne ikke finne brukerkontoen"
     personal_info_updated: "Personlig informasjon er oppdatert"
     token_invalid: "Tokenet er ugyldig"
+    cannot_encrypt_new_user_token: "Kan ikke kryptere det nye brukertokenet"
+    cannot_decrypt_new_user_token: "Kan ikke dekryptere det nye brukertokenet"
+    cannot_encrypt_forgot_code: "Kan ikke kryptere gjenopprettingskoden"
+    cannot_decrypt_forgot_code: "Kan ikke dekryptere gjenopprettingskoden"
   register:
     description: "Fyll ut skjemaet for å registrere deg i applikasjonen. En OpenUEM-administrator vil gjennomgå forespørselen din"
     button: "Registrer"
@@ -823,6 +829,7 @@ no:
     saved: "SMTP-innstillinger lagret!"
     test: "Test innstillinger"
     test_success: "E-posttest ble sendt vellykket til %s!"
+    cannot_be_encrypted: "Kunne ikke kryptere SMTP-passordet"
   settings:
     title: "Generelle innstillinger"
     description: "OpenUEM har noen innstillinger som konfigurerer hvordan den fungerer."

@@ -566,6 +566,8 @@ fr:
     totp_enter_code: "L'authentification à deux facteurs (2FA) est activée pour votre compte. Veuillez entrer le code à six chiffres"
     totp_empty_code: "Le code TOTP ne peut pas être vide"
     totp_wrong_setup: "Impossible de valider le code TOTP"
+    totp_secret_cannot_be_decrypted: "Impossible de déchiffrer le secret TOTP"
+    totp_secret_cannot_be_encrypted: "Impossible de chiffrer le secret TOTP"
     totp_could_not_save_secret: "Impossible d'enregistrer la clé secrète TOTP"
     totp_could_not_generate_codes: "Impossible de générer des codes de récupération"
     totp_could_not_save_codes: "Impossible d'enregistrer les codes de récupération"
@@ -619,6 +621,10 @@ fr:
     could_not_find_user: "Impossible de trouver le compte d'utilisateur"
     personal_info_updated: "Les informations personnelles ont été mises à jour"
     token_invalid: "Le jeton n'est pas valide"
+    cannot_encrypt_new_user_token: "Impossible de chiffrer le nouveau jeton utilisateur"
+    cannot_encrypt_forgot_code: "Impossible de chiffrer le code de récupération"
+    cannot_decrypt_new_user_token: "Impossible de déchiffrer le nouveau jeton utilisateur"
+    cannot_decrypt_forgot_code: "Impossible de déchiffrer le code de récupération"
   register:
     description: "Remplissez le formulaire pour vous inscrire à l'application. Un administrateur OpenUEM examinera votre demande"
     button: "S'inscrire"
@@ -823,6 +829,7 @@ fr:
     saved: "Paramètres SMTP enregistrés !"
     test: "Paramètres de test"
     test_success: "Le test d'e-mail a été envoyé avec succès à %s !"
+    cannot_be_encrypted: "Impossible de chiffrer le mot de passe SMTP"
   settings:
     title: "Paramètres généraux"
     description: "OpenUEM a certains paramètres qui configurent son comportement."

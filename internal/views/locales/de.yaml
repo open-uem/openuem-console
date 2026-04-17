@@ -566,6 +566,8 @@ de:
     totp_enter_code: "Die Zwei-Faktor-Authentifizierung (2FA) ist für Ihr Konto aktiviert. Bitte geben Sie den sechsstelligen Code ein"
     totp_empty_code: "Der TOTP-Code darf nicht leer sein"
     totp_wrong_setup: "Der TOTP-Code konnte nicht validiert werden"
+    totp_secret_cannot_be_decrypted: "TOTP-Geheimnis konnte nicht entschlüsselt werden"
+    totp_secret_cannot_be_encrypted: "TOTP-Geheimnis konnte nicht verschlüsselt werden"
     totp_could_not_save_secret: "Der geheime TOTP-Schlüssel konnte nicht gespeichert werden"
     totp_could_not_generate_codes: "Es konnten keine Wiederherstellungscodes generiert werden"
     totp_could_not_save_codes: "Die Wiederherstellungscodes konnten nicht gespeichert werden"
@@ -619,6 +621,10 @@ de:
     could_not_find_user: "Das Benutzerkonto konnte nicht gefunden werden"
     personal_info_updated: "Die persönlichen Informationen wurden aktualisiert"
     token_invalid: "Das Token ist ungültig"
+    cannot_encrypt_new_user_token: "Der neue Benutzertoken kann nicht verschlüsselt werden"
+    cannot_decrypt_new_user_token: "Der neue Benutzertoken kann nicht entschlüsselt werden"
+    cannot_encrypt_forgot_code: "Der Wiederherstellungscode kann nicht verschlüsselt werden"
+    cannot_decrypt_forgot_code: "Der Wiederherstellungscode kann nicht entschlüsselt werden"
   register:
     description: "Füllen Sie das Formular aus, um sich in der Anwendung zu registrieren. Ein OpenUEM-Administrator wird Ihre Anfrage prüfen"
     button: "Registrieren"
@@ -823,6 +829,7 @@ de:
     saved: "SMTP-Einstellungen gespeichert!"
     test: "Einstellungen testen"
     test_success: "E-Mail-Test wurde erfolgreich an %s gesendet!"
+    cannot_be_encrypted: "SMTP-Passwort konnte nicht verschlüsselt werden"
   settings:
     title: "Allgemeine Einstellungen"
     description: "OpenUEM hat einige Einstellungen, die sein Verhalten konfigurieren."

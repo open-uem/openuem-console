@@ -59,6 +59,19 @@ type ZitadelRolesResponse struct {
 	Message string   `json:"message"`
 }
 
+type OIDCSessionInfo struct {
+	ID            string
+	Name          string
+	Email         string
+	Phone         string
+	RefreshToken  string
+	AccessToken   string
+	TokenType     string
+	TokenExpiry   int
+	IDToken       string
+	EmailVerified bool
+}
+
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 	settings, err := h.Model.GetAuthenticationSettings()
@@ -207,7 +220,7 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 	}
 
 	// Get user information
-	oidcUser := ent.User{
+	oidcUser := OIDCSessionInfo{
 		ID:            u.PreferredUsername,
 		Name:          u.Name,
 		Email:         u.Email,
@@ -438,7 +451,7 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 	return u
 }
 
-func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
+func (h *Handler) ManageOIDCSession(c echo.Context, u *OIDCSessionInfo) error {
 	settings, err := h.Model.GetAuthenticationSettings()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
@@ -472,11 +485,6 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		if err := h.CreateSession(c, account); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
-		}
-
-		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
-			log.Printf("[ERROR]: could not save refresh token, reason: %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "could not save refresh token for user")
 		}
 
 		if h.AuthLogger != nil {

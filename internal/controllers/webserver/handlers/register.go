@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/register_views"
+	"github.com/open-uem/utils"
 )
 
 type RegisterRequest struct {
@@ -47,6 +48,8 @@ func (h *Handler) SignIn(c echo.Context) error {
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
+	var err error
+
 	defaultCountry, err := h.Model.GetDefaultCountry()
 	if err != nil {
 		return err
@@ -137,6 +140,14 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		}
 
 		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings), csrfToken))
+	}
+
+	// encrypt cert password
+	if h.EncryptionMasterKey != "" {
+		r.Password, err = utils.EncryptSensitiveField(r.Password, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := h.Model.RegisterUser(r.UID, r.Name, r.Email, r.Phone, r.Country, r.Password, r.AuthType); err != nil {

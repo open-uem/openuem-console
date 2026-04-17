@@ -6,6 +6,7 @@ import (
 
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/authentication"
+	"github.com/open-uem/utils"
 	"github.com/sethvargo/go-password/password"
 )
 
@@ -24,7 +25,7 @@ func (m *Model) GetAuthenticationSettings() (*openuem_ent.Authentication, error)
 }
 
 func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister bool, useOIDC bool, provider string,
-	server string, clientID string, role string, autoCreate bool, autoApprove bool, usePasswd bool) error {
+	server string, clientID string, role string, autoCreate bool, autoApprove bool, usePasswd bool, encryptionMasterKey string) error {
 
 	s, err := m.Client.Authentication.Query().Only(context.Background())
 	if err != nil {
@@ -50,6 +51,15 @@ func (m *Model) SaveAuthenticationSettings(useCertificates bool, allowRegister b
 			if err != nil {
 				return errors.New("could not generate the cookie encryption key")
 			}
+
+			// encrypt the TOTP secret if we have the encryption master key
+			if encryptionMasterKey != "" {
+				key, err = utils.EncryptSensitiveField(key, encryptionMasterKey)
+				if err != nil {
+					return err
+				}
+			}
+
 			update.SetOIDCCookieEncriptionKey(key)
 		}
 	} else {

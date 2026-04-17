@@ -57,7 +57,7 @@ templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *pa
 								class="uk-search uk-search-default w-full flex items-center gap-4"
 								_="on load
 										set emptyArray to [] as Array
-										set sessionStorage.checkedItems to emptyArray as JSON
+										set sessionStorage.checkedItems to emptyArray as JSONString
 									end
 								"
 							>
@@ -322,7 +322,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 													end
 												end
 												set storedItems to %s as Array
-												set sessionStorage.selectedAgents to storedItems as JSON
+												set sessionStorage.selectedAgents to storedItems as JSONString
 												set #filterBySelectedItems.value to '%d'
 												set #items-selected.innerHTML to '%d'
 												remove @disabled from #deploy-package
@@ -342,7 +342,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 													end
 												end
 												set storedItems to [] as Array
-												set sessionStorage.selectedAgents to storedItems as JSON
+												set sessionStorage.selectedAgents to storedItems as JSONString
 												set #filterBySelectedItems.value to '0'
 												set #items-selected.innerHTML to '0'
 												add @disabled to #deploy-package
@@ -360,7 +360,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 									_="on load
 											if #filterBySelectedItems.value is '0' then
 												set storedItems to [] as Array
-												set sessionStorage.selectedAgents to storedItems as JSON
+												set sessionStorage.selectedAgents to storedItems as JSONString
 											end
 										end"
 								>
@@ -422,7 +422,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 																set #items-selected.innerHTML to #filterBySelectedItems.value
 																if index < 0 then 															
 																	append my name to storedItems
-																	set sessionStorage.selectedAgents to storedItems as JSON
+																	set sessionStorage.selectedAgents to storedItems as JSONString
 																end														
 															else
 																decrement #filterBySelectedItems.value by 1
@@ -437,7 +437,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 																	set #filterBySelectedItems.value to '0'
 																end
 
-																set sessionStorage.selectedAgents to storedItems as JSON 
+																set sessionStorage.selectedAgents to storedItems as JSONString 
 															end
 
 															if ((<input[title='check-agent']:checked/>).length > 0 or storedItems.length > 0) then

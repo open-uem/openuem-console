@@ -566,6 +566,8 @@ ca:
     totp_enter_code: "L'autenticació de dos factors (2FA) està activada per al vostre compte. Si us plau, introduïu el codi de sis dígits"
     totp_empty_code: "El codi TOTP no pot estar buit"
     totp_wrong_setup: "No s'ha pogut validar el codi TOTP"
+    totp_secret_cannot_be_decrypted: "No s'ha pogut desxifrar el secret TOTP"
+    totp_secret_cannot_be_encrypted: "No s'ha pogut xifrar el secret TOTP"
     totp_could_not_save_secret: "No s'ha pogut desar la clau secreta TOTP"
     totp_could_not_generate_codes: "No s'han pogut generar codis de recuperació"
     totp_could_not_save_codes: "No s'han pogut desar els codis de recuperació"
@@ -619,6 +621,10 @@ ca:
     could_not_find_user: "No s'ha pogut trobar el compte d'usuari"
     personal_info_updated: "La informació personal s'ha actualitzat"
     token_invalid: "El token no és vàlid"
+    cannot_encrypt_new_user_token: "No es pot xifrar el nou token d'usuari"
+    cannot_decrypt_new_user_token: "No es pot desxifrar el nou token d'usuari"
+    cannot_encrypt_forgot_code: "No es pot xifrar el codi de recuperació"
+    cannot_decrypt_forgot_code: "No es pot desxifrar el codi de recuperació"
   register:
     description: "Ompliu el formulari per registrar-vos a la sol·licitud. Un administrador d'OpenUEM revisarà la vostra sol·licitud"
     button: "Registra't"
@@ -823,6 +829,7 @@ ca:
     saved: "Configuració SMTP desada!"
     test: "Configuració de prova"
     test_success: "La prova de correu electrònic s'ha enviat correctament a %s!"
+    cannot_be_encrypted: "No s'ha pogut xifrar la contrasenya SMTP"
   settings:
     title: "Configuració general"
     description: "OpenUEM té alguns paràmetres que configuren el seu comportament."

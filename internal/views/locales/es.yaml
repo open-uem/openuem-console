@@ -566,6 +566,8 @@ es:
     totp_enter_code: "La autenticación de dos factores (2FA) está habilitada para tu cuenta. Por favor, introduce el código de seis dígitos"
     totp_empty_code: "El código TOTP no puede estar vacío"
     totp_wrong_setup: "No se pudo validar el código TOTP"
+    totp_secret_cannot_be_decrypted: "No se pudo descifrar el secreto TOTP"
+    totp_secret_cannot_be_encrypted: "No se pudo cifrar el secreto TOTP"
     totp_could_not_save_secret: "No se pudo guardar la clave secreta TOTP"
     totp_could_not_generate_codes: "No se pudieron generar códigos de recuperación"
     totp_could_not_save_codes: "No se pudieron guardar los códigos de recuperación"
@@ -619,6 +621,10 @@ es:
     could_not_find_user: "No se pudo encontrar la cuenta de usuario"
     personal_info_updated: "La información personal ha sido actualizada"
     token_invalid: "El token no es válido"
+    cannot_encrypt_new_user_token: "No se puede cifrar el nuevo token de usuario"
+    cannot_decrypt_new_user_token: "No se puede descifrar el nuevo token de usuario"
+    cannot_encrypt_forgot_code: "No se puede cifrar el código de recuperación"
+    cannot_decrypt_forgot_code: "No se puede descifrar el código de recuperación"
   register:
     description: "Complete el formulario para registrarse en la aplicación. Un administrador de OpenUEM revisará su solicitud."
     button: "Regístrese"
@@ -823,6 +829,7 @@ es:
     saved: "La configuración SMTP se ha guardado"
     test: "Probar config."
     test_success: "Se envió con éxito el email de prueba a %s"
+    cannot_be_encrypted: "No se pudo cifrar la contraseña SMTP"
   settings:
     title: "Configuración general"
     description: "OpenUEM tiene algunos ajustes que configuran su comportamiento."
