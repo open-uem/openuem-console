@@ -1313,6 +1313,7 @@ de:
     local_user_password_description: "SHA512 wird beim Speichern generiert..."
     local_user_password_confirm: "Passwort bestätigen"
     local_user_password_confirm_description: "Passwort bestätigen..."
+    local_user_password_could_not_encrypt: "Das Passwort des lokalen Benutzers konnte nicht verschlüsselt werden"
     introduce_local_user_group_description: "Legt die primäre Gruppe des Benutzers fest, sie muss existieren..."
     introduce_local_user_groups_description: "Legt die zusätzlichen Gruppen fest (müssen existieren), kommagetrennte Liste..."
     local_user_home_description: "Home-Verzeichnis des Benutzers (optional)"

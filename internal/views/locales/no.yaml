@@ -1313,6 +1313,7 @@ no:
     local_user_password_description: "SHA512 vil bli generert ved lagring..."
     local_user_password_confirm: "Bekreft passord"
     local_user_password_confirm_description: "Bekreft passord..."
+    local_user_password_could_not_encrypt: "Kunne ikke kryptere passordet til den lokale brukeren"
     introduce_local_user_group_description: "Angir brukerens primære gruppe, den må eksistere..."
     introduce_local_user_groups_description: "Angir tilleggsgruppene (må eksistere), kommanseparert liste..."
     local_user_home_description: "Brukerens hjemmekatalog (valgfritt)"

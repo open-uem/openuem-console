@@ -266,6 +266,11 @@ func (w *Worker) EncryptSensitiveFields() error {
 		return err
 	}
 
+	// 6. Encrypt Sensitive Task information if needed
+	if err := w.EncryptSentitiveTaskInformation(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -450,6 +455,37 @@ func (w *Worker) EncryptSentitiveUserInformation() error {
 
 				if err := w.Model.UpdateUserNewUserToken(u.ID, encrypted); err != nil {
 					log.Printf("[ERROR]: could not encrypt New User Token, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (w *Worker) EncryptSentitiveTaskInformation() error {
+	tasks, err := w.Model.GetTaskSensitiveInformation()
+	if err != nil {
+		return err
+	}
+
+	for _, t := range tasks {
+		if t.LocalUserPassword != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(t.LocalUserPassword, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encryptedKey, err := utils.EncryptSensitiveField(t.LocalUserPassword, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt Local User Password, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateLocalUserPassword(t.ID, encryptedKey); err != nil {
+					log.Printf("[ERROR]: could not encrypt Local User Password, reason: %v", err)
 					continue
 				}
 			}

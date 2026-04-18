@@ -634,3 +634,11 @@ func CloneTask(query *ent.TaskCreate, t *ent.Task, taskName string, profileID in
 func (m *Model) GetLasTaskOrderInProfile(profileID int) (*ent.Task, error) {
 	return m.Client.Task.Query().Where(task.HasProfileWith(profile.ID(profileID))).Order(ent.Desc(task.FieldOrder)).First(context.Background())
 }
+
+func (m *Model) GetTaskSensitiveInformation() ([]*ent.Task, error) {
+	return m.Client.Task.Query().Select(task.FieldID, task.FieldLocalUserPassword).All(context.Background())
+}
+
+func (m *Model) UpdateLocalUserPassword(taskID int, password string) error {
+	return m.Client.Task.UpdateOneID(taskID).SetLocalUserPassword(password).Exec(context.Background())
+}

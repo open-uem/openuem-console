@@ -2036,7 +2036,7 @@ func (h *Handler) RunTask(c echo.Context) error {
 
 	if t.AgentType == task.AgentTypeLinux || t.AgentType == task.AgentTypeMacos {
 		// prepare playbook
-		pb, err := createAnsiblePlaybook(t)
+		pb, err := h.CreateAnsiblePlaybook(t)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_ansible_playbook"), err), true))
 		}
@@ -2060,7 +2060,7 @@ func (h *Handler) RunTask(c echo.Context) error {
 
 	if t.AgentType == task.AgentTypeWindows {
 		// prepare config
-		cfg, err := createWindowsTaskConfig(t)
+		cfg, err := h.CreateWindowsTaskConfig(t)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.could_not_create_windows_task"), err), true))
 		}
@@ -2135,7 +2135,7 @@ func (h *Handler) RunProfile(c echo.Context) error {
 	return h.ComputerTasks(c, i18n.T(c.Request().Context(), "profiles.profile_run_request_sent"))
 }
 
-func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, error) {
+func (h *Handler) CreateAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, error) {
 	var err error
 
 	pb := ansiblecfg.NewAnsiblePlaybook()
@@ -2232,6 +2232,18 @@ func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, er
 			}
 		}
 
+		if h.EncryptionMasterKey != "" {
+			isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(t.LocalUserPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return nil, err
+			}
+
+			if isAccessTokenEncrypted {
+				t.LocalUserPassword, err = utils.DecryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+				return nil, err
+			}
+		}
+
 		addLinuxUser, err := ansiblecfg.AddLocalUser(fmt.Sprintf("task_%d", t.ID), t.LocalUserAppend, t.LocalUserDescription,
 			t.LocalUserCreateHome, expires, t.LocalUserForce, t.LocalUserGenerateSSHKey, t.LocalUserGroup, t.LocalUserGroups,
 			t.LocalUserHome, t.LocalUserUsername, t.LocalUserNonunique, t.LocalUserPassword, password_expire_account_disable, password_expire_max,
@@ -2317,7 +2329,7 @@ func createAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.AnsiblePlaybook, er
 	return pb, nil
 }
 
-func createWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGetCfg, error) {
+func (h *Handler) CreateWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGetCfg, error) {
 	cfg := wingetcfg.NewWingetCfg()
 
 	taskID := fmt.Sprintf("task_%d_%d", t.ID, t.Version)
@@ -2366,6 +2378,18 @@ func createWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGetCfg, error) 
 		}
 		cfg.AddResource(registryKey)
 	case task.TypeAddLocalUser:
+		if h.EncryptionMasterKey != "" {
+			isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(t.LocalUserPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return nil, err
+			}
+
+			if isAccessTokenEncrypted {
+				t.LocalUserPassword, err = utils.DecryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+				return nil, err
+			}
+		}
+
 		localUser, err := wingetcfg.AddOrModifyLocalUser(taskID, t.LocalUserUsername, t.LocalUserDescription, t.LocalUserDisable, t.LocalUserFullname, t.LocalUserPassword, t.LocalUserPasswordChangeNotAllowed, t.LocalUserPasswordChangeRequired, t.LocalUserPasswordNeverExpires)
 		if err != nil {
 			return nil, err

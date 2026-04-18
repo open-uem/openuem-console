@@ -1313,6 +1313,7 @@ es:
     local_user_password_description: "Se generará SHA512 al guardar..."
     local_user_password_confirm: "Confirmar contraseña"
     local_user_password_confirm_description: "Confirmar la contraseña..."
+    local_user_password_could_not_encrypt: "No se pudo cifrar la contraseña del usuario local"
     introduce_local_user_group_description: "Grupo principal, debe existir..."
     introduce_local_user_groups_description: "Indique grupos adicionales existentes, lista separada por comas..."
     local_user_home_description: "Directorio home del usuario"

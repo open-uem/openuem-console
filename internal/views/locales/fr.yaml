@@ -1313,6 +1313,7 @@ fr:
     local_user_password_description: "SHA512 sera généré lors de l'enregistrement..."
     local_user_password_confirm: "Confirmer le mot de passe"
     local_user_password_confirm_description: "Confirmer le mot de passe..."
+    local_user_password_could_not_encrypt: "Impossible de chiffrer le mot de passe de l'utilisateur local"
     introduce_local_user_group_description: "Définit le groupe principal de l'utilisateur, il doit exister..."
     introduce_local_user_groups_description: "Définit les groupes supplémentaires (doivent exister), liste séparée par des virgules..."
     local_user_home_description: "Répertoire personnel de l'utilisateur (facultatif)"

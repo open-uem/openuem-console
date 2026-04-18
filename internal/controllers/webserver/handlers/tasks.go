@@ -14,6 +14,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"github.com/open-uem/openuem-console/internal/views/tasks_views"
+	"github.com/open-uem/utils"
 	"github.com/open-uem/wingetcfg/wingetcfg"
 )
 
@@ -39,6 +40,14 @@ func (h *Handler) NewTask(c echo.Context) error {
 		t, err := validateTaskForm(c)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%v", err), true))
+		}
+
+		// encrypt local user password if not empty
+		if h.EncryptionMasterKey != "" && t.LocalUserPassword != "" {
+			t.LocalUserPassword, err = utils.EncryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_could_not_encrypt"), true))
+			}
 		}
 
 		if err := h.Model.AddTaskToProfile(c, profileID, *t); err != nil {
@@ -82,6 +91,14 @@ func (h *Handler) EditTask(c echo.Context) error {
 		t, err := validateTaskForm(c)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%v", err), true))
+		}
+
+		// encrypt local user password if not empty
+		if h.EncryptionMasterKey != "" && t.LocalUserPassword != "" {
+			t.LocalUserPassword, err = utils.EncryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_could_not_encrypt"), true))
+			}
 		}
 
 		if err := h.Model.UpdateProfileTask(c, taskId, *t); err != nil {
