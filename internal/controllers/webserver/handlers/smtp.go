@@ -12,6 +12,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"github.com/wneessen/go-mail"
 )
 
@@ -29,6 +30,15 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
+
+		// encrypt the SMTP Password if we have the encryption master key
+		if h.EncryptionMasterKey != "" {
+			settings.Password, err = utils.EncryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_encrypted"), true))
+			}
+		}
+
 		if err := h.Model.UpdateSMTPSettings(settings); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
@@ -71,7 +81,7 @@ func (h *Handler) TestSMTPSettings(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	if err := sendEmailTest(settings, settings.MailFrom); err != nil {
+	if err := h.SendEmailTest(settings, settings.MailFrom); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 	return RenderSuccess(c, partials.SuccessMessage(i18n.T(c.Request().Context(), "smtp.test_success", settings.MailFrom)))
@@ -136,14 +146,34 @@ func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {
 	return &settings, nil
 }
 
-func sendEmailTest(settings *models.SMTPSettings, to string) error {
+func (h *Handler) SendEmailTest(settings *models.SMTPSettings, to string) error {
 	var err error
 	var c *mail.Client
 	if settings.Auth == "NOAUTH" || (settings.User == "" && settings.Password == "") {
 		c, err = mail.NewClient(settings.Server, mail.WithPort(settings.Port))
 	} else {
+
+		// We need the SMTP password in clear
+		smtpPassword := settings.Password
+
+		// if not empty check if we have the key to decrypt it
+		if settings.Password != "" {
+			if h.EncryptionMasterKey != "" {
+				isSMTPPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.Password, h.EncryptionMasterKey)
+				if err != nil {
+					return err
+				}
+
+				if isSMTPPasswordEncrypted {
+					smtpPassword, err = utils.DecryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
 		c, err = mail.NewClient(settings.Server, mail.WithPort(settings.Port), mail.WithSMTPAuth(mail.SMTPAuthType(settings.Auth)),
-			mail.WithUsername(settings.User), mail.WithPassword(settings.Password))
+			mail.WithUsername(settings.User), mail.WithPassword(smtpPassword))
 	}
 	if err != nil {
 		return err

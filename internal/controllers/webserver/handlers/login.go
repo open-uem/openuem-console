@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -23,6 +22,7 @@ import (
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/views/login_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"github.com/pquerna/otp/totp"
 )
 
@@ -196,7 +196,16 @@ func (h *Handler) Register2FA(c echo.Context) error {
 
 	qrCode := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	if err := h.Model.SaveTOTPSecretKey(username, key.Secret()); err != nil {
+	totpSecret := key.Secret()
+	// encrypt the TOTP secret if we have the encryption master key
+	if h.EncryptionMasterKey != "" {
+		totpSecret, err = utils.EncryptSensitiveField(key.Secret(), h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_encrypted"), true))
+		}
+	}
+
+	if err := h.Model.SaveTOTPSecretKey(username, totpSecret); err != nil {
 		log.Printf("[ERROR]: could not save TOTP secret key, reason: %v", err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_could_not_save_secret"), true))
 	}
@@ -219,6 +228,20 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 	if err != nil {
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
+	}
+
+	if h.EncryptionMasterKey != "" {
+		isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(user.TotpSecret, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+		}
+
+		if isAccessTokenEncrypted {
+			user.TotpSecret, err = utils.DecryptSensitiveField(user.TotpSecret, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+			}
+		}
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)
@@ -264,8 +287,7 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 	}
 	h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-	_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-	if err != nil {
+	if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -323,6 +345,20 @@ func (h *Handler) LoginTOTPValidate(c echo.Context) error {
 	if err != nil {
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_wrong_setup"), true))
+	}
+
+	if h.EncryptionMasterKey != "" {
+		isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(user.TotpSecret, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+		}
+
+		if isAccessTokenEncrypted {
+			user.TotpSecret, err = utils.DecryptSensitiveField(user.TotpSecret, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_secret_cannot_be_decrypted", err), true))
+			}
+		}
 	}
 
 	valid := totp.Validate(passcode, user.TotpSecret)
@@ -394,6 +430,18 @@ func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
+
+		// encrypt token if key is set
+		if h.EncryptionMasterKey != "" {
+			encryptedToken, err := utils.EncryptSensitiveField(token, h.EncryptionMasterKey)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+
+			if err := h.Model.UpdateSessionToken(token, encryptedToken); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
 	}
 
 	return nil
@@ -420,8 +468,7 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 	}
 	h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-	_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-	if err != nil {
+	if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -513,6 +560,14 @@ func (h *Handler) ForgotPasswordEmail(c echo.Context) error {
 			return err
 		}
 
+		// encrypt the TOTP secret if we have the encryption master key
+		if h.EncryptionMasterKey != "" {
+			code, err = utils.EncryptSensitiveField(code, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_encrypt_forgot_code"), true))
+			}
+		}
+
 		if err := h.Model.SaveForgotCode(username, hash); err != nil {
 			return err
 		}
@@ -584,6 +639,20 @@ func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
 		}
 	}
 
+	if h.EncryptionMasterKey != "" {
+		isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(confirmCode, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_forgot_code"), true))
+		}
+
+		if isAccessTokenEncrypted {
+			confirmCode, err = utils.DecryptSensitiveField(confirmCode, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_forgot_code"), true))
+			}
+		}
+	}
+
 	valid := h.Model.IsForgotCodeValid(username, confirmCode)
 	if !valid {
 		log.Printf("[ERROR]: %s is not a valid code", confirmCode)
@@ -623,8 +692,7 @@ func (h *Handler) CreateForgotPasswordSession(c echo.Context, user *ent.User) er
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-		_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-		if err != nil {
+		if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
@@ -678,6 +746,20 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 		}
 
 		// Check if token exists in database for this user
+		if h.EncryptionMasterKey != "" {
+			isNewUserToken, err := utils.IsSensitiveFieldEncrypted(user.NewUserToken, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_new_user_token"), true))
+			}
+
+			if isNewUserToken {
+				user.NewUserToken, err = utils.DecryptSensitiveField(user.NewUserToken, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_new_user_token"), true))
+				}
+			}
+		}
+
 		if user.NewUserToken != tokenString {
 			return echo.NewHTTPError(http.StatusForbidden, "token is not valid, please contact your administrator to request a new email to set your initial password")
 		}

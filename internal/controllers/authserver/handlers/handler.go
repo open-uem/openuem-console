@@ -16,9 +16,10 @@ type Handler struct {
 	ServerName           string
 	ConsolePort          string
 	ReverseProxyAuthPort string
+	EncryptionMasterKey  string
 }
 
-func NewHandler(model *models.Model, sm *sessions.SessionManager, cert *x509.Certificate, server, consolePort, reverseProxyAuthPort string) *Handler {
+func NewHandler(model *models.Model, sm *sessions.SessionManager, cert *x509.Certificate, server, consolePort, reverseProxyAuthPort, encryptionMasterKey string) *Handler {
 	return &Handler{
 		Model:                model,
 		SessionManager:       sm,
@@ -26,6 +27,7 @@ func NewHandler(model *models.Model, sm *sessions.SessionManager, cert *x509.Cer
 		ServerName:           server,
 		ConsolePort:          consolePort,
 		ReverseProxyAuthPort: reverseProxyAuthPort,
+		EncryptionMasterKey:  encryptionMasterKey,
 	}
 }
 

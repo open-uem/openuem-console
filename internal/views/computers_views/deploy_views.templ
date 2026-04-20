@@ -48,7 +48,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 										hx-swap="innerHTML"
 										_="on load
 										set emptyArray to [] as Array
-										set sessionStorage.checkedItems to emptyArray as JSON
+										set sessionStorage.checkedItems to emptyArray as JSONString
 									end
 								"
 									>

@@ -124,5 +124,10 @@ func StartConsoleFlags() []cli.Flag {
 			EnvVars: []string{"RESET_OPENUEM_USER"},
 			Value:   false,
 		},
+		&cli.StringFlag{
+			Name:    "encryption-master-key",
+			Usage:   "master key used to encrypt sensitive fields in the database, need to be 32 bytes long (for example 32 ASCII characters)",
+			EnvVars: []string{"ENCRYPTION_MASTER_KEY"},
+		},
 	}
 }

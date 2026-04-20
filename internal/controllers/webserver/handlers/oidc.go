@@ -25,6 +25,7 @@ import (
 	"github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/auth"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"golang.org/x/oauth2"
 )
 
@@ -58,6 +59,19 @@ type ZitadelRolesResponse struct {
 	Message string   `json:"message"`
 }
 
+type OIDCSessionInfo struct {
+	ID            string
+	Name          string
+	Email         string
+	Phone         string
+	RefreshToken  string
+	AccessToken   string
+	TokenType     string
+	TokenExpiry   int
+	IDToken       string
+	EmailVerified bool
+}
+
 func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 	settings, err := h.Model.GetAuthenticationSettings()
@@ -79,6 +93,20 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 
 	authProvider := settings.OIDCProvider
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
+
+	if h.EncryptionMasterKey != "" {
+		isKeyEncrypted, err := utils.IsSensitiveFieldEncrypted(cookieEncryptionKey, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
+
+		if isKeyEncrypted {
+			cookieEncryptionKey, err = utils.DecryptSensitiveField(cookieEncryptionKey, h.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	oauth2Config.Scopes = []string{"openid", "profile", "email"}
 	switch authProvider {
@@ -144,6 +172,20 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 
 	cookieEncryptionKey := settings.OIDCCookieEncriptionKey
 
+	if h.EncryptionMasterKey != "" {
+		isKeyEncrypted, err := utils.IsSensitiveFieldEncrypted(cookieEncryptionKey, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
+
+		if isKeyEncrypted {
+			cookieEncryptionKey, err = utils.DecryptSensitiveField(cookieEncryptionKey, h.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	// Get state from cookie
 	stateFromCookie, err := ReadOIDCCookie(c, "state", cookieEncryptionKey)
 	if err != nil {
@@ -178,7 +220,7 @@ func (h *Handler) OIDCCallback(c echo.Context) error {
 	}
 
 	// Get user information
-	oidcUser := ent.User{
+	oidcUser := OIDCSessionInfo{
 		ID:            u.PreferredUsername,
 		Name:          u.Name,
 		Email:         u.Email,
@@ -377,8 +419,7 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-		_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-		if err != nil {
+		if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
@@ -409,7 +450,7 @@ func (h *Handler) GetRedirectURI(c echo.Context) string {
 	return u
 }
 
-func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
+func (h *Handler) ManageOIDCSession(c echo.Context, u *OIDCSessionInfo) error {
 	settings, err := h.Model.GetAuthenticationSettings()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.could_not_get_settings", err.Error()), true))
@@ -443,11 +484,6 @@ func (h *Handler) ManageOIDCSession(c echo.Context, u *ent.User) error {
 		if err := h.CreateSession(c, account); err != nil {
 			log.Printf("[ERROR]: could not create session, reason: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "could not create session")
-		}
-
-		if err := h.Model.SaveOIDCTokenInfo(u.ID, u.AccessToken, u.RefreshToken, u.IDToken, u.TokenType, u.TokenExpiry); err != nil {
-			log.Printf("[ERROR]: could not save refresh token, reason: %v", err)
-			return echo.NewHTTPError(http.StatusInternalServerError, "could not save refresh token for user")
 		}
 
 		if h.AuthLogger != nil {

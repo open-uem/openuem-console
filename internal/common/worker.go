@@ -59,6 +59,7 @@ type Worker struct {
 	ReenablePasswdAuth                bool
 	ResetOpenUEMUser                  bool
 	AuthLogger                        *log.Logger
+	EncryptionMasterKey               string
 }
 
 func NewWorker(logName string) *Worker {

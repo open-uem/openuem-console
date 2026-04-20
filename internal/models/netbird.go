@@ -72,3 +72,11 @@ func (m *Model) SaveNetbirdInfo(agentID string, data nats.Netbird) error {
 func (m *Model) SetNetbirdAsUninstalled(agentID string) error {
 	return m.Client.Netbird.Update().SetInstalled(false).Where(netbird.HasOwnerWith(agent.ID(agentID))).Exec(context.Background())
 }
+
+func (m *Model) GetNetbirdAccessTokens() ([]*ent.NetbirdSettings, error) {
+	return m.Client.NetbirdSettings.Query().Select(netbirdsettings.FieldID, netbirdsettings.FieldAccessToken).All(context.Background())
+}
+
+func (m *Model) UpdateNetbirdAccessToken(settingID int, token string) error {
+	return m.Client.NetbirdSettings.UpdateOneID(settingID).SetAccessToken(token).Exec(context.Background())
+}

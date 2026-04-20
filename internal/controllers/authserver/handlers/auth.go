@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"crypto"
 	"crypto/x509"
 	"encoding/base64"
@@ -139,8 +138,7 @@ func (h *Handler) Auth(c echo.Context) error {
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-		_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(uid).Save(context.Background())
-		if err != nil {
+		if err := h.Model.AddUserToSession(token, uid, h.EncryptionMasterKey); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 

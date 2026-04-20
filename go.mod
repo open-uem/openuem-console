@@ -7,7 +7,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.1001
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/alexedwards/scs/pgxstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/ali-assar/NATS-Leader-Election v1.0.0
 	github.com/biter777/countries v1.7.5
@@ -32,10 +31,10 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.49.0
-	github.com/open-uem/ent v0.0.0-20260415085708-1eb18deefcd0
+	github.com/open-uem/ent v0.0.0-20260417163453-1f6d3eab61fc
 	github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf
 	github.com/open-uem/openuem-ansible-config v0.0.0-20260327072817-2d801600b177
-	github.com/open-uem/utils v0.0.0-20260306074720-edefb16dda84
+	github.com/open-uem/utils v0.0.0-20260415123925-dd58aa737176
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.10
 	github.com/pquerna/otp v1.5.0

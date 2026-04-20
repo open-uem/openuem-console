@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/alexedwards/scs/pgxstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,7 +14,7 @@ type SessionManager struct {
 	Pool    *pgxpool.Pool
 }
 
-func New(dbUrl string, sessionLifetimeInMinutes int) *SessionManager {
+func New(dbUrl string, sessionLifetimeInMinutes int, encryptionMasterKey string) *SessionManager {
 	var err error
 	sm := SessionManager{}
 
@@ -27,7 +26,7 @@ func New(dbUrl string, sessionLifetimeInMinutes int) *SessionManager {
 
 	sm.Manager = scs.New()
 	sm.Manager.Lifetime = time.Duration(sessionLifetimeInMinutes) * time.Minute
-	sm.Manager.Store = pgxstore.New(sm.Pool)
+	sm.Manager.Store = NewPostgresStore(sm.Pool, encryptionMasterKey)
 	sm.Manager.Cookie.Secure = true
 	return &sm
 }

@@ -225,6 +225,10 @@ func (m *Model) RegisterUser(uid, name, email, phone, country, password string, 
 		query.SetOpenid(true)
 	}
 
+	if password != "" {
+		query.SetCertClearPassword(password)
+	}
+
 	return query.Exec(context.Background())
 }
 
@@ -324,16 +328,6 @@ func applyUsersFilter(query *ent.UserQuery, f filters.UserFilter) {
 	if len(f.RegisterOptions) > 0 {
 		query.Where(user.RegisterIn(f.RegisterOptions...))
 	}
-}
-
-func (m *Model) SaveOIDCTokenInfo(uid string, accessToken string, refreshToken string, idToken string, tokenType string, expiry int) error {
-	return m.Client.User.UpdateOneID(uid).
-		SetAccessToken(accessToken).
-		SetRefreshToken(refreshToken).
-		SetIDToken(idToken).
-		SetTokenType(tokenType).
-		SetTokenExpiry(expiry).
-		Exec(context.Background())
 }
 
 func (m *Model) CreateDefaultAdminPassword(reset bool) error {
@@ -544,4 +538,27 @@ func (m *Model) SaveNewAccountToken(username string, token string) error {
 
 func (m *Model) DeleteNewAccountToken(username string) error {
 	return m.Client.User.UpdateOneID(username).SetNewUserToken("").Exec(context.Background())
+}
+
+func (m *Model) GetUserSensitiveInformation() ([]*ent.User, error) {
+	query := m.Client.User.Query().
+		Select(user.FieldID, user.FieldTotpSecret, user.FieldCertClearPassword, user.FieldForgotPasswordCode, user.FieldNewUserToken)
+
+	return query.All(context.Background())
+}
+
+func (m *Model) UpdateUserTOTPSecret(userID string, secret string) error {
+	return m.Client.User.UpdateOneID(userID).SetTotpSecret(secret).Exec(context.Background())
+}
+
+func (m *Model) UpdateUserCertClearPassword(userID string, secret string) error {
+	return m.Client.User.UpdateOneID(userID).SetCertClearPassword(secret).Exec(context.Background())
+}
+
+func (m *Model) UpdateUserForgotPasswordCode(userID string, secret string) error {
+	return m.Client.User.UpdateOneID(userID).SetForgotPasswordCode(secret).Exec(context.Background())
+}
+
+func (m *Model) UpdateUserNewUserToken(userID string, secret string) error {
+	return m.Client.User.UpdateOneID(userID).SetNewUserToken(secret).Exec(context.Background())
 }

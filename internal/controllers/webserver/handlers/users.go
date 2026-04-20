@@ -19,6 +19,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 	"golang.org/x/crypto/ocsp"
 	"software.sslmate.com/src/go-pkcs12"
 )
@@ -225,6 +226,14 @@ func (h *Handler) RequestUserCertificate(c echo.Context) error {
 	user, err := h.Model.GetUserById(uid)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	// encrypt cert password
+	if h.EncryptionMasterKey != "" {
+		user.CertClearPassword, err = utils.EncryptSensitiveField(user.CertClearPassword, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := h.SendCertificateRequestToNATS(c, user); err != nil {
@@ -467,12 +476,21 @@ func (h *Handler) sendConfirmationEmail(c echo.Context, user *openuem_ent.User) 
 }
 
 func (h *Handler) sendLinkToGeneratePassword(c echo.Context, user *openuem_ent.User) error {
+	encryptedToken := ""
 	token, err := h.generateEmailToken(user.ID, "New password", 1)
 	if err != nil {
 		return err
 	}
 
-	if err := h.Model.SaveNewAccountToken(user.ID, token); err != nil {
+	// encrypt the access token if we have the encryption master key
+	if h.EncryptionMasterKey != "" {
+		encryptedToken, err = utils.EncryptSensitiveField(token, h.EncryptionMasterKey)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := h.Model.SaveNewAccountToken(user.ID, encryptedToken); err != nil {
 		return err
 	}
 
