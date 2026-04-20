@@ -5,7 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 )
 
-templ Register(csrfToken string) {
+templ Register(csrfToken string, isTurnstileEnabled bool) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -27,6 +27,9 @@ templ Register(csrfToken string) {
 			<script src="/assets/js/icon.iife.js" type="module"></script>
 			<script src="/assets/js/htmx.min.js"></script>
 			<script src="/assets/js/openuem.js" type="module"></script>
+			if isTurnstileEnabled {
+				<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+			}
 			<script>
 				const htmlElement = document.documentElement;
 

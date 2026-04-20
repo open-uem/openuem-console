@@ -44,7 +44,15 @@ func (h *Handler) SignIn(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings), csrfToken))
+	// get Turnstile settings
+	turnstileSiteKey, turnstileSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+	}
+
+	isTurnstileEnabled := turnstileSecretKey != "" && turnstileSiteKey != ""
+
+	return RenderView(c, register_views.RegisterIndex(register_views.Register(c, register_views.RegisterValues{}, validations, defaultCountry, settings, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) SendRegister(c echo.Context) error {
@@ -53,6 +61,25 @@ func (h *Handler) SendRegister(c echo.Context) error {
 	defaultCountry, err := h.Model.GetDefaultCountry()
 	if err != nil {
 		return err
+	}
+
+	// get Turnstile settings
+	turnstileSiteKey, turnstileSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+	}
+
+	isTurnstileEnabled := turnstileSecretKey != "" && turnstileSiteKey != ""
+
+	// if CloudFlare Turnstile is used, check response
+	if isTurnstileEnabled {
+		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, turnstileSecretKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
 	}
 
 	r := RegisterRequest{}
@@ -139,7 +166,9 @@ func (h *Handler) SendRegister(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings), csrfToken))
+		isTurnstileEnabled := turnstileSecretKey != "" && turnstileSiteKey != ""
+
+		return RenderView(c, register_views.RegisterIndex(register_views.Register(c, values, validations, defaultCountry, settings, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnabled))
 	}
 
 	// encrypt cert password
@@ -159,7 +188,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful(), csrfToken))
+	return RenderView(c, register_views.RegisterIndex(register_views.RegisterSuccesful(), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) generateEmailToken(uid string, subject string, hours int) (string, error) {

@@ -62,9 +62,9 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
 	}
 
-	isTurnstileEnable := turnstileSecretKey != "" && turnstileSiteKey != ""
+	isTurnstileEnabled := turnstileSecretKey != "" && turnstileSiteKey != ""
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnable))
+	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) LoginPasswordAuth(c echo.Context) error {
