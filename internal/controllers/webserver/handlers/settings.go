@@ -15,6 +15,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/utils"
 )
 
 var UpdateChannels = []string{"stable", "devel", "testing"}
@@ -94,6 +95,26 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 
 		if settings.AgentFrequency != 0 {
 			return h.ChangeAgentFrequency(c, settings)
+		}
+
+		if settings.TurnstileSiteKey != "" {
+			if err := h.Model.UpdateTurnstileSiteKeySetting(settings.ID, settings.TurnstileSiteKey); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+
+		if settings.TurnstileSecretKey != "" {
+			// encrypt Turnstile secret key
+			if h.EncryptionMasterKey != "" {
+				settings.TurnstileSecretKey, err = utils.EncryptSensitiveField(settings.TurnstileSecretKey, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_secret_key_cannot_be_encrypted", err), true))
+				}
+			}
+
+			if err := h.Model.UpdateTurnstileSecretKeySetting(settings.ID, settings.TurnstileSecretKey); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
 		}
 
 		if c.FormValue("request-pin") != "" {
@@ -210,6 +231,8 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 	netbird := c.FormValue("netbird")
 	itemsPerPage := c.FormValue("items-per-page")
 	registerRateLimit := c.FormValue("register-rate-limit")
+	turnstileSiteKey := c.FormValue("turnstile-site-key")
+	turnstileSecretKey := c.FormValue("turnstile-secret-key")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.id_cannot_be_empty"))
@@ -405,6 +428,14 @@ func validateGeneralSettings(c echo.Context) (*models.GeneralSettings, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "settings.netbird_invalid"))
 		}
+	}
+
+	if turnstileSiteKey != "" {
+		settings.TurnstileSiteKey = turnstileSiteKey
+	}
+
+	if turnstileSecretKey != "" {
+		settings.TurnstileSecretKey = turnstileSecretKey
 	}
 
 	return &settings, nil

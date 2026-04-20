@@ -7,7 +7,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 )
 
-templ Login(authSettings *ent.Authentication) {
+templ Login(authSettings *ent.Authentication, turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -22,7 +22,7 @@ templ Login(authSettings *ent.Authentication) {
 					</div>
 					<div class="flex flex-col gap-16">
 						if authSettings.UsePasswd {
-							@LoginUserPassword(authSettings)
+							@LoginUserPassword(authSettings, turnstileSiteKey, turnstileSecretKey)
 						}
 						<div id="other-logins" class="flex flex-col gap-4">
 							if authSettings.UseCertificates {
@@ -75,7 +75,7 @@ templ Login(authSettings *ent.Authentication) {
 	</div>
 }
 
-templ LoginUserPassword(authSettings *ent.Authentication) {
+templ LoginUserPassword(authSettings *ent.Authentication, turnstileSiteKey string, turnstileSecretKey string) {
 	<form class="flex flex-col gap-4" autocomplete="off">
 		<div id="error" class="hidden"></div>
 		<div class="uk-inline">
@@ -130,6 +130,9 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 		>
 			{ i18n.T(ctx, "login.forgot") }
 		</a>
+		if turnstileSiteKey != "" && turnstileSecretKey != "" {
+			<div class="cf-turnstile" data-sitekey={ turnstileSiteKey } data-theme="auto" data-size="flexible" data-callback="onSuccess"></div>
+		}
 		<button
 			class="uk-button uk-button-primary text-white flex gap-2"
 			hx-post="/login/userpass"
@@ -144,6 +147,9 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 			</div>
 			{ i18n.T(ctx, "Login") }
 		</button>
+		if turnstileSiteKey != "" && turnstileSecretKey != "" {
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+		}
 	</form>
 }
 

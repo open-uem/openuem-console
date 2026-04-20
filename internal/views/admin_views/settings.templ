@@ -613,6 +613,56 @@ templ GeneralSettings(c echo.Context, settings *openuem_ent.Settings, agentsExis
 									</td>
 								</tr>
 							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.turnstile_site_key_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.turnstile_site_key_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="text" name="turnstile-site-key" value={ settings.TurnstileSiteKey }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-21"
+												_="on click scroll to the top of main"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-21" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
+							if commonInfo.TenantID == "-1" {
+								<tr>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.turnstile_secret_key_title") }</td>
+									<td class="!align-middle">{ i18n.T(ctx, "settings.turnstile_secret_key_description") }</td>
+									<td class="!align-middle">
+										<form class="flex gap-2">
+											<input type="hidden" name="settingsId" value={ strconv.Itoa(settings.ID) }/>
+											<input class="uk-input" type="password" name="turnstile-secret-key" value={ settings.TurnstileSecretKey }/>
+											<button
+												class="flex items-center gap-2"
+												type="submit"
+												hx-post="/admin/settings"
+												hx-push-url="false"
+												hx-target="#main"
+												hx-swap="outerHTML"
+												htmx-indicator="#save-settings-21"
+												_="on click scroll to the top of main"
+											>
+												<uk-icon hx-history="false" icon="save" custom-class="h-7 w-7 text-blue-600" uk-cloack></uk-icon>
+												<uk-icon id="save-settings-21" hx-history="false" icon="loader-circle" custom-class="htmx-indicator h-4 w-4 animate-spin" uk-cloack></uk-icon>
+											</button>
+										</form>
+									</td>
+								</tr>
+							}
 						</table>
 					</div>
 				</div>

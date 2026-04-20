@@ -143,6 +143,8 @@ github.com/mattn/go-runewidth v0.0.20 h1:WcT52H91ZUAwy8+HUkdM3THM6gXqXuLJi9O3rjc
 github.com/mattn/go-runewidth v0.0.20/go.mod h1:XBkDxAl56ILZc9knddidhrOlY5R/pDhgLpndooCuJAs=
 github.com/mattn/go-sqlite3 v1.14.34 h1:3NtcvcUnFBPsuRcno8pUtupspG/GM+9nZ88zgJcp6Zk=
 github.com/mattn/go-sqlite3 v1.14.34/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
+github.com/meyskens/go-turnstile v0.0.0-20230622160222-89160e594ca1 h1:lGjDY7OC1VfMpuVUN+b59vPPepbPx/eJQXGqpM2pCdw=
+github.com/meyskens/go-turnstile v0.0.0-20230622160222-89160e594ca1/go.mod h1:YbEb1gFAr7w2NcabqA2aPAeyW4Mhf85fmt+vVrrLo4s=
 github.com/microcosm-cc/bluemonday v1.0.27 h1:MpEUotklkwCSLeH+Qdx1VJgNqLlpY2KXwXFM08ygZfk=
 github.com/microcosm-cc/bluemonday v1.0.27/go.mod h1:jFi9vgW+H7c3V0lb6nR74Ib/DIB5OBs92Dimizgw2cA=
 github.com/minio/highwayhash v1.0.4-0.20251030100505-070ab1a87a76 h1:KGuD/pM2JpL9FAYvBrnBBeENKZNh6eNtjqytV6TYjnk=
@@ -165,6 +167,8 @@ github.com/nats-io/nuid v1.0.1 h1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=
 github.com/nats-io/nuid v1.0.1/go.mod h1:19wcPz3Ph3q0Jbyiqsd0kePYG7A95tJPxeL+1OSON2c=
 github.com/open-uem/ent v0.0.0-20260417163453-1f6d3eab61fc h1:I/oiXkg3laIJTlaP3CT2wY4T6Wt8qVYVgCL5cKjUQgE=
 github.com/open-uem/ent v0.0.0-20260417163453-1f6d3eab61fc/go.mod h1:pnv1dXKu1JK/9XRIPkLBT1Ijxvqe6jDlatIQh6un37o=
+github.com/open-uem/ent v0.0.0-20260420110541-021f6acffc13 h1:zsQgAriDY7mrKntRgQQmuzL5DUtW85FDVb7QUF5Akg4=
+github.com/open-uem/ent v0.0.0-20260420110541-021f6acffc13/go.mod h1:pnv1dXKu1JK/9XRIPkLBT1Ijxvqe6jDlatIQh6un37o=
 github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf h1:MLhSkmuRM9sWDHJsgVnPYGv7amdF4rKoYWI7qMg40PA=
 github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf/go.mod h1:chcBtTU0QNmPvWecVPVlGe5LcEBHevv1Ee+ye8AnLAg=
 github.com/open-uem/openuem-ansible-config v0.0.0-20260327072817-2d801600b177 h1:E5/n5IlKxFdz/B+FWdPx5XygJ4ILXkokWTvBn1O87q0=
