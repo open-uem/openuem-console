@@ -419,8 +419,7 @@ func (h *Handler) CreateSession(c echo.Context, user *ent.User) error {
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-		_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-		if err != nil {
+		if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 

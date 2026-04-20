@@ -219,7 +219,7 @@ func (w *Worker) StartConsoleService() {
 		sessionLifetimeInMinutes = 1440
 	}
 
-	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes)
+	w.SessionManager = sessions.New(w.DBUrl, sessionLifetimeInMinutes, w.EncryptionMasterKey)
 
 	// HTTPS web server
 	w.WebServer = webserver.New(w.Model, w.NATSServers, w.SessionManager, w.TaskScheduler, w.JWTKey, w.ConsoleCertPath, w.ConsolePrivateKeyPath, w.SFTPPrivateKeyPath, w.CACertPath, serverName, consolePort, authPort, w.DownloadDir, w.Domain, w.OrgName, w.OrgProvince, w.OrgLocality, w.OrgAddress, w.Country, w.ReverseProxyAuthPort, w.ReverseProxyServer, w.ServerReleasesFolder, w.CommonSoftwareDBFolder, w.Version, w.EncryptionMasterKey, w.ReenableCertAuth, w.ReenablePasswdAuth, w.ResetOpenUEMUser, w.AuthLogger)
@@ -231,7 +231,7 @@ func (w *Worker) StartConsoleService() {
 	log.Println("[INFO]: console is running")
 
 	// HTTPS auth server
-	w.AuthServer = authserver.New(w.Model, w.SessionManager, w.CACertPath, serverName, consolePort, authPort, w.ReverseProxyAuthPort)
+	w.AuthServer = authserver.New(w.Model, w.SessionManager, w.CACertPath, serverName, consolePort, authPort, w.ReverseProxyAuthPort, w.EncryptionMasterKey)
 	go func() {
 		if err := w.AuthServer.Serve(":"+authPort, w.ConsoleCertPath, w.ConsolePrivateKeyPath); err != http.ErrServerClosed {
 			log.Printf("[ERROR]: the server has stopped, reason: %v", err.Error())
@@ -268,6 +268,11 @@ func (w *Worker) EncryptSensitiveFields() error {
 
 	// 6. Encrypt Sensitive Task information if needed
 	if err := w.EncryptSentitiveTaskInformation(); err != nil {
+		return err
+	}
+
+	// 7. Encrypt Sessions tokens if needed
+	if err := w.EncryptSessionsTokens(); err != nil {
 		return err
 	}
 
@@ -486,6 +491,37 @@ func (w *Worker) EncryptSentitiveTaskInformation() error {
 
 				if err := w.Model.UpdateLocalUserPassword(t.ID, encryptedKey); err != nil {
 					log.Printf("[ERROR]: could not encrypt Local User Password, reason: %v", err)
+					continue
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (w *Worker) EncryptSessionsTokens() error {
+	tokens, err := w.Model.GetSessionsTokens()
+	if err != nil {
+		return err
+	}
+
+	for _, t := range tokens {
+		if t.ID != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(t.ID, w.EncryptionMasterKey)
+			if err != nil {
+				return err
+			}
+
+			if !isEncrypted {
+				encryptedToken, err := utils.EncryptSensitiveField(t.ID, w.EncryptionMasterKey)
+				if err != nil {
+					log.Printf("[ERROR]: could not encrypt session token, reason: %v", err)
+					continue
+				}
+
+				if err := w.Model.UpdateSessionToken(t.ID, encryptedToken); err != nil {
+					log.Printf("[ERROR]: could not encrypt session token, reason: %v", err)
 					continue
 				}
 			}

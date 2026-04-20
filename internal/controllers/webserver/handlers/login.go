@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -288,8 +287,7 @@ func (h *Handler) LoginTOTPConfirm(c echo.Context) error {
 	}
 	h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-	_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-	if err != nil {
+	if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -432,6 +430,18 @@ func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
+
+		// encrypt token if key is set
+		if h.EncryptionMasterKey != "" {
+			encryptedToken, err := utils.EncryptSensitiveField(token, h.EncryptionMasterKey)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+
+			if err := h.Model.UpdateSessionToken(token, encryptedToken); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
 	}
 
 	return nil
@@ -458,8 +468,7 @@ func (h *Handler) AccessGranted(c echo.Context, user *ent.User) error {
 	}
 	h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-	_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-	if err != nil {
+	if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -683,8 +692,7 @@ func (h *Handler) CreateForgotPasswordSession(c echo.Context, user *ent.User) er
 		}
 		h.SessionManager.Manager.WriteSessionCookie(c.Request().Context(), c.Response().Writer, token, expiry)
 
-		_, err = h.Model.Client.Sessions.UpdateOneID(token).SetOwnerID(user.ID).Save(context.Background())
-		if err != nil {
+		if err := h.Model.AddUserToSession(token, user.ID, h.EncryptionMasterKey); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}

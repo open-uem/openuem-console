@@ -15,14 +15,15 @@ import (
 )
 
 type AuthServer struct {
-	Router         *echo.Echo
-	Handler        *handlers.Handler
-	Server         *http.Server
-	SessionManager *sessions.SessionManager
-	CACert         *x509.Certificate
+	Router              *echo.Echo
+	Handler             *handlers.Handler
+	Server              *http.Server
+	SessionManager      *sessions.SessionManager
+	CACert              *x509.Certificate
+	EncryptionMasterKey string
 }
 
-func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePort, authPort, reverseProxyAuthPort string) *AuthServer {
+func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePort, authPort, reverseProxyAuthPort, encryptionMasterKey string) *AuthServer {
 	var err error
 	a := AuthServer{}
 
@@ -45,7 +46,7 @@ func New(m *models.Model, s *sessions.SessionManager, caCert, server, consolePor
 	}
 
 	// Create Handlers and register its router
-	a.Handler = handlers.NewHandler(m, s, a.CACert, server, consolePort, reverseProxyAuthPort)
+	a.Handler = handlers.NewHandler(m, s, a.CACert, server, consolePort, reverseProxyAuthPort, encryptionMasterKey)
 	a.Handler.Register(a.Router)
 
 	return &a

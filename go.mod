@@ -7,7 +7,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/a-h/templ v0.3.1001
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/alexedwards/scs/pgxstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/ali-assar/NATS-Leader-Election v1.0.0
 	github.com/biter777/countries v1.7.5
