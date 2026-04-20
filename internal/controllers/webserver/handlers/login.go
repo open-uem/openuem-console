@@ -62,7 +62,9 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings, turnstileSiteKey, turnstileSecretKey), csrfToken))
+	isTurnstileEnable := turnstileSecretKey != "" && turnstileSiteKey != ""
+
+	return RenderLogin(c, login_views.LoginIndex(login_views.Login(settings, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnable))
 }
 
 func (h *Handler) LoginPasswordAuth(c echo.Context) error {
@@ -82,7 +84,9 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
 	}
 
-	if tsSiteKey != "" && tsSecretKey != "" {
+	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	if isTurnstileEnabled {
 		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
 		if cfTurnStileResponse == "" {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
@@ -127,7 +131,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 			log.Printf("[ERROR]: could not create a forgot password session for user %s, reason: %v", user.ID, err)
 		}
 
-		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken, isTurnstileEnabled))
 	}
 
 	// Passwords match, create a new session
@@ -138,7 +142,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 
 	if user.Use2fa {
 		if user.TotpSecretConfirmed {
-			return RenderLoginPartial(c, login_views.Use2FA(username))
+			return RenderLoginPartial(c, login_views.Use2FA(username, tsSiteKey, tsSecretKey))
 		} else {
 			return h.Register2FA(c)
 		}
@@ -363,6 +367,22 @@ func (h *Handler) LoginTOTPValidate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.totp_empty_code"), true))
 	}
 
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	if tsSiteKey != "" && tsSecretKey != "" {
+		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+	}
+
 	user, err := h.Model.GetUserById(username)
 	if err != nil {
 		log.Printf("[ERROR]: could not get user account for username %s, reason: %v", username, err)
@@ -429,7 +449,15 @@ func (h *Handler) LoginForgotPass(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(), csrfToken))
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
@@ -678,7 +706,15 @@ func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 	}
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) CreateForgotPasswordSession(c echo.Context, user *ent.User) error {
@@ -788,7 +824,15 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 		if err := h.CreateForgotPasswordSession(c, user); err != nil {
 			return err
 		}
-		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken))
+
+		// if CloudFlare Turnstile is used, check response
+		tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+		}
+
+		isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+		return RenderLogin(c, login_views.LoginIndex(login_views.ChangePassword(), csrfToken, isTurnstileEnabled))
 
 	} else {
 		return echo.NewHTTPError(http.StatusBadRequest, "unknown claims type, cannot proceed")
