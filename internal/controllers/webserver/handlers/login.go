@@ -432,10 +432,31 @@ func (h *Handler) LoginTOTPValidate(c echo.Context) error {
 }
 
 func (h *Handler) LoginTOTPBackupRequest(c echo.Context) error {
-	return RenderLoginPartial(c, login_views.EnterRecoveryCode())
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	return RenderLoginPartial(c, login_views.EnterRecoveryCode(tsSiteKey, tsSecretKey))
 }
 
 func (h *Handler) LoginTOTPBackupCheck(c echo.Context) error {
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	if tsSiteKey != "" && tsSecretKey != "" {
+		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+	}
+
 	username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
 	if username == "" {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.username_empty"), true))

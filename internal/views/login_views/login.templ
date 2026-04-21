@@ -622,12 +622,28 @@ templ Register2FA(username string, qrCode string, secret string) {
 	</div>
 }
 
-templ EnterRecoveryCode() {
+templ EnterRecoveryCode(turnstileSiteKey string, turnstileSecretKey string) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.totp_use_recovery") }</h1>
 		</div>
-		<form class="flex flex-col gap-4" autocomplete="off">
+		<form
+			class="flex flex-col gap-4"
+			autocomplete="off"
+			if turnstileSiteKey != "" && turnstileSecretKey !="" {
+				_={ fmt.Sprintf(`
+			on load 
+				if #cf-turnstile.innerHTML is empty then				
+					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+				else
+					if #error.innerHTML is not empty then
+						call turnstile.reset(#cf-turnstile)
+					end
+				end
+			end
+		`, turnstileSiteKey) }
+			}
+		>
 			<div id="error" class="hidden"></div>
 			<span class="text">{ i18n.T(ctx, "login.totp_use_recovery_instructions") }</span>
 			<div class="uk-inline">
@@ -653,6 +669,9 @@ templ EnterRecoveryCode() {
 					<uk-icon id="reveal-code" icon="eye" class="uk-text-muted"></uk-icon>
 				</button>
 			</div>
+			if turnstileSiteKey != "" && turnstileSecretKey != "" {
+				<div id="cf-turnstile"></div>
+			}
 			<a
 				class="uk-button uk-button-primary text-white flex gap-2"
 				hx-post="/login/totpbackupcheck"

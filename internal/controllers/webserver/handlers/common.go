@@ -128,6 +128,14 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "settings.could_not_get_detect_remote_agents_setting"))
 	}
 
+	// is turnstile enabled
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return nil, errors.New(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+	}
+
+	info.IsTurnstileEnabled = tsSecretKey != "" && tsSiteKey != ""
+
 	return &info, nil
 }
 
