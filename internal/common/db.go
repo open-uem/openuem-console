@@ -423,27 +423,6 @@ func (w *Worker) EncryptSentitiveUserInformation() error {
 			}
 		}
 
-		// forgot_password_code
-		if u.ForgotPasswordCode != "" {
-			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.ForgotPasswordCode, w.EncryptionMasterKey)
-			if err != nil {
-				return err
-			}
-
-			if !isEncrypted {
-				encrypted, err := utils.EncryptSensitiveField(u.ForgotPasswordCode, w.EncryptionMasterKey)
-				if err != nil {
-					log.Printf("[ERROR]: could not encrypt ForgotPasswordCode, reason: %v", err)
-					continue
-				}
-
-				if err := w.Model.UpdateUserForgotPasswordCode(u.ID, encrypted); err != nil {
-					log.Printf("[ERROR]: could not encrypt ForgotPasswordCode, reason: %v", err)
-					continue
-				}
-			}
-		}
-
 		// new_user_token
 		if u.NewUserToken != "" {
 			isEncrypted, err := utils.IsSensitiveFieldEncrypted(u.NewUserToken, w.EncryptionMasterKey)

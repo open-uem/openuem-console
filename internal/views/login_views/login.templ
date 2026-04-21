@@ -308,7 +308,7 @@ templ ChangePassword(turnstileSiteKey string, turnstileSecretKey string) {
 	</div>
 }
 
-templ LostPassword() {
+templ LostPassword(turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -321,7 +321,23 @@ templ LostPassword() {
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
 					</div>
-					<form class="flex flex-col gap-4" autocomplete="off">
+					<form
+						class="flex flex-col gap-4"
+						autocomplete="off"
+						if turnstileSiteKey != "" && turnstileSecretKey !="" {
+							_={ fmt.Sprintf(`
+							on load 
+								if #cf-turnstile.innerHTML is empty then				
+									call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+								else
+									if #error.innerHTML is not empty then
+										call turnstile.reset(#cf-turnstile)
+									end
+								end
+							end
+						`, turnstileSiteKey) }
+						}
+					>
 						<div id="success" class="hidden"></div>
 						<div id="error" class="hidden"></div>
 						<span class="text">{ i18n.T(ctx, "login.forgot_email") }</span>
@@ -331,6 +347,9 @@ templ LostPassword() {
 							</span>
 							<input class="uk-input" name="email" type="text" placeholder={ i18n.T(ctx, "login.email") } aria-label="Not clickable icon" required/>
 						</div>
+						if turnstileSiteKey != "" && turnstileSecretKey != "" {
+							<div id="cf-turnstile"></div>
+						}
 						<a
 							class="uk-button uk-button-primary text-white flex gap-2"
 							hx-post="/login/forgot"
@@ -359,12 +378,28 @@ templ LostPassword() {
 	</div>
 }
 
-templ LostPasswordCode(email string) {
+templ LostPasswordCode(email string, turnstileSiteKey string, turnstileSecretKey string) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
 		</div>
-		<form class="flex flex-col gap-4" autocomplete="off">
+		<form
+			class="flex flex-col gap-4"
+			autocomplete="off"
+			if turnstileSiteKey != "" && turnstileSecretKey !="" {
+				_={ fmt.Sprintf(`
+				on load 
+					if #cf-turnstile.innerHTML is empty then				
+						call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+					else
+						if #error.innerHTML is not empty then
+							call turnstile.reset(#cf-turnstile)
+						end
+					end
+				end
+			`, turnstileSiteKey) }
+			}
+		>
 			<div id="error" class="hidden"></div>
 			<span class="uk-text uk-text-bold uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter") }</span>
 			<span class="uk-text uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter_instructions", email) }</span>
@@ -375,6 +410,9 @@ templ LostPasswordCode(email string) {
 					uk-cloak
 				></uk-input-pin>
 			</div>
+			if turnstileSiteKey != "" && turnstileSecretKey != "" {
+				<div id="cf-turnstile"></div>
+			}
 			<div class="flex justify-between items-center">
 				<button
 					class="flex gap-2 uk-button uk-button-default"

@@ -475,7 +475,7 @@ func (h *Handler) LoginForgotPass(c echo.Context) error {
 
 	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
 
-	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(), csrfToken, isTurnstileEnabled))
+	return RenderLogin(c, login_views.LoginIndex(login_views.LostPassword(tsSiteKey, tsSecretKey), csrfToken, isTurnstileEnabled))
 }
 
 func (h *Handler) NewSession(c echo.Context, user *ent.User) error {
@@ -604,6 +604,22 @@ func (h *Handler) ForgotPasswordEmail(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.email_empty"), true))
 	}
 
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
+	}
+
+	if tsSiteKey != "" && tsSecretKey != "" {
+		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+	}
+
 	username := h.Model.GetUserIDByEmail(email)
 	if username != "" {
 		code, err := generateForgotCode()
@@ -614,14 +630,6 @@ func (h *Handler) ForgotPasswordEmail(c echo.Context) error {
 		hash, err := argon2id.CreateHash(code, argon2id.DefaultParams)
 		if err != nil {
 			return err
-		}
-
-		// encrypt the TOTP secret if we have the encryption master key
-		if h.EncryptionMasterKey != "" {
-			code, err = utils.EncryptSensitiveField(code, h.EncryptionMasterKey)
-			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_encrypt_forgot_code"), true))
-			}
 		}
 
 		if err := h.Model.SaveForgotCode(username, hash); err != nil {
@@ -663,7 +671,7 @@ func (h *Handler) ForgotPasswordEmail(c echo.Context) error {
 		}
 	}
 
-	return RenderLoginPartial(c, login_views.LostPasswordCode(email))
+	return RenderLoginPartial(c, login_views.LostPasswordCode(email, tsSiteKey, tsSecretKey))
 }
 
 func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
@@ -672,17 +680,27 @@ func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
 		confirmCode = c.QueryParam("code")
 	}
 
-	if c.Request().Method == "POST" {
-		confirmCode = c.FormValue("confirm-code")
-	}
-
-	// if CloudFlare Turnstile is used, check response
 	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err), true))
 	}
 
 	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	if c.Request().Method == "POST" {
+		confirmCode = c.FormValue("confirm-code")
+
+		// if CloudFlare Turnstile is used, check response
+		if tsSiteKey != "" && tsSecretKey != "" {
+			cfTurnStileResponse := c.FormValue("cf-turnstile-response")
+			if cfTurnStileResponse == "" {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
+			}
+			if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+			}
+		}
+	}
 
 	username := h.SessionManager.Manager.GetString(c.Request().Context(), "uid")
 	if username == "" {
@@ -700,20 +718,6 @@ func (h *Handler) VerifyForgotPasswordCode(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusUnauthorized, i18n.T(c.Request().Context(), "login.forgot_code_empty"))
 		} else {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.forgot_code_empty"), true))
-		}
-	}
-
-	if h.EncryptionMasterKey != "" {
-		isAccessTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(confirmCode, h.EncryptionMasterKey)
-		if err != nil {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_forgot_code"), true))
-		}
-
-		if isAccessTokenEncrypted {
-			confirmCode, err = utils.DecryptSensitiveField(confirmCode, h.EncryptionMasterKey)
-			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_forgot_code"), true))
-			}
 		}
 	}
 
