@@ -52,7 +52,8 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 				<form
 					id="register"
 					class="uk-form-stacked gap-4"
-					_={ fmt.Sprintf(`
+					if turnstileSiteKey != "" && turnstileSecretKey !="" {
+						_={ fmt.Sprintf(`
 						on load 
 							if #cf-turnstile.innerHTML is empty then				
 								call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
@@ -63,6 +64,7 @@ templ Register(c echo.Context, values RegisterValues, validations RegisterValida
 							end
 						end
 					`, turnstileSiteKey) }
+					}
 				>
 					<div class="uk-margin" id="uid-field" hx-swap="outerHTML">
 						<label class="uk-form-label" for="uid">{ i18n.T(ctx, "register.uid") }</label>

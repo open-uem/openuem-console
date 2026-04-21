@@ -108,7 +108,8 @@ templ LoginUserPassword(authSettings *ent.Authentication, turnstileSiteKey strin
 	<form
 		class="flex flex-col gap-4"
 		autocomplete="off"
-		_={ fmt.Sprintf(`
+		if turnstileSiteKey != "" && turnstileSecretKey !="" {
+			_={ fmt.Sprintf(`
 			on load 
 				if #cf-turnstile.innerHTML is empty then				
 					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
@@ -119,6 +120,7 @@ templ LoginUserPassword(authSettings *ent.Authentication, turnstileSiteKey strin
 				end
 			end
 		`, turnstileSiteKey) }
+		}
 	>
 		<div id="error" class="hidden"></div>
 		<div class="uk-inline">
@@ -193,7 +195,7 @@ templ LoginUserPassword(authSettings *ent.Authentication, turnstileSiteKey strin
 	</form>
 }
 
-templ ChangePassword() {
+templ ChangePassword(turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -210,7 +212,23 @@ templ ChangePassword() {
 						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.redirect_to_login") }</span>
 						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.password_complexity") }</span>
 					</div>
-					<form class="flex flex-col gap-4" autocomplete="off">
+					<form
+						class="flex flex-col gap-4"
+						autocomplete="off"
+						if turnstileSiteKey != "" && turnstileSecretKey !="" {
+							_={ fmt.Sprintf(`
+							on load 
+								if #cf-turnstile.innerHTML is empty then				
+									call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+								else
+									if #error.innerHTML is not empty then
+										call turnstile.reset(#cf-turnstile)
+									end
+								end
+							end
+						`, turnstileSiteKey) }
+						}
+					>
 						<div id="error" class="hidden"></div>
 						<span class="text">{ i18n.T(ctx, "login.please_change_password") }</span>
 						<div class="uk-inline">
@@ -245,20 +263,23 @@ templ ChangePassword() {
 								class="uk-form-icon uk-form-icon-flip"
 								type="button"
 								_="
-						on click 
-							if #reveal-confirm-password@icon is 'eye' then
-								set #reveal-confirm-password@icon to 'eye-off'
-								set #confirm-password@type to 'text'
-							else
-								set #reveal-confirm-password@icon to 'eye'
-								set #confirm-password@type to 'password'
-							end
-						end
-					"
+									on click 
+										if #reveal-confirm-password@icon is 'eye' then
+											set #reveal-confirm-password@icon to 'eye-off'
+											set #confirm-password@type to 'text'
+										else
+											set #reveal-confirm-password@icon to 'eye'
+											set #confirm-password@type to 'password'
+										end
+									end
+								"
 							>
 								<uk-icon id="reveal-confirm-password" icon="eye" class="uk-text-muted"></uk-icon>
 							</button>
 						</div>
+						if turnstileSiteKey != "" && turnstileSecretKey != "" {
+							<div id="cf-turnstile"></div>
+						}
 						<a
 							class="uk-button uk-button-primary text-white flex gap-2"
 							hx-post="/login/changepass"
@@ -432,7 +453,8 @@ templ Use2FA(username string, turnstileSiteKey string, turnstileSecretKey string
 	<div
 		id="login"
 		class="grid gap-2"
-		_={ fmt.Sprintf(`
+		if turnstileSiteKey != "" && turnstileSecretKey !="" {
+			_={ fmt.Sprintf(`
 			on load 
 				if #cf-turnstile.innerHTML is empty then				
 					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
@@ -443,6 +465,7 @@ templ Use2FA(username string, turnstileSiteKey string, turnstileSecretKey string
 				end
 			end
 		`, turnstileSiteKey) }
+		}
 	>
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.totp_required") }</h1>
