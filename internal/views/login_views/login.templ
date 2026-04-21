@@ -29,8 +29,14 @@ templ Login(authSettings *ent.Authentication, turnstileSiteKey string, turnstile
 								<a
 									if turnstileSiteKey != "" && turnstileSecretKey != "" {
 										_="on click 
+											set :challenge to ''
 											repeat in <input[name='cf-turnstile-response']/>
-												go to `/auth?cf-turnstile-response=${it.value}`
+												set :challenge to it.value
+											end
+											if :challenge is empty then
+												go to /auth
+											else
+												go to `/auth?cf-turnstile-response=${:challenge}`
 											end
 										end"
 									} else {
@@ -44,10 +50,25 @@ templ Login(authSettings *ent.Authentication, turnstileSiteKey string, turnstile
 							}
 							if authSettings.UseOIDC {
 								<a
-									href="/oidc"
 									class="uk-button uk-button-primary text-white"
 									type="button"
-									_="on click remove .hidden from #oidc-spinner"
+									if turnstileSiteKey != "" && turnstileSecretKey != "" {
+										_="on click 
+											remove .hidden from #oidc-spinner
+											set :challenge to ''
+											repeat in <input[name='cf-turnstile-response']/>
+												set :challenge to it.value
+											end
+											if :challenge is empty then
+												go to /oidc
+											else
+												go to `/oidc?cf-turnstile-response=${:challenge}`
+											end
+										end"
+									} else {
+										_="on click remove .hidden from #oidc-spinner"
+										href="/oidc"
+									}
 								>
 									<div id="oidc-spinner" class="hidden">
 										<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
