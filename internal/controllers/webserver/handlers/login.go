@@ -89,7 +89,7 @@ func (h *Handler) LoginPasswordAuth(c echo.Context) error {
 	if isTurnstileEnabled {
 		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
 		if cfTurnStileResponse == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
 		}
 		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -376,7 +376,7 @@ func (h *Handler) LoginTOTPValidate(c echo.Context) error {
 	if tsSiteKey != "" && tsSecretKey != "" {
 		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
 		if cfTurnStileResponse == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
 		}
 		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -793,12 +793,12 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 
 		// Check if token exists in database for this user
 		if h.EncryptionMasterKey != "" {
-			isNewUserToken, err := utils.IsSensitiveFieldEncrypted(user.NewUserToken, h.EncryptionMasterKey)
+			isNewUserTokenEncrypted, err := utils.IsSensitiveFieldEncrypted(user.NewUserToken, h.EncryptionMasterKey)
 			if err != nil {
 				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_new_user_token"), true))
 			}
 
-			if isNewUserToken {
+			if isNewUserTokenEncrypted {
 				user.NewUserToken, err = utils.DecryptSensitiveField(user.NewUserToken, h.EncryptionMasterKey)
 				if err != nil {
 					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.cannot_decrypt_new_user_token"), true))

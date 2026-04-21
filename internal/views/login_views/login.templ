@@ -27,7 +27,15 @@ templ Login(authSettings *ent.Authentication, turnstileSiteKey string, turnstile
 						<div id="other-logins" class="flex flex-col gap-4">
 							if authSettings.UseCertificates {
 								<a
-									href="/auth"
+									if turnstileSiteKey != "" && turnstileSecretKey != "" {
+										_="on click 
+											repeat in <input[name='cf-turnstile-response']/>
+												go to `/auth?cf-turnstile-response=${it.value}`
+											end
+										end"
+									} else {
+										href="/auth"
+									}
 									class="uk-button uk-button-primary text-white"
 									type="button"
 								>

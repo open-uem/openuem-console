@@ -35,7 +35,7 @@ require (
 	github.com/open-uem/ent v0.0.0-20260420110541-021f6acffc13
 	github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf
 	github.com/open-uem/openuem-ansible-config v0.0.0-20260327072817-2d801600b177
-	github.com/open-uem/utils v0.0.0-20260415123925-dd58aa737176
+	github.com/open-uem/utils v0.0.0-20260420170122-91c07c6c24cb
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.10
 	github.com/pquerna/otp v1.5.0

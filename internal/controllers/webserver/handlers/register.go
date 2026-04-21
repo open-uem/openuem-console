@@ -75,7 +75,7 @@ func (h *Handler) SendRegister(c echo.Context) error {
 	if isTurnstileEnabled {
 		cfTurnStileResponse := c.FormValue("cf-turnstile-response")
 		if cfTurnStileResponse == "" {
-			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found", err), true))
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"), true))
 		}
 		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, turnstileSecretKey); err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
