@@ -63,7 +63,7 @@ func (m *Model) GetRegisterRateLimit() (float64, error) {
 }
 
 func (m *Model) UpdateRegisterRateLimitSetting(settingsId int, rate int) error {
-	return m.Client.Settings.UpdateOneID(settingsId).SetRegisterRateLimit(float64(rate) / 3600).Exec(context.Background())
+	return m.Client.Settings.UpdateOneID(settingsId).SetRegisterRateLimit(float64(rate)).Exec(context.Background())
 }
 
 func (m *Model) GetTurnstileSettings() (string, string, error) {

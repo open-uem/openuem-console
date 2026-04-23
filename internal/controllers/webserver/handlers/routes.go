@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
@@ -464,7 +465,13 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/tenant/:tenant/site/:site/profiles/:uuid/clone", h.CloneProfile, h.IsAuthenticated)
 
 	e.GET("/register", h.SignIn)
-	e.POST("/register", h.SendRegister, middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(registerRateLimit))))
+	e.POST("/register", h.SendRegister, middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(
+		middleware.RateLimiterMemoryStoreConfig{
+			Rate:      rate.Every(time.Hour),
+			Burst:     int(registerRateLimit),
+			ExpiresIn: 1 * time.Hour,
+		},
+	)))
 
 	e.POST("/reports/agents", h.GenerateAgentsReport, h.IsAuthenticated)
 	e.POST("/reports/computers", h.GenerateComputersReport, h.IsAuthenticated)
@@ -576,7 +583,16 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.GET("/oidc", h.OIDCLogIn)
 	e.GET("/oidc/callback", h.OIDCCallback)
 
-	e.POST("/login/userpass", h.LoginPasswordAuth)
+	// Rate-Limit for user password auth, only allow 5 requests per minute
+	// Reference: https://github.com/labstack/echo/discussions/2689
+	e.POST("/login/userpass", h.LoginPasswordAuth, middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(
+		middleware.RateLimiterMemoryStoreConfig{
+			Rate:      rate.Every(time.Minute),
+			Burst:     5,
+			ExpiresIn: 15 * time.Minute,
+		},
+	)))
+
 	e.POST("/login/changepass", h.LoginPasswordChange)
 	e.GET("/login/forgot", h.LoginForgotPass)
 	e.POST("/login/forgot", h.ForgotPasswordEmail)
@@ -584,9 +600,28 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/login/forgotverify", h.VerifyForgotPasswordCode)
 	e.POST("/login/totpregister", h.Register2FA)
 	e.POST("/login/totpconfirm", h.LoginTOTPConfirm)
-	e.POST("/login/totpvalidate", h.LoginTOTPValidate)
+
+	// Rate-Limit for TOTP validate, only allow 5 requests per 30 seconds window
+	e.POST("/login/totpvalidate", h.LoginTOTPValidate, middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(
+		middleware.RateLimiterMemoryStoreConfig{
+			Rate:      rate.Every(30 * time.Second),
+			Burst:     5,
+			ExpiresIn: 1 * time.Minute,
+		},
+	)))
+
 	e.POST("/login/totpbackuprequested", h.LoginTOTPBackupRequest)
-	e.POST("/login/totpbackupcheck", h.LoginTOTPBackupCheck)
+
+	// Rate-Limit for user password auth, only allow 5 requests per minute
+	// Reference: https://github.com/labstack/echo/discussions/2689
+	e.POST("/login/totpbackupcheck", h.LoginTOTPBackupCheck, middleware.RateLimiter(middleware.NewRateLimiterMemoryStoreWithConfig(
+		middleware.RateLimiterMemoryStoreConfig{
+			Rate:      rate.Every(time.Minute),
+			Burst:     5,
+			ExpiresIn: 15 * time.Minute,
+		},
+	)))
+
 	e.GET("/login/new", h.LoginNewUser)
 
 	e.GET("/myaccount", h.MyAccount, h.IsAuthenticated)
