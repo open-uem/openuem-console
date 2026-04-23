@@ -33,7 +33,7 @@ func New(m *models.Model, natsServers string, s *sessions.SessionManager, ts goc
 	// Get register rate limit setting
 	registerRateLimit, err := m.GetRegisterRateLimit()
 	if err != nil {
-		registerRateLimit = 0.000833333
+		registerRateLimit = 3
 		log.Println("[ERROR]: could not get register rate limit from database")
 	}
 

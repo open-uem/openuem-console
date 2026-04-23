@@ -97,24 +97,20 @@ func (h *Handler) GeneralSettings(c echo.Context) error {
 			return h.ChangeAgentFrequency(c, settings)
 		}
 
-		if settings.TurnstileSiteKey != "" {
-			if err := h.Model.UpdateTurnstileSiteKeySetting(settings.ID, settings.TurnstileSiteKey); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		if err := h.Model.UpdateTurnstileSiteKeySetting(settings.ID, settings.TurnstileSiteKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
+
+		// encrypt Turnstile secret key
+		if h.EncryptionMasterKey != "" {
+			settings.TurnstileSecretKey, err = utils.EncryptSensitiveField(settings.TurnstileSecretKey, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_secret_key_cannot_be_encrypted", err), true))
 			}
 		}
 
-		if settings.TurnstileSecretKey != "" {
-			// encrypt Turnstile secret key
-			if h.EncryptionMasterKey != "" {
-				settings.TurnstileSecretKey, err = utils.EncryptSensitiveField(settings.TurnstileSecretKey, h.EncryptionMasterKey)
-				if err != nil {
-					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "settings.turnstile_secret_key_cannot_be_encrypted", err), true))
-				}
-			}
-
-			if err := h.Model.UpdateTurnstileSecretKeySetting(settings.ID, settings.TurnstileSecretKey); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
-			}
+		if err := h.Model.UpdateTurnstileSecretKeySetting(settings.ID, settings.TurnstileSecretKey); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
 		if c.FormValue("request-pin") != "" {
