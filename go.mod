@@ -28,13 +28,14 @@ require (
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/linde12/gowol v0.0.0-20180926075039-797e4d01634c
 	github.com/mattn/go-sqlite3 v1.14.34
+	github.com/meyskens/go-turnstile v0.0.0-20230622160222-89160e594ca1
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mssola/useragent v1.0.0
 	github.com/nats-io/nats.go v1.49.0
-	github.com/open-uem/ent v0.0.0-20260417163453-1f6d3eab61fc
+	github.com/open-uem/ent v0.0.0-20260420110541-021f6acffc13
 	github.com/open-uem/nats v0.11.1-0.20260327113100-98373a46adcf
 	github.com/open-uem/openuem-ansible-config v0.0.0-20260327072817-2d801600b177
-	github.com/open-uem/utils v0.0.0-20260415123925-dd58aa737176
+	github.com/open-uem/utils v0.0.0-20260420170122-91c07c6c24cb
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.10
 	github.com/pquerna/otp v1.5.0

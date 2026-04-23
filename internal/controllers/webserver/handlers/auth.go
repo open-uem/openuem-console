@@ -16,6 +16,24 @@ type MyCustomClaims struct {
 }
 
 func (h *Handler) Auth(c echo.Context) error {
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+	}
+
+	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	if isTurnstileEnabled {
+		cfTurnStileResponse := c.QueryParam("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	if h.ReverseProxyServer != "" && h.ReverseProxyAuthPort != "" {
 		return c.Redirect(http.StatusFound, fmt.Sprintf("https://%s:%s/auth", h.ReverseProxyServer, h.ReverseProxyAuthPort))
 	} else {
@@ -61,7 +79,15 @@ func (h *Handler) ConfirmEmail(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 		}
 
-		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed(), csrfToken))
+		// get Turnstile settings
+		turnstileSiteKey, turnstileSecretKey, err := h.Model.GetTurnstileSettings()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+		}
+
+		isTurnstileEnabled := turnstileSecretKey != "" && turnstileSiteKey != ""
+
+		return RenderView(c, register_views.RegisterIndex(register_views.EmailConfirmed(), csrfToken, isTurnstileEnabled))
 
 	} else {
 		return echo.NewHTTPError(http.StatusBadRequest, "unknown claims type, cannot proceed")

@@ -555,10 +555,6 @@ func (m *Model) UpdateUserCertClearPassword(userID string, secret string) error 
 	return m.Client.User.UpdateOneID(userID).SetCertClearPassword(secret).Exec(context.Background())
 }
 
-func (m *Model) UpdateUserForgotPasswordCode(userID string, secret string) error {
-	return m.Client.User.UpdateOneID(userID).SetForgotPasswordCode(secret).Exec(context.Background())
-}
-
 func (m *Model) UpdateUserNewUserToken(userID string, secret string) error {
 	return m.Client.User.UpdateOneID(userID).SetNewUserToken(secret).Exec(context.Background())
 }

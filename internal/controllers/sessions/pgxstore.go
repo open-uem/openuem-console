@@ -154,6 +154,7 @@ func (p *PostgresStore) CommitCtx(ctx context.Context, token string, b []byte, e
 
 				if decryptedRetrievedToken == token {
 					foundToken = retrievedToken
+					break
 				}
 			}
 		}

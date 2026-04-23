@@ -635,7 +635,16 @@ func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
 				if !ok || csrfToken == "" {
 					return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.csrf_token_not_found"))
 				}
-				return RenderLogin(c, login_views.LoginIndex(login_views.Enter2FA(username), csrfToken))
+
+				// get Turnstile settings
+				turnstileSiteKey, turnstileSecretKey, err := h.Model.GetTurnstileSettings()
+				if err != nil {
+					return echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+				}
+
+				isTurnstileEnabled := turnstileSiteKey != "" && turnstileSecretKey != ""
+
+				return RenderLogin(c, login_views.LoginIndex(login_views.Enter2FA(username, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnabled))
 			}
 		}
 

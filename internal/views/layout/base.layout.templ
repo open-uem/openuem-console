@@ -30,6 +30,9 @@ templ Base(section string, commonInfo *partials.CommonInfo) {
 			<script src="/assets/js/htmx.min.js"></script>
 			<script src="/assets/js/echarts.min.js"></script>
 			<script src="/assets/js/openuem.js" type="module"></script>
+			if commonInfo.IsTurnstileEnabled {
+				<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+			}
 			<script>
 				const htmlElement = document.documentElement;
 

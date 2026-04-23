@@ -7,7 +7,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/layout"
 )
 
-templ Login(authSettings *ent.Authentication) {
+templ Login(authSettings *ent.Authentication, turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -22,12 +22,26 @@ templ Login(authSettings *ent.Authentication) {
 					</div>
 					<div class="flex flex-col gap-16">
 						if authSettings.UsePasswd {
-							@LoginUserPassword(authSettings)
+							@LoginUserPassword(authSettings, turnstileSiteKey, turnstileSecretKey)
 						}
 						<div id="other-logins" class="flex flex-col gap-4">
 							if authSettings.UseCertificates {
 								<a
-									href="/auth"
+									if turnstileSiteKey != "" && turnstileSecretKey != "" {
+										_="on click 
+											set :challenge to ''
+											repeat in <input[name='cf-turnstile-response']/>
+												set :challenge to it.value
+											end
+											if :challenge is empty then
+												go to /auth
+											else
+												go to `/auth?cf-turnstile-response=${:challenge}`
+											end
+										end"
+									} else {
+										href="/auth"
+									}
 									class="uk-button uk-button-primary text-white"
 									type="button"
 								>
@@ -36,10 +50,25 @@ templ Login(authSettings *ent.Authentication) {
 							}
 							if authSettings.UseOIDC {
 								<a
-									href="/oidc"
 									class="uk-button uk-button-primary text-white"
 									type="button"
-									_="on click remove .hidden from #oidc-spinner"
+									if turnstileSiteKey != "" && turnstileSecretKey != "" {
+										_="on click 
+											remove .hidden from #oidc-spinner
+											set :challenge to ''
+											repeat in <input[name='cf-turnstile-response']/>
+												set :challenge to it.value
+											end
+											if :challenge is empty then
+												go to /oidc
+											else
+												go to `/oidc?cf-turnstile-response=${:challenge}`
+											end
+										end"
+									} else {
+										_="on click remove .hidden from #oidc-spinner"
+										href="/oidc"
+									}
 								>
 									<div id="oidc-spinner" class="hidden">
 										<uk-icon hx-history="false" icon="loader-circle" custom-class="h-4 w-4 animate-spin" uk-cloack></uk-icon>
@@ -75,8 +104,24 @@ templ Login(authSettings *ent.Authentication) {
 	</div>
 }
 
-templ LoginUserPassword(authSettings *ent.Authentication) {
-	<form class="flex flex-col gap-4" autocomplete="off">
+templ LoginUserPassword(authSettings *ent.Authentication, turnstileSiteKey string, turnstileSecretKey string) {
+	<form
+		class="flex flex-col gap-4"
+		autocomplete="off"
+		if turnstileSiteKey != "" && turnstileSecretKey !="" {
+			_={ fmt.Sprintf(`
+			on load 
+				if #cf-turnstile.innerHTML is empty then				
+					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+				else
+					if #error.innerHTML is not empty then
+						call turnstile.reset(#cf-turnstile)
+					end
+				end
+			end
+		`, turnstileSiteKey) }
+		}
+	>
 		<div id="error" class="hidden"></div>
 		<div class="uk-inline">
 			<span class="uk-form-icon">
@@ -130,6 +175,9 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 		>
 			{ i18n.T(ctx, "login.forgot") }
 		</a>
+		if turnstileSiteKey != "" && turnstileSecretKey != "" {
+			<div id="cf-turnstile"></div>
+		}
 		<button
 			class="uk-button uk-button-primary text-white flex gap-2"
 			hx-post="/login/userpass"
@@ -147,7 +195,7 @@ templ LoginUserPassword(authSettings *ent.Authentication) {
 	</form>
 }
 
-templ ChangePassword() {
+templ ChangePassword(turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -164,7 +212,23 @@ templ ChangePassword() {
 						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.redirect_to_login") }</span>
 						<span class="uk-text uk-text-small uk-text-muted">{ i18n.T(ctx, "login.password_complexity") }</span>
 					</div>
-					<form class="flex flex-col gap-4" autocomplete="off">
+					<form
+						class="flex flex-col gap-4"
+						autocomplete="off"
+						if turnstileSiteKey != "" && turnstileSecretKey !="" {
+							_={ fmt.Sprintf(`
+							on load 
+								if #cf-turnstile.innerHTML is empty then				
+									call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+								else
+									if #error.innerHTML is not empty then
+										call turnstile.reset(#cf-turnstile)
+									end
+								end
+							end
+						`, turnstileSiteKey) }
+						}
+					>
 						<div id="error" class="hidden"></div>
 						<span class="text">{ i18n.T(ctx, "login.please_change_password") }</span>
 						<div class="uk-inline">
@@ -199,20 +263,23 @@ templ ChangePassword() {
 								class="uk-form-icon uk-form-icon-flip"
 								type="button"
 								_="
-						on click 
-							if #reveal-confirm-password@icon is 'eye' then
-								set #reveal-confirm-password@icon to 'eye-off'
-								set #confirm-password@type to 'text'
-							else
-								set #reveal-confirm-password@icon to 'eye'
-								set #confirm-password@type to 'password'
-							end
-						end
-					"
+									on click 
+										if #reveal-confirm-password@icon is 'eye' then
+											set #reveal-confirm-password@icon to 'eye-off'
+											set #confirm-password@type to 'text'
+										else
+											set #reveal-confirm-password@icon to 'eye'
+											set #confirm-password@type to 'password'
+										end
+									end
+								"
 							>
 								<uk-icon id="reveal-confirm-password" icon="eye" class="uk-text-muted"></uk-icon>
 							</button>
 						</div>
+						if turnstileSiteKey != "" && turnstileSecretKey != "" {
+							<div id="cf-turnstile"></div>
+						}
 						<a
 							class="uk-button uk-button-primary text-white flex gap-2"
 							hx-post="/login/changepass"
@@ -241,7 +308,7 @@ templ ChangePassword() {
 	</div>
 }
 
-templ LostPassword() {
+templ LostPassword(turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -254,7 +321,23 @@ templ LostPassword() {
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
 					</div>
-					<form class="flex flex-col gap-4" autocomplete="off">
+					<form
+						class="flex flex-col gap-4"
+						autocomplete="off"
+						if turnstileSiteKey != "" && turnstileSecretKey !="" {
+							_={ fmt.Sprintf(`
+							on load 
+								if #cf-turnstile.innerHTML is empty then				
+									call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+								else
+									if #error.innerHTML is not empty then
+										call turnstile.reset(#cf-turnstile)
+									end
+								end
+							end
+						`, turnstileSiteKey) }
+						}
+					>
 						<div id="success" class="hidden"></div>
 						<div id="error" class="hidden"></div>
 						<span class="text">{ i18n.T(ctx, "login.forgot_email") }</span>
@@ -264,6 +347,9 @@ templ LostPassword() {
 							</span>
 							<input class="uk-input" name="email" type="text" placeholder={ i18n.T(ctx, "login.email") } aria-label="Not clickable icon" required/>
 						</div>
+						if turnstileSiteKey != "" && turnstileSecretKey != "" {
+							<div id="cf-turnstile"></div>
+						}
 						<a
 							class="uk-button uk-button-primary text-white flex gap-2"
 							hx-post="/login/forgot"
@@ -292,12 +378,28 @@ templ LostPassword() {
 	</div>
 }
 
-templ LostPasswordCode(email string) {
+templ LostPasswordCode(email string, turnstileSiteKey string, turnstileSecretKey string) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.forgot") }</h1>
 		</div>
-		<form class="flex flex-col gap-4" autocomplete="off">
+		<form
+			class="flex flex-col gap-4"
+			autocomplete="off"
+			if turnstileSiteKey != "" && turnstileSecretKey !="" {
+				_={ fmt.Sprintf(`
+				on load 
+					if #cf-turnstile.innerHTML is empty then				
+						call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+					else
+						if #error.innerHTML is not empty then
+							call turnstile.reset(#cf-turnstile)
+						end
+					end
+				end
+			`, turnstileSiteKey) }
+			}
+		>
 			<div id="error" class="hidden"></div>
 			<span class="uk-text uk-text-bold uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter") }</span>
 			<span class="uk-text uk-text-muted text-center">{ i18n.T(ctx, "login.forgot_enter_instructions", email) }</span>
@@ -308,6 +410,9 @@ templ LostPasswordCode(email string) {
 					uk-cloak
 				></uk-input-pin>
 			</div>
+			if turnstileSiteKey != "" && turnstileSecretKey != "" {
+				<div id="cf-turnstile"></div>
+			}
 			<div class="flex justify-between items-center">
 				<button
 					class="flex gap-2 uk-button uk-button-default"
@@ -382,8 +487,24 @@ templ ShowRecoveryCodes(codes string, url string) {
 	</div>
 }
 
-templ Use2FA(username string) {
-	<div id="login" class="grid gap-2">
+templ Use2FA(username string, turnstileSiteKey string, turnstileSecretKey string) {
+	<div
+		id="login"
+		class="grid gap-2"
+		if turnstileSiteKey != "" && turnstileSecretKey !="" {
+			_={ fmt.Sprintf(`
+			on load 
+				if #cf-turnstile.innerHTML is empty then				
+					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+				else
+					if #error.innerHTML is not empty then
+						call turnstile.reset(#cf-turnstile)
+					end
+				end
+			end
+		`, turnstileSiteKey) }
+		}
+	>
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.totp_required") }</h1>
 		</div>
@@ -410,6 +531,9 @@ templ Use2FA(username string) {
 					{ i18n.T(ctx, "Clean") }
 				</button>
 			</div>
+			if turnstileSiteKey != "" && turnstileSecretKey != "" {
+				<div id="cf-turnstile"></div>
+			}
 			<div class="flex justify-between items-center">
 				<a
 					class="underline"
@@ -498,12 +622,28 @@ templ Register2FA(username string, qrCode string, secret string) {
 	</div>
 }
 
-templ EnterRecoveryCode() {
+templ EnterRecoveryCode(turnstileSiteKey string, turnstileSecretKey string) {
 	<div id="login" class="grid gap-2">
 		<div class="grid gap-2 text-center">
 			<h1 class="text-2xl font-bold">{ i18n.T(ctx, "login.totp_use_recovery") }</h1>
 		</div>
-		<form class="flex flex-col gap-4" autocomplete="off">
+		<form
+			class="flex flex-col gap-4"
+			autocomplete="off"
+			if turnstileSiteKey != "" && turnstileSecretKey !="" {
+				_={ fmt.Sprintf(`
+			on load 
+				if #cf-turnstile.innerHTML is empty then				
+					call turnstile.render('#cf-turnstile', { sitekey: '%s', size: 'flexible' })
+				else
+					if #error.innerHTML is not empty then
+						call turnstile.reset(#cf-turnstile)
+					end
+				end
+			end
+		`, turnstileSiteKey) }
+			}
+		>
 			<div id="error" class="hidden"></div>
 			<span class="text">{ i18n.T(ctx, "login.totp_use_recovery_instructions") }</span>
 			<div class="uk-inline">
@@ -529,6 +669,9 @@ templ EnterRecoveryCode() {
 					<uk-icon id="reveal-code" icon="eye" class="uk-text-muted"></uk-icon>
 				</button>
 			</div>
+			if turnstileSiteKey != "" && turnstileSecretKey != "" {
+				<div id="cf-turnstile"></div>
+			}
 			<a
 				class="uk-button uk-button-primary text-white flex gap-2"
 				hx-post="/login/totpbackupcheck"
@@ -547,7 +690,7 @@ templ EnterRecoveryCode() {
 	</div>
 }
 
-templ Enter2FA(username string) {
+templ Enter2FA(username string, turnstileSiteKey string, turnstileSecretKey string) {
 	<div class="flex flex-1 h-full w-full max-h-screen">
 		<div class="flex items-center justify-center py-12 w-1/2 print:w-full">
 			<div class="uk-card uk-card-body uk-card-default mx-auto my-7 grid w-1/2 gap-6">
@@ -560,7 +703,7 @@ templ Enter2FA(username string) {
 					<div class="grid gap-2 text-center">
 						<h1 class="text-2xl font-bold">{ i18n.T(ctx, "Login") }</h1>
 					</div>
-					@Use2FA(username)
+					@Use2FA(username, turnstileSiteKey, turnstileSecretKey)
 				</div>
 			</div>
 		</div>
@@ -574,8 +717,8 @@ templ Enter2FA(username string) {
 	</div>
 }
 
-templ LoginIndex(cmp templ.Component, csrfToken string) {
-	@layout.Login(csrfToken) {
+templ LoginIndex(cmp templ.Component, csrfToken string, isTurnstileEnabled bool) {
+	@layout.Login(csrfToken, isTurnstileEnabled) {
 		@cmp
 	}
 }

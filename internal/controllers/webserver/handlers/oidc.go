@@ -79,6 +79,24 @@ func (h *Handler) OIDCLogIn(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "authentication.could_not_get_settings"))
 	}
 
+	// if CloudFlare Turnstile is used, check response
+	tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "settings.turnstile_could_not_get_settings", err))
+	}
+
+	isTurnstileEnabled := tsSecretKey != "" && tsSiteKey != ""
+
+	if isTurnstileEnabled {
+		cfTurnStileResponse := c.QueryParam("cf-turnstile-response")
+		if cfTurnStileResponse == "" {
+			return echo.NewHTTPError(http.StatusInternalServerError, i18n.T(c.Request().Context(), "settings.turnstile_challenge_not_found"))
+		}
+		if err := h.TurnstileCheckChallenge(c, cfTurnStileResponse, tsSecretKey); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	provider, err := oidc.NewProvider(context.Background(), settings.OIDCIssuerURL)
 	if err != nil {
 		log.Printf("[ERROR]: we could not instantiate OIDC provider, reason: %v", err)

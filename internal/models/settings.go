@@ -32,6 +32,8 @@ type GeneralSettings struct {
 	NetBird                  bool
 	ItemsPerPage             int
 	RegisterRateLimit        int
+	TurnstileSiteKey         string
+	TurnstileSecretKey       string
 }
 
 func (m *Model) GetMaxUploadSize() (string, error) {
@@ -62,6 +64,25 @@ func (m *Model) GetRegisterRateLimit() (float64, error) {
 
 func (m *Model) UpdateRegisterRateLimitSetting(settingsId int, rate int) error {
 	return m.Client.Settings.UpdateOneID(settingsId).SetRegisterRateLimit(float64(rate) / 3600).Exec(context.Background())
+}
+
+func (m *Model) GetTurnstileSettings() (string, string, error) {
+	var err error
+
+	settings, err := m.Client.Settings.Query().Select(settings.FieldTurnstileSiteKey, settings.FieldTurnstileSecretKey).Where(settings.Not(settings.HasTenant())).Only(context.Background())
+	if err != nil {
+		return "", "", err
+	}
+
+	return settings.TurnstileSiteKey, settings.TurnstileSecretKey, nil
+}
+
+func (m *Model) UpdateTurnstileSiteKeySetting(settingsId int, siteKey string) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetTurnstileSiteKey(siteKey).Exec(context.Background())
+}
+
+func (m *Model) UpdateTurnstileSecretKeySetting(settingsId int, siteKey string) error {
+	return m.Client.Settings.UpdateOneID(settingsId).SetTurnstileSecretKey(siteKey).Exec(context.Background())
 }
 
 func (m *Model) GetNATSTimeout() (int, error) {
@@ -377,6 +398,8 @@ func (m *Model) GetGeneralSettings(tenantID string) (*openuem_ent.Settings, erro
 			settings.FieldAutoAdmitAgents,
 			settings.TagColumn,
 			settings.FieldRegisterRateLimit,
+			settings.FieldTurnstileSiteKey,
+			settings.FieldTurnstileSecretKey,
 		).Where(settings.Not(settings.HasTenantWith()))
 	} else {
 		id, err := strconv.Atoi(tenantID)

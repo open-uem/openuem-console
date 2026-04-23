@@ -37,6 +37,7 @@ type CommonInfo struct {
 	ProfileSiteID      string
 	CSRFToken          string
 	IsDocker           bool
+	IsTurnstileEnabled bool
 }
 
 templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
