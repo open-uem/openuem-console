@@ -835,6 +835,7 @@ fr:
     encryption_smtps: "SSL/TLS"
     encryption_starttls: "STARTTLS"
     encription_invalid: "Le type de chiffrement n'est pas valide"
+    cannot_be_decrypted: "Impossible de chiffrer le mot de passe SMTP, raison : %v"
   settings:
     title: "Paramètres généraux"
     description: "OpenUEM a certains paramètres qui configurent son comportement."
@@ -1331,6 +1332,7 @@ fr:
     local_user_password_confirm: "Confirmer le mot de passe"
     local_user_password_confirm_description: "Confirmer le mot de passe..."
     local_user_password_could_not_encrypt: "Impossible de chiffrer le mot de passe de l'utilisateur local"
+    local_user_password_cannot_be_decrypted: "Le mot de passe de l'utilisateur local ne peut pas être déchiffré, raison : %v"
     introduce_local_user_group_description: "Définit le groupe principal de l'utilisateur, il doit exister..."
     introduce_local_user_groups_description: "Définit les groupes supplémentaires (doivent exister), liste séparée par des virgules..."
     local_user_home_description: "Répertoire personnel de l'utilisateur (facultatif)"

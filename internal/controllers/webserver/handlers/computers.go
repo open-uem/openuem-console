@@ -2240,7 +2240,9 @@ func (h *Handler) CreateAnsiblePlaybook(t *openuem_ent.Task) (*ansiblecfg.Ansibl
 
 			if isAccessTokenEncrypted {
 				t.LocalUserPassword, err = utils.DecryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
-				return nil, err
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 
@@ -2386,7 +2388,9 @@ func (h *Handler) CreateWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGe
 
 			if isAccessTokenEncrypted {
 				t.LocalUserPassword, err = utils.DecryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
-				return nil, err
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 

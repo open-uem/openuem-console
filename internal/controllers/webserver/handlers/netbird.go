@@ -54,11 +54,18 @@ func (h *Handler) NetbirdSettings(c echo.Context) error {
 			managementURL = "https://api.netbird.io"
 		}
 
-		// encrypt the access token if we have the encryption master key
-		if h.EncryptionMasterKey != "" {
-			accessToken, err = utils.EncryptSensitiveField(accessToken, h.EncryptionMasterKey)
+		// encrypt the access token if we have the encryption master key and the token is not already encrypted
+		if h.EncryptionMasterKey != "" && accessToken != "" {
+			isEncrypted, err := utils.IsSensitiveFieldEncrypted(accessToken, h.EncryptionMasterKey)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_encrypted"), true))
+				return err
+			}
+
+			if !isEncrypted {
+				accessToken, err = utils.EncryptSensitiveField(accessToken, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_encrypted"), true))
+				}
 			}
 		}
 
@@ -72,6 +79,21 @@ func (h *Handler) NetbirdSettings(c echo.Context) error {
 	settings, err := h.Model.GetNetbirdSettings(tenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.could_not_get_settings", err.Error()), true))
+	}
+
+	// decrypt access token
+	if h.EncryptionMasterKey != "" && settings.AccessToken != "" {
+		isSecretEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.AccessToken, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err.Error()), true))
+		}
+
+		if isSecretEncrypted {
+			settings.AccessToken, err = utils.DecryptSensitiveField(settings.AccessToken, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "netbird.token_cannot_be_decrypted", err.Error()), true))
+			}
+		}
 	}
 
 	agentsExists, err := h.Model.AgentsExists(commonInfo)

@@ -835,6 +835,7 @@ pt:
     encryption_smtps: "SSL/TLS"
     encryption_starttls: "STARTTLS"
     encription_invalid: "O tipo de criptografia não é válido"
+    cannot_be_decrypted: "Não foi possível criptografar a senha SMTP, motivo: %v"
   settings:
     title: "Configurações Gerais"
     description: "O OpenUEM possui algumas configurações que definem seu comportamento."
@@ -1331,6 +1332,7 @@ pt:
     local_user_password_confirm: "Confirmar senha"
     local_user_password_confirm_description: "Confirmar senha..."
     local_user_password_could_not_encrypt: "Não foi possível criptografar a senha do usuário local"
+    local_user_password_cannot_be_decrypted: "A senha do usuário local não pode ser descriptografada, motivo: %v"
     introduce_local_user_group_description: "Define o grupo primário do usuário, ele deve existir..."
     introduce_local_user_groups_description: "Define os grupos suplementares (devem existir), lista separada por vírgulas..."
     local_user_home_description: "Diretório home do usuário (opcional)"

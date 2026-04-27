@@ -253,7 +253,9 @@ func (p *PostgresStore) AllCtx(ctx context.Context) (map[string][]byte, error) {
 			}
 			if isTokenEncrypted {
 				token, err = utils.DecryptSensitiveField(token, p.encryptionMasterKey)
-				return nil, err
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 
