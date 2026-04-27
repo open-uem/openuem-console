@@ -835,6 +835,7 @@ de:
     encryption_smtps: "SSL/TLS"
     encryption_starttls: "STARTTLS"
     encription_invalid: "Der Verschlüsselungstyp ist ungültig"
+    cannot_be_decrypted: "Das SMTP-Passwort konnte nicht verschlüsselt werden, Grund: %v"
   settings:
     title: "Allgemeine Einstellungen"
     description: "OpenUEM hat einige Einstellungen, die sein Verhalten konfigurieren."
@@ -1331,6 +1332,7 @@ de:
     local_user_password_confirm: "Passwort bestätigen"
     local_user_password_confirm_description: "Passwort bestätigen..."
     local_user_password_could_not_encrypt: "Das Passwort des lokalen Benutzers konnte nicht verschlüsselt werden"
+    local_user_password_cannot_be_decrypted: "Das Passwort des lokalen Benutzers kann nicht entschlüsselt werden, Grund: %v"
     introduce_local_user_group_description: "Legt die primäre Gruppe des Benutzers fest, sie muss existieren..."
     introduce_local_user_groups_description: "Legt die zusätzlichen Gruppen fest (müssen existieren), kommagetrennte Liste..."
     local_user_home_description: "Home-Verzeichnis des Benutzers (optional)"

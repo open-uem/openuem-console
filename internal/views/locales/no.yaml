@@ -835,6 +835,7 @@ no:
     encryption_smtps: "SSL/TLS"
     encryption_starttls: "STARTTLS"
     encription_invalid: "Krypteringstypen er ikke gyldig"
+    cannot_be_decrypted: "Kunne ikke kryptere SMTP-passordet, årsak: %v"
   settings:
     title: "Generelle innstillinger"
     description: "OpenUEM har noen innstillinger som konfigurerer hvordan den fungerer."
@@ -1331,6 +1332,7 @@ no:
     local_user_password_confirm: "Bekreft passord"
     local_user_password_confirm_description: "Bekreft passord..."
     local_user_password_could_not_encrypt: "Kunne ikke kryptere passordet til den lokale brukeren"
+    local_user_password_cannot_be_decrypted: "Passordet til den lokale brukeren kan ikke dekrypteres, årsak: %v"
     introduce_local_user_group_description: "Angir brukerens primære gruppe, den må eksistere..."
     introduce_local_user_groups_description: "Angir tilleggsgruppene (må eksistere), kommanseparert liste..."
     local_user_home_description: "Brukerens hjemmekatalog (valgfritt)"

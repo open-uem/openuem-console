@@ -33,7 +33,7 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 		}
 
 		// encrypt the SMTP Password if we have the encryption master key and the password is not already encrypted
-		if h.EncryptionMasterKey != "" {
+		if h.EncryptionMasterKey != "" && settings.Password != "" {
 			isSMTPPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.Password, h.EncryptionMasterKey)
 			if err != nil {
 				return err
@@ -66,6 +66,21 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 	settings, err := h.Model.GetSMTPSettings(commonInfo.TenantID)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
+	}
+
+	// decrypt access token
+	if h.EncryptionMasterKey != "" && settings.SMTPPassword != "" {
+		isSecretEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.SMTPPassword, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_decrypted", err.Error()), true))
+		}
+
+		if isSecretEncrypted {
+			settings.SMTPPassword, err = utils.DecryptSensitiveField(settings.SMTPPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_decrypted", err.Error()), true))
+			}
+		}
 	}
 
 	agentsExists, err := h.Model.AgentsExists(commonInfo)

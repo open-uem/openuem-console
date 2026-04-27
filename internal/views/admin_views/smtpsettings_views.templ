@@ -69,9 +69,28 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 										<label class="uk-form-label" for="user">{ i18n.T(ctx, "smtp.user") }</label>
 										<input id="user" name="user" type="text" spellcheck="false" class="uk-input" value={ settings.SMTPUser } placeholder={ i18n.T(ctx, "smtp.user_placeholder") }/>
 									</div>
-									<div class="uk-margin">
+									<div class="uk-margin flex flex-col">
 										<label class="uk-form-label" for="password">{ i18n.T(ctx, "smtp.password") }</label>
-										<input id="password" name="password" type="password" class="uk-input" value={ settings.SMTPPassword } placeholder={ i18n.T(ctx, "smtp.password_placeholder") }/>
+										<div class="uk-inline">
+											<input id="password" name="password" type="password" class="uk-input mt-1" value={ settings.SMTPPassword } placeholder={ i18n.T(ctx, "smtp.password_placeholder") }/>
+											<button
+												class="uk-form-icon uk-form-icon-flip"
+												type="button"
+												_="
+													on click 
+														if #reveal-password@icon is 'eye' then
+															set #reveal-password@icon to 'eye-off'
+															set #password@type to 'text'
+														else
+															set #reveal-password@icon to 'eye'
+															set #password@type to 'password'
+														end
+													end
+												"
+											>
+												<uk-icon id="reveal-password" icon="eye" class="uk-text-muted mt-1"></uk-icon>
+											</button>
+										</div>
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="auth">{ i18n.T(ctx, "smtp.auth_type") }</label>

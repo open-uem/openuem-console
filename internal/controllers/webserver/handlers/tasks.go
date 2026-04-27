@@ -95,9 +95,16 @@ func (h *Handler) EditTask(c echo.Context) error {
 
 		// encrypt local user password if not empty
 		if h.EncryptionMasterKey != "" && t.LocalUserPassword != "" {
-			t.LocalUserPassword, err = utils.EncryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+			isPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(t.LocalUserPassword, h.EncryptionMasterKey)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_could_not_encrypt"), true))
+				return err
+			}
+
+			if !isPasswordEncrypted {
+				t.LocalUserPassword, err = utils.EncryptSensitiveField(t.LocalUserPassword, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_could_not_encrypt"), true))
+				}
 			}
 		}
 
@@ -113,6 +120,21 @@ func (h *Handler) EditTask(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(fmt.Sprintf("%s : %v", i18n.T(c.Request().Context(), "tasks.edit.could_not_delete"), err), true))
 		}
 		return h.EditProfile(c, "GET", strconv.Itoa(task.Edges.Profile.ID), i18n.T(c.Request().Context(), "tasks.edit.deleted"))
+	}
+
+	// decrypt local user password
+	if h.EncryptionMasterKey != "" && task.LocalUserPassword != "" {
+		isSecretEncrypted, err := utils.IsSensitiveFieldEncrypted(task.LocalUserPassword, h.EncryptionMasterKey)
+		if err != nil {
+			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_cannot_be_decrypted", err.Error()), true))
+		}
+
+		if isSecretEncrypted {
+			task.LocalUserPassword, err = utils.DecryptSensitiveField(task.LocalUserPassword, h.EncryptionMasterKey)
+			if err != nil {
+				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.local_user_password_cannot_be_decrypted", err.Error()), true))
+			}
+		}
 	}
 
 	return RenderView(c, tasks_views.TasksIndex("| Tasks", tasks_views.EditTask(c, task.Edges.Profile.ID, task, commonInfo), commonInfo))

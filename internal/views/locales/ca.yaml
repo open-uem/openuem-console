@@ -835,6 +835,7 @@ ca:
     encryption_smtps: "SSL/TLS"
     encryption_starttls: "STARTTLS"
     encription_invalid: "El tipus d'encriptació no és vàlid"
+    cannot_be_decrypted: "No s'ha pogut encriptar la contrasenya SMTP, motiu: %v"
   settings:
     title: "Configuració general"
     description: "OpenUEM té alguns paràmetres que configuren el seu comportament."
@@ -1331,6 +1332,7 @@ ca:
     local_user_password_confirm: "Confirmeu la contrasenya"
     local_user_password_confirm_description: "Confirmeu la contrasenya..."
     local_user_password_could_not_encrypt: "No s'ha pogut xifrar la contrasenya de l'usuari local"
+    local_user_password_cannot_be_decrypted: "La contrasenya de l'usuari local no es pot desencriptar, motiu: %v"
     introduce_local_user_group_description: "Estableix el grup principal de l'usuari, ha d'existir..."
     introduce_local_user_groups_description: "Estableix els grups suplementaris (han d'existir), la llista separada per comes..."
     local_user_home_description: "Directori d'inici de l'usuari (opcional)"

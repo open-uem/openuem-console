@@ -45,7 +45,26 @@ templ NetbirdSettings(c echo.Context, settings *ent.NetbirdSettings, agentsExist
 									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_token_title") }</td>
 									<td class="!align-middle">{ i18n.T(ctx, "netbird.settings_token_description") }</td>
 									<td class="!align-middle">
-										<input class="uk-input" type="text" name="netbird-access-token" value={ settings.AccessToken } spellcheck="false" autocomplete="off" autofocus/>
+										<div class="flex uk-inline">
+											<input id="password" class="uk-input pr-10" type="password" name="netbird-access-token" value={ settings.AccessToken } spellcheck="false" autocomplete="off" autofocus/>
+											<button
+												class="uk-form-icon uk-form-icon-flip"
+												type="button"
+												_="
+													on click 
+														if #reveal-password@icon is 'eye' then
+															set #reveal-password@icon to 'eye-off'
+															set #password@type to 'text'
+														else
+															set #reveal-password@icon to 'eye'
+															set #password@type to 'password'
+														end
+													end
+												"
+											>
+												<uk-icon id="reveal-password" icon="eye" class="uk-text-muted mt-1"></uk-icon>
+											</button>
+										</div>
 									</td>
 								</tr>
 							</table>

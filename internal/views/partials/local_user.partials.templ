@@ -65,21 +65,42 @@ templ LocalUserComponent(t *ent.Task) {
 			/>
 		</div>
 		<div id="local-user-password-section" class={ templ.KV("hidden", t.Type != task.TypeAddLocalUser) }>
-			<label class="uk-form-label" for="local-user-password">
-				{ i18n.T(ctx, "tasks.local_user_password") }
-			</label>
-			<input
-				type="password"
-				class="uk-input"
-				id="local-user-password"
-				name="local-user-password"
-				spellcheck="false"
-				aria-label={ i18n.T(ctx, "tasks.local_user_password") }
-				if t.Name != "" {
-					value={ t.LocalUserPassword }
-				}
-				autocomplete="off"
-			/>
+			<div class="flex flex-col">
+				<label class="uk-form-label" for="local-user-password">
+					{ i18n.T(ctx, "tasks.local_user_password") }
+				</label>
+				<div class="uk-inline">
+					<input
+						type="password"
+						class="uk-input mt-1"
+						id="local-user-password"
+						name="local-user-password"
+						spellcheck="false"
+						aria-label={ i18n.T(ctx, "tasks.local_user_password") }
+						if t.Name != "" {
+							value={ t.LocalUserPassword }
+						}
+						autocomplete="off"
+					/>
+					<button
+						class="uk-form-icon uk-form-icon-flip"
+						type="button"
+						_="
+							on click 
+								if #reveal-password@icon is 'eye' then
+									set #reveal-password@icon to 'eye-off'
+									set #local-user-password@type to 'text'
+								else
+									set #reveal-password@icon to 'eye'
+									set #local-user-password@type to 'password'
+								end
+							end
+						"
+					>
+						<uk-icon id="reveal-password" icon="eye" class="uk-text-muted mt-1"></uk-icon>
+					</button>
+				</div>
+			</div>
 		</div>
 		<div id="local-user-disabled-section" class={ templ.KV("hidden", t.Type != task.TypeAddLocalUser) }>
 			<label class="uk-text-small uk-text-bold"><input class="uk-checkbox" id="local-user-disabled" name="local-user-disabled" type="checkbox" checked?={ t != nil && t.LocalUserDisable }/> { i18n.T(ctx, "tasks.local_user_disabled") }</label>
