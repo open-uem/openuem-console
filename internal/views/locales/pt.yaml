@@ -830,6 +830,11 @@ pt:
     test: "Testar configurações"
     test_success: "Teste de e-mail enviado com sucesso para %s!"
     cannot_be_encrypted: "Não foi possível criptografar a senha SMTP"
+    encryption_type: "Tipo de criptografia"
+    encryption_none: "Nenhum"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "O tipo de criptografia não é válido"
   settings:
     title: "Configurações Gerais"
     description: "O OpenUEM possui algumas configurações que definem seu comportamento."

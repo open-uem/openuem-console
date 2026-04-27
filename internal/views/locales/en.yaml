@@ -830,6 +830,11 @@ en:
     test: "Test settings"
     test_success: "Email test was sent successfully to %s!"
     cannot_be_encrypted: "Could not encrypt the SMTP password"
+    encryption_type: "Encryption type"
+    encryption_none: "None"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "Encryption type is not valid"
   settings:
     title: "General Settings"
     description: "OpenUEM has some settings that configure its behavior."

@@ -593,8 +593,7 @@ func (m *Model) CloneGlobalSettings(tenantID int) error {
 		SetSMTPPassword(s.SMTPPassword).
 		SetSMTPPort(s.SMTPPort).
 		SetSMTPServer(s.SMTPServer).
-		SetSMTPStarttls(s.SMTPStarttls).
-		SetSMTPTLS(s.SMTPTLS).
+		SetSMTPEncryptionType(s.SMTPEncryptionType).
 		SetSMTPUser(s.SMTPUser).
 		SetSessionLifetimeInMinutes(s.SessionLifetimeInMinutes).
 		SetUpdateChannel(s.UpdateChannel).
@@ -635,8 +634,7 @@ func (m *Model) ApplyGlobalSettings(tenantID int) error {
 		SetSMTPPassword(s.SMTPPassword).
 		SetSMTPPort(s.SMTPPort).
 		SetSMTPServer(s.SMTPServer).
-		SetSMTPStarttls(s.SMTPStarttls).
-		SetSMTPTLS(s.SMTPTLS).
+		SetSMTPEncryptionType(s.SMTPEncryptionType).
 		SetSMTPUser(s.SMTPUser).
 		SetSessionLifetimeInMinutes(s.SessionLifetimeInMinutes).
 		SetUpdateChannel(s.UpdateChannel).

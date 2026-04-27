@@ -6,17 +6,19 @@ import (
 
 	openuem_ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/settings"
+	smtpsettings "github.com/open-uem/ent/settings"
 	"github.com/open-uem/ent/tenant"
 )
 
 type SMTPSettings struct {
-	ID       int
-	Server   string
-	Port     int
-	User     string
-	Password string
-	Auth     string
-	MailFrom string
+	ID             int
+	Server         string
+	Port           int
+	User           string
+	Password       string
+	Auth           string
+	MailFrom       string
+	EncryptionType string
 }
 
 func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) {
@@ -29,9 +31,8 @@ func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) 
 		settings.FieldSMTPUser,
 		settings.FieldSMTPPassword,
 		settings.FieldSMTPAuth,
-		settings.FieldSMTPTLS,
-		settings.FieldSMTPStarttls,
-		settings.FieldMessageFrom)
+		settings.FieldMessageFrom,
+		settings.FieldSMTPEncryptionType)
 
 	if tenantID == "-1" {
 		s, err = query.Where(settings.Not(settings.HasTenant())).Only(context.Background())
@@ -92,8 +93,14 @@ func (m *Model) GetSMTPSettings(tenantID string) (*openuem_ent.Settings, error) 
 }
 
 func (m *Model) UpdateSMTPSettings(settings *SMTPSettings) error {
-	mainQuery := m.Client.Settings.UpdateOneID(settings.ID).SetSMTPServer(settings.Server).SetSMTPPort(settings.Port).SetSMTPUser(settings.User).SetSMTPPassword(settings.Password).SetMessageFrom(settings.MailFrom)
-	return mainQuery.Exec(context.Background())
+	return m.Client.Settings.UpdateOneID(settings.ID).
+		SetSMTPServer(settings.Server).
+		SetSMTPPort(settings.Port).
+		SetSMTPUser(settings.User).
+		SetSMTPPassword(settings.Password).
+		SetMessageFrom(settings.MailFrom).
+		SetSMTPEncryptionType(smtpsettings.SMTPEncryptionType(settings.EncryptionType)).
+		Exec(context.Background())
 }
 
 func (m *Model) IsSMTPConfigured() bool {

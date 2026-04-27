@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
+	smtpsettings "github.com/open-uem/ent/settings"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/admin_views"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -31,11 +32,18 @@ func (h *Handler) SMTPSettings(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), false))
 		}
 
-		// encrypt the SMTP Password if we have the encryption master key
+		// encrypt the SMTP Password if we have the encryption master key and the password is not already encrypted
 		if h.EncryptionMasterKey != "" {
-			settings.Password, err = utils.EncryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+			isSMTPPasswordEncrypted, err := utils.IsSensitiveFieldEncrypted(settings.Password, h.EncryptionMasterKey)
 			if err != nil {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_encrypted"), true))
+				return err
+			}
+
+			if !isSMTPPasswordEncrypted {
+				settings.Password, err = utils.EncryptSensitiveField(settings.Password, h.EncryptionMasterKey)
+				if err != nil {
+					return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "smtp.cannot_be_encrypted"), true))
+				}
 			}
 		}
 
@@ -100,6 +108,7 @@ func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {
 	settings.Password = c.FormValue("password")
 	settings.Auth = c.FormValue("auth")
 	settings.MailFrom = c.FormValue("mail-from")
+	settings.EncryptionType = c.FormValue("encryption")
 
 	if settingsId == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.id_cannot_be_empty"))
@@ -137,6 +146,10 @@ func validateSMTPSettings(c echo.Context) (*models.SMTPSettings, error) {
 
 	if settings.MailFrom == "" {
 		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.mailfrom_cannot_be_empty"))
+	}
+
+	if !slices.Contains([]string{string(smtpsettings.SMTPEncryptionTypeNone), string(smtpsettings.SMTPEncryptionTypeSmtps), string(smtpsettings.SMTPEncryptionTypeStarttls)}, settings.EncryptionType) {
+		return nil, fmt.Errorf("%s", i18n.T(c.Request().Context(), "smtp.encription_invalid"))
 	}
 
 	if errs := validate.Var(settings.MailFrom, "email"); errs != nil {
@@ -177,6 +190,14 @@ func (h *Handler) SendEmailTest(settings *models.SMTPSettings, to string) error 
 	}
 	if err != nil {
 		return err
+	}
+
+	if settings.EncryptionType == string(smtpsettings.SMTPEncryptionTypeSmtps) {
+		c.SetSSL(true)
+	}
+
+	if settings.EncryptionType == string(smtpsettings.SMTPEncryptionTypeStarttls) {
+		c.SetTLSPortPolicy(mail.TLSMandatory)
 	}
 
 	m := mail.NewMsg()

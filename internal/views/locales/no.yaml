@@ -830,6 +830,11 @@ no:
     test: "Test innstillinger"
     test_success: "E-posttest ble sendt vellykket til %s!"
     cannot_be_encrypted: "Kunne ikke kryptere SMTP-passordet"
+    encryption_type: "Krypteringstype"
+    encryption_none: "Ingen"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "Krypteringstypen er ikke gyldig"
   settings:
     title: "Generelle innstillinger"
     description: "OpenUEM har noen innstillinger som konfigurerer hvordan den fungerer."
