@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	smtpsettings "github.com/open-uem/ent/settings"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"strconv"
@@ -44,7 +45,22 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 									</div>
 									<div class="uk-margin">
 										<label class="uk-form-label" for="port">{ i18n.T(ctx, "smtp.port") }</label>
-										<input id="port" name="port" type="number" class="uk-input" value={ strconv.Itoa(settings.SMTPPort) } placeholder={ i18n.T(ctx, "smtp.port_placeholder") }/>
+										<input
+											id="port"
+											name="port"
+											type="number"
+											class="uk-input"
+											value={ strconv.Itoa(settings.SMTPPort) }
+											placeholder={ i18n.T(ctx, "smtp.port_placeholder") }
+											_="on keyup 
+												if my.value is '465' then 
+													set #encryption.value to 'smtps'
+												end
+												if my.value is '587' then 
+													set #encryption.value to 'starttls'
+												end
+											end"
+										/>
 									</div>
 								</fieldset>
 								<fieldset class="uk-fieldset w-1/6">
@@ -61,8 +77,16 @@ templ SMTPSettings(c echo.Context, settings *ent.Settings, agentsExists, servers
 										<label class="uk-form-label" for="auth">{ i18n.T(ctx, "smtp.auth_type") }</label>
 										<select id="auth" name="auth" class="uk-select">
 											for _, authType := range AuthTypes {
-												<option checked?={ settings.SMTPAuth == authType }>{ authType }</option>
+												<option selected?={ settings.SMTPAuth == authType }>{ authType }</option>
 											}
+										</select>
+									</div>
+									<div class="uk-margin">
+										<label class="uk-form-label" for="encryption">{ i18n.T(ctx, "smtp.encryption_type") }</label>
+										<select id="encryption" name="encryption" class="uk-select">
+											<option selected?={ settings.SMTPEncryptionType == smtpsettings.SMTPEncryptionTypeNone } value={ smtpsettings.SMTPEncryptionTypeNone.String() }>{ i18n.T(ctx, "smtp.encryption_none") }</option>
+											<option selected?={ settings.SMTPEncryptionType == smtpsettings.SMTPEncryptionTypeSmtps } value={ smtpsettings.SMTPEncryptionTypeSmtps.String() }>{ i18n.T(ctx, "smtp.encryption_smtps") }</option>
+											<option selected?={ settings.SMTPEncryptionType == smtpsettings.SMTPEncryptionTypeStarttls } value={ smtpsettings.SMTPEncryptionTypeStarttls.String() }>{ i18n.T(ctx, "smtp.encryption_starttls") }</option>
 										</select>
 									</div>
 								</fieldset>

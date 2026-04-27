@@ -830,6 +830,11 @@ de:
     test: "Einstellungen testen"
     test_success: "E-Mail-Test wurde erfolgreich an %s gesendet!"
     cannot_be_encrypted: "SMTP-Passwort konnte nicht verschlüsselt werden"
+    encryption_type: "Verschlüsselungstyp"
+    encryption_none: "Keine"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "Der Verschlüsselungstyp ist ungültig"
   settings:
     title: "Allgemeine Einstellungen"
     description: "OpenUEM hat einige Einstellungen, die sein Verhalten konfigurieren."

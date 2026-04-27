@@ -830,6 +830,11 @@ fr:
     test: "Paramètres de test"
     test_success: "Le test d'e-mail a été envoyé avec succès à %s !"
     cannot_be_encrypted: "Impossible de chiffrer le mot de passe SMTP"
+    encryption_type: "Type de chiffrement"
+    encryption_none: "Aucun"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "Le type de chiffrement n'est pas valide"
   settings:
     title: "Paramètres généraux"
     description: "OpenUEM a certains paramètres qui configurent son comportement."

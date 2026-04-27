@@ -830,6 +830,11 @@ ca:
     test: "Configuració de prova"
     test_success: "La prova de correu electrònic s'ha enviat correctament a %s!"
     cannot_be_encrypted: "No s'ha pogut xifrar la contrasenya SMTP"
+    encryption_type: "Tipus d'encriptació"
+    encryption_none: "Cap"
+    encryption_smtps: "SSL/TLS"
+    encryption_starttls: "STARTTLS"
+    encription_invalid: "El tipus d'encriptació no és vàlid"
   settings:
     title: "Configuració general"
     description: "OpenUEM té alguns paràmetres que configuren el seu comportament."
