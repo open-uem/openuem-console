@@ -16,6 +16,7 @@ templ UserPermissions(c echo.Context, u *ent.User, tenants []*ent.Tenant, sites 
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@ConfigNavbar("users", true, true, commonInfo)
+				<div id="error" class="hidden"></div>
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				}
@@ -24,50 +25,86 @@ templ UserPermissions(c echo.Context, u *ent.User, tenants []*ent.Tenant, sites 
 				}
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h3 class="uk-card-title">Permissions for { u.ID }</h3>
+						<h3 class="uk-card-title">Permission Manager</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							Configure access for <span class="uk-text-bold">{ u.ID }</span> ({ u.Email }).
+						</p>
 					</div>
-					<div class="uk-card-body">
+					<div class="uk-card-body flex flex-col gap-4">
 						<form hx-post={ fmt.Sprintf("/admin/users/%s/permissions", u.ID) } hx-target="#main" hx-swap="outerHTML" class="flex flex-col gap-4">
-							<div class="flex gap-4 items-center">
-								<label><input class="uk-radio" type="radio" name="console_role" value="admin" checked?={ u.ConsoleRole == user.ConsoleRoleAdmin }/> Admin</label>
-								<label><input class="uk-radio" type="radio" name="console_role" value="custom" checked?={ u.ConsoleRole == user.ConsoleRoleCustom }/> Custom</label>
+							<div class="uk-card uk-card-muted p-4">
+								<div class="flex gap-6 items-center">
+									<span class="uk-text-bold">Role</span>
+									<label class="flex gap-2 items-center"><input class="uk-radio" type="radio" name="console_role" value="admin" checked?={ u.ConsoleRole == user.ConsoleRoleAdmin }/> Admin (full access)</label>
+									<label class="flex gap-2 items-center"><input class="uk-radio" type="radio" name="console_role" value="custom" checked?={ u.ConsoleRole == user.ConsoleRoleCustom }/> Custom (scoped access)</label>
+								</div>
 							</div>
-							<div class="grid grid-cols-3 gap-4">
-								<div>
-									<h4 class="uk-text-bold mb-2">Organizations</h4>
-									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+							<div class="grid grid-cols-3 gap-4 items-start">
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<h4 class="uk-card-title text-sm">Organizations</h4>
+									</div>
+									<div class="uk-card-body max-h-80 overflow-y-auto">
+										if len(tenants) == 0 {
+											<p class="uk-text-muted uk-text-small">No organizations available.</p>
+										}
 										for _, t := range tenants {
-											<label class="flex gap-2 items-center mb-1">
+											<label class="flex gap-2 items-center mb-2">
 												<input class="uk-checkbox" type="checkbox" name="tenant_ids" value={ fmt.Sprintf("%d", t.ID) } checked?={ hasTenant(u, t.ID) }/>
 												<span>{ t.Description }</span>
 											</label>
 										}
 									</div>
 								</div>
-								<div>
-									<h4 class="uk-text-bold mb-2">Sites</h4>
-									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<h4 class="uk-card-title text-sm">Sites</h4>
+									</div>
+									<div class="uk-card-body max-h-80 overflow-y-auto">
+										if len(sites) == 0 {
+											<p class="uk-text-muted uk-text-small">No sites available.</p>
+										}
 										for _, s := range sites {
-											<label class="flex gap-2 items-center mb-1">
+											<label class="flex gap-2 items-center mb-2">
 												<input class="uk-checkbox" type="checkbox" name="site_ids" value={ fmt.Sprintf("%d", s.ID) } checked?={ hasSite(u, s.ID) }/>
 												<span>{ s.Description }</span>
 											</label>
 										}
 									</div>
 								</div>
-								<div>
-									<h4 class="uk-text-bold mb-2">Endpoints/Agents (top 300)</h4>
-									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<h4 class="uk-card-title text-sm">Endpoints / Agents</h4>
+										<p class="uk-text-muted uk-text-small">Showing first 300 agents.</p>
+									</div>
+									<div class="uk-card-body max-h-80 overflow-y-auto">
+										if len(agents) == 0 {
+											<p class="uk-text-muted uk-text-small">No agents available.</p>
+										}
 										for _, a := range agents {
-											<label class="flex gap-2 items-center mb-1">
+											<label class="flex gap-2 items-start mb-2">
 												<input class="uk-checkbox" type="checkbox" name="agent_ids" value={ a.ID } checked?={ hasAgent(u, a.ID) }/>
-												<span>{ a.Nickname } ({ a.Hostname })</span>
+												<span class="uk-text-small">
+													<span class="uk-text-bold">{ a.Nickname }</span>
+													<br/>
+													<span class="uk-text-muted">{ a.Hostname }</span>
+												</span>
 											</label>
 										}
 									</div>
 								</div>
 							</div>
-							<div>
+							<div class="flex gap-3">
+								<a
+									href="/admin/users"
+									hx-get="/admin/users"
+									hx-target="#main"
+									hx-push-url="true"
+									hx-swap="outerHTML"
+									class="uk-button uk-button-secondary"
+								>
+									Back to users
+								</a>
 								<button class="uk-button uk-button-primary" type="submit">Save permissions</button>
 							</div>
 						</form>
