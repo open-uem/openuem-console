@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/authz"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"golang.org/x/mod/semver"
 	"slices"
@@ -38,6 +39,7 @@ type CommonInfo struct {
 	CSRFToken          string
 	IsDocker           bool
 	IsTurnstileEnabled bool
+	Scope              *authz.AccessScope
 }
 
 templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {

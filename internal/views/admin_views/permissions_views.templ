@@ -1,0 +1,107 @@
+package admin_views
+
+import (
+	"fmt"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/user"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+templ UserPermissions(c echo.Context, u *ent.User, tenants []*ent.Tenant, sites []*ent.Site, agents []*ent.Agent, successMessage, errMessage string, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"}, {Title: i18n.T(ctx, "User.other"), Url: "/admin/users"}, {Title: "Permissions", Url: ""}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("users", true, true, commonInfo)
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				}
+				if errMessage != "" {
+					@partials.ErrorMessage(errMessage, false)
+				}
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">Permissions for { u.ID }</h3>
+					</div>
+					<div class="uk-card-body">
+						<form hx-post={ fmt.Sprintf("/admin/users/%s/permissions", u.ID) } hx-target="#main" hx-swap="outerHTML" class="flex flex-col gap-4">
+							<div class="flex gap-4 items-center">
+								<label><input class="uk-radio" type="radio" name="console_role" value="admin" checked?={ u.ConsoleRole == user.ConsoleRoleAdmin }/> Admin</label>
+								<label><input class="uk-radio" type="radio" name="console_role" value="custom" checked?={ u.ConsoleRole == user.ConsoleRoleCustom }/> Custom</label>
+							</div>
+							<div class="grid grid-cols-3 gap-4">
+								<div>
+									<h4 class="uk-text-bold mb-2">Organizations</h4>
+									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+										for _, t := range tenants {
+											<label class="flex gap-2 items-center mb-1">
+												<input class="uk-checkbox" type="checkbox" name="tenant_ids" value={ fmt.Sprintf("%d", t.ID) } checked?={ hasTenant(u, t.ID) }/>
+												<span>{ t.Description }</span>
+											</label>
+										}
+									</div>
+								</div>
+								<div>
+									<h4 class="uk-text-bold mb-2">Sites</h4>
+									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+										for _, s := range sites {
+											<label class="flex gap-2 items-center mb-1">
+												<input class="uk-checkbox" type="checkbox" name="site_ids" value={ fmt.Sprintf("%d", s.ID) } checked?={ hasSite(u, s.ID) }/>
+												<span>{ s.Description }</span>
+											</label>
+										}
+									</div>
+								</div>
+								<div>
+									<h4 class="uk-text-bold mb-2">Endpoints/Agents (top 300)</h4>
+									<div class="max-h-64 overflow-y-auto border p-2 rounded">
+										for _, a := range agents {
+											<label class="flex gap-2 items-center mb-1">
+												<input class="uk-checkbox" type="checkbox" name="agent_ids" value={ a.ID } checked?={ hasAgent(u, a.ID) }/>
+												<span>{ a.Nickname } ({ a.Hostname })</span>
+											</label>
+										}
+									</div>
+								</div>
+							</div>
+							<div>
+								<button class="uk-button uk-button-primary" type="submit">Save permissions</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+func hasTenant(u *ent.User, tenantID int) bool {
+	for _, t := range u.Edges.AllowedTenants {
+		if t.ID == tenantID {
+			return true
+		}
+	}
+	return false
+}
+
+func hasSite(u *ent.User, siteID int) bool {
+	for _, s := range u.Edges.AllowedSites {
+		if s.ID == siteID {
+			return true
+		}
+	}
+	return false
+}
+
+func hasAgent(u *ent.User, agentID string) bool {
+	for _, a := range u.Edges.AllowedAgents {
+		if a.ID == agentID {
+			return true
+		}
+	}
+	return false
+}
+

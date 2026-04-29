@@ -65,6 +65,7 @@ func (m *Model) CountAllComputers(f filters.AgentFilter, c *partials.CommonInfo)
 			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	// Apply filters
 	applyComputerFilters(query, f)
@@ -160,6 +161,7 @@ func (m *Model) GetComputersByPage(p partials.PaginationAndSort, f filters.Agent
 			Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
 			Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	// Apply filters
 	applyComputerFilters(query, f)
