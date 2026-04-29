@@ -388,6 +388,10 @@ func (h *Handler) ImportTenants(c echo.Context) error {
 }
 
 func (h *Handler) GetTenantSites(c echo.Context) error {
+	scope := getScope(c)
+	if scope == nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.not_authenticated"), true))
+	}
 
 	tenant := c.FormValue("tenant-id")
 
@@ -399,8 +403,15 @@ func (h *Handler) GetTenantSites(c echo.Context) error {
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tenants.could_not_convert_to_int", err.Error()), true))
 	}
+	if !scope.AllowsTenant(tenantID) && !scope.IsAdmin {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "authentication.not_authenticated"), true))
+	}
 
-	sites, err := h.Model.GetSites(tenantID)
+	t, err := h.Model.GetTenantByID(tenantID)
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_sites"), true))
+	}
+	sites, err := h.Model.GetAssociatedSitesForScope(t, scope)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.could_not_get_sites"), true))
 	}
