@@ -204,6 +204,11 @@ func (h *Handler) LoginPasswordChange(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "login.could_not_remove_forgot_code"), true))
 	}
 
+	// Consume the new user token now that the password is actually set
+	if err := h.Model.DeleteNewAccountToken(username); err != nil {
+		log.Printf("[ERROR]: could not delete new account token for %s, reason: %v", username, err)
+	}
+
 	// Password has been changed
 	h.AuthLogger.Printf("user %s has changed the password", username)
 
@@ -853,11 +858,6 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, "token is not valid, please contact your administrator to request a new email to set your initial password")
 		}
 
-		// Delete token
-		if err := h.Model.DeleteNewAccountToken(user.ID); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "could not delete token")
-		}
-
 		// Create a session as we'll require the user to change the password
 		csrfToken, ok := c.Get("csrf").(string)
 		if !ok || csrfToken == "" {
@@ -868,6 +868,7 @@ func (h *Handler) LoginNewUser(c echo.Context) error {
 			return err
 		}
 
+		// Token stays in DB until the user actually sets the password (LoginPasswordChange)
 		// if CloudFlare Turnstile is used, check response
 		tsSiteKey, tsSecretKey, err := h.Model.GetTurnstileSettings()
 		if err != nil {
