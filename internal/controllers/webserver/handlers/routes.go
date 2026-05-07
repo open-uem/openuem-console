@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/open-uem/openuem-console/internal/authz"
 	"github.com/open-uem/openuem-console/internal/views/login_views"
 	"golang.org/x/time/rate"
 )
@@ -103,6 +104,8 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/admin/users/:uid/confirmemail", h.SetEmailConfirmed, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/approve", h.ApproveAccount, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/resendpasslink", h.ResendPasswordLink, h.IsAuthenticated)
+	e.GET("/admin/users/:uid/permissions", h.UserPermissions, h.IsAuthenticated)
+	e.POST("/admin/users/:uid/permissions", h.SaveUserPermissions, h.IsAuthenticated)
 	e.DELETE("/admin/users/:uid", h.DeleteUser, h.IsAuthenticated)
 
 	e.GET("/admin/tenants/new", h.NewTenant, h.IsAuthenticated)
@@ -681,6 +684,16 @@ func (h *Handler) IsAuthenticated(next echo.HandlerFunc) echo.HandlerFunc {
 
 				return RenderLogin(c, login_views.LoginIndex(login_views.Enter2FA(username, turnstileSiteKey, turnstileSecretKey), csrfToken, isTurnstileEnabled))
 			}
+		}
+
+		scope, err := authz.LoadScope(c.Request().Context(), h.Model.Client, username)
+		if err != nil {
+			return h.Login(c)
+		}
+		c.Set(accessScopeContextKey, scope)
+
+		if err := h.enforceRouteAuthorization(c, scope); err != nil {
+			return err
 		}
 
 		return next(c)

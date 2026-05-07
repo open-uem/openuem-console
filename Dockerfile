@@ -1,12 +1,15 @@
-FROM golang:1.26.1 AS build
-COPY . ./
+FROM golang:1.26.2 AS build
+WORKDIR /src
+COPY ./ent ./ent
+COPY ./openuem-console ./openuem-console
+WORKDIR /src/openuem-console
 RUN go install github.com/a-h/templ/cmd/templ@v0.3.1001
 RUN templ generate
 RUN CGO_ENABLED=1 go build -o "/bin/openuem-console" .
 
 FROM debian:latest
 COPY --from=build /bin/openuem-console /bin/openuem-console
-COPY ./assets /bin/assets
+COPY --from=build /src/openuem-console/assets /bin/assets
 RUN apt-get update
 RUN apt install -y ca-certificates
 EXPOSE 1323

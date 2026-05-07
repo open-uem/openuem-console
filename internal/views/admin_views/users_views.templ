@@ -343,6 +343,16 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													}
 													<li>
 														<a
+															hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/permissions", user.ID))) }
+															hx-target="#main"
+															hx-push-url="true"
+															hx-swap="outerHTML"
+														>
+															<uk-icon hx-history="false" icon="shield-user" custom-class="h-6 w-6 pr-2" uk-cloack></uk-icon>Permissions
+														</a>
+													</li>
+													<li>
+														<a
 															hx-delete={ string(templ.URL(fmt.Sprintf("/admin/users/%s", user.ID))) }
 															hx-target="#main"
 															hx-push-url="false"
