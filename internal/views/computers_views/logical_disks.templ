@@ -54,7 +54,13 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agen
 									<th>{ i18n.T(ctx, "inventory.logical_disk.usage") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.remaining_space") }</th>
 									<th>{ i18n.T(ctx, "inventory.logical_disk.total_size") }</th>
+									if agent.Os == "windows" {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.drive_type") }</th>
+									}
 									<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker") }</th>
+									if agent.Os == "windows" {
+										<th>{ i18n.T(ctx, "inventory.logical_disk.bitlocker_recovery_key") }</th>
+									}
 									if  agent.SftpPort != "" {
 										<th>{ i18n.T(ctx, "inventory.file_browser.title") }</th>
 									}
@@ -79,9 +85,19 @@ templ LogicalDisks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agen
 									</td>
 									<td class="!align-middle">{ disk.RemainingSpaceInUnits }</td>
 									<td class="!align-middle">{ disk.SizeInUnits }</td>
+									if agent.Os == "windows" {
+										<td class="!align-middle">
+											@partials.RemovableDriveIcon(disk.IsRemovable)
+										</td>
+									}
 									<td class="!align-middle">
 										@partials.BitlockerStatus(disk.BitlockerStatus)
 									</td>
+									if agent.Os == "windows" {
+										<td class="!align-middle">
+											@partials.BitlockerRecoveryKey(disk.BitlockerStatus, disk.BitlockerRecoveryKey)
+										</td>
+									}
 									if agent.SftpPort != "" && agent.SftpService && (!commonInfo.DetectRemoteAgents || (commonInfo.DetectRemoteAgents && !agent.IsRemote)) {
 										<td class="!align-middle">
 											<form>

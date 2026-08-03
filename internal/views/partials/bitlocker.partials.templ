@@ -5,6 +5,50 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 )
 
+templ BitlockerRecoveryKey(status string, recoveryKey string) {
+	if status == "Encrypted" {
+		if recoveryKey == "" {
+			<span class="text-gray-400 text-xs" uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.bitlocker_recovery_key_unavailable")) }>
+				{ i18n.T(ctx, "inventory.logical_disk.bitlocker_recovery_key_unavailable") }
+			</span>
+		} else {
+			<div class="flex items-center gap-1">
+				<button
+					type="button"
+					class="text-gray-400 hover:text-gray-700 transition-colors"
+					title={ i18n.T(ctx, "inventory.logical_disk.bitlocker_recovery_key_reveal") }
+					_="on click toggle .hidden on the next <span/>"
+				>
+					<uk-icon hx-history="false" icon="key-round" custom-class="h-4 w-4" uk-cloak></uk-icon>
+				</button>
+				<span
+					class="hidden font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer"
+					uk-tooltip={ fmt.Sprintf("title: %s; pos: top", i18n.T(ctx, "inventory.logical_disk.bitlocker_recovery_key_copy")) }
+					_={ fmt.Sprintf("on click navigator.clipboard.writeText('%s') then call UIkit.notification({message: '%s', status: 'primary'})", recoveryKey, i18n.T(ctx, "Clipboard")) }
+				>{ recoveryKey }</span>
+			</div>
+		}
+	} else {
+		<span class="text-gray-400">-</span>
+	}
+}
+
+templ RemovableDriveIcon(isRemovable bool) {
+	if isRemovable {
+		<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.removable")) }>
+			<span class="text-gray-400">
+				<uk-icon hx-history="false" icon="usb" custom-class="h-5 w-5" uk-cloak></uk-icon>
+			</span>
+		</div>
+	} else {
+		<div uk-tooltip={ fmt.Sprintf("title: %s; pos: left", i18n.T(ctx, "inventory.logical_disk.fixed")) }>
+			<span class="text-gray-400">
+				<uk-icon hx-history="false" icon="hard-drive" custom-class="h-5 w-5" uk-cloak></uk-icon>
+			</span>
+		</div>
+	}
+}
+
 templ BitlockerStatus(status string) {
 	switch status {
 		case "Unencrypted":
