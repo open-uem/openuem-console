@@ -14,7 +14,17 @@ import (
 )
 
 func (m *Model) CreateDefaultTenant() (*ent.Tenant, error) {
-	return m.Client.Tenant.Create().SetDescription("DefaultTenant").SetIsDefault(true).Save(context.Background())
+	const maxRetries = 5
+	for i := 0; i < maxRetries; i++ {
+		t, err := m.Client.Tenant.Create().SetDescription("DefaultTenant").SetIsDefault(true).Save(context.Background())
+		if err == nil {
+			return t, nil
+		}
+		if !ent.IsConstraintError(err) {
+			return nil, err
+		}
+	}
+	return nil, fmt.Errorf("could not create default tenant: ID collision after %d retries", maxRetries)
 }
 
 func (m *Model) CountTenants() (int, error) {
@@ -118,9 +128,22 @@ func (m *Model) AddTenant(name string, isDefault bool, siteName string) error {
 		}
 	}
 
-	t, err := m.Client.Tenant.Create().SetDescription(name).SetIsDefault(isDefault).Save(context.Background())
+	const maxRetries = 5
+	var (
+		t   *ent.Tenant
+		err error
+	)
+	for i := 0; i < maxRetries; i++ {
+		t, err = m.Client.Tenant.Create().SetDescription(name).SetIsDefault(isDefault).Save(context.Background())
+		if err == nil {
+			break
+		}
+		if !ent.IsConstraintError(err) {
+			return err
+		}
+	}
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create tenant: ID collision after %d retries", maxRetries)
 	}
 
 	// Clone global settings
