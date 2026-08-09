@@ -235,7 +235,7 @@ func (m *Model) AddTaskToProfile(c echo.Context, profileID int, cfg TaskConfig) 
 		return query.Exec(context.Background())
 	case task.TypePowershellScript.String():
 		return query.
-			SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
+			SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeUnixScript.String():
 		return query.
 			SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
@@ -391,7 +391,7 @@ func (m *Model) UpdateProfileTask(c echo.Context, taskID int, cfg TaskConfig) er
 		}
 		return query.Exec(context.Background())
 	case task.TypePowershellScript.String():
-		return query.SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).Exec(context.Background())
+		return query.SetScript(cfg.ShellScript).SetScriptRun(task.ScriptRun(cfg.ShellRunConfig)).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeUnixScript.String():
 		return query.SetScript(cfg.ShellScript).SetScriptCreates(cfg.ShellCreates).SetScriptExecutable(cfg.ShellExecute).Exec(context.Background())
 	case task.TypeFlatpakInstall.String(), task.TypeFlatpakUninstall.String():

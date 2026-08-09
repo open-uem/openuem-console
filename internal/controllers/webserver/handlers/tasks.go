@@ -792,6 +792,12 @@ func validatePowerShellScript(c echo.Context) (*models.TaskConfig, error) {
 		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_wrong_run_config"))
 	}
 
+	taskConfig.ShellExecute = c.FormValue("powershell-executable")
+	validEngines := []string{"", "powershell", "pwsh", "auto"}
+	if taskType == "powershell_type" && !slices.Contains(validEngines, taskConfig.ShellExecute) {
+		return nil, errors.New(i18n.T(c.Request().Context(), "tasks.shell_wrong_run_config"))
+	}
+
 	return &taskConfig, nil
 }
 

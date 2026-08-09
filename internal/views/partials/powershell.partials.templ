@@ -41,5 +41,19 @@ templ PowerShellComponent(t *ent.Task) {
 				<option value={ "always" } selected?={ t != nil && t.ScriptRun.String() == "always" }>{ i18n.T(ctx, "tasks.shell_run_always") }</option>
 			</select>
 		</div>
+		<div id="powershell-executable-section">
+			<label class="uk-form-label" for="powershell-executable">
+				{ i18n.T(ctx, "tasks.powershell_executable") }
+			</label>
+			<select
+				class="uk-select"
+				id="powershell-executable"
+				name="powershell-executable"
+			>
+				<option value="powershell" selected?={ t == nil || t.ScriptExecutable == "" || t.ScriptExecutable == "powershell" }>{ i18n.T(ctx, "tasks.powershell_engine_51") }</option>
+				<option value="pwsh" selected?={ t != nil && t.ScriptExecutable == "pwsh" }>{ i18n.T(ctx, "tasks.powershell_engine_7") }</option>
+				<option value="auto" selected?={ t != nil && t.ScriptExecutable == "auto" }>{ i18n.T(ctx, "tasks.powershell_engine_auto") }</option>
+			</select>
+		</div>
 	</div>
 }
