@@ -402,6 +402,7 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/computers/:uuid/status", h.AgentStatus, h.IsAuthenticated)
+	e.GET("/tenant/:tenant/site/:site/computers/:uuid/statusdot", h.AgentStatusDot, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/site/:site/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/runtask", h.RunTask, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/site/:site/computers/:uuid/runprofile", h.RunProfile, h.IsAuthenticated)

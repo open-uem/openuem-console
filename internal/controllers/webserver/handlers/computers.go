@@ -1907,6 +1907,18 @@ func (h *Handler) AgentStatus(c echo.Context) error {
 	return RenderView(c, partials.AgentStatus(commonInfo, url, offline))
 }
 
+func (h *Handler) AgentStatusDot(c echo.Context) error {
+	agentId := c.Param("uuid")
+	if agentId == "" {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_empty_id"), false))
+	}
+
+	offline := h.IsAgentOffline(c)
+	url := fmt.Sprintf("/tenant/%s/site/%s/computers/%s/statusdot", c.Param("tenant"), c.Param("site"), agentId)
+
+	return RenderView(c, partials.AgentStatusDot(url, agentId, true, offline))
+}
+
 func (h *Handler) IsAgentOffline(c echo.Context) bool {
 	agentId := c.Param("uuid")
 	if agentId == "" {

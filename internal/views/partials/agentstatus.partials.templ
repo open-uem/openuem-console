@@ -19,3 +19,37 @@ templ AgentStatus(commonInfo *CommonInfo, url string, offline bool) {
 		}
 	</div>
 }
+
+// AgentStatusDot is a compact online/offline indicator used in the computers list.
+// It is loaded lazily so that pinging offline agents doesn't slow down the page.
+templ AgentStatusDot(url string, agentID string, loaded bool, offline bool) {
+	<span
+		id={ "agent-status-dot-" + agentID }
+		class="flex items-center"
+		hx-get={ url }
+		hx-push-url="false"
+		hx-target="this"
+		hx-swap="outerHTML"
+		if loaded {
+			hx-trigger="every 1m"
+		} else {
+			hx-trigger="load"
+		}
+		if loaded {
+			if offline {
+				uk-tooltip={ "title: " + i18n.T(ctx, "Offline") }
+			} else {
+				uk-tooltip={ "title: " + i18n.T(ctx, "Online") }
+			}
+		}
+	>
+		// main.css is a precompiled Tailwind build, so inline styles are used to avoid missing classes
+		if !loaded {
+			<span style="display:inline-block;width:12px;height:12px;border-radius:9999px;background-color:#9ca3af;"></span>
+		} else if offline {
+			<span style="display:inline-block;width:12px;height:12px;border-radius:9999px;background-color:#dc2626;"></span>
+		} else {
+			<span style="display:inline-block;width:12px;height:12px;border-radius:9999px;background-color:#16a34a;"></span>
+		}
+	</span>
+}
