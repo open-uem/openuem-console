@@ -148,8 +148,9 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 				hx-swap="outerHTML"
 			>
 				<div class="flex items-center gap-2">
+					@partials.AgentStatusDot(fmt.Sprintf("/tenant/%s/site/%d/computers/%s/statusdot", commonInfo.TenantID, agent.SiteID, agent.ID), agent.ID, false, false)
 					<span class="underline">{ agent.Nickname }</span>
-					if (time.Since(time.Now()).Hours()) > 24 {
+					if (time.Since(agent.LastContact).Hours()) > 24 {
 						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>
 							<uk-icon hx-history="false" icon="clock-8" custom-class="h-5 w-5 text-red-600" uk-cloack></uk-icon>
 						</div>

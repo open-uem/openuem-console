@@ -48,6 +48,7 @@ func (m *Model) GetAllAgents(f filters.AgentFilter, c *partials.CommonInfo) ([]*
 	} else {
 		query = m.Client.Agent.Query().WithRelease().Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	// Apply filters
 	applyAgentFilters(query, f)
@@ -85,6 +86,7 @@ func (m *Model) GetAgentsByPage(p partials.PaginationAndSort, f filters.AgentFil
 	} else {
 		query = query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	if p.PageSize != 0 {
 		query = query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
@@ -251,6 +253,7 @@ func (m *Model) CountAllAgents(f filters.AgentFilter, excludeWaitingForAdmission
 	} else {
 		query = query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	applyAgentFilters(query, f)
 
@@ -275,6 +278,7 @@ func (m *Model) GetAgentsUsedOSes(c *partials.CommonInfo, f filters.AgentFilter,
 	} else {
 		query.Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID)))).Unique(true)
 	}
+	query = m.ApplyAgentScope(query, c.Scope)
 
 	if len(f.AgentOSVersions) > 0 {
 		query.Where(agent.HasOperatingsystemWith(operatingsystem.TypeIn(f.AgentOSVersions...)))

@@ -476,21 +476,20 @@ func (h *Handler) sendConfirmationEmail(c echo.Context, user *openuem_ent.User) 
 }
 
 func (h *Handler) sendLinkToGeneratePassword(c echo.Context, user *openuem_ent.User) error {
-	encryptedToken := ""
 	token, err := h.generateEmailToken(user.ID, "New password", 1)
 	if err != nil {
 		return err
 	}
 
-	// encrypt the access token if we have the encryption master key
+	tokenToSave := token
 	if h.EncryptionMasterKey != "" {
-		encryptedToken, err = utils.EncryptSensitiveField(token, h.EncryptionMasterKey)
+		tokenToSave, err = utils.EncryptSensitiveField(token, h.EncryptionMasterKey)
 		if err != nil {
 			return err
 		}
 	}
 
-	if err := h.Model.SaveNewAccountToken(user.ID, encryptedToken); err != nil {
+	if err := h.Model.SaveNewAccountToken(user.ID, tokenToSave); err != nil {
 		return err
 	}
 

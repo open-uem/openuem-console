@@ -29,32 +29,43 @@ templ ErrorPage(code, message string) {
 		</head>
 		<body>
 			<main class="flex items-center justify-center h-screen w-screen">
-				<div id="errorPage" class="flex items-center justifiy-items-center gap-10 h-">
-					switch code {
-						case "400":
-							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "403":
-							if strings.Contains(message, "approve") {
-								<uk-icon hx-history="false" icon="user-round-check" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-							} else {
-								<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
+				<div id="errorPage" class="uk-card uk-card-default uk-card-body w-full max-w-3xl mx-4">
+					<div class="flex items-center gap-6">
+						<div>
+							switch code {
+								case "400":
+									<uk-icon hx-history="false" icon="ban" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "403":
+									if strings.Contains(message, "approve") {
+										<uk-icon hx-history="false" icon="user-round-check" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+									} else {
+										<uk-icon hx-history="false" icon="ban" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+									}
+								case "404":
+									<uk-icon hx-history="false" icon="search-x" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "500":
+									<uk-icon hx-history="false" icon="bomb" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "503":
+									<uk-icon hx-history="false" icon="circle-alert" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "401":
+									<uk-icon hx-history="false" icon="ticket-x" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "429", "405":
+									<uk-icon hx-history="false" icon="ban" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								case "413":
+									<uk-icon hx-history="false" icon="weight" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
+								default:
+									<uk-icon hx-history="false" icon="circle-x" custom-class="h-20 w-20 text-red-600" uk-cloack></uk-icon>
 							}
-						case "404":
-							<uk-icon hx-history="false" icon="search-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "500":
-							<uk-icon hx-history="false" icon="bomb" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "503":
-							<uk-icon hx-history="false" icon="circle-alert" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "401":
-							<uk-icon hx-history="false" icon="ticket-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "429", "405":
-							<uk-icon hx-history="false" icon="ban" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						case "413":
-							<uk-icon hx-history="false" icon="weight" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-						default:
-							<uk-icon hx-history="false" icon="circle-x" custom-class="h-40 w-40 pt-4 text-red-600" uk-cloack></uk-icon>
-					}
-					<span>{ code } | { message }</span>
+						</div>
+						<div class="flex flex-col gap-1">
+							<p class="uk-text-bold text-2xl">{ code }</p>
+							if code == "403" && strings.Contains(strings.ToLower(message), "admin permissions are required") {
+								<p class="uk-text-muted">You do not have permission to access this administration page.</p>
+							} else {
+								<p class="uk-text-muted">{ message }</p>
+							}
+						</div>
+					</div>
 				</div>
 			</main>
 		</body>
