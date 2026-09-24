@@ -1,0 +1,329 @@
+package admin_views
+
+import (
+	"fmt"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/ent/user"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+type SiteGroup struct {
+	TenantID   int
+	TenantName string
+	Sites      []*ent.Site
+}
+
+func buildSiteGroups(sites []*ent.Site) []SiteGroup {
+	seen := map[int]int{}
+	groups := []SiteGroup{}
+	for _, s := range sites {
+		if s.Edges.Tenant == nil {
+			continue
+		}
+		t := s.Edges.Tenant
+		if idx, ok := seen[t.ID]; ok {
+			groups[idx].Sites = append(groups[idx].Sites, s)
+		} else {
+			seen[t.ID] = len(groups)
+			groups = append(groups, SiteGroup{
+				TenantID:   t.ID,
+				TenantName: t.Description,
+				Sites:      []*ent.Site{s},
+			})
+		}
+	}
+	return groups
+}
+
+func hasDuplicateSiteName(sites []*ent.Site, desc string) bool {
+	count := 0
+	for _, s := range sites {
+		if s.Description == desc {
+			count++
+			if count > 1 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func siteLabel(sites []*ent.Site, s *ent.Site) string {
+	if hasDuplicateSiteName(sites, s.Description) && s.Edges.Tenant != nil {
+		return fmt.Sprintf("%s [%s]", s.Description, s.Edges.Tenant.Description)
+	}
+	return s.Description
+}
+
+func allGroupSitesChecked(u *ent.User, groupSites []*ent.Site) bool {
+	if len(groupSites) == 0 {
+		return false
+	}
+	for _, s := range groupSites {
+		if !hasSite(u, s.ID) {
+			return false
+		}
+	}
+	return true
+}
+
+templ UserPermissions(c echo.Context, u *ent.User, tenants []*ent.Tenant, sites []*ent.Site, agents []*ent.Agent, successMessage, errMessage string, commonInfo *partials.CommonInfo) {
+	@partials.Header(c, []partials.Breadcrumb{
+		{Title: i18n.T(ctx, "Global Config"), Url: "/admin/users"},
+		{Title: i18n.T(ctx, "User.other"), Url: "/admin/users"},
+		{Title: i18n.T(ctx, "permissions.title"), Url: ""},
+	}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@ConfigNavbar("users", true, true, commonInfo)
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				}
+				if errMessage != "" {
+					@partials.ErrorMessage(errMessage, false)
+				}
+				<div class="uk-card uk-card-default">
+					<!-- Card header -->
+					<div class="uk-card-header">
+						<div class="uk-card-title flex gap-2 items-center">
+							<uk-icon hx-history="false" icon="shield-user" custom-class="h-5 w-5 text-green-700" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "permissions.title") }
+						</div>
+						<p class="uk-margin-small-top uk-text-small uk-text-muted">
+							{ i18n.T(ctx, "permissions.description") } <span class="uk-text-bold text-foreground">{ u.ID }</span>
+							if u.Email != "" {
+								<span> ({ u.Email })</span>
+							}
+						</p>
+					</div>
+					<div class="uk-card-body flex flex-col gap-6">
+						<form hx-post={ fmt.Sprintf("/admin/users/%s/permissions", u.ID) } hx-target="#main" hx-swap="outerHTML" class="flex flex-col gap-6">
+							<!-- Role -->
+							<div>
+								<h5 class="uk-text-bold uk-text-small mb-3 flex gap-2 items-center">
+									<uk-icon hx-history="false" icon="key-round" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "permissions.role") }
+								</h5>
+								<table class="uk-table uk-table-divider uk-table-small mb-0">
+									<tbody>
+										<tr>
+											<td class="!align-middle w-1/2">
+												<label class="flex gap-3 items-start cursor-pointer">
+													<input class="uk-radio mt-0.5" type="radio" name="console_role" value="admin" checked?={ u.ConsoleRole == user.ConsoleRoleAdmin }/>
+													<div>
+														<span class="uk-text-bold">{ i18n.T(ctx, "permissions.admin_role_title") }</span>
+														<p class="uk-text-muted uk-text-small mt-0.5">{ i18n.T(ctx, "permissions.admin_role_desc") }</p>
+													</div>
+												</label>
+											</td>
+											<td class="!align-middle w-1/2">
+												<label class="flex gap-3 items-start cursor-pointer">
+													<input class="uk-radio mt-0.5" type="radio" name="console_role" value="custom" checked?={ u.ConsoleRole == user.ConsoleRoleCustom }/>
+													<div>
+														<span class="uk-text-bold">{ i18n.T(ctx, "permissions.custom_role_title") }</span>
+														<p class="uk-text-muted uk-text-small mt-0.5">{ i18n.T(ctx, "permissions.custom_role_desc") }</p>
+													</div>
+												</label>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- Access columns -->
+							<div class="grid grid-cols-3 gap-4 items-start">
+								<!-- Organizations -->
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<div class="flex gap-2 items-center">
+											<uk-icon hx-history="false" icon="globe" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+											<h4 class="uk-card-title text-sm">{ i18n.T(ctx, "permissions.organizations") }</h4>
+										</div>
+										<p class="uk-text-muted uk-text-small mt-1">{ i18n.T(ctx, "permissions.organizations_description") }</p>
+									</div>
+									<div class="uk-card-body p-0 max-h-72 overflow-y-auto">
+										if len(tenants) == 0 {
+											<p class="uk-text-muted uk-text-small p-4">{ i18n.T(ctx, "permissions.no_organizations") }</p>
+										} else {
+											<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mb-0">
+												<tbody>
+													for _, t := range tenants {
+														<tr>
+															<td class="!align-middle" style="width:2rem">
+																<input class="uk-checkbox" type="checkbox" name="tenant_ids" value={ fmt.Sprintf("%d", t.ID) } checked?={ hasTenant(u, t.ID) }/>
+															</td>
+															<td class="!align-middle">
+																if t.Description == "DefaultTenant" {
+																	<span class="uk-text-small">{ i18n.T(ctx, "DefaultTenant") }</span>
+																} else {
+																	<span class="uk-text-small">{ t.Description }</span>
+																}
+															</td>
+														</tr>
+													}
+												</tbody>
+											</table>
+										}
+									</div>
+								</div>
+								<!-- Sites grouped by org -->
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<div class="flex gap-2 items-center">
+											<uk-icon hx-history="false" icon="building" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+											<h4 class="uk-card-title text-sm">{ i18n.T(ctx, "Site.other") }</h4>
+										</div>
+										<p class="uk-text-muted uk-text-small mt-1">{ i18n.T(ctx, "permissions.sites_description") }</p>
+									</div>
+									<div class="uk-card-body p-0 max-h-72 overflow-y-auto">
+										if len(sites) == 0 {
+											<p class="uk-text-muted uk-text-small p-4">{ i18n.T(ctx, "permissions.no_sites") }</p>
+										} else {
+											<table class="uk-table uk-table-divider uk-table-small mb-0">
+												<tbody>
+													for _, group := range buildSiteGroups(sites) {
+														<!-- org header row: acts as "select all" for this org -->
+														<tr class="bg-gray-50 dark:bg-gray-800">
+															<td class="!align-middle" style="width:2rem">
+																<input
+																	class="uk-checkbox"
+																	type="checkbox"
+																	checked?={ allGroupSitesChecked(u, group.Sites) }
+																	_={ fmt.Sprintf("on change set .perm-site-org-%d.checked to my.checked", group.TenantID) }
+																/>
+															</td>
+															<td class="!align-middle" colspan="1">
+																<span class="uk-text-bold uk-text-small flex gap-1 items-center">
+																	<uk-icon hx-history="false" icon="globe" custom-class="h-3 w-3 uk-text-muted" uk-cloack></uk-icon>
+																	if group.TenantName == "DefaultTenant" {
+																		{ i18n.T(ctx, "DefaultTenant") }
+																	} else {
+																		{ group.TenantName }
+																	}
+																</span>
+															</td>
+														</tr>
+														<!-- individual site rows, indented -->
+														for _, s := range group.Sites {
+															<tr class="hover:bg-muted/40">
+																<td class="!align-middle pl-6" style="width:2rem">
+																	<input
+																		class={ fmt.Sprintf("uk-checkbox perm-site-org-%d", group.TenantID) }
+																		type="checkbox"
+																		name="site_ids"
+																		value={ fmt.Sprintf("%d", s.ID) }
+																		checked?={ hasSite(u, s.ID) }
+																	/>
+																</td>
+																<td class="!align-middle pl-1">
+																	if s.Description == "DefaultSite" {
+																		<span class="uk-text-small">{ i18n.T(ctx, "DefaultSite") }</span>
+																	} else {
+																		<span class="uk-text-small">{ siteLabel(sites, s) }</span>
+																	}
+																</td>
+															</tr>
+														}
+													}
+												</tbody>
+											</table>
+										}
+									</div>
+								</div>
+								<!-- Agents -->
+								<div class="uk-card uk-card-default">
+									<div class="uk-card-header py-3">
+										<div class="flex gap-2 items-center">
+											<uk-icon hx-history="false" icon="monitor" custom-class="h-4 w-4 text-green-700" uk-cloack></uk-icon>
+											<h4 class="uk-card-title text-sm">{ i18n.T(ctx, "permissions.agents") }</h4>
+										</div>
+										<p class="uk-text-muted uk-text-small mt-1">{ i18n.T(ctx, "permissions.agents_description") }</p>
+									</div>
+									<div class="uk-card-body p-0 max-h-72 overflow-y-auto">
+										if len(agents) == 0 {
+											<p class="uk-text-muted uk-text-small p-4">{ i18n.T(ctx, "permissions.no_agents") }</p>
+										} else {
+											<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mb-0">
+												<tbody>
+													for _, a := range agents {
+														<tr>
+															<td class="!align-middle" style="width:2rem">
+																<input class="uk-checkbox" type="checkbox" name="agent_ids" value={ a.ID } checked?={ hasAgent(u, a.ID) }/>
+															</td>
+															<td class="!align-middle">
+																<span class="uk-text-bold uk-text-small">{ a.Nickname }</span>
+																<br/>
+																<span class="uk-text-muted uk-text-small">{ a.Hostname }</span>
+																if len(a.Edges.Site) > 0 {
+																	<br/>
+																	<span class="uk-text-muted uk-text-small">
+																		if a.Edges.Site[0].Edges.Tenant != nil {
+																			{ a.Edges.Site[0].Description } [{ a.Edges.Site[0].Edges.Tenant.Description }]
+																		} else {
+																			{ a.Edges.Site[0].Description }
+																		}
+																	</span>
+																}
+															</td>
+														</tr>
+													}
+												</tbody>
+											</table>
+										}
+									</div>
+								</div>
+							</div>
+							<!-- Actions -->
+							<div class="flex gap-3 pt-2 border-t">
+								<a
+									href="/admin/users"
+									hx-get="/admin/users"
+									hx-target="#main"
+									hx-push-url="true"
+									hx-swap="outerHTML"
+									class="uk-button uk-button-secondary"
+								>
+									{ i18n.T(ctx, "permissions.back_to_users") }
+								</a>
+								<button class="uk-button uk-button-primary" type="submit">
+									{ i18n.T(ctx, "permissions.save") }
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+func hasTenant(u *ent.User, tenantID int) bool {
+	for _, t := range u.Edges.AllowedTenants {
+		if t.ID == tenantID {
+			return true
+		}
+	}
+	return false
+}
+
+func hasSite(u *ent.User, siteID int) bool {
+	for _, s := range u.Edges.AllowedSites {
+		if s.ID == siteID {
+			return true
+		}
+	}
+	return false
+}
+
+func hasAgent(u *ent.User, agentID string) bool {
+	for _, a := range u.Edges.AllowedAgents {
+		if a.ID == agentID {
+			return true
+		}
+	}
+	return false
+}

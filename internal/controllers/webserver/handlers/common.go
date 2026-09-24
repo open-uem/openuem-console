@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/authz"
 	model "github.com/open-uem/openuem-console/internal/models/servers"
 	"github.com/open-uem/openuem-console/internal/views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -27,11 +29,18 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		SM:             h.SessionManager,
 		CurrentVersion: h.Version,
 		Translator:     views.GetTranslatorForDates(c),
-		IsAdmin:        strings.Contains(c.Request().URL.String(), "admin"),
+		IsAdmin:        false,
 		IsProfile:      strings.Contains(c.Request().URL.String(), "profiles"),
 		IsTask:         strings.Contains(c.Request().URL.String(), "tasks"),
 		CSRFToken:      csrfToken,
 	}
+
+	scope, ok := c.Get(accessScopeContextKey).(*authz.AccessScope)
+	if !ok || scope == nil {
+		return nil, echo.NewHTTPError(http.StatusForbidden, i18n.T(c.Request().Context(), "authentication.not_authenticated"))
+	}
+	info.IsAdmin = scope.IsAdmin
+	info.Scope = scope
 
 	if strings.Contains(c.Request().URL.String(), "computers") && !strings.HasSuffix(c.Request().URL.String(), "computers") {
 		info.IsComputer = true
@@ -54,7 +63,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 	tenantID := c.Param("tenant")
 	siteID := c.Param("site")
 
-	info.Tenants, err = h.Model.GetTenants()
+	info.Tenants, err = h.Model.GetTenantsForScope(scope)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +74,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 			info.SiteID = "-1"
 			return &info, nil
 		}
-		tenant, err = h.Model.GetDefaultTenant()
+		tenant, err = h.Model.GetDefaultTenantForScope(scope)
 		if err != nil {
 			return nil, err
 		}
@@ -76,9 +85,9 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 			return nil, err
 		}
 
-		tenant, err = h.Model.GetTenantByID(id)
+		tenant, err = h.Model.GetTenantByIDForScope(id, scope)
 		if err != nil {
-			tenant, err = h.Model.GetDefaultTenant()
+			tenant, err = h.Model.GetDefaultTenantForScope(scope)
 			if err != nil {
 				return nil, err
 			}
@@ -88,7 +97,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 		}
 	}
 
-	info.Sites, err = h.Model.GetAssociatedSites(tenant)
+	info.Sites, err = h.Model.GetAssociatedSitesForScope(tenant, scope)
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +108,9 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 			return nil, err
 		}
 
-		_, err = h.Model.GetSiteById(tenant.ID, id)
+		_, err = h.Model.GetSiteByIdForScope(tenant.ID, id, scope)
 		if err != nil {
-			s, err := h.Model.GetDefaultSite(tenant)
+			s, err := h.Model.GetDefaultSiteForScope(tenant, scope)
 			if err != nil {
 				return nil, err
 			}
@@ -112,7 +121,7 @@ func (h *Handler) GetCommonInfo(c echo.Context) (*partials.CommonInfo, error) {
 			info.ProfileSiteID = info.SiteID
 		}
 	} else {
-		s, err := h.Model.GetDefaultSite(tenant)
+		s, err := h.Model.GetDefaultSiteForScope(tenant, scope)
 		if err != nil {
 			return nil, err
 		}
