@@ -1,0 +1,92 @@
+package partials
+
+import (
+	"context"
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+type LanguageItem struct {
+	Code string
+	Name string
+	Flag string
+}
+
+func GetSupportedLanguages() []LanguageItem {
+	return []LanguageItem{
+		{Code: "en", Name: "English", Flag: "fi fi-gb fis"},
+		{Code: "cn", Name: "简体中文", Flag: "fi fi-cn fis"},
+		{Code: "es", Name: "Español", Flag: "fi fi-es fis"},
+		{Code: "ca", Name: "Català", Flag: "fi fi-es-ct fis"},
+		{Code: "de", Name: "Deutsch", Flag: "fi fi-de fis"},
+		{Code: "fr", Name: "Français", Flag: "fi fi-fr fis"},
+		{Code: "no", Name: "Norsk", Flag: "fi fi-no fis"},
+		{Code: "pt", Name: "Português", Flag: "fi fi-pt fis"},
+	}
+}
+
+func GetCurrentLocale(ctx context.Context) string {
+	loc := i18n.GetLocale(ctx)
+	if loc == nil {
+		return "en"
+	}
+	code := loc.Code().String()
+	if code == "" {
+		return "en"
+	}
+	return code
+}
+
+func GetCurrentLanguageName(ctx context.Context) string {
+	curr := GetCurrentLocale(ctx)
+	for _, l := range GetSupportedLanguages() {
+		if l.Code == curr {
+			return l.Name
+		}
+	}
+	return "English"
+}
+
+func GetCurrentLanguageFlag(ctx context.Context) string {
+	curr := GetCurrentLocale(ctx)
+	for _, l := range GetSupportedLanguages() {
+		if l.Code == curr {
+			return l.Flag
+		}
+	}
+	return "fi fi-gb fis"
+}
+
+templ LanguageSelector() {
+	{{ currentLang := GetCurrentLocale(ctx) }}
+	<div class="inline-block">
+		<button
+			title={ i18n.T(ctx, "Language", i18n.Default("Language")) }
+			type="button"
+			class="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-sm uk-text-muted hover:text-foreground hover:bg-muted transition-colors"
+		>
+			<span class={ GetCurrentLanguageFlag(ctx) }></span>
+			<span class="text-xs font-semibold uppercase">{ currentLang }</span>
+			<uk-icon hx-history="false" icon="chevron-down" custom-class="h-3.5 w-3.5" uk-cloak></uk-icon>
+		</button>
+		<div class="uk-drop uk-dropdown min-w-44 p-2 shadow-lg rounded-lg border bg-popover text-popover-foreground" uk-dropdown="mode: click; pos: bottom-right">
+			<ul class="uk-nav uk-dropdown-nav flex flex-col gap-1">
+				for _, lang := range GetSupportedLanguages() {
+					<li>
+						<a
+							href="#"
+							_={ fmt.Sprintf("on click set document.cookie to 'openuem_lang=%s; path=/; max-age=31536000; SameSite=Lax' then call window.location.reload()", lang.Code) }
+							class={ "flex items-center gap-2.5 py-1.5 px-2 rounded-md text-sm hover:bg-muted transition-colors cursor-pointer", templ.KV("font-semibold text-primary bg-primary/10", currentLang == lang.Code) }
+						>
+							<span class={ lang.Flag }></span>
+							<span class="flex-1">{ lang.Name }</span>
+							if currentLang == lang.Code {
+								<uk-icon hx-history="false" icon="check" custom-class="h-4 w-4 text-green-600" uk-cloak></uk-icon>
+							}
+						</a>
+					</li>
+				}
+			</ul>
+		</div>
+	</div>
+}
