@@ -3,11 +3,12 @@ package layout
 import (
 	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
+	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
 templ Register(csrfToken string, isTurnstileEnabled bool) {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang={ partials.GetCurrentLocale(ctx) }>
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -53,7 +54,10 @@ templ Register(csrfToken string, isTurnstileEnabled bool) {
 				hx-headers={ fmt.Sprintf(`{"X-CSRF-TOKEN": "%s"}`, csrfToken) }
 			}
 		>
-			<div class="flex min-h-screen w-full flex-col bg-muted">
+			<div class="flex min-h-screen w-full flex-col bg-muted relative">
+				<div class="absolute top-4 right-4 z-50 flex items-center gap-2">
+					@partials.LanguageSelector()
+				</div>
 				{ children... }
 			</div>
 		</body>

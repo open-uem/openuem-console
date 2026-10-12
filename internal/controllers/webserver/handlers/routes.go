@@ -19,6 +19,9 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.GET("/auth", h.Auth)
 	e.GET("/auth/confirm/:token", h.ConfirmEmail)
 
+	e.GET("/language", h.ChangeLanguage)
+	e.POST("/language", h.ChangeLanguage)
+
 	e.GET("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)
 	e.POST("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)
 	e.DELETE("/agents", func(c echo.Context) error { return h.ListAgents(c, "", "", false) }, h.IsAuthenticated)

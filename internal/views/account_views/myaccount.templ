@@ -95,6 +95,26 @@ templ MyAccount(c echo.Context, user *ent.User, defaultCountry string, commonInf
 												/>
 											</div>
 										</div>
+										<div class="uk-margin">
+											<label class="uk-form-label" for="user-language">{ i18n.T(ctx, "Language", i18n.Default("Language")) }</label>
+											<div class="uk-form-controls">
+												<select
+													id="user-language"
+													name="language"
+													class="uk-select"
+													_="on change set document.cookie to `openuem_lang=${my.value}; path=/; max-age=31536000; SameSite=Lax` then call window.location.reload()"
+												>
+													for _, lang := range partials.GetSupportedLanguages() {
+														<option
+															value={ lang.Code }
+															selected?={ partials.GetCurrentLocale(ctx) == lang.Code }
+														>
+															{ lang.Name }
+														</option>
+													}
+												</select>
+											</div>
+										</div>
 									</fieldset>
 								</div>
 								<div class="flex justify-between mt-2">
