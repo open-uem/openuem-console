@@ -214,6 +214,7 @@ templ Header(c echo.Context, breadcrumbs []Breadcrumb, commonInfo *CommonInfo) {
 			>
 				<uk-icon id="theme-switch" hx-history="false" icon="moon" custom-class="h-6 w-6" uk-cloack></uk-icon>
 			</a>
+			@LanguageSelector()
 			<div class="flex items-center gap-4">
 				<p class="text-sm uk-text-muted">OpenUEM { commonInfo.CurrentVersion }</p>
 				if newVersionAvailable(commonInfo.CurrentVersion, commonInfo.LatestVersion) {
