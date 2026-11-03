@@ -26,23 +26,33 @@ templ MSIComponent(t *ent.Task) {
 		// 		}
 		// 	/>
 		// </div>
-		<div id="msi-path-section">
-			<label class="uk-form-label" for="msi-path">
-				{ i18n.T(ctx, "tasks.msi_path") }
+		if t != nil {
+			@MSIPathInput(t.MsiPath, "")
+		} else {
+			@MSIPathInput("", "")
+		}
+		<div id="msi-upload-section" class="flex flex-col gap-2">
+			<label class="uk-form-label" for="msi-file">
+				{ i18n.T(ctx, "tasks.msi_upload") }
 			</label>
-			<input
-				type="text"
-				class="uk-input"
-				id="msi-path"
-				name="msi-path"
-				spellcheck="false"
-				placeholder={ i18n.T(ctx, "tasks.msi_path_description") }
-				spellcheck="false"
-				aria-label={ i18n.T(ctx, "tasks.msi_path_description") }
-				if t != nil {
-					value={ t.MsiPath }
-				}
-			/>
+			<div class="flex items-center gap-2">
+				<input type="file" class="uk-input" id="msi-file" name="msi-file" accept=".msi"/>
+				<button
+					type="button"
+					class="uk-button uk-button-default"
+					hx-post="/tasks/files/msi"
+					hx-encoding="multipart/form-data"
+					hx-include="#msi-file, #task-profile-id"
+					hx-target="#msi-path-section"
+					hx-swap="outerHTML"
+					hx-indicator="#msi-upload-spinner"
+					hx-disabled-elt="this"
+				>
+					{ i18n.T(ctx, "tasks.msi_upload_button") }
+				</button>
+				<div id="msi-upload-spinner" class="htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5"></div>
+			</div>
+			<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "tasks.msi_upload_description") }</p>
 		</div>
 		<div id="msi-arguments-section">
 			<label class="uk-form-label" for="msi-arguments">
@@ -122,5 +132,28 @@ templ MSIComponent(t *ent.Task) {
 		// 		}
 		// 	/>
 		// </div>
+	</div>
+}
+
+// MSIPathInput is the path of the MSI package, a URL, a network share or a local path.
+// After an upload, it's set to the URL of the uploaded file.
+templ MSIPathInput(path string, message string) {
+	<div id="msi-path-section">
+		<label class="uk-form-label" for="msi-path">
+			{ i18n.T(ctx, "tasks.msi_path") }
+		</label>
+		<input
+			type="text"
+			class="uk-input"
+			id="msi-path"
+			name="msi-path"
+			spellcheck="false"
+			placeholder={ i18n.T(ctx, "tasks.msi_path_description") }
+			aria-label={ i18n.T(ctx, "tasks.msi_path_description") }
+			value={ path }
+		/>
+		if message != "" {
+			<p class="uk-text-small text-green-600 mt-2">{ message }</p>
+		}
 	</div>
 }

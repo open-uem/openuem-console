@@ -133,3 +133,5 @@ require (
 	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/open-uem/nats => github.com/devilAPI/nats v0.0.0-20261103105407-85f99e4edce0

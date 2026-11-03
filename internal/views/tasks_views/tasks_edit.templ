@@ -7,6 +7,7 @@ import (
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
 )
 
 templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.CommonInfo) {
@@ -32,6 +33,7 @@ templ EditTask(c echo.Context, profileID int, t *ent.Task, commonInfo *partials.
 					hx-swap="outerHTML"
 					hx-push-url="false"
 				>
+					<input type="hidden" id="task-profile-id" name="task-profile-id" value={ strconv.Itoa(profileID) }/>
 					<div class="flex flex-col gap-4 w-1/2">
 						<div>
 							<label class="uk-form-label" for="task-description">

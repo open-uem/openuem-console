@@ -18,35 +18,10 @@ import (
 
 func (h *Handler) Auth(c echo.Context) error {
 	var err error
-	var cert *x509.Certificate
-	certs := c.Request().TLS.PeerCertificates
 
-	if len(certs) != 1 {
-		clientEncodedCert := c.Request().Header.Get("Client-Cert")
-		if clientEncodedCert != "" {
-			cleanBase64 := ""
-			if strings.Contains(clientEncodedCert, "BEGIN CERTIFICATE") {
-				// NGINX
-				cleanBase64 = strings.TrimPrefix(clientEncodedCert, ":-----BEGIN CERTIFICATE----- ")
-				cleanBase64 = strings.TrimSuffix(cleanBase64, " -----END CERTIFICATE-----:")
-				cleanBase64 = strings.ReplaceAll(cleanBase64, " ", "")
-			} else {
-				// Caddy
-				cleanBase64 = strings.Trim(clientEncodedCert, ":")
-			}
-			decoded, err := base64.StdEncoding.DecodeString(cleanBase64)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "The certificate could not be decoded")
-			}
-			cert, err = x509.ParseCertificate(decoded)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Could not parse client certificate")
-			}
-		} else {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Please provide valid credentials")
-		}
-	} else {
-		cert = certs[0]
+	cert, err := clientCertificate(c, h.ReverseProxyAuthPort != "")
+	if err != nil {
+		return err
 	}
 
 	caCert := h.CACert
@@ -200,4 +175,41 @@ func getIssuerFromCert(cert, caCert *x509.Certificate) (*x509.Certificate, error
 	} else {
 		return chains[0][1], err
 	}
+}
+
+// clientCertificate returns the certificate presented by the client in the TLS connection.
+// Behind a reverse proxy (NGINX or Caddy), the proxy passes it in the Client-Cert header.
+// The header proves nothing by itself, as anyone can send any certificate in it, so it's
+// only used when a reverse proxy is configured.
+func clientCertificate(c echo.Context, behindReverseProxy bool) (*x509.Certificate, error) {
+	if c.Request().TLS != nil && len(c.Request().TLS.PeerCertificates) == 1 {
+		return c.Request().TLS.PeerCertificates[0], nil
+	}
+
+	clientEncodedCert := c.Request().Header.Get("Client-Cert")
+	if clientEncodedCert == "" || !behindReverseProxy {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Please provide valid credentials")
+	}
+
+	cleanBase64 := ""
+	if strings.Contains(clientEncodedCert, "BEGIN CERTIFICATE") {
+		// NGINX
+		cleanBase64 = strings.TrimPrefix(clientEncodedCert, ":-----BEGIN CERTIFICATE----- ")
+		cleanBase64 = strings.TrimSuffix(cleanBase64, " -----END CERTIFICATE-----:")
+		cleanBase64 = strings.ReplaceAll(cleanBase64, " ", "")
+	} else {
+		// Caddy
+		cleanBase64 = strings.Trim(clientEncodedCert, ":")
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(cleanBase64)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "The certificate could not be decoded")
+	}
+
+	cert, err := x509.ParseCertificate(decoded)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not parse client certificate")
+	}
+	return cert, nil
 }

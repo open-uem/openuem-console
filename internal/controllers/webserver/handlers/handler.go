@@ -17,6 +17,7 @@ import (
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/taskfiles"
 )
 
 type Handler struct {
@@ -49,6 +50,7 @@ type Handler struct {
 	Country              string
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
+	TaskFiles            *taskfiles.Store
 	LatestServerRelease  openuem_nats.OpenUEMRelease
 	Replicas             int
 	ServerReleasesFolder string

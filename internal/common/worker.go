@@ -9,6 +9,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/taskfiles"
 	"github.com/open-uem/utils"
 )
 
@@ -42,6 +43,7 @@ type Worker struct {
 	ReverseProxyAuthPort              string
 	ReverseProxyServer                string
 	ServerReleasesFolder              string
+	TaskFiles                         *taskfiles.Store
 	DownloadWingetDBJob               gocron.Job
 	DownloadWingetJobDuration         time.Duration
 	DownloadServerReleasesJob         gocron.Job

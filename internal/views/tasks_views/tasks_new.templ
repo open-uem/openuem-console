@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strconv"
 )
 
 templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
@@ -31,6 +32,7 @@ templ NewTask(c echo.Context, profileId int, commonInfo *partials.CommonInfo) {
 					hx-swap="outerHTML"
 					hx-push-url="false"
 				>
+					<input type="hidden" id="task-profile-id" name="task-profile-id" value={ strconv.Itoa(profileId) }/>
 					<div class="flex flex-col gap-4 w-1/2">
 						@partials.SelectTaskAgentType(nil)
 						<div id="select-task-type"></div>
