@@ -125,6 +125,16 @@ func StartConsoleFlags() []cli.Flag {
 			Value:   false,
 		},
 		&cli.StringFlag{
+			Name:    "winget-repository-dir",
+			Usage:   "the directory where the packages of the private winget repository are stored (default: winget-repository in the working directory)",
+			EnvVars: []string{"WINGET_REPOSITORY_DIR"},
+		},
+		&cli.StringFlag{
+			Name:    "task-files-dir",
+			Usage:   "the directory where the files uploaded for tasks, like MSI packages, are stored (default: task-files in the working directory)",
+			EnvVars: []string{"TASK_FILES_DIR"},
+		},
+		&cli.StringFlag{
 			Name:    "encryption-master-key",
 			Usage:   "master key used to encrypt sensitive fields in the database, need to be 32 bytes long (for example 32 ASCII characters)",
 			EnvVars: []string{"ENCRYPTION_MASTER_KEY"},

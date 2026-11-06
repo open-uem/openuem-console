@@ -8,26 +8,18 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 	"strconv"
 	"strings"
 )
 
-templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *partials.CommonInfo) {
-	if install {
-		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Install", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")))}}, commonInfo)
-	} else {
-		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Uninstall", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/uninstall")))}}, commonInfo)
-	}
+templ Deploy(c echo.Context, action string, successMessage string, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(action)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(action)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				if install {
-					@DeployNavbar("install", commonInfo)
-				} else {
-					@DeployNavbar("uninstall", commonInfo)
-				}
+				@DeployNavbar(action, commonInfo)
 				if successMessage != "" {
 					@partials.SuccessMessage(successMessage)
 				} else {
@@ -37,18 +29,10 @@ templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *pa
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">
-							if install {
-								{ i18n.T(ctx, "install.title") }
-							} else {
-								{ i18n.T(ctx, "uninstall.title") }
-							}
+							{ i18n.T(ctx, action+".title") }
 						</h3>
 						<p class="uk-margin-small-top uk-text-small">
-							if install {
-								{ i18n.T(ctx, "install.phase_1") }
-							} else {
-								{ i18n.T(ctx, "uninstall.phase_1") }
-							}
+							{ i18n.T(ctx, action+".phase_1") }
 						</p>
 					</div>
 					<div class="uk-card-body mt-8 mb-2">
@@ -81,11 +65,7 @@ templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *pa
 									id="search-packages"
 									type="submit"
 									class="uk-button uk-button-primary"
-									if install {
-										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchinstall"))) }
-									} else {
-										hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchuninstall"))) }
-									}
+									hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, searchPath(action)))) }
 									hx-push-url="true"
 									hx-target="#deploy-search-results"
 									hx-swap="innerHTML"
@@ -106,28 +86,19 @@ templ Deploy(c echo.Context, install bool, successMessage string, commonInfo *pa
 
 templ DeployNavbar(active string, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
-		<li class={ templ.KV("uk-active", active == "install") }>
-			<a
-				href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")) }
-				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install"))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-			>
-				{ i18n.T(ctx, "Install") }
-			</a>
-		</li>
-		<li class={ templ.KV("uk-active", active == "uninstall") }>
-			<a
-				href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/uninstall")) }
-				hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/uninstall"))) }
-				hx-push-url="true"
-				hx-target="#main"
-				hx-swap="outerHTML"
-			>
-				{ i18n.T(ctx, "Uninstall") }
-			</a>
-		</li>
+		for _, action := range []string{ActionInstall, ActionUpdate, ActionUninstall, ActionUpdateAll, TabUpdateStatus, TabLibrary} {
+			<li class={ templ.KV("uk-active", active == action) }>
+				<a
+					href={ templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action))) }
+					hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action)))) }
+					hx-push-url="true"
+					hx-target="#main"
+					hx-swap="outerHTML"
+				>
+					{ i18n.T(ctx, actionTitle(action)) }
+				</a>
+			</li>
+		}
 	</ul>
 }
 
@@ -137,7 +108,7 @@ templ DeployIndex(title string, cmp templ.Component, commonInfo *partials.Common
 	}
 }
 
-templ SearchPacketResult(install bool, packages []*ent.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ SearchPacketResult(action string, packages []*ent.SoftwarePackage, c echo.Context, p partials.PaginationAndSort, f filters.DeployPackageFilter, allSources []string, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	if len(packages) > 0 {
 		<table class="uk-table uk-table-divider uk-table-small uk-table-striped  mt-6">
 			<thead>
@@ -186,25 +157,13 @@ templ SearchPacketResult(install bool, packages []*ent.SoftwarePackage, c echo.C
 								<input type="hidden" name="filterByPackageBrewType" value={ p.BrewType }/>
 								<input type="hidden" name="filterByPackageVerified" value={ strconv.FormatBool(p.Verified) }/>
 								<input type="hidden" name="filterBySource" value={ p.Source }/>
-								if install {
-									<input type="hidden" name="filterByInstallationType" value="true"/>
-								} else {
-									<input type="hidden" name="filterByInstallationType" value="false"/>
-								}
+								<input type="hidden" name="filterByInstallationType" value={ action }/>
 								<button
-									class={ templ.KV("text-green-600", install), templ.KV("text-red-600", !install) }
-									if install {
-										title={ i18n.T(ctx, "agents.install_package") }
-									} else {
-										title={ i18n.T(ctx, "agents.uninstall_package") }
-									}
+									class={ templ.KV("text-green-600", action == ActionInstall), templ.KV("text-blue-600", action == ActionUpdate), templ.KV("text-red-600", action == ActionUninstall) }
+									title={ i18n.T(ctx, "agents."+action+"_package") }
 									type="submit"
 								>
-									if install {
-										<uk-icon hx-history="false" icon="package-plus" custom-class="h-6 w-6" uk-cloack></uk-icon>
-									} else {
-										<uk-icon hx-history="false" icon="package-minus" custom-class="h-6 w-6" uk-cloack></uk-icon>
-									}
+									<uk-icon hx-history="false" icon={ actionIcon(action) } custom-class="h-6 w-6" uk-cloack></uk-icon>
 								</button>
 							</form>
 						</td>
@@ -212,51 +171,34 @@ templ SearchPacketResult(install bool, packages []*ent.SoftwarePackage, c echo.C
 				}
 			</tbody>
 		</table>
-		if install {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchinstall"))), itemsPerPage)
-		} else {
-			@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/searchuninstall"))), itemsPerPage)
-		}
+		@partials.Pagination(c, p, "post", "#deploy-search-results", "innerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, searchPath(action)))), itemsPerPage)
 	} else {
 		<p class="uk-text-small uk-text-muted mt-8 mb-2">
-			{ i18n.T(ctx, "install.no_packages") }
+			{ i18n.T(ctx, action+".no_packages") }
 		</p>
 	}
 }
 
-templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName, packageSource, packageBranch, packageBrewType string, packageVerified bool, agents []*ent.Agent, install bool, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
-	if install {
-		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Install") } </title>
-		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Install", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/install")))}, {Title: packageName, Url: ""}}, commonInfo)
+templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, packageId, packageName, packageSource, packageBranch, packageBrewType string, packageVerified bool, agents []*ent.Agent, action string, refresh int, itemsPerPage int, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(action)) } </title>
+	if action == ActionUpdateAll {
+		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(action)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action))))}}, commonInfo)
 	} else {
-		<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, "Uninstall") } </title>
-		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: "Uninstall", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/uninstall")))}, {Title: packageName, Url: ""}}, commonInfo)
+		@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(action)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action))))}, {Title: packageName, Url: ""}}, commonInfo)
 	}
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
-				if install {
-					@DeployNavbar("install", commonInfo)
-				} else {
-					@DeployNavbar("uninstall", commonInfo)
-				}
+				@DeployNavbar(action, commonInfo)
 				<div id="error" class="hidden"></div>
 				<div id="success" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">
-							if install {
-								{ i18n.T(ctx, "install.title") }
-							} else {
-								{ i18n.T(ctx, "uninstall.title") }
-							}
+							{ i18n.T(ctx, action+".title") }
 						</h3>
 						<p class="uk-margin-small-top uk-text-small">
-							if install {
-								{ i18n.T(ctx, "install.phase_2") + " " }
-							} else {
-								{ i18n.T(ctx, "uninstall.phase_2") + " " }
-							}
+							{ i18n.T(ctx, action+".phase_2") + " " }
 							<span class="uk-text-bolder">{ packageName }</span>
 						</p>
 						<form
@@ -274,7 +216,7 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 								end
 							end"
 						>
-							<input type="hidden" name="filterByInstallationType" value={ strconv.FormatBool(install) }/>
+							<input type="hidden" name="filterByInstallationType" value={ action }/>
 							<input type="hidden" name="filterByPackageId" value={ packageId }/>
 							<input type="hidden" name="filterByPackageName" value={ packageName }/>
 							<input type="hidden" name="filterByPackageBranch" value={ packageBranch }/>
@@ -285,28 +227,20 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 							<input id="selectedAgents" type="hidden" name="selectedAgents"/>
 							<button
 								id="deploy-package"
-								if install {
-									title={ i18n.T(ctx, "Install") }
-								} else {
-									title={ i18n.T(ctx, "Uninstall") }
-								}
+								title={ i18n.T(ctx, actionTitle(action)) }
 								type="submit"
-								class={ "uk-button mt-4", templ.KV("uk-button-primary", install), templ.KV("uk-button-danger", !install) }
+								class={ "uk-button mt-4", templ.KV("uk-button-danger", action == ActionUninstall), templ.KV("uk-button-primary", action != ActionUninstall) }
 								disabled?={ f.SelectedItems == 0 }
 							>
-								<uk-icon hx-history="false" icon="package-plus" custom-class="h-5 w-5 mr-4" uk-cloak></uk-icon>
-								if install {
-									{ i18n.T(ctx, "Install") }
-								} else {
-									{ i18n.T(ctx, "Uninstall") }
-								}
+								<uk-icon hx-history="false" icon={ actionIcon(action) } custom-class="h-5 w-5 mr-4" uk-cloak></uk-icon>
+								{ i18n.T(ctx, actionTitle(action)) }
 								<div id="update-spinner" class="ml-2 htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5" uk-spinner></div>
 							</button>
 						</form>
 					</div>
 					<div class="uk-card-body mt-8 mb-2">
 						<div class="flex items-center gap-4">
-							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/selectpackagedeployment"))), "#main", "outerHTML", func() bool {
+							@filters.ClearFilters(string(templ.URL(partials.GetNavigationUrl(commonInfo, selectAgentsPath(action)))), "#main", "outerHTML", func() bool {
 								return f.Nickname == "" && len(f.Versions) == 0 && len(f.AgentOSVersions) == 0 && len(f.Tags) == 0
 							})
 							if len(agents) > 0 {
@@ -496,4 +430,342 @@ templ SelectPackageDeployment(c echo.Context, p partials.PaginationAndSort, f fi
 			</div>
 		</div>
 	</main>
+}
+
+templ UpdateAllRequested(c echo.Context, result UpdateAllResult, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(ActionUpdateAll)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(ActionUpdateAll)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(ActionUpdateAll))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(ActionUpdateAll, commonInfo)
+				<div id="error" class="hidden"></div>
+				if result.Started > 0 {
+					@partials.SuccessMessage(i18n.T(ctx, "updateall.requested", result.Started))
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				if len(result.Queued) > 0 {
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header">
+							<h3 class="uk-card-title">{ i18n.T(ctx, "updateall.queued_title", len(result.Queued)) }</h3>
+							<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "updateall.queued_description") }</p>
+						</div>
+						<div class="uk-card-body">
+							<p class="uk-text-small">{ strings.Join(result.Queued, ", ") }</p>
+						</div>
+					</div>
+				}
+				if len(result.Failures) > 0 {
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header">
+							<h3 class="uk-card-title">{ i18n.T(ctx, "updateall.failed_title", len(result.Failures)) }</h3>
+							<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "updateall.failed_description") }</p>
+						</div>
+						<div class="uk-card-body">
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>{ i18n.T(ctx, "agents.nickname") }</th>
+										<th>{ i18n.T(ctx, "updateall.reason") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, f := range result.Failures {
+										<tr>
+											<td>{ f.Computer }</td>
+											<td>{ f.Reason }</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				}
+				<div class="flex gap-4">
+					<button
+						type="button"
+						class="uk-button uk-button-primary"
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabUpdateStatus)))) }
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						{ i18n.T(ctx, "updateall.show_status") }
+					</button>
+					<button
+						type="button"
+						class="uk-button uk-button-default"
+						hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(ActionUpdateAll)))) }
+						hx-push-url="true"
+						hx-target="#main"
+						hx-swap="outerHTML"
+					>
+						{ i18n.T(ctx, "updateall.back") }
+					</button>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ UpdateStatus(c echo.Context, p partials.PaginationAndSort, rows []UpdateStatusRow, refreshTime int, itemsPerPage int, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(TabUpdateStatus)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(TabUpdateStatus)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabUpdateStatus))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(TabUpdateStatus, commonInfo)
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex justify-between items-center">
+							<div>
+								<h3 class="uk-card-title">{ i18n.T(ctx, "updatestatus.title") }</h3>
+								<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "updatestatus.description") }</p>
+							</div>
+							@partials.RefreshPage(commonInfo.Translator, refreshTime, true)
+						</div>
+					</div>
+					<div class="uk-card-body">
+						if len(rows) == 0 {
+							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "agents.no_agents") }</p>
+						} else {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>
+											<div class="flex gap-1 items-center">
+												<span>{ i18n.T(ctx, "agents.nickname") }</span>
+												@partials.SortByColumnIcon(c, p, i18n.T(ctx, "agents.nickname"), "nickname", "alpha", "#main", "outerHTML", "get")
+											</div>
+										</th>
+										<th>{ i18n.T(ctx, "agents.os") }</th>
+										<th>{ i18n.T(ctx, "Status") }</th>
+										<th>{ i18n.T(ctx, "updatestatus.last_run") }</th>
+										<th>{ i18n.T(ctx, "updatestatus.result") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, row := range rows {
+										<tr>
+											<td class="!align-middle">
+												<a
+													class="underline"
+													href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates", row.AgentID))) }
+													hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates", row.AgentID)))) }
+													hx-push-url="true"
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													{ row.Nickname }
+												</a>
+											</td>
+											<td class="!align-middle">
+												@partials.OSBadge(row.OS)
+											</td>
+											<td class="!align-middle">
+												@updateStatusLabel(row)
+											</td>
+											<td class="!align-middle">
+												if row.Run != nil && !row.Run.Started.IsZero() {
+													{ commonInfo.Translator.FmtDateMedium(row.Run.Started.Local()) + " " + commonInfo.Translator.FmtTimeShort(row.Run.Started.Local()) }
+												}
+											</td>
+											<td class="!align-middle">
+												if row.Run != nil && len(row.Run.Results) > 0 {
+													{ updateRunCounts(ctx, row.Run) }
+												} else if row.Reachable && row.Run != nil && !row.Run.Running() && row.Run.Error == "" {
+													<span class="uk-text-muted">{ i18n.T(ctx, "updatestatus.nothing_to_update") }</span>
+												}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+							@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabUpdateStatus)))), itemsPerPage)
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ updateStatusLabel(row UpdateStatusRow) {
+	switch  {
+		case row.Run.Running():
+			<span class="text-blue-600">{ i18n.T(ctx, "updatestatus.running", len(row.Run.Results), row.Run.Total) }</span>
+		case !row.Reachable && row.Online:
+			<span class="uk-text-muted">{ i18n.T(ctx, "updatestatus.unsupported") }</span>
+		case !row.Reachable && row.Queued:
+			<span class="text-orange-600">{ i18n.T(ctx, "updatestatus.queued") }</span>
+		case !row.Reachable:
+			<span class="uk-text-muted">{ i18n.T(ctx, "updatestatus.offline") }</span>
+		case row.Queued:
+			<span class="text-blue-600">{ i18n.T(ctx, "updatestatus.queued_online") }</span>
+		case row.Run == nil:
+			<span class="uk-text-muted">{ i18n.T(ctx, "updatestatus.never") }</span>
+		case row.Run.Error != "":
+			<span class="text-red-600">{ i18n.T(ctx, "updatestatus.failed", row.Run.Error) }</span>
+		default:
+			<span class="text-green-600">{ i18n.T(ctx, "updatestatus.finished") }</span>
+	}
+}
+
+templ Library(c echo.Context, packages []wingetrepo.Package, successMessage string, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(TabLibrary)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(TabLibrary)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(TabLibrary, commonInfo)
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "library.description") }</p>
+					</div>
+					<div class="uk-card-body">
+						<form
+							class="flex flex-col gap-4"
+							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)))) }
+							hx-encoding="multipart/form-data"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#library-upload-spinner"
+							hx-disabled-elt="find button"
+						>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label class="uk-form-label" for="library-file">{ i18n.T(ctx, "library.file") }</label>
+								<input type="file" class="uk-input" id="library-file" name="library-file" accept=".msi" required/>
+								<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "library.file_description") }</p>
+							</div>
+							<div class="flex flex-col gap-4 w-1/2">
+								@libraryField("library-name", "library.name")
+								@libraryField("library-publisher", "library.publisher")
+								@libraryField("library-version", "library.version")
+								@libraryField("library-id", "library.id")
+								<div class="flex flex-col gap-2">
+									<label class="uk-form-label" for="library-architecture">{ i18n.T(ctx, "library.architecture") }</label>
+									<select class="uk-select" id="library-architecture" name="library-architecture">
+										<option value="neutral" selected>{ i18n.T(ctx, "library.architecture_any") }</option>
+										<option value="x64">x64</option>
+										<option value="x86">x86</option>
+										<option value="arm64">arm64</option>
+									</select>
+								</div>
+								<div class="flex flex-col gap-2">
+									<label class="uk-form-label" for="library-scope">{ i18n.T(ctx, "library.scope") }</label>
+									<select class="uk-select" id="library-scope" name="library-scope">
+										<option value="organization" selected>{ i18n.T(ctx, "library.scope_organization") }</option>
+										<option value="all">{ i18n.T(ctx, "library.scope_all") }</option>
+									</select>
+								</div>
+							</div>
+							<div class="flex items-center gap-4">
+								<button type="submit" class="uk-button uk-button-primary">
+									<uk-icon hx-history="false" icon="upload" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "library.upload") }
+								</button>
+								<div id="library-upload-spinner" class="htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5"></div>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.packages") }</h3>
+					</div>
+					<div class="uk-card-body">
+						if len(packages) == 0 {
+							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "library.no_packages") }</p>
+						} else {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>{ i18n.T(ctx, "Name") }</th>
+										<th>{ i18n.T(ctx, "library.version") }</th>
+										<th>{ i18n.T(ctx, "library.publisher") }</th>
+										<th>{ i18n.T(ctx, "library.scope") }</th>
+										<th>{ i18n.T(ctx, "library.uploaded_on") }</th>
+										<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, p := range packages {
+										<tr>
+											<td class="!align-middle">
+												<div class="flex flex-col">
+													<span>{ p.PackageName }</span>
+													<span class="uk-text-small uk-text-muted">{ p.PackageIdentifier }</span>
+												</div>
+											</td>
+											<td class="!align-middle">{ p.PackageVersion }</td>
+											<td class="!align-middle">{ p.Publisher }</td>
+											<td class="!align-middle">
+												if p.TenantID == 0 {
+													{ i18n.T(ctx, "library.scope_all") }
+												} else {
+													{ i18n.T(ctx, "library.scope_organization") }
+												}
+											</td>
+											<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(p.Uploaded.Local()) }</td>
+											<td class="!align-middle">
+												<button
+													type="button"
+													class="text-red-600"
+													title={ i18n.T(ctx, "library.remove") }
+													hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)+"/delete"))) }
+													hx-vals={ libraryPackageValues(p) }
+													hx-confirm={ i18n.T(ctx, "library.confirm_remove", p.PackageName, p.PackageVersion) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													<uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.computers") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "library.computers_description") }</p>
+					</div>
+					<div class="uk-card-body flex items-center gap-4">
+						<button
+							type="button"
+							class="uk-button uk-button-default"
+							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)+"/register"))) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#library-register-spinner"
+							hx-disabled-elt="this"
+						>
+							{ i18n.T(ctx, "library.register") }
+						</button>
+						<div id="library-register-spinner" class="htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ libraryField(name string, label string) {
+	<div class="flex flex-col gap-2">
+		<label class="uk-form-label" for={ name }>{ i18n.T(ctx, label) }</label>
+		<input type="text" class="uk-input" id={ name } name={ name } spellcheck="false" placeholder={ i18n.T(ctx, "library.from_msi") }/>
+	</div>
 }

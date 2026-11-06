@@ -11,30 +11,37 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-func (h *Handler) DeployInstall(c echo.Context) error {
-	commonInfo, err := h.GetCommonInfo(c)
-	if err != nil {
-		return err
-	}
+// agentPackageSubjects are the NATS subjects used to ask an agent to install, update or uninstall a package
+var agentPackageSubjects = map[string]string{
+	deploy_views.ActionInstall:   "agent.installpackage.",
+	deploy_views.ActionUpdate:    "agent.updatepackage.",
+	deploy_views.ActionUninstall: "agent.uninstallpackage.",
+}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, "", commonInfo), commonInfo))
+func (h *Handler) DeployInstall(c echo.Context) error {
+	return h.DeployAction(c, deploy_views.ActionInstall)
 }
 
 func (h *Handler) DeployUninstall(c echo.Context) error {
+	return h.DeployAction(c, deploy_views.ActionUninstall)
+}
+
+func (h *Handler) DeployAction(c echo.Context, action string) error {
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, "", commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, action, "", commonInfo), commonInfo))
 }
 
-func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
+func (h *Handler) SearchPackagesAction(c echo.Context, action string) error {
 	var err error
 
 	commonInfo, err := h.GetCommonInfo(c)
@@ -56,6 +63,10 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 
 	if useWinget {
 		allSources = append(allSources, "winget")
+		// Packages of the console's private winget repository
+		if h.WinGetLibrary != nil {
+			allSources = append(allSources, models.LibraryPackageSource)
+		}
 	}
 
 	useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
@@ -124,10 +135,21 @@ func (h *Handler) SearchPackagesAction(c echo.Context, install bool) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	return RenderView(c, deploy_views.SearchPacketResult(install, packages, c, p, f, allSources, itemsPerPage, commonInfo))
+	return RenderView(c, deploy_views.SearchPacketResult(action, packages, c, p, f, allSources, itemsPerPage, commonInfo))
 }
 
 func (h *Handler) SelectPackageDeployment(c echo.Context) error {
+	action, ok := deploy_views.ParseAction(c.FormValue("filterByInstallationType"))
+	if !ok {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), false))
+	}
+
+	return h.SelectAgentsForDeployment(c, action)
+}
+
+// SelectAgentsForDeployment shows the agents where a package can be installed, updated or uninstalled.
+// When every package must be updated, no package is selected and agents with any OS are shown.
+func (h *Handler) SelectAgentsForDeployment(c echo.Context, action string) error {
 	commonInfo, err := h.GetCommonInfo(c)
 	if err != nil {
 		return err
@@ -138,14 +160,13 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	packageBranch := c.FormValue("filterByPackageBranch")
 	packageBrewType := c.FormValue("filterByPackageBrewType")
 	packageVerified := c.FormValue("filterByPackageVerified")
-	installParam := c.FormValue("filterByInstallationType")
 	source := c.FormValue("filterBySource")
 
-	if packageId == "" || packageName == "" || installParam == "" {
+	if action != deploy_views.ActionUpdateAll && (packageId == "" || packageName == "") {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), false))
 	}
 
-	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+	if packageBrewType != "" && !slices.Contains([]string{"cask", "formula"}, packageBrewType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
 	}
 
@@ -166,7 +187,7 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 	}
 
 	switch source {
-	case "winget":
+	case "winget", models.LibraryPackageSource:
 		f.AgentOSVersions = []string{"windows"}
 	case "flatpak":
 		f.AgentOSVersions = []string{"ubuntu", "neon", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky"}
@@ -204,18 +225,13 @@ func (h *Handler) SelectPackageDeployment(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
 	}
 
-	install, err := strconv.ParseBool(installParam)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
-	}
-
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
 	if err != nil {
 		log.Println("[ERROR]: could not get refresh time from database")
 		refreshTime = 5
 	}
 
-	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, source, packageBranch, packageBrewType, isPackageVerified, agents, install, refreshTime, itemsPerPage, commonInfo), commonInfo))
+	return RenderView(c, deploy_views.DeployIndex("", deploy_views.SelectPackageDeployment(c, p, f, packageId, packageName, source, packageBranch, packageBrewType, isPackageVerified, agents, action, refreshTime, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
@@ -232,9 +248,8 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 	packageBranch := c.FormValue("filterByPackageBranch")
 	packageBrewType := c.FormValue("filterByPackageBrewType")
 	packageVerified := c.FormValue("filterByPackageVerified")
-	installParam := c.FormValue("filterByInstallationType")
 
-	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+	if packageBrewType != "" && !slices.Contains([]string{"cask", "formula"}, packageBrewType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
 	}
 
@@ -246,34 +261,41 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 		}
 	}
 
-	agents := strings.Split(checkedItems, ",")
+	agents := []string{}
+	for _, agent := range strings.Split(checkedItems, ",") {
+		if agent != "" {
+			agents = append(agents, agent)
+		}
+	}
 	if len(agents) == 0 {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.no_selected_agents_to_deploy"), true))
 	}
 
-	install, err := strconv.ParseBool(installParam)
-	if err != nil {
-		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	action, ok := deploy_views.ParseAction(c.FormValue("filterByInstallationType"))
+	if !ok {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.required_params_missing"), true))
+	}
+
+	if action == deploy_views.ActionUpdateAll {
+		return h.UpdateAllPackagesOnAgents(c, agents, commonInfo)
+	}
+
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
 	}
 
 	for _, agent := range agents {
-		action := openuem_nats.DeployAction{
+		deployAction := openuem_nats.DeployAction{
 			AgentId:         agent,
+			Action:          action,
 			PackageId:       packageId,
 			PackageName:     packageName,
 			PackageBranch:   packageBranch,
 			PackageBrewType: packageBrewType,
 			PackageVerified: isPackageVerified,
-			// Repository:  "winget",
 		}
 
-		if install {
-			action.Action = "install"
-		} else {
-			action.Action = "uninstall"
-		}
-
-		actionBytes, err := json.Marshal(action)
+		actionBytes, err := json.Marshal(deployAction)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
@@ -283,36 +305,14 @@ func (h *Handler) DeployPackageToSelectedAgents(c echo.Context) error {
 			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 
-		if install {
-			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
-			}
+		if err := h.NATSConnection.Publish(agentPackageSubjects[action]+agent, actionBytes); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
+		}
 
-			if err := h.NATSConnection.Publish("agent.installpackage."+agent, actionBytes); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
-			}
-
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
-			}
-		} else {
-			if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
-				return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "nats.not_connected"), false))
-			}
-
-			if err := h.NATSConnection.Publish("agent.uninstallpackage."+agent, actionBytes); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
-			}
-
-			if err := h.Model.SaveDeployInfo(&action, deploymentFailed, commonInfo); err != nil {
-				return RenderError(c, partials.ErrorMessage(err.Error(), true))
-			}
+		if err := h.Model.SaveDeployInfo(&deployAction, deploymentFailed, commonInfo); err != nil {
+			return RenderError(c, partials.ErrorMessage(err.Error(), true))
 		}
 	}
 
-	if install {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, true, i18n.T(c.Request().Context(), "install.requested"), commonInfo), commonInfo))
-	} else {
-		return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, false, i18n.T(c.Request().Context(), "uninstall.requested"), commonInfo), commonInfo))
-	}
+	return RenderView(c, deploy_views.DeployIndex("| Deploy", deploy_views.Deploy(c, action, i18n.T(c.Request().Context(), action+".requested"), commonInfo), commonInfo))
 }
