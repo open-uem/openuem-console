@@ -8,6 +8,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/layout"
 	"github.com/open-uem/openuem-console/internal/views/partials"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 	"strconv"
 	"strings"
 )
@@ -85,7 +86,7 @@ templ Deploy(c echo.Context, action string, successMessage string, commonInfo *p
 
 templ DeployNavbar(active string, commonInfo *partials.CommonInfo) {
 	<ul class="uk-tab">
-		for _, action := range []string{ActionInstall, ActionUpdate, ActionUninstall, ActionUpdateAll, TabUpdateStatus} {
+		for _, action := range []string{ActionInstall, ActionUpdate, ActionUninstall, ActionUpdateAll, TabUpdateStatus, TabLibrary} {
 			<li class={ templ.KV("uk-active", active == action) }>
 				<a
 					href={ templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(action))) }
@@ -575,6 +576,8 @@ templ UpdateStatus(c echo.Context, p partials.PaginationAndSort, rows []UpdateSt
 											<td class="!align-middle">
 												if row.Run != nil && len(row.Run.Results) > 0 {
 													{ updateRunCounts(ctx, row.Run) }
+												} else if row.Reachable && row.Run != nil && !row.Run.Running() && row.Run.Error == "" {
+													<span class="uk-text-muted">{ i18n.T(ctx, "updatestatus.nothing_to_update") }</span>
 												}
 											</td>
 										</tr>
@@ -609,4 +612,160 @@ templ updateStatusLabel(row UpdateStatusRow) {
 		default:
 			<span class="text-green-600">{ i18n.T(ctx, "updatestatus.finished") }</span>
 	}
+}
+
+templ Library(c echo.Context, packages []wingetrepo.Package, successMessage string, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(TabLibrary)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(TabLibrary)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(TabLibrary, commonInfo)
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "library.description") }</p>
+					</div>
+					<div class="uk-card-body">
+						<form
+							class="flex flex-col gap-4"
+							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)))) }
+							hx-encoding="multipart/form-data"
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#library-upload-spinner"
+							hx-disabled-elt="find button"
+						>
+							<div class="flex flex-col gap-2 w-1/2">
+								<label class="uk-form-label" for="library-file">{ i18n.T(ctx, "library.file") }</label>
+								<input type="file" class="uk-input" id="library-file" name="library-file" accept=".msi" required/>
+								<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "library.file_description") }</p>
+							</div>
+							<div class="flex flex-col gap-4 w-1/2">
+								@libraryField("library-name", "library.name")
+								@libraryField("library-publisher", "library.publisher")
+								@libraryField("library-version", "library.version")
+								@libraryField("library-id", "library.id")
+								<div class="flex flex-col gap-2">
+									<label class="uk-form-label" for="library-architecture">{ i18n.T(ctx, "library.architecture") }</label>
+									<select class="uk-select" id="library-architecture" name="library-architecture">
+										<option value="neutral" selected>{ i18n.T(ctx, "library.architecture_any") }</option>
+										<option value="x64">x64</option>
+										<option value="x86">x86</option>
+										<option value="arm64">arm64</option>
+									</select>
+								</div>
+								<div class="flex flex-col gap-2">
+									<label class="uk-form-label" for="library-scope">{ i18n.T(ctx, "library.scope") }</label>
+									<select class="uk-select" id="library-scope" name="library-scope">
+										<option value="organization" selected>{ i18n.T(ctx, "library.scope_organization") }</option>
+										<option value="all">{ i18n.T(ctx, "library.scope_all") }</option>
+									</select>
+								</div>
+							</div>
+							<div class="flex items-center gap-4">
+								<button type="submit" class="uk-button uk-button-primary">
+									<uk-icon hx-history="false" icon="upload" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>
+									{ i18n.T(ctx, "library.upload") }
+								</button>
+								<div id="library-upload-spinner" class="htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5"></div>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.packages") }</h3>
+					</div>
+					<div class="uk-card-body">
+						if len(packages) == 0 {
+							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "library.no_packages") }</p>
+						} else {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>{ i18n.T(ctx, "Name") }</th>
+										<th>{ i18n.T(ctx, "library.version") }</th>
+										<th>{ i18n.T(ctx, "library.publisher") }</th>
+										<th>{ i18n.T(ctx, "library.scope") }</th>
+										<th>{ i18n.T(ctx, "library.uploaded_on") }</th>
+										<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, p := range packages {
+										<tr>
+											<td class="!align-middle">
+												<div class="flex flex-col">
+													<span>{ p.PackageName }</span>
+													<span class="uk-text-small uk-text-muted">{ p.PackageIdentifier }</span>
+												</div>
+											</td>
+											<td class="!align-middle">{ p.PackageVersion }</td>
+											<td class="!align-middle">{ p.Publisher }</td>
+											<td class="!align-middle">
+												if p.TenantID == 0 {
+													{ i18n.T(ctx, "library.scope_all") }
+												} else {
+													{ i18n.T(ctx, "library.scope_organization") }
+												}
+											</td>
+											<td class="!align-middle">{ commonInfo.Translator.FmtDateMedium(p.Uploaded.Local()) }</td>
+											<td class="!align-middle">
+												<button
+													type="button"
+													class="text-red-600"
+													title={ i18n.T(ctx, "library.remove") }
+													hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)+"/delete"))) }
+													hx-vals={ libraryPackageValues(p) }
+													hx-confirm={ i18n.T(ctx, "library.confirm_remove", p.PackageName, p.PackageVersion) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+												>
+													<uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "library.computers") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "library.computers_description") }</p>
+					</div>
+					<div class="uk-card-body flex items-center gap-4">
+						<button
+							type="button"
+							class="uk-button uk-button-default"
+							hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabLibrary)+"/register"))) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-indicator="#library-register-spinner"
+							hx-disabled-elt="this"
+						>
+							{ i18n.T(ctx, "library.register") }
+						</button>
+						<div id="library-register-spinner" class="htmx-indicator" hx-history="false" uk-spinner="ratio: 0.5"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ libraryField(name string, label string) {
+	<div class="flex flex-col gap-2">
+		<label class="uk-form-label" for={ name }>{ i18n.T(ctx, label) }</label>
+		<input type="text" class="uk-input" id={ name } name={ name } spellcheck="false" placeholder={ i18n.T(ctx, "library.from_msi") }/>
+	</div>
 }

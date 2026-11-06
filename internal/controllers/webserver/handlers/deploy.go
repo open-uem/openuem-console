@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/labstack/echo/v4"
 	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -62,6 +63,10 @@ func (h *Handler) SearchPackagesAction(c echo.Context, action string) error {
 
 	if useWinget {
 		allSources = append(allSources, "winget")
+		// Packages of the console's private winget repository
+		if h.WinGetLibrary != nil {
+			allSources = append(allSources, models.LibraryPackageSource)
+		}
 	}
 
 	useFlatpak, err := h.Model.GetDefaultUseFlatpak(commonInfo.TenantID)
@@ -182,7 +187,7 @@ func (h *Handler) SelectAgentsForDeployment(c echo.Context, action string) error
 	}
 
 	switch source {
-	case "winget":
+	case "winget", models.LibraryPackageSource:
 		f.AgentOSVersions = []string{"windows"}
 	case "flatpak":
 		f.AgentOSVersions = []string{"ubuntu", "neon", "debian", "opensuse-leap", "linuxmint", "fedora", "manjaro", "arch", "almalinux", "rocky"}

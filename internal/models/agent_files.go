@@ -72,3 +72,25 @@ func (m *Model) GetTaskFilePaths() ([]string, error) {
 		Select(task.FieldMsiPath).
 		Strings(context.Background())
 }
+
+// EnabledAgentTenants returns the organizations of an enabled agent, through its sites.
+// ok is false if the agent doesn't exist or isn't enabled.
+func (m *Model) EnabledAgentTenants(agentID string) (tenantIDs []int, ok bool, err error) {
+	a, err := m.Client.Agent.Query().
+		WithSite(func(q *ent.SiteQuery) { q.WithTenant() }).
+		Where(agent.ID(agentID), agent.AgentStatusEQ(agent.AgentStatusEnabled)).
+		Only(context.Background())
+	if ent.IsNotFound(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+
+	for _, s := range a.Edges.Site {
+		if s.Edges.Tenant != nil {
+			tenantIDs = append(tenantIDs, s.Edges.Tenant.ID)
+		}
+	}
+	return tenantIDs, true, nil
+}

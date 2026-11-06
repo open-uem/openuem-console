@@ -10,6 +10,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/controllers/webserver"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/taskfiles"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 	"github.com/open-uem/utils"
 )
 
@@ -44,6 +45,7 @@ type Worker struct {
 	ReverseProxyServer                string
 	ServerReleasesFolder              string
 	TaskFiles                         *taskfiles.Store
+	WinGetLibrary                     *wingetrepo.Library
 	DownloadWingetDBJob               gocron.Job
 	DownloadWingetJobDuration         time.Duration
 	DownloadServerReleasesJob         gocron.Job

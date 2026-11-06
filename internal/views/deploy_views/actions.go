@@ -2,9 +2,11 @@ package deploy_views
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/invopop/ctxi18n/i18n"
 	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 )
 
 // Actions that can be requested from the Deploy section
@@ -17,6 +19,8 @@ const (
 
 	// TabUpdateStatus isn't an action: it shows the status of the agents' update runs
 	TabUpdateStatus = "updatestatus"
+	// TabLibrary isn't an action: it shows the packages of the private winget repository
+	TabLibrary = "library"
 )
 
 // ParseAction validates the deploy action sent in a form. The "true" and "false" values
@@ -62,6 +66,8 @@ func actionTitle(action string) string {
 		return "updateall.tab"
 	case TabUpdateStatus:
 		return "updatestatus.tab"
+	case TabLibrary:
+		return "library.tab"
 	default:
 		return "Install"
 	}
@@ -113,4 +119,10 @@ type UpdateStatusRow struct {
 func updateRunCounts(ctx context.Context, run *openuem_nats.UpdateRun) string {
 	updated, upToDate, failed := run.Counts()
 	return i18n.T(ctx, "updatestatus.result_counts", updated, failed, upToDate)
+}
+
+// libraryPackageValues identifies a package version of the library in a request
+func libraryPackageValues(p wingetrepo.Package) string {
+	data, _ := json.Marshal(map[string]string{"library-id": p.PackageIdentifier, "library-version": p.PackageVersion})
+	return string(data)
 }

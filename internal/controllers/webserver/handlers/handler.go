@@ -18,6 +18,7 @@ import (
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/taskfiles"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 )
 
 type Handler struct {
@@ -51,6 +52,7 @@ type Handler struct {
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
 	TaskFiles            *taskfiles.Store
+	WinGetLibrary        *wingetrepo.Library
 	LatestServerRelease  openuem_nats.OpenUEMRelease
 	Replicas             int
 	ServerReleasesFolder string

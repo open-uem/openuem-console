@@ -39,6 +39,7 @@ require (
 	github.com/open-uem/wingetcfg v0.0.0-20251011111407-80e823d91ea5
 	github.com/pkg/sftp v1.13.10
 	github.com/pquerna/otp v1.5.0
+	github.com/richardlehane/mscfb v1.0.6
 	github.com/sethvargo/go-password v0.3.1
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.27.7
@@ -48,6 +49,7 @@ require (
 	golang.org/x/mod v0.34.0
 	golang.org/x/oauth2 v0.35.0
 	golang.org/x/sys v0.42.0
+	golang.org/x/text v0.36.0
 	golang.org/x/time v0.14.0
 	gopkg.in/ini.v1 v1.67.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -110,7 +112,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/richardlehane/mscfb v1.0.6 // indirect
 	github.com/richardlehane/msoleps v1.0.6 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -128,10 +129,9 @@ require (
 	golang.org/x/image v0.39.0 // indirect
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/open-uem/nats => github.com/devilAPI/nats v0.0.0-20261103105407-85f99e4edce0
+replace github.com/open-uem/nats => github.com/devilAPI/nats v0.0.0-20261106070022-b3a4794d5abe
