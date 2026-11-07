@@ -1201,6 +1201,12 @@ en:
     clone_profile: "Clone profile"
     clone_task: "Clone task"    
   tasks:
+    archive_report: "Archive report"
+    unarchive_report: "Unarchive report"
+    show_archived: "Show archived"
+    hide_archived: "Hide archived"
+    report_archived: "The report has been archived"
+    report_unarchived: "The report has been unarchived"
     description: "Tasks allow you to perform actions on the endpoints automatically (install packages, uninstall packages, modify the registry, manage MSI packages...) that will be executed by OpenUEM agents"
     choose_task_type: "Choose a task's type"
     choose_task_subtype: "Choose a task's subtype"

@@ -1201,6 +1201,12 @@ ca:
     clone_profile: "Clonar perfil"
     clone_task: "Clonar tasca"
   tasks:
+    archive_report: "Arxivar informe"
+    unarchive_report: "Desarxivar informe"
+    show_archived: "Mostrar arxivats"
+    hide_archived: "Amagar arxivats"
+    report_archived: "L'informe s'ha arxivat"
+    report_unarchived: "L'informe s'ha desarxivat"
     description: "Les tasques permeten realitzar accions als punts finals automàticament (instal·lar paquets, desinstal·lar paquets, modificar el registre, gestionar paquets MSI...) que seran executades pels agents d'OpenUEM"
     choose_task_type: "Trieu el tipus de tasca"
     choose_task_subtype: "Trieu el subtipus d'una tasca"

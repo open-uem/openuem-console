@@ -1201,6 +1201,12 @@ pt:
     clone_profile: "Clonar perfil"
     clone_task: "Clonar tarefa"
   tasks:
+    archive_report: "Arquivar relatorio"
+    unarchive_report: "Desarquivar relatorio"
+    show_archived: "Mostrar arquivados"
+    hide_archived: "Ocultar arquivados"
+    report_archived: "O relatorio foi arquivado"
+    report_unarchived: "O relatorio foi desarquivado"
     description: "As tarefas permitem que você execute ações nos endpoints automaticamente (instalar pacotes, desinstalar pacotes, modificar o registro, gerenciar pacotes MSI...) que serão executadas pelos agentes OpenUEM"
     choose_task_type: "Escolha o tipo de tarefa"
     choose_task_subtype: "Escolha o subtipo de tarefa"

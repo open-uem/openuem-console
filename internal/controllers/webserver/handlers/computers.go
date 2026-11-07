@@ -1954,12 +1954,14 @@ func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	reports, err := h.Model.TaskReportsByPageInfo(agentId, commonInfo, p)
+	showArchived := c.QueryParam("archived") == "true"
+
+	reports, err := h.Model.TaskReportsByPageInfo(agentId, commonInfo, p, showArchived)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
-	p.NItems, err = h.Model.CountTaskReportsByPageInfo(agentId, commonInfo)
+	p.NItems, err = h.Model.CountTaskReportsByPageInfo(agentId, commonInfo, showArchived)
 	if err != nil {
 		log.Printf("[ERROR]: an error occurred counting apps for agent: %v", err)
 		return RenderError(c, partials.ErrorMessage(err.Error(), true))
@@ -1995,7 +1997,7 @@ func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {
 		refreshTime = 5
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, availableProfiles, confirmDelete, itemsPerPage, commonInfo, netbird, offline, successMessage, refreshTime), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Tasks(c, p, agent, reports, availableTasks, availableProfiles, confirmDelete, itemsPerPage, commonInfo, netbird, offline, showArchived, successMessage, refreshTime), commonInfo))
 }
 
 func (h *Handler) RunTask(c echo.Context) error {
@@ -2449,4 +2451,34 @@ func (h *Handler) CreateWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGe
 		cfg.AddResource(msiUninstall)
 	}
 	return cfg, nil
+}
+
+func (h *Handler) ArchiveTaskReport(c echo.Context) error {
+	var err error
+
+	commonInfo, err := h.GetCommonInfo(c)
+	if err != nil {
+		return err
+	}
+
+	agentID := c.Param("uuid")
+	if agentID == "" {
+		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, "an error occurred getting uuid param", "Computer", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
+	}
+
+	reportID, err := strconv.Atoi(c.FormValue("report"))
+	if err != nil {
+		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "tasks.edit.invalid_task"), true))
+	}
+
+	archived := c.FormValue("archived") == "true"
+	if err := h.Model.SetTaskReportArchived(reportID, archived, commonInfo); err != nil {
+		return RenderError(c, partials.ErrorMessage(err.Error(), true))
+	}
+
+	msg := "tasks.report_archived"
+	if !archived {
+		msg = "tasks.report_unarchived"
+	}
+	return h.ComputerTasks(c, i18n.T(c.Request().Context(), msg))
 }

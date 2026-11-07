@@ -1201,6 +1201,12 @@ fr:
     clone_profile: "Cloner le profil"
     clone_task: "Cloner la tâche"
   tasks:
+    archive_report: "Archiver le rapport"
+    unarchive_report: "Desarchiver le rapport"
+    show_archived: "Afficher les archives"
+    hide_archived: "Masquer les archives"
+    report_archived: "Le rapport a ete archive"
+    report_unarchived: "Le rapport a ete desarchive"
     description: "Les tâches vous permettent d'effectuer automatiquement des actions sur les points de terminaison (installer des paquets, désinstaller des paquets, modifier le registre, gérer les paquets MSI...) qui seront exécutées par les agents OpenUEM"
     choose_task_type: "Choisissez le type d'une tâche"
     choose_task_subtype: "Choisissez le sous-type d'une tâche"

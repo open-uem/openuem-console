@@ -7,11 +7,12 @@ import (
 	"github.com/labstack/echo/v4"
 	ent "github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
+	"strconv"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 	"time"
 )
 
-templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, reports []*ent.TaskReport, availableTasks []*ent.Task, availableProfiles []*ent.Profile, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, successMessage string, refresh int) {
+templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, reports []*ent.TaskReport, availableTasks []*ent.Task, availableProfiles []*ent.Profile, confirmDelete bool, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, showArchived bool, successMessage string, refresh int) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -86,8 +87,29 @@ templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, repo
 							</div>
 						</div>
 						<div>
+							<div class="flex justify-end mb-2">
+								if showArchived {
+									<a
+										class="uk-text-small underline"
+										href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", agent.ID))) }
+										hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", agent.ID)))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>{ i18n.T(ctx, "tasks.hide_archived") }</a>
+								} else {
+									<a
+										class="uk-text-small underline"
+										href={ templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks?archived=true", agent.ID))) }
+										hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks?archived=true", agent.ID)))) }
+										hx-push-url="true"
+										hx-target="#main"
+										hx-swap="outerHTML"
+									>{ i18n.T(ctx, "tasks.show_archived") }</a>
+								}
+							</div>
 							if len(reports) > 0 {
-								@ReportDetail(agent, reports, commonInfo)
+								@ReportDetail(agent, reports, showArchived, commonInfo)
 								@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/tasks", agent.ID)))), itemsPerPage)
 							} else {
 								<p class="uk-text-small uk-text-muted">
@@ -102,7 +124,7 @@ templ Tasks(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, repo
 	</main>
 }
 
-templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, commonInfo *partials.CommonInfo) {
+templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, showArchived bool, commonInfo *partials.CommonInfo) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped -mt-4">
 		<thead>
 			<tr>
@@ -113,6 +135,7 @@ templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, commonInfo *part
 				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_output") }</span></th>
 				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "profiles.standard_error") }</span></th>
 				<th class="dark:text-white"><span class="text-nowrap">{ i18n.T(ctx, "Profile") }</span></th>
+				<th></th>
 			</tr>
 		</thead>
 		for _, report := range reports {
@@ -176,6 +199,36 @@ templ ReportDetail(agent *ent.Agent, reports []*ent.TaskReport, commonInfo *part
 					} else {
 						{ "-" }
 					}
+				</td>
+				<td class="items-center !align-middle">
+					<form>
+						<input type="hidden" name="report" value={ strconv.Itoa(report.ID) }/>
+						if report.Archived {
+							<input type="hidden" name="archived" value="false"/>
+							<button
+								class="flex gap-2"
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/archivetaskreport", agent.ID)))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								uk-tooltip={ i18n.T(ctx, "tasks.unarchive_report") }
+							>
+								<uk-icon hx-history="false" icon="archive-restore" custom-class="text-green-600 h-6 w-6" uk-cloack></uk-icon>
+							</button>
+						} else {
+							<input type="hidden" name="archived" value="true"/>
+							<button
+								class="flex gap-2"
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/archivetaskreport", agent.ID)))) }
+								hx-push-url="false"
+								hx-target="#main"
+								hx-swap="outerHTML"
+								uk-tooltip={ i18n.T(ctx, "tasks.archive_report") }
+							>
+								<uk-icon hx-history="false" icon="archive" custom-class="text-orange-600 h-6 w-6" uk-cloack></uk-icon>
+							</button>
+						}
+					</form>
 				</td>
 			</tr>
 		}
