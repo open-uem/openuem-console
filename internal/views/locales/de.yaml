@@ -739,6 +739,13 @@ de:
     date: "Installationsdatum"
     support_url: "Support-URL"
     no_info: "Noch kein Update-Verlauf verfügbar"
+  pending_updates:
+    title: "Ausstehende Updates"
+    description: "Dies sind die Windows-Updates, die auf diesem Computer noch installiert werden müssen, wie vom OpenUEM-Agent gemeldet"
+    update_title: "Beschreibung"
+    kb: "KB"
+    downloaded: "Heruntergeladen?"
+    no_info: "Keine ausstehenden Updates"
   reports:
     description: "Informationen aus OpenUEM mithilfe der folgenden vordefinierten Berichte exportieren"
     computer: "Computerbericht generieren"

@@ -739,6 +739,13 @@ fr:
     date: "Date d'installation"
     support_url: "URL de support"
     no_info: "Aucun historique de mises à jour disponible pour le moment"
+  pending_updates:
+    title: "Mises à jour en attente"
+    description: "Voici les mises à jour Windows en attente d'installation sur cet ordinateur, telles que rapportées par l'agent OpenUEM"
+    update_title: "Description"
+    kb: "KB"
+    downloaded: "Téléchargée ?"
+    no_info: "Aucune mise à jour en attente"
   reports:
     description: "Exporter les informations d'OpenUEM en utilisant les rapports prédéfinis suivants"
     computer: "Générer un rapport d'ordinateur"

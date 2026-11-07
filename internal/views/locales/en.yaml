@@ -739,6 +739,13 @@ en:
     date: "Installation Date"
     support_url: "Support URL"
     no_info: "No updates history available yet"
+  pending_updates:
+    title: "Pending Updates"
+    description: "These are the Windows updates that are pending to be installed on this computer as reported by the OpenUEM Agent"
+    update_title: "Description"
+    kb: "KB"
+    downloaded: "Downloaded?"
+    no_info: "No pending updates"
   reports:
     description: "Export information from OpenUEM using the following predefined reports"
     computer: "Generate computer report"

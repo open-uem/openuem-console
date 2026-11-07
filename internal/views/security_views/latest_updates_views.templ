@@ -8,13 +8,53 @@ import (
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
 
-templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ LatestUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, updates []*ent.Update, pendingUpdates []*ent.PendingUpdate, itemsPerPage int, commonInfo *partials.CommonInfo) {
 	<title>OpenUEM | { i18n.T(ctx, "Security") } | { i18n.T(ctx, "updates_history.title") } </title>
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Security", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security")))}, {Title: i18n.T(ctx, "Updates"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/security/updates")))}, {Title: agent.Nickname, Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/security/%s/updates", agent.ID))))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
 			<div class="uk-card-body uk-flex uk-flex-column gap-4">
 				@SecurityNavbar("updates", commonInfo)
+				<div class="uk-width-1-2@m uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "pending_updates.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">
+							{ i18n.T(ctx, "pending_updates.description") }
+						</p>
+					</div>
+					<div class="uk-card-body">
+						if len(pendingUpdates) > 0 {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped mt-5 mb-2">
+								<thead>
+									<tr>
+										<th class="w-8/12">{ i18n.T(ctx, "pending_updates.update_title") }</th>
+										<th class="w-2/12">{ i18n.T(ctx, "pending_updates.kb") }</th>
+										<th class="w-2/12">{ i18n.T(ctx, "pending_updates.downloaded") }</th>
+									</tr>
+								</thead>
+								for _, pendingUpdate := range pendingUpdates {
+									<tr>
+										<td>{ pendingUpdate.Title }</td>
+										if pendingUpdate.KBArticleIds != "" {
+											<td class="!align-middle">{ pendingUpdate.KBArticleIds }</td>
+										} else {
+											<td class="!align-middle">-</td>
+										}
+										if pendingUpdate.IsDownloaded {
+											<td class="!align-middle"><span class="text-green-600">{ i18n.T(ctx, "Yes") }</span></td>
+										} else {
+											<td class="!align-middle">{ i18n.T(ctx, "No") }</td>
+										}
+									</tr>
+								}
+							</table>
+						} else {
+							<p class="uk-text-small uk-text-muted mt-4">
+								{ i18n.T(ctx, "pending_updates.no_info") }
+							</p>
+						}
+					</div>
+				</div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "updates_history.title") }</h3>
