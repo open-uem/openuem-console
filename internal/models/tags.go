@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	ent "github.com/open-uem/ent"
@@ -147,6 +148,14 @@ func (m *Model) NewTag(title, description, color string, c *partials.CommonInfo)
 		return err
 	}
 
+	exists, err := m.Client.Tag.Query().Where(tag.Tag(title), tag.HasTenantWith(tenant.ID(tenantID))).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("a tag with the name %s already exists", title)
+	}
+
 	return m.Client.Tag.Create().SetTag(title).SetDescription(description).SetColor(color).SetTenantID(tenantID).Exec(context.Background())
 }
 
@@ -154,6 +163,14 @@ func (m *Model) UpdateTag(tagId int, title, description, color string, c *partia
 	tenantID, err := strconv.Atoi(c.TenantID)
 	if err != nil {
 		return err
+	}
+
+	exists, err := m.Client.Tag.Query().Where(tag.Tag(title), tag.IDNEQ(tagId), tag.HasTenantWith(tenant.ID(tenantID))).Exist(context.Background())
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("a tag with the name %s already exists", title)
 	}
 
 	return m.Client.Tag.Update().SetTag(title).SetDescription(description).SetColor(color).Where(tag.ID(tagId), tag.HasTenantWith(tenant.ID(tenantID))).Exec(context.Background())
