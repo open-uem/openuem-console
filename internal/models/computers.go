@@ -929,7 +929,7 @@ func (m *Model) GetAgentAppsInfo(agentId string, c *partials.CommonInfo) ([]*ent
 	}
 }
 
-func (m *Model) TaskReportsByPageInfo(agentId string, c *partials.CommonInfo, p partials.PaginationAndSort) ([]*ent.TaskReport, error) {
+func (m *Model) TaskReportsByPageInfo(agentId string, c *partials.CommonInfo, p partials.PaginationAndSort, showArchived bool) ([]*ent.TaskReport, error) {
 	var query *ent.TaskReportQuery
 
 	siteID, err := strconv.Atoi(c.SiteID)
@@ -941,7 +941,7 @@ func (m *Model) TaskReportsByPageInfo(agentId string, c *partials.CommonInfo, p 
 		return nil, err
 	}
 
-	query = m.Client.TaskReport.Query().WithTask().WithProfileissue(func(q *ent.ProfileIssueQuery) { q.WithProfile().All(context.Background()) })
+	query = m.Client.TaskReport.Query().WithTask().WithProfileissue(func(q *ent.ProfileIssueQuery) { q.WithProfile().All(context.Background()) }).Where(taskreport.ArchivedEQ(showArchived))
 
 	if siteID == -1 {
 		query.Where(taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.ID(agentId), agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))))
@@ -953,7 +953,7 @@ func (m *Model) TaskReportsByPageInfo(agentId string, c *partials.CommonInfo, p 
 	return query.Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize).Order(taskreport.ByEnd(sql.OrderDesc())).All(context.Background())
 }
 
-func (m *Model) CountTaskReportsByPageInfo(agentId string, c *partials.CommonInfo) (int, error) {
+func (m *Model) CountTaskReportsByPageInfo(agentId string, c *partials.CommonInfo, showArchived bool) (int, error) {
 	var query *ent.TaskReportQuery
 
 	siteID, err := strconv.Atoi(c.SiteID)
@@ -1008,4 +1008,24 @@ func (m *Model) GetAvailableProfilesForAgent(agentID string) ([]*ent.Profile, er
 		return m.Client.Profile.Query().Where(profile.HasTasksWith(task.AgentTypeIn(task.AgentTypeLinux, task.AgentTypeAny))).All(context.Background())
 	}
 
+}
+
+func (m *Model) SetTaskReportArchived(reportID int, archived bool, c *partials.CommonInfo) error {
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return err
+	}
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return err
+	}
+
+	if siteID == -1 {
+		return m.Client.TaskReport.Update().SetArchived(archived).Where(
+			taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))),
+			taskreport.ID(reportID)).Exec(context.Background())
+	}
+	return m.Client.TaskReport.Update().SetArchived(archived).Where(
+		taskreport.HasProfileissueWith(profileissue.HasAgentsWith(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))),
+		taskreport.ID(reportID)).Exec(context.Background())
 }

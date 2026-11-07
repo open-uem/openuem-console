@@ -10,6 +10,7 @@ import (
 	"github.com/open-uem/ent/profileissue"
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/task"
+	"github.com/open-uem/ent/taskreport"
 	"github.com/open-uem/ent/tenant"
 	"github.com/open-uem/openuem-console/internal/views/partials"
 )
@@ -45,7 +46,7 @@ func (m *Model) GetProfilesByPage(p partials.PaginationAndSort, c *partials.Comm
 	var profiles []*ent.Profile
 
 	query := m.Client.Profile.Query().WithTasks().WithTags().WithIssues(func(q *ent.ProfileIssueQuery) {
-		q.WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().All(context.Background()) }).All(context.Background())
+		q.WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().Where(taskreport.ArchivedEQ(false)).All(context.Background()) }).All(context.Background())
 	}).Limit(p.PageSize).Offset((p.CurrentPage - 1) * p.PageSize)
 
 	siteID, err := strconv.Atoi(c.SiteID)
@@ -167,7 +168,7 @@ func (m *Model) GetProfileIssuesByPage(p partials.PaginationAndSort, profileID i
 
 	return m.Client.ProfileIssue.Query().
 		WithAgents().
-		WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().All(context.Background()) }).
+		WithTasksreports(func(q *ent.TaskReportQuery) { q.WithTask().Where(taskreport.ArchivedEQ(false)).All(context.Background()) }).
 		Where(profileissue.HasProfileWith(profile.ID(profileID))).
 		Order(ent.Desc(profileissue.FieldWhen)).
 		Limit(p.PageSize).

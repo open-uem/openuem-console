@@ -1201,6 +1201,12 @@ es:
     clone_profile: "Clonar perfil"
     clone_task: "Clonar tarea"
   tasks:
+    archive_report: "Archivar reporte"
+    unarchive_report: "Desarchivar reporte"
+    show_archived: "Mostrar archivados"
+    hide_archived: "Ocultar archivados"
+    report_archived: "El reporte ha sido archivado"
+    report_unarchived: "El reporte ha sido desarchivado"
     description: "Las tareas permiten realizar acciones sobre los equipos de forma automática (instalación de paquetes, desinstalación de paquetes, modificación del registro, gestionar paquetes MSI...) que serán ejecutadas por los agentes de OpenUEM"
     choose_task_type: "Elija un tipo de tarea"
     choose_task_subtype: "Elija un tipo de subtarea"

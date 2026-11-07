@@ -1201,6 +1201,12 @@ de:
     clone_profile: "Profil klonen"
     clone_task: "Aufgabe klonen"
   tasks:
+    archive_report: "Bericht archivieren"
+    unarchive_report: "Bericht wiederherstellen"
+    show_archived: "Archivierte anzeigen"
+    hide_archived: "Archivierte ausblenden"
+    report_archived: "Der Bericht wurde archiviert"
+    report_unarchived: "Der Bericht wurde wiederhergestellt"
     description: "Aufgaben ermöglichen es Ihnen, Aktionen auf den Endpunkten automatisch durchzuführen (Pakete installieren, deinstallieren, die Registry ändern, MSI-Pakete verwalten...), die von OpenUEM-Agenten ausgeführt werden"
     choose_task_type: "Aufgabentyp auswählen"
     choose_task_subtype: "Aufgaben-Untertyp auswählen"

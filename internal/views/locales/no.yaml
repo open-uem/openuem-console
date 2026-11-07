@@ -1201,6 +1201,12 @@ no:
     clone_profile: "Klon profil"
     clone_task: "Klon oppgave"
   tasks:
+    archive_report: "Arkiver rapport"
+    unarchive_report: "Gjenopprett rapport"
+    show_archived: "Vis arkiverte"
+    hide_archived: "Skjul arkiverte"
+    report_archived: "Rapporten er arkivert"
+    report_unarchived: "Rapporten er gjenopprettet"
     description: "Oppgaver lar deg utføre handlinger på endepunktene automatisk (installere pakker, avinstallere pakker, endre registeret, administrere MSI-pakker...) som vil bli utført av OpenUEM-agenter"
     choose_task_type: "Velg en oppgavetype"
     choose_task_subtype: "Velg en oppgaveundertype"
