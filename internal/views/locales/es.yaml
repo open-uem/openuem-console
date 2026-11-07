@@ -739,6 +739,13 @@ es:
     date: "Fecha Instalación"
     support_url: "URL de soporte"
     no_info: "El historial de actualizaciones no está disponible aún"
+  pending_updates:
+    title: "Actualizaciones pendientes"
+    description: "Estas son las actualizaciones de Windows pendientes de instalar en este equipo de acuerdo con lo informado por el agente de OpenUEM"
+    update_title: "Descripción"
+    kb: "KB"
+    downloaded: "¿Descargada?"
+    no_info: "No hay actualizaciones pendientes"
   reports:
     description: "Exporte información desde OpenUEM utilizando los siguientes informes predefinidos"
     computer: "Generar informe de equipo"

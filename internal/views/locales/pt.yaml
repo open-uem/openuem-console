@@ -739,6 +739,13 @@ pt:
     date: "Data de Instalação"
     support_url: "URL de Suporte"
     no_info: "Nenhum histórico de atualizações disponível ainda"
+  pending_updates:
+    title: "Atualizações Pendentes"
+    description: "Estas são as atualizações do Windows pendentes de instalação neste computador, conforme relatado pelo Agente OpenUEM"
+    update_title: "Descrição"
+    kb: "KB"
+    downloaded: "Baixada?"
+    no_info: "Nenhuma atualização pendente"
   reports:
     description: "Exportar informações do OpenUEM usando os seguintes relatórios predefinidos"
     computer: "Gerar relatório de computador"

@@ -739,6 +739,13 @@ no:
     date: "Installasjonsdato"
     support_url: "Support-URL"
     no_info: "Ingen oppdateringshistorikk tilgjengelig ennå"
+  pending_updates:
+    title: "Ventende oppdateringer"
+    description: "Dette er Windows-oppdateringene som venter på å bli installert på denne datamaskinen, som rapportert av OpenUEM-agenten"
+    update_title: "Beskrivelse"
+    kb: "KB"
+    downloaded: "Lastet ned?"
+    no_info: "Ingen ventende oppdateringer"
   reports:
     description: "Eksporter informasjon fra OpenUEM ved hjelp av følgende forhåndsdefinerte rapporter"
     computer: "Generer datamaskinrapport"

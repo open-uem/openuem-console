@@ -739,6 +739,13 @@ ca:
     date: "Data d'instal·lació"
     support_url: "URL de suport"
     no_info: "Encara no hi ha cap historial d'actualitzacions disponible"
+  pending_updates:
+    title: "Actualitzacions pendents"
+    description: "Aquestes són les actualitzacions de Windows pendents d'instal·lar en aquest ordinador segons ha informat l'agent OpenUEM"
+    update_title: "Descripció"
+    kb: "KB"
+    downloaded: "Descarregada?"
+    no_info: "No hi ha actualitzacions pendents"
   reports:
     description: "Exporteu informació des d'OpenUEM mitjançant els informes predefinits següents"
     computer: "Generar informe informàtic"

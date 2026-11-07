@@ -161,11 +161,16 @@ func (h *Handler) ListLatestUpdates(c echo.Context) error {
 		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(c, err.Error(), "Security", partials.GetNavigationUrl(commonInfo, "/security"), commonInfo), commonInfo))
 	}
 
-	if c.Request().Method == "POST" {
-		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo))
+	pendingUpdates, err := h.Model.GetPendingUpdates(agentId, commonInfo)
+	if err != nil {
+		return RenderView(c, security_views.SecurityIndex("| Security", partials.Error(c, err.Error(), "Security", partials.GetNavigationUrl(commonInfo, "/security"), commonInfo), commonInfo))
 	}
 
-	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, itemsPerPage, commonInfo), commonInfo))
+	if c.Request().Method == "POST" {
+		return RenderView(c, security_views.LatestUpdates(c, p, agent, updates, pendingUpdates, itemsPerPage, commonInfo))
+	}
+
+	return RenderView(c, security_views.SecurityIndex("| Security", security_views.LatestUpdates(c, p, agent, updates, pendingUpdates, itemsPerPage, commonInfo), commonInfo))
 }
 
 func (h *Handler) GetEDRFilters(c echo.Context) (*filters.AgentFilter, error) {
