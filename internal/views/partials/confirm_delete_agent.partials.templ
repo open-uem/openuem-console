@@ -36,7 +36,7 @@ templ ConfirmDeleteAgent(c echo.Context, confirm, cancelURL, deleteURL string) {
 							{ i18n.T(ctx, "Cancel") }
 						</button>
 					} else {
-						<button class="uk-button uk-button-default" _="on click UIkit.alert('#confirm-message').close() then toggle .hidden on #confirm" id="error-message" class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white " uk-alert="animation:true">
+						<button class="uk-button uk-button-default" _="on click toggle .hidden on #confirm" id="error-message" class="uk-alert uk-animation-fade  border-red-700 bg-red-600 text-white " uk-alert="animation:true">
 							{ i18n.T(ctx, "Cancel") }
 						</button>
 					}
