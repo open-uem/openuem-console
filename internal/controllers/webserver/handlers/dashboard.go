@@ -145,6 +145,13 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	agentIDs, err := h.Model.GetAgentsIDs(commonInfo)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	data.NAgents = len(agentIDs)
+	data.NOnlineAgents = len(h.GetAgentsOnlineStatus(agentIDs))
+
 	h.CheckNATSComponentStatus(&data)
 
 	return RenderView(c, dashboard_views.DashboardIndex("| Dashboard", dashboard_views.Dashboard(c, data, commonInfo), commonInfo))

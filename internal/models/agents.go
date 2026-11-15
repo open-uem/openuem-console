@@ -1023,3 +1023,24 @@ func (m *Model) GetAgentNetBirdById(agentId string, c *partials.CommonInfo) (*en
 		return agent, err
 	}
 }
+
+func (m *Model) GetAgentsIDs(c *partials.CommonInfo) ([]string, error) {
+	var query *ent.AgentQuery
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return nil, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	if siteID == -1 {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	} else {
+		query = m.Client.Agent.Query().Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).Where(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
+
+	return query.IDs(context.Background())
+}

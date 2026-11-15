@@ -1098,6 +1098,7 @@ fr:
     num_sessions: "Nombre de sessions ouvertes dans la console"
     num_os_users: "Nombre d'utilisateurs avec un point de terminaison attribué"
     no_reported_in_last_24h: "Agents qui n'ont pas fait de rapport au cours des dernières 24 heures"
+    online_agents: "Agents en ligne"
     num_upgradable_agents: "Agents qui peuvent être mis à niveau"
     certificates_to_expire: "Certificats qui expirent dans deux mois"
   nats:

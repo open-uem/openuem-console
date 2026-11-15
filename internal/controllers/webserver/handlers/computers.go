@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gomarkdown/markdown"
@@ -838,6 +839,12 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
 	}
 
+	agentIDs := []string{}
+	for _, agent := range computers {
+		agentIDs = append(agentIDs, agent.ID)
+	}
+	online := h.GetAgentsOnlineStatus(agentIDs)
+
 	p.NItems, err = h.Model.CountAllComputers(f, commonInfo)
 	if err != nil {
 		return RenderView(c, computers_views.InventoryIndex(" | Inventory", partials.Error(c, err.Error(), "Computers", partials.GetNavigationUrl(commonInfo, "/computers"), commonInfo), commonInfo))
@@ -857,7 +864,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 				q.Del("page")
 				q.Add("page", "1")
 				u.RawQuery = q.Encode()
-				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo), u)
+				return RenderViewWithReplaceUrl(c, computers_views.InventoryIndex("| Inventory", computers_views.Computers(c, p, f, computers, online, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo), u)
 			}
 		}
 	}
@@ -878,7 +885,7 @@ func (h *Handler) ComputersList(c echo.Context, successMessage string, comesFrom
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
-	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Inventory", computers_views.Computers(c, p, f, computers, online, versions, vendors, models, tags, availableOSes, refreshTime, itemsPerPage, successMessage, commonInfo), commonInfo))
 }
 
 func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
@@ -1913,11 +1920,38 @@ func (h *Handler) IsAgentOffline(c echo.Context) bool {
 		return true
 	}
 
+	return h.isAgentOffline(agentId)
+}
+
+func (h *Handler) isAgentOffline(agentId string) bool {
+	if h.NATSConnection == nil || !h.NATSConnection.IsConnected() {
+		return true
+	}
+
 	if _, err := h.NATSConnection.Request(fmt.Sprintf("agent.ping.%s", agentId), nil, 1*time.Second); err != nil {
 		return true
 	}
 
 	return false
+}
+
+func (h *Handler) GetAgentsOnlineStatus(agentIDs []string) map[string]bool {
+	online := make(map[string]bool, len(agentIDs))
+
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	for _, agentId := range agentIDs {
+		wg.Go(func() {
+			if !h.isAgentOffline(agentId) {
+				mu.Lock()
+				online[agentId] = true
+				mu.Unlock()
+			}
+		})
+	}
+	wg.Wait()
+
+	return online
 }
 
 func (h *Handler) ComputerTasks(c echo.Context, successMessage string) error {

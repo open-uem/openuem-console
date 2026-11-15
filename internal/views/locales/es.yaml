@@ -1098,6 +1098,7 @@ es:
     num_sessions: "Número de sesiones abiertas en la consola"
     num_os_users: "Número de usuarios con un equipo asignado"
     no_reported_in_last_24h: "Agentes que no han informado desde hace más de 24h"
+    online_agents: "Agentes en línea"
     num_upgradable_agents: "Agentes que pueden ser actualizados"
     certificates_to_expire: "Certificados que caducan en dos meses"
   nats:
