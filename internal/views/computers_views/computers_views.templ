@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, versions, vendors, models []string, availableTags []*ent.Tag, availableOSes []string, refreshTime int, itemsPerPage int, successMessage string, commonInfo *partials.CommonInfo) {
+templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFilter, agents []models.Computer, online map[string]bool, versions, vendors, models []string, availableTags []*ent.Tag, availableOSes []string, refreshTime int, itemsPerPage int, successMessage string, commonInfo *partials.CommonInfo) {
 	@partials.Header(c, []partials.Breadcrumb{{Title: "Computers", Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")))}}, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		if successMessage != "" {
@@ -63,7 +63,7 @@ templ Computers(c echo.Context, p partials.PaginationAndSort, f filters.AgentFil
 							@ComputersHeader(c, p, f, versions, vendors, models, availableTags, availableOSes)
 						</thead>
 						<tbody>
-							@ComputersBody(p, agents, availableTags, commonInfo)
+							@ComputersBody(p, agents, online, availableTags, commonInfo)
 						</tbody>
 					</table>
 					@partials.Pagination(c, p, "get", "#main", "outerHTML", string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))), itemsPerPage)
@@ -137,7 +137,7 @@ templ ComputersHeader(c echo.Context, p partials.PaginationAndSort, f filters.Ag
 	</tr>
 }
 
-templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, availableTags []*ent.Tag, commonInfo *partials.CommonInfo) {
+templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, online map[string]bool, availableTags []*ent.Tag, commonInfo *partials.CommonInfo) {
 	for index, agent := range agents {
 		<tr class="h-16">
 			<td
@@ -148,6 +148,15 @@ templ ComputersBody(p partials.PaginationAndSort, agents []models.Computer, avai
 				hx-swap="outerHTML"
 			>
 				<div class="flex items-center gap-2">
+					if online[agent.ID] {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "Online")) }>
+							<uk-icon hx-history="false" icon="circle" custom-class="h-3 w-3 text-green-600" uk-cloack></uk-icon>
+						</span>
+					} else {
+						<span uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "Offline")) }>
+							<uk-icon hx-history="false" icon="circle" custom-class="h-3 w-3 text-red-600" uk-cloack></uk-icon>
+						</span>
+					}
 					<span class="underline">{ agent.Nickname }</span>
 					if (time.Since(time.Now()).Hours()) > 24 {
 						<div uk-tooltip={ i18n.T(ctx, "agents.no_contact_in_last_day") }>

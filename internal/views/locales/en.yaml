@@ -1098,6 +1098,7 @@ en:
     num_sessions: "Number of sessions opened in the console"
     num_os_users: "Number of users with an endpoint assigned"
     no_reported_in_last_24h: "Agents that haven't reported in the last 24h"
+    online_agents: "Agents online"
     num_upgradable_agents: "Agents that can be upgraded"
     certificates_to_expire: "Certificates that expires in two months"
   nats:

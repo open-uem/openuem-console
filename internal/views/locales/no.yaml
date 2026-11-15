@@ -1098,6 +1098,7 @@ no:
     num_sessions: "Antall økter åpnet i konsollen"
     num_os_users: "Antall brukere med et tildelt endepunkt"
     no_reported_in_last_24h: "Agenter som ikke har rapportert de siste 24t"
+    online_agents: "Agenter på nett"
     num_upgradable_agents: "Agenter som kan oppgraderes"
     certificates_to_expire: "Sertifikater som utløper om to måneder"
   nats:

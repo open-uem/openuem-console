@@ -1098,6 +1098,7 @@ ca:
     num_sessions: "Nombre de sessions obertes a la consola"
     num_os_users: "Nombre d'usuaris amb i punt final assignat"
     no_reported_in_last_24h: "Agents que no s'han informat en les últimes 24h"
+    online_agents: "Agents en línia"
     num_upgradable_agents: "Agents que es poden actualitzar"
     certificates_to_expire: "Certificats que caduquen en dos mesos"
   nats:

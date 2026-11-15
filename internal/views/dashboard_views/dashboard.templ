@@ -38,6 +38,8 @@ type DashboardData struct {
 	NUsernames                 int
 	RefreshTime                int
 	NAgentsNotReportedIn24h    int
+	NAgents                    int
+	NOnlineAgents              int
 	NUpgradableAgents          int
 	NATSServerStatus           string
 	AgentWorkerStatus          string
@@ -65,6 +67,23 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 			<div class="flex gap-2 justify-start">
 				<table class="uk-table uk-table-divider uk-table-small uk-table-hover uk-table-striped mt-6 w-1/3">
 					<tbody>
+						<tr>
+							<th class="!align-middle">
+								{ i18n.T(ctx, "dashboard.online_agents") }
+							</th>
+							<td class="!align-middle text-center">
+								<a
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/computers")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/computers"))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("text-red-600", data.NOnlineAgents < data.NAgents), templ.KV("text-green-600", data.NOnlineAgents == data.NAgents) }
+								>
+									{ fmt.Sprintf("%d / %d", data.NOnlineAgents, data.NAgents) }
+								</a>
+							</td>
+						</tr>
 						<tr>
 							<th class="!align-middle">
 								{ i18n.T(ctx, "dashboard.no_reported_in_last_24h") }

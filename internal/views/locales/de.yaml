@@ -1098,6 +1098,7 @@ de:
     num_sessions: "Anzahl in der Konsole geöffneter Sitzungen"
     num_os_users: "Anzahl Benutzer mit zugewiesenem Endpunkt"
     no_reported_in_last_24h: "Agenten, die in den letzten 24h nicht gemeldet haben"
+    online_agents: "Agenten online"
     num_upgradable_agents: "Agenten, die aktualisiert werden können"
     certificates_to_expire: "Zertifikate, die in zwei Monaten ablaufen"
   nats:
