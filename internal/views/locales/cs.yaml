@@ -534,6 +534,7 @@ cs:
     agents_admit: "Opravdu chcete schválit tyto agenty? Tímto budou moci být tito agenti spravováni z OpenUEM a jejich informace se zobrazí v jednotlivých dostupných přehledech"
     agents_enable: "Opravdu chcete povolit tyto agenty?"
     agents_disable: "Opravdu chcete zakázat tyto agenty? Tito agenti nebudou odesílat další informace, dokud je znovu nepovolíte"
+    user_delete: "Opravdu chcete odstranit tohoto uživatele a všechny související informace? Tato akce je nevratná a je považována za destruktivní"
   forms:
     required: "Toto pole nesmí být prázdné"
   login:
