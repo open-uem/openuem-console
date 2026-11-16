@@ -534,6 +534,7 @@ ca:
     agents_admit: "Esteu segur que voleu donar l'admissió a aquests agents? D'aquesta manera, aquests agents es poden gestionar des d'OpenUEM i la seva informació es mostrarà en les diferents vistes disponibles"
     agents_enable: "Esteu segur que voleu activar aquests agents?"
     agents_disable: "Esteu segur que voleu desactivar aquests agents? Aquests agents no informaran de més informació fins que els tornis a habilitar"
+    user_delete: "Esteu segur que voleu eliminar aquest usuari i tota la informació associada? Tingueu en compte que aquesta acció és irreversible i es considera destructiva"
   forms:
     required: "Aquest camp no pot estar buit"
   login:

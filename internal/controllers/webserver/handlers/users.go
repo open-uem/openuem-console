@@ -280,6 +280,15 @@ func (h *Handler) SendCertificateRequestToNATS(c echo.Context, user *openuem_ent
 	return nil
 }
 
+func (h *Handler) UserDelete(c echo.Context) error {
+	uid := c.Param("uid")
+	if uid == "" {
+		return RenderError(c, partials.ErrorMessage("no user was found in request", true))
+	}
+
+	return RenderConfirm(c, partials.ConfirmDelete(c, i18n.T(c.Request().Context(), "confirm.user_delete"), "/admin/users", fmt.Sprintf("/admin/users/%s", uid)))
+}
+
 func (h *Handler) DeleteUser(c echo.Context) error {
 	uid := c.Param("uid")
 

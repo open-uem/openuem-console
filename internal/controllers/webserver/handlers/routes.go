@@ -103,6 +103,7 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/admin/users/:uid/confirmemail", h.SetEmailConfirmed, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/approve", h.ApproveAccount, h.IsAuthenticated)
 	e.POST("/admin/users/:uid/resendpasslink", h.ResendPasswordLink, h.IsAuthenticated)
+	e.GET("/admin/users/:uid/delete", h.UserDelete, h.IsAuthenticated)
 	e.DELETE("/admin/users/:uid", h.DeleteUser, h.IsAuthenticated)
 
 	e.GET("/admin/tenants/new", h.NewTenant, h.IsAuthenticated)

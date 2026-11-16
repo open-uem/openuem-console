@@ -534,6 +534,7 @@ fr:
     agents_admit: "Êtes-vous sûr de vouloir autoriser ces agents ? En faisant cela, ces agents peuvent être gérés depuis OpenUEM et leurs informations apparaîtront dans les différentes vues disponibles"
     agents_enable: "Êtes-vous sûr de vouloir activer ces agents ?"
     agents_disable: "Êtes-vous sûr de vouloir désactiver ces agents ? Ces agents ne signaleront plus d'informations tant que vous ne les aurez pas réactivés"
+    user_delete: "Êtes-vous sûr de vouloir supprimer cet utilisateur et toutes les informations associées ? Notez que cette action est irréversible et est considérée comme destructrice"
   forms:
     required: "Ce champ ne peut pas être vide"
   login:

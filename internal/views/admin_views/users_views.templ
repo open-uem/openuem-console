@@ -28,6 +28,7 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 					<div id="success" class="hidden"></div>
 				}
 				<div id="error" class="hidden"></div>
+				<div id="confirm" class="hidden"></div>
 				<div class="uk-width-1-2@m uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h3 class="uk-card-title">{ i18n.T(ctx, "users.title") } </h3>
@@ -343,9 +344,8 @@ templ Users(c echo.Context, p partials.PaginationAndSort, f filters.UserFilter, 
 													}
 													<li>
 														<a
-															hx-delete={ string(templ.URL(fmt.Sprintf("/admin/users/%s", user.ID))) }
+															hx-get={ string(templ.URL(fmt.Sprintf("/admin/users/%s/delete", user.ID))) }
 															hx-target="#main"
-															hx-push-url="false"
 															hx-swap="outerHTML"
 														>
 															<uk-icon hx-history="false" icon="user-x" custom-class="h-6 w-6 pr-2 text-red-600" uk-cloack></uk-icon>{ i18n.T(ctx, "Delete") }

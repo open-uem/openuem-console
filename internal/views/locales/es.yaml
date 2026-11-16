@@ -534,6 +534,7 @@ es:
     agents_admit: "¿Está seguro de que quiere admitir estos agentes? Al admitir los agentes se podrán gestionar desde OpenUEM y su información aparecerá en las distintas vistas"
     agents_enable: "¿Está seguro de que quiere activar estos agentes?"
     agents_disable: "¿Está seguro de que quiere desactivar estos agentes? Los agentes no enviarán más información hasta que vuelvan a ser activados"
+    user_delete: "¿Está seguro de que desea eliminar este usuario y toda su información asociada? Tenga en cuenta que esta acción es irreversible y se considera destructiva"
   forms:
     required: "Este campo no puede estar vacío"
   login:
