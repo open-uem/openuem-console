@@ -534,6 +534,7 @@ no:
     agents_admit: "Er du sikker på at du vil gi tilgang til disse agentene? Ved å gjøre dette kan disse agentene administreres fra OpenUEM og informasjonen deres vil vises i de ulike tilgjengelige visningene"
     agents_enable: "Er du sikker på at du vil aktivere disse agentene?"
     agents_disable: "Er du sikker på at du vil deaktivere disse agentene? Disse agentene vil ikke rapportere mer informasjon før du aktiverer dem igjen"
+    user_delete: "Er du sikker på at du vil slette denne brukeren og all tilknyttet informasjon? Merk at handlingen er irreversibel og regnes som destruktiv"
   forms:
     required: "Dette feltet kan ikke være tomt"
   login:

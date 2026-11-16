@@ -534,6 +534,7 @@ de:
     agents_admit: "Sind Sie sicher, dass Sie diesen Agenten Zulassung gewähren möchten? Dadurch können diese Agenten von OpenUEM verwaltet werden und ihre Informationen werden in den verschiedenen verfügbaren Ansichten angezeigt"
     agents_enable: "Sind Sie sicher, dass Sie diese Agenten aktivieren möchten?"
     agents_disable: "Sind Sie sicher, dass Sie diese Agenten deaktivieren möchten? Diese Agenten werden keine weiteren Informationen melden, bis Sie sie wieder aktivieren"
+    user_delete: "Sind Sie sicher, dass Sie diesen Benutzer und alle zugehörigen Informationen löschen möchten? Beachten Sie, dass diese Aktion unwiderruflich ist und als destruktiv gilt"
   forms:
     required: "Dieses Feld kann nicht leer sein"
   login:

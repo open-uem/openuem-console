@@ -534,6 +534,7 @@ en:
     agents_admit: "Are you sure that you want to give admission to these agents? By doing this, these agents can be managed from OpenUEM and their information will show in the different views available"
     agents_enable: "Are you sure that you want to enable these agents?"
     agents_disable: "Are you sure that you want to disable these agents? These agents won't report more information until you enable them again"
+    user_delete: "Are you sure that you want to delete this user and all its associated information? Note that this action is irreversible and it's considered destructive"
   forms:
     required: "This field cannot be empty"
   login:
