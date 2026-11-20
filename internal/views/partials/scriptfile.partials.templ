@@ -1,0 +1,26 @@
+package partials
+
+import (
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+)
+
+// ScriptFileLoader fills a script textarea with the content of a local file. The file is
+// read by the browser, the script is saved with the task when the form is submitted.
+templ ScriptFileLoader(textareaID string, accept string) {
+	<div class="flex items-center gap-2 mt-2">
+		<label class="uk-text-small" for={ textareaID + "-file" }>{ i18n.T(ctx, "tasks.script_load_file") }</label>
+		<input
+			type="file"
+			class="uk-text-small"
+			id={ textareaID + "-file" }
+			accept={ accept }
+			_={ fmt.Sprintf(`on change
+				if my.files.length > 0
+					call my.files[0].text()
+					set #%s.value to it
+				end
+			end`, textareaID) }
+		/>
+	</div>
+}

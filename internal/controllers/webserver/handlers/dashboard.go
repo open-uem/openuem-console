@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/charts"
 	"github.com/open-uem/openuem-console/internal/views/dashboard_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -113,6 +114,14 @@ func (h *Handler) Dashboard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	data.NLibraryPackages, err = h.libraryPackagesCount(commonInfo)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// From the console's hourly count of the updates the computers need
+	data.NComputersNeedingUpdates = h.availableUpdatesCounts(commonInfo).NeedingUpdates()
+
 	data.NOpenUEMUsers, err = h.Model.CountAllUsers(filters.UserFilter{})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -182,6 +191,31 @@ func (h *Handler) generateCharts(c echo.Context) (*dashboard_views.DashboardChar
 	}
 
 	ch.AgentByLastReport = charts.AgentsByLastReportDate(c.Request().Context(), countAgents, countAllAgents)
+
+	// Software deployments of the fork by status, from the database
+	deploymentCounts, err := h.Model.CountDeploymentsByStatus(commonInfo)
+	if err != nil {
+		return nil, err
+	}
+	totalDeployments := deploymentCounts.Installed + deploymentCounts.Failed + deploymentCounts.Pending
+	ch.DeploymentsByStatus = charts.DeploymentsByStatus(c.Request().Context(), deploymentCounts, totalDeployments)
+
+	// How many software updates the computers need, from the hourly background job:
+	// counting them runs the computers' package managers, which takes minutes
+	ch.AgentByAvailableUpdates = charts.AvailableUpdates(c.Request().Context(), h.availableUpdatesCounts(commonInfo))
+
+	// Agents by the result of their last software update run, live from the agents.
+	// The agents are only asked when the console is connected, otherwise every agent
+	// counts as not answering
+	updateCounts := models.UpdateRunStatusCounts{Unreachable: countAllAgents}
+	if h.NATSConnection != nil && h.NATSConnection.IsConnected() {
+		agents, err := h.Model.GetAllAgents(filters.AgentFilter{}, commonInfo)
+		if err != nil {
+			return nil, err
+		}
+		updateCounts, countAllAgents = h.updateRunStatuses(agents)
+	}
+	ch.AgentByUpdateRun = charts.UpdateRunsByStatus(c.Request().Context(), updateCounts, countAllAgents)
 
 	return &ch, nil
 }

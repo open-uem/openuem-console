@@ -2,11 +2,12 @@ package dashboard_views
 
 import "github.com/go-echarts/go-echarts/v2/render"
 
-templ Chart(title, description string, chart render.ChartSnippet) {
+templ Chart(description string, chart render.ChartSnippet) {
 	<div class="grow">
 		<div class="flex justify-center">
 			@templ.Raw(chart.Element)
 			@templ.Raw(chart.Script)
 		</div>
+		<p class="uk-text-small uk-text-muted uk-text-center mt-2">{ description }</p>
 	</div>
 }

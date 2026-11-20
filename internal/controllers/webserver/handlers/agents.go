@@ -340,6 +340,8 @@ func (h *Handler) AgentEnable(c echo.Context) error {
 	if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
+	// Register the private winget repository right away instead of waiting for the periodic job
+	go h.registerWinGetSources([]string{agentId})
 
 	return h.ListAgents(c, i18n.T(c.Request().Context(), "agents.has_been_enabled"), "", true)
 }
@@ -427,6 +429,7 @@ func (h *Handler) AgentsAdmit(c echo.Context) error {
 					errorsFound = true
 					continue
 				}
+				go h.registerWinGetSources([]string{agentId})
 
 				if settings, err := h.Model.GetGeneralSettings(commonInfo.TenantID); err != nil {
 					log.Println("[ERROR]: ", err.Error())
@@ -497,6 +500,7 @@ func (h *Handler) AgentsEnable(c echo.Context) error {
 					errorsFound = true
 					continue
 				}
+				go h.registerWinGetSources([]string{agentId})
 			} else {
 				log.Printf("[ERROR]: agent %s is not in a valid state\n", agentId)
 				errorsFound = true
@@ -668,6 +672,8 @@ func (h *Handler) AgentConfirmAdmission(c echo.Context, regenerate bool) error {
 	if err := h.Model.EnableAgent(agentId, commonInfo); err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
+	// Register the private winget repository right away instead of waiting for the periodic job
+	go h.registerWinGetSources([]string{agentId})
 
 	sftpServiceDisabled, err := h.Model.GetDefaultSFTPDisabled(commonInfo.TenantID)
 	if err != nil {

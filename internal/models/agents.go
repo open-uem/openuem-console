@@ -1023,3 +1023,38 @@ func (m *Model) GetAgentNetBirdById(agentId string, c *partials.CommonInfo) (*en
 		return agent, err
 	}
 }
+
+// AgentOrgSite tells which organization and site a computer belongs to
+type AgentOrgSite struct {
+	ID       string
+	TenantID int
+	SiteID   int
+}
+
+// GetAllAgentOrgSites returns every agent that isn't waiting for admission, whatever its
+// organization and site is, together with the organization and site it belongs to. The
+// console uses it for its statistic of the software updates the computers need
+func (m *Model) GetAllAgentOrgSites() ([]AgentOrgSite, error) {
+	agents, err := m.Client.Agent.Query().
+		Where(agent.AgentStatusNEQ(agent.AgentStatusWaitingForAdmission)).
+		WithSite(func(siteQuery *ent.SiteQuery) {
+			siteQuery.WithTenant()
+		}).
+		All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	result := []AgentOrgSite{}
+	for _, a := range agents {
+		info := AgentOrgSite{ID: a.ID}
+		if sites := a.Edges.Site; len(sites) > 0 {
+			info.SiteID = sites[0].ID
+			if t := sites[0].Edges.Tenant; t != nil {
+				info.TenantID = t.ID
+			}
+		}
+		result = append(result, info)
+	}
+	return result, nil
+}

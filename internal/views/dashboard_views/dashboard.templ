@@ -11,11 +11,14 @@ import (
 )
 
 type DashboardCharts struct {
-	AgentByOs           render.ChartSnippet
-	AgentByOsVersion    render.ChartSnippet
-	AgentBySystemUpdate render.ChartSnippet
-	AgentByLastReport   render.ChartSnippet
-	Top10Apps           render.ChartSnippet
+	AgentByOs               render.ChartSnippet
+	AgentByOsVersion        render.ChartSnippet
+	AgentBySystemUpdate     render.ChartSnippet
+	AgentByLastReport       render.ChartSnippet
+	Top10Apps               render.ChartSnippet
+	DeploymentsByStatus     render.ChartSnippet
+	AgentByUpdateRun        render.ChartSnippet
+	AgentByAvailableUpdates render.ChartSnippet
 }
 
 type DashboardData struct {
@@ -33,6 +36,8 @@ type DashboardData struct {
 	NWaitingForAdmission       int
 	NApps                      int
 	NDeployments               int
+	NLibraryPackages           int
+	NComputersNeedingUpdates   int
 	NOpenUEMUsers              int
 	NSessions                  int
 	NUsernames                 int
@@ -53,11 +58,18 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 		<div class="uk-width-1-2@m uk-card uk-card-body uk-card-default">
 			<h3 class="uk-card-title">{ i18n.T(ctx, "Dashboard") }</h3>
 			<div class="flex justify-between gap-2 mt-4">
-				@Chart("Agents By Last Contact", "Agent distribution by last contact date", data.Charts.AgentByLastReport)
+				@Chart(i18n.T(ctx, "charts.tip_last_contact"), data.Charts.AgentByLastReport)
 				<div class="hidden 2xl:block">
-					@Chart("Agents By OS", "Agent distribution by operating system", data.Charts.AgentByOs)
+					@Chart(i18n.T(ctx, "charts.tip_os"), data.Charts.AgentByOs)
 				</div>
-				@Chart("Agents By OS Version", "Agent distribution by operating system version", data.Charts.AgentByOsVersion)
+				@Chart(i18n.T(ctx, "charts.tip_os_version"), data.Charts.AgentByOsVersion)
+			</div>
+			<div class="flex justify-between gap-2 mt-4">
+				@Chart(i18n.T(ctx, "charts.tip_deployments"), data.Charts.DeploymentsByStatus)
+				<div class="hidden 2xl:block">
+					@Chart(i18n.T(ctx, "charts.tip_update_runs"), data.Charts.AgentByUpdateRun)
+				</div>
+				@Chart(i18n.T(ctx, "charts.tip_updates_needed"), data.Charts.AgentByAvailableUpdates)
 			</div>
 			<div class="flex justify-end">
 				@partials.RefreshPage(commonInfo.Translator, data.RefreshTime, true)
@@ -151,6 +163,19 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 									hx-push-url="true"
 									class={ "uk-text-bold underline", templ.KV("text-red-600", data.NPendingUpdates > 0) }
 								>{ strconv.Itoa(data.NPendingUpdates) }</a>
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.needs_software_updates") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/updatestatus")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/updatestatus"))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class={ "uk-text-bold underline", templ.KV("text-red-600", data.NComputersNeedingUpdates > 0) }
+								>{ strconv.Itoa(data.NComputersNeedingUpdates) }</a>
 							</td>
 						</tr>
 						<tr>
@@ -282,6 +307,21 @@ templ Dashboard(c echo.Context, data DashboardData, commonInfo *partials.CommonI
 							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_deployments") }</th>
 							<td class="!align-middle text-center">
 								{ strconv.Itoa(data.NDeployments) }
+							</td>
+						</tr>
+						<tr>
+							<th class="!align-middle">{ i18n.T(ctx, "dashboard.num_library_packages") }</th>
+							<td class="!align-middle text-center">
+								<a
+									href={ templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/library")) }
+									hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy/library"))) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+									class="uk-text-bold underline"
+								>
+									{ strconv.Itoa(data.NLibraryPackages) }
+								</a>
 							</td>
 						</tr>
 						<tr>

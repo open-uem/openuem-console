@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 	openuem_nats "github.com/open-uem/nats"
 	"github.com/open-uem/openuem-console/internal/controllers/sessions"
 	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/wingetrepo"
 )
 
 type Handler struct {
@@ -49,6 +52,7 @@ type Handler struct {
 	Country              string
 	ReverseProxyAuthPort string
 	ReverseProxyServer   string
+	WinGetLibrary        *wingetrepo.Library
 	LatestServerRelease  openuem_nats.OpenUEMRelease
 	Replicas             int
 	ServerReleasesFolder string
@@ -59,6 +63,24 @@ type Handler struct {
 	OIDCRedirectURI      string
 	CommonAppsJob        gocron.Job
 	EncryptionMasterKey  string
+
+	// Jobs of the scheduled tasks of the Deploy section, and the mutex that
+	// protects them from the concurrent requests that manage them. The console
+	// instance that wins the NATS leader election is the only one that runs
+	// them; the follower keeps the map for its own list rendering
+	scheduledEventJobs          map[int]gocron.Job
+	scheduledEventMu            sync.Mutex
+	scheduledEventsLeader       bool
+	scheduledEventsReconcileJob gocron.Job
+	scheduledEventRunning       map[int]bool
+
+	AvailableUpdatesJob gocron.Job
+	// AvailableUpdates is how many software updates every computer needed the last time
+	// the console asked, keyed by agent id, see StartAvailableUpdatesJob
+	AvailableUpdates map[string]agentUpdates
+
+	availableUpdatesMu         sync.RWMutex
+	refreshingAvailableUpdates atomic.Bool
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, commonFolder, version, encryptionMasterKey string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
@@ -74,40 +96,47 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 	replicas := strings.Split(natsServers, ",")
 
 	h := Handler{
-		Model:                model,
-		SessionManager:       s,
-		JWTKey:               jwtKey,
-		CertPath:             certPath,
-		KeyPath:              keyPath,
-		SFTPKeyPath:          sftpKeyPath,
-		CACertPath:           caCertPath,
-		DownloadDir:          tmpDownloadDir,
-		ServerName:           server,
-		ConsolePort:          consolePort,
-		AuthPort:             authPort,
-		Domain:               domain,
-		NATSTimeout:          timeout,
-		NATSServers:          natsServers,
-		TaskScheduler:        ts,
-		OrgName:              orgName,
-		OrgProvince:          orgProvince,
-		OrgLocality:          orgLocality,
-		OrgAddress:           orgAddress,
-		Country:              country,
-		ReverseProxyAuthPort: reverseProxyAuthPort,
-		ReverseProxyServer:   reverseProxyServer,
-		Replicas:             len(replicas),
-		ServerReleasesFolder: serverReleasesFolder,
-		Version:              version,
-		ReenableCertAuth:     reEnableCertAuth,
-		ReenablePasswdAuth:   reEnablePasswdAuth,
-		AuthLogger:           authLogger,
-		EncryptionMasterKey:  encryptionMasterKey,
+		Model:                 model,
+		scheduledEventJobs:    map[int]gocron.Job{},
+		scheduledEventRunning: map[int]bool{},
+		SessionManager:        s,
+		JWTKey:                jwtKey,
+		CertPath:              certPath,
+		KeyPath:               keyPath,
+		SFTPKeyPath:           sftpKeyPath,
+		CACertPath:            caCertPath,
+		DownloadDir:           tmpDownloadDir,
+		ServerName:            server,
+		ConsolePort:           consolePort,
+		AuthPort:              authPort,
+		Domain:                domain,
+		NATSTimeout:           timeout,
+		NATSServers:           natsServers,
+		TaskScheduler:         ts,
+		OrgName:               orgName,
+		OrgProvince:           orgProvince,
+		OrgLocality:           orgLocality,
+		OrgAddress:            orgAddress,
+		Country:               country,
+		ReverseProxyAuthPort:  reverseProxyAuthPort,
+		ReverseProxyServer:    reverseProxyServer,
+		Replicas:              len(replicas),
+		ServerReleasesFolder:  serverReleasesFolder,
+		Version:               version,
+		ReenableCertAuth:      reEnableCertAuth,
+		ReenablePasswdAuth:    reEnablePasswdAuth,
+		AuthLogger:            authLogger,
+		EncryptionMasterKey:   encryptionMasterKey,
 	}
 
 	// Try to create the NATS Connection and start a job if it can't be possible to connect
 	if err := h.StartNATSConnectJob(); err != nil {
 		log.Fatalf("[FATAL]: could not start NATS Connect job")
+	}
+
+	// Count the software updates the computers need for the dashboard's statistic
+	if err := h.StartAvailableUpdatesJob(); err != nil {
+		log.Printf("[ERROR]: could not start the software updates statistic job, reason: %v", err)
 	}
 
 	return &h
@@ -292,6 +321,9 @@ func (h *Handler) StartAppsDBElection(ctx context.Context) {
 			log.Printf("[ERROR]: could not start job to create common packages db, reason: %s", err.Error())
 			return
 		}
+
+		// Run the tasks scheduled in the Deploy section
+		h.EnableScheduledEventsJobs()
 	})
 
 	// Step 5: Register OnDemote callback. This is called when THIS instance loses leadership
@@ -300,8 +332,10 @@ func (h *Handler) StartAppsDBElection(ctx context.Context) {
 
 		if err := h.TaskScheduler.RemoveJob(h.CommonAppsJob.ID()); err != nil {
 			log.Printf("[ERROR]: could not remove the job that updates the software packages table, reason: %v", err)
-			return
 		}
+
+		// Stop running the tasks scheduled in the Deploy section
+		h.DisableScheduledEventsJobs()
 	})
 
 	// Step 6: Start the election
