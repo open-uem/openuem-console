@@ -148,6 +148,52 @@ func (m *Model) CountAllDeployments(c *partials.CommonInfo) (int, error) {
 	}
 }
 
+// DeploymentStatusCounts is the number of deployments by result, see CountDeploymentsByStatus
+type DeploymentStatusCounts struct {
+	Installed int
+	Failed    int
+	Pending   int
+}
+
+// CountDeploymentsByStatus returns how many deployments of the current organization and
+// site are already installed, failed, or still waiting for the agent's result
+func (m *Model) CountDeploymentsByStatus(c *partials.CommonInfo) (DeploymentStatusCounts, error) {
+	counts := DeploymentStatusCounts{}
+
+	siteID, err := strconv.Atoi(c.SiteID)
+	if err != nil {
+		return counts, err
+	}
+	tenantID, err := strconv.Atoi(c.TenantID)
+	if err != nil {
+		return counts, err
+	}
+
+	owner := deployment.HasOwnerWith(agent.HasSiteWith(site.HasTenantWith(tenant.ID(tenantID))))
+	if siteID != -1 {
+		owner = deployment.HasOwnerWith(agent.HasSiteWith(site.ID(siteID), site.HasTenantWith(tenant.ID(tenantID))))
+	}
+
+	deployments := func() *ent.DeploymentQuery {
+		return m.Client.Deployment.Query().Where(owner)
+	}
+
+	// SaveDeployInfo writes the zero time while a deployment waits for the agent's result
+	timeZero := time.Date(0001, 1, 1, 00, 00, 00, 00, time.UTC)
+
+	if counts.Failed, err = deployments().Where(deployment.FailedEQ(true)).Count(context.Background()); err != nil {
+		return counts, err
+	}
+	if counts.Installed, err = deployments().Where(deployment.FailedEQ(false), deployment.InstalledNEQ(timeZero)).Count(context.Background()); err != nil {
+		return counts, err
+	}
+	if counts.Pending, err = deployments().Where(deployment.FailedEQ(false), deployment.InstalledEQ(timeZero)).Count(context.Background()); err != nil {
+		return counts, err
+	}
+
+	return counts, nil
+}
+
 // saveInstallMu serializes saving install requests, see SaveDeployInfo
 var saveInstallMu sync.Mutex
 

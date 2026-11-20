@@ -81,6 +81,19 @@ func (h *Handler) libraryPackages(commonInfo *partials.CommonInfo) ([]wingetrepo
 	return packages, nil
 }
 
+// libraryPackagesCount returns how many packages of the private winget repository the
+// current organization can use, used by the dashboard
+func (h *Handler) libraryPackagesCount(commonInfo *partials.CommonInfo) (int, error) {
+	if h.WinGetLibrary == nil {
+		return 0, nil
+	}
+	packages, err := h.libraryPackages(commonInfo)
+	if err != nil {
+		return 0, err
+	}
+	return len(packages), nil
+}
+
 // hiddenLibraryPackageIDs returns the identifiers of the library packages the current
 // organization can't install. The package catalog is shared by all organizations, so
 // the package searches leave these out. Nothing is hidden when all organizations are

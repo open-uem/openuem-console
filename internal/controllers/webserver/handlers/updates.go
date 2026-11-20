@@ -16,7 +16,9 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/open-uem/ent"
+	"github.com/open-uem/ent/agent"
 	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/deploy_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
@@ -254,6 +256,76 @@ func (h *Handler) updateStatuses(agents []*ent.Agent) []deploy_views.UpdateStatu
 	wg.Wait()
 
 	return rows
+}
+
+// updateRunStatuses asks the agents, concurrently, for the status of their last update
+// run, like updateStatuses does, and classifies them for the dashboard's pie chart. It
+// returns the classification and the number of agents that were asked, agents waiting
+// for admission are not counted
+func (h *Handler) updateRunStatuses(agents []*ent.Agent) (models.UpdateRunStatusCounts, int) {
+	counts := models.UpdateRunStatusCounts{}
+
+	request, err := json.Marshal(openuem_nats.ListPackageUpdatesRequest{StatusOnly: true})
+	if err != nil {
+		return counts, 0
+	}
+
+	ids := []string{}
+	for _, a := range agents {
+		if a.AgentStatus != agent.AgentStatusWaitingForAdmission {
+			ids = append(ids, a.ID)
+		}
+	}
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	limit := make(chan struct{}, updatePackagesConcurrency)
+
+	for _, agentID := range ids {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			limit <- struct{}{}
+			defer func() { <-limit }()
+
+			msg, err := h.NATSConnection.Request("agent.listpackageupdates."+agentID, request, updateStatusTimeout)
+			if err != nil {
+				mu.Lock()
+				counts.Unreachable++
+				mu.Unlock()
+				return
+			}
+
+			response := openuem_nats.AvailableUpdatesResponse{}
+			if err := json.Unmarshal(msg.Data, &response); err != nil {
+				mu.Lock()
+				counts.Unreachable++
+				mu.Unlock()
+				return
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+			switch {
+			case response.LastRun == nil:
+				counts.Never++
+			case response.LastRun.Running():
+				counts.Running++
+			case response.LastRun.Error != "":
+				counts.Failed++
+			default:
+				_, _, failed := response.LastRun.Counts()
+				if failed > 0 {
+					counts.Failed++
+				} else {
+					counts.Finished++
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	return counts, len(ids)
 }
 
 // errAgentUpdateRefused is returned when the agent refuses to start an update run

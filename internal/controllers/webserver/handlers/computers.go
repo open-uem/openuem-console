@@ -25,6 +25,7 @@ import (
 	"github.com/open-uem/ent/task"
 	openuem_nats "github.com/open-uem/nats"
 	ansiblecfg "github.com/open-uem/openuem-ansible-config/ansible"
+	"github.com/open-uem/openuem-console/internal/models"
 	"github.com/open-uem/openuem-console/internal/views/computers_views"
 	"github.com/open-uem/openuem-console/internal/views/filters"
 	"github.com/open-uem/openuem-console/internal/views/partials"
@@ -916,13 +917,25 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
+	// The deployments don't record the source, so the library's package ids are passed
+	// to the view to mark the ones that came from the software library
+	libraryPackages := map[string]bool{}
+	libraryIDs, err := h.Model.GetLibraryPackagesInCatalog()
+	if err != nil {
+		log.Println("[ERROR]: could not get the software library's packages from the catalog")
+	} else {
+		for _, id := range libraryIDs {
+			libraryPackages[id] = true
+		}
+	}
+
 	p.NItems, err = h.Model.CountDeploymentsForAgent(agentId, commonInfo)
 	if err != nil {
 		return RenderError(c, partials.ErrorMessage(err.Error(), false))
 	}
 
 	if c.Request().Method == "POST" {
-		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, itemsPerPage, commonInfo))
+		return RenderView(c, computers_views.DeploymentsTable(c, p, agentId, deployments, itemsPerPage, commonInfo, libraryPackages))
 	}
 
 	refreshTime, err := h.Model.GetDefaultRefreshTime()
@@ -943,7 +956,7 @@ func (h *Handler) ComputerDeploy(c echo.Context, successMessage string) error {
 
 	offline := h.IsAgentOffline(c)
 
-	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, itemsPerPage, commonInfo, netbird, offline), commonInfo))
+	return RenderView(c, computers_views.InventoryIndex(" | Deploy SW", computers_views.ComputerDeploy(c, p, agent, deployments, successMessage, confirmDelete, refreshTime, itemsPerPage, commonInfo, netbird, offline, libraryPackages), commonInfo))
 }
 
 func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
@@ -988,7 +1001,9 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 
 	switch agent.Os {
 	case "windows":
-		f = filters.DeployPackageFilter{Sources: []string{"winget"}}
+		sources := []string{"winget"}
+		exclude := []string{}
+
 		useWinget, err := h.Model.GetDefaultUseWinget(commonInfo.TenantID)
 		if err != nil {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.could_not_get_winget_use"), true))
@@ -997,6 +1012,14 @@ func (h *Handler) ComputerDeploySearchPackagesInstall(c echo.Context) error {
 		if !useWinget {
 			return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "install.use_winget_is_false"), true))
 		}
+
+		// Packages of the console's private winget repository, like Deploy -> Install does
+		if h.WinGetLibrary != nil {
+			sources = append(sources, models.LibraryPackageSource)
+			exclude = h.hiddenLibraryPackages(commonInfo)
+		}
+
+		f = filters.DeployPackageFilter{Sources: sources, ExcludePackageIDs: exclude}
 	case "macos", "macOS":
 		f = filters.DeployPackageFilter{Sources: []string{"brew"}}
 		useBrew, err := h.Model.GetDefaultUseBrew(commonInfo.TenantID)

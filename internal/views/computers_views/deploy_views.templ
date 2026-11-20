@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, deployments []*ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool) {
+templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, deployments []*ent.Deployment, successMessage string, confirmDelete bool, refreshTime int, itemsPerPage int, commonInfo *partials.CommonInfo, netbird, offline bool, libraryPackages map[string]bool) {
 	@partials.ComputerBreadcrumb(c, agent, commonInfo)
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 		<div class="uk-width-1-2@m uk-card uk-card-default">
@@ -109,7 +109,7 @@ templ ComputerDeploy(c echo.Context, p partials.PaginationAndSort, agent *ent.Ag
 								<div>
 									if p.NItems > 0 {
 										<div id="deployments-results">
-											@DeploymentsTable(c, p, agent.ID, deployments, itemsPerPage, commonInfo)
+											@DeploymentsTable(c, p, agent.ID, deployments, itemsPerPage, commonInfo, libraryPackages)
 										</div>
 									}
 								</div>
@@ -140,6 +140,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []*ent.Softwar
 							@partials.SortByColumnIcon(c, p, i18n.T(ctx, "Name"), "name", "alpha", "#deploy-search-results", "innerHTML", "post")
 						</div>
 					</th>
+					<th>{ i18n.T(ctx, "OS") }</th>
 					<th>{ i18n.T(ctx, "Actions") }</th>
 				</tr>
 			</thead>
@@ -151,8 +152,11 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []*ent.Softwar
 						</td>
 						<td class="!align-middle">
 							<div class="flex items-center gap-4 text-left">
-								@partials.SoftwarePackageDescription(p.PackageID, p.Name, p.Branch, p.Verified)
+								@partials.SoftwarePackageDescription(p.PackageID, p.Name, p.Branch, p.Verified, p.Source)
 							</div>
+						</td>
+						<td class="!align-middle">
+							@partials.PackageManagementTool(p.Source)
 						</td>
 						<td class="!align-middle">
 							<form>
@@ -184,7 +188,7 @@ templ SearchPacketResult(c echo.Context, agentId string, packages []*ent.Softwar
 	}
 }
 
-templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*ent.Deployment, itemsPerPage int, commonInfo *partials.CommonInfo) {
+templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId string, packages []*ent.Deployment, itemsPerPage int, commonInfo *partials.CommonInfo, libraryPackages map[string]bool) {
 	<table class="uk-table uk-table-divider uk-table-small uk-table-striped ">
 		<thead>
 			<tr>
@@ -221,7 +225,7 @@ templ DeploymentsTable(c echo.Context, p partials.PaginationAndSort, agentId str
 						@partials.Brand(strings.ToLower(item.Name), "")
 					</td>
 					<td class="!align-middle">
-						@partials.SoftwarePackageDescription(item.PackageID, item.Name, item.Branch, item.Verified)
+						@partials.SoftwarePackageDescription(item.PackageID, item.Name, item.Branch, item.Verified, DeploymentPackageSource(item.PackageID, libraryPackages))
 					</td>
 					<td class="!align-middle">
 						if item.Failed {

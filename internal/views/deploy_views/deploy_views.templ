@@ -139,7 +139,7 @@ templ SearchPacketResult(action string, packages []*ent.SoftwarePackage, c echo.
 							@partials.Brand(strings.ToLower(p.Name), "")
 						</td>
 						<td class="!align-middle">
-							@partials.SoftwarePackageDescription(p.PackageID, p.Name, p.Branch, p.Verified)
+							@partials.SoftwarePackageDescription(p.PackageID, p.Name, p.Branch, p.Verified, p.Source)
 						</td>
 						<td class="!align-middle">
 							@partials.PackageManagementTool(p.Source)

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-templ SoftwarePackageDescription(packageID string, packageName string, packageBranch string, packageVerified bool) {
+templ SoftwarePackageDescription(packageID string, packageName string, packageBranch string, packageVerified bool, packageSource string) {
 	<div class="flex items-center gap-4 text-left">
 		<div>
 			<p>
@@ -27,6 +27,11 @@ templ SoftwarePackageDescription(packageID string, packageName string, packageBr
 		if packageVerified {
 			<div class="flex items-center">
 				<uk-icon uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "Verified")) } hx-history="false" icon="badge-check" custom-class="h-7 w-7 mr-2 text-green-600" uk-cloack></uk-icon>
+			</div>
+		}
+		if packageSource == "openuem" {
+			<div class="flex items-center">
+				<span class="uk-badge" uk-tooltip={ fmt.Sprintf("title: %s", i18n.T(ctx, "library.package_badge")) }>OpenUEM</span>
 			</div>
 		}
 	</div>

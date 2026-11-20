@@ -221,3 +221,24 @@ func (suite *DeploymentTestSuite) TestSaveDeployInfoConcurrentInstalls() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 1, n, "one deployment for concurrent requests")
 }
+
+func (suite *DeploymentTestSuite) TestCountDeploymentsByStatus() {
+	// The suite creates seven installed deployments
+	counts, err := suite.model.CountDeploymentsByStatus(suite.commonInfo)
+	assert.NoError(suite.T(), err, "should count deployments by status")
+	assert.Equal(suite.T(), 7, counts.Installed, "seven deployments are installed")
+	assert.Equal(suite.T(), 0, counts.Failed, "no deployment failed")
+	assert.Equal(suite.T(), 0, counts.Pending, "no deployment is pending")
+
+	// One deployment is still waiting for the agent's result and another one failed
+	err = suite.model.Client.Deployment.Create().SetName("pending").SetVersion("1").SetOwnerID("agent1").SetPackageID("package.pending").SetInstalled(time.Time{}).SetUpdated(time.Time{}).Exec(context.Background())
+	assert.NoError(suite.T(), err)
+	err = suite.model.Client.Deployment.Create().SetName("failed").SetVersion("1").SetOwnerID("agent1").SetPackageID("package.failed").SetInstalled(time.Time{}).SetUpdated(time.Time{}).SetFailed(true).Exec(context.Background())
+	assert.NoError(suite.T(), err)
+
+	counts, err = suite.model.CountDeploymentsByStatus(suite.commonInfo)
+	assert.NoError(suite.T(), err, "should count deployments by status again")
+	assert.Equal(suite.T(), 7, counts.Installed, "seven deployments are installed")
+	assert.Equal(suite.T(), 1, counts.Failed, "one deployment failed")
+	assert.Equal(suite.T(), 1, counts.Pending, "one deployment is pending")
+}

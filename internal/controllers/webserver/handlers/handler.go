@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -61,6 +63,14 @@ type Handler struct {
 	OIDCRedirectURI      string
 	CommonAppsJob        gocron.Job
 	EncryptionMasterKey  string
+
+	AvailableUpdatesJob gocron.Job
+	// AvailableUpdates is how many software updates every computer needed the last time
+	// the console asked, keyed by agent id, see StartAvailableUpdatesJob
+	AvailableUpdates map[string]agentUpdates
+
+	availableUpdatesMu          sync.RWMutex
+	refreshingAvailableUpdates atomic.Bool
 }
 
 func NewHandler(model *models.Model, natsServers string, s *sessions.SessionManager, ts gocron.Scheduler, jwtKey, certPath, keyPath, sftpKeyPath, caCertPath, server, consolePort, authPort, tmpDownloadDir, domain, orgName, orgProvince, orgLocality, orgAddress, country, reverseProxyAuthPort, reverseProxyServer, serverReleasesFolder, commonFolder, version, encryptionMasterKey string, reEnableCertAuth, reEnablePasswdAuth bool, authLogger *log.Logger) *Handler {
@@ -110,6 +120,11 @@ func NewHandler(model *models.Model, natsServers string, s *sessions.SessionMana
 	// Try to create the NATS Connection and start a job if it can't be possible to connect
 	if err := h.StartNATSConnectJob(); err != nil {
 		log.Fatalf("[FATAL]: could not start NATS Connect job")
+	}
+
+	// Count the software updates the computers need for the dashboard's statistic
+	if err := h.StartAvailableUpdatesJob(); err != nil {
+		log.Printf("[ERROR]: could not start the software updates statistic job, reason: %v", err)
 	}
 
 	return &h
