@@ -232,6 +232,7 @@ func (w *Worker) StartConsoleService() {
 	w.AuthServer = authserver.New(w.Model, w.SessionManager, w.CACertPath, serverName, consolePort, authPort, w.ReverseProxyAuthPort, w.EncryptionMasterKey)
 	w.AuthServer.Handler.WinGetLibrary = w.WinGetLibrary
 	w.AuthServer.Handler.WinGetKey = []byte(w.JWTKey)
+	w.AuthServer.Handler.WinGetBaseURL = w.WebServer.Handler.ConsoleBaseURL()
 
 	// The winget repository is served by the web server, which doesn't ask for client
 	// certificates, with the auth server's handlers

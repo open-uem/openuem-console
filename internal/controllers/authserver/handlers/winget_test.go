@@ -101,6 +101,21 @@ func TestWinGetSource(t *testing.T) {
 	installerURL := manifest.Data.Versions[0].Installers[0].InstallerUrl
 	assert.Equal(t, "https://"+strings.TrimPrefix(base, "http://")+"/installers/Example.Tenant1/2.0/app.msi", installerURL)
 
+	// Behind a reverse proxy the request's Host is the proxy's upstream (nginx sets it to
+	// the proxied address), so the installers are on the address the agents registered
+	h.WinGetBaseURL = "https://uem.example.com"
+	req, err := http.NewRequest(http.MethodGet, base+"/packageManifests/Example.Tenant1", nil)
+	require.NoError(t, err)
+	req.Host = "127.0.0.1:1323"
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	manifest = wingetrepo.ManifestResponse{}
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&manifest))
+	resp.Body.Close()
+	assert.Equal(t, "https://uem.example.com/winget/agent1/"+wingetrepo.AgentToken(key, "agent1")+"/installers/Example.Tenant1/2.0/app.msi",
+		manifest.Data.Versions[0].Installers[0].InstallerUrl)
+	h.WinGetBaseURL = ""
+
 	code, _ = do(http.MethodGet, base+"/packageManifests/Example.Tenant2", "")
 	assert.Equal(t, http.StatusNoContent, code, "package of another organization")
 

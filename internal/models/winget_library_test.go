@@ -55,6 +55,21 @@ func TestLibraryPackagesInCatalog(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, count)
 
+	// Excluding a library identifier never hides a community package with that identifier
+	client.SoftwarePackage.Create().SetPackageID("Mozilla.Firefox").SetName("Example Tool Firefox").SetSource("winget").ExecX(ctx)
+	found, err = m.SearchAllWingetPackages("example tool", []string{"ExampleCorp.Tool", "Mozilla.Firefox"})
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []string{"Example.Community", "Mozilla.Firefox"}, ids(found))
+
+	// Library identifiers must not be community packages: the source of a task is chosen
+	// by the identifier
+	taken, err := m.IsPackageOfOtherSource("mozilla.firefox")
+	require.NoError(t, err)
+	assert.True(t, taken)
+	taken, err = m.IsPackageOfOtherSource("ExampleCorp.Tool")
+	require.NoError(t, err)
+	assert.False(t, taken, "the library's own package")
+
 	require.NoError(t, m.RemoveLibraryPackageFromCatalog("ExampleCorp.Tool"))
 	isLibrary, err = m.IsLibraryPackage("ExampleCorp.Tool")
 	require.NoError(t, err)

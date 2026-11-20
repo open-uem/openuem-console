@@ -21,6 +21,9 @@ type Handler struct {
 	WinGetLibrary        *wingetrepo.Library
 	// WinGetKey signs the agents' tokens of the winget repository
 	WinGetKey []byte
+	// WinGetBaseURL is the console's address as the agents registered the repository,
+	// e.g. https://uem.example.com behind a reverse proxy
+	WinGetBaseURL string
 }
 
 func NewHandler(model *models.Model, sm *sessions.SessionManager, cert *x509.Certificate, server, consolePort, reverseProxyAuthPort, encryptionMasterKey string) *Handler {

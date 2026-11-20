@@ -584,6 +584,8 @@ no:
     not_available: "winget-repositoriet er ikke tilgjengelig"
     not_msi: "Filen er ikke en gyldig MSI-pakke"
     invalid_package: "Pakkeidentifikatoren %s eller versjonen %s er ugyldig. Identifikatoren må se ut som Utgiver.Navn, og versjonen kan bare inneholde bokstaver, sifre og . + _ -"
+    id_of_other_source: "Pakkeidentifikatoren %s brukes allerede av en pakke fra en annen kilde (f.eks. winget sitt fellesskapsrepositorium). Angi en annen identifikator."
+    id_owned: "Pakkeidentifikatoren %s brukes allerede i repositoriet av en annen organisasjon eller av en pakke som er tilgjengelig for alle organisasjoner. Angi en annen identifikator."
     not_found: "Fant ikke pakken"
     from_installer: "Fra installasjonsprogrammet"
     installer_type: "Installasjonstype (bare EXE)"

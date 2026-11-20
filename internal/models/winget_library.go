@@ -5,6 +5,7 @@ import (
 
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/agent"
+	"github.com/open-uem/ent/predicate"
 	"github.com/open-uem/ent/site"
 	"github.com/open-uem/ent/softwarepackage"
 	"github.com/open-uem/ent/tenant"
@@ -89,4 +90,19 @@ func (m *Model) EnabledAgentTenants(agentID string) (tenantIDs []int, ok bool, e
 		}
 	}
 	return tenantIDs, true, nil
+}
+
+// IsPackageOfOtherSource reports whether a package identifier is in the catalog with
+// another source than the winget repository's, e.g. a package of winget's community
+// repository. Identifiers are compared without case, like winget does.
+func (m *Model) IsPackageOfOtherSource(packageID string) (bool, error) {
+	return m.Client.SoftwarePackage.Query().
+		Where(softwarepackage.PackageIDEqualFold(packageID), softwarepackage.SourceNEQ(LibraryPackageSource)).
+		Exist(context.Background())
+}
+
+// notLibraryPackages excludes packages of the winget repository by identifier, without
+// hiding packages of other sources that have the same identifier
+func notLibraryPackages(packageIDs []string) predicate.SoftwarePackage {
+	return softwarepackage.Not(softwarepackage.And(softwarepackage.PackageIDIn(packageIDs...), softwarepackage.Source(LibraryPackageSource)))
 }

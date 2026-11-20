@@ -107,7 +107,14 @@ func (h *Handler) WinGetPackageManifest(c echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
 	}
 
-	installersURL := "https://" + c.Request().Host + "/winget/" + c.Param("agent") + "/" + c.Param("token") + "/installers"
+	// The installers are on the address the agents registered the repository with. The
+	// request's Host is only used without it, e.g. in tests: behind a reverse proxy it's
+	// often the proxy's upstream address, which computers can't reach.
+	baseURL := h.WinGetBaseURL
+	if baseURL == "" {
+		baseURL = "https://" + c.Request().Host
+	}
+	installersURL := baseURL + "/winget/" + c.Param("agent") + "/" + c.Param("token") + "/installers"
 	return c.JSON(http.StatusOK, wingetrepo.BuildManifest(versions, installersURL))
 }
 

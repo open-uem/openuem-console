@@ -584,6 +584,8 @@ en:
     not_available: "The winget repository is not available"
     not_msi: "The file is not a valid MSI package"
     invalid_package: "The package identifier %s or the version %s is not valid. The identifier must look like Publisher.Name and the version can only contain letters, digits and . + _ -"
+    id_of_other_source: "The package identifier %s is already used by a package of another source (e.g. winget's community repository). Enter another identifier."
+    id_owned: "The package identifier %s is already used in the repository by another organization, or by a package available to all organizations. Enter another identifier."
     not_found: "The package was not found"
     from_installer: "From the installer"
     installer_type: "Installer type (EXE only)"

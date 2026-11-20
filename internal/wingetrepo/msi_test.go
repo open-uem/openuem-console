@@ -2,6 +2,7 @@ package wingetrepo
 
 import (
 	"bytes"
+	"encoding/binary"
 	"os"
 	"testing"
 
@@ -29,6 +30,25 @@ func TestReadMSIProperties(t *testing.T) {
 func TestReadMSIPropertiesNotMSI(t *testing.T) {
 	_, err := ReadMSIProperties(bytes.NewReader([]byte("MZ this is not an MSI package")))
 	assert.ErrorIs(t, err, ErrNotMSI)
+}
+
+func TestReadMSIPropertiesCorruptHeader(t *testing.T) {
+	data, err := os.ReadFile("testdata/test.msi")
+	require.NoError(t, err)
+
+	// Sector counts in the compound file header that the file is far too small for made
+	// the compound file reader allocate gigabytes and the console die (fatal out of memory)
+	for name, offset := range map[string]int{"directory sectors": 0x28, "FAT sectors": 0x2C, "mini FAT sectors": 0x40, "DIFAT sectors": 0x48} {
+		corrupt := bytes.Clone(data)
+		binary.LittleEndian.PutUint32(corrupt[offset:], 0xC0000000)
+		_, err := ReadMSIProperties(bytes.NewReader(corrupt))
+		assert.ErrorIs(t, err, ErrNotMSI, name)
+	}
+
+	corrupt := bytes.Clone(data)
+	binary.LittleEndian.PutUint16(corrupt[0x1E:], 30)
+	_, err = ReadMSIProperties(bytes.NewReader(corrupt))
+	assert.ErrorIs(t, err, ErrNotMSI, "sector size")
 }
 
 func TestDecodeMSIStreamName(t *testing.T) {

@@ -1,7 +1,6 @@
 package partials
 
 import (
-	"fmt"
 	"github.com/invopop/ctxi18n/i18n"
 	"github.com/open-uem/ent"
 	"github.com/open-uem/ent/task"
@@ -138,15 +137,17 @@ templ SearchPacketResult(wingetPackages []*ent.SoftwarePackage) {
 						<div
 							class="w-full border-b"
 							title={ item.Name }
-							_={ fmt.Sprintf(`
+							_="
                                 on click 
                                     remove .uk-open from #select-package-dropdown
-                                    set #package-id.value to '%s'
-                                    set #package-name.value to '%s'
+                                    set #package-id.value to @data-package-id
+                                    set #package-name.value to @data-package-name
                                     set #package-search.value to ''
                                     remove .hidden from #package-selected-section
                                     add .hidden to #package-search-section
-                                end`, item.PackageID, item.Name) }
+                                end"
+							data-package-id={ item.PackageID }
+							data-package-name={ item.Name }
 						>
 							<button type="button">
 								<div class="flex items-center gap-4 text-left p-2">

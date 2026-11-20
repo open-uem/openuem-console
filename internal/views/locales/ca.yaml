@@ -584,6 +584,8 @@ ca:
     not_available: "El repositori de winget no està disponible"
     not_msi: "El fitxer no és un paquet MSI vàlid"
     invalid_package: "L'identificador %s o la versió %s no són vàlids. L'identificador ha de tenir la forma Editor.Nom i la versió només pot contenir lletres, dígits i . + _ -"
+    id_of_other_source: "L'identificador de paquet %s ja l'utilitza un paquet d'un altre origen (p. ex. el repositori de la comunitat de winget). Introduïu un altre identificador."
+    id_owned: "L'identificador de paquet %s ja l'utilitza al repositori una altra organització o un paquet disponible per a totes les organitzacions. Introduïu un altre identificador."
     not_found: "No s'ha trobat el paquet"
     from_installer: "De l'instal·lador"
     installer_type: "Tipus d'instal·lador (només EXE)"

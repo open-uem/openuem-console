@@ -238,3 +238,59 @@ func TestSanitizeInstallerName(t *testing.T) {
 	assert.Len(t, long, 120)
 	assert.True(t, installerFilePattern.MatchString(long), "a long name is still a valid installer name")
 }
+
+func TestLibraryOwnership(t *testing.T) {
+	dir := t.TempDir()
+	l, err := NewLibrary(dir)
+	require.NoError(t, err)
+
+	orgA := testPackage("Contoso.Tool", "1.2")
+	orgA.TenantID = 1
+	addPackage(t, l, orgA, "org A")
+
+	stage := func(content string) string {
+		staged, err := l.Stage(strings.NewReader(content))
+		require.NoError(t, err)
+		return staged
+	}
+
+	// Another organization, or all organizations, can't take over the identifier
+	orgB := testPackage("Contoso.Tool", "1.2")
+	orgB.TenantID = 2
+	_, err = l.Add(orgB, stage("org B"))
+	assert.ErrorIs(t, err, ErrPackageOwned)
+	everyone := testPackage("contoso.tool", "2.0")
+	_, err = l.Add(everyone, stage("all"))
+	assert.ErrorIs(t, err, ErrPackageOwned, "case variant of the identifier")
+
+	path, p, err := l.InstallerPath("Contoso.Tool", "1.2")
+	require.NoError(t, err)
+	assert.Equal(t, 1, p.TenantID)
+	data, _ := os.ReadFile(path)
+	assert.Equal(t, "org A", string(data), "org A's installer is kept")
+
+	// The same organization can add versions and replace one, with the stored spelling
+	newer := testPackage("CONTOSO.TOOL", "1.3")
+	newer.TenantID = 1
+	added, err := l.Add(newer, stage("org A 1.3"))
+	require.NoError(t, err)
+	assert.Equal(t, "Contoso.Tool", added.PackageIdentifier)
+	replaced := testPackage("Contoso.Tool", "1.2")
+	replaced.TenantID = 1
+	_, err = l.Add(replaced, stage("org A again"))
+	require.NoError(t, err)
+	path, _, err = l.InstallerPath("Contoso.Tool", "1.2")
+	require.NoError(t, err)
+	data, _ = os.ReadFile(path)
+	assert.Equal(t, "org A again", string(data))
+	versions, err := l.Versions("contoso.tool")
+	require.NoError(t, err)
+	assert.Len(t, versions, 2)
+
+	// Staged uploads left by a crash are removed when the library is opened
+	leftover := stage("interrupted")
+	_, err = NewLibrary(dir)
+	require.NoError(t, err)
+	_, err = os.Stat(leftover)
+	assert.True(t, os.IsNotExist(err), "leftover staged upload removed")
+}

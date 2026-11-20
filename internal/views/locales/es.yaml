@@ -584,6 +584,8 @@ es:
     not_available: "El repositorio de winget no está disponible"
     not_msi: "El archivo no es un paquete MSI válido"
     invalid_package: "El identificador %s o la versión %s no son válidos. El identificador debe tener la forma Editor.Nombre y la versión solo puede contener letras, dígitos y . + _ -"
+    id_of_other_source: "El identificador de paquete %s ya lo usa un paquete de otro origen (p. ej., el repositorio de la comunidad de winget). Introduzca otro identificador."
+    id_owned: "El identificador de paquete %s ya lo usa en el repositorio otra organización o un paquete disponible para todas las organizaciones. Introduzca otro identificador."
     not_found: "No se ha encontrado el paquete"
     from_installer: "Del instalador"
     installer_type: "Tipo de instalador (solo EXE)"

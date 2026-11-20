@@ -113,7 +113,11 @@ func (h *Handler) queuePackageUpdates(agentIDs []string) map[string]queueOutcome
 			defer func() { <-limit }()
 
 			outcome := queueOutcome{}
-			if outcome.err = h.queueAgentPackageUpdates(agentID); outcome.err == nil {
+			// A request still waiting for an offline agent covers this one: each request
+			// would be a run of its own when the agent connects
+			if queued, known := h.queuedPackageUpdates(agentID); known && queued {
+				outcome.online = h.agentIsOnline(agentID)
+			} else if outcome.err = h.queueAgentPackageUpdates(agentID); outcome.err == nil {
 				outcome.online = h.agentIsOnline(agentID)
 				if queued, known := h.queuedPackageUpdates(agentID); !outcome.online && known && !queued {
 					outcome.err = errUpdateNotQueued

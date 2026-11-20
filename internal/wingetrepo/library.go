@@ -26,6 +26,8 @@ const metadataFile = "package.json"
 var (
 	ErrInvalidPackage  = errors.New("invalid package")
 	ErrPackageNotFound = errors.New("package not found")
+	// ErrPackageOwned is returned when an identifier is used by another organization
+	ErrPackageOwned = errors.New("the package identifier belongs to another organization")
 
 	// The same rules as winget's manifest schema: 2 to 8 parts separated by dots
 	packageIdentifierPattern = regexp.MustCompile(`^[^\.\s\\/:\*\?"<>\|\x01-\x1f]{1,32}(\.[^\.\s\\/:\*\?"<>\|\x01-\x1f]{1,32}){1,7}$`)
@@ -141,6 +143,14 @@ func NewLibrary(dir string) (*Library, error) {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, err
 	}
+	// Uploads staged before the console stopped were never added
+	for _, pattern := range []string{".upload-*", filepath.Join("*", "*~new")} {
+		if leftovers, err := filepath.Glob(filepath.Join(dir, pattern)); err == nil {
+			for _, f := range leftovers {
+				_ = os.RemoveAll(f)
+			}
+		}
+	}
 	return &Library{dir: dir}, nil
 }
 
@@ -165,6 +175,11 @@ func (l *Library) Stage(src io.Reader) (string, error) {
 
 // Add moves a staged installer into the library. The installer's hash and size are set
 // from the file. An existing package with the same identifier and version is replaced.
+//
+// An identifier belongs to one organization, or to all of them: adding a version for
+// another one fails with ErrPackageOwned, so an upload can't replace or shadow another
+// organization's package. Identifiers are compared without case, and new versions use
+// the spelling of the existing ones.
 func (l *Library) Add(p Package, stagedPath string) (Package, error) {
 	f, err := os.Open(stagedPath)
 	if err != nil {
@@ -189,22 +204,49 @@ func (l *Library) Add(p Package, stagedPath string) (Package, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	dir := l.versionDir(p.PackageIdentifier, p.PackageVersion)
-	if err := os.RemoveAll(dir); err != nil {
-		return Package{}, err
-	}
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return Package{}, err
-	}
-	if err := os.Rename(stagedPath, filepath.Join(dir, p.InstallerFile)); err != nil {
-		return Package{}, err
-	}
-
-	data, err := json.MarshalIndent(p, "", "  ")
+	existing, err := l.list()
 	if err != nil {
 		return Package{}, err
 	}
-	if err := os.WriteFile(filepath.Join(dir, metadataFile), data, 0o600); err != nil {
+	for _, e := range existing {
+		if !strings.EqualFold(e.PackageIdentifier, p.PackageIdentifier) {
+			continue
+		}
+		if e.TenantID != p.TenantID {
+			return Package{}, ErrPackageOwned
+		}
+		p.PackageIdentifier = e.PackageIdentifier
+	}
+
+	// The new version is prepared next to the old one and swapped in, so a failure
+	// doesn't lose the version that was there
+	dir := l.versionDir(p.PackageIdentifier, p.PackageVersion)
+	next := dir + "~new"
+	if err := os.RemoveAll(next); err != nil {
+		return Package{}, err
+	}
+	if err := os.MkdirAll(next, 0o700); err != nil {
+		return Package{}, err
+	}
+	if err := os.Rename(stagedPath, filepath.Join(next, p.InstallerFile)); err != nil {
+		os.RemoveAll(next)
+		return Package{}, err
+	}
+	data, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		os.RemoveAll(next)
+		return Package{}, err
+	}
+	if err := os.WriteFile(filepath.Join(next, metadataFile), data, 0o600); err != nil {
+		os.RemoveAll(next)
+		return Package{}, err
+	}
+	if err := os.RemoveAll(dir); err != nil {
+		os.RemoveAll(next)
+		return Package{}, err
+	}
+	if err := os.Rename(next, dir); err != nil {
+		os.RemoveAll(next)
 		return Package{}, err
 	}
 	return p, nil
@@ -214,7 +256,10 @@ func (l *Library) Add(p Package, stagedPath string) (Package, error) {
 func (l *Library) List() ([]Package, error) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
+	return l.list()
+}
 
+func (l *Library) list() ([]Package, error) {
 	matches, err := filepath.Glob(filepath.Join(l.dir, "*", "*", metadataFile))
 	if err != nil {
 		return nil, err
@@ -222,6 +267,10 @@ func (l *Library) List() ([]Package, error) {
 
 	packages := []Package{}
 	for _, m := range matches {
+		// A version being replaced
+		if strings.HasSuffix(filepath.Dir(m), "~new") {
+			continue
+		}
 		data, err := os.ReadFile(m)
 		if err != nil {
 			continue

@@ -1,10 +1,12 @@
 package wingetrepo
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"unicode/utf8"
 
 	"github.com/richardlehane/mscfb"
@@ -24,6 +26,10 @@ var ErrNotMSI = errors.New("the file is not an MSI package")
 // stored in the !Property stream as two columns of references to the string pool, kept in
 // the !_StringPool (lengths) and !_StringData (bytes) streams.
 func ReadMSIProperties(r io.ReaderAt) (map[string]string, error) {
+	if err := checkCompoundFileHeader(r); err != nil {
+		return nil, err
+	}
+
 	doc, err := mscfb.New(r)
 	if err != nil {
 		return nil, ErrNotMSI
@@ -160,4 +166,51 @@ func readMSIStringRef(b []byte, size int) int {
 		return int(b[0]) | int(b[1])<<8 | int(b[2])<<16
 	}
 	return int(binary.LittleEndian.Uint16(b))
+}
+
+// checkCompoundFileHeader rejects compound files whose header counts more sectors than the
+// file can hold. The compound file reader allocates its tables from these counts before
+// reading anything, so a few corrupt bytes made it allocate gigabytes, and an out of
+// memory error ends the whole process.
+func checkCompoundFileHeader(r io.ReaderAt) error {
+	size, ok := readerSize(r)
+	if !ok {
+		return ErrNotMSI
+	}
+
+	header := make([]byte, 0x4C)
+	if _, err := r.ReadAt(header, 0); err != nil {
+		return ErrNotMSI
+	}
+	if !bytes.Equal(header[:8], []byte{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}) {
+		return ErrNotMSI
+	}
+
+	sectorShift := binary.LittleEndian.Uint16(header[0x1E:])
+	if sectorShift != 9 && sectorShift != 12 {
+		return ErrNotMSI
+	}
+	sectors := uint64(size) >> sectorShift
+
+	for _, offset := range []int{0x28, 0x2C, 0x40, 0x48} {
+		if uint64(binary.LittleEndian.Uint32(header[offset:])) > sectors {
+			return ErrNotMSI
+		}
+	}
+	return nil
+}
+
+// readerSize returns the size of an *os.File, *bytes.Reader or similar reader
+func readerSize(r io.ReaderAt) (int64, bool) {
+	switch v := r.(type) {
+	case interface{ Size() int64 }:
+		return v.Size(), true
+	case interface{ Stat() (os.FileInfo, error) }:
+		info, err := v.Stat()
+		if err != nil {
+			return 0, false
+		}
+		return info.Size(), true
+	}
+	return 0, false
 }

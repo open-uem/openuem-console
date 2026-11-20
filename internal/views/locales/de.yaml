@@ -584,6 +584,8 @@ de:
     not_available: "Das winget-Repository ist nicht verfügbar"
     not_msi: "Die Datei ist kein gültiges MSI-Paket"
     invalid_package: "Die Paketkennung %s oder die Version %s ist ungültig. Die Kennung muss wie Herausgeber.Name aufgebaut sein und die Version darf nur Buchstaben, Ziffern und . + _ - enthalten"
+    id_of_other_source: "Die Paketkennung %s wird bereits von einem Paket einer anderen Quelle verwendet (z. B. dem Community-Repository von winget). Geben Sie eine andere Kennung ein."
+    id_owned: "Die Paketkennung %s wird im Repository bereits von einer anderen Organisation oder von einem Paket für alle Organisationen verwendet. Geben Sie eine andere Kennung ein."
     not_found: "Das Paket wurde nicht gefunden"
     from_installer: "Aus dem Installationsprogramm"
     installer_type: "Installationstyp (nur EXE)"

@@ -584,6 +584,8 @@ fr:
     not_available: "Le dépôt winget n'est pas disponible"
     not_msi: "Le fichier n'est pas un paquet MSI valide"
     invalid_package: "L'identifiant %s ou la version %s n'est pas valide. L'identifiant doit avoir la forme Éditeur.Nom et la version ne peut contenir que des lettres, des chiffres et . + _ -"
+    id_of_other_source: "L'identifiant de paquet %s est déjà utilisé par un paquet d'une autre source (p. ex. le dépôt communautaire de winget). Saisissez un autre identifiant."
+    id_owned: "L'identifiant de paquet %s est déjà utilisé dans le dépôt par une autre organisation ou par un paquet disponible pour toutes les organisations. Saisissez un autre identifiant."
     not_found: "Le paquet est introuvable"
     from_installer: "Du programme d'installation"
     installer_type: "Type d'installation (EXE uniquement)"

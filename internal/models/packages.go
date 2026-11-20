@@ -18,7 +18,7 @@ func (m *Model) SearchPackages(packageName string, p partials.PaginationAndSort,
 
 	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName))
 	if len(f.ExcludePackageIDs) > 0 {
-		query.Where(softwarepackage.PackageIDNotIn(f.ExcludePackageIDs...))
+		query.Where(notLibraryPackages(f.ExcludePackageIDs))
 	}
 
 	// Query the SQLite database
@@ -64,7 +64,7 @@ func (m *Model) CountPackages(packageName string, f filters.DeployPackageFilter)
 
 	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName))
 	if len(f.ExcludePackageIDs) > 0 {
-		query.Where(softwarepackage.PackageIDNotIn(f.ExcludePackageIDs...))
+		query.Where(notLibraryPackages(f.ExcludePackageIDs))
 	}
 
 	if len(f.Sources) != 0 {
@@ -80,7 +80,7 @@ func (m *Model) CountPackages(packageName string, f filters.DeployPackageFilter)
 func (m *Model) SearchAllWingetPackages(packageName string, excludePackageIDs []string) ([]*ent.SoftwarePackage, error) {
 	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName), softwarepackage.SourceIn("winget", LibraryPackageSource))
 	if len(excludePackageIDs) > 0 {
-		query.Where(softwarepackage.PackageIDNotIn(excludePackageIDs...))
+		query.Where(notLibraryPackages(excludePackageIDs))
 	}
 	return query.All(context.Background())
 }
