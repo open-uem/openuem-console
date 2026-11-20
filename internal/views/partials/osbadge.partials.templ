@@ -35,6 +35,11 @@ templ PackageManagementTool(source string) {
 	switch source {
 		case "winget":
 			<i class="ri-windows-fill ri-2x text-blue-600"></i>
+		case "openuem":
+			<span class="flex items-center gap-1" title="OpenUEM">
+				<i class="ri-windows-fill ri-2x text-blue-600"></i>
+				<span class="uk-text-small">OpenUEM</span>
+			</span>
 		case "flatpak":
 			<i class="si si-linux uk-cloak text-3xl"></i>
 		case "brew":

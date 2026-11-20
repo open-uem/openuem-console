@@ -52,6 +52,8 @@ func New(s *sessions.SessionManager, server, port, maxUploadSize string) *echo.E
 
 	// Add CSRF middleware
 	e.Use(mw.CSRFWithConfig(mw.CSRFConfig{
+		// winget's REST source requests are authenticated by the agent token in the URL
+		Skipper:        func(c echo.Context) bool { return strings.HasPrefix(c.Request().URL.Path, "/winget/") },
 		TokenLookup:    "cookie:_csrf",
 		CookiePath:     "/",
 		CookieSecure:   true,

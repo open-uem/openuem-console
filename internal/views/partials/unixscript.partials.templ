@@ -32,6 +32,7 @@ templ UnixScriptComponent(t *ent.Task) {
 					{ t.Script }
 				}
 			</textarea>
+			@ScriptFileLoader("unix-script", ".sh,.bash,.zsh,.py,.txt")
 		</div>
 		<div id="unix-executable-section">
 			<label class="uk-form-label" for="unix-script-executable">

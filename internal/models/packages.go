@@ -17,6 +17,9 @@ func (m *Model) SearchPackages(packageName string, p partials.PaginationAndSort,
 	}
 
 	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName))
+	if len(f.ExcludePackageIDs) > 0 {
+		query.Where(notLibraryPackages(f.ExcludePackageIDs))
+	}
 
 	// Query the SQLite database
 	switch p.SortBy {
@@ -60,6 +63,9 @@ func (m *Model) CountPackages(packageName string, f filters.DeployPackageFilter)
 	}
 
 	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName))
+	if len(f.ExcludePackageIDs) > 0 {
+		query.Where(notLibraryPackages(f.ExcludePackageIDs))
+	}
 
 	if len(f.Sources) != 0 {
 		query.Where(softwarepackage.SourceIn(sources...))
@@ -68,8 +74,15 @@ func (m *Model) CountPackages(packageName string, f filters.DeployPackageFilter)
 	return query.Count(context.Background())
 }
 
-func (m *Model) SearchAllWingetPackages(packageName string) ([]*ent.SoftwarePackage, error) {
-	return m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName), softwarepackage.Source("winget")).All(context.Background())
+// SearchAllWingetPackages searches the packages of winget's community repository and of
+// the console's own winget repository, without the excluded packages (those of the
+// repository that belong to other organizations)
+func (m *Model) SearchAllWingetPackages(packageName string, excludePackageIDs []string) ([]*ent.SoftwarePackage, error) {
+	query := m.Client.SoftwarePackage.Query().Where(softwarepackage.NameContainsFold(packageName), softwarepackage.SourceIn("winget", LibraryPackageSource))
+	if len(excludePackageIDs) > 0 {
+		query.Where(notLibraryPackages(excludePackageIDs))
+	}
+	return query.All(context.Background())
 }
 
 func (m *Model) SearchAllFlatpakPackages(packageName string) ([]*ent.SoftwarePackage, error) {

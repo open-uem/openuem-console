@@ -134,6 +134,8 @@ type UpdateServersFilter struct {
 type DeployPackageFilter struct {
 	Sources []string
 	Arch    string
+	// Packages of the console's winget repository that belong to other organizations
+	ExcludePackageIDs []string
 }
 
 func GetPaginationUrl(c echo.Context) string {

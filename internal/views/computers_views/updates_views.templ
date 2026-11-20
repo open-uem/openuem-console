@@ -1,0 +1,289 @@
+package computers_views
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	"github.com/open-uem/ent"
+	openuem_nats "github.com/open-uem/nats"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+	"strings"
+)
+
+templ ComputerUpdates(c echo.Context, p partials.PaginationAndSort, agent *ent.Agent, commonInfo *partials.CommonInfo, netbird, offline bool) {
+	@partials.ComputerBreadcrumb(c, agent, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@partials.ComputerHeader(p, agent, commonInfo, offline)
+				@ComputersNavbar(agent.ID, "deploy", agent.VncProxyPort, false, commonInfo, agent.Os, netbird, agent.Edges.Release.Version)
+				<div id="error" class="hidden"></div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<div class="flex justify-between items-center">
+							<div class="flex items-center gap-2">
+								<uk-icon hx-history="false" icon="package-check" custom-class="h-5 w-5" uk-cloack></uk-icon>
+								<h3 class="uk-card-title">{ i18n.T(ctx, "package_updates.title") }</h3>
+							</div>
+							<button
+								type="button"
+								class="uk-button uk-button-default"
+								hx-get={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy", agent.ID)))) }
+								hx-push-url="true"
+								hx-target="#main"
+								hx-swap="outerHTML"
+							>
+								{ i18n.T(ctx, "Deploy") }
+							</button>
+						</div>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "package_updates.description") }</p>
+					</div>
+					<div class="uk-card-body">
+						<div id="available-updates" class="flex items-center gap-4">
+							<button
+								type="button"
+								class="uk-button uk-button-primary"
+								hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates/list", agent.ID)))) }
+								hx-trigger="click, load"
+								hx-target="#available-updates"
+								hx-swap="outerHTML"
+								hx-indicator="#updates-spinner"
+								hx-disabled-elt="this"
+							>
+								{ i18n.T(ctx, "package_updates.check") }
+							</button>
+							@updatesSpinner()
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ updatesSpinner() {
+	<div id="updates-spinner" class="htmx-indicator flex items-center gap-2">
+		<div hx-history="false" uk-spinner="ratio: 0.6"></div>
+		<span class="uk-text-small uk-text-muted">{ i18n.T(ctx, "package_updates.checking") }</span>
+	</div>
+}
+
+templ AvailableUpdates(agentId string, response *openuem_nats.AvailableUpdatesResponse, successMessage string, commonInfo *partials.CommonInfo) {
+	<div id="available-updates" class="flex flex-col gap-4">
+		@partials.SuccessMessage(successMessage)
+		if response.LastRun.Running() {
+			<div
+				class="flex flex-col gap-4"
+				hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates/list", agentId)))) }
+				hx-trigger="every 15s"
+				hx-target="#available-updates"
+				hx-swap="outerHTML"
+			>
+				<div class="flex items-center gap-2">
+					<div hx-history="false" uk-spinner="ratio: 0.6"></div>
+					<span class="uk-text-small">
+						{ i18n.T(ctx, "package_updates.in_progress", len(response.LastRun.Results), response.LastRun.Total) }
+					</span>
+				</div>
+				@updateRunResults(response.LastRun)
+			</div>
+		} else {
+			<div class="flex items-center gap-4">
+				<button
+					type="button"
+					class="uk-button uk-button-default"
+					hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates/list", agentId)))) }
+					hx-target="#available-updates"
+					hx-swap="outerHTML"
+					hx-indicator="#updates-spinner"
+					hx-disabled-elt="this"
+				>
+					<uk-icon hx-history="false" icon="refresh-cw" custom-class="h-4 w-4 mr-2" uk-cloack></uk-icon>
+					{ i18n.T(ctx, "package_updates.check") }
+				</button>
+				@updatesSpinner()
+			</div>
+			if response.Error != "" {
+				<div class="uk-alert text-orange-600">
+					<div class="uk-alert-description uk-text-small">{ i18n.T(ctx, "package_updates.list_error", response.Error) }</div>
+				</div>
+			}
+			if len(response.Updates) == 0 {
+				if response.Error == "" {
+					<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "package_updates.no_updates") }</p>
+				}
+			} else {
+				@availableUpdatesTable(agentId, response.Updates, commonInfo)
+			}
+			if response.LastRun != nil {
+				@lastUpdateRun(response.LastRun, commonInfo)
+			}
+		}
+	</div>
+}
+
+templ availableUpdatesTable(agentId string, updates []openuem_nats.AvailableUpdate, commonInfo *partials.CommonInfo) {
+	<form
+		class="flex flex-col gap-4"
+		hx-post={ string(templ.URL(partials.GetNavigationUrl(commonInfo, fmt.Sprintf("/computers/%s/deploy/updates", agentId)))) }
+		hx-target="#available-updates"
+		hx-swap="outerHTML"
+		hx-disabled-elt="find button"
+	>
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+			<thead>
+				<tr>
+					<th class="w-1/12">
+						<input
+							id="select-all-updates"
+							class="uk-checkbox"
+							type="checkbox"
+							checked
+							title={ i18n.T(ctx, "SelectAll") }
+							_="on click
+								repeat in <input[name='packages']/>
+									set it.checked to #select-all-updates.checked
+								end
+								send change to <input[name='packages']/>
+							end"
+						/>
+					</th>
+					<th>{ i18n.T(ctx, "Name") }</th>
+					<th>{ i18n.T(ctx, "package_updates.installed_version") }</th>
+					<th>{ i18n.T(ctx, "package_updates.available_version") }</th>
+					<th>{ i18n.T(ctx, "package_updates.source") }</th>
+					<th>{ i18n.T(ctx, "package_updates.scope") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, u := range updates {
+					<tr>
+						<td class="!align-middle">
+							<input
+								class="uk-checkbox"
+								type="checkbox"
+								name="packages"
+								value={ updateJSON(u) }
+								checked
+								_="on change
+									if (<input[name='packages']:checked/>).length > 0 then
+										remove @disabled from #update-selected
+									else
+										add @disabled to #update-selected
+									end
+								end"
+							/>
+						</td>
+						<td class="!align-middle">
+							<div class="flex flex-col">
+								<span>{ u.PackageName }</span>
+								<span class="uk-text-small uk-text-muted">{ u.PackageId }</span>
+							</div>
+						</td>
+						<td class="!align-middle">{ u.InstalledVersion }</td>
+						<td class="!align-middle">{ u.AvailableVersion }</td>
+						<td class="!align-middle">{ u.Source }</td>
+						<td class="!align-middle">
+							@updateScope(u)
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<div class="flex items-center gap-4">
+			<button id="update-selected" type="submit" class="uk-button uk-button-primary">
+				<uk-icon hx-history="false" icon="package-check" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>
+				{ i18n.T(ctx, "package_updates.update_selected") }
+			</button>
+			<button type="submit" name="updateAll" value="true" class="uk-button uk-button-default">
+				{ i18n.T(ctx, "package_updates.update_all", len(updates)) }
+			</button>
+		</div>
+	</form>
+}
+
+templ updateScope(u openuem_nats.AvailableUpdate) {
+	if u.Scope == openuem_nats.PackageScopeUser {
+		<span class="uk-badge" uk-tooltip={ "title: " + strings.Join(u.Users, ", ") }>
+			{ i18n.T(ctx, "package_updates.scope_user") }
+		</span>
+	} else if u.Scope == openuem_nats.PackageScopeMachine {
+		<span class="uk-text-small">{ i18n.T(ctx, "package_updates.scope_machine") }</span>
+	}
+}
+
+templ lastUpdateRun(run *openuem_nats.UpdateRun, commonInfo *partials.CommonInfo) {
+	<div class="flex flex-col gap-2 mt-4">
+		<h4 class="uk-text-bold">{ i18n.T(ctx, "package_updates.last_run") }</h4>
+		<p class="uk-text-small uk-text-muted">
+			{ i18n.T(ctx, "package_updates.last_run_summary", commonInfo.Translator.FmtDateMedium(run.Started.Local()) + " " + commonInfo.Translator.FmtTimeShort(run.Started.Local()), updatedCount(run), failedCount(run), run.Total) }
+		</p>
+		if run.Error != "" {
+			<p class="uk-text-small text-red-600">{ run.Error }</p>
+		}
+		@updateRunResults(run)
+	</div>
+}
+
+templ updateRunResults(run *openuem_nats.UpdateRun) {
+	if len(run.Results) > 0 {
+		<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+			<thead>
+				<tr>
+					<th>{ i18n.T(ctx, "Name") }</th>
+					<th>{ i18n.T(ctx, "package_updates.available_version") }</th>
+					<th>{ i18n.T(ctx, "package_updates.scope") }</th>
+					<th>{ i18n.T(ctx, "Status") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, r := range run.Results {
+					<tr>
+						<td class="!align-middle">
+							<div class="flex flex-col">
+								<span>{ r.PackageName }</span>
+								<span class="uk-text-small uk-text-muted">{ r.PackageId }</span>
+							</div>
+						</td>
+						<td class="!align-middle">{ r.AvailableVersion }</td>
+						<td class="!align-middle">
+							@updateScope(r.AvailableUpdate)
+						</td>
+						<td class="!align-middle">
+							switch  {
+								case r.Failed:
+									<span class="text-red-600">{ i18n.T(ctx, "package_updates.status_failed") }</span>
+									if r.Info != "" {
+										<p class="uk-text-small uk-text-muted">{ r.Info }</p>
+									}
+								case r.UpToDate:
+									<span class="uk-text-muted">{ i18n.T(ctx, "package_updates.status_up_to_date") }</span>
+								default:
+									<span class="text-green-600">{ i18n.T(ctx, "package_updates.status_updated") }</span>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}
+
+func updateJSON(u openuem_nats.AvailableUpdate) string {
+	data, err := json.Marshal(u)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+func updatedCount(run *openuem_nats.UpdateRun) int {
+	updated, _, _ := run.Counts()
+	return updated
+}
+
+func failedCount(run *openuem_nats.UpdateRun) int {
+	_, _, failed := run.Counts()
+	return failed
+}
