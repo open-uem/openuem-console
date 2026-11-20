@@ -296,6 +296,7 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/computers/:uuid/netbird/deletepeer", func(c echo.Context) error { return h.NetbirdDeletePeer(c, false) }, h.IsAuthenticated)
 	e.POST("/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
+	e.GET("/computers/:uuid/status", h.AgentStatus, h.IsAuthenticated)
 	e.GET("/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
@@ -363,6 +364,7 @@ func (h *Handler) Register(e *echo.Echo, registerRateLimit float64) {
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/deletepeer", func(c echo.Context) error { return h.NetbirdDeletePeer(c, false) }, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/connect", h.NetbirdConnect, h.IsAuthenticated)
 	e.POST("/tenant/:tenant/computers/:uuid/netbird/disconnect", func(c echo.Context) error { return h.NetbirdDisconnect(c, "") }, h.IsAuthenticated)
+	e.GET("/tenant/:tenant/computers/:uuid/status", h.AgentStatus, h.IsAuthenticated)
 	e.GET("/tenant/:tenant/computers/:uuid/tasks", func(c echo.Context) error { return h.ComputerTasks(c, "") }, h.IsAuthenticated)
 
 	e.GET("/tenant/:tenant/site/:site/computers", func(c echo.Context) error { return h.ComputersList(c, "", false) }, h.IsAuthenticated)
