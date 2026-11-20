@@ -1,0 +1,378 @@
+package deploy_views
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/invopop/ctxi18n/i18n"
+	"github.com/labstack/echo/v4"
+	ent "github.com/open-uem/ent"
+	"github.com/open-uem/openuem-console/internal/models"
+	"github.com/open-uem/openuem-console/internal/views/partials"
+)
+
+// ScheduledEventNextRun pairs a scheduled event with the next time its job runs
+type ScheduledEventNextRun struct {
+	EventID int
+	NextRun time.Time
+}
+
+// scheduledTypeLabel returns the translation key of a scheduled task type
+func scheduledTypeLabel(eventType string) string {
+	switch eventType {
+	case models.ScheduledEventUpdateAll:
+		return "scheduled.type_updateall"
+	case models.ScheduledEventPowerOff:
+		return "scheduled.type_poweroff"
+	case models.ScheduledEventRestart:
+		return "scheduled.type_reboot"
+	case models.ScheduledEventWakeOnLAN:
+		return "scheduled.type_wakeonlan"
+	default:
+		return "scheduled.type_updateall"
+	}
+}
+
+// scheduledEventNextRunOf returns the next run of a scheduled event, if its job is registered
+func scheduledEventNextRunOf(nextRuns []ScheduledEventNextRun, eventID int) *time.Time {
+	for _, nextRun := range nextRuns {
+		if nextRun.EventID == eventID {
+			return &nextRun.NextRun
+		}
+	}
+	return nil
+}
+
+// scheduledEventsPath returns the path of the scheduled tasks pages
+func scheduledEventsPath(action string, commonInfo *partials.CommonInfo) string {
+	return string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabScheduled)+action)))
+}
+
+templ ScheduledEvents(c echo.Context, events []*ent.ScheduledEvent, nextRuns []ScheduledEventNextRun, successMessage string, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(TabScheduled)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(TabScheduled)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabScheduled))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(TabScheduled, commonInfo)
+				<div id="error" class="hidden"></div>
+				if successMessage != "" {
+					@partials.SuccessMessage(successMessage)
+				} else {
+					<div id="success" class="hidden"></div>
+				}
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "scheduled.title") }</h3>
+						<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "scheduled.description") }</p>
+					</div>
+					<div class="uk-card-body">
+						<button
+							type="button"
+							class="uk-button uk-button-primary"
+							hx-get={ scheduledEventsPath("/new", commonInfo) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-push-url="true"
+						>
+							<uk-icon hx-history="false" icon="plus" custom-class="h-5 w-5 mr-2" uk-cloack></uk-icon>
+							{ i18n.T(ctx, "scheduled.new") }
+						</button>
+					</div>
+				</div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						<h3 class="uk-card-title">{ i18n.T(ctx, "scheduled.tab") }</h3>
+					</div>
+					<div class="uk-card-body">
+						if len(events) == 0 {
+							<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "scheduled.empty") }</p>
+						} else {
+							<table class="uk-table uk-table-divider uk-table-small uk-table-striped">
+								<thead>
+									<tr>
+										<th>{ i18n.T(ctx, "Description") }</th>
+										<th>{ i18n.T(ctx, "scheduled.type") }</th>
+										<th>{ i18n.T(ctx, "scheduled.schedule") }</th>
+										<th>{ i18n.T(ctx, "scheduled.next_run") }</th>
+										<th>{ i18n.T(ctx, "scheduled.last_run") }</th>
+										<th>{ i18n.T(ctx, "scheduled.result") }</th>
+										<th>{ i18n.T(ctx, "Enabled") }</th>
+										<th class="w-1/12">{ i18n.T(ctx, "Actions") }</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, event := range events {
+										<tr>
+											<td class="!align-middle">
+												<div class="flex flex-col">
+													<span>{ event.Description }</span>
+													if event.Edges.Site != nil {
+														<span class="uk-text-small uk-text-muted">{ event.Edges.Site.Description }</span>
+													}
+												</div>
+											</td>
+											<td class="!align-middle">{ i18n.T(ctx, scheduledTypeLabel(event.Type)) }</td>
+											<td class="!align-middle">
+												<code class="uk-text-small">{ event.Cron }</code>
+												if event.Cron == "" && event.When != nil {
+													<span class="uk-text-small">
+														{ commonInfo.Translator.FmtDateMedium(event.When.Local()) + " " + commonInfo.Translator.FmtTimeShort(event.When.Local()) }
+													</span>
+												}
+											</td>
+											<td class="!align-middle">
+												if nextRun := scheduledEventNextRunOf(nextRuns, event.ID); nextRun != nil {
+													<span class="uk-text-small">
+														{ commonInfo.Translator.FmtDateMedium(nextRun.Local()) + " " + commonInfo.Translator.FmtTimeShort(nextRun.Local()) }
+													</span>
+												} else if event.Enabled {
+													<span class="uk-text-small uk-text-muted">—</span>
+												}
+											</td>
+											<td class="!align-middle">
+												<span class="uk-text-small">
+													if event.LastRun == nil || event.LastRun.IsZero() {
+														{ i18n.T(ctx, "scheduled.never") }
+													} else {
+														{ commonInfo.Translator.FmtDateMedium(event.LastRun.Local()) + " " + commonInfo.Translator.FmtTimeShort(event.LastRun.Local()) }
+													}
+												</span>
+											</td>
+											<td class="!align-middle">
+												if event.LastRun != nil && !event.LastRun.IsZero() {
+													if event.LastRunFailed {
+														<span class="uk-text-small text-red-600">{ event.LastResult }</span>
+													} else {
+														<span class="uk-text-small">{ event.LastResult }</span>
+													}
+												} else {
+													<span class="uk-text-small uk-text-muted">—</span>
+												}
+											</td>
+											<td class="!align-middle">
+												<input
+													type="checkbox"
+													name={ fmt.Sprintf("%d", event.ID) }
+													checked={ event.Enabled }
+													hx-post={ scheduledEventsPath("/toggle/"+fmt.Sprintf("%d", event.ID), commonInfo) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-disabled-elt="this"
+												/>
+											</td>
+											<td class="!align-middle">
+												<button
+													type="button"
+													title={ i18n.T(ctx, "scheduled.run_now") }
+													hx-post={ scheduledEventsPath("/run/"+fmt.Sprintf("%d", event.ID), commonInfo) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-disabled-elt="this"
+												>
+													<uk-icon hx-history="false" icon="play" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												</button>
+												<button
+													type="button"
+													class="mx-2"
+													title={ i18n.T(ctx, "Edit") }
+													hx-get={ scheduledEventsPath("/edit/"+fmt.Sprintf("%d", event.ID), commonInfo) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-push-url="true"
+												>
+													<uk-icon hx-history="false" icon="pencil" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												</button>
+												<button
+													type="button"
+													class="text-red-600"
+													title={ i18n.T(ctx, "library.remove") }
+													hx-post={ scheduledEventsPath("/delete/"+fmt.Sprintf("%d", event.ID), commonInfo) }
+													hx-confirm={ i18n.T(ctx, "scheduled.confirm_remove", event.Description) }
+													hx-target="#main"
+													hx-swap="outerHTML"
+													hx-disabled-elt="this"
+												>
+													<uk-icon hx-history="false" icon="trash-2" custom-class="h-5 w-5" uk-cloack></uk-icon>
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}
+
+templ ScheduledEventForm(c echo.Context, event *ent.ScheduledEvent, frequency string, commonInfo *partials.CommonInfo) {
+	<title>OpenUEM | { i18n.T(ctx, "Deploy") } | { i18n.T(ctx, actionTitle(TabScheduled)) } </title>
+	@partials.Header(c, []partials.Breadcrumb{{Title: i18n.T(ctx, "Deploy"), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, "/deploy")))}, {Title: i18n.T(ctx, actionTitle(TabScheduled)), Url: string(templ.URL(partials.GetNavigationUrl(commonInfo, actionPath(TabScheduled))))}}, commonInfo)
+	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+		<div class="uk-width-1-2@m uk-card uk-card-default">
+			<div class="uk-card-body uk-flex uk-flex-column gap-4">
+				@DeployNavbar(TabScheduled, commonInfo)
+				<div id="error" class="hidden"></div>
+				<div id="success" class="hidden"></div>
+				<div class="uk-card uk-card-default">
+					<div class="uk-card-header">
+						if event == nil {
+							<h3 class="uk-card-title">{ i18n.T(ctx, "scheduled.new") }</h3>
+							<p class="uk-margin-small-top uk-text-small">{ i18n.T(ctx, "scheduled.new_description") }</p>
+						} else {
+							<h3 class="uk-card-title">{ i18n.T(ctx, "scheduled.edit") }</h3>
+						}
+					</div>
+					<div class="uk-card-body">
+						<form
+							class="flex flex-col gap-4"
+							_="on submit if my.checkValidity() then else halt the event's default"
+							method="post"
+							hx-post={ scheduledEventSavePath(event, commonInfo) }
+							hx-target="#main"
+							hx-swap="outerHTML"
+							hx-disabled-elt="find button"
+						>
+							if event != nil && event.Edges.Site != nil {
+								<div class="flex flex-col gap-2">
+									<span class="uk-form-label">{ i18n.T(ctx, "scheduled.site") }</span>
+									<span class="uk-text-small">{ event.Edges.Site.Description }</span>
+								</div>
+							}
+							<div class="flex flex-col gap-2">
+								<label class="uk-form-label" for="scheduled-description">{ i18n.T(ctx, "scheduled.name") }</label>
+								<input
+									type="text"
+									class="uk-input"
+									id="scheduled-description"
+									name="description"
+									maxlength="250"
+									required
+									placeholder={ i18n.T(ctx, "scheduled.name_placeholder") }
+									value={ scheduledEventDescription(event) }
+								/>
+							</div>
+							<div class="flex flex-col gap-2">
+								<label class="uk-form-label" for="scheduled-type">{ i18n.T(ctx, "scheduled.type") }</label>
+								<select class="uk-select" id="scheduled-type" name="type" required>
+									for _, taskType := range models.ScheduledEventTypes() {
+										<option
+											value={ taskType }
+											selected={ (event != nil && event.Type == taskType) || (event == nil && taskType == models.ScheduledEventUpdateAll) }
+										>
+											{ i18n.T(ctx, scheduledTypeLabel(taskType)) }
+										</option>
+									}
+								</select>
+							</div>
+							<div class="flex flex-col gap-2">
+								<label class="uk-form-label" for="scheduled-frequency">{ i18n.T(ctx, "scheduled.frequency") }</label>
+								<select
+									class="uk-select"
+									id="scheduled-frequency"
+									name="frequency"
+									required
+									_="on change
+										add .hidden to #schedule-once
+										add .hidden to #schedule-time
+										add .hidden to #schedule-weekday
+										add .hidden to #schedule-monthday
+										add .hidden to #schedule-cron
+										if my.value is 'once' then
+											remove .hidden from #schedule-once
+										end
+										if my.value is 'daily' then
+											remove .hidden from #schedule-time
+										end
+										if my.value is 'weekly' then
+											remove .hidden from #schedule-time
+											remove .hidden from #schedule-weekday
+										end
+										if my.value is 'monthly' then
+											remove .hidden from #schedule-time
+											remove .hidden from #schedule-monthday
+										end
+										if my.value is 'custom' then
+											remove .hidden from #schedule-cron
+										end"
+								>
+									for _, f := range []string{FrequencyOnce, FrequencyDaily, FrequencyWeekly, FrequencyMonthly, FrequencyCustom} {
+										<option value={ f } selected={ frequency == f }>{ i18n.T(ctx, "scheduled.frequency_"+f) }</option>
+									}
+								</select>
+							</div>
+							<div id="schedule-once" class={ "flex flex-col gap-2", templ.KV("hidden", frequency != FrequencyOnce) }>
+								<label class="uk-form-label" for="scheduled-when">{ i18n.T(ctx, "scheduled.when") }</label>
+								<input
+									type="datetime-local"
+									class="uk-input"
+									id="scheduled-when"
+									name="when"
+									value={ scheduledEventWhenValue(event) }
+								/>
+								<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "scheduled.when_description") }</p>
+							</div>
+							<div id="schedule-time" class={ "flex flex-col gap-2", templ.KV("hidden", frequency == FrequencyOnce || frequency == FrequencyCustom) }>
+								<label class="uk-form-label" for="scheduled-time">{ i18n.T(ctx, "scheduled.time") }</label>
+								<input type="time" class="uk-input" id="scheduled-time" name="time" value={ scheduledEventHourMinute(event) }/>
+							</div>
+							<div id="schedule-weekday" class={ "flex flex-col gap-2", templ.KV("hidden", frequency != FrequencyWeekly) }>
+								<label class="uk-form-label" for="scheduled-weekday">{ i18n.T(ctx, "scheduled.weekday") }</label>
+								<select class="uk-select" id="scheduled-weekday" name="weekday">
+									<option value="0" selected={ scheduledEventWeekday(event) == 0 }>{ i18n.T(ctx, "scheduled.weekday_0") }</option>
+									<option value="1" selected={ scheduledEventWeekday(event) == 1 }>{ i18n.T(ctx, "scheduled.weekday_1") }</option>
+									<option value="2" selected={ scheduledEventWeekday(event) == 2 }>{ i18n.T(ctx, "scheduled.weekday_2") }</option>
+									<option value="3" selected={ scheduledEventWeekday(event) == 3 }>{ i18n.T(ctx, "scheduled.weekday_3") }</option>
+									<option value="4" selected={ scheduledEventWeekday(event) == 4 }>{ i18n.T(ctx, "scheduled.weekday_4") }</option>
+									<option value="5" selected={ scheduledEventWeekday(event) == 5 }>{ i18n.T(ctx, "scheduled.weekday_5") }</option>
+									<option value="6" selected={ scheduledEventWeekday(event) == 6 }>{ i18n.T(ctx, "scheduled.weekday_6") }</option>
+								</select>
+							</div>
+							<div id="schedule-monthday" class={ "flex flex-col gap-2", templ.KV("hidden", frequency != FrequencyMonthly) }>
+								<label class="uk-form-label" for="scheduled-monthday">{ i18n.T(ctx, "scheduled.monthday") }</label>
+								<input
+									type="number"
+									class="uk-input"
+									id="scheduled-monthday"
+									name="monthday"
+									min="1"
+									max="31"
+									value={ scheduledEventMonthday(event) }
+								/>
+							</div>
+							<div id="schedule-cron" class={ "flex flex-col gap-2", templ.KV("hidden", frequency != FrequencyCustom) }>
+								<label class="uk-form-label" for="scheduled-cron">{ i18n.T(ctx, "scheduled.cron") }</label>
+								<input
+									type="text"
+									class="uk-input"
+									id="scheduled-cron"
+									name="cron"
+									spellcheck="false"
+									placeholder="*/10 * * * *"
+									value={ scheduledEventCronValue(event, frequency) }
+								/>
+								<p class="uk-text-small uk-text-muted">{ i18n.T(ctx, "scheduled.cron_description") }</p>
+							</div>
+							<div class="flex items-center gap-4">
+								<button type="submit" class="uk-button uk-button-primary">{ i18n.T(ctx, "Save") }</button>
+								<button
+									type="button"
+									class="uk-button uk-button-default"
+									hx-get={ scheduledEventsPath("", commonInfo) }
+									hx-target="#main"
+									hx-swap="outerHTML"
+									hx-push-url="true"
+								>
+									{ i18n.T(ctx, "Cancel") }
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+}

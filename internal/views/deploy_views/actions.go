@@ -21,6 +21,17 @@ const (
 	TabUpdateStatus = "updatestatus"
 	// TabLibrary isn't an action: it shows the packages of the private winget repository
 	TabLibrary = "library"
+	// TabScheduled isn't an action: it shows the tasks scheduled to run automatically
+	TabScheduled = "scheduled"
+)
+
+// Scheduled frequencies selectable in the form instead of writing cron expressions
+const (
+	FrequencyOnce    = "once"
+	FrequencyDaily   = "daily"
+	FrequencyWeekly  = "weekly"
+	FrequencyMonthly = "monthly"
+	FrequencyCustom  = "custom"
 )
 
 // ParseAction validates the deploy action sent in a form. The "true" and "false" values
@@ -68,6 +79,8 @@ func actionTitle(action string) string {
 		return "updatestatus.tab"
 	case TabLibrary:
 		return "library.tab"
+	case TabScheduled:
+		return "scheduled.tab"
 	default:
 		return "Install"
 	}
