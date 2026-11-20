@@ -1054,7 +1054,7 @@ func (h *Handler) ComputerDeployInstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
-	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+	if packageBrewType != "" && !slices.Contains([]string{"cask", "formula"}, packageBrewType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
 	}
 
@@ -1133,7 +1133,7 @@ func (h *Handler) ComputerDeployUpdate(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
-	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+	if packageBrewType != "" && !slices.Contains([]string{"cask", "formula"}, packageBrewType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
 	}
 
@@ -1203,7 +1203,7 @@ func (h *Handler) ComputerDeployUninstall(c echo.Context) error {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "agents.deploy_empty_values"), true))
 	}
 
-	if packageBrewType != "" && !slices.Contains([]string{"cask,formula"}, packageBrewType) {
+	if packageBrewType != "" && !slices.Contains([]string{"cask", "formula"}, packageBrewType) {
 		return RenderError(c, partials.ErrorMessage(i18n.T(c.Request().Context(), "packages.wrong_brew_type"), false))
 	}
 
@@ -2338,13 +2338,13 @@ func (h *Handler) CreateWindowsTaskConfig(t *openuem_ent.Task) (*wingetcfg.WinGe
 
 	switch t.Type {
 	case task.TypeWingetInstall:
-		installPackage, err := wingetcfg.InstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		installPackage, err := wingetcfg.InstallPackage(taskID, t.PackageName, t.PackageID, h.wingetPackageSource(t.PackageID), t.PackageVersion, t.PackageLatest)
 		if err != nil {
 			return nil, err
 		}
 		cfg.AddResource(installPackage)
 	case task.TypeWingetDelete:
-		uninstallPackage, err := wingetcfg.UninstallPackage(taskID, t.PackageName, t.PackageID, "winget", t.PackageVersion, t.PackageLatest)
+		uninstallPackage, err := wingetcfg.UninstallPackage(taskID, t.PackageName, t.PackageID, h.wingetPackageSource(t.PackageID), t.PackageVersion, t.PackageLatest)
 		if err != nil {
 			return nil, err
 		}

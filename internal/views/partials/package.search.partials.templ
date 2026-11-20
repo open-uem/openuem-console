@@ -23,6 +23,7 @@ templ WingetPackageSearch(t *ent.Task) {
 				spellcheck="false"
 				aria-label={ i18n.T(ctx, "tasks.edit.introduce_package_name") }
 				hx-post="/packages"
+				hx-include="#task-profile-id"
 				hx-trigger="keyup[target.value.length > 2]"
 				hx-target="#select-package-dropdown"
 				hx-swap="outerHTML"
@@ -154,7 +155,12 @@ templ SearchPacketResult(wingetPackages []*ent.SoftwarePackage) {
 										<p>
 											{ item.Name }
 										</p>
-										<p class="uk-text-muted uk-text-italic">{ item.PackageID }</p>
+										<p class="uk-text-muted uk-text-italic">
+											{ item.PackageID }
+											if item.Source == "openuem" {
+												· OpenUEM
+											}
+										</p>
 									</div>
 								</div>
 							</button>

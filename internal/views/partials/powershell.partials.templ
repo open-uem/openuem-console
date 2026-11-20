@@ -27,6 +27,7 @@ templ PowerShellComponent(t *ent.Task) {
 					{ t.Script }
 				}
 			</textarea>
+			@ScriptFileLoader("powershell-script", ".ps1,.txt")
 		</div>
 		<div id="powershell-run-section">
 			<label class="uk-form-label" for="powershell-run">

@@ -49,6 +49,8 @@ github.com/danieljoos/wincred v1.2.3/go.mod h1:6qqX0WNrS4RzPZ1tnroDzq9kY3fu1KwE7
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/devilAPI/nats v0.0.0-20261106070022-b3a4794d5abe h1:6Ch0/eOYI+1OlGAJsGFU/It4dgAU5xD8sueQdMBC31o=
+github.com/devilAPI/nats v0.0.0-20261106070022-b3a4794d5abe/go.mod h1:chcBtTU0QNmPvWecVPVlGe5LcEBHevv1Ee+ye8AnLAg=
 github.com/dimmerz92/go-lucide-icons v1.15.0 h1:MkQ2T+vFVbcCYjTM+k8s2qJhWV0c8511P74iH7HlTb4=
 github.com/dimmerz92/go-lucide-icons v1.15.0/go.mod h1:ChzyAQSUWx/kxwCWKStjgTdEufBcKotMuzuZ7imMq1c=
 github.com/f-amaral/go-async v0.3.0 h1:h4kLsX7aKfdWaHvV0lf+/EE3OIeCzyeDYJDb/vDZUyg=
