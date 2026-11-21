@@ -6,6 +6,7 @@ import "embed"
 //go:embed en.yaml
 //go:embed es.yaml
 //go:embed ca.yaml
+//go:embed cs.yaml
 //go:embed fr.yaml
 //go:embed no.yaml
 //go:embed pt.yaml
